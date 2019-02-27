@@ -1,0 +1,15 @@
+@import "../modules/variables";
+
+
+.c-modal {
+  background-color: $modalBGColor;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  &.c-modal--absolute {
+    position: absolute;
+  }
+}

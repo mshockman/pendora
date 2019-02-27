@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="../dist/css/style.css" />
+    <script type="text/javascript" src="../dist/pendora.bundle.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        let modal = new pendora.ui.Modal();
+        modal.appendTo(document.body);
+
+        modal.on('*', (event) => console.log("Event: ", event));
+
+        modal.visible = true;
+        modal.visible = false;
+        modal.visible = true;
+    </script>
+</body>
+</html>
