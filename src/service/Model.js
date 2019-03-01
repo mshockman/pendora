@@ -2,7 +2,8 @@
 
 export class Model {
     constructor() {
-
+        this._data = {};
+        this._dirty = {};
     }
 
     /**
@@ -127,7 +128,7 @@ export class Model {
      * Validates the object and returns the results as a new dictionary.
      * Raises ValidationError on invalid field.
      */
-    clean() {
+    serialize(config) {
 
     }
 
@@ -150,7 +151,31 @@ export class Model {
 
 
 export class ModelField {
+    constructor({type=null, missing=undefined, nullable=false, validator=null, serialize=true, pk=false, constraints=null, ...config}) {
+        this.property = null;
+        this.key = null;
+        this.bound = null;
+        this.constaints = [];
 
+        this.type = type;
+        this.missing = missing;
+        this.nullable = nullable;
+        this.validator = validator;
+
+        this._serialize = serialize;
+
+        if(constraints) {
+            for(let constraint of constraints) {
+                this.addConstraint(constraint);
+            }
+        }
+
+        if(config) Object.assign(config);
+    }
+
+    addConstraint(constraint) {
+
+    }
 }
 
 
