@@ -16,6 +16,10 @@ export default [{
         'pendora': './src/index.js'
     },
 
+    resolve: {
+        modules: ['src', 'node_modules']
+    },
+
     module: {
         rules: [
             {test: /\.js$/, loader: 'babel-loader'}

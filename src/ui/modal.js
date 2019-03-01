@@ -1,5 +1,6 @@
 import Observable from "../core/interface/Observable";
 import $ from 'jquery';
+import AutoLoader from 'autoloader';
 
 
 function modalTemplate() {
@@ -221,3 +222,19 @@ export class ModalWindow extends Modal {
         this.$title.html(value);
     }
 }
+
+
+AutoLoader.register('Modal', (element) => {
+    element = $(element);
+    let config = Object.assign({}, element.data());
+    config.template = element;
+    return new Modal(config);
+});
+
+
+AutoLoader.register('ModalWindow', (element) => {
+    element = $(element);
+    let config = Object.assign({}, element.data());
+    config.template = element;
+    return new ModalWindow(config);
+});
