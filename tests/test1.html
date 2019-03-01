@@ -13,7 +13,7 @@
     <button id="button-click" type="button">Show</button>
 
     <script type="text/javascript">
-        let modal = new pendora.ui.ModalWindow("Hello World!");
+        let modal = new pendora.ui.ModalWindow({title: "Hello World!"});
         modal.appendTo(document.body);
 
         modal.on('*', (event) => console.log("Event: ", event));

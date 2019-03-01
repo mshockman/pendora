@@ -83,7 +83,7 @@ export default class Modal extends Observable {
 }
 
 
-function constructModalWindow({template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
+function constructModalWindow({title, classes, template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
     if(template) {
         if(typeof template === 'function') {
             return $(template({titlebar, menubar, iconbar, statusbar, scrollable}));
@@ -95,12 +95,16 @@ function constructModalWindow({template=null, titlebar=true, menubar=false, icon
     let $window = $(`<div class="c-window c-modal__window"></div>`);
 
     if(titlebar) {
-        $window.append(`
+        let $titlebar = $(`
             <div class="c-window__title-bar">
                 <div class="c-window__title"></div>
                 <div class="c-window__title-bar__buttons"></div>
             </div>
         `);
+
+        let $title = $titlebar.find('.c-window__title');
+        $window.append($titlebar);
+        if(title) $title.html(title);
     }
 
     if(menubar) {
@@ -128,6 +132,7 @@ function constructModalWindow({template=null, titlebar=true, menubar=false, icon
         $context.addClass('c-window__context--scrollable');
     }
 
+    if(classes) $window.addClass(classes);
     return $window;
 }
 
@@ -142,10 +147,10 @@ function findElementOrNull(context, selector) {
 
 
 export class ModalWindow extends Modal {
-    constructor(title, windowClasses="", {template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
+    constructor({title=null, classes, template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
         super();
 
-        this.$window = constructModalWindow({template, titlebar, menubar, iconbar, statusbar, scrollable});
+        this.$window = constructModalWindow({template, title, classes, titlebar, menubar, iconbar, statusbar, scrollable});
         this.$element.append(this.$window);
         this.$titlebar = findElementOrNull(this.$window, '.c-window__title-bar');
         this.$statusbar = findElementOrNull(this.$window, '.c-window__status-bar');
@@ -154,9 +159,6 @@ export class ModalWindow extends Modal {
         this.$title = findElementOrNull(this.$titlebar, '.c-window__title');
         this.$context = findElementOrNull(this.$window, '.c-window__context');
         this.$titleButtons = findElementOrNull(this.$window, '.c-window__title-bar__buttons');
-
-        this.title = title;
-        if(windowClasses) this.$window.addClass(windowClasses);
     }
 
     get title() {
