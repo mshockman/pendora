@@ -83,19 +83,87 @@ export default class Modal extends Observable {
 }
 
 
-export class ModalWindow extends Modal {
-    constructor(title, windowClasses="", titlebar=true, menubar=true, iconbar=false, statusbar=true, scrollable=true) {
-        super();
+function constructModalWindow({template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
+    if(template) {
+        if(typeof template === 'function') {
+            return $(template({titlebar, menubar, iconbar, statusbar, scrollable}));
+        } else{
+            return $(template);
+        }
+    }
 
-        this.$element.append(`
-            <div class="c-window c-modal__window">
-                <div class="c-window__title-bar">
-                    <div class="c-window__title"></div>
-                    <div class="c-window__title-bar__buttons"></div>
-                </div>
-                <div class="c-window__context"></div>
-                <div class="c-window__status-bar"></div>
+    let $window = $(`<div class="c-window c-modal__window"></div>`);
+
+    if(titlebar) {
+        $window.append(`
+            <div class="c-window__title-bar">
+                <div class="c-window__title"></div>
+                <div class="c-window__title-bar__buttons"></div>
             </div>
         `);
+    }
+
+    if(menubar) {
+        $window.append(`
+            <div class="c-window__menu-bar"></div>
+        `);
+    }
+
+    if(iconbar) {
+        $window.append(`
+            <div class="c-window__icon-bar"></div>
+        `);
+    }
+
+    let $context = $('<div class="c-window__context"></div>');
+    $window.append($context);
+
+    if(statusbar) {
+        $window.append(`
+            <div class="c-window__status-bar"></div>
+        `);
+    }
+
+    if(scrollable) {
+        $context.addClass('c-window__context--scrollable');
+    }
+
+    return $window;
+}
+
+
+function findElementOrNull(context, selector) {
+    if(context) {
+        let f = context.find(selector);
+        return f.length ? f : null;
+    }
+    return null;
+}
+
+
+export class ModalWindow extends Modal {
+    constructor(title, windowClasses="", {template=null, titlebar=true, menubar=false, iconbar=false, statusbar=true, scrollable=true}={}) {
+        super();
+
+        this.$window = constructModalWindow({template, titlebar, menubar, iconbar, statusbar, scrollable});
+        this.$element.append(this.$window);
+        this.$titlebar = findElementOrNull(this.$window, '.c-window__title-bar');
+        this.$statusbar = findElementOrNull(this.$window, '.c-window__status-bar');
+        this.$menubar = findElementOrNull(this.$window, '.c-window__menu-bar');
+        this.$iconbar = findElementOrNull(this.$window, '.c-window__icon-bar');
+        this.$title = findElementOrNull(this.$titlebar, '.c-window__title');
+        this.$context = findElementOrNull(this.$window, '.c-window__context');
+        this.$titleButtons = findElementOrNull(this.$window, '.c-window__title-bar__buttons');
+
+        this.title = title;
+        if(windowClasses) this.$window.addClass(windowClasses);
+    }
+
+    get title() {
+        return this.$title.html();
+    }
+
+    set title(value) {
+        this.$title.html(value);
     }
 }

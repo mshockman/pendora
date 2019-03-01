@@ -9,8 +9,11 @@
     <script type="text/javascript" src="../dist/pendora.bundle.js"></script>
 </head>
 <body>
+    Hello world how are you?<br><br>
+    <button id="button-click" type="button">Show</button>
+
     <script type="text/javascript">
-        let modal = new pendora.ui.Modal();
+        let modal = new pendora.ui.ModalWindow("Hello World!");
         modal.appendTo(document.body);
 
         modal.on('*', (event) => console.log("Event: ", event));
@@ -18,6 +21,18 @@
         modal.visible = true;
         modal.visible = false;
         modal.visible = true;
+
+        modal.$statusbar.append("Hello World");
+
+        modal.$context.append(`
+            <header>
+                <h2>Header Test</h2>
+            </header>
+        `);
+
+        $("#button-click").on('click', () => {
+            modal.show();
+        });
     </script>
 </body>
 </html>
