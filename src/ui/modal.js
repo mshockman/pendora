@@ -2,8 +2,43 @@ import Observable from "../core/interface/Observable";
 import $ from 'jquery';
 
 
+function modalTemplate() {
+    return `<div class="c-modal">`;
+}
+
+
+/**
+ * The `Modal` class creates a widget that can be used to create a transparent background that can be displayed and hidden.
+ * Useful for creating windows, lightboxes or other popup content.  By default the modal will hide if the use clicks on it.
+ *
+ * Modal is an observable with the following events:
+ * modal.show: Fired when the modal goes from hidden to visible.
+ * modal.hide: Fired when the modal goes from visible to hidden.
+ *
+ * CLASSES:
+ * .c-modal - Main class of the widget
+ *
+ * STATE CLASSES:
+ * .c-modal--visible - Applied when the widget is visible.
+ * .c-modal--hidden - Applied when the widget is hidden.
+ * .disabled - Applied when the widget is disabled.
+ *
+ * ACTION CLASSES
+ * .js-modal-close - Can be applied to any child element.  If the user clicks an element marked with this class that
+ * doesn't have the class disabled the modal will close.
+ */
 export default class Modal extends Observable {
-    constructor(template, classes="", visibleClassName="c-modal--visible", hiddenClassName="c-modal--hidden", closeOnClick=true) {
+    /**
+     * Constructs the modal.
+     *
+     * @param template - A template function, string or selector that is to be used to create the modal.  If null
+     * the default will be used.
+     * @param classes - Additional classes to add to the modal.
+     * @param visibleClassName - The visible state class name.
+     * @param hiddenClassName - The hidden state class name.
+     * @param closeOnClick - If true the modal will close when clicked directly.
+     */
+    constructor({template=modalTemplate, classes="", visibleClassName="c-modal--visible", hiddenClassName="c-modal--hidden", closeOnClick=true}={}) {
         super();
 
         if(template) {
@@ -20,6 +55,7 @@ export default class Modal extends Observable {
         this._hiddenClassName = hiddenClassName;
         this._visibleClassName = visibleClassName;
         this._visible = true;
+        this.closeOnClick = closeOnClick;
 
         if(classes) this.$element.addClass(classes);
 
@@ -29,7 +65,7 @@ export default class Modal extends Observable {
 
             if(!$targetModal.is(this.$element)) return;
 
-            if(closeOnClick && $target.is(this.$element)) {
+            if(this.closeOnClick && $target.is(this.$element)) {
                 this.visible = false;
                 return;
             }
@@ -44,6 +80,10 @@ export default class Modal extends Observable {
         this.visible = false; // Set to hidden by default.  This will cause correct classes to be applied.
     }
 
+    /**
+     * Shows the modal.
+     * @returns {boolean}
+     */
     show() {
         if(!this.visible) {
             this.$element.addClass(this._visibleClassName);
@@ -56,15 +96,27 @@ export default class Modal extends Observable {
         return false;
     }
 
+    /**
+     * Hides the modal.
+     * @returns {boolean}
+     */
     hide() {
         if(this.visible) {
             this.$element.removeClass(this._visibleClassName);
             this.$element.addClass(this._hiddenClassName);
             this._visible = false;
-            this.trigger('modal.hidden', this);
+            this.trigger('modal.hide', this);
+            return true;
         }
+
+        return false;
     }
 
+    /**
+     * Appends to modal to the target selector.
+     * @param selector
+     * @returns {*}
+     */
     appendTo(selector) {
         return this.$element.appendTo(selector);
     }
