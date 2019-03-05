@@ -56,3 +56,35 @@ export function assertInstanceHasField(instance, field) {
         throw new Error("Object missing _states private property");
     }
 }
+
+
+export function getForeignKeyConstraint(field) {
+    for(let constraint of field.constraints) {
+        if(constraint.fk) {
+            return constraint;
+        }
+    }
+}
+
+
+export function getFieldSignature(field) {
+    if(typeof field === 'string') {
+        let parts = field.split('.');
+
+        if(parts.length !== 1 && parts.length !== 2) {
+            throw new Error("Invalid field signature");
+        }
+
+        return field;
+    } else {
+        if(typeof field === 'function') {
+            field = field();
+        }
+
+        if(!field || !field.bound || !field.bound.name || !field.name) {
+            throw new Error("Invalid field for signature");
+        }
+
+        return `${field.bound.name}.${field.name}`;
+    }
+}

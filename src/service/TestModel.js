@@ -3,7 +3,7 @@
  */
 
 
-import {Model, field, ModelField, Relationship} from './Model';
+import {Model, field, ModelField, Relationship, ForeignKey, drop} from './Model';
 
 
 export default class TestModel extends Model {
@@ -17,20 +17,40 @@ export default class TestModel extends Model {
     /**@type {*} */ @field description = new ModelField();
     /**@type {*} */ @field color = new ModelField();
 
-    @field addresses = new Relationship();
+    /**@type {*} */ @field addresses = new Relationship({rel: () => Address, fk: "Address.test_id", serialize: {
+            firstName: true,
+            lastName: true,
+            addressLine1: true,
+            addressLine2: true,
+            addressLine3: true,
+            city: true,
+            state: true,
+            zip: true,
+            phone: true,
+            test_id: true,
+            test: false
+        }});
 }
 
 
 export class Address extends Model {
     @field id = new ModelField({pk: true});
 
-    @field firstName = new ModelField();
-    @field lastName = new ModelField();
-    @field addressLine1 = new ModelField();
-    @field addressLine2 = new ModelField();
-    @field addressLine3 = new ModelField();
-    @field city = new ModelField();
-    @field state = new ModelField();
-    @field zip = new ModelField();
-    @field phone = new ModelField();
+    /**@type {*} */ @field firstName = new ModelField();
+    /**@type {*} */ @field lastName = new ModelField();
+    /**@type {*} */ @field addressLine1 = new ModelField();
+    /**@type {*} */ @field addressLine2 = new ModelField();
+    /**@type {*} */ @field addressLine3 = new ModelField();
+    /**@type {*} */ @field city = new ModelField();
+    /**@type {*} */ @field state = new ModelField();
+    /**@type {*} */ @field zip = new ModelField();
+    /**@type {*} */ @field phone = new ModelField();
+    /**@type {*} */ @field test_id = new ModelField({
+        constraints: [
+            new ForeignKey('TestModel.id')
+        ],
+        missing: drop
+    });
+
+    /**@type {*} */ @field test = new Relationship({rel: () => TestModel, fk: 'test_id', missing: drop});
 }
