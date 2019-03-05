@@ -57,3 +57,9 @@ export function any(iterable) {
 
     return false;
 }
+
+
+export function proto(descriptor) {
+    descriptor.placement = "prototype";
+    return descriptor;
+}
