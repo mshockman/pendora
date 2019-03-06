@@ -88,3 +88,16 @@ export function getFieldSignature(field) {
         return `${field.bound.name}.${field.name}`;
     }
 }
+
+
+export function getUniqueFields(ModelClass) {
+    let r = [];
+
+    for(let field of Object.values(ModelClass.c)) {
+        if(field.unique) {
+            r.push(field);
+        }
+    }
+
+    return r;
+}

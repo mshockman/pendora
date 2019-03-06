@@ -162,7 +162,7 @@ export class Model {
      * @returns {*}
      */
     get pk() {
-        return this.constructor.pkField.get();
+        return this.constructor.getPrimaryKeyField().get();
     }
 
     /**
@@ -177,7 +177,7 @@ export class Model {
      * Static method that returns the primary key field.
      * @returns {{pk}|any}
      */
-    static get pkField() {
+    static getPrimaryKeyField() {
         for(let field of Object.values(this.c)) {
             if(field.pk) {
                 return field;
@@ -229,7 +229,7 @@ export class Model {
  * serialized, deserialized, set, get, deleted, and validated.
  */
 export class ModelField {
-    constructor({type=null, missing=undefined, nullable=false, validator=null, serialize=true, pk=false, constraints=null, initializer=() => undefined, ...config}={}) {
+    constructor({type=null, missing=undefined, nullable=false, validator=null, serialize=true, pk=false, constraints=null, initializer=() => undefined, unique=false, ...config}={}) {
         this.name = null; // The name of the name on the model.
         // noinspection JSUnusedGlobalSymbols
         this.key = null; // The name of the key in the database.
@@ -241,6 +241,7 @@ export class ModelField {
         this.nullable = nullable;
         this.validator = validator;
         this.pk = pk;
+        this.unique = unique;
         this.initializer = initializer;
 
         this._serialize = serialize;
