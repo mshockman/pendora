@@ -65,6 +65,7 @@ export class DataGridTable extends Observable {
     constructor(source, columns, {placeholder="", classes=""}={}) {
         super();
         this.placeholder = placeholder;
+        // {on(event, listener), off(event, listener), getItem(index), getLength()}
         this.source = null;
         this.rows = null;
         this.columns = [];
