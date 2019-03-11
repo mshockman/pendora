@@ -63,3 +63,13 @@ export function proto(descriptor) {
     descriptor.placement = "prototype";
     return descriptor;
 }
+
+
+/**
+ * Returns a random value from an array.
+ * @param array
+ * @returns {*}
+ */
+export function randomChoice(array) {
+    return array[Math.floor(Math.random()*array.length)];
+}
