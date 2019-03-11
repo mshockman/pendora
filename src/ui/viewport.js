@@ -81,17 +81,17 @@ export default class Viewport extends Observable {
         let listener;
 
         if(mode === 'x') {
-            listener = (event) => {
-                this._left = event.left;
+            listener = (name, event) => {
+                this.left = event.left;
             };
         } else if(mode === 'y') {
-            listener = (event) => {
-                this._top = event.top;
+            listener = (name, event) => {
+                this.top = event.top;
             };
         } else {
-            listener = (event) => {
-                this._left = event.left;
-                this._top = event.top;
+            listener = (name, event) => {
+                this.left = event.left;
+                this.top = event.top;
             };
         }
 
