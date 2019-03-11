@@ -1,16 +1,17 @@
 import {clamp} from '../core/utility';
 import $ from 'jquery';
 import Observable from "../core/interface/Observable";
-import {} from './header';
+import * as ds from "./datasource";
+import * as g from './DataGridTable';
 
 
 const SORTING_OPTIONS = ['none', 'asc', 'desc'];
 
 
 export const CLASSES = {
-    header: "c-grid-columns",
-    body: "c-grid-columns__body",
-    column: 'c-grid-columns__column',
+    header: "c-datagrid-columns",
+    body: "c-datagrid-columns__body",
+    column: 'c-datagrid-columns__column',
     uiSortASC: 'ui-sort-asc',
     uiSortDESC: 'ui-sort-desc',
     uiSortNone: 'ui-sort-none',
@@ -24,7 +25,6 @@ export const CLASSES = {
 
 export const EVENTS = {
     sortChange: 'sort-change',
-    colResize: 'col-resize',
     resizing: 'resizing',
     resizeEnd: 'resizing-end',
     resizeStart: 'resizing-start',
@@ -92,7 +92,7 @@ export default class DataGridHeader extends Observable {
     constructor(grid, {sortable=false, reorderable=false, resizeable=false, template=null}={}) {
         super();
 
-        this.grid = grid;
+        this.grid = null;
         this.sortable = sortable;
         this.reorderable = reorderable;
         this.resizeable = resizeable;
@@ -110,9 +110,7 @@ export default class DataGridHeader extends Observable {
 
         this.$row = this.$element.find(`.${CLASSES.body}`);
         this._render = this.render.bind(this);
-        this._refreshColumnWidths = this.refreshColumnWidths.bind(this);
-        this.grid.on("render", this._render);
-        this.grid.on('col-resize', this._refreshColumnWidths);
+        this._refreshWidths = this.refreshColumnWidths.bind(this);
 
         if(this.sortable) {
             this.initSortableColumns();
@@ -125,6 +123,41 @@ export default class DataGridHeader extends Observable {
         if(this.resizeable) {
             this.initResizeableColumns();
         }
+
+        this.setGrid(grid);
+    }
+
+    setGrid(grid) {
+        if(this.grid) {
+            if(this.grid === grid) return;
+
+            this.grid.source.off(ds.EVENTS.dataChanged, this._render);
+            this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
+            this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
+            this.grid.off(g.EVENTS.render, this._render);
+            this.grid = null;
+        }
+
+        if(grid) {
+            this.grid = grid;
+            this.grid.source.on(ds.EVENTS.dataChanged, this._render);
+            this.grid.source.on(ds.EVENTS.columnsChanged, this._render);
+            this.grid.source.on(ds.EVENTS.columnResized, this._refreshWidths);
+            this.grid.on(g.EVENTS.render, this._render);
+        }
+    }
+
+    destroy() {
+        this.grid.source.off(ds.EVENTS.dataChanged, this._render);
+        this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
+        this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
+        this.grid = null;
+
+        this.$element.remove();
+        this.$element = null;
+
+        this._render = null;
+        this._refreshWidths = null;
     }
 
     /**
@@ -239,10 +272,8 @@ export default class DataGridHeader extends Observable {
             dY = y - startY;
 
             width = clamp(startWidth + dX, Math.max(column.minWidth, 0), column.maxWidth);
-            column.width = width;
-            column = null;
 
-            this.grid.refreshColumnWidths();
+            this.source.setColumnWidth(column, width);
             this.trigger(EVENTS.resizeEnd, {startX, startY, x, y, dX, dY, startWidth, width, column, $doc, $handle, $column, target: this});
         };
 
@@ -272,21 +303,36 @@ export default class DataGridHeader extends Observable {
     }
 
     render() {
-        this.$row.empty();
+        if(this._renderID) return;
 
-        for(let column of this.grid.columns) {
-            let $th = $(`<th class="${CLASSES.column}">`);
-            $th = column.columnRenderer($th);
-            $th.data(COLUMN_KEY, column);
-            this.$row.append($th);
-        }
+        this._renderID = window.requestAnimationFrame(() => {
+            this._renderID = null;
 
-        this.refreshColumnWidths();
+            this.$row.empty();
 
-        this.trigger(EVENTS.render, {target: this});
+            for(let column of this.source.getColumns()) {
+                let $th = $(`<th class="${CLASSES.column}">`);
+                $th = column.columnRenderer($th);
+                $th.data(COLUMN_KEY, column);
+                this.$row.append($th);
+            }
+
+            this._refreshColumnWidths();
+
+            this.trigger(EVENTS.render, {target: this});
+        });
     }
 
     refreshColumnWidths() {
+        if(this._refreshWidthID || this._renderID) return;
+
+        this._refreshWidthID = window.requestAnimationFrame(() => {
+            this._refreshWidthID = null;
+            this._refreshColumnWidths();
+        });
+    }
+
+    _refreshColumnWidths() {
         let total = 0,
             widths = [];
 
@@ -299,11 +345,14 @@ export default class DataGridHeader extends Observable {
         });
 
         this.$element.css('width', total);
-        this.trigger(EVENTS.colResize, {target: this, totalWidth: total, widths: widths});
     }
 
     appendTo(selector) {
         return this.$element.appendTo(selector);
+    }
+
+    get source() {
+        return this.grid.source;
     }
 
     static inlineTemplate() {
@@ -328,7 +377,7 @@ export class ResizeHelper {
         this.$element = $(`<div class="${CLASSES.uiResizeHelper}" style="display: none; position: absolute;">`);
         this.header = header;
 
-        this.header.on(EVENTS.resizeStart, (ui) => {
+        this.header.on(EVENTS.resizeStart, (name, ui) => {
             this.show();
             this.setOffset({left: ui.x});
         });
@@ -337,7 +386,7 @@ export class ResizeHelper {
             this.hide();
         });
 
-        this.header.on(EVENTS.resizing, (ui) => {
+        this.header.on(EVENTS.resizing, (name, ui) => {
             this.setOffset({left: ui.x});
         });
     }

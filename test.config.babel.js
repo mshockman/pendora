@@ -13,7 +13,8 @@ export default {
     mode: "development",
 
     entry: {
-        'test2': './tests/src/test2.js'
+        'test2': './tests/src/test2.js',
+        'testDataGrid': './tests/src/test_data_grid.js'
     },
 
     resolve: {

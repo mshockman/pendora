@@ -73,3 +73,21 @@ export function proto(descriptor) {
 export function randomChoice(array) {
     return array[Math.floor(Math.random()*array.length)];
 }
+
+
+/**
+ * Checks to see if 2 arrays are "equal".
+ * @param array1
+ * @param array2
+ */
+export function arraysEqual(array1, array2) {
+    if(array1 === array2) return true; // The same object.
+    if(array1 == null || array2 == null) return false;
+    if(array1.length !== array2.length) return false;
+
+    for(let i = 0, l = array1.length; i < l; i++) {
+        if(array1[i] !== array2[i]) return false;
+    }
+
+    return true;
+}
