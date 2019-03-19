@@ -20,6 +20,22 @@ export class Manager extends Observable {
         this.multiDelete = multiDelete;
         this.savable = savable;
         this.ajaxCache = ajaxCache;
+
+        /**
+         * A hook that can be added to add extra behavior to the fetch and list calls.  After the response from the
+         * server and the result has been deserialized, this method will be called.  It will be passed the deserialized
+         * model and it should either return the model back or return a new model that it will be replaced with.
+         *
+         * The idea behind this method is that it can be overridden by a higher abstraction layer to implement features
+         * such as caching.  The hook can check to see if the new model already exists in storage and merge the new
+         * data into the old model.
+         * @type {Function}
+         */
+        this.onList = null;
+        this.onFetch = null;
+        this.onRefresh = null;
+        this.onDelete = null;
+        this.onSave = null;
     }
 
     save(instance, {$fields=null, $timeout=null}={}) {
@@ -43,6 +59,7 @@ export class Manager extends Observable {
 
                 success: (response) => {
                     instance.update(response.result);
+                    if(this.onSave) instance = this.onSave(instance, this);
                     resolve(instance);
                 },
 
@@ -79,6 +96,7 @@ export class Manager extends Observable {
 
             this.fetch($filter, {$select, $expand, $timeout, reason: 'refreshing', instance}).then((results) => {
                 instance.update(results.result);
+                if(this.onRefresh) instance = this.onRefresh(instance, this);
                 resolve(instance);
             }).catch(reject);
         });
@@ -115,7 +133,7 @@ export class Manager extends Observable {
                 timeout: $timeout !== null ? $timeout : this.timeout,
 
                 success: (response) => {
-                    let r = {results: []};
+                    let r = [];
 
                     if(response.query) {
                         r.query = response.query;
@@ -125,7 +143,9 @@ export class Manager extends Observable {
 
                     for(let document of response.results) {
                         let model = this.modelCls.deserialize(document);
-                        r.results.push(model);
+
+                        if(this.onList) model = this.onList(model, this);
+                        r.push(model);
                     }
 
                     resolve(r);
@@ -181,16 +201,9 @@ export class Manager extends Observable {
                 timeout: $timeout !== null ? $timeout : (this.timeout || 0),
 
                 success: (response) => {
-                    let r = {};
-
-                    r.result = this.modelCls.deserialize(response.result);
-                    r.count = response.count;
-
-                    if(response.query) {
-                        r.query = response.query;
-                    }
-
-                    resolve(r);
+                    let model = this.modelCls.deserialize(response.result);
+                    if(this.onFetch) model = this.onFetch(model, this);
+                    resolve(model);
                 },
 
                 error: (xhr, httpStatus, error) => {
