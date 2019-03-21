@@ -6,7 +6,7 @@ import $ from 'jquery';
  * @EVENTS
  *  page-change({target, paginator, from, to})
  */
-export class Paginator extends Observable {
+export default class Paginator extends Observable {
     constructor(page=1, totalPages=1) {
         super();
 
@@ -42,6 +42,10 @@ export class Paginator extends Observable {
         });
 
         this.refresh();
+    }
+
+    appendTo(selector) {
+        return this.$element.appendTo(selector);
     }
 
     setPage(page) {

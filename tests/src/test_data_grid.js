@@ -94,6 +94,7 @@ let table = new DataGridTable(source),
     headerViewport = new Viewport(),
     resizeHelper = new ResizeHelper(header);
 
+
 headerViewport.$element.addClass("c-datagrid__header");
 tableViewport.$element.addClass("c-datagrid__body");
 

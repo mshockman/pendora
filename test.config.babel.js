@@ -2,6 +2,7 @@
 import path from 'path';
 
 
+
 // noinspection JSUnresolvedVariable
 const ROOT = __dirname;
 
@@ -14,7 +15,8 @@ export default {
 
     entry: {
         'test2': './tests/src/test2.js',
-        'testDataGrid': './tests/src/test_data_grid.js'
+        'testDataGrid': './tests/src/test_data_grid.js',
+        'testPaginator': './tests/src/test_paginator.js'
     },
 
     resolve: {
