@@ -26,6 +26,8 @@ export default class Paginator extends Observable {
         this.$element.on('click', (event) => {
             let $action = $(event.target).closest("[data-action]", this.$element);
 
+            if($action.prop('disabled')) return;
+
             if($action.length) {
                 let action = $action.attr('data-action');
 
@@ -85,7 +87,7 @@ export default class Paginator extends Observable {
             this.$pageInput.val(this.page);
 
             if(!this.disabled) {
-                this.$element.find("input button").prop('disabled', false).removeClass('disabled');
+                this.$element.find("input, button").prop('disabled', false).removeClass('disabled');
 
                 if (!this.hasPreviousPage()) {
                     this.$first.prop('disabled', true).addClass('disabled');
