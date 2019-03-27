@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "jsc": "webpack -w",
-    "start-sass-compiler": "sass --watch scss:dist/css",
-    "compile:sass-tests": "sass --watch scss:tests/dist",
+    "sc": "sass --watch scss:dist/css",
+    "sc:tests": "sass --watch scss:tests/dist",
     "jsc:tests": "webpack -w --config test.config.babel.js"
   },
   "repository": {
