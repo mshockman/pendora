@@ -43,6 +43,16 @@ export default class Paginator extends Observable {
             }
         });
 
+        this.$pageInput.on('change', (event) => {
+            let page = parseInt(this.$pageInput.val(), 10);
+
+            if(!Number.isNaN(page)) {
+                this.setPage(page);
+            } else {
+                this.$pageInput.val(this.page);
+            }
+        });
+
         this.refresh();
     }
 
@@ -68,6 +78,8 @@ export default class Paginator extends Observable {
                 to: this.page
             });
         }
+
+        this.$pageInput.val(this.page);
     }
 
     setTotalPages(total) {
@@ -86,27 +98,31 @@ export default class Paginator extends Observable {
             this.$pageDisplay.html(this.totalPages);
             this.$pageInput.val(this.page);
 
-            if(!this.disabled) {
-                this.$element.find("input, button").prop('disabled', false).removeClass('disabled');
-
-                if (!this.hasPreviousPage()) {
-                    this.$first.prop('disabled', true).addClass('disabled');
-                    this.$prev.prop('disabled', true).addClass('disabled');
-                }
-
-                if (!this.hasNextPage()) {
-                    this.$next.prop('disabled', true).addClass('disabled');
-                    this.$last.prop('disabled', true).addClass('disabled');
-                }
-            } else {
-                this.$element.find("input button").prop('disabled', true).addClass('disabled');
-            }
+            this._refreshDisabled();
 
             this.trigger('refresh', {
                 paginator: this,
                 target: this
             });
         });
+    }
+
+    _refreshDisabled() {
+        if(!this.disabled) {
+            this.$element.find("input, button").prop('disabled', false).removeClass('disabled');
+
+            if (!this.hasPreviousPage()) {
+                this.$first.prop('disabled', true).addClass('disabled');
+                this.$prev.prop('disabled', true).addClass('disabled');
+            }
+
+            if (!this.hasNextPage()) {
+                this.$next.prop('disabled', true).addClass('disabled');
+                this.$last.prop('disabled', true).addClass('disabled');
+            }
+        } else {
+            this.$element.find("input, button").prop('disabled', true).addClass('disabled');
+        }
     }
 
     hasNextPage() {
@@ -124,11 +140,11 @@ export default class Paginator extends Observable {
     set disabled(value) {
         if(value && !this.disabled) {
             this.$element.addClass('disabled');
-            this.$element.find("input button").prop('disabled', true).addClass('disabled');
+            this._refreshDisabled();
             this.trigger('disabled', {target: this});
         } else if(!value && this.disabled) {
             this.$element.removeClass('disabled');
-            this.$element.find("input button").prop('disabled', false).removeClass('disabled');
+            this._refreshDisabled();
             this.trigger('enabled', {target: this});
         }
     }
@@ -150,16 +166,20 @@ export default class Paginator extends Observable {
     static template() {
         return `
         <div class="c-paginator">
-            <button type="button" class="c-paginator__first" data-action="first-page"><i class="fas fa-step-backward"></i></button>
-            <button type="button" class="c-paginator__previous" data-action="previous-page"><i class="fas fa-caret-left"></i></button>
-            <div>
+            <div class="c-paginator__left-controls">
+                <button type="button" class="c-paginator__first" data-action="first-page"><i class="fas fa-step-backward"></i></button>
+                <button type="button" class="c-paginator__previous" data-action="previous-page"><i class="fas fa-caret-left"></i></button>
+            </div>
+            <div class="c-paginator__page-input-container">
                 Page 
                 <input type="text" class="c-paginator__page-input" /> 
                 of 
                 <span class="c-paginator__page-total"></span>
             </div>
-            <button type="button" class="c-paginator__next" data-action="next-page"><i class="fas fa-caret-right"></i></button>
-            <button type="button" class="c-paginator__last" data-action="last-page"><i class="fas fa-step-forward"></i></button>
+            <div class="c-paginator__right-controls">
+                <button type="button" class="c-paginator__next" data-action="next-page"><i class="fas fa-caret-right"></i></button>
+                <button type="button" class="c-paginator__last" data-action="last-page"><i class="fas fa-step-forward"></i></button>
+            </div>
         </div>
         `;
     }
