@@ -53,7 +53,10 @@ const reg_whitesplace = /\s+/;
  * If you want to unsubscribe from a topic and all of its subtopics you must pass the topic and a wild card matching
  * all subtopics aka:
  * publisher.unsubscribe('user user.*')
- * will unsubscribe from user user.added and user.removed
+ * will unsubscribe from user user.added and user.removed.
+ *
+ * Or you can simply use clearTopic.  It will completely remove all subscribers from that topic as well as all sub
+ * topics.
  */
 class Publisher {
     constructor() {
@@ -159,7 +162,7 @@ class Publisher {
         }
     }
 
-    clearAllSubscriptions(topic) {
+    clearTopic(topic) {
         topic = `${topic} ${topic}.*`;
         return this.unsubscribe(topic);
     }
