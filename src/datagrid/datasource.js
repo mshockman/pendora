@@ -4,267 +4,167 @@
  * information is needed.
  */
 
+import {IndexError} from '../core/errors';
+import {clamp} from '../core/utility';
 import Observable from "../core/interface/Observable";
-import {arraysEqual} from '../core/utility';
+
 
 
 export const EVENTS = {
     dataChanged: 'data-changed',
+    dataRefreshed: 'data-refreshed',
     loadingStart: 'loading-start',
     loadingEnd: 'loading-end',
     requestSuccess: 'request-success',
-    requestFailed: 'request-failed',
-    columnRemoved: 'column-removed',
-    columnAdded: 'column-added',
-    columnsChanged: 'columns-changed',
-    columnResized: 'column-resized'
+    requestFailed: 'request-failed'
 };
 
 
 /**
- * EVENTS:
- *  data-changed
+ * Stores row data for the DataGrid component.
  *
- * @interface
+ * @implements Pageable
  */
-export class DataSourceInterface extends Observable {
-    /**
-     * @virtual
-     * @param index
-     */
-    getItem(index) {}
-
-    /**
-     * @virtual
-     */
-    getLength() {}
-
-    /**
-     * @virtual
-     */
-    getPageSize() {}
-
-    /**
-     * @virtual
-     */
-    getPageNumber() {}
-
-    /**
-     * @virtual
-     * @param page
-     */
-    setPageNumber(page) {}
-
-    /**
-     * @virtual
-     * @param size
-     */
-    setPageSize(size) {}
-
-    /**
-     * @virtual
-     */
-    filter() {}
-
-    /**
-     * @virtual
-     */
-    sort() {}
-
-    /**
-     * @virtual
-     */
-    getItemCount() {}
-
-    /**
-     * @virtual
-     */
-    isLoading() {}
-
-    getPageTotal() {
-        Math.ceil(this.getItemCount() / this.getPageSize());
-    }
-
-    /**
-     * @virtual
-     */
-    getColumns() {}
-
-    /**
-     * @virtual
-     * @param columns
-     */
-    setColumns(columns) {}
-
-    /**
-     * @virtual
-     * @param column
-     * @param width
-     */
-    setColumnWidth(column, width) {
-
-    }
-}
-
-
-export class DataSource extends DataSourceInterface {
-    constructor(data, columns, pageSize=100) {
+export class DataSource extends Observable {
+    constructor(data) {
         super();
-        this._data = null;
-        this._columns = [];
-        this._pageNumber = 1;
-        this._pageSize = pageSize;
-        this.setData(data);
-        this.setColumns(columns);
+        this._page = 1;
+        this._pageSize = Number.POSITIVE_INFINITY;
+
+        if(data) {
+            this.setData(data);
+        }
     }
 
     setData(data) {
         this._data = data;
-        this.refresh();
+        this._page = 1;
     }
 
-    setColumns(columns) {
-        let added = [],
-            removed = [],
-            old = this._columns;
+    //---------------------------------------------------------------------------------------------------//
+    // Primary data source method.  Used by the data grid to list the rows that need to be displayed.
 
-        for(let c of this._columns) {
-            if(columns.indexOf(c) === -1) {
-                this.trigger(EVENTS.columnRemoved, {
-                    target: this,
-                    column: c,
-                    source: this
-                });
+    /**
+     * Returns the data row at the given index.  If a value outside the valid range of 0 <= index < this.getLength()
+     * is passed a IndexError should be thrown.
+     *
+     * @param index {Number} - Index of the value to retrieve.
+     * @throws IndexError - Outside valid range
+     * @return {Object} - Row at the given index.
+     */
+    getItem(index) {
+        let offset = 0,
+            pageSize = this.getPageSize();
 
-                removed.push(c);
-            }
+        if(pageSize !== Number.POSITIVE_INFINITY) {
+            offset = (this.getPage() - 1) * this.getPageSize();
         }
 
-        for(let c of columns) {
-            if(old.indexOf(c) === -1) {
-                this.trigger(EVENTS.columnAdded, {
-                    target: this,
-                    column: c,
-                    source: this
-                });
-
-                added.push(c);
-            }
-        }
-
-        this._columns = columns;
-
-        this.trigger(EVENTS.columnsChanged, {
-            target: this,
-            from: old,
-            to: columns,
-            added: added,
-            removed: removed,
-            source: this
-        });
-
-        if(!arraysEqual(old, this._columns)) {
-            this.refresh();
+        if(index >= 0 && index < this.getLength()) {
+            return this._data[offset + index];
+        } else {
+            throw new IndexError(`${index} is out of range`);
         }
     }
 
-    getColumns() {
-        return this._columns;
-    }
 
-    setPageSize(size) {
-        if(size !== this._pageSize) {
-            this._pageSize = size;
-            this.refresh();
+    /**
+     * Returns the total number of data rows that are CURRENTLY BEING DISPLAYED.  Not the total number of rows in
+     * the data source object in total.  To get the total number of items use the getItemCount() method.  In many
+     * cases the getLength() and getItemCount() methods might return the same value.  For example if there is no
+     * pagination and all items are currently being displayed.
+     *
+     * @return {Number}
+     */
+    getLength() {
+        if(this.getPageSize() !== Number.POSITIVE_INFINITY) {
+            let offset = (this.getPage() - 1) * this.getPageSize();
+            return clamp(this.getItemCount() - offset, 0, this.getPageSize());
+        } else {
+            return this.getItemCount();
         }
     }
 
-    setPageNumber(page) {
-        if(page !== this._pageNumber) {
-            this._pageNumber = page;
-            this.refresh();
+    /**
+     * Iterates through all rows currently being displayed.  This is an alternate to using the standard for loop with
+     * the getItem() and getLength() methods.
+     *
+     * @return {IterableIterator<Object>}
+     */
+    * items() {
+        for(let i = 0, l = this.getLength(); i < l; i++) {
+            yield this.getItem(i);
         }
     }
 
-    getPageNumber() {
-        return this._pageNumber;
+    //---------------------------------------------------------------------------------------------
+    // Used by cell editors to modify the value of a rows field.
+    // These methods are responsible for sending the new data to the server if necessary.
+
+    /**
+     * Sets the value of the field of the row at the given index.
+     *
+     * @param index {Number} - Index of the row who's field is being set.
+     * @param field - {String} - The name of the field to set.
+     * @param value {*} - The value to set the field to.
+     * @throws IndexError - If the index is out of bounds.
+     */
+    setDataField(index, field, value) {
+        let item = this.getItem(index);
+        item[field] = value;
+    }
+
+    /**
+     * Returns the value of the field of the row at the given index.
+     *
+     * @param index {Number} - Index of the row who's field is being retrieved.
+     * @param field {String} - The name of the field to get.
+     * @throws IndexError - If the index is out of bounds.
+     */
+    getDataField(index, field) {
+        let item = this.getItem(index);
+        return item[field];
+    }
+
+    getPage() {
+        return this._page;
+    }
+
+    getItemCount() {
+        return this._data ? this._data.length : 0;
+    }
+
+    getPageCount() {
+        return Math.max(1, Math.ceil(this.getItemCount() / this.getPageSize()));
     }
 
     getPageSize() {
         return this._pageSize;
     }
 
-    getLength() {
-        let pageIndex = this.getPageNumber() - 1,
-            pageSize = this.getPageSize(),
-            start = pageIndex * pageSize,
-            end = Math.min(start + pageSize, this._data.length);
-
-        return end - start;
-    }
-
-    getItemCount() {
-        return this._data.length;
-    }
-
-    getItem(index) {
-        let pageIndex = this.getPageNumber() - 1,
-            pageSize = this.getPageSize(),
-            offset = pageSize * pageIndex,
-            length = this.getLength();
-
-        if(index >= length) {
-            index = null;
-        }
-
-        if(index < 0) {
-            index = null;
-        }
-
-        if(index !== null) {
-            return this._data[offset + index];
+    setPage(page) {
+        if(this._page !== page) {
+            this._page = page;
+            this.queueDataChange();
         }
     }
 
-    filter() {
-
-    }
-
-    sort() {
-
-    }
-
-    refresh() {
-        if(this._refreshID) return;
-
-        this._refreshID = window.requestAnimationFrame(() => {
-            this._refreshID = null;
-            this.trigger('data-changed', {target: this});
-        });
-    }
-
-    isLoading() {
-        return false;
-    }
-
-    setColumnWidth(column, width) {
-        if(typeof column === 'number') {
-            column = this.getColumns()[column];
-        } else if(this.getColumns().indexOf(column) === -1) {
-            throw new Error("unknown column");
+    setPageSize(size) {
+        if(this._pageSize !== size) {
+            this._pageSize = size;
+            this.queueDataChange();
         }
+    }
 
-        let oldWidth = column.width;
+    queueDataChange() {
+        if(this._dataChangeQueue) return;
 
-        if(width !== oldWidth) {
-            column.width = width;
+        this._dataChangeQueue = window.requestAnimationFrame(() => {
+            this._dataChangeQueue = null;
 
-            this.trigger(EVENTS.columnResized, {
-                column: column,
-                oldWidth: oldWidth,
-                width: width,
-                source: this
+            this.trigger(EVENTS.dataChanged, {
+                target: this
             });
-        }
+        });
     }
 }

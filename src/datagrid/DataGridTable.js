@@ -43,9 +43,16 @@ export class Row {
 
         this.$element = $(`<tr class="${CLASSES.row}">`);
 
-        for(let column of this.source.getColumns()) {
-            let $td = $(`<td class="${CLASSES.cell}">`);
+        for(let column of this.datatable.columns) {
+            // let $td = $(`<td class="${CLASSES.cell}">`);
+            // $td = column.cellRenderer($td, this.data);
+            // this.$element.append($td);
+
+            let td = document.createElement('td');
+            td.className = CLASSES.cell;
+            let $td = $(td);
             $td = column.cellRenderer($td, this.data);
+
             this.$element.append($td);
         }
     }
@@ -62,7 +69,7 @@ export class DataGridTable extends Observable {
     // noinspection JSUnusedGlobalSymbols
     static CLASSES = CLASSES;
 
-    constructor(source, {placeholder="", classes=""}={}) {
+    constructor(source, columns=null, {placeholder="", classes=""}={}) {
         super();
         this.placeholder = placeholder;
         // {on(event, listener), off(event, listener), getItem(index), getLength()}
@@ -86,6 +93,14 @@ export class DataGridTable extends Observable {
         if(source) {
             this.setDataSource(source);
         }
+
+        if(columns) {
+            this.setColumns(columns);
+        }
+    }
+
+    setColumns(columns) {
+        this.columns = columns;
     }
 
     setDataSource(source) {
@@ -94,7 +109,6 @@ export class DataGridTable extends Observable {
         // Remove the old data source
         if(source !== old && old) {
             this.source.off(SOURCE_EVENTS.dataChanged, this._onDataChange);
-            this.source.off(SOURCE_EVENTS.columnResized, this._refreshWidths);
             this.source = null;
 
             this.trigger(EVENTS.dataSourceRemoved, {
@@ -108,7 +122,6 @@ export class DataGridTable extends Observable {
 
         if(this.source) {
             this.source.on(SOURCE_EVENTS.dataChanged, this._onDataChange);
-            this.source.on(SOURCE_EVENTS.columnResized, this._refreshWidths);
 
             this.trigger(EVENTS.dataSourceAdded, {
                 target: this,
@@ -142,6 +155,8 @@ export class DataGridTable extends Observable {
 
             this.refreshColumnWidths();
 
+            let frag = document.createDocumentFragment();
+
             if(l === 0) {
                 if(typeof this.placeholder === 'function') {
                     this.placeholder(this);
@@ -155,10 +170,11 @@ export class DataGridTable extends Observable {
                     if(row.init) row.init();
                     this.rows.push(row);
                     row.$element.data('row', row);
-                    row.appendTo(this.$body);
+                    row.appendTo(frag);
                 }
             }
 
+            this.$body.append(frag);
             this.trigger(EVENTS.render, {target: this});
         });
     }
@@ -169,7 +185,7 @@ export class DataGridTable extends Observable {
 
         this.$colgroup.empty();
 
-        for(let column of this.source.getColumns()) {
+        for(let column of this.columns) {
             let w = Math.max(column.width || 0, 0),
                 $col = $("<col>");
 

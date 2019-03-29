@@ -62,12 +62,18 @@ export default class Column {
      * @param data
      */
     cellRenderer($cell, data) {
-        $cell.html(this.getCellValue(data));
-
-        if(this.cellClasses) $cell.addClass(this.cellClasses);
-        if(this.cellStyle) $cell.css(this.cellStyle);
-
+        let cell = $cell[0];
+        cell.innerHTML = this.getCellValue(data);
+        if(this.cellClasses) cell.classList.add(this.cellClasses);
         return $cell;
+
+
+        // $cell.html(this.getCellValue(data));
+        //
+        // if(this.cellClasses) $cell.addClass(this.cellClasses);
+        // if(this.cellStyle) $cell.css(this.cellStyle);
+        //
+        // return $cell;
     }
 
     columnRenderer($column) {

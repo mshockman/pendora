@@ -15,7 +15,7 @@ export default {
 
     entry: {
         'test2': './tests/src/test2.js',
-        'testDataGrid': './tests/src/test_data_grid.js',
+        'testDataGrid': ["@babel/polyfill", './tests/src/test_data_grid.js'],
         'testPaginator': './tests/src/test_paginator.js'
     },
 

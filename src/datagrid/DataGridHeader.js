@@ -131,26 +131,26 @@ export default class DataGridHeader extends Observable {
         if(this.grid) {
             if(this.grid === grid) return;
 
-            this.grid.source.off(ds.EVENTS.dataChanged, this._render);
-            this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
-            this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
+            // this.grid.source.off(ds.EVENTS.dataChanged, this._render);
+            // this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
+            // this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
             this.grid.off(g.EVENTS.render, this._render);
             this.grid = null;
         }
 
         if(grid) {
             this.grid = grid;
-            this.grid.source.on(ds.EVENTS.dataChanged, this._render);
-            this.grid.source.on(ds.EVENTS.columnsChanged, this._render);
-            this.grid.source.on(ds.EVENTS.columnResized, this._refreshWidths);
+            // this.grid.source.on(ds.EVENTS.dataChanged, this._render);
+            // this.grid.source.on(ds.EVENTS.columnsChanged, this._render);
+            // this.grid.source.on(ds.EVENTS.columnResized, this._refreshWidths);
             this.grid.on(g.EVENTS.render, this._render);
         }
     }
 
     destroy() {
-        this.grid.source.off(ds.EVENTS.dataChanged, this._render);
-        this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
-        this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
+        // this.grid.source.off(ds.EVENTS.dataChanged, this._render);
+        // this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
+        // this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
         this.grid = null;
 
         this.$element.remove();

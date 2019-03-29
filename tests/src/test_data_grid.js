@@ -1,4 +1,4 @@
-import {DataSource, DataGridTable, DataGridHeader, Column, ResizeHelper} from '../../src/datagrid/';
+import {DataGridHeader, Column, ResizeHelper, DataGridTable, DataSource} from '../../src/datagrid/';
 import {randomChoice} from '../../src/core/utility';
 import Viewport from '../../src/ui/viewport';
 import $ from 'jquery';
@@ -85,25 +85,30 @@ const columns = [
 
 
 let data = buildRandomData(500),
-    source = new DataSource(data, columns, 100);
+    source = new DataSource(data);
 
 
-let table = new DataGridTable(source),
-    header = new DataGridHeader(table, {resizeable: true}),
-    tableViewport = new Viewport(),
-    headerViewport = new Viewport(),
-    resizeHelper = new ResizeHelper(header);
+let table = new DataGridTable(source, columns),
+    tableViewport = new Viewport();
 
-
-headerViewport.$element.addClass("c-datagrid__header");
 tableViewport.$element.addClass("c-datagrid__body");
-
-headerViewport.mirror(tableViewport);
-headerViewport.append(header);
 tableViewport.append(table);
-headerViewport.appendTo("#test_output");
 tableViewport.appendTo("#test_output");
-resizeHelper.appendTo("#test_output");
+
+// let headerViewport = new Viewport(),
+//     header = new DataGridHeader(table, {resizeable: true}),
+//     resizeHelper = new ResizeHelper(header);
+//
+// headerViewport.$element.addClass("c-datagrid__header");
+// headerViewport.mirror(tableViewport);
+// headerViewport.append(header);
+// headerViewport.appendTo("#test_output");
+
+// resizeHelper.appendTo("#test_output");
+
+table.render();
 
 window.table = table;
 window.source = source;
+
+window.DataGrid = DataGridTable;
