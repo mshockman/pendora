@@ -1,8 +1,11 @@
-$defaultDataGridBorder: 1px solid #dcdbdb;
+$dataTableGridBorder: 1px solid #DADEE0;
+$dataTableHeaderBackground: #F4F5F9;
+$dataTableCellBorder: 1px solid #EDEFF0;
+$dataTableHeaderTextColor: #313131;
 
 
 .c-datagrid {
-  border: $defaultDataGridBorder;
+  border: $dataTableGridBorder;
   display: flex;
   flex-direction: column;
   width: 900px;
@@ -11,17 +14,17 @@ $defaultDataGridBorder: 1px solid #dcdbdb;
 
   .ui-resize-helper {
     width: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.5);
     top: 0;
     bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 }
 
 
 .c-datagrid__header {
-  background-color: #f0efef;
+  background-color: $dataTableHeaderBackground;
   overflow: hidden !important;
-  border-bottom: $defaultDataGridBorder;
+  border-bottom: $dataTableGridBorder;
 
   .c-viewport__body {
     float: left;
@@ -33,6 +36,25 @@ $defaultDataGridBorder: 1px solid #dcdbdb;
 
 .c-datagrid-columns, .c-datagrid-columns__column, .c-datatable, .c-datatable__row, .c-datatable__cell {
   box-sizing: border-box;
+}
+
+
+.c-datatable__row {
+  &:first-child {
+    border-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+
+.c-datatable__cell {
+  border: $dataTableCellBorder;
+  font-size: 11pt;
+  color: #475466;
+  padding: 0 0.4rem;
 }
 
 
@@ -58,18 +80,33 @@ $defaultDataGridBorder: 1px solid #dcdbdb;
 
 
 .c-datagrid-columns {
-
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
 }
 
 
 .c-datagrid-columns__column {
   position: relative;
   user-select: none;
+  border-left: $dataTableGridBorder;
+  border-right: $dataTableGridBorder;
+  color: $dataTableHeaderTextColor;
+  font-weight: 600;
+
+  &:first-child {
+    border-left: 0;
+  }
+
+  &:last-child {
+    border-right: 0;
+  }
 }
 
 
 .c-datatable {
-
+  border-spacing: 0;
+  border-collapse: collapse;
 }
 
 
