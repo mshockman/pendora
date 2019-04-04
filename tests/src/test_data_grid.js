@@ -1,6 +1,7 @@
 import {DataGridHeader, Column, ResizeHelper, DataGridTable, DataSource} from '../../src/datagrid/';
 import {randomChoice} from '../../src/core/utility';
 import Viewport from '../../src/ui/viewport';
+import {parseHTML} from 'core/utility';
 import $ from 'jquery';
 
 
@@ -93,22 +94,23 @@ let table = new DataGridTable(source, columns),
 
 tableViewport.$element.addClass("c-datagrid__body");
 tableViewport.append(table);
-tableViewport.appendTo("#test_output");
 
-// let headerViewport = new Viewport(),
-//     header = new DataGridHeader(table, {resizeable: true}),
-//     resizeHelper = new ResizeHelper(header);
-//
-// headerViewport.$element.addClass("c-datagrid__header");
-// headerViewport.mirror(tableViewport);
-// headerViewport.append(header);
-// headerViewport.appendTo("#test_output");
+let headerViewport = new Viewport(),
+    header = new DataGridHeader(table, {resizeable: true}),
+    resizeHelper = new ResizeHelper(header);
 
-// resizeHelper.appendTo("#test_output");
+headerViewport.$element.addClass("c-datagrid__header");
+headerViewport.mirror(tableViewport);
+headerViewport.append(header);
+headerViewport.appendTo("#test_output");
+
+resizeHelper.appendTo("#test_output");
 
 table.render();
+tableViewport.appendTo("#test_output");
 
 window.table = table;
 window.source = source;
 
 window.DataGrid = DataGridTable;
+window.parseHTML = parseHTML;

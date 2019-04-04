@@ -2,7 +2,6 @@
  * Widget that displays information in a data source in a table.
  */
 import Observable from "../core/interface/Observable";
-import $ from 'jquery';
 import {EVENTS as SOURCE_EVENTS} from './datasource';
 
 
@@ -35,30 +34,30 @@ export const EVENTS = {
  *  col-refresh({target, totalWidth, widths})
  */
 export class Row {
-    constructor(table, source, index) {
-        this.datatable = table;
-        this.source = source;
+    constructor(grid, index) {
+        this.grid = grid;
         this.index = index;
-        this.data = this.source.getItem(this.index);
+        this.data = this.grid.source.getItem(this.index);
 
-        this.$element = $(`<tr class="${CLASSES.row}">`);
-
-        for(let column of this.datatable.columns) {
-            // let $td = $(`<td class="${CLASSES.cell}">`);
-            // $td = column.cellRenderer($td, this.data);
-            // this.$element.append($td);
-
-            let td = document.createElement('td');
-            td.className = CLASSES.cell;
-            let $td = $(td);
-            $td = column.cellRenderer($td, this.data);
-
-            this.$element.append($td);
-        }
+        this.element = document.createElement('tr');
+        this.element.classList.add(CLASSES.row);
     }
 
-    appendTo(selector) {
-        return this.$element.appendTo(selector);
+    render() {
+        let fragment = document.createDocumentFragment();
+
+        for(let column of this.grid.columns) {
+            let cell = document.createElement('td');
+            cell.classList.add(CLASSES.cell);
+            cell.appendChild(column.cellRenderer(this.data));
+
+            fragment.appendChild(cell);
+        }
+
+        while(this.element.firstChild) this.element.removeChild(this.element.firstChild);
+
+        this.element.appendChild(fragment);
+        return this.element;
     }
 }
 
@@ -75,14 +74,20 @@ export class DataGridTable extends Observable {
         // {on(event, listener), off(event, listener), getItem(index), getLength()}
         this.source = null;
         this.rows = [];
+        this.columns = [];
 
         this.RowClass = Row;
 
-        this.$element = $(DataGridTable.template());
-        this.$colgroup = this.$element.find('colgroup');
-        this.$body = this.$element.find('tbody');
+        this.element = document.createElement('table');
+        this.colgroup = document.createElement('colgroup');
+        this.tbody = document.createElement('tbody');
+        this.element.classList.add(CLASSES.table);
+        this.tbody.classList.add(CLASSES.body);
+        this.element.appendChild(this.colgroup);
+        this.element.appendChild(this.tbody);
 
-        if(classes) this.$element.addClass(classes);
+
+        if(classes) this.element.classList.add(classes);
 
         this._onDataChange = () => {
             this.render();
@@ -100,7 +105,22 @@ export class DataGridTable extends Observable {
     }
 
     setColumns(columns) {
-        this.columns = columns;
+        for(let column of this.columns) {
+            column.onRemoved(this);
+        }
+
+        this.columns = [];
+
+        if(columns) {
+            for (let column of columns) {
+                column.onAdded(this);
+                this.columns.push(column);
+            }
+        }
+
+        this.trigger('columns-changed', {
+            target: this
+        });
     }
 
     setDataSource(source) {
@@ -150,12 +170,11 @@ export class DataGridTable extends Observable {
                 if(row.destroy) row.destroy();
             }
 
-            this.$body.empty();
             this.rows = [];
 
             this.refreshColumnWidths();
 
-            let frag = document.createDocumentFragment();
+            let fragment = document.createDocumentFragment();
 
             if(l === 0) {
                 if(typeof this.placeholder === 'function') {
@@ -165,16 +184,17 @@ export class DataGridTable extends Observable {
                 }
             } else {
                 for(; i < l; i++) {
-                    let row = new this.RowClass(this, this.source, i);
+                    let row = new this.RowClass(this, i);
+                    row.render();
 
                     if(row.init) row.init();
                     this.rows.push(row);
-                    row.$element.data('row', row);
-                    row.appendTo(frag);
+                    fragment.appendChild(row.element);
                 }
             }
 
-            this.$body.append(frag);
+            while(this.tbody.firstChild) this.tbody.removeChild(this.tbody.firstChild);
+            this.tbody.appendChild(fragment);
             this.trigger(EVENTS.render, {target: this});
         });
     }
@@ -183,32 +203,31 @@ export class DataGridTable extends Observable {
         let width = 0,
             widths = [];
 
-        this.$colgroup.empty();
+        while(this.colgroup.firstChild) this.colgroup.removeChild(this.colgroup.firstChild);
+        let fragment = document.createDocumentFragment();
 
         for(let column of this.columns) {
             let w = Math.max(column.width || 0, 0),
-                $col = $("<col>");
+                col = document.createElement('col');
 
             widths.push(w);
             width += w;
-            $col.css('width', w);
-            $col.data("column", column);
-            this.$colgroup.append($col);
+
+            col.style.width = w + 'px';
+            fragment.appendChild(col);
         }
 
-        this.$element.css('width', width);
+        this.colgroup.appendChild(fragment);
+        this.element.style.width = width + 'px';
     }
 
     appendTo(selector) {
-        return this.$element.appendTo(selector);
-    }
-
-    static template() {
-        return `
-            <table class="${CLASSES.table}">
-                <colgroup></colgroup>
-                <tbody class="${CLASSES.body}"></tbody>
-            </table>
-        `;
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.jquery) {
+            selector.append(this.element);
+        } else {
+            selector.appendChild(this.element);
+        }
     }
 }
