@@ -91,3 +91,18 @@ export function arraysEqual(array1, array2) {
 
     return true;
 }
+
+
+export function parseHTML(html) {
+    let template = document.createElement('template');
+    template.innerHTML = html;
+
+    if(template.content) {
+        return template.content;
+    } else {
+        // Doesn't support template tag.
+        let fragment = document.createDocumentFragment();
+        while(template.firstChild) fragment.appendChild(template.firstChild);
+        return fragment;
+    }
+}
