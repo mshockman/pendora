@@ -3,6 +3,7 @@
  */
 import Observable from "../core/interface/Observable";
 import {EVENTS as SOURCE_EVENTS} from './datasource';
+import {privateCache} from 'core/data';
 
 
 export const CLASSES = {
@@ -41,6 +42,8 @@ export class Row {
 
         this.element = document.createElement('tr');
         this.element.classList.add(CLASSES.row);
+
+        privateCache.set(this.element, 'row', this);
     }
 
     render() {
@@ -180,7 +183,7 @@ export class DataGridTable extends Observable {
                 if(typeof this.placeholder === 'function') {
                     this.placeholder(this);
                 } else if(this.placeholder) {
-                    this.$body.html(this.placeholder);
+                    this.tbody.innerHTML = this.placeholder;
                 }
             } else {
                 for(; i < l; i++) {

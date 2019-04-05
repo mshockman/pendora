@@ -2,7 +2,7 @@ import {DataGridHeader, Column, ResizeHelper, DataGridTable, DataSource} from '.
 import {randomChoice} from '../../src/core/utility';
 import Viewport from '../../src/ui/viewport';
 import {parseHTML} from 'core/utility';
-import $ from 'jquery';
+import {privateCache} from 'core/data';
 
 
 const labels = [
@@ -73,7 +73,7 @@ const columns = [
     new Column({name: 'id', label: "ID", resizeable: true, width: 100}),
     new Column({name: 'sku', label: "SKU", resizeable: true, width: 100}),
     new Column({name: 'name', label: "Name", resizeable: true, width: 100}),
-    new Column({name: 'status', label: "Status", resizeable: true, width: 100}),
+    new Column({name: 'status', label: "Status", resizeable: true, width: 100, sortable: true}),
     new Column({name: 'color', label: "Color", resizeable: true, width: 100}),
     new Column({name: 'label', label: "Label", resizeable: true, width: 100}),
     new Column({name: 'price', label: "Price", resizeable: true, width: 100}),
@@ -96,7 +96,7 @@ tableViewport.$element.addClass("c-datagrid__body");
 tableViewport.append(table);
 
 let headerViewport = new Viewport(),
-    header = new DataGridHeader(table, {resizeable: true}),
+    header = new DataGridHeader(table, {resizeable: true, sortable: true}),
     resizeHelper = new ResizeHelper(header);
 
 headerViewport.$element.addClass("c-datagrid__header");
@@ -114,3 +114,4 @@ window.source = source;
 
 window.DataGrid = DataGridTable;
 window.parseHTML = parseHTML;
+window.privateCache = privateCache;

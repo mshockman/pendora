@@ -1,3 +1,6 @@
+import {clamp} from 'core/utility';
+
+
 /**
  * Contains meta information for a grid column.
  */
@@ -15,6 +18,10 @@ export default class Column {
         this.sortable = sortable;
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
+
+        // If sortable is true then this field holds how the column is sorted.
+        // Can be false for no sort, asc or desc.
+        this.sort = false;
 
         this.onRenderCell = null;
         this.onRenderHeader = null;
@@ -49,6 +56,8 @@ export default class Column {
     }
 
     setWidth(width) {
+        width = clamp(width, this.minWidth, this.maxWidth);
+
         if(width !== this.width) {
             this.width = width;
 
@@ -56,6 +65,8 @@ export default class Column {
                 this.grid.trigger('column-resize', {
                     target: this
                 });
+
+                this.grid.refreshColumnWidths();
             }
         }
     }

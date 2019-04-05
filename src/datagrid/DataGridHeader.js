@@ -1,11 +1,10 @@
-import {clamp} from '../core/utility';
-import $ from 'jquery';
+import {clamp, emptyElement, addClasses, setElementOffset} from 'core/utility';
+import {privateCache} from "core/data";
 import Observable from "../core/interface/Observable";
-import * as ds from "./datasource";
 import * as g from './DataGridTable';
 
 
-const SORTING_OPTIONS = ['none', 'asc', 'desc'];
+const SORTING_OPTIONS = [false, 'asc', 'desc'];
 
 
 export const CLASSES = {
@@ -35,33 +34,44 @@ export const EVENTS = {
 const COLUMN_KEY = "column";
 
 
-function setSortClass($node, direction) {
+function setSortClass(element, direction) {
     if(direction === 'asc') {
-        $node.removeClass(CLASSES.uiSortDESC);
-        $node.removeClass(CLASSES.uiSortNone);
-        $node.addClass(CLASSES.uiSortASC);
+        element.classList.remove(CLASSES.uiSortDESC);
+        element.classList.remove(CLASSES.uiSortNone);
+        element.classList.add(CLASSES.uiSortASC);
         return 'asc';
     } else if(direction === 'desc') {
-        $node.removeClass(CLASSES.uiSortASC);
-        $node.removeClass(CLASSES.uiSortNone);
-        $node.addClass(CLASSES.uiSortDESC);
+        element.classList.remove(CLASSES.uiSortASC);
+        element.classList.remove(CLASSES.uiSortNone);
+        element.classList.add(CLASSES.uiSortDESC);
         return 'desc';
     } else {
-        $node.removeClass(CLASSES.uiSortASC);
-        $node.removeClass(CLASSES.uiSortDESC);
-        $node.addClass(CLASSES.uiSortNone);
-        return 'none';
+        element.classList.remove(CLASSES.uiSortASC);
+        element.classList.remove(CLASSES.uiSortDESC);
+        element.classList.add(CLASSES.uiSortNone);
+        return false;
     }
 }
 
 
-function getSortDirection($node) {
-    if($node.hasClass(CLASSES.uiSortASC)) {
+function getSortDirection(element) {
+    if(element.classList.contains(CLASSES.uiSortASC)) {
         return 'asc';
-    } else if($node.hasClass(CLASSES.uiSortDESC)) {
+    } else if(element.classList.contains(CLASSES.uiSortDESC)) {
         return 'desc';
     } else {
-        return 'none';
+        return false;
+    }
+}
+
+
+function getSortClass(sort) {
+    if(sort === 'asc') {
+        return CLASSES.uiSortASC;
+    } else if(sort === 'desc') {
+        return CLASSES.uiSortDESC;
+    } else if(sort === false || sort === 'none') {
+        return CLASSES.uiSortNone;
     }
 }
 
@@ -97,18 +107,22 @@ export default class DataGridHeader extends Observable {
         this.reorderable = reorderable;
         this.resizeable = resizeable;
         this.disabled = false;
+        this.columnElements = new WeakMap();
+        this.columns = [];
 
-        if(!template) {
-            this.$element = $(DataGridHeader.template());
-        } else if(template === 'inline') {
-            this.$element = $(DataGridHeader.inlineTemplate());
-        } else if(typeof template === 'function') {
-            this.$element = $(template(this));
+        if(template === 'inline') {
+            this.element = document.createElement('thead');
+            addClasses(this.element, `${CLASSES.header} ${CLASSES.body}`);
+            this.row = this.element;
         } else {
-            this.$element = $(template);
+            this.element = document.createElement('table');
+            this.row = document.createElement('tbody');
+            this.element.appendChild(this.row);
+
+            addClasses(this.element, CLASSES.header);
+            addClasses(this.row, CLASSES.body);
         }
 
-        this.$row = this.$element.find(`.${CLASSES.body}`);
         this._render = this.render.bind(this);
         this._refreshWidths = this.refreshColumnWidths.bind(this);
 
@@ -135,6 +149,7 @@ export default class DataGridHeader extends Observable {
             // this.grid.source.off(ds.EVENTS.columnsChanged, this._render);
             // this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
             this.grid.off(g.EVENTS.render, this._render);
+            this.grid.off('column-resize', this._refreshWidths);
             this.grid = null;
         }
 
@@ -144,6 +159,7 @@ export default class DataGridHeader extends Observable {
             // this.grid.source.on(ds.EVENTS.columnsChanged, this._render);
             // this.grid.source.on(ds.EVENTS.columnResized, this._refreshWidths);
             this.grid.on(g.EVENTS.render, this._render);
+            this.grid.on('column-resize', this._refreshWidths);
         }
     }
 
@@ -153,32 +169,34 @@ export default class DataGridHeader extends Observable {
         // this.grid.source.off(ds.EVENTS.columnResized, this._refreshWidths);
         this.grid = null;
 
-        this.$element.remove();
-        this.$element = null;
+        emptyElement(this.element);
+        this.element = null;
 
         this._render = null;
         this._refreshWidths = null;
     }
 
     /**
-     * Sets the sorting column for the given direction.
-     * @param $column
-     * @param direction
+     * Applies the sorting method to the column.
+     *
+     * @param column
+     * @param sort {string|boolean} Can be 'asc', 'desc', or false.
      */
-    setSort($column, direction) {
-        let $currentSortNodes = this.$row.find(`.${CLASSES.uiSortDESC} .${CLASSES.uiSortASC}`).not($column);
+    setSort(column, sort) {
+        if(column.sort === sort) return;
 
-        if((direction === 'asc' || direction === 'desc') && $currentSortNodes.length) {
-            $currentSortNodes.each((x, element) => {
-                element = $(element);
-                setSortClass(element, 'none');
-            });
+        if(sort === 'asc' || sort === 'desc') {
+            for(let c of this.columns) {
+                if(c !== column) {
+                    this.setSort(c, false);
+                }
+            }
         }
 
-        setSortClass($column, direction);
-
-        let column = $column.data(COLUMN_KEY);
-        this.trigger(EVENTS.sortChange, {$column, column, direction});
+        let columnNode = this.columnElements.get(column);
+        setSortClass(columnNode, sort);
+        column.sort = sort;
+        this.trigger(EVENTS.sortChange, {column, element: columnNode, sort});
     }
 
     /**
@@ -190,34 +208,32 @@ export default class DataGridHeader extends Observable {
         this._sortingOnClick = (event) => {
             if(this.disabled) return;
 
-            let $target = $(event.target),
-                $column = $target.closest(`.${CLASSES.column}.${CLASSES.uiSortable}`, this.$row),
-                column = $column.data(COLUMN_KEY);
+            let columnNode = event.target.closest(`.${CLASSES.column}.${CLASSES.uiSortable}`, this.row),
+                column = privateCache.get(columnNode, COLUMN_KEY);
 
-            if(!column || !column.sortable || $column.hasClass(CLASSES.uiNoSort)) return;
+            if(!column || !column.sortable || columnNode.classList.contains(CLASSES.uiNoSort)) return;
 
-            let currentDirection = getSortDirection($column),
-                nextDirection = getNextDirection(currentDirection);
-
-            this.setSort($column, nextDirection);
+            let direction = getNextDirection(column.sort);
+            this.setSort(column, direction);
         };
 
         // Applies the CLASSES.uiSortable class to all sortable columns.
         this._sortingOnRender = () => {
-            this.$row.find(`.${CLASSES.column}`).each((x, element) => {
-                element = $(element);
-                let column = element.data(COLUMN_KEY);
-
+            for(let column of this.columns) {
                 if(column.sortable) {
-                    element.addClass(CLASSES.uiSortable);
-                    element.addClass(CLASSES.uiSortNone);
+                    let columnElement = this.columnElements.get(column),
+                        cls = getSortClass(column.sort);
+
+                    columnElement.classList.add(CLASSES.uiSortable);
+                    if(cls) columnElement.classList.add(cls);
                 }
-            });
+            }
         };
 
         // Add listeners
         this.on(EVENTS.render, this._sortingOnRender);
-        this.$row.on('click', this._sortingOnClick);
+
+        this.row.addEventListener('click', this._sortingOnClick);
     }
 
     /**
@@ -230,21 +246,20 @@ export default class DataGridHeader extends Observable {
     initResizeableColumns() {
         // Add resizeable class to all resizeable columns.
         this._resizeableOnRender = () => {
-            this.$row.find(`.${CLASSES.column}`).each((x, element) => {
-                element = $(element);
-                let column = element.data(COLUMN_KEY);
+            for(let column of this.columns) {
+                let element = this.columnElements.get(column);
 
                 if(column.resizeable) {
-                    element.addClass(CLASSES.resizable);
+                    element.classList.add(CLASSES.resizable);
 
-                    let $handle = $(`<div class="${CLASSES.uiResizeHandle}">`);
-                    element.append($handle);
+                    let handle = document.createElement('div');
+                    handle.classList.add(CLASSES.uiResizeHandle);
+                    element.appendChild(handle);
                 }
-            });
+            }
         };
 
-        let $doc = $(document),
-            startX = 0,
+        let startX = 0,
             startY = 0,
             x = 0,
             y = 0,
@@ -253,7 +268,7 @@ export default class DataGridHeader extends Observable {
             startWidth = 0,
             width = 0,
             column = null,
-            $handle, $column;
+            handle, columnElement;
 
         let onMouseMove = (event) => {
             x = event.pageX;
@@ -261,30 +276,29 @@ export default class DataGridHeader extends Observable {
             width = clamp(startWidth + dX, Math.max(column.minWidth, 0), column.maxWidth);
             event.preventDefault();
 
-            this.trigger(EVENTS.resizing, {startX, startY, x, y, dX, dY, startWidth, width, column, $doc, $handle, $column, grid: this});
+            this.trigger(EVENTS.resizing, {startX, startY, x, y, dX, dY, startWidth, width, column, handle, columnElement, grid: this});
         };
 
         let onMouseUp = () => {
-            $doc.off('mousemove', onMouseMove);
-            $doc.off('mouseup', onMouseUp);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
 
             dX = x - startX;
             dY = y - startY;
 
             width = clamp(startWidth + dX, Math.max(column.minWidth, 0), column.maxWidth);
 
-            this.source.setColumnWidth(column, width);
-            this.trigger(EVENTS.resizeEnd, {startX, startY, x, y, dX, dY, startWidth, width, column, $doc, $handle, $column, target: this});
+            column.setWidth(width);
+            this.trigger(EVENTS.resizeEnd, {startX, startY, x, y, dX, dY, startWidth, width, column, handle, columnElement, target: this});
         };
 
         this._resizeOnMouseDown = (event) => {
             if(this.disabled) return;
 
-            let $target = $(event.target);
-            $handle = $target.closest(`.${CLASSES.uiResizeHandle}`, this.$row);
-            $column = $handle.closest(`.${CLASSES.column}`);
-
-            column = $column.data(COLUMN_KEY);
+            handle = event.target.closest(`.${CLASSES.uiResizeHandle}`, this.row);
+            if(!handle) return;
+            columnElement = handle.closest(`.${CLASSES.column}`);
+            column = privateCache.get(columnElement, COLUMN_KEY);
 
             if(!column || column.disabled) return;
 
@@ -293,12 +307,12 @@ export default class DataGridHeader extends Observable {
             dX = 0;
             dY = 0;
             width = startWidth = column.width;
-            $doc.on('mousemove', onMouseMove);
-            $doc.on('mouseup', onMouseUp);
-            this.trigger(EVENTS.resizeStart, {startX, startY, x, y, dX, dY, startWidth, width, column, $doc, $handle, $column, target: this, event});
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            this.trigger(EVENTS.resizeStart, {startX, startY, x, y, dX, dY, startWidth, width, column, handle, columnElement, target: this, event});
         };
 
-        this.$row.on('mousedown', this._resizeOnMouseDown);
+        this.row.addEventListener('mousedown', this._resizeOnMouseDown);
         this.on(EVENTS.render, this._resizeableOnRender);
     }
 
@@ -308,15 +322,24 @@ export default class DataGridHeader extends Observable {
         this._renderID = window.requestAnimationFrame(() => {
             this._renderID = null;
 
-            this.$row.empty();
+            emptyElement(this.row);
+            this.columnElements = new WeakMap();
+            this.columns = [];
+            let fragment = document.createDocumentFragment();
 
-            for(let column of this.source.getColumns()) {
-                let $th = $(`<th class="${CLASSES.column}">`);
-                $th = column.columnRenderer($th);
-                $th.data(COLUMN_KEY, column);
-                this.$row.append($th);
+            for(let column of this.grid.columns) {
+                let th = document.createElement('th');
+                addClasses(th, CLASSES.column);
+                th.appendChild(column.columnRenderer());
+                privateCache.set(th, COLUMN_KEY, column);
+                fragment.appendChild(th);
+                this.columnElements.set(column, th);
+                this.columns.push(column);
+
+                if(column.onRenderHeader) column.onRenderHeader(column, th, this);
             }
 
+            this.row.appendChild(fragment);
             this._refreshColumnWidths();
 
             this.trigger(EVENTS.render, {target: this});
@@ -333,38 +356,29 @@ export default class DataGridHeader extends Observable {
     }
 
     _refreshColumnWidths() {
-        let total = 0,
-            widths = [];
+        let total = 0;
 
-        this.$row.find(`.${CLASSES.column}`).each((x, element) => {
-            element = $(element);
-            let column = element.data(COLUMN_KEY);
+        for(let column of this.columns) {
             total += column.width;
-            element.css('width', column.width);
-            widths.push(column.width);
-        });
+            let element = this.columnElements.get(column);
+            element.style.width = column.width + 'px';
+        }
 
-        this.$element.css('width', total);
+        this.element.style.width = total + 'px';
     }
 
     appendTo(selector) {
-        return this.$element.appendTo(selector);
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.jquery) {
+            selector.append(this.element);
+        } else {
+            selector.appendChild(this.element);
+        }
     }
 
     get source() {
         return this.grid.source;
-    }
-
-    static inlineTemplate() {
-        return `<thead class="${CLASSES.header} ${CLASSES.body}"></thead>`;
-    }
-
-    static template() {
-        return `
-            <table class="${CLASSES.header}">
-                <thead class="${CLASSES.body}"></thead>
-            </table>
-        `;
     }
 }
 
@@ -374,8 +388,14 @@ export default class DataGridHeader extends Observable {
  */
 export class ResizeHelper {
     constructor(header) {
-        this.$element = $(`<div class="${CLASSES.uiResizeHelper}" style="display: none; position: absolute;">`);
         this.header = header;
+
+        this.element = document.createElement('div');
+        addClasses(this.element, CLASSES.uiResizeHelper);
+        Object.assign(this.element.style, {
+            display: 'none',
+            position: 'absolute'
+        });
 
         this.header.on(EVENTS.resizeStart, (name, ui) => {
             this.show();
@@ -392,18 +412,24 @@ export class ResizeHelper {
     }
 
     show() {
-        this.$element.css('display', 'block');
+        this.element.style.display = 'block';
     }
 
     hide() {
-        this.$element.css('display', 'none');
+        this.element.style.display = 'none';
     }
 
     setOffset(cords) {
-        this.$element.offset(cords);
+        setElementOffset(this.element, cords);
     }
 
     appendTo(selector) {
-        return this.$element.appendTo(selector);
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.jquery) {
+            selector.append(this.element);
+        } else {
+            selector.appendChild(this.element);
+        }
     }
 }

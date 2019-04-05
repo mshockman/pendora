@@ -1,3 +1,6 @@
+const REG_WHITESPACE = /\s+/;
+
+
 /**
  * Clamps a value between a minimum and maximum values.
  * @param value
@@ -93,6 +96,12 @@ export function arraysEqual(array1, array2) {
 }
 
 
+/**
+ * Parses an html string into a document fragment.
+ *
+ * @param html
+ * @return {DocumentFragment}
+ */
 export function parseHTML(html) {
     let template = document.createElement('template');
     template.innerHTML = html;
@@ -108,6 +117,12 @@ export function parseHTML(html) {
 }
 
 
+/**
+ * Tests to see if the object is empty.
+ *
+ * @param object
+ * @return {boolean}
+ */
 export function isEmptyObject(object) {
     // noinspection LoopStatementThatDoesntLoopJS
     for(let key in object) {
@@ -115,4 +130,87 @@ export function isEmptyObject(object) {
     }
 
     return true;
+}
+
+
+/**
+ * Empties a dom element.
+ *
+ * @param element
+ */
+export function emptyElement(element) {
+    while(element.firstChild) element.removeChild(element.firstChild);
+}
+
+
+/**
+ * Adds classes to an element.  Can take a space separated list of classes.
+ *
+ * @param element
+ * @param classes
+ */
+export function addClasses(element, classes) {
+    if(typeof classes === 'string') {
+        classes = classes.split(REG_WHITESPACE);
+    }
+
+    element.classList.add(...classes);
+}
+
+
+/**
+ * Removes classes to an element.  Can take a space separated list of classes.
+ *
+ * @param element
+ * @param classes
+ */
+export function removeClasses(element, classes) {
+    if(typeof classes === 'string') {
+        classes = classes.split(REG_WHITESPACE);
+    }
+
+    element.classList.remove(...classes);
+}
+
+
+/**
+ * Sets an elements position relative to the document.
+ *
+ * @param element
+ * @param coords
+ */
+export function setElementOffset(element, coords) {
+    if(coords.nodeType) {
+        coords = getElementOffset(element);
+    } else if(Array.isArray(coords)) {
+        coords = {
+            left: coords.left,
+            top: coords.top
+        };
+    }
+
+    let offset = element.getBoundingClientRect();
+
+    let style = getComputedStyle(element),
+        left = parseInt(style.left, 10) || 0,
+        top = parseInt(style.top, 10) || 0;
+
+    element.style.left = (left + (coords.left - offset.left)) + 'px';
+    element.style.top = (top + (coords.top - offset.top)) + 'px';
+}
+
+
+/**
+ * Returns the top and left position of an element relative to the document.
+ *
+ * @param element
+ * @return {{top: number, left: number}}
+ */
+export function getElementOffset(element) {
+    let box = element.getBoundingClientRect();
+
+    return {
+        left: box.left,
+        top: box.top
+    };
 }
