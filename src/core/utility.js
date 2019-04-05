@@ -106,3 +106,13 @@ export function parseHTML(html) {
         return fragment;
     }
 }
+
+
+export function isEmptyObject(object) {
+    // noinspection LoopStatementThatDoesntLoopJS
+    for(let key in object) {
+        return false;
+    }
+
+    return true;
+}
