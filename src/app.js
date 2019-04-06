@@ -1,4 +1,3 @@
-import $ from 'jquery';
 
 
 /**
@@ -49,7 +48,7 @@ export default class Application {
             throw new Error("Page is already loaded");
         }
 
-        $(async () => {
+        window.addEventListener('load', async () => {
             this.isLoaded = true;
 
             const pageClassImporter = this.classes[page],

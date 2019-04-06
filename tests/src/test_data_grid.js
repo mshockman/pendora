@@ -92,14 +92,14 @@ let data = buildRandomData(500),
 let table = new DataGridTable(source, columns),
     tableViewport = new Viewport();
 
-tableViewport.$element.addClass("c-datagrid__body");
+tableViewport.element.classList.add("c-datagrid__body");
 tableViewport.append(table);
 
 let headerViewport = new Viewport(),
     header = new DataGridHeader(table, {resizeable: true, sortable: true}),
     resizeHelper = new ResizeHelper(header);
 
-headerViewport.$element.addClass("c-datagrid__header");
+headerViewport.element.classList.add("c-datagrid__header");
 headerViewport.mirror(tableViewport);
 headerViewport.append(header);
 headerViewport.appendTo("#test_output");

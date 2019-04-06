@@ -104,7 +104,7 @@ export function arraysEqual(array1, array2) {
  */
 export function parseHTML(html) {
     let template = document.createElement('template');
-    template.innerHTML = html;
+    template.innerHTML = html.trim();
 
     if(template.content) {
         return template.content;
@@ -210,7 +210,88 @@ export function getElementOffset(element) {
     let box = element.getBoundingClientRect();
 
     return {
-        left: box.left,
-        top: box.top
+        left: box.left + window.pageXOffset,
+        top: box.top + window.pageYOffset
     };
+}
+
+
+/**
+ * Normalizing accessing scroll position for an element.
+ *
+ * Windows and elements have different ways of accessing their scroll left and scroll top values on IE.
+ * This function normalizes this behavior so getScroll(variable).scrollLeft always works.
+ * @param element
+ * @returns {{left, top}}
+ */
+export function getScroll(element) {
+    if(isWindow(element)) {
+        return {
+            scrollLeft: element.pageXOffset,
+            scrollTop: element.pageYOffset
+        };
+    } else {
+        return {
+            scrollLeft: element.scrollLeft,
+            scrollTop: element.scrollTop
+        }
+    }
+}
+
+
+/**
+ * Test to see if the variable is a window.
+ * @param variable
+ * @returns {boolean}
+ */
+export function isWindow(variable) {
+    return variable && typeof variable === 'object' && setInterval in variable;
+}
+
+
+/**
+ * Normalizes setting a scroll position for an element.
+ * Windows on ie and elements with overflow scroll have different ways of setting the scroll position.
+ * This methods normalizes them.
+ * @param element - The element to scroll
+ * @param scroll - An object with a left or a top property or both.
+ */
+export function setScroll(element, scroll) {
+    if(element.scrollTo) {
+        element.scrollTo(scroll);
+    } else {
+        element.scrollLeft = scroll.left;
+        element.scrollTop = scroll.top;
+    }
+}
+
+
+/**
+ * Matches a single dom element based on the given selector.
+ * Can take a css selector string, a jquery object, a dom element, a document element or a document fragment.
+ * If a css selector is passed it will query for the element.
+ * If a jquery object is passed it will return the first matched element.
+ * If an element is passed it will return that element.
+ *
+ * If a context is provided and the selector was a css selector, the selectors scope will be limited to that element.
+ * Otherwise the context will be the document.
+ *
+ * @param selector
+ * @param context
+ * @returns {Element|Document|DocumentFragment}
+ */
+export function selectElement(selector, context=null) {
+    if(!context) {
+        context = document;
+    } else {
+        context = selectElement(context);
+    }
+
+    if(typeof selector === 'string') {
+        return context.querySelector(selector);
+    } else if(selector.jquery) {
+        return selector[0];
+    } else if(selector.nodeType === 1 || selector.nodeType === 9 || selector.nodeType === 11) {
+        return selector;
+    }
 }

@@ -1,5 +1,5 @@
 import Observable from "../core/interface/Observable";
-import $ from 'jquery';
+import {selectElement, getScroll, setScroll} from "../core/utility";
 
 
 /**
@@ -19,24 +19,46 @@ export default class Viewport extends Observable {
         this._left = 0;
         this._top = 0;
 
-        if(!selector) {
-            this.$element = $(Viewport.template());
-        } else {
-            if(typeof selector === 'function') {
-                this.$element = $(selector());
-            } else {
-                this.$element = $(selector);
+        if(selector) {
+            if (typeof selector === 'string') {
+                this.element = document.querySelector(selector);
+            } else if (typeof selector === 'function') {
+                this.element = selector();
+            } else if (selector.jquery) {
+                this.element = selector[0];
+            } else if (selector.nodeType) {
+                this.element = selector;
             }
         }
 
-        // The body element is used to set the width and height of the scrollable area of the viewport
-        // if it manually needs to be set.
-        this.$body = this.$element.find('.c-viewport__body');
+        if(this.element) {
+            this.body = this.element.querySelector('.c-viewport__body');
+
+            if(!this.body) {
+                let fragment = document.createDocumentFragment();
+                while(this.element.firstChild) fragment.appendChild(this.element.firstChild);
+
+                // Wrap child element in a body.
+                this.body = document.createElement('div');
+                this.body.classList.add('c-viewport__body');
+                this.body.appendChild(fragment);
+                this.element.appendChild(this.body);
+            }
+        } else {
+            // Create from scratch.
+            this.element = document.createElement('div');
+            this.body = document.createElement('div');
+
+            this.element.classList.add('c-viewport');
+            this.body.classList.add('c-viewport__body');
+            this.element.appendChild(this.body);
+        }
 
         // Attaching scrolling event.
-        this.$element.on('scroll', () => {
-            this._left = this.$element.scrollLeft();
-            this._top = this.$element.scrollTop();
+        this.element.addEventListener('scroll', () => {
+            let scroll = getScroll(this.element);
+            this._left = scroll.scrollLeft;
+            this._top = scroll.scrollTop;
 
             this.trigger('scroll', {
                 target: this,
@@ -52,7 +74,7 @@ export default class Viewport extends Observable {
      * @returns {*}
      */
     appendTo(selector) {
-        return this.$element.appendTo(selector);
+        return selectElement(selector).appendChild(this.element);
     }
 
     /**
@@ -62,9 +84,9 @@ export default class Viewport extends Observable {
      */
     append(component) {
         if(component.appendTo) {
-            return component.appendTo(this.$body);
+            return component.appendTo(this.body);
         } else {
-            this.$body.append(component);
+            this.body.appendChild(selectElement(component));
         }
     }
 
@@ -101,12 +123,16 @@ export default class Viewport extends Observable {
 
     set left(value) {
         this._left = value;
-        this.$element.scrollLeft(value);
+        setScroll(this.element, {
+            left: value
+        });
     }
 
     set top(value) {
         this._top = value;
-        this.$element.scrollTop(value);
+        setScroll(this.element, {
+            top: value
+        });
     }
 
     get left() {
@@ -118,24 +144,18 @@ export default class Viewport extends Observable {
     }
 
     get viewportWidth() {
-        return this.$body.outerWidth();
+        return this.body.offsetWidth;
     }
 
     get viewportHeight() {
-        return this.$body.outerHeight();
+        return this.body.offsetHeight;
     }
 
     set viewportWidth(value) {
-        this.$body.outerWidth(value);
+        this.body.style.width = value + 'px';
     }
 
     set viewportHeight(value) {
-        this.$body.outerHeight(value);
-    }
-
-    static template() {
-        return `
-            <div class="c-viewport"><div class="c-viewport__body"></div></div>
-        `;
+        this.body.style.height = value + 'px';
     }
 }

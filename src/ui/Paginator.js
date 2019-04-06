@@ -1,5 +1,5 @@
 import Observable from "../core/interface/Observable";
-import $ from 'jquery';
+import {parseHTML} from 'core/utility';
 
 
 /**
@@ -12,52 +12,58 @@ export default class Paginator extends Observable {
 
         this.page = page;
         this.totalPages = totalPages;
+        this._disabled = null;
 
-        this.$element = $(Paginator.template());
-        this.$pageInput = this.$element.find('.c-paginator__page-input');
-        this.$pageDisplay = this.$element.find(".c-paginator__page-total");
-        this.$next = this.$element.find('.c-paginator__next');
-        this.$prev = this.$element.find('.c-paginator__previous');
-        this.$first = this.$element.find('.c-paginator__first');
-        this.$last = this.$element.find('.c-paginator__last');
+        /**
+         * @type {ChildNode}
+         */
+        this.element = parseHTML(Paginator.template()).firstChild;
+        this.pageInput = this.element.querySelector('.c-paginator__page-input');
+        this.pageDisplay = this.element.querySelector('.c-paginator__page-total');
+        this.nextBTN = this.element.querySelector('.c-paginator__next');
+        this.prevBTN = this.element.querySelector('.c-paginator__previous');
+        this.firstBTN = this.element.querySelector('.c-paginator__first');
+        this.lastBTN = this.element.querySelector('.c-paginator__last');
 
-        this.$element.addClass('visible');
+        this.element.addEventListener('click', (event) => {
+            let actionElement = event.target.closest("[data-action]", this.element);
+            if(!actionElement || actionElement.disabled) return;
 
-        this.$element.on('click', (event) => {
-            let $action = $(event.target).closest("[data-action]", this.$element);
+            let action = actionElement.dataset.action;
 
-            if($action.prop('disabled')) return;
-
-            if($action.length) {
-                let action = $action.attr('data-action');
-
-                if(action === 'first-page') {
-                    this.setPage(1);
-                } else if(action === 'previous-page') {
-                    this.setPage(this.page - 1);
-                } else if(action === 'next-page') {
-                    this.setPage(this.page + 1);
-                } else if(action === 'last-page') {
-                    this.setPage(this.totalPages);
-                }
+            if(action === 'first-page') {
+                this.setPage(1);
+            } else if(action === 'previous-page') {
+                this.setPage(this.page - 1);
+            } else if(action === 'next-page') {
+                this.setPage(this.page + 1);
+            } else if(action === 'last-page') {
+                this.setPage(this.totalPages);
             }
         });
 
-        this.$pageInput.on('change', (event) => {
-            let page = parseInt(this.$pageInput.val(), 10);
+        this.pageInput.addEventListener('change', () => {
+            let page = parseInt(this.pageInput.value, 10);
 
             if(!Number.isNaN(page)) {
                 this.setPage(page);
             } else {
-                this.$pageInput.val(this.page);
+                this.pageInput.value = this.page;
             }
         });
 
+        this.setDisabled(false);
         this.refresh();
     }
 
     appendTo(selector) {
-        return this.$element.appendTo(selector);
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.jquery) {
+            selector.append(this.element);
+        } else {
+            selector.appendChild(this.element);
+        }
     }
 
     setPage(page) {
@@ -79,7 +85,7 @@ export default class Paginator extends Observable {
             });
         }
 
-        this.$pageInput.val(this.page);
+        this.pageInput.value = this.page;
     }
 
     setTotalPages(total) {
@@ -95,10 +101,11 @@ export default class Paginator extends Observable {
         this._renderID = window.requestAnimationFrame(() => {
             this._renderID = null;
 
-            this.$pageDisplay.html(this.totalPages);
-            this.$pageInput.val(this.page);
-
-            this._refreshDisabled();
+            this.pageDisplay.innerHTML = this.totalPages;
+            this.pageInput.value = this.page;
+            let disabled = this._disabled;
+            this._disabled = null;
+            this.setDisabled(disabled);
 
             this.trigger('refresh', {
                 paginator: this,
@@ -107,21 +114,33 @@ export default class Paginator extends Observable {
         });
     }
 
-    _refreshDisabled() {
-        if(!this.disabled) {
-            this.$element.find("input, button").prop('disabled', false).removeClass('disabled');
+    setDisabled(disabled) {
+        if(this._disabled === disabled) return;
 
-            if (!this.hasPreviousPage()) {
-                this.$first.prop('disabled', true).addClass('disabled');
-                this.$prev.prop('disabled', true).addClass('disabled');
+        this._disabled = disabled;
+
+        let inputs = [
+            this.pageInput,
+            this.firstBTN,
+            this.prevBTN,
+            this.lastBTN,
+            this.nextBTN
+        ];
+
+        if(this._disabled) {
+            for(let i = 0, l = inputs.length; i < l; i++) {
+                inputs[i].disabled = true;
             }
 
-            if (!this.hasNextPage()) {
-                this.$next.prop('disabled', true).addClass('disabled');
-                this.$last.prop('disabled', true).addClass('disabled');
-            }
+            this.element.classList.add('disabled');
+            this.trigger('disabled', {target: this});
         } else {
-            this.$element.find("input, button").prop('disabled', true).addClass('disabled');
+            for(let i = 0, l = inputs.length; i < l; i++) {
+                inputs[i].disabled = false;
+            }
+
+            this.element.classList.remove('disabled');
+            this.trigger('enabled', {target: this});
         }
     }
 
@@ -134,32 +153,24 @@ export default class Paginator extends Observable {
     }
 
     get disabled() {
-        return this.$element.hasClass('disabled');
+        return this._disabled;
     }
 
     set disabled(value) {
-        if(value && !this.disabled) {
-            this.$element.addClass('disabled');
-            this._refreshDisabled();
-            this.trigger('disabled', {target: this});
-        } else if(!value && this.disabled) {
-            this.$element.removeClass('disabled');
-            this._refreshDisabled();
-            this.trigger('enabled', {target: this});
-        }
+        this.setDisabled(value);
     }
 
     get visible() {
-        return this.$element.hasClass('visible');
+        return !this.element.classList.contains('hidden');
     }
 
     set visible(value) {
-        if(value && !this.visible) {
-            this.$element.addClass('visible');
-            this.$element.removeClass('hidden');
-        } else if(!value && this.visible) {
-            this.$element.removeClass('visible');
-            this.$element.addClass('hidden');
+        if(this.visible !== value) {
+            if(value) {
+                this.element.classList.remove('hidden');
+            } else {
+                this.element.classList.add('hidden');
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import {privateCache} from "./core/data";
 
 
 export default class AutoLoader {
@@ -18,31 +18,28 @@ export default class AutoLoader {
 
     load(context) {
         if(!context) {
-            context = $(document);
-        } else {
-            context = $(context);
+            context = document;
+        } else if(typeof context === 'string') {
+            context = document.querySelector(context);
         }
 
-        let widgets = context.find("[data-init]");
+        let widgets = context.querySelectorAll('[data-init]');
 
-        widgets.each((x, element) => {
-            let $target = $(element);
-            const classes = ($target.attr('data-init') || '').split(/\s+/);
+        for(let element of widgets) {
+            let components = element.dataset.init.split(/\s+/);
 
-            for(let c of classes) {
-                // noinspection JSValidateTypes
-                c = c.split(':');
-
-                let cls = this.registry[c[0]],
-                    namespace = c.length > 1 ? c[1] : '',
-                    key = namespace ? `${cls}.${namespace}` : cls;
+            for(let c of components) {
+                let parts = c.split(':'),
+                    cls = this.registry[parts[0]],
+                    namespace = parts.length > 1 ? c[1] : '',
+                    key = namespace ? `${c[0]}.${namespace}` : cls;
 
                 if(cls) {
-                    let initialized = $target.data('initialized');
+                    let initialized = privateCache.get(element, 'initialized');
 
                     if(!initialized) {
                         initialized = {};
-                        $target.data('initialized', initialized);
+                        privateCache.set(element, 'initialized', initialized);
                     }
 
                     if(!initialized[key]) {
@@ -52,7 +49,7 @@ export default class AutoLoader {
                     throw new Error(`No component registered called ${cls}`);
                 }
             }
-        });
+        }
     }
 
     static register(name, fn) {
@@ -68,7 +65,7 @@ export default class AutoLoader {
 AutoLoader.loader = new AutoLoader();
 
 
-$(() => {
+window.addEventListener('load', () => {
     if(AutoLoader.autoLoad) {
         AutoLoader.load();
     }
