@@ -38,3 +38,10 @@ export class ValidationError extends ExtendableError {
         this.children = [];
     }
 }
+
+
+export class AssertionError extends ExtendableError {
+    constructor(message) {
+        super(message);
+    }
+}

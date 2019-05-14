@@ -1,3 +1,4 @@
+import {AssertionError} from './errors';
 const REG_WHITESPACE = /\s+/;
 
 
@@ -293,5 +294,18 @@ export function selectElement(selector, context=null) {
         return selector[0];
     } else if(selector.nodeType === 1 || selector.nodeType === 9 || selector.nodeType === 11) {
         return selector;
+    }
+}
+
+
+/**
+ * Asserts that a condition is true or raises an AssertionError.
+ * @param condition - condition to check.
+ * @param message - message on fail.
+ * @throws AssertionError
+ */
+export function assert(condition, message) {
+    if(!condition) {
+        throw new AssertionError(message);
     }
 }
