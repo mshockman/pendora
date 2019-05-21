@@ -11,8 +11,6 @@ export default class MenuItem extends MenuNode {
             item.classList.add('c-menuitem__item');
             item.innerHTML = text;
 
-            element.classList.add('c-menuitem');
-            element.dataset.role = 'menuitem';
             element.appendChild(item);
         } else if(typeof target === 'string') {
             element = document.querySelector(target);
@@ -25,14 +23,8 @@ export default class MenuItem extends MenuNode {
         this.toggle = false;
         this.menuNodeType = 'menuitem';
 
-        this.element = document.createElement("li");
-        let item = document.createElement('a');
-        item.classList.add('c-menuitem__item');
-        item.innerHTML = text;
-
         this.element.classList.add('c-menuitem');
         this.element.dataset.role = 'menuitem';
-        this.element.appendChild(item);
     }
 
     activate() {

@@ -1,10 +1,10 @@
-import {privateCache} from 'core/data';
+import {attachMenuNode, getMenuNode} from './core';
 
 
 export default class MenuNode {
     constructor(element) {
         this.element = element;
-        privateCache.set(this.element, 'menu-node', this);
+        attachMenuNode(this.element, this);
     }
 
     get root() {
@@ -23,7 +23,7 @@ export default class MenuNode {
         let o = this.element.parentElement;
 
         while(o) {
-            let node = privateCache.get(o, 'menu-node');
+            let node = getMenuNode(this.element);
 
             if(node) {
                 return node;
@@ -52,6 +52,20 @@ export default class MenuNode {
             }
 
             o = o.parent;
+        }
+    }
+
+    get isActive() {
+        return this.element.classList.contains('active');
+    }
+
+    set isActive(value) {
+        let isActive = this.isActive;
+
+        if(!isActive && value) {
+            this.element.classList.add('active');
+        } else if(isActive && !value) {
+            this.element.classList.remove('active');
         }
     }
 }
