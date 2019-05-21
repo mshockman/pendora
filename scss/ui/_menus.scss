@@ -1,0 +1,41 @@
+
+
+.c-menubar.c-menu {
+  list-style: none;
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+
+  .c-menuitem {
+    padding: 0.5rem;
+  }
+
+  .c-menu {
+    top: 100%;
+    left: 0;
+  }
+}
+
+
+.c-menuitem {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+
+.c-menu {
+  position: absolute;
+
+  border: 1px solid #000;
+  background-color: #fff;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-width: 200px;
+
+  .c-menu {
+    left: 100%;
+    top: 0;
+  }
+}

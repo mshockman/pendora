@@ -1,5 +1,5 @@
 import MenuNode from './MenuNode';
-import {getMenuNode} from './core';
+import {getMenuNode, getClosestMenu, getClosestMenuItem, getClosestMenuNode, isMenuItem} from './core';
 
 
 export default class Menu extends MenuNode {
@@ -14,61 +14,125 @@ export default class Menu extends MenuNode {
             element = target;
         }
 
-        element.classList.add('menu');
+        element.classList.add('c-menu');
         element.dataset.role = 'menu';
 
         super(element);
 
+        /**
+         * Controls how long after the user moves off the menu that it will timeout.
+         * @type {boolean|Number}
+         */
         this.timeout = false;
-        this.autoActivate = false;
-        this.delay = false;
-        this.closeOnBlur = false;
-        this.multiple = false;
-        this.toggle = false;
-        this.menuNodeType = "menu";
-    }
 
-    init() {
+        /**
+         * If a number greater then or equal to 0, this property controls how long the user must hover over an item
+         * for the menu to activate.  If the value is false or a negative number the menu will never auto activate.
+         * If true or 0 the menu will activate immediately.
+         * @type {boolean|Number}
+         */
+        this.autoActivate = 0;
+        this.delay = false;
+        this.multiple = false;
+
+        this.toggleItem = "both";
+        this.toggleMenu = "off";
+
+        this.menuNodeType = "menu";
+
+        this.visible = false;
+
         this._onMouseOver = this.onMouseOver.bind(this);
         this._onMouseOut = this.onMouseOut.bind(this);
         this._onClick = this.onClick.bind(this);
-        this.isRoot = true;
-
         this.element.addEventListener('mouseover', this._onMouseOver);
         this.element.addEventListener('mouseout', this._onMouseOut);
         this.element.addEventListener('click', this._onClick);
     }
 
     activate() {
+        if(!this.isActive) {
+            this.isActive = true;
 
+            let parent = this.parent;
+
+            if(parent && !parent.isActive) {
+                parent.activate();
+            }
+        }
     }
 
     deactivate() {
+        if(this.isActive) {
+            this.isActive = false;
 
+            for(let child of this.activeItems) {
+                child.deactivate();
+            }
+        }
     }
 
     show() {
-
+        this.visible = true;
     }
 
     hide() {
-
+        this.visible = false;
     }
 
     add(item) {
         this.element.appendChild(item.element);
+        return item;
     }
 
     onMouseOver(event) {
-        console.log("On Mouse Over");
+        // Clear the timeout timer if it exists.
+        if(this._timeoutTimer) {
+            clearTimeout(this._timeoutTimer);
+            this._timeoutTimer = null;
+        }
+
+        let targetMenu = getClosestMenu(event.target);
+
+        // Ignore event if the menu was not the primary target.
+        if(!targetMenu) {
+            return;
+        }
+
+        let targetItem = getClosestMenuItem(event.target);
+
+        if(targetItem && !targetItem.element.contains(event.relatedTarget)) {
+            targetItem.onMouseEnter(event);
+        }
     }
 
     onMouseOut(event) {
-        console.log("On Mouse Out");
+        if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
+            this._timeoutTimer = setTimeout(() => {
+                this._timeoutTimer = null;
+                this.deactivate();
+            }, this.timeout);
+        }
+
+        let targetItem = getClosestMenuItem(event.target, this.element);
+
+        if(targetItem && targetItem.parent === this && !targetItem.element.contains(event.relatedTarget)) {
+            targetItem.onMouseLeave(event);
+        }
     }
 
     onClick(event) {
-        console.log("On Click");
+        let target = getClosestMenuNode(event.target, this.element);
+
+        if(this.isActive && target === this && (this.toggleMenu === 'off' || this.toggleMenu === 'both')) {
+            this.deactivate();
+        } else if(!this.isActive && target === this && (this.toggleMenu === 'on' || this.toggleMenu === 'both')) {
+            this.activate();
+        }
+
+        if(target.parent === this && isMenuItem(target)) {
+            target.onClick(event);
+        }
     }
 
     get activeItems() {
@@ -86,7 +150,7 @@ export default class Menu extends MenuNode {
     get children() {
         let r = [];
 
-        for(let element of this.element.querySelectorAll('.menuitem')) {
+        for(let element of this.element.querySelectorAll('[data-role="menuitem"], [data-role="menu"]')) {
             let menuNode = getMenuNode(element);
 
             if(menuNode && menuNode.parent === this) {
@@ -95,5 +159,15 @@ export default class Menu extends MenuNode {
         }
 
         return r;
+    }
+
+    get visible() {
+        return !this.element.classList.contains('hidden');
+    }
+
+    set visible(value) {
+        if(this.visible !== !!value) {
+            this.element.classList.toggle('hidden');
+        }
     }
 }

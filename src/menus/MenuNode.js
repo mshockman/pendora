@@ -8,26 +8,29 @@ export default class MenuNode {
     }
 
     get root() {
-        let o = this;
+        let o = this,
+            r = this;
 
         while(o) {
-            if(o.isRoot) {
-                return o;
-            }
-
             o = o.parent;
+
+            if(o) r = o;
         }
+
+        return r;
     }
 
     get parent() {
         let o = this.element.parentElement;
 
         while(o) {
-            let node = getMenuNode(this.element);
+            let node = getMenuNode(o);
 
             if(node) {
                 return node;
             }
+
+            o = o.parentElement;
         }
     }
 
@@ -67,5 +70,29 @@ export default class MenuNode {
         } else if(isActive && !value) {
             this.element.classList.remove('active');
         }
+    }
+
+    get isDisabled() {
+        return this.element.classList.contains('disabled');
+    }
+
+    set isDisabled(value) {
+        if(!!value !== this.isDisabled) {
+            this.element.classList.toggle('disabled');
+        }
+    }
+
+    _getDisabled() {
+        let o = this.element;
+
+        while(o) {
+            if(o.classList.contains('disabled')) {
+                return true;
+            }
+
+            o = o.parentElement;
+        }
+
+        return false;
     }
 }

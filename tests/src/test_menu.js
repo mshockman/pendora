@@ -1,12 +1,20 @@
 import Menu from 'menus/Menu';
 import MenuItem from 'menus/MenuItem';
+import {privateCache} from 'core/data';
 
 
 let menu = new Menu(),
     container = document.querySelector('#test-menu-area');
 
+menu.autoActivate = true;
+menu.delay = false;
+menu.multiple = false;
+menu.element.classList.add('c-menubar');
+menu.visible = true;
+
 
 container.appendChild(menu.element);
+window.privateCache = privateCache;
 
 
 let fileItem = new MenuItem({text: "File"}),
@@ -20,6 +28,7 @@ let fileItem = new MenuItem({text: "File"}),
     windowItem = new MenuItem({text: "Window"}),
     helpItem = new MenuItem({text: "Help"});
 
+
 menu.add(fileItem);
 menu.add(editItem);
 menu.add(viewItem);
@@ -31,4 +40,10 @@ menu.add(vcsItem);
 menu.add(windowItem);
 menu.add(helpItem);
 
-menu.init();
+let fileSubMenu = new Menu();
+fileItem.attachSubMenu(fileSubMenu);
+
+for(let i = 0; i < 10; i++) {
+    let item = new MenuItem({text: `Sub Item ${i+1}`});
+    fileSubMenu.add(item);
+}

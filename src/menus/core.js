@@ -83,3 +83,35 @@ export function getClosestMenuItem(element, context) {
         element = element.parentElement;
     }
 }
+
+
+export function isMenuItem(node) {
+    if(node && node.nodeType) node = getMenuNode(node);
+
+    if(node) {
+        if(node.menuNodeType === 'menuitem') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+export function isMenu(node) {
+    if(node && node.nodeType) node = getMenuNode(node);
+
+    if(node) {
+        if(node.menuNodeType === 'menu') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+export function isMenuNode(node) {
+    if(node && node.nodeType) node = getMenuNode(node);
+    return node && node instanceof MenuNode;
+}
