@@ -13,6 +13,11 @@
   .c-menu {
     top: 100%;
     left: 0;
+
+    .c-menu {
+      top: 0;
+      left: 100%;
+    }
   }
 }
 
@@ -37,5 +42,6 @@
   .c-menu {
     left: 100%;
     top: 0;
+    visibility: hidden;
   }
 }

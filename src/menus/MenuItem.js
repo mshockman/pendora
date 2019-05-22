@@ -22,6 +22,7 @@ export default class MenuItem extends MenuNode {
         super(element);
 
         this.menuNodeType = 'menuitem';
+        this.isMenuItem = true;
 
         this.element.classList.add('c-menuitem');
         this.element.dataset.role = 'menuitem';
@@ -65,6 +66,7 @@ export default class MenuItem extends MenuNode {
             let submenu = this.submenu;
 
             if(submenu) {
+                submenu.deactivate();
                 submenu.hide();
             }
 

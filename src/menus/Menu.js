@@ -1,12 +1,14 @@
 import MenuNode from './MenuNode';
 import {getMenuNode, getClosestMenu, getClosestMenuItem, getClosestMenuNode, isMenuItem} from './core';
+import {parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
+import MenuItem from "./MenuItem";
 
 
 export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul'}={}) {
+                toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null}={}) {
         let element;
 
         if(!target) {
@@ -26,7 +28,7 @@ export default class Menu extends MenuNode {
          * Controls how long after the user moves off the menu that it will timeout.
          * @type {boolean|Number}
          */
-        this.timeout = timeout;
+        this.timeout = parseBooleanOrInt(timeout, 10);
 
         /**
          * If a number greater then or equal to 0, this property controls how long the user must hover over an item
@@ -34,15 +36,16 @@ export default class Menu extends MenuNode {
          * If true or 0 the menu will activate immediately.
          * @type {boolean|Number}
          */
-        this.autoActivate = autoActivate;
-        this.delay = delay;
-        this.multiple = multiple;
-        this.position = null;
+        this.autoActivate = parseBooleanOrInt(autoActivate, 10);
+        this.delay = parseBooleanOrInt(delay, 10);
+        this.multiple = parseBoolean(multiple);
+        this.position = position;
 
-        this.toggleItem = toggleItem;
-        this.toggleMenu = toggleMenu;
+        this.toggleItem = validateChoice(toggleItem, ['on', 'off', 'both', 'none']);
+        this.toggleMenu = validateChoice(toggleMenu, ['on', 'off', 'both', 'none']);
 
         this.menuNodeType = "menu";
+        this.isMenu = true;
 
         this.visible = false;
 
@@ -53,8 +56,8 @@ export default class Menu extends MenuNode {
         this.element.addEventListener('mouseout', this._onMouseOut);
         this.element.addEventListener('click', this._onClick);
 
-        this.closeOnBlur = closeOnBlur;
-        this.closeOnSelect = closeOnSelect;
+        this.closeOnBlur = parseBoolean(closeOnBlur);
+        this.closeOnSelect = parseBoolean(closeOnSelect);
     }
 
     activate() {
@@ -194,8 +197,12 @@ export default class Menu extends MenuNode {
     }
 
     set visible(value) {
-        if(this.visible !== !!value) {
-            this.element.classList.toggle('hidden');
+        if(value && !this.visible) {
+            this.element.classList.remove('hidden');
+            this.element.classList.add('visible');
+        } else if(!value && this.visible) {
+            this.element.classList.add('hidden');
+            this.element.classList.remove('visible');
         }
     }
 
@@ -265,5 +272,26 @@ export default class Menu extends MenuNode {
         }
 
         this._closeOnSelect = value;
+    }
+
+    static buildFromHTML(selector, {submenus=null, items=null, options=null}={}) {
+        if(typeof selector === 'string') {
+            selector = document.querySelector(selector);
+        }
+
+        submenus = submenus || {};
+        items = items || {};
+        options = options || {};
+        let root = new this({target: selector, ...selector.dataset, ...options});
+
+        for(let element of root.element.querySelectorAll('[data-role="menu"]')) {
+            new Menu({target: element, ...element.dataset, ...submenus});
+        }
+
+        for(let element of root.element.querySelectorAll('[data-role="menuitem"]')) {
+            new MenuItem({target: element, ...element.dataset, ...items});
+        }
+
+        return root;
     }
 }
