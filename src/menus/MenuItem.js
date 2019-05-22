@@ -21,7 +21,6 @@ export default class MenuItem extends MenuNode {
 
         super(element);
 
-        this.toggle = false;
         this.menuNodeType = 'menuitem';
 
         this.element.classList.add('c-menuitem');
@@ -51,6 +50,8 @@ export default class MenuItem extends MenuNode {
             if(submenu) {
                 submenu.show();
             }
+
+            this.trigger('activate', this);
         }
     }
 
@@ -69,6 +70,8 @@ export default class MenuItem extends MenuNode {
             if(parent.isActive && !parent.activeItems.length) {
                 parent.deactivate();
             }
+
+            this.trigger('deactivate', this);
         }
     }
 

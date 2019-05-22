@@ -1,8 +1,10 @@
 import {attachMenuNode, getMenuNode} from './core';
+import Observable from 'core/interface/Observable';
 
 
-export default class MenuNode {
+export default class MenuNode extends Observable {
     constructor(element) {
+        super();
         this.element = element;
         attachMenuNode(this.element, this);
     }

@@ -3,7 +3,8 @@ import {getMenuNode, getClosestMenu, getClosestMenuItem, getClosestMenuNode, isM
 
 
 export default class Menu extends MenuNode {
-    constructor({target=null}={}) {
+    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
+                toggleItem='both', toggleMenu='off'}={}) {
         let element;
 
         if(!target) {
@@ -23,7 +24,7 @@ export default class Menu extends MenuNode {
          * Controls how long after the user moves off the menu that it will timeout.
          * @type {boolean|Number}
          */
-        this.timeout = false;
+        this.timeout = timeout;
 
         /**
          * If a number greater then or equal to 0, this property controls how long the user must hover over an item
@@ -31,12 +32,12 @@ export default class Menu extends MenuNode {
          * If true or 0 the menu will activate immediately.
          * @type {boolean|Number}
          */
-        this.autoActivate = 0;
-        this.delay = false;
-        this.multiple = false;
+        this.autoActivate = autoActivate;
+        this.delay = delay;
+        this.multiple = multiple;
 
-        this.toggleItem = "both";
-        this.toggleMenu = "off";
+        this.toggleItem = toggleItem;
+        this.toggleMenu = toggleMenu;
 
         this.menuNodeType = "menu";
 
@@ -48,6 +49,41 @@ export default class Menu extends MenuNode {
         this.element.addEventListener('mouseover', this._onMouseOver);
         this.element.addEventListener('mouseout', this._onMouseOut);
         this.element.addEventListener('click', this._onClick);
+
+        if(closeOnBlur) {
+            let doc = document,
+                clickCaptured = false;
+
+            this._closeOnBlurEvents = {};
+
+            this._closeOnBlurEvents.onDocumentClick = () => {
+                if(!this.element.contains(event.target)) {
+                    this.deactivate();
+
+                    // Just in case the menu ended up deactivated for whatever reason and the onDeactivate trigger
+                    // didn't run.
+                    if(clickCaptured) {
+                        doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                        clickCaptured = false;
+                    }
+                }
+            };
+
+            this._closeOnBlurEvents.onActivate = () => {
+                if(!clickCaptured) {
+                    doc.addEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                    clickCaptured = true;
+                }
+            };
+
+            this._closeOnBlurEvents.onDeactivate = () => {
+                doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                clickCaptured = false;
+            };
+
+            this.on('activate', this._closeOnBlurEvents.onActivate);
+            this.on('deactivate', this._closeOnBlurEvents.onDeactivate);
+        }
     }
 
     activate() {
@@ -59,6 +95,8 @@ export default class Menu extends MenuNode {
             if(parent && !parent.isActive) {
                 parent.activate();
             }
+
+            this.trigger('activate', this);
         }
     }
 
@@ -69,15 +107,23 @@ export default class Menu extends MenuNode {
             for(let child of this.activeItems) {
                 child.deactivate();
             }
+
+            this.trigger('deactivate', this);
         }
     }
 
     show() {
-        this.visible = true;
+        if(!this.visible) {
+            this.visible = true;
+            this.trigger('show', this);
+        }
     }
 
     hide() {
-        this.visible = false;
+        if(this.visible) {
+            this.visible = false;
+            this.trigger("hide", this);
+        }
     }
 
     add(item) {

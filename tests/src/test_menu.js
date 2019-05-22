@@ -3,7 +3,7 @@ import MenuItem from 'menus/MenuItem';
 import {privateCache} from 'core/data';
 
 
-let menu = new Menu(),
+let menu = new Menu({closeOnBlur: true}),
     container = document.querySelector('#test-menu-area');
 
 menu.autoActivate = true;
@@ -11,6 +11,7 @@ menu.delay = false;
 menu.multiple = false;
 menu.element.classList.add('c-menubar');
 menu.visible = true;
+menu.timeout = 3000;
 
 
 container.appendChild(menu.element);
