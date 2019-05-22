@@ -1,17 +1,9 @@
-import Menu from 'menus/Menu';
-import MenuItem from 'menus/MenuItem';
 import {privateCache} from 'core/data';
+import {Menu, MenuBar, MenuItem} from 'menus';
 
 
-let menu = new Menu({closeOnBlur: true}),
+let menu = new MenuBar(),
     container = document.querySelector('#test-menu-area');
-
-menu.autoActivate = true;
-menu.delay = false;
-menu.multiple = false;
-menu.element.classList.add('c-menubar');
-menu.visible = true;
-menu.timeout = 3000;
 
 
 container.appendChild(menu.element);

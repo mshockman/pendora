@@ -3,12 +3,14 @@ import {getMenuNode, getClosestMenu, getClosestMenuItem, getClosestMenuNode, isM
 
 
 export default class Menu extends MenuNode {
+    static POSITIONERS = {};
+
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                toggleItem='both', toggleMenu='off'}={}) {
+                toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul'}={}) {
         let element;
 
         if(!target) {
-            element = document.createElement('ul');
+            element = document.createElement(nodeName);
         } else if(typeof target === 'string') {
             element = document.querySelector(target);
         } else {
@@ -35,6 +37,7 @@ export default class Menu extends MenuNode {
         this.autoActivate = autoActivate;
         this.delay = delay;
         this.multiple = multiple;
+        this.position = null;
 
         this.toggleItem = toggleItem;
         this.toggleMenu = toggleMenu;
@@ -50,40 +53,8 @@ export default class Menu extends MenuNode {
         this.element.addEventListener('mouseout', this._onMouseOut);
         this.element.addEventListener('click', this._onClick);
 
-        if(closeOnBlur) {
-            let doc = document,
-                clickCaptured = false;
-
-            this._closeOnBlurEvents = {};
-
-            this._closeOnBlurEvents.onDocumentClick = (event) => {
-                if(!this.element.contains(event.target)) {
-                    this.deactivate();
-
-                    // Just in case the menu ended up deactivated for whatever reason and the onDeactivate trigger
-                    // didn't run.
-                    if(clickCaptured) {
-                        doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
-                        clickCaptured = false;
-                    }
-                }
-            };
-
-            this._closeOnBlurEvents.onActivate = () => {
-                if(!clickCaptured) {
-                    doc.addEventListener('click', this._closeOnBlurEvents.onDocumentClick);
-                    clickCaptured = true;
-                }
-            };
-
-            this._closeOnBlurEvents.onDeactivate = () => {
-                doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
-                clickCaptured = false;
-            };
-
-            this.on('activate', this._closeOnBlurEvents.onActivate);
-            this.on('deactivate', this._closeOnBlurEvents.onDeactivate);
-        }
+        this.closeOnBlur = closeOnBlur;
+        this.closeOnSelect = closeOnSelect;
     }
 
     activate() {
@@ -115,6 +86,17 @@ export default class Menu extends MenuNode {
     show() {
         if(!this.visible) {
             this.visible = true;
+
+            if(this.position) {
+                let position = this.position;
+
+                if(typeof position === 'string') {
+                    position = Menu.POSITIONERS[position];
+                }
+
+                position.call(this, this);
+            }
+
             this.trigger('show', this);
         }
     }
@@ -215,5 +197,73 @@ export default class Menu extends MenuNode {
         if(this.visible !== !!value) {
             this.element.classList.toggle('hidden');
         }
+    }
+
+    get closeOnBlur() {
+        return !!this._closeOnBlurEvents;
+    }
+
+    set closeOnBlur(value) {
+        value = !!value;
+
+        if(value && !this.closeOnBlur) {
+            let doc = document;
+
+            this._closeOnBlurEvents = {doc: doc, clickCaptured: false};
+
+            this._closeOnBlurEvents.onDocumentClick = (event) => {
+                if(!this.element.contains(event.target)) {
+                    this.deactivate();
+
+                    // Just in case the menu ended up deactivated for whatever reason and the onDeactivate trigger
+                    // didn't run.
+                    if(this._closeOnBlurEvents.clickCaptured) {
+                        doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                        this._closeOnBlurEvents.clickCaptured = false;
+                    }
+                }
+            };
+
+            this._closeOnBlurEvents.onActivate = () => {
+                if(!this._closeOnBlurEvents.clickCaptured) {
+                    doc.addEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                    this._closeOnBlurEvents.clickCaptured = true;
+                }
+            };
+
+            this._closeOnBlurEvents.onDeactivate = () => {
+                doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+                this._closeOnBlurEvents.clickCaptured = false;
+            };
+
+            this.on('activate', this._closeOnBlurEvents.onActivate);
+            this.on('deactivate', this._closeOnBlurEvents.onDeactivate);
+        } else if(!value && this.closeOnBlur) {
+            this.off('activate', this._closeOnBlurEvents.onActivate);
+            this.off('deactivate', this._closeOnBlurEvents.onDeactivate);
+            this._closeOnBlurEvents.doc.removeEventListener('click', this._closeOnBlurEvents.onDocumentClick);
+            this._closeOnBlurEvents = null;
+        }
+    }
+
+    get closeOnSelect() {
+        return this._closeOnSelect;
+    }
+
+    set closeOnSelect(value) {
+        if((value === 'child' || value === true) && !this._closeOnSelectHandler) {
+            this._closeOnSelectHandler = (event) => {
+                if(this.closeOnSelect === true || this.closeOnSelect === 'child' && event.detail.item.parent === this) {
+                    this.deactivate();
+                }
+            };
+
+            this.element.addEventListener('item-select', this._closeOnSelectHandler);
+        } else if(value === false && this._closeOnSelectHandler) {
+            this.element.removeEventListener('item-select', this._closeOnSelectHandler);
+            this._closeOnSelectHandler = null;
+        }
+
+        this._closeOnSelect = value;
     }
 }

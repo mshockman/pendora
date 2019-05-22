@@ -3,11 +3,11 @@ import {getMenuNode} from "./core";
 
 
 export default class MenuItem extends MenuNode {
-    constructor({target, text}={}) {
+    constructor({target, text, nodeName='li'}={}) {
         let element;
 
         if(!target) {
-            element = document.createElement("li");
+            element = document.createElement(nodeName);
             let item = document.createElement('a');
             item.classList.add('c-menuitem__item');
             item.innerHTML = text;
@@ -70,6 +70,25 @@ export default class MenuItem extends MenuNode {
 
             this.trigger('deactivate', this);
         }
+    }
+
+    select() {
+        this.trigger('select', this);
+
+        let parent = this.parent;
+
+        if(parent) {
+            parent.trigger("child-item-select", this);
+        }
+
+        let event = new CustomEvent('item-select', {
+            detail: {
+                item: this
+            },
+            bubbles: true
+        });
+
+        this.element.dispatchEvent(event);
     }
 
     onMouseEnter(event) {
@@ -138,6 +157,12 @@ export default class MenuItem extends MenuNode {
             } else if (!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
                 this.activate();
             }
+        } else {
+            if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
+                this.activate();
+            }
+
+            this.select();
         }
     }
 
