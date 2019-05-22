@@ -56,7 +56,7 @@ export default class Menu extends MenuNode {
 
             this._closeOnBlurEvents = {};
 
-            this._closeOnBlurEvents.onDocumentClick = () => {
+            this._closeOnBlurEvents.onDocumentClick = (event) => {
                 if(!this.element.contains(event.target)) {
                     this.deactivate();
 
