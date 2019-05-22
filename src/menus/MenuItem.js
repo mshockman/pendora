@@ -31,6 +31,9 @@ export default class MenuItem extends MenuNode {
         if(!this.isActive) {
             this.isActive = true;
 
+            /**
+             * @type {Menu}
+             */
             let parent = this.parent;
 
             if(!parent.multiple) {
@@ -59,16 +62,10 @@ export default class MenuItem extends MenuNode {
         if(this.isActive) {
             this.isActive = false;
 
-            let parent = this.parent;
-
             let submenu = this.submenu;
 
             if(submenu) {
                 submenu.hide();
-            }
-
-            if(parent.isActive && !parent.activeItems.length) {
-                parent.deactivate();
             }
 
             this.trigger('deactivate', this);
@@ -134,6 +131,10 @@ export default class MenuItem extends MenuNode {
         if(submenu) {
             if (this.isActive && (parent.toggleItem === 'off' || parent.toggleItem === 'both')) {
                 this.deactivate();
+
+                if(parent.isActive && !parent.activeItems.length) {
+                    parent.deactivate();
+                }
             } else if (!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
                 this.activate();
             }
