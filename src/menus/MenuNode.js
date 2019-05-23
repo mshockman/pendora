@@ -2,6 +2,9 @@ import {attachMenuNode, getMenuNode} from './core';
 import Observable from 'core/interface/Observable';
 
 
+/**
+ * The base class for all menu nodes.
+ */
 export default class MenuNode extends Observable {
     constructor(element) {
         super();
@@ -9,6 +12,10 @@ export default class MenuNode extends Observable {
         attachMenuNode(this.element, this);
     }
 
+    /**
+     * Returns the root most MenuNode.
+     * @returns {MenuNode}
+     */
     get root() {
         let o = this,
             r = this;
@@ -40,6 +47,10 @@ export default class MenuNode extends Observable {
         }
     }
 
+    /**
+     * Returns the first MenuItem parent that the node has in the tree.
+     * @returns {MenuItem}
+     */
     get parentItem() {
         let o = this.parent;
 
@@ -52,6 +63,10 @@ export default class MenuNode extends Observable {
         }
     }
 
+    /**
+     * Returns the closest parent Menu that the node has.
+     * @returns {Menu}
+     */
     get parentMenu() {
         let o = this.parent;
 
@@ -64,6 +79,10 @@ export default class MenuNode extends Observable {
         }
     }
 
+    /**
+     * True if the node is active.
+     * @returns {boolean}
+     */
     get isActive() {
         return this.element.classList.contains('active');
     }
@@ -78,6 +97,10 @@ export default class MenuNode extends Observable {
         }
     }
 
+    /**
+     * True if the node is disabled.
+     * @returns {boolean}
+     */
     get isDisabled() {
         return this.element.classList.contains('disabled');
     }
@@ -88,6 +111,11 @@ export default class MenuNode extends Observable {
         }
     }
 
+    /**
+     * Returns true if the node or any of it's ancestor nodes in the tree are disabled.
+     * @returns {boolean}
+     * @private
+     */
     _getDisabled() {
         let o = this.element;
 

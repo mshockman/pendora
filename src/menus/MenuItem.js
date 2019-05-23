@@ -2,13 +2,21 @@ import MenuNode from './MenuNode';
 import {getMenuNode} from "./core";
 
 
+/**
+ * Represents a selectable item inside a menu.
+ */
 export default class MenuItem extends MenuNode {
-    constructor({target, text, nodeName='li'}={}) {
+    constructor({target, text, action, href, nodeName='li'}={}) {
         let element;
 
         if(!target) {
             element = document.createElement(nodeName);
             let item = document.createElement('a');
+
+            if(href != null) {
+                item.href = href;
+            }
+
             item.classList.add('c-menuitem__item');
             item.innerHTML = text;
 
@@ -26,8 +34,18 @@ export default class MenuItem extends MenuNode {
 
         this.element.classList.add('c-menuitem');
         this.element.dataset.role = 'menuitem';
+
+        if(action) {
+            this.on('select', action);
+        }
     }
 
+    /**
+     * Activates the item and show the submenu if available.  The showMenuDelay controls how much time in milliseconds
+     * after the item activates that it will show it's submenu.  By default it shows immediately.  You can pass in a
+     * negative value to prevent the submenu from displaying.
+     * @param showMenuDelay {Number}
+     */
     activate(showMenuDelay=0) {
         if(!this.isActive) {
             this.isActive = true;
@@ -74,6 +92,9 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Deactivates the item.
+     */
     deactivate() {
         if(this.isActive) {
             this.isActive = false;
@@ -94,6 +115,9 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Triggers a select action for the item.
+     */
     select() {
         this.trigger('select', this);
 
@@ -118,14 +142,6 @@ export default class MenuItem extends MenuNode {
      * @param event
      */
     onMouseEnter(event) {
-        // if(this._getDisabled()) {
-        //     if(this.isActive) {
-        //         this.deactivate();
-        //     }
-        //
-        //     return;
-        // }
-
         let parent = this.parent;
 
         if(parent._activateItemTimer) {
@@ -214,6 +230,11 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Attaches the submenu to the item.
+     * @param menu
+     * @returns {*}
+     */
     attachSubMenu(menu) {
         if(this.submenu) {
             throw Error("Already has submenu.");
@@ -223,6 +244,10 @@ export default class MenuItem extends MenuNode {
         return menu;
     }
 
+    /**
+     * Detaches the items current submenu if it has one and returns it.
+     * @returns {MenuNode}
+     */
     detachSubMenu() {
         let submenu = this.submenu;
 
@@ -238,6 +263,10 @@ export default class MenuItem extends MenuNode {
         return submenu;
     }
 
+    /**
+     * Gets the items submenu.
+     * @returns {MenuNode}
+     */
     get submenu() {
         for(let element of this.element.children) {
             let node = getMenuNode(element);
@@ -248,6 +277,12 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Implements the children interface for a MenuItem node. Will return either an empty array or an array with the
+     * child submenu inside it.  For MenuItem nodes this should either be 0 or 1 items but it has to be an array to
+     * keep with the specification.
+     * @returns {MenuNode[]|Array}
+     */
     get children() {
         let submenu = this.submenu;
 
