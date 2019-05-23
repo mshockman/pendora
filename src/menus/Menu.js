@@ -93,7 +93,7 @@ export default class Menu extends MenuNode {
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
                     toggleItem='on', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
-                    showDelay=0}={}) {
+                    showDelay=0, classNames, id}={}) {
         let element;
 
         if(!target) {
@@ -107,7 +107,7 @@ export default class Menu extends MenuNode {
         element.classList.add('c-menu');
         element.dataset.role = 'menu';
 
-        super(element);
+        super(element, {classNames, id});
 
         /**
          * Controls how long after the user moves off the menu that it will timeout.

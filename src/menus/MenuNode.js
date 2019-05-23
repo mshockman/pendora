@@ -1,15 +1,24 @@
 import {attachMenuNode, getMenuNode} from './core';
 import Observable from 'core/interface/Observable';
+import {addClasses} from 'core/utility';
 
 
 /**
  * The base class for all menu nodes.
  */
 export default class MenuNode extends Observable {
-    constructor(element) {
+    constructor(element, {classNames, id}={}) {
         super();
         this.element = element;
         attachMenuNode(this.element, this);
+
+        if(classNames) {
+            addClasses(this.element, classNames);
+        }
+
+        if(id) {
+            this.element.id = id;
+        }
     }
 
     /**

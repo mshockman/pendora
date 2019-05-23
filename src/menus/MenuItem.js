@@ -6,7 +6,7 @@ import {getMenuNode} from "./core";
  * Represents a selectable item inside a menu.
  */
 export default class MenuItem extends MenuNode {
-    constructor({target, text, action, href, nodeName='li'}={}) {
+    constructor({target, text, action, href, nodeName='li', id, classNames}={}) {
         let element;
 
         if(!target) {
@@ -27,7 +27,7 @@ export default class MenuItem extends MenuNode {
             element = target;
         }
 
-        super(element);
+        super(element, {classNames, id});
 
         this.menuNodeType = 'menuitem';
         this.isMenuItem = true;
