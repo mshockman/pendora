@@ -9,9 +9,7 @@ function build_test_menu_1() {
     let menu = new MenuBar(),
         container = document.querySelector('#test-menu-area');
 
-
     container.appendChild(menu.element);
-
 
     let fileItem = new MenuItem({text: "File"}),
         editItem = new MenuItem({text: "Edit"}),
@@ -23,7 +21,6 @@ function build_test_menu_1() {
         vcsItem = new MenuItem({text: "VCS"}),
         windowItem = new MenuItem({text: "Window"}),
         helpItem = new MenuItem({text: "Help"});
-
 
     menu.add(fileItem);
     menu.add(editItem);
@@ -47,7 +44,11 @@ function build_test_menu_1() {
 
 
 function build_from_dom() {
-    let root = MenuBar.buildFromHTML('#test-menubar');
+    let root = MenuBar.buildFromHTML('#test-menubar', {
+        submenus: {
+            showDelay: 500
+        }
+    });
 
     return root;
 }

@@ -1,6 +1,6 @@
 import MenuNode from './MenuNode';
 import {getMenuNode, getClosestMenu, getClosestMenuItem, getClosestMenuNode, isMenuItem} from './core';
-import {parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
+import {parseBoolean, parseBooleanOrInt, parseIntValue, validateChoice} from 'core/utility';
 import MenuItem from "./MenuItem";
 
 
@@ -8,7 +8,8 @@ export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null}={}) {
+                    toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
+                    showDelay=0}={}) {
         let element;
 
         if(!target) {
@@ -40,6 +41,7 @@ export default class Menu extends MenuNode {
         this.delay = parseBooleanOrInt(delay, 10);
         this.multiple = parseBoolean(multiple);
         this.position = position;
+        this.showDelay = parseIntValue(showDelay, 10);
 
         this.toggleItem = validateChoice(toggleItem, ['on', 'off', 'both', 'none']);
         this.toggleMenu = validateChoice(toggleMenu, ['on', 'off', 'both', 'none']);

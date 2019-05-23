@@ -22,6 +22,10 @@ export default class MenuNode extends Observable {
         return r;
     }
 
+    /**
+     * Returns the parent Menu or MenuItem.
+     * @returns {MenuNode|Menu|MenuItem}
+     */
     get parent() {
         let o = this.element.parentElement;
 

@@ -32,6 +32,11 @@ export default class MenuItem extends MenuNode {
         if(!this.isActive) {
             this.isActive = true;
 
+            if(this._showDelayTimer) {
+                clearTimeout(this._showDelayTimer);
+                this._showDelayTimer = null;
+            }
+
             /**
              * @type {Menu}
              */
@@ -52,7 +57,14 @@ export default class MenuItem extends MenuNode {
             let submenu = this.submenu;
 
             if(submenu) {
-                submenu.show();
+                if(parent.showDelay) {
+                    this._showDelayTimer = setTimeout(() => {
+                        submenu.show();
+                        this._showDelayTimer = null;
+                    }, parent.showDelay);
+                } else {
+                    submenu.show();
+                }
             }
 
             this.trigger('activate', this);
@@ -62,6 +74,11 @@ export default class MenuItem extends MenuNode {
     deactivate() {
         if(this.isActive) {
             this.isActive = false;
+
+            if(this._showDelayTimer) {
+                clearTimeout(this._showDelayTimer);
+                this._showDelayTimer = null;
+            }
 
             let submenu = this.submenu;
 
@@ -93,8 +110,16 @@ export default class MenuItem extends MenuNode {
         this.element.dispatchEvent(event);
     }
 
+    /**
+     * Called when the user enter the MenuItem.
+     * @param event
+     */
     onMouseEnter(event) {
         if(this._getDisabled()) {
+            if(this.isActive) {
+                this.deactivate();
+            }
+
             return;
         }
 
@@ -128,6 +153,10 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Called when the user leaves the MenuItem.
+     * @param event
+     */
     onMouseLeave(event) {
         let parent = this.parent;
 
@@ -141,6 +170,10 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Called when the user clicks the MenuItem.
+     * @param event
+     */
     onClick(event) {
         if(this._getDisabled()) {
             return;
@@ -175,6 +208,21 @@ export default class MenuItem extends MenuNode {
 
         this.element.appendChild(menu.element);
         return menu;
+    }
+
+    detachSubMenu() {
+        let submenu = this.submenu;
+
+        if(submenu) {
+            if(this._showDelayTimer) {
+                clearTimeout(this._showDelayTimer);
+                this._showDelayTimer = null;
+            }
+
+            this.element.removeChild(submenu.element);
+        }
+
+        return submenu;
     }
 
     get submenu() {

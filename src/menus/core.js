@@ -51,11 +51,18 @@ export function getClosestMenuNode(element, context) {
 }
 
 
+/**
+ * Returns the closest Menu node.
+ * @param element
+ * @param context
+ * @returns {Menu}
+ */
 export function getClosestMenu(element, context) {
     while(element) {
         let node = getMenuNode(element);
 
         if(node && node.menuNodeType === 'menu') {
+            // noinspection JSValidateTypes
             return node;
         }
 
@@ -68,11 +75,18 @@ export function getClosestMenu(element, context) {
 }
 
 
+/**
+ * Returns the closest MenuItem
+ * @param element
+ * @param context
+ * @returns {MenuItem}
+ */
 export function getClosestMenuItem(element, context) {
     while(element) {
         let node = getMenuNode(element);
 
         if(node && node.menuNodeType === 'menuitem') {
+            // noinspection JSValidateTypes
             return node;
         }
 
