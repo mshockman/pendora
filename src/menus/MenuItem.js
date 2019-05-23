@@ -47,6 +47,10 @@ export default class MenuItem extends MenuNode {
                 }
             }
 
+            if(this._getDisabled()) {
+                return;
+            }
+
             if(!parent.isActive) {
                 parent.activate();
             }
@@ -114,13 +118,13 @@ export default class MenuItem extends MenuNode {
      * @param event
      */
     onMouseEnter(event) {
-        if(this._getDisabled()) {
-            if(this.isActive) {
-                this.deactivate();
-            }
-
-            return;
-        }
+        // if(this._getDisabled()) {
+        //     if(this.isActive) {
+        //         this.deactivate();
+        //     }
+        //
+        //     return;
+        // }
 
         let parent = this.parent;
 
@@ -175,6 +179,7 @@ export default class MenuItem extends MenuNode {
      */
     onClick(event) {
         if(this._getDisabled()) {
+            event.preventDefault();
             return;
         }
 

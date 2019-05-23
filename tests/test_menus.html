@@ -7,16 +7,24 @@
     <link type="text/css" href="dist/style.css" rel="stylesheet" />
 
     <style type="text/css">
-        .c-menuitem.active {
+        .c-menuitem.active:not(.disabled) {
            background-color: #475466;
         }
 
-        .c-menu.active > .c-menuitem:hover {
+        .c-menu.active > .c-menuitem:hover:not(.disabled) {
             background-color: #475466;
         }
 
-        .c-menu .c-menu > .c-menuitem:hover {
+        .c-menu .c-menu > .c-menuitem:hover:not(.disabled) {
             background-color: #475466;
+        }
+
+        .disabled.c-menuitem, .disabled .c-menuitem, .disabled .c-menuitem > a, .disabled.c-menuitem > a {
+            color: #c7c7c7 !important;
+        }
+
+        .disabled:hover, .disabled *:hover {
+            background-color: #fff;
         }
     </style>
 </head>
@@ -27,11 +35,11 @@
         <li class="c-menuitem" data-role="menuitem">
             <a>Item #1</a>
             <ul class="c-menu" data-role="menu">
-                <li class="c-menuitem" data-role="menuitem">
+                <li class="c-menuitem disabled" data-role="menuitem">
                     <a>Sub Menu #1</a>
                     <ul class="c-menu" data-role="menu">
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
+                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
@@ -41,7 +49,7 @@
                     <a>Sub Menu #2</a>
                     <ul class="c-menu" data-role="menu">
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
+                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
@@ -50,7 +58,7 @@
                 <li class="c-menuitem" data-role="menuitem">
                     <a>Sub Menu #3</a>
                     <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
+                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
                         <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
@@ -79,7 +87,7 @@
                 </li>
             </ul>
         </li>
-        <li class="c-menuitem" data-role="menuitem">
+        <li class="c-menuitem disabled" data-role="menuitem">
             <a>Item #2</a>
             <ul class="c-menu" data-role="menu">
                 <li class="c-menuitem" data-role="menuitem">

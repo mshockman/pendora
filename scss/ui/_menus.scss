@@ -6,7 +6,7 @@
   margin: 0;
   padding: 0;
 
-  .c-menuitem {
+  .c-menuitem > a {
     padding: 0.5rem;
   }
 
@@ -26,6 +26,10 @@
   cursor: pointer;
   user-select: none;
   position: relative;
+
+  & > a {
+    display: block;
+  }
 }
 
 
