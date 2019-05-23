@@ -46,7 +46,7 @@ function build_test_menu_1() {
 function build_from_dom() {
     let root = MenuBar.buildFromHTML('#test-menubar', {
         submenus: {
-            showDelay: 500
+            showDelay: 3000
         }
     });
 

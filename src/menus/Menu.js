@@ -8,7 +8,7 @@ export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                    toggleItem='both', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
+                    toggleItem='on', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
                     showDelay=0}={}) {
         let element;
 

@@ -28,7 +28,7 @@ export default class MenuItem extends MenuNode {
         this.element.dataset.role = 'menuitem';
     }
 
-    activate() {
+    activate(showMenuDelay=0) {
         if(!this.isActive) {
             this.isActive = true;
 
@@ -37,9 +37,6 @@ export default class MenuItem extends MenuNode {
                 this._showDelayTimer = null;
             }
 
-            /**
-             * @type {Menu}
-             */
             let parent = this.parent;
 
             if(!parent.multiple) {
@@ -54,16 +51,18 @@ export default class MenuItem extends MenuNode {
                 parent.activate();
             }
 
-            let submenu = this.submenu;
+            if(showMenuDelay >= 0) {
+                let submenu = this.submenu;
 
-            if(submenu) {
-                if(parent.showDelay) {
-                    this._showDelayTimer = setTimeout(() => {
+                if(submenu) {
+                    if(showMenuDelay !== 0) {
+                        this._showDelayTimer = setTimeout(() => {
+                            submenu.show();
+                            this._showDelayTimer = null;
+                        }, showMenuDelay);
+                    } else {
                         submenu.show();
-                        this._showDelayTimer = null;
-                    }, parent.showDelay);
-                } else {
-                    submenu.show();
+                    }
                 }
             }
 
@@ -133,19 +132,19 @@ export default class MenuItem extends MenuNode {
         if(!this.isActive) {
             if(!parent.isActive) {
                 if(parent.autoActivate === true) {
-                    this.activate();
+                    this.activate(parent.showDelay);
                 } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
                     parent._activateItemTimer = setTimeout(() => {
-                        this.activate();
+                        this.activate(parent.showDelay);
                         parent._activateItemTimer = null;
                     }, parent.autoActivate);
                 }
             } else {
                 if(parent.delay === false) {
-                    this.activate();
+                    this.activate(parent.showDelay);
                 } else if(typeof parent.delay === 'number' && parent.delay >= 0) {
                     parent._activateItemTimer = setTimeout(() => {
-                        this.activate();
+                        this.activate(parent.showDelay);
                         parent._activateItemTimer = null;
                     }, parent.delay);
                 }
@@ -191,6 +190,15 @@ export default class MenuItem extends MenuNode {
                 }
             } else if (!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
                 this.activate();
+            } else if(this.isActive && this._showDelayTimer) {
+                // If the user clicks an already active item with a submenu why the show menu timer is active and we can
+                // toggle items on show the submenu immediately.
+                if(this._showDelayTimer) {
+                    clearTimeout(this._showDelayTimer);
+                    this._showDelayTimer = null;
+                }
+
+                submenu.show();
             }
         } else {
             if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
