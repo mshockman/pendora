@@ -1,4 +1,4 @@
-import {attachMenuNode, getMenuNode} from './core';
+import {attachMenuNode, getMenuNode, isMenu, isMenuItem} from './core';
 import Observable from 'core/interface/Observable';
 import {addClasses} from 'core/utility';
 
@@ -64,7 +64,7 @@ export default class MenuNode extends Observable {
         let o = this.parent;
 
         while(o) {
-            if(o.menuNodeType === 'item') {
+            if(isMenuItem(o)) {
                 return o;
             }
 
@@ -80,7 +80,7 @@ export default class MenuNode extends Observable {
         let o = this.parent;
 
         while(o) {
-            if(o.menuNodeType === 'menu') {
+            if(isMenu(o)) {
                 return o;
             }
 

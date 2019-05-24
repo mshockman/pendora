@@ -61,7 +61,7 @@ export function getClosestMenu(element, context) {
     while(element) {
         let node = getMenuNode(element);
 
-        if(node && node.menuNodeType === 'menu') {
+        if(node && isMenu(node)) {
             // noinspection JSValidateTypes
             return node;
         }
@@ -85,7 +85,7 @@ export function getClosestMenuItem(element, context) {
     while(element) {
         let node = getMenuNode(element);
 
-        if(node && node.menuNodeType === 'menuitem') {
+        if(node && isMenuItem(node)) {
             // noinspection JSValidateTypes
             return node;
         }
@@ -103,7 +103,7 @@ export function isMenuItem(node) {
     if(node && node.nodeType) node = getMenuNode(node);
 
     if(node) {
-        if(node.menuNodeType === 'menuitem') {
+        if(node.menuNodeType === 'menuitem' || node.menuNodeType === 'dropdown') {
             return true;
         }
     }

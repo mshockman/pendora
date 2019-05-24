@@ -1,5 +1,5 @@
 import MenuNode from './MenuNode';
-import {getMenuNode} from "./core";
+import {getMenuNode, isMenu} from "./core";
 
 
 /**
@@ -271,7 +271,7 @@ export default class MenuItem extends MenuNode {
         for(let element of this.element.children) {
             let node = getMenuNode(element);
 
-            if(node && node.menuNodeType === 'menu') {
+            if(node && isMenu(node)) {
                 return node;
             }
         }
