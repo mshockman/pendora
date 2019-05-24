@@ -297,16 +297,9 @@ export default class Menu extends MenuNode {
             this._timeoutTimer = null;
         }
 
-        let targetMenu = getClosestMenu(event.target);
+        let targetItem = getClosestMenuItem(event.target, this.element);
 
-        // Ignore event if the menu was not the primary target.
-        if(!targetMenu) {
-            return;
-        }
-
-        let targetItem = getClosestMenuItem(event.target);
-
-        if(targetItem && !targetItem.element.contains(event.relatedTarget)) {
+        if(targetItem && targetItem.parent === this && !targetItem.element.contains(event.relatedTarget)) {
             targetItem.onMouseEnter(event);
         }
     }
@@ -335,6 +328,8 @@ export default class Menu extends MenuNode {
      * @param event
      */
     onClick(event) {
+        // Used because we need to know if the menu was targeted directly with the click.
+        // We can test for this if the target is a menuitem.
         let target = getClosestMenuNode(event.target, this.element);
 
         if(this.isActive && target === this && (this.toggleMenu === 'off' || this.toggleMenu === 'both')) {
