@@ -7,10 +7,18 @@ import {addClasses} from 'core/utility';
  * The base class for all menu nodes.
  */
 export default class MenuNode extends Observable {
-    constructor(element, {classNames, id}={}) {
+    constructor(element, nodeType, {classNames, id}={}) {
         super();
         this.element = element;
         attachMenuNode(this.element, this);
+
+        /**
+         * Used to test if an object is a menu controller.
+         * @readonly
+         * @type {boolean}
+         */
+        this.isMenuController = false;
+        this.menuNodeType = nodeType;
 
         if(classNames) {
             addClasses(this.element, classNames);
@@ -123,9 +131,8 @@ export default class MenuNode extends Observable {
     /**
      * Returns true if the node or any of it's ancestor nodes in the tree are disabled.
      * @returns {boolean}
-     * @private
      */
-    _getDisabled() {
+    getDisabled() {
         let o = this.element;
 
         while(o) {
@@ -137,5 +144,21 @@ export default class MenuNode extends Observable {
         }
 
         return false;
+    }
+
+    /**
+     * Returns the controller node that capture event listeners.
+     * @returns {MenuControllerBase}
+     */
+    getController() {
+        let o = this;
+
+        while(o) {
+            if(o.isMenuController) {
+                return o;
+            }
+
+            o = o.parent;
+        }
     }
 }

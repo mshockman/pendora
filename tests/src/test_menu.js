@@ -50,6 +50,8 @@ function build_from_dom() {
         }
     });
 
+    window.root = root;
+
     return root;
 }
 

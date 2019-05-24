@@ -27,9 +27,8 @@ export default class MenuItem extends MenuNode {
             element = target;
         }
 
-        super(element, {classNames, id});
+        super(element, 'menuitem', {classNames, id});
 
-        this.menuNodeType = 'menuitem';
         this.isMenuItem = true;
 
         this.element.classList.add('c-menuitem');
@@ -65,7 +64,7 @@ export default class MenuItem extends MenuNode {
                 }
             }
 
-            if(this._getDisabled()) {
+            if(this.getDisabled()) {
                 return;
             }
 
@@ -141,7 +140,7 @@ export default class MenuItem extends MenuNode {
      * Called when the user enter the MenuItem.
      * @param event
      */
-    onMouseEnter(event) {
+    onMouseEnterItem(event) {
         let parent = this.parent;
 
         if(parent._activateItemTimer) {
@@ -176,7 +175,7 @@ export default class MenuItem extends MenuNode {
      * Called when the user leaves the MenuItem.
      * @param event
      */
-    onMouseLeave(event) {
+    onMouseLeaveItem(event) {
         let parent = this.parent;
 
         if(parent._activateItemTimer) {
@@ -193,8 +192,8 @@ export default class MenuItem extends MenuNode {
      * Called when the user clicks the MenuItem.
      * @param event
      */
-    onClick(event) {
-        if(this._getDisabled()) {
+    onClickItem(event) {
+        if(this.getDisabled()) {
             event.preventDefault();
             return;
         }
