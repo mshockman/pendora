@@ -106,7 +106,9 @@ export default class Menu extends MenuControllerBase {
         element.classList.add('c-menu');
         element.dataset.role = 'menu';
 
-        super(element, 'menu', {
+        super(element, 'menu');
+
+        this.initMenuController({
             classNames, id, closeOnSelect, closeOnBlur, timeout, autoActivate, delay, multiple, toggleItem,
             toggleMenu, position, showDelay
         });

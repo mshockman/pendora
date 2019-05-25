@@ -67,12 +67,9 @@ import {parseBoolean, parseBooleanOrInt, parseIntValue, validateChoice} from "..
  * isMenuController     Used to test if the menu is a menu controller.  Readonly.
  */
 export default class MenuControllerBase extends MenuNode {
-    constructor(element, menuNodeType, {closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
+    initMenuController({closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
                 toggleItem='on', toggleMenu='off', closeOnSelect=false, position=null,
-                showDelay=0, classNames, id}={}) {
-
-        super(element, menuNodeType, {classNames, id});
-
+                showDelay=0}={}) {
         /**
          * Controls how long after the user moves off the menu that it will timeout.
          * @type {boolean|Number}
@@ -175,7 +172,7 @@ export default class MenuControllerBase extends MenuNode {
 
         let targetItem = getClosestMenuItem(event.target, this.element);
 
-        if(targetItem && target.getController() === this && !targetItem.element.contains(event.relatedTarget)) {
+        if(targetItem && targetItem.getController() === this && !targetItem.element.contains(event.relatedTarget)) {
             targetItem.onMouseEnterItem(event);
         }
     }
