@@ -148,7 +148,7 @@ export default class MenuNode extends Observable {
 
     /**
      * Returns the controller node that capture event listeners.
-     * @returns {MenuControllerBase}
+     * @returns {MenuNode}
      */
     getController() {
         let o = this;
@@ -159,6 +159,17 @@ export default class MenuNode extends Observable {
             }
 
             o = o.parent;
+        }
+    }
+
+    appendTo(element) {
+        if(element.jquery) {
+            element.append(this.element);
+        } else if(typeof element === 'string') {
+            element = document.querySelector(element);
+            element.appendChild(this.element);
+        } else {
+            element.appendChild(this.element);
         }
     }
 }

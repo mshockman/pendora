@@ -17,7 +17,8 @@ export default {
         'test2': './tests/src/test2.js',
         'testDataGrid': ["@babel/polyfill", './tests/src/test_data_grid.js'],
         'testPaginator': './tests/src/test_paginator.js',
-        'testMenu': './tests/src/test_menu.js'
+        'testMenu': './tests/src/test_menu.js',
+        'test_pages': ["@babel/polyfill", './tests/src/test_pages.js'],
     },
 
     resolve: {

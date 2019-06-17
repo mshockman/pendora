@@ -1,51 +1,58 @@
+@import "../modules/variables";
 
 
-.c-menubar.c-menu {
-  list-style: none;
-  display: inline-flex;
+.c-menu {
+  position: absolute;
+  min-width: 200px;
+  border-radius: 4px;
   margin: 0;
+  list-style: none;
   padding: 0;
-
-  .c-menuitem > a {
-    padding: 0.5rem;
-  }
+  background-clip: padding-box;
+  box-shadow: 0 3px 12px rgba(27,31,35,.15), 0 0 1px rgba(27,31,35,.2);
+  border: 1px solid #ccc;
+  background-color: #fff;
+  z-index: $menu-z-layer;
+  visibility: hidden;
 
   .c-menu {
-    top: 100%;
-    left: 0;
-
-    .c-menu {
-      top: 0;
-      left: 100%;
-    }
+    left: 100%;
+    top: 0;
   }
 }
 
 
 .c-menuitem {
-  cursor: pointer;
-  user-select: none;
+  display: block;
   position: relative;
 
   & > a {
     display: block;
+    line-height: 2rem;
+    padding: 0 0.5rem;
+    cursor: pointer;
+  }
+
+  &.active > a {
+    background-color: royalblue;
+    color: #fff;
   }
 }
 
 
-.c-menu {
-  position: absolute;
+.c-dropdown {
+  display: inline-block;
+  position: relative;
+}
 
-  border: 1px solid #000;
-  background-color: #fff;
-  list-style: none;
-  padding: 0;
+
+.c-menubar {
+  display: block;
   margin: 0;
-  min-width: 200px;
+  padding: 0;
+  border: 1px solid #ccc;
 
-  .c-menu {
-    left: 100%;
-    top: 0;
-    visibility: hidden;
+  & > .c-menuitem {
+    display: inline-block;
   }
 }

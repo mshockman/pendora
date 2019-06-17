@@ -17,6 +17,7 @@ export default class MenuBar extends Menu {
         });
 
         this.element.classList.add('c-menubar');
+        this.element.classList.remove('c-menu');
         this.visible = true;
     }
 }

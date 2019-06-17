@@ -1,6 +1,7 @@
-import {getMenuNode} from './core';
+import {getClosestMenuItem, getClosestMenuNode, getMenuNode, isMenuItem, getTargetChild} from './core';
 import MenuItem from "./MenuItem";
-import MenuControllerBase from './MenuControllerBase';
+import MenuNode from "./MenuNode";
+import {parseBoolean, parseBooleanOrInt, validateChoice} from "../core/utility";
 
 
 /**
@@ -59,8 +60,6 @@ import MenuControllerBase from './MenuControllerBase';
  *
  * position             Gets or sets a function that will be called whenever the menu is shown to position it.
  *
- * showDelay            Gets or sets the delay after a menuitem activates that is show's its submenu.
- *
  * toggleItem           Gets or sets how items will behave when the user clicks them.  Can be on, off, both or none.
  *                      If on items will only toggle on when clicked and if off they will only toggle off.
  *                      If both they will toggle both off and on.
@@ -86,13 +85,16 @@ import MenuControllerBase from './MenuControllerBase';
  *                      'child'.  If true the menu will close itself when an item-select event is encountered.
  *                      The special 'child' option is similiar to true but will only close if the item is an immediate
  *                      child item of the menu.
+ *
+ * deactivateOnItemHover
+ *      If true item will automatically deactivate when the user mouses over another item even if that item is disabled.
  */
-export default class Menu extends MenuControllerBase {
+export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
                     toggleItem='on', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
-                    showDelay=0, classNames, id}={}) {
+                    deactivateOnItemHover=false, classNames, id}={}) {
         let element;
 
         if(!target) {
@@ -106,12 +108,22 @@ export default class Menu extends MenuControllerBase {
         element.classList.add('c-menu');
         element.dataset.role = 'menu';
 
-        super(element, 'menu');
+        super(element, 'menu', {classNames, id});
 
-        this.initMenuController({
-            classNames, id, closeOnSelect, closeOnBlur, timeout, autoActivate, delay, multiple, toggleItem,
-            toggleMenu, position, showDelay
-        });
+        this._timeoutTimer = null;
+        this._activateItemTimer = null;
+
+        this.timeout = timeout;
+        this.closeOnBlur = closeOnBlur;
+        this.autoActivate = autoActivate;
+        this.delay = delay;
+        this.multiple = multiple;
+        this.toggleItem = toggleItem;
+        this.toggleMenu = toggleMenu;
+        this.closeOnSelect = closeOnSelect;
+        this.position = position;
+
+        this.deactivateOnItemHover = deactivateOnItemHover;
 
         /**
          * Gets or sets the visibility of the menu.  This only updates the css classes.  It does not trigger events.
@@ -120,7 +132,42 @@ export default class Menu extends MenuControllerBase {
          * @type {boolean}
          */
         this.visible = false;
+
+        this.initEvents();
     }
+
+    initEvents() {
+        if(!this.isMenuController) {
+            this.isMenuController = true;
+            this.boundEvents = {};
+
+            this.boundEvents.onClick = this.onClick.bind(this);
+            this.boundEvents.onMouseOver = this.onMouseOver.bind(this);
+            this.boundEvents.onMouseOut = this.onMouseOut.bind(this);
+            this.boundEvents.onSelect = this.onSelect.bind(this);
+
+            this.element.addEventListener('click', this.boundEvents.onClick);
+            this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
+            this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
+            this.element.addEventListener('item-select', this.boundEvents.onSelect);
+        }
+    }
+
+    destroyEvents() {
+        if(this.isMenuController) {
+            this.isMenuController = false;
+
+            this.element.removeEventListener('click', this.boundEvents.onClick);
+            this.element.removeEventListener('mouseover', this.boundEvents.onMouseOver);
+            this.element.removeEventListener('mouseout', this.boundEvents.onMouseOut);
+            this.element.removeEventListener('item-select', this.boundEvents.onSelect);
+
+            this.boundEvents = null;
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // METHODS
 
     /**
      * Activates the menu.
@@ -131,8 +178,29 @@ export default class Menu extends MenuControllerBase {
 
             let parent = this.parent;
 
-            if(parent && !parent.isActive) {
-                parent.activate();
+            if(parent) {
+                if(!parent.isActive) {
+                    parent.activate();
+                }
+
+                if(parent.setActiveItem) {
+                    parent.setActiveItem(this, true);
+                }
+            }
+
+            if(this.closeOnBlur && !this._captureDocumentClick) {
+                let doc = document;
+                this._captureDocumentClick = {
+                    doc: doc,
+                    onDocumentClick: (event) => {
+                        if(!this.element.contains(event.target)) {
+                            this.deactivate();
+                        }
+                    }
+                };
+
+                // noinspection JSUnresolvedFunction
+                doc.addEventListener('click', this._captureDocumentClick.onDocumentClick);
             }
 
             this.trigger('activate', this);
@@ -146,9 +214,21 @@ export default class Menu extends MenuControllerBase {
         if(this.isActive) {
             this.isActive = false;
 
-            for(let child of this.activeItems) {
-                child.deactivate();
+            if(this._captureDocumentClick) {
+                // noinspection JSUnresolvedFunction
+                this._captureDocumentClick.doc.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
+                this._captureDocumentClick = null;
             }
+
+            this.clearTimeoutTimer();
+            this.clearActivateItemTimer();
+
+            if(this._activateItemTimer) {
+                clearTimeout(this._activateItemTimer);
+                this._activateItemTimer = null;
+            }
+
+            this.clearActiveItems();
 
             this.trigger('deactivate', this);
         }
@@ -195,6 +275,145 @@ export default class Menu extends MenuControllerBase {
         return item;
     }
 
+    setActiveItem(item, active) {
+        if(active) {
+            if(!item.isActive) {
+                item.activate();
+                return;
+            }
+
+            if(!this.multiple) {
+                let activeItems = this.activeItems;
+
+                for(let _item of activeItems) {
+                    if(_item !== item) {
+                        _item.deactivate();
+                    }
+                }
+            }
+        } else {
+            if(item.isActive) {
+                item.deactivate();
+            }
+        }
+    }
+
+    clearActiveItems() {
+        let activeItems = this.activeItems;
+
+        for(let _item of activeItems) {
+            _item.deactivate();
+        }
+    }
+
+    startTimeoutTimer(timeout=null) {
+        if(!this.isActive) return;
+
+        if(timeout === null) timeout = this.timeout;
+
+        this.clearTimeoutTimer();
+
+        this._timeoutTimer = setTimeout(() => {
+            this._timeoutTimer = null;
+            this.deactivate();
+        }, timeout);
+
+        return this._timeoutTimer;
+    }
+
+    clearTimeoutTimer() {
+        if(this._timeoutTimer) {
+            clearTimeout(this._timeoutTimer);
+            this._timeoutTimer = null;
+        }
+    }
+
+    startActivateItemTimer(item, time) {
+        this.clearActivateItemTimer();
+        this._activateItemTimerTarget = item;
+
+        this._activateItemTimer = setTimeout(() => {
+            this._activateItemTimer = null;
+            this._activateItemTimerTarget = null;
+            item.activate();
+        }, time);
+    }
+
+    clearActivateItemTimer(target) {
+        if(this._activateItemTimer && (!target || target === this._activateItemTimerTarget)) {
+            clearTimeout(this._activateItemTimer);
+            this._activateItemTimer = null;
+            this._activateItemTimerTarget = null;
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // EVENT HANDLER METHODS
+
+    onMouseOver(event) {
+        // Clear timeout timer.
+       this.clearTimeoutTimer();
+
+        // Pass event to target item.
+        let targetItem = getClosestMenuItem(event.target, this.element);
+
+        if(targetItem && targetItem.getController() === this) {
+            targetItem.onMouseOver(event);
+        }
+
+        // If the user mouses over an item and deactivateOnItemHover is true and multiple is false
+        // then deactivate any other active items.
+        if(this.deactivateOnItemHover && !this.multiple) {
+            let childItem = getTargetChild(this, event.target),
+                activeItems = this.activeItems;
+
+            if(childItem) {
+                for (let item of activeItems) {
+                    if (item !== childItem) {
+                        item.deactivate();
+                    }
+                }
+            }
+        }
+    }
+
+    onMouseOut(event) {
+        // Start timer if menu is active, timeout is a valid time and it is a mouseleave event.
+        if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
+            this.startTimeoutTimer(this.timeout);
+        }
+
+        // Pass event to target item.
+        let targetItem = getClosestMenuItem(event.target, this.element);
+
+        if(targetItem && targetItem.getController() === this) {
+            targetItem.onMouseOut(event);
+        }
+    }
+
+    onClick(event) {
+        let target = getClosestMenuNode(event.target, this.element);
+
+        if(target === this) {
+            if(this.isActive && (this.toggleMenu === 'off' || this.toggleMenu === 'both')) {
+                this.deactivate();
+            } else if(!this.isActive && (this.toggleMenu === 'on' || this.toggleMenu === 'both')) {
+                this.activate();
+            }
+        } else if(target && isMenuItem(target) && target.getController() === this) {
+            target.onClick(event);
+        }
+    }
+
+    onSelect(event) {
+        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && event.detail.item.parent === this)) {
+            this.deactivate();
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // GETTER AND SETTER METHODS
+
     /**
      * Gets the menus active child items.
      * @returns {Array}
@@ -218,7 +437,7 @@ export default class Menu extends MenuControllerBase {
     get children() {
         let r = [];
 
-        for(let element of this.element.querySelectorAll('[data-role="menuitem"], [data-role="menu"]')) {
+        for(let element of this.element.querySelectorAll('[data-role="menuitem"], [data-role="menu"], [data-role="dropdown"]')) {
             let menuNode = getMenuNode(element);
 
             if(menuNode && menuNode.parent === this) {
@@ -251,33 +470,64 @@ export default class Menu extends MenuControllerBase {
         }
     }
 
-    /**
-     * Used to build a menu tree from the dom.  Options for the nodes are separated into 3 classes.  The root,
-     * items and submenus.  Properties are also read from the dom from their dataset.  Options passed in the construct
-     * take presidence over config options found on the element.
-     *
-     * @param selector - The element or a selector string that can be used to find the element.
-     * @param submenus - Config options for the submenus.
-     * @param items - Config options for the menu items.
-     * @param options - Config options for the root menu.
-     * @returns {Menu}
-     */
-    static buildFromHTML(selector, {submenus=null, items=null, options=null}={}) {
+    //------------------------------------------------------------------------------------------------------------------
+    // STATIC METHODS
+
+    static FromHTML(selector, config={}) {
         if(typeof selector === 'string') {
             selector = document.querySelector(selector);
         }
 
-        submenus = submenus || {};
-        items = items || {};
-        options = options || {};
-        let root = new this({target: selector, ...selector.dataset, ...options});
+        config = config || {};
+
+        let dataset = {};
+
+        if(selector.dataset.timeout) {
+            dataset.timeout = parseBooleanOrInt(selector.dataset.timeout);
+        }
+        if(selector.dataset.closeOnBlur) {
+            dataset.closeOnBlur = parseBoolean(selector.dataset.closeOnBlur);
+        }
+        if(selector.dataset.autoActivate) {
+            dataset.autoActivate = parseBooleanOrInt(selector.dataset.autoActivate);
+        }
+        if(selector.dataset.delay) {
+            dataset.delay = parseBooleanOrInt(selector.dataset.delay);
+        }
+        if(selector.dataset.multiple) {
+            dataset.multiple = parseBoolean(selector.dataset.multiple);
+        }
+        if(selector.dataset.toggleItem) {
+            dataset.toggleItem = validateChoice(selector.dataset.toggleItem, ['on', 'off', 'both']);
+        }
+        if(selector.dataset.toggleMenu) {
+            dataset.toggleMenu = validateChoice(selector.dataset.toggleMenu, ['on', 'off', 'both']);
+        }
+        if(selector.dataset.closeOnSelect) {
+            let value = validateChoice(selector.dataset.closeOnSelect, ['true', 'false', 'child']);
+
+            if(value === 'true' || value === 'false') {
+                value = value === 'true';
+            }
+
+            dataset.closeOnSelect = value;
+        }
+        if(selector.dataset.deactivateOnItemHover) {
+            dataset.deactivateOnItemHover = parseBoolean(selector.dataset.deactivateOnItemHover);
+        }
+
+        return new this({target: selector, ...dataset, ...config});
+    }
+
+    static widget({target, subItemConfig={}, subMenuConfig={}, config={}}={}) {
+        let root = this.FromHTML(target, config);
 
         for(let element of root.element.querySelectorAll('[data-role="menu"]')) {
-            new Menu({target: element, ...element.dataset, ...submenus});
+            Menu.FromHTML(element, subMenuConfig);
         }
 
         for(let element of root.element.querySelectorAll('[data-role="menuitem"]')) {
-            new MenuItem({target: element, ...element.dataset, ...items});
+            MenuItem.FromHTML(element, subItemConfig);
         }
 
         return root;

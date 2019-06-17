@@ -6,15 +6,15 @@ import {getMenuNode, isMenu} from "./core";
  * Represents a selectable item inside a menu.
  */
 export default class MenuItem extends MenuNode {
-    constructor({target, text, action, href, nodeName='li', id, classNames}={}) {
+    constructor(text, action, {target, nodeName='li', id, classNames}={}) {
         let element;
 
         if(!target) {
             element = document.createElement(nodeName);
             let item = document.createElement('a');
 
-            if(href != null) {
-                item.href = href;
+            if(typeof action === 'string') {
+                item.href = action;
             }
 
             item.classList.add('c-menuitem__item');
@@ -34,57 +34,30 @@ export default class MenuItem extends MenuNode {
         this.element.classList.add('c-menuitem');
         this.element.dataset.role = 'menuitem';
 
-        if(action) {
+        if(typeof action === 'function') {
             this.on('select', action);
         }
     }
 
-    /**
-     * Activates the item and show the submenu if available.  The showMenuDelay controls how much time in milliseconds
-     * after the item activates that it will show it's submenu.  By default it shows immediately.  You can pass in a
-     * negative value to prevent the submenu from displaying.
-     * @param showMenuDelay {Number}
-     */
-    activate(showMenuDelay=0) {
+    //------------------------------------------------------------------------------------------------------------------
+    // METHODS
+    //------------------------------------------------------------------------------------------------------------------
+
+    activate() {
         if(!this.isActive) {
             this.isActive = true;
 
-            if(this._showDelayTimer) {
-                clearTimeout(this._showDelayTimer);
-                this._showDelayTimer = null;
-            }
-
-            let parent = this.parent;
-
-            if(!parent.multiple) {
-                for(let activeItem of parent.activeItems) {
-                    if(activeItem !== this) {
-                        activeItem.deactivate();
-                    }
-                }
-            }
-
-            if(this.getDisabled()) {
-                return;
-            }
+            let parent = this.parent,
+                submenu = this.submenu;
 
             if(!parent.isActive) {
                 parent.activate();
             }
 
-            if(showMenuDelay >= 0) {
-                let submenu = this.submenu;
+            parent.setActiveItem(this, true);
 
-                if(submenu) {
-                    if(showMenuDelay !== 0) {
-                        this._showDelayTimer = setTimeout(() => {
-                            submenu.show();
-                            this._showDelayTimer = null;
-                        }, showMenuDelay);
-                    } else {
-                        submenu.show();
-                    }
-                }
+            if(submenu) {
+                submenu.show();
             }
 
             this.trigger('activate', this);
@@ -97,11 +70,6 @@ export default class MenuItem extends MenuNode {
     deactivate() {
         if(this.isActive) {
             this.isActive = false;
-
-            if(this._showDelayTimer) {
-                clearTimeout(this._showDelayTimer);
-                this._showDelayTimer = null;
-            }
 
             let submenu = this.submenu;
 
@@ -120,12 +88,6 @@ export default class MenuItem extends MenuNode {
     select() {
         this.trigger('select', this);
 
-        let parent = this.parent;
-
-        if(parent) {
-            parent.trigger("child-item-select", this);
-        }
-
         let event = new CustomEvent('item-select', {
             detail: {
                 item: this
@@ -134,99 +96,6 @@ export default class MenuItem extends MenuNode {
         });
 
         this.element.dispatchEvent(event);
-    }
-
-    /**
-     * Called when the user enter the MenuItem.
-     * @param event
-     */
-    onMouseEnterItem(event) {
-        let parent = this.parent;
-
-        if(parent._activateItemTimer) {
-            clearTimeout(parent._activateItemTimer);
-            parent._activateItemTimer = null;
-        }
-
-        if(!this.isActive) {
-            if(!parent.isActive) {
-                if(parent.autoActivate === true) {
-                    this.activate(parent.showDelay);
-                } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
-                    parent._activateItemTimer = setTimeout(() => {
-                        this.activate(parent.showDelay);
-                        parent._activateItemTimer = null;
-                    }, parent.autoActivate);
-                }
-            } else {
-                if(parent.delay === false) {
-                    this.activate(parent.showDelay);
-                } else if(typeof parent.delay === 'number' && parent.delay >= 0) {
-                    parent._activateItemTimer = setTimeout(() => {
-                        this.activate(parent.showDelay);
-                        parent._activateItemTimer = null;
-                    }, parent.delay);
-                }
-            }
-        }
-    }
-
-    /**
-     * Called when the user leaves the MenuItem.
-     * @param event
-     */
-    onMouseLeaveItem(event) {
-        let parent = this.parent;
-
-        if(parent._activateItemTimer) {
-            clearTimeout(parent._activateItemTimer);
-            parent._activateItemTimer = null;
-        }
-
-        if(this.isActive && !this.submenu) {
-            this.deactivate();
-        }
-    }
-
-    /**
-     * Called when the user clicks the MenuItem.
-     * @param event
-     */
-    onClickItem(event) {
-        if(this.getDisabled()) {
-            event.preventDefault();
-            return;
-        }
-
-        let parent = this.parent,
-            submenu = this.submenu;
-
-        if(submenu) {
-            if (this.isActive && (parent.toggleItem === 'off' || parent.toggleItem === 'both')) {
-                this.deactivate();
-
-                if(parent.isActive && !parent.activeItems.length) {
-                    parent.deactivate();
-                }
-            } else if (!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
-                this.activate();
-            } else if(this.isActive && this._showDelayTimer) {
-                // If the user clicks an already active item with a submenu why the show menu timer is active and we can
-                // toggle items on show the submenu immediately.
-                if(this._showDelayTimer) {
-                    clearTimeout(this._showDelayTimer);
-                    this._showDelayTimer = null;
-                }
-
-                submenu.show();
-            }
-        } else {
-            if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
-                this.activate();
-            }
-
-            this.select();
-        }
     }
 
     /**
@@ -262,6 +131,94 @@ export default class MenuItem extends MenuNode {
         return submenu;
     }
 
+
+    //------------------------------------------------------------------------------------------------------------------
+    // EVENT HANDLERS
+    //------------------------------------------------------------------------------------------------------------------
+
+    onMouseOver(event) {
+        if(this.getDisabled()) return;
+
+        if(!this.element.contains(event.relatedTarget)) {
+            // Mouse entered item.
+
+            let parent = this.parent;
+            parent.clearActivateItemTimer();
+
+            if(!this.isActive) {
+                if(!parent.isActive) {
+                    // Use autoActivate property.
+
+                    if(parent.autoActivate === true) {
+                        this.activate();
+                    } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
+                        parent.startActivateItemTimer(this, parent.autoActivate);
+                    }
+                } else {
+                    // Use delay property because menu is already active.
+
+                    if(parent.delay === false) {
+                        this.activate();
+                    } else if(typeof parent.delay === 'number' && parent.delay >= 0) {
+                        parent.startActivateItemTimer(this, parent.delay);
+                    }
+                }
+            }
+        }
+    }
+
+    onMouseOut(event) {
+        if(this.getDisabled()) return;
+
+        if(!this.element.contains(event.relatedTarget)) {
+            let parent = this.parent;
+
+            parent.clearActivateItemTimer(this);
+
+            // If the item doesn't have a submenu deactivate immediately when the user leaves it.
+            if(this.isActive && !this.submenu) {
+                this.deactivate();
+            }
+        }
+    }
+
+    /**
+     * Called when the user clicks the MenuItem.
+     * @param event
+     */
+    onClick(event) {
+        if(this.getDisabled()) {
+            event.preventDefault();
+            return;
+        }
+
+        let parent = this.parent,
+            submenu = this.submenu;
+
+        if(submenu) {
+            if(this.isActive && (parent.toggleItem === 'off' || parent.toggleItem === 'both')) {
+                this.deactivate();
+
+                // If we toggle off the last item then deactivate the parent menu.
+                if(parent.isActive && !parent.activeItems.length) {
+                    parent.deactivate();
+                }
+            } else if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
+                this.activate();
+            }
+        } else {
+            if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
+                this.activate();
+            }
+
+            this.select();
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // GETTERS AND SETTERS
+    //------------------------------------------------------------------------------------------------------------------
+
     /**
      * Gets the items submenu.
      * @returns {MenuNode}
@@ -290,5 +247,17 @@ export default class MenuItem extends MenuNode {
         } else {
             return [];
         }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // STATIC METHODS
+    //------------------------------------------------------------------------------------------------------------------
+
+    static FromHTML(selector, config={}) {
+        if(typeof selector === 'string') {
+            selector = document.querySelector(selector);
+        }
+
+        return new this(null, null, {target: selector, ...config});
     }
 }

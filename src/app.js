@@ -52,7 +52,7 @@ export default class Application {
             this.isLoaded = true;
 
             const pageClassImporter = this.classes[page],
-                PageClass = pageClassImporter(await pageClassImporter()).default;
+                PageClass = (await pageClassImporter()).default;
 
             this.page = new PageClass(context);
             if(this.page.load) this.page.load();

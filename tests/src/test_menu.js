@@ -1,5 +1,6 @@
 import {privateCache} from 'core/data';
 import {Menu, MenuBar, MenuItem} from 'menus';
+import {getTargetChild, getClosestMenuNode} from 'menus/core';
 
 
 window.privateCache = privateCache;
@@ -44,10 +45,8 @@ function build_test_menu_1() {
 
 
 function build_from_dom() {
-    let root = MenuBar.buildFromHTML('#test-menubar', {
-        submenus: {
-            showDelay: 3000
-        }
+    let root = MenuBar.widget({
+        target: '#test-menubar'
     });
 
     window.root = root;
@@ -57,3 +56,30 @@ function build_from_dom() {
 
 
 build_from_dom();
+
+
+function testMixin(superClass) {
+    return class extends superClass {
+        test() {
+            console.log("Hello World");
+        }
+    }
+}
+
+
+class TestClass {
+    constructor(msg) {
+        console.log(msg);
+        this.msg = msg;
+    }
+
+    test2() {
+        console.log("Test class 2");
+    }
+}
+
+
+window.testMixin = testMixin;
+window.TestClass = TestClass;
+window.getTargetChild = getTargetChild;
+window.getClosestMenuNode = getClosestMenuNode;

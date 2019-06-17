@@ -31,10 +31,11 @@
 <body>
     <div id="test-menu-area"></div>
 
-    <ul id="test-menubar" class="c-menubar c-menu" data-role="menu" data-timeout="3000">
+    <ul id="test-menubar" class="c-menubar" data-role="menu" data-timeout="3000" data-auto-activate="false" data-close-on-blur="true" data-delay="0" data-multiple="false" data-toggle-item="on" data-close-on-select="false"
+    data-deactivate-on-item-hover="true">
         <li class="c-menuitem" data-role="menuitem">
             <a>Item #1</a>
-            <ul class="c-menu" data-role="menu">
+            <ul class="c-menu" data-role="menu" data-deactivate-on-item-hover="true">
                 <li class="c-menuitem disabled" data-role="menuitem">
                     <a>Sub Menu #1</a>
                     <ul class="c-menu" data-role="menu">

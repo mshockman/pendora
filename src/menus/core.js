@@ -129,3 +129,22 @@ export function isMenuNode(node) {
     if(node && node.nodeType) node = getMenuNode(node);
     return node && node instanceof MenuNode;
 }
+
+
+export function getTargetChild(parent, targetElement) {
+    let node = getClosestMenuNode(targetElement, parent.element);
+
+    while(node) {
+        if(node === parent) {
+            return;
+        }
+
+        let _parent = node.parent;
+
+        if(parent === _parent) {
+            return node;
+        }
+
+        node = _parent;
+    }
+}
