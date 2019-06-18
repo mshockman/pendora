@@ -15,5 +15,6 @@ export default class TestDropDown {
         this.dropDown.menu.add(new MenuItem("Test 3"));
         this.dropDown.menu.add(new MenuItem("Test 4"));
         this.dropDown.menu.add(new MenuItem("Test 5"));
+        window.test = this.dropDown;
     }
 }

@@ -490,3 +490,41 @@ export function validateChoice(value, choices, defaultValue=TypeError) {
 
     return value;
 }
+
+
+/**
+ * Returns first child element that matches the test function.
+ * @param element - Parent element
+ * @param fn - Test Function
+ * @returns {Element}
+ */
+export function findChild(element, fn) {
+    for(let i = 0, l = element.children.length; i < l; i++) {
+        let child = element.children[i];
+
+        if(fn(child)) {
+            return child;
+        }
+    }
+}
+
+
+/**
+ * Creates a filtered list of element from the children that match the test function.
+ * @param element - Parent element.
+ * @param fn - Test function.
+ * @returns {Array}
+ */
+export function filterChildren(element, fn) {
+    let r = [];
+
+    for(let i = 0, l = element.children.length; i < l; i++) {
+        let child = element.children[i];
+
+        if(fn(child)) {
+            r.push(child);
+        }
+    }
+
+    return r;
+}
