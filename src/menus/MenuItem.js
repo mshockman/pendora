@@ -6,7 +6,7 @@ import {getMenuNode, isMenu} from "./core";
  * Represents a selectable item inside a menu.
  */
 export default class MenuItem extends MenuNode {
-    constructor(text, action, {target, nodeName='li', id, classNames}={}) {
+    constructor(text, action, {target, nodeName='div', id, classNames}={}) {
         let element;
 
         if(!target) {
@@ -196,18 +196,18 @@ export default class MenuItem extends MenuNode {
             submenu = this.submenu;
 
         if(submenu) {
-            if(this.isActive && (parent.toggleItem === 'off' || parent.toggleItem === 'both')) {
+            if(this.isActive && (parent.toggleItems === 'off' || parent.toggleItems === 'both')) {
                 this.deactivate();
 
                 // If we toggle off the last item then deactivate the parent menu.
                 if(parent.isActive && !parent.activeItems.length) {
                     parent.deactivate();
                 }
-            } else if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
+            } else if(!this.isActive && (parent.toggleItems === 'on' || parent.toggleItems === 'both')) {
                 this.activate();
             }
         } else {
-            if(!this.isActive && (parent.toggleItem === 'on' || parent.toggleItem === 'both')) {
+            if(!this.isActive && (parent.toggleItems === 'on' || parent.toggleItems === 'both')) {
                 this.activate();
             }
 

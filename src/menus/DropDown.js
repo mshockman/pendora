@@ -1,7 +1,9 @@
 import MenuNode from "./MenuNode";
 import Menu from "./Menu";
 import {getMenuNode, isMenu} from "./core";
-import {findChild} from 'core/utility';
+import {findChild, parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
+import MenuItem from "./MenuItem";
+import AutoLoader from 'autoloader';
 
 
 export class DropDown extends MenuNode {
@@ -267,4 +269,57 @@ export class DropDown extends MenuNode {
             }
         }
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // STATIC FUNCTIONS
+    //------------------------------------------------------------------------------------------------------------------
+
+    static FromHTML(selector, config={}) {
+        if(typeof selector === 'string') {
+            selector = document.querySelector(selector);
+        }
+
+        let attributes = {};
+
+        if(selector.dataset.closeOnBlur) {
+            attributes.closeOnBlur = parseBoolean(selector.dataset.closeOnBlur);
+        }
+        if(selector.dataset.closeOnSelect) {
+            attributes.closeOnSelect = parseBoolean(selector.dataset.closeOnSelect);
+        }
+        if(selector.dataset.timeout) {
+            attributes.timeout = parseBooleanOrInt(selector.dataset.timeout, 10);
+        }
+        if(selector.dataset.autoActivate) {
+            attributes.autoActivate = parseBooleanOrInt(selector.dataset.autoActivate, 10);
+        }
+        if(selector.dataset.toggle) {
+            attributes.toggle = validateChoice(selector.dataset.toggle, ['on', 'off', 'both']);
+        }
+
+        return new this({...attributes, ...config, target: selector});
+    }
+
+    static widget({target, subItemConfig={}, subMenuConfig={}, config={}, dropDownConfig={}}) {
+        let root = this.FromHTML(target, config);
+
+        for(let element of root.element.querySelectorAll('[data-role="menu"]')) {
+            Menu.FromHTML(element, subMenuConfig);
+        }
+
+        for(let element of root.element.querySelectorAll('[data-role="menuitem"]')) {
+            MenuItem.FromHTML(element, subItemConfig);
+        }
+
+        for(let element of root.element.querySelectorAll('[data-role="dropdown"]')) {
+            DropDown.FromHTML(element, dropDownConfig);
+        }
+
+        return root;
+    }
 }
+
+
+AutoLoader.register('dropdown', (element) => {
+    return DropDown.widget({target: element});
+});

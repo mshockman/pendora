@@ -1,4 +1,5 @@
 import Menu from './Menu';
+import AutoLoader from 'autoloader';
 
 
 export default class MenuBar extends Menu {
@@ -21,3 +22,8 @@ export default class MenuBar extends Menu {
         this.visible = true;
     }
 }
+
+
+AutoLoader.register('menubar', (element) => {
+    return MenuBar.widget({target: element});
+});

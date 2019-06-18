@@ -2,6 +2,8 @@ import {getClosestMenuItem, getClosestMenuNode, getMenuNode, isMenuItem, getTarg
 import MenuItem from "./MenuItem";
 import MenuNode from "./MenuNode";
 import {parseBoolean, parseBooleanOrInt, validateChoice} from "../core/utility";
+import AutoLoader from 'autoloader';
+import MenuBar from "./MenuBar";
 
 
 /**
@@ -60,7 +62,7 @@ import {parseBoolean, parseBooleanOrInt, validateChoice} from "../core/utility";
  *
  * position             Gets or sets a function that will be called whenever the menu is shown to position it.
  *
- * toggleItem           Gets or sets how items will behave when the user clicks them.  Can be on, off, both or none.
+ * toggleItems          Gets or sets how items will behave when the user clicks them.  Can be on, off, both or none.
  *                      If on items will only toggle on when clicked and if off they will only toggle off.
  *                      If both they will toggle both off and on.
  *                      If none nothing will happen when the user clicks an item.
@@ -93,7 +95,7 @@ export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                    toggleItem='on', toggleMenu='off', closeOnSelect=false, nodeName='ul', position=null,
+                    toggleItems='on', toggleMenu='off', closeOnSelect=false, nodeName='div', position=null,
                     deactivateOnItemHover=false, classNames, id}={}) {
         let element;
 
@@ -118,7 +120,7 @@ export default class Menu extends MenuNode {
         this.autoActivate = autoActivate;
         this.delay = delay;
         this.multiple = multiple;
-        this.toggleItem = toggleItem;
+        this.toggleItems = toggleItems;
         this.toggleMenu = toggleMenu;
         this.closeOnSelect = closeOnSelect;
         this.position = position;
@@ -266,13 +268,19 @@ export default class Menu extends MenuNode {
     }
 
     /**
-     * Adds an item to the menu.
+     * Append an item or element to the menu.
      * @param item
      * @returns {*}
      */
-    add(item) {
-        this.element.appendChild(item.element);
-        return item;
+    append(item) {
+        if(item.appendTo) {
+            item.appendTo(this.element);
+        } else if(typeof item === 'string') {
+            item = document.querySelector(item);
+            this.element.appendChild(item);
+        } else {
+            this.element.appendChild(item);
+        }
     }
 
     setActiveItem(item, active) {
@@ -497,8 +505,8 @@ export default class Menu extends MenuNode {
         if(selector.dataset.multiple) {
             dataset.multiple = parseBoolean(selector.dataset.multiple);
         }
-        if(selector.dataset.toggleItem) {
-            dataset.toggleItem = validateChoice(selector.dataset.toggleItem, ['on', 'off', 'both']);
+        if(selector.dataset.toggleItems) {
+            dataset.toggleItems = validateChoice(selector.dataset.toggleItems, ['on', 'off', 'both']);
         }
         if(selector.dataset.toggleMenu) {
             dataset.toggleMenu = validateChoice(selector.dataset.toggleMenu, ['on', 'off', 'both']);
@@ -533,3 +541,8 @@ export default class Menu extends MenuNode {
         return root;
     }
 }
+
+
+AutoLoader.register('menu', (element) => {
+    return Menu.widget({target: element});
+});

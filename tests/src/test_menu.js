@@ -23,16 +23,16 @@ function build_test_menu_1() {
         windowItem = new MenuItem({text: "Window"}),
         helpItem = new MenuItem({text: "Help"});
 
-    menu.add(fileItem);
-    menu.add(editItem);
-    menu.add(viewItem);
-    menu.add(navigateItem);
-    menu.add(codeItem);
-    menu.add(refactorItem);
-    menu.add(toolsItem);
-    menu.add(vcsItem);
-    menu.add(windowItem);
-    menu.add(helpItem);
+    menu.append(fileItem);
+    menu.append(editItem);
+    menu.append(viewItem);
+    menu.append(navigateItem);
+    menu.append(codeItem);
+    menu.append(refactorItem);
+    menu.append(toolsItem);
+    menu.append(vcsItem);
+    menu.append(windowItem);
+    menu.append(helpItem);
 
     let fileSubMenu = new Menu();
     fileItem.attachSubMenu(fileSubMenu);
