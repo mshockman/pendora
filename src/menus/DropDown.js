@@ -1,13 +1,13 @@
 import MenuNode from "./MenuNode";
 import Menu from "./Menu";
-import {getMenuNode, isMenu} from "./core";
+import {getMenu} from "./core";
 import {findChild, parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
 import MenuItem from "./MenuItem";
 import AutoLoader from 'autoloader';
 
 
-export class DropDown extends MenuNode {
-    constructor({target=null, text='', closeOnBlur=false, timeout=false, autoActivate=false, toggle="both",
+export default class DropDown extends MenuNode {
+    constructor({target=null, text='', closeOnBlur=true, timeout=false, autoActivate=false, toggle="both",
                     closeOnSelect=true, position=null}={}) {
         let element,
             btn,
@@ -26,14 +26,9 @@ export class DropDown extends MenuNode {
             element.appendChild(menu.element);
         } else {
             element = target;
-            btn = findChild(element, (child) => child.dataset.role === 'button');
-            menu = findChild(element, (child) => child.dataset.role === 'menu');
-            menu = new Menu({target: menu});
         }
 
         super(element, 'dropdown');
-        this.menu = menu;
-        this.button = btn;
         this.element.classList.add('c-dropdown');
         this.element.dataset.role = 'dropdown';
 
@@ -89,7 +84,7 @@ export class DropDown extends MenuNode {
                 this._autoActivateTimer = null;
             }
 
-            let submenu = this.submenu,
+            let submenu = this.getSubMenu(),
                 parent = this.parent;
 
             if(parent) {
@@ -103,7 +98,12 @@ export class DropDown extends MenuNode {
             }
 
             if(submenu) {
-                submenu.show();
+                if(submenu.show) {
+                    submenu.show();
+                } else {
+                    submenu.classList.remove('hidden');
+                    submenu.classList.add('visible');
+                }
             }
 
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -140,19 +140,21 @@ export class DropDown extends MenuNode {
                 this._timeoutTimer = null;
             }
 
-            let submenu = this.submenu;
+            let submenu = this.getSubMenu();
 
             if(submenu) {
-                submenu.deactivate();
-                submenu.hide();
+                if(submenu.deactivate) submenu.deactivate();
+
+                if(submenu.hide) {
+                    submenu.hide();
+                } else {
+                    submenu.classList.remove('visible');
+                    submenu.classList.add('hidden');
+                }
             }
 
             this.trigger('deactivate', this);
         }
-    }
-
-    add(item) {
-        return this.menu.add(item);
     }
 
     startTimeoutTimer(timeout=null) {
@@ -239,13 +241,31 @@ export class DropDown extends MenuNode {
             return;
         }
 
-        if(event.target === this.button || this.button.contains(event.target)) {
-            let isActive = this.isActive;
+        let isActive = this.isActive;
 
+        if(event.target === this.buttonElement || this.buttonElement.contains(event.target)) {
             if(!isActive && (this.toggle === "on" || this.toggle === 'both')) {
                 this.activate();
             } else if(isActive && (this.toggle === "off" || this.toggle === "both")) {
                 this.deactivate();
+            }
+        }
+
+        // Handle cases where a link is clicked inside the menu.
+        // For design reasons this is considered equivent to selecting
+        // an item.
+        if(this.closeOnSelect && isActive) {
+            let o = event.target;
+
+            while (o) {
+                if (o.nodeName === 'A' && o.href) {
+                    this.deactivate();
+                    break;
+                } else if(o === this.element) {
+                    break;
+                }
+
+                o = o.parentNode;
             }
         }
     }
@@ -260,14 +280,34 @@ export class DropDown extends MenuNode {
     // GETTERS AND SETTERS METHODS
     //------------------------------------------------------------------------------------------------------------------
 
-    get submenu() {
-        for(let element of this.element.children) {
-            let node = getMenuNode(element);
+    getSubMenu() {
+        let submenuElement = this.submenuElement;
 
-            if(node && isMenu(node)) {
-                return node;
+        if(submenuElement) {
+            let menu = getMenu(submenuElement);
+
+            if(menu) {
+                return menu;
             }
+
+            return submenuElement;
         }
+    }
+
+    get submenu() {
+        let submenuElement = this.submenuElement;
+
+        if(submenuElement) {
+            return getMenu(submenuElement);
+        }
+    }
+
+    get submenuElement() {
+        return findChild(this.element, (child) => child.dataset.role === 'menu');
+    }
+
+    get buttonElement() {
+        return findChild(this.element, (child) => child.dataset.role === 'button' || child.nodeName === 'BUTTON' || child.nodeName === 'A');
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -6,310 +6,140 @@
 
     <link type="text/css" href="dist/style.css" rel="stylesheet" />
 
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
+
+    <script type="text/javascript">
+        // noinspection ES6ModulesDependencies
+        app.init('test_menus');
+    </script>
+
     <style type="text/css">
-        .c-menuitem.active:not(.disabled) {
-           background-color: #475466;
-        }
-
-        .c-menu.active > .c-menuitem:hover:not(.disabled) {
-            background-color: #475466;
-        }
-
-        .c-menu .c-menu > .c-menuitem:hover:not(.disabled) {
-            background-color: #475466;
-        }
-
-        .disabled.c-menuitem, .disabled .c-menuitem, .disabled .c-menuitem > a, .disabled.c-menuitem > a {
-            color: #c7c7c7 !important;
-        }
-
-        .disabled:hover, .disabled *:hover {
-            background-color: #fff;
+        body {
+            padding: 1rem;
         }
     </style>
 </head>
 <body>
-    <div id="test-menu-area"></div>
 
-    <ul id="test-menubar" class="c-menubar" data-role="menu" data-timeout="3000" data-auto-activate="false" data-close-on-blur="true" data-delay="0" data-multiple="false" data-toggle-item="on" data-close-on-select="false"
-    data-deactivate-on-item-hover="true">
-        <li class="c-menuitem" data-role="menuitem">
-            <a>Item #1</a>
-            <ul class="c-menu" data-role="menu" data-deactivate-on-item-hover="true">
-                <li class="c-menuitem disabled" data-role="menuitem">
-                    <a>Sub Menu #1</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #2</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #3</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem disabled" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #4</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #5</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li class="c-menuitem disabled" data-role="menuitem">
-            <a>Item #2</a>
-            <ul class="c-menu" data-role="menu">
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #1</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #2</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #3</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #4</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #5</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li class="c-menuitem" data-role="menuitem">
-            <a>Item #3</a>
-            <ul class="c-menu" data-role="menu">
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #1</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #2</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #3</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #4</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #5</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li class="c-menuitem" data-role="menuitem">
-            <a>Item #4</a>
-            <ul class="c-menu" data-role="menu">
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #1</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #2</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #3</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #4</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #5</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li class="c-menuitem" data-role="menuitem">
-            <a>Item #5</a>
-            <ul class="c-menu" data-role="menu">
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #1</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #2</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #3</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #4</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-                <li class="c-menuitem" data-role="menuitem">
-                    <a>Sub Menu #5</a>
-                    <ul class="c-menu" data-role="menu">
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #1</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #2</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #3</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #4</a></li>
-                        <li class="c-menuitem" data-role="menuitem"><a href="http://www.google.com">Child Item #5</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ul>
+<div class="c-container">
+    <h1>DropDowns</h1>
+    <p>Toggles overlays for displaying lists of items and other elements.</p>
 
-    <script type="text/javascript" src="dist/testMenu.bundle.js"></script>
+    <h3>Overview</h3>
+    <p>The dropdown component creates buttons that toggle contextual overlays.  These overlays can be used to display a list of links or other elements.  They are designed to be as customizable as possible.  They can be configured to toggle on on user click on on mouse over and many other configuration properties are available.</p>
+
+    <p>Dropdown can be used to display any type of overlay element.  The most common display of the dropdown component is the Menu component but any element can be used as long as it defines the attribute data-role="menu".  When the dropdown toggles it first searches for it submenu child.  The submenu child is defined as any element that has the data-role="menu" attribute.  Once found it checks to see if it has an attached menu component.  If it does it calls it's show method.  Otherwise, it toggles the visible and hidden utility classes as needed.</p>
+
+    <p></p>
+
+    <div data-init="dropdown">
+        <button class="c-btn">DropDown</button>
+        <div data-role="menu" class="c-menu">
+            <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://bing.com">Bing</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://reddit.com">Reddit</a></div>
+            <hr>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://bing.com">Bing</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://reddit.com">Reddit</a></div>
+        </div>
+    </div>
+
+<pre>
+<code data-lang="html">
+&lt;div data-init="dropdown"&gt;
+    &lt;button&gt;DropDown&lt;/button&gt;
+    &lt;div data-role="menu" class="c-menu"&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://google.com"&gt;Google&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://bing.com"&gt;Bing&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://reddit.com"&gt;Reddit&lt;/a&gt;&lt;/div&gt;
+        &lt;hr&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://google.com"&gt;Google&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://bing.com"&gt;Bing&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://reddit.com"&gt;Reddit&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code>
+</pre>
+
+</div>
+
+<div>
+    <h3>Timeout</h3>
+    <p>If you want your dropdown menu to automatically deactivate after a set period of time after the user leaves the item, you can set it's timeout property.  The timeout property takes an integer greater then or equal to 0.  After the user leaves the item the dropdown is deactivated after that many milliseconds.  If the user hover back over the dropdown before it expires the timer is cleared.</p>
+
+    <div data-init="dropdown" data-timeout="2000">
+        <button class="c-btn">DropDown</button>
+        <div data-role="menu" class="c-menu">
+            <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://bing.com">Bing</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://reddit.com">Reddit</a></div>
+            <hr>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://bing.com">Bing</a></div>
+            <div data-role="menuitem" class="c-menuitem"><a href="http://reddit.com">Reddit</a></div>
+        </div>
+    </div>
+
+<pre>
+<code data-lang="html">
+&lt;div data-init="dropdown" data-timeout="2000"&gt;
+    &lt;button&gt;DropDown&lt;/button&gt;
+    &lt;div data-role="menu" class="c-menu"&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://google.com"&gt;Google&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://bing.com"&gt;Bing&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://reddit.com"&gt;Reddit&lt;/a&gt;&lt;/div&gt;
+        &lt;hr&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://google.com"&gt;Google&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://bing.com"&gt;Bing&lt;/a&gt;&lt;/div&gt;
+        &lt;div data-role="menuitem" class="c-menuitem"&gt;&lt;a href="http://reddit.com"&gt;Reddit&lt;/a&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code>
+</pre>
+</div>
+
+
+<div>
+    <h3>Properties</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Property Name</th>
+            <th>Attribute Name</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>closeOnBlur</td>
+            <td>data-close-on-blur</td>
+            <td>Boolean<br>When true the dropdown or menu closes when the user clicks outside of it.</td>
+        </tr>
+        <tr>
+            <td>closeOnSelect</td>
+            <td>data-close-on-select</td>
+            <td>Boolean<br>When true the dropdown closes when the user selects an item.</td>
+        </tr>
+        <tr>
+            <td>timeout</td>
+            <td>data-timeout</td>
+            <td>false|integer<br>Defines the number of milliseconds after the user leaves the item that it deactivates.  If false or a negative number then the menu will never deactivate.</td>
+        </tr>
+        <tr>
+            <td>autoActivate</td>
+            <td>data-auto-activate</td>
+            <td>false|integer<br>Defines the number of milliseconds after the user enters the item that it activates.  If false or a negative number the dropdown will never activate.  To tell the dropdown to activate immediately set the value to 0.</td>
+        </tr>
+        <tr>
+            <td>toggle</td>
+            <td>data-toggle</td>
+            <td>on|off|both<br>Controls how the dropdown handles being clicked.  If on then the dropdown will toggle on when clicked but won't toggle off when clicked.  If off the reverse happens.  If both then the dropdown will toggle both on and off.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 </body>
 </html>

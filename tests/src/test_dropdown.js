@@ -1,4 +1,4 @@
-import {DropDown} from "menus/DropDown";
+import DropDown from "menus/DropDown";
 import {MenuItem} from "menus";
 
 

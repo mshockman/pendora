@@ -1,0 +1,37 @@
+@import "../variables";
+
+
+@each $mult in $spacing-multipliers {
+  $size: $mult * $spacing;
+  $index: index($spacing-multipliers, $mult) - 1;
+
+  .p-#{$index} {
+    padding: $size !important;
+  }
+
+  .m-#{$index} {
+    margin: $size !important;
+  }
+
+  .mx-#{$index} {
+    margin-right: $size !important;
+    margin-left: $size !important;
+  }
+
+  .my-#{$index} {
+    margin-top: $size !important;
+    margin-bottom: $size !important;
+  }
+
+  @each $property in (left, right, top, bottom) {
+    $char: str-slice($property, 0, 0);
+
+    .p#{$char}-#{$index} {
+      padding-#{$property}: $size !important;
+    }
+
+    .m#{$char}-#{$index} {
+      margin-#{$property}: $size !important;
+    }
+  }
+}

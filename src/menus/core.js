@@ -14,6 +14,20 @@ export function getMenuNode(element) {
 
 
 /**
+ * Returns the attached Menu object from the element.
+ * @param element
+ * @returns {MenuNode}
+ */
+export function getMenu(element) {
+    let node = getMenuNode(element);
+
+    if(node && isMenu(node)) {
+        return node;
+    }
+}
+
+
+/**
  * Attaches a MenuNode element to a dom element.
  * @param element {Element}
  * @param node {MenuNode}

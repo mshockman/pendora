@@ -1,11 +1,12 @@
-@import "ui/windows";
-@import "ui/datagrid";
-@import "ui/viewport";
+@import "components/windows";
+@import "components/datagrid";
+@import "utility/viewport";
 @import "ui/resize";
-@import "ui/paginator";
-@import "ui/menus";
-@import "ui/states";
+@import "components/paginator";
+@import "components/menus";
+@import "utility/states";
 @import "ui/buttons";
+@import "utility/spacing";
 
 
 * {
