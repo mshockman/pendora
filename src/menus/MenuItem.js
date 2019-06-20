@@ -62,7 +62,7 @@ export default class MenuItem extends MenuNode {
 
             if(submenu) {
                 submenu.show();
-            } else {
+            } else if(overlay) {
                 overlay.classList.remove('hidden');
                 overlay.classList.add('visible');
             }

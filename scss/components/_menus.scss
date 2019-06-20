@@ -26,14 +26,14 @@
   display: block;
   position: relative;
 
-  & > a {
+  & > a, .c-menuitem__button {
     display: block;
     line-height: 2rem;
     padding: 0 0.5rem;
     cursor: pointer;
   }
 
-  &.active > a {
+  &.active > a, &.active > .c-menuitem__button {
     background-color: royalblue;
     color: #fff;
   }
@@ -54,5 +54,19 @@
 
   & > .c-menuitem {
     display: inline-block;
+  }
+}
+
+
+.c-menu__filter {
+  background: #fafafa;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ccc;
+
+  .c-filter {
+    width: 100%;
+    padding: 0.25rem;
+    font-size: 1rem;
+    color: #101010;
   }
 }

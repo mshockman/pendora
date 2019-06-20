@@ -2,6 +2,7 @@
 import Application from 'app';
 import AutoLoader from 'autoloader';
 import "menus";
+import "filters";
 
 
 __webpack_public_path__ = "dist/";

@@ -9,7 +9,9 @@ import MenuNode from './MenuNode';
  * @returns {MenuNode}
  */
 export function getMenuNode(element) {
-    return privateCache.get(element, 'menu-node');
+    if(element) {
+        return privateCache.get(element, 'menu-node');
+    }
 }
 
 

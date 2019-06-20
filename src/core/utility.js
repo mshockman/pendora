@@ -528,3 +528,38 @@ export function filterChildren(element, fn) {
 
     return r;
 }
+
+
+/**
+ * Returns the object own property or the default value if it does not have that property.
+ * @param obj
+ * @param propName
+ * @param defaultValue
+ * @returns {*}
+ */
+export function getOwnProperty(obj, propName, defaultValue=undefined) {
+    if(obj.hasOwnProperty(propName)) {
+        return obj[propName];
+    } else {
+        return defaultValue;
+    }
+}
+
+
+/**
+ * Returns the obj value by following it's property path.  For example getPropertyByPath(a, 'b.c.d') is equivalent to
+ * a.b.c.d but can be passed in string form.
+ * @param obj
+ * @param path
+ * @returns {*}
+ */
+export function getPropertyByPath(obj, path) {
+    let parts = path.split('.'),
+        r = obj;
+
+    for(let part of parts) {
+        r = r[part];
+    }
+
+    return r;
+}
