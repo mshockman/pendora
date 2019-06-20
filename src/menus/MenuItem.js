@@ -1,12 +1,13 @@
 import MenuNode from './MenuNode';
-import {getMenuNode, isMenu} from "./core";
+import {getMenuNode, isMenu, getMenu} from "./core";
+import {findChild} from "../core/utility";
 
 
 /**
  * Represents a selectable item inside a menu.
  */
 export default class MenuItem extends MenuNode {
-    constructor(text, action, {target, nodeName='div', id, classNames}={}) {
+    constructor(text, action, {target, nodeName='div', id, classNames, value}={}) {
         let element;
 
         if(!target) {
@@ -37,6 +38,8 @@ export default class MenuItem extends MenuNode {
         if(typeof action === 'function') {
             this.on('select', action);
         }
+
+        if(value !== undefined) this.value = value;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -48,7 +51,8 @@ export default class MenuItem extends MenuNode {
             this.isActive = true;
 
             let parent = this.parent,
-                submenu = this.submenu;
+                overlay = this.overlayElement,
+                submenu = getMenu(overlay);
 
             if(!parent.isActive) {
                 parent.activate();
@@ -58,6 +62,9 @@ export default class MenuItem extends MenuNode {
 
             if(submenu) {
                 submenu.show();
+            } else {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('visible');
             }
 
             this.trigger('activate', this);
@@ -71,11 +78,15 @@ export default class MenuItem extends MenuNode {
         if(this.isActive) {
             this.isActive = false;
 
-            let submenu = this.submenu;
+            let overlay = this.overlayElement,
+                submenu = getMenu(overlay);
 
             if(submenu) {
                 submenu.deactivate();
                 submenu.hide();
+            } else if(overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('visible');
             }
 
             this.trigger('deactivate', this);
@@ -104,33 +115,17 @@ export default class MenuItem extends MenuNode {
      * @returns {*}
      */
     attachSubMenu(menu) {
-        if(this.submenu) {
-            throw Error("Already has submenu.");
+        if(this.hasOverlay()) {
+            throw Error("Already has overlay element.");
         }
 
-        this.element.appendChild(menu.element);
+        menu.appendTo(this.element);
         return menu;
     }
 
-    /**
-     * Detaches the items current submenu if it has one and returns it.
-     * @returns {MenuNode}
-     */
-    detachSubMenu() {
-        let submenu = this.submenu;
-
-        if(submenu) {
-            if(this._showDelayTimer) {
-                clearTimeout(this._showDelayTimer);
-                this._showDelayTimer = null;
-            }
-
-            this.element.removeChild(submenu.element);
-        }
-
-        return submenu;
+    hasOverlay() {
+        return !!this.overlayElement;
     }
-
 
     //------------------------------------------------------------------------------------------------------------------
     // EVENT HANDLERS
@@ -176,7 +171,7 @@ export default class MenuItem extends MenuNode {
             parent.clearActivateItemTimer(this);
 
             // If the item doesn't have a submenu deactivate immediately when the user leaves it.
-            if(this.isActive && !this.submenu) {
+            if(this.isActive && !this.hasOverlay()) {
                 this.deactivate();
             }
         }
@@ -192,10 +187,9 @@ export default class MenuItem extends MenuNode {
             return;
         }
 
-        let parent = this.parent,
-            submenu = this.submenu;
+        let parent = this.parent;
 
-        if(submenu) {
+        if(this.hasOverlay()) {
             if(this.isActive && (parent.toggleItems === 'off' || parent.toggleItems === 'both')) {
                 this.deactivate();
 
@@ -247,6 +241,22 @@ export default class MenuItem extends MenuNode {
         } else {
             return [];
         }
+    }
+
+    get value() {
+        return this.element.dataset.value;
+    }
+
+    set value(value) {
+        this.element.dataset.value = value;
+    }
+
+    get buttonElement() {
+        return findChild(this.element, (child) => child.dataset.role === 'button' || child.nodeName === 'BUTTON' || child.nodeName === 'A');
+    }
+
+    get overlayElement() {
+        return findChild(this.element, (child) => child.dataset.role === 'menu');
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -84,8 +84,9 @@ export default class DropDown extends MenuNode {
                 this._autoActivateTimer = null;
             }
 
-            let submenu = this.getSubMenu(),
-                parent = this.parent;
+            let overlay = this.overlayElement,
+                parent = this.parent,
+                submenu = getMenu(overlay);
 
             if(parent) {
                 if(!parent.isActive) {
@@ -98,12 +99,10 @@ export default class DropDown extends MenuNode {
             }
 
             if(submenu) {
-                if(submenu.show) {
-                    submenu.show();
-                } else {
-                    submenu.classList.remove('hidden');
-                    submenu.classList.add('visible');
-                }
+                submenu.show();
+            } else if(overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('visible');
             }
 
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -140,17 +139,15 @@ export default class DropDown extends MenuNode {
                 this._timeoutTimer = null;
             }
 
-            let submenu = this.getSubMenu();
+            let overlay = this.overlayElement,
+                submenu = getMenu(overlay);
 
             if(submenu) {
-                if(submenu.deactivate) submenu.deactivate();
-
-                if(submenu.hide) {
-                    submenu.hide();
-                } else {
-                    submenu.classList.remove('visible');
-                    submenu.classList.add('hidden');
-                }
+                submenu.deactivate();
+                submenu.hide();
+            } else if(overlay) {
+                overlay.classList.remove('visible');
+                overlay.classList.add('hidden');
             }
 
             this.trigger('deactivate', this);
@@ -280,29 +277,15 @@ export default class DropDown extends MenuNode {
     // GETTERS AND SETTERS METHODS
     //------------------------------------------------------------------------------------------------------------------
 
-    getSubMenu() {
-        let submenuElement = this.submenuElement;
-
-        if(submenuElement) {
-            let menu = getMenu(submenuElement);
-
-            if(menu) {
-                return menu;
-            }
-
-            return submenuElement;
-        }
-    }
-
     get submenu() {
-        let submenuElement = this.submenuElement;
+        let overlayElement = this.overlayElement;
 
-        if(submenuElement) {
-            return getMenu(submenuElement);
+        if(overlayElement) {
+            return getMenu(overlayElement);
         }
     }
 
-    get submenuElement() {
+    get overlayElement() {
         return findChild(this.element, (child) => child.dataset.role === 'menu');
     }
 
