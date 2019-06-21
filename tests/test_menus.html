@@ -461,12 +461,12 @@
 
 
 <div>
-    <h3>Filtered</h3>
+    <h3>Filtered & Selectable</h3>
 
-    <div data-init="dropdown">
+    <div data-init="dropdown selectable" data-close-on-select="false">
         <button class="c-btn">US States</button>
-        <div data-role="menu" class="c-menu" data-selectable="true">
-            <div class="c-menu__filter"><input type="text" class="c-filter" data-init="search-filter" data-filter="#us-states .c-menuitem" data-filter-key="innerText" data-filter-child=".c-menuitem__button" placeholder="Filter" /></div>
+        <div data-role="menu" class="c-menu" data-selectable="true" data-name="state" data-multiple="true" data-auto-activate="false" data-timein="false" data-deactivate-on-item-hover="false">
+            <div class="c-menu__filter"><input type="text" class="c-filter" data-init="search-filter" data-filter="#us-states .c-menuitem" data-filter-key="innerText" data-toggle="select" data-filter-child=".c-menuitem__button" placeholder="Filter" /></div>
             <div style="height: 300px;" class="viewport-y-auto" id="us-states">
                 <div data-role='menuitem' class='c-menuitem' data-value='AL'><span data-role='button' class='c-menuitem__button'>Alabama</span></div>
                 <div data-role='menuitem' class='c-menuitem' data-value='AK'><span data-role='button' class='c-menuitem__button'>Alaska</span></div>
@@ -523,6 +523,78 @@
         </div>
     </div>
 
+</div>
+
+
+<div>
+    <h3>Menus</h3>
+
+    <div data-init="menu" data-role="menu" class="c-menu c-menu--inline visible" data-selectable="true" data-name="state" data-multiple="true" data-auto-activate="false" data-timein="false" data-toggle="select" data-deactivate-on-item-hover="false">
+        <div class="c-menu__filter"><input type="text" class="c-filter" data-init="search-filter" data-filter="#us-states2 .c-menuitem" data-filter-key="innerText" data-filter-child=".c-menuitem__button" placeholder="Filter" /></div>
+        <div style="height: 300px;" class="viewport-y-auto" id="us-states2">
+            <div data-role='menuitem' class='c-menuitem' data-value='AL'><span data-role='button' class='c-menuitem__button'>Alabama</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='AK'><span data-role='button' class='c-menuitem__button'>Alaska</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='AZ'><span data-role='button' class='c-menuitem__button'>Arizona</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='AR'><span data-role='button' class='c-menuitem__button'>Arkansas</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='CA'><span data-role='button' class='c-menuitem__button'>California</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='CO'><span data-role='button' class='c-menuitem__button'>Colorado</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='CT'><span data-role='button' class='c-menuitem__button'>Connecticut</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='DE'><span data-role='button' class='c-menuitem__button'>Delaware</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='DC'><span data-role='button' class='c-menuitem__button'>District of Columbia</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='FL'><span data-role='button' class='c-menuitem__button'>Florida</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='GA'><span data-role='button' class='c-menuitem__button'>Georgia</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='HI'><span data-role='button' class='c-menuitem__button'>Hawaii</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='ID'><span data-role='button' class='c-menuitem__button'>Idaho</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='IL'><span data-role='button' class='c-menuitem__button'>Illinois</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='IN'><span data-role='button' class='c-menuitem__button'>Indiana</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='IA'><span data-role='button' class='c-menuitem__button'>Iowa</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='KS'><span data-role='button' class='c-menuitem__button'>Kansas</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='KY'><span data-role='button' class='c-menuitem__button'>Kentucky</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='LA'><span data-role='button' class='c-menuitem__button'>Louisiana</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='ME'><span data-role='button' class='c-menuitem__button'>Maine</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MT'><span data-role='button' class='c-menuitem__button'>Montana</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NE'><span data-role='button' class='c-menuitem__button'>Nebraska</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NV'><span data-role='button' class='c-menuitem__button'>Nevada</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NH'><span data-role='button' class='c-menuitem__button'>New Hampshire</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NJ'><span data-role='button' class='c-menuitem__button'>New Jersey</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NM'><span data-role='button' class='c-menuitem__button'>New Mexico</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NY'><span data-role='button' class='c-menuitem__button'>New York</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='NC'><span data-role='button' class='c-menuitem__button'>North Carolina</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='ND'><span data-role='button' class='c-menuitem__button'>North Dakota</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='OH'><span data-role='button' class='c-menuitem__button'>Ohio</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='OK'><span data-role='button' class='c-menuitem__button'>Oklahoma</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='OR'><span data-role='button' class='c-menuitem__button'>Oregon</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MD'><span data-role='button' class='c-menuitem__button'>Maryland</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MA'><span data-role='button' class='c-menuitem__button'>Massachusetts</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MI'><span data-role='button' class='c-menuitem__button'>Michigan</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MN'><span data-role='button' class='c-menuitem__button'>Minnesota</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MS'><span data-role='button' class='c-menuitem__button'>Mississippi</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='MO'><span data-role='button' class='c-menuitem__button'>Missouri</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='PA'><span data-role='button' class='c-menuitem__button'>Pennsylvania</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='RI'><span data-role='button' class='c-menuitem__button'>Rhode Island</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='SC'><span data-role='button' class='c-menuitem__button'>South Carolina</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='SD'><span data-role='button' class='c-menuitem__button'>South Dakota</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='TN'><span data-role='button' class='c-menuitem__button'>Tennessee</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='TX'><span data-role='button' class='c-menuitem__button'>Texas</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='UT'><span data-role='button' class='c-menuitem__button'>Utah</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='VT'><span data-role='button' class='c-menuitem__button'>Vermont</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='VA'><span data-role='button' class='c-menuitem__button'>Virginia</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='WA'><span data-role='button' class='c-menuitem__button'>Washington</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='WV'><span data-role='button' class='c-menuitem__button'>West Virginia</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='WI'><span data-role='button' class='c-menuitem__button'>Wisconsin</span></div>
+            <div data-role='menuitem' class='c-menuitem' data-value='WY'><span data-role='button' class='c-menuitem__button'>Wyoming</span></div>
+        </div>
+    </div>
+
+    <h3>timein and autoActivate</h3>
+
+    <div data-init="menu" data-role="menu" class="c-menu c-menu--inline visible">
+        <div data-role="menuitem" class="c-menuitem"><span data-role="button" class="c-menuitem__button">Item #1</span></div>
+        <div data-role="menuitem" class="c-menuitem"><span data-role="button" class="c-menuitem__button">Item #2</span></div>
+        <div data-role="menuitem" class="c-menuitem"><span data-role="button" class="c-menuitem__button">Item #3</span></div>
+        <div data-role="menuitem" class="c-menuitem"><span data-role="button" class="c-menuitem__button">Item #4</span></div>
+        <div data-role="menuitem" class="c-menuitem"><span data-role="button" class="c-menuitem__button">Item #5</span></div>
+    </div>
 </div>
 
 

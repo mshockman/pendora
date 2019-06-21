@@ -8,10 +8,10 @@ export default class MenuBar extends Menu {
             target,
             closeOnBlur: true,
             timeout: false,
-            autoActivate: false,
-            delay: false,
+            autoActivate: true,
+            timein: false,
             multiple: false,
-            toggleItem: 'both',
+            toggle: 'both',
             toggleMenu: 'none',
             closeOnSelect: true,
             ...options

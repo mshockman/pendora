@@ -5,6 +5,19 @@ import {parseBoolean, parseBooleanOrInt, validateChoice} from "../core/utility";
 import AutoLoader from 'autoloader';
 
 
+// toggleOn, toggleOff, multipleSelectAction, rangeSelectAction
+const specialToggle = {
+    'on': ['click', 'none'],
+    'off': ['none', 'click'],
+    'both': ['click', 'click'],
+    'none': ['none', 'none'],
+    'select': ['click', 'ctrl-click', 'ctrl-click', 'shift-click']
+};
+
+
+const regWhitespace = /\s+/;
+
+
 /**
  * Represents a Menu component that enables you to display an hierarchically organized set of elements with commands.
  *
@@ -48,20 +61,11 @@ import AutoLoader from 'autoloader';
  *
  * timeout              Controls how long after the user moves off the menu that it will timeout.
  *
- * autoActivate         If a number greater then or equal to 0, this property controls how long the user must hover
- *                      over an item for the menu to activate.  If the value is false or a negative number the menu will
- *                      never auto activate. If true or 0 the menu will activate immediately.
- *
- * delay                Gets or sets the delay between the user hovering over the menu item and it activating.  This is
- *                      only used in the cases in which the container menu is already active.  Otherwise the
- *                      autoActivate property is used instead.  If the value is negative items will never activate on
- *                      hover.
- *
  * multiple             Controls if the menu allows multiple items to be active at the same time.
  *
  * position             Gets or sets a function that will be called whenever the menu is shown to position it.
  *
- * toggleItems          Gets or sets how items will behave when the user clicks them.  Can be on, off, both or none.
+ * toggle               Gets or sets how items will behave when the user clicks them.  Can be on, off, both or none.
  *                      If on items will only toggle on when clicked and if off they will only toggle off.
  *                      If both they will toggle both off and on.
  *                      If none nothing will happen when the user clicks an item.
@@ -93,9 +97,9 @@ import AutoLoader from 'autoloader';
 export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
-    constructor({target=null, selectable=false, bindActiveToSelect=true, multiSelectMethod='click', closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                    toggleItems='on', toggleMenu='none', closeOnSelect=false, nodeName='div', position=null,
-                    deactivateOnItemHover=false, classNames, id}={}) {
+    constructor({target=null, selectable=false, bindActiveToSelect=true, closeOnBlur=false,
+                    timeout=false, timein=0, autoActivate=true, multiple=false, toggle=null, toggleMenu='none',
+                    closeOnSelect=false, nodeName='div', position=null, deactivateOnItemHover=false, classNames, id}={}) {
         let element;
 
         if(!target) {
@@ -111,23 +115,38 @@ export default class Menu extends MenuNode {
 
         super(element, 'menu', {classNames, id});
 
+        this.on('item-select', (topic, message) => {
+            this.onItemSelect(message);
+        });
+
+        this.on('item-deselect', (topic, message) => {
+            this.onItemDeselect(message);
+        });
+
         this._timeoutTimer = null;
         this._activateItemTimer = null;
 
         this.timeout = timeout;
         this.closeOnBlur = closeOnBlur;
+        this.timein = timein;
         this.autoActivate = autoActivate;
-        this.delay = delay;
         this.multiple = multiple;
-        this.toggleItems = toggleItems;
+        this.toggle = toggle;
         this.toggleMenu = toggleMenu;
         this.closeOnSelect = closeOnSelect;
         this.position = position;
         this.selectable = selectable;
         this.bindActiveToSelect = bindActiveToSelect;
-        this.multiSelectMethod = multiSelectMethod;
 
         this.deactivateOnItemHover = deactivateOnItemHover;
+
+        if(toggle === null) {
+            if(this.selectable) {
+                this.toggle = specialToggle.select;
+            } else {
+                this.toggle = specialToggle.on;
+            }
+        }
 
         /**
          * Gets or sets the visibility of the menu.  This only updates the css classes.  It does not trigger events.
@@ -135,7 +154,7 @@ export default class Menu extends MenuNode {
          * visible property.
          * @type {boolean}
          */
-        this.visible = false;
+        if(!this.element.classList.contains('hidden') && !this.element.classList.contains('visible')) this.visible = false;
 
         this.initEvents();
     }
@@ -148,12 +167,10 @@ export default class Menu extends MenuNode {
             this.boundEvents.onClick = this.onClick.bind(this);
             this.boundEvents.onMouseOver = this.onMouseOver.bind(this);
             this.boundEvents.onMouseOut = this.onMouseOut.bind(this);
-            this.boundEvents.onSelect = this.onSelect.bind(this);
 
             this.element.addEventListener('click', this.boundEvents.onClick);
             this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
             this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
-            this.element.addEventListener('item-select', this.boundEvents.onSelect);
         }
     }
 
@@ -164,7 +181,6 @@ export default class Menu extends MenuNode {
             this.element.removeEventListener('click', this.boundEvents.onClick);
             this.element.removeEventListener('mouseover', this.boundEvents.onMouseOver);
             this.element.removeEventListener('mouseout', this.boundEvents.onMouseOut);
-            this.element.removeEventListener('item-select', this.boundEvents.onSelect);
 
             this.boundEvents = null;
         }
@@ -183,13 +199,7 @@ export default class Menu extends MenuNode {
             let parent = this.parent;
 
             if(parent) {
-                if(!parent.isActive) {
-                    parent.activate();
-                }
-
-                if(parent.setActiveItem) {
-                    parent.setActiveItem(this, true);
-                }
+                parent.trigger('submenu-activate', this);
             }
 
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -217,6 +227,12 @@ export default class Menu extends MenuNode {
     deactivate() {
         if(this.isActive) {
             this.isActive = false;
+
+            let parent = this.parent;
+
+            if(parent) {
+                parent.trigger('submenu-deactivate', this);
+            }
 
             if(this._captureDocumentClick) {
                 // noinspection JSUnresolvedFunction
@@ -423,14 +439,32 @@ export default class Menu extends MenuNode {
         }
     }
 
-    onSelect(event) {
-        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && event.detail.item.parent === this)) {
+    onItemSelect(message) {
+        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && message.parent === this)) {
             this.deactivate();
         }
+
+        this.lastItemSelect = message.item;
+    }
+
+    onItemDeselect(message) {
+        this.lastItemSelect = null;
     }
 
     //------------------------------------------------------------------------------------------------------------------
     // GETTER AND SETTER METHODS
+
+    getToggleValues() {
+        if(Array.isArray(this.toggle)) {
+            return this.toggle;
+        }
+
+        if(specialToggle[this.toggle]) {
+            return specialToggle[this.toggle];
+        }
+
+        return this.toggle.split(regWhitespace);
+    }
 
     getSelectedChildren() {
         let r = [];
@@ -528,14 +562,14 @@ export default class Menu extends MenuNode {
         if(selector.dataset.autoActivate) {
             dataset.autoActivate = parseBooleanOrInt(selector.dataset.autoActivate);
         }
-        if(selector.dataset.delay) {
-            dataset.delay = parseBooleanOrInt(selector.dataset.delay);
+        if(selector.dataset.timein) {
+            dataset.timein = parseBooleanOrInt(selector.dataset.timein);
         }
         if(selector.dataset.multiple) {
             dataset.multiple = parseBoolean(selector.dataset.multiple);
         }
-        if(selector.dataset.toggleItems) {
-            dataset.toggleItems = validateChoice(selector.dataset.toggleItems, ['on', 'off', 'both']);
+        if(selector.dataset.toggle) {
+            dataset.toggle = selector.dataset.toggle;
         }
         if(selector.dataset.toggleMenu) {
             dataset.toggleMenu = validateChoice(selector.dataset.toggleMenu, ['on', 'off', 'both']);
@@ -557,9 +591,6 @@ export default class Menu extends MenuNode {
         }
         if(selector.dataset.bindActiveToSelect) {
             dataset.bindActiveToSelect = parseBoolean(selector.dataset.bindActiveToSelect);
-        }
-        if(selector.dataset.multiSelectMethod) {
-            dataset.multiSelectMethod = selector.dataset.multiSelectMethod;
         }
 
         return new this({target: selector, ...dataset, ...config});

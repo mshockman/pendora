@@ -3,6 +3,11 @@ import {getMenuNode, isMenu, getMenu, getMenuItem} from "./core";
 import {findChild} from "../core/utility";
 
 
+function isToggleEvent(event, option) {
+    return option === 'click' || (event.ctrlKey && option === 'ctrl-click') || (event.shiftKey && option === 'shift-click');
+}
+
+
 /**
  * Represents a selectable item inside a menu.
  */
@@ -29,8 +34,6 @@ export default class MenuItem extends MenuNode {
         }
 
         super(element, 'menuitem', {classNames, id});
-
-        this.isMenuItem = true;
 
         this.element.classList.add('c-menuitem');
         this.element.dataset.role = 'menuitem';
@@ -99,7 +102,7 @@ export default class MenuItem extends MenuNode {
     select(multiple) {
         let parent = this.parent;
 
-        if(parent && parent.selectable && !this.isSelected) {
+        if(parent && parent.selectable) {
             this.isSelected = true;
 
             if(!multiple) {
@@ -112,9 +115,54 @@ export default class MenuItem extends MenuNode {
             }
         }
 
+        let o = parent;
+
+        while(o) {
+            if(o.trigger) {
+                o.trigger('item-select', {
+                    item: this,
+                    parent: this
+                });
+            }
+
+            o = o.parent;
+        }
+
         this.trigger('select', this);
 
         let event = new CustomEvent('item-select', {
+            detail: {
+                item: this
+            },
+            bubbles: true
+        });
+
+        this.element.dispatchEvent(event);
+    }
+
+    deselect() {
+        let parent = this.parent;
+
+        if(parent && parent.selectable && this.isSelected) {
+            this.isSelected = false;
+        }
+
+        let o = parent;
+
+        while(o) {
+            if(o.trigger) {
+                o.trigger('item-deselect', {
+                    item: this,
+                    parent: this
+                });
+            }
+
+            o = o.parent;
+        }
+
+        this.trigger('deselect', this);
+
+        let event = new CustomEvent('item-deselect', {
             detail: {
                 item: this
             },
@@ -157,20 +205,20 @@ export default class MenuItem extends MenuNode {
 
             if(!this.isActive) {
                 if(!parent.isActive) {
-                    // Use autoActivate property.
+                    // Use timein property.
+
+                    if(parent.timein === true) {
+                        this.activate();
+                    } else if(typeof parent.timein === 'number' && parent.timein >= 0) {
+                        parent.startActivateItemTimer(this, parent.timein);
+                    }
+                } else {
+                    // Use autoActivate property because menu is already active.
 
                     if(parent.autoActivate === true) {
                         this.activate();
                     } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
                         parent.startActivateItemTimer(this, parent.autoActivate);
-                    }
-                } else {
-                    // Use delay property because menu is already active.
-
-                    if(parent.delay === false) {
-                        this.activate();
-                    } else if(typeof parent.delay === 'number' && parent.delay >= 0) {
-                        parent.startActivateItemTimer(this, parent.delay);
                     }
                 }
             }
@@ -185,8 +233,16 @@ export default class MenuItem extends MenuNode {
 
             parent.clearActivateItemTimer(this);
 
+            let doesAutoActivate = false;
+
+            if(typeof parent.autoActivate === 'number') {
+                doesAutoActivate = parent.autoActivate >= 0;
+            } else if(typeof parent.autoActivate === 'boolean') {
+                doesAutoActivate = parent.autoActivate;
+            }
+
             // If the item doesn't have a submenu deactivate immediately when the user leaves it.
-            if(this.isActive && !this.hasOverlay()) {
+            if(this.isActive && !this.hasOverlay() && doesAutoActivate) {
                 this.deactivate();
             }
         }
@@ -202,33 +258,65 @@ export default class MenuItem extends MenuNode {
             return;
         }
 
-        let parent = this.parent;
+        let parent = this.parent,
+            toggle = this.parent.getToggleValues();
 
         if(this.hasOverlay()) {
-            if(this.isActive && (parent.toggleItems === 'off' || parent.toggleItems === 'both')) {
+            if(this.isActive && isToggleEvent(event, toggle[1])) {
                 this.deactivate();
 
                 // If we toggle off the last item then deactivate the parent menu.
                 if(parent.isActive && !parent.activeItems.length) {
                     parent.deactivate();
                 }
-            } else if(!this.isActive && (parent.toggleItems === 'on' || parent.toggleItems === 'both')) {
+            } else if(!this.isActive && isToggleEvent(event, toggle[0])) {
+                this.activate();
+            }
+        } else if(parent.selectable) {
+            let multipleSelectAction = toggle[2] || 'ctrl-click',
+                rangeSelectAction = toggle[3] || 'shift-click';
+
+            event.preventDefault();
+
+            if(!this.isSelected) {
+                if(parent.multiple && parent.lastItemSelect && isToggleEvent(event, rangeSelectAction)) {
+                    // We are performing a range selection.
+
+                    let children = parent.children,
+                        start = children.indexOf(parent.lastItemSelect),
+                        end = children.indexOf(this);
+
+                    if(start > end) {
+                        [start, end] = [end, start];
+                    }
+
+                    if(start === -1) {
+                        throw new Error("Could range select items.  One of the selected items was not a child item.");
+                    }
+
+                    for(let i = start; i < end+1; i++) {
+                        let item = children[i];
+                        if(!item.isSelected) item.select(true);
+                        if(!item.isActive) item.activate();
+                    }
+                } else if(isToggleEvent(event, toggle[0])) {
+                    this.select(parent.multiple && isToggleEvent(event, multipleSelectAction));
+                    this.activate();
+                }
+            } else if(isToggleEvent(event, toggle[1])) {
+                // Deselect item.
+                this.deselect();
+                if(parent.bindActiveToSelect) this.deactivate();
+            } else {
+                this.select(false);
                 this.activate();
             }
         } else {
-            if(!this.isActive && (parent.toggleItems === 'on' || parent.toggleItems === 'both')) {
+            if(!this.isActive && isToggleEvent(event, toggle[0])) {
                 this.activate();
             }
 
-            if(parent.selectable && parent.multiple) {
-                if(parent.multiSelectMethod === 'ctrl-click') {
-                    this.select(event.ctrlKey);
-                } else {
-                    this.select(true);
-                }
-            } else {
-                this.select();
-            }
+            this.select();
         }
     }
 

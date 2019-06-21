@@ -24,11 +24,18 @@ export default class DropDown extends MenuNode {
 
             element.appendChild(btn);
             element.appendChild(menu.element);
+        } else if(typeof target === 'string') {
+            element = document.querySelector(target);
         } else {
             element = target;
         }
 
         super(element, 'dropdown');
+
+        this.on('item-select', (topic, message) => {
+            this.onItemSelect(message);
+        });
+
         this.element.classList.add('c-dropdown');
         this.element.dataset.role = 'dropdown';
 
@@ -49,12 +56,10 @@ export default class DropDown extends MenuNode {
             this.boundEvents.onMouseOver = this.onMouseOver.bind(this);
             this.boundEvents.onMouseOut = this.onMouseOut.bind(this);
             this.boundEvents.onClick = this.onClick.bind(this);
-            this.boundEvents.onSelect = this.onSelect.bind(this);
 
             this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
             this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
             this.element.addEventListener('click', this.boundEvents.onClick);
-            this.element.addEventListener('item-select', this.boundEvents.onSelect);
         }
     }
 
@@ -65,7 +70,6 @@ export default class DropDown extends MenuNode {
             this.element.removeEventListener('mouseover', this.boundEvents.onMouseOver);
             this.element.removeEventListener('mouseout', this.boundEvents.onMouseOut);
             this.element.removeEventListener('click', this.boundEvents.onClick);
-            this.element.removeEventListener('item-select', this.boundEvents.onSelect);
 
             this.boundEvents = null;
         }
@@ -267,8 +271,8 @@ export default class DropDown extends MenuNode {
         }
     }
 
-    onSelect(event) {
-        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && event.detail.item.parent === this)) {
+    onItemSelect(message) {
+        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && message.parent === this)) {
             this.deactivate();
         }
     }

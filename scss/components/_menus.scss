@@ -22,9 +22,17 @@
 }
 
 
+.c-menu.c-menu--inline {
+  position: static;
+  visibility: visible;
+  z-index: 0;
+}
+
+
 .c-menuitem {
   display: block;
   position: relative;
+  user-select: none;
 
   & > a, .c-menuitem__button {
     display: block;
