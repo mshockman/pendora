@@ -1,6 +1,6 @@
 import MenuNode from "./MenuNode";
 import Menu from "./Menu";
-import {getMenu} from "./core";
+import {getMenu, getMenuNode} from "./core";
 import {findChild, parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
 import MenuItem from "./MenuItem";
 import AutoLoader from 'autoloader';
@@ -300,6 +300,13 @@ export default class DropDown extends MenuNode {
     static FromHTML(selector, config={}) {
         if(typeof selector === 'string') {
             selector = document.querySelector(selector);
+        }
+
+        let node = getMenuNode(selector);
+
+        // Element already initialized.
+        if(node) {
+            return node;
         }
 
         let attributes = {};

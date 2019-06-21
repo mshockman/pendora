@@ -1,9 +1,8 @@
-import {getClosestMenuItem, getClosestMenuNode, getMenuNode, isMenuItem, getTargetChild} from './core';
+import {getClosestMenuItem, getClosestMenuNode, getMenuNode, isMenuItem, getTargetChild, getMenu} from './core';
 import MenuItem from "./MenuItem";
 import MenuNode from "./MenuNode";
 import {parseBoolean, parseBooleanOrInt, validateChoice} from "../core/utility";
 import AutoLoader from 'autoloader';
-import MenuBar from "./MenuBar";
 
 
 /**
@@ -484,6 +483,13 @@ export default class Menu extends MenuNode {
     static FromHTML(selector, config={}) {
         if(typeof selector === 'string') {
             selector = document.querySelector(selector);
+        }
+
+        let menu = getMenu(selector);
+
+        // Test to see if the menu has already been initialized.
+        if(menu) {
+            return menu;
         }
 
         config = config || {};

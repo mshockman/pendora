@@ -1,5 +1,5 @@
 import MenuNode from './MenuNode';
-import {getMenuNode, isMenu, getMenu} from "./core";
+import {getMenuNode, isMenu, getMenu, getMenuItem} from "./core";
 import {findChild} from "../core/utility";
 
 
@@ -266,6 +266,13 @@ export default class MenuItem extends MenuNode {
     static FromHTML(selector, config={}) {
         if(typeof selector === 'string') {
             selector = document.querySelector(selector);
+        }
+
+        let menuitem = getMenuItem(selector);
+
+        // Object already initialized.
+        if(menuitem) {
+            return menuitem;
         }
 
         return new this(null, null, {target: selector, ...config});
