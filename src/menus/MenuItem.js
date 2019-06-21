@@ -96,7 +96,22 @@ export default class MenuItem extends MenuNode {
     /**
      * Triggers a select action for the item.
      */
-    select() {
+    select(multiple) {
+        let parent = this.parent;
+
+        if(parent && parent.selectable && !this.isSelected) {
+            this.isSelected = true;
+
+            if(!multiple) {
+                for(let child of parent.children) {
+                    if(child !== this && child.isSelected) {
+                        child.isSelected = false;
+                        if(child.isActive) child.deactivate();
+                    }
+                }
+            }
+        }
+
         this.trigger('select', this);
 
         let event = new CustomEvent('item-select', {
@@ -205,7 +220,15 @@ export default class MenuItem extends MenuNode {
                 this.activate();
             }
 
-            this.select();
+            if(parent.selectable && parent.multiple) {
+                if(parent.multiSelectMethod === 'ctrl-click') {
+                    this.select(event.ctrlKey);
+                } else {
+                    this.select(true);
+                }
+            } else {
+                this.select();
+            }
         }
     }
 
@@ -257,6 +280,18 @@ export default class MenuItem extends MenuNode {
 
     get overlayElement() {
         return findChild(this.element, (child) => child.dataset.role === 'menu');
+    }
+
+    get isSelected() {
+        return this.element.classList.contains('selected');
+    }
+
+    set isSelected(value) {
+        if(value) {
+            this.element.classList.add('selected');
+        } else {
+            this.element.classList.remove('selected');
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------

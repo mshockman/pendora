@@ -465,60 +465,60 @@
 
     <div data-init="dropdown">
         <button class="c-btn">US States</button>
-        <div data-role="menu" class="c-menu">
+        <div data-role="menu" class="c-menu" data-selectable="true">
             <div class="c-menu__filter"><input type="text" class="c-filter" data-init="search-filter" data-filter="#us-states .c-menuitem" data-filter-key="innerText" data-filter-child=".c-menuitem__button" placeholder="Filter" /></div>
             <div style="height: 300px;" class="viewport-y-auto" id="us-states">
-                <div data-role='menuitem' class='c-menuitem' data-value='AL'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Alabama</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='AK'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Alaska</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='AZ'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Arizona</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='AR'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Arkansas</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='CA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>California</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='CO'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Colorado</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='CT'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Connecticut</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='DE'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Delaware</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='DC'><span data-role='button' class='c-menuitem__button' data-filter-innertext>District of Columbia</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='FL'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Florida</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='GA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Georgia</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='HI'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Hawaii</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='ID'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Idaho</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='IL'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Illinois</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='IN'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Indiana</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='IA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Iowa</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='KS'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Kansas</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='KY'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Kentucky</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='LA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Louisiana</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='ME'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Maine</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MT'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Montana</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NE'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Nebraska</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NV'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Nevada</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NH'><span data-role='button' class='c-menuitem__button' data-filter-innertext>New Hampshire</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NJ'><span data-role='button' class='c-menuitem__button' data-filter-innertext>New Jersey</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NM'><span data-role='button' class='c-menuitem__button' data-filter-innertext>New Mexico</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NY'><span data-role='button' class='c-menuitem__button' data-filter-innertext>New York</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='NC'><span data-role='button' class='c-menuitem__button' data-filter-innertext>North Carolina</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='ND'><span data-role='button' class='c-menuitem__button' data-filter-innertext>North Dakota</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='OH'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Ohio</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='OK'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Oklahoma</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='OR'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Oregon</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MD'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Maryland</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Massachusetts</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MI'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Michigan</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MN'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Minnesota</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MS'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Mississippi</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='MO'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Missouri</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='PA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Pennsylvania</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='RI'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Rhode Island</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='SC'><span data-role='button' class='c-menuitem__button' data-filter-innertext>South Carolina</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='SD'><span data-role='button' class='c-menuitem__button' data-filter-innertext>South Dakota</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='TN'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Tennessee</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='TX'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Texas</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='UT'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Utah</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='VT'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Vermont</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='VA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Virginia</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='WA'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Washington</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='WV'><span data-role='button' class='c-menuitem__button' data-filter-innertext>West Virginia</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='WI'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Wisconsin</span></div>
-                <div data-role='menuitem' class='c-menuitem' data-value='WY'><span data-role='button' class='c-menuitem__button' data-filter-innertext>Wyoming</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='AL'><span data-role='button' class='c-menuitem__button'>Alabama</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='AK'><span data-role='button' class='c-menuitem__button'>Alaska</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='AZ'><span data-role='button' class='c-menuitem__button'>Arizona</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='AR'><span data-role='button' class='c-menuitem__button'>Arkansas</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='CA'><span data-role='button' class='c-menuitem__button'>California</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='CO'><span data-role='button' class='c-menuitem__button'>Colorado</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='CT'><span data-role='button' class='c-menuitem__button'>Connecticut</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='DE'><span data-role='button' class='c-menuitem__button'>Delaware</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='DC'><span data-role='button' class='c-menuitem__button'>District of Columbia</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='FL'><span data-role='button' class='c-menuitem__button'>Florida</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='GA'><span data-role='button' class='c-menuitem__button'>Georgia</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='HI'><span data-role='button' class='c-menuitem__button'>Hawaii</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='ID'><span data-role='button' class='c-menuitem__button'>Idaho</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='IL'><span data-role='button' class='c-menuitem__button'>Illinois</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='IN'><span data-role='button' class='c-menuitem__button'>Indiana</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='IA'><span data-role='button' class='c-menuitem__button'>Iowa</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='KS'><span data-role='button' class='c-menuitem__button'>Kansas</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='KY'><span data-role='button' class='c-menuitem__button'>Kentucky</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='LA'><span data-role='button' class='c-menuitem__button'>Louisiana</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='ME'><span data-role='button' class='c-menuitem__button'>Maine</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MT'><span data-role='button' class='c-menuitem__button'>Montana</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NE'><span data-role='button' class='c-menuitem__button'>Nebraska</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NV'><span data-role='button' class='c-menuitem__button'>Nevada</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NH'><span data-role='button' class='c-menuitem__button'>New Hampshire</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NJ'><span data-role='button' class='c-menuitem__button'>New Jersey</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NM'><span data-role='button' class='c-menuitem__button'>New Mexico</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NY'><span data-role='button' class='c-menuitem__button'>New York</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='NC'><span data-role='button' class='c-menuitem__button'>North Carolina</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='ND'><span data-role='button' class='c-menuitem__button'>North Dakota</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='OH'><span data-role='button' class='c-menuitem__button'>Ohio</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='OK'><span data-role='button' class='c-menuitem__button'>Oklahoma</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='OR'><span data-role='button' class='c-menuitem__button'>Oregon</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MD'><span data-role='button' class='c-menuitem__button'>Maryland</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MA'><span data-role='button' class='c-menuitem__button'>Massachusetts</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MI'><span data-role='button' class='c-menuitem__button'>Michigan</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MN'><span data-role='button' class='c-menuitem__button'>Minnesota</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MS'><span data-role='button' class='c-menuitem__button'>Mississippi</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='MO'><span data-role='button' class='c-menuitem__button'>Missouri</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='PA'><span data-role='button' class='c-menuitem__button'>Pennsylvania</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='RI'><span data-role='button' class='c-menuitem__button'>Rhode Island</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='SC'><span data-role='button' class='c-menuitem__button'>South Carolina</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='SD'><span data-role='button' class='c-menuitem__button'>South Dakota</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='TN'><span data-role='button' class='c-menuitem__button'>Tennessee</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='TX'><span data-role='button' class='c-menuitem__button'>Texas</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='UT'><span data-role='button' class='c-menuitem__button'>Utah</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='VT'><span data-role='button' class='c-menuitem__button'>Vermont</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='VA'><span data-role='button' class='c-menuitem__button'>Virginia</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='WA'><span data-role='button' class='c-menuitem__button'>Washington</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='WV'><span data-role='button' class='c-menuitem__button'>West Virginia</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='WI'><span data-role='button' class='c-menuitem__button'>Wisconsin</span></div>
+                <div data-role='menuitem' class='c-menuitem' data-value='WY'><span data-role='button' class='c-menuitem__button'>Wyoming</span></div>
             </div>
         </div>
     </div>

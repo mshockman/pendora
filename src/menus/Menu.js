@@ -93,8 +93,8 @@ import AutoLoader from 'autoloader';
 export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
-    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
-                    toggleItems='on', toggleMenu='off', closeOnSelect=false, nodeName='div', position=null,
+    constructor({target=null, selectable=false, bindActiveToSelect=true, multiSelectMethod='click', closeOnBlur=false, timeout=false, autoActivate=0, delay=false, multiple=false,
+                    toggleItems='on', toggleMenu='none', closeOnSelect=false, nodeName='div', position=null,
                     deactivateOnItemHover=false, classNames, id}={}) {
         let element;
 
@@ -123,6 +123,9 @@ export default class Menu extends MenuNode {
         this.toggleMenu = toggleMenu;
         this.closeOnSelect = closeOnSelect;
         this.position = position;
+        this.selectable = selectable;
+        this.bindActiveToSelect = bindActiveToSelect;
+        this.multiSelectMethod = multiSelectMethod;
 
         this.deactivateOnItemHover = deactivateOnItemHover;
 
@@ -241,6 +244,14 @@ export default class Menu extends MenuNode {
     show() {
         if(!this.visible) {
             this.visible = true;
+
+            if(this.selectable && this.bindActiveToSelect) {
+                for(let child of this.getSelectedChildren()) {
+                    if(!child.isActive && child.isSelected) {
+                        child.activate();
+                    }
+                }
+            }
 
             if(this.position) {
                 let position = this.position;
@@ -421,6 +432,18 @@ export default class Menu extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // GETTER AND SETTER METHODS
 
+    getSelectedChildren() {
+        let r = [];
+
+        for(let child of this.children) {
+            if(child.isSelected) {
+                r.push(child);
+            }
+        }
+
+        return r;
+    }
+
     /**
      * Gets the menus active child items.
      * @returns {Array}
@@ -528,6 +551,15 @@ export default class Menu extends MenuNode {
         }
         if(selector.dataset.deactivateOnItemHover) {
             dataset.deactivateOnItemHover = parseBoolean(selector.dataset.deactivateOnItemHover);
+        }
+        if(selector.dataset.selectable) {
+            dataset.selectable = parseBoolean(selector.dataset.selectable);
+        }
+        if(selector.dataset.bindActiveToSelect) {
+            dataset.bindActiveToSelect = parseBoolean(selector.dataset.bindActiveToSelect);
+        }
+        if(selector.dataset.multiSelectMethod) {
+            dataset.multiSelectMethod = selector.dataset.multiSelectMethod;
         }
 
         return new this({target: selector, ...dataset, ...config});
