@@ -244,6 +244,12 @@ export default class DropDown extends MenuNode {
 
         let isActive = this.isActive;
 
+        let stop = event.target.closest('.js-prevent-item-action');
+
+        if(stop) {
+            return;
+        }
+
         if(event.target === this.buttonElement || this.buttonElement.contains(event.target)) {
             if(!isActive && (this.toggle === "on" || this.toggle === 'both')) {
                 this.activate();

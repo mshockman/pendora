@@ -6,6 +6,7 @@ export default class MenuBar extends Menu {
     constructor({target=null, ...options}={}) {
         super({
             target,
+            selectable: false,
             closeOnBlur: true,
             timeout: false,
             autoActivate: true,
