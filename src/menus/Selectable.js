@@ -34,23 +34,32 @@ export function defaultPillFactory(item) {
  * Turns a MenuItem or DropDown into a select like component that displays what items have been selected.
  */
 export default class Selectable {
-    constructor(item, {displayType='csv', delimiter=', ', pillFactory=defaultPillFactory, placeholder=''}={}) {
+    constructor(item, {displayType='csv', delimiter=', ', maxItems=3, pillFactory=defaultPillFactory, placeholder=''}={}) {
         this.item = item;
         this.item.selectController = this;
         this.placeholder = placeholder;
+        this.maxItems = maxItems;
 
         if(displayType === 'csv') {
             this._onSelect = () => {
-                let labels = this.getLabels().join(delimiter),
+                let labels = this.getLabels(),
                     textNode,
                     button = this.item.buttonElement;
 
-                if(labels) {
-                    textNode = document.createTextNode(labels);
-                    button.classList.remove('placeholder');
+                if(labels.length <= this.maxItems) {
+                    if (labels) {
+                        textNode = document.createTextNode(labels.join(delimiter));
+                        button.classList.remove('placeholder');
+                    } else {
+                        textNode = document.createTextNode(this.placeholder);
+                        button.classList.add('placeholder');
+                    }
                 } else {
-                    textNode = document.createTextNode(this.placeholder);
-                    button.classList.add('placeholder');
+                    if(labels.length !== 1) {
+                        textNode = document.createTextNode(`${labels.length} Items Selected`)
+                    } else {
+                        textNode = document.createTextNode('1 Item Selected');
+                    }
                 }
 
                 emptyElement(button);
@@ -100,14 +109,16 @@ export default class Selectable {
 
 
 AutoLoader.register('selectable', (element) => {
-    let display = element.dataset.selectDisplayType || 'csv',
-        delimiter = element.dataset.delimiter || ', ',
-        placeholder = element.dataset.placeholder || '';
+    let options = {};
+
+    options.delimiter = element.dataset.delimiter || ', ';
+    options.placeholder = element.dataset.placeholder || '';
+    options.displayType = element.dataset.selectDisplayType || 'csv';
+
+    if(element.dataset.maxItems) {
+        options.maxItems = parseInt(element.dataset.maxItems, 10);
+    }
 
     let item = getMenuItem(element);
-    new Selectable(item, {
-        displayType: display,
-        delimiter: delimiter,
-        placeholder: placeholder
-    });
+    new Selectable(item, options);
 });

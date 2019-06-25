@@ -78,3 +78,29 @@
     color: #101010;
   }
 }
+
+
+.c-pill-label {
+  display: inline-block;
+  margin: 0.25rem;
+  border: 1px solid #ccc;
+  user-select: none;
+  background-color: #f0f0f0;
+  padding: 0.125rem 0.25rem;
+  vertical-align: middle;
+}
+
+
+.c-pill-label__deselect {
+  display: inline;
+  margin-right: 0.25rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  vertical-align: baseline;
+  margin-top: -2px;
+
+  &:hover {
+    color: #991111;
+  }
+}
