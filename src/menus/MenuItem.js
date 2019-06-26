@@ -99,27 +99,12 @@ export default class MenuItem extends MenuNode {
     /**
      * Triggers a select action for the item.
      */
-    select(multiple) {
-        let parent = this.parent;
-
-        if(parent && parent.selectable) {
-            this.isSelected = true;
-
-            if(!multiple) {
-                for(let child of parent.children) {
-                    if(child !== this && child.isSelected) {
-                        child.isSelected = false;
-                        if(child.isActive) child.deactivate();
-                    }
-                }
-            }
-        }
-
-        let o = parent;
+    select() {
+        let o = this.parent;
 
         while(o) {
             if(o.trigger) {
-                o.trigger('item-select', {
+                o.trigger('item.select', {
                     item: this,
                     parent: this
                 });
@@ -131,38 +116,6 @@ export default class MenuItem extends MenuNode {
         this.trigger('select', this);
 
         let event = new CustomEvent('item-select', {
-            detail: {
-                item: this
-            },
-            bubbles: true
-        });
-
-        this.element.dispatchEvent(event);
-    }
-
-    deselect() {
-        let parent = this.parent;
-
-        if(parent && parent.selectable && this.isSelected) {
-            this.isSelected = false;
-        }
-
-        let o = parent;
-
-        while(o) {
-            if(o.trigger) {
-                o.trigger('item-deselect', {
-                    item: this,
-                    parent: this
-                });
-            }
-
-            o = o.parent;
-        }
-
-        this.trigger('deselect', this);
-
-        let event = new CustomEvent('item-deselect', {
             detail: {
                 item: this
             },
@@ -195,7 +148,7 @@ export default class MenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
 
     onMouseOver(event) {
-        if(this.getDisabled()) return;
+        let disabled = this.getDisabled();
 
         if(!this.element.contains(event.relatedTarget)) {
             // Mouse entered item.
@@ -208,7 +161,11 @@ export default class MenuItem extends MenuNode {
                     // Use timein property.
 
                     if(parent.timein === true) {
-                        this.activate();
+                        if(!disabled) {
+                            this.activate();
+                        } else if(!parent.multiple) {
+                            parent.clearActiveItems();
+                        }
                     } else if(typeof parent.timein === 'number' && parent.timein >= 0) {
                         parent.startActivateItemTimer(this, parent.timein);
                     }
@@ -216,7 +173,11 @@ export default class MenuItem extends MenuNode {
                     // Use autoActivate property because menu is already active.
 
                     if(parent.autoActivate === true) {
-                        this.activate();
+                        if(!disabled) {
+                            this.activate();
+                        } else {
+                            parent.clearActiveItems();
+                        }
                     } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
                         parent.startActivateItemTimer(this, parent.autoActivate);
                     }
@@ -261,6 +222,9 @@ export default class MenuItem extends MenuNode {
         let parent = this.parent,
             toggle = this.parent.getToggleValues();
 
+        // If the menuitem has a submenu then you can toggle the item on but not off.
+        // Otherwise toggle the item on if toggle.on is click and then trigger a select event.
+
         if(this.hasOverlay()) {
             if(this.isActive && isToggleEvent(event, toggle[1])) {
                 this.deactivate();
@@ -270,45 +234,6 @@ export default class MenuItem extends MenuNode {
                     parent.deactivate();
                 }
             } else if(!this.isActive && isToggleEvent(event, toggle[0])) {
-                this.activate();
-            }
-        } else if(parent.selectable) {
-            let multipleSelectAction = toggle[2] || 'ctrl-click',
-                rangeSelectAction = toggle[3] || 'shift-click';
-
-            event.preventDefault();
-
-            if(!this.isSelected) {
-                if(parent.multiple && parent.lastItemSelect && isToggleEvent(event, rangeSelectAction)) {
-                    // We are performing a range selection.
-
-                    let children = parent.children,
-                        start = children.indexOf(parent.lastItemSelect),
-                        end = children.indexOf(this);
-
-                    if(start > end) {
-                        [start, end] = [end, start];
-                    }
-
-                    if(start === -1) {
-                        throw new Error("Could range select items.  One of the selected items was not a child item.");
-                    }
-
-                    for(let i = start; i < end+1; i++) {
-                        let item = children[i];
-                        if(!item.isSelected) item.select(true);
-                        if(!item.isActive) item.activate();
-                    }
-                } else if(isToggleEvent(event, toggle[0])) {
-                    this.select(parent.multiple && isToggleEvent(event, multipleSelectAction));
-                    this.activate();
-                }
-            } else if(isToggleEvent(event, toggle[1])) {
-                // Deselect item.
-                this.deselect();
-                if(parent.bindActiveToSelect) this.deactivate();
-            } else {
-                this.select(false);
                 this.activate();
             }
         } else {

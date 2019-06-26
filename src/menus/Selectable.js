@@ -1,109 +1,136 @@
 import AutoLoader from 'autoloader';
-import {getMenuItem} from "./core";
-import {emptyElement} from "core/utility";
-import {privateCache} from "core/data";
+import {emptyElement} from 'core/utility';
 
 
-export function defaultPillFactory(item) {
-    let pill = document.createElement('div'),
-        exit = document.createElement('div'),
-        label = item.buttonElement.textContent,
-        text = document.createTextNode(label);
-
-    privateCache.set(pill, 'item', item);
-
-    pill.classList.add('c-pill-label');
-    exit.classList.add('c-pill-label__deselect');
-    exit.classList.add('js-prevent-item-action');
-
-    exit.addEventListener('click', () => {
-        item.deselect();
-        pill.parentElement.removeChild(pill);
-    });
-
-    exit.appendChild(document.createTextNode('X'));
-
-    pill.appendChild(exit);
-    pill.appendChild(text);
-
-    return pill;
-}
-
-
-/**
- * Turns a MenuItem or DropDown into a select like component that displays what items have been selected.
- */
-export default class Selectable {
-    constructor(item, {displayType='csv', delimiter=', ', maxItems=3, pillFactory=defaultPillFactory, placeholder=''}={}) {
-        this.item = item;
-        this.item.selectController = this;
-        this.placeholder = placeholder;
-        this.maxItems = maxItems;
-
-        if(displayType === 'csv') {
-            this._onSelect = () => {
-                let labels = this.getLabels(),
-                    textNode,
-                    button = this.item.buttonElement;
-
-                if(labels.length <= this.maxItems) {
-                    if (labels) {
-                        textNode = document.createTextNode(labels.join(delimiter));
-                        button.classList.remove('placeholder');
-                    } else {
-                        textNode = document.createTextNode(this.placeholder);
-                        button.classList.add('placeholder');
-                    }
-                } else {
-                    if(labels.length !== 1) {
-                        textNode = document.createTextNode(`${labels.length} Items Selected`)
-                    } else {
-                        textNode = document.createTextNode('1 Item Selected');
-                    }
-                }
-
-                emptyElement(button);
-                button.appendChild(textNode);
-            };
-        } else if(displayType === 'pill') {
-            this._onSelect = () => {
-                let selected = this.getSelectedChildren(),
-                    button = this.item.buttonElement;
-
-                emptyElement(button);
-
-                if(selected.length) {
-                    button.classList.remove('placeholder');
-
-                    for(let child of selected) {
-                        let pill = pillFactory(child);
-                        button.appendChild(pill);
-                    }
-                } else {
-                    button.classList.add('placeholder');
-                    button.appendChild(document.createTextNode(this.placeholder));
-                }
-            };
+export class Selectable {
+    constructor(target, {multiple=true, selectOn='click', deselectOn="ctrl-click", multiSelectOn="ctrl-click", rangeSelectOn="shift-click"}={}) {
+        if(typeof target === 'string') {
+            this.element = document.querySelector(target);
+        } else {
+            this.element = target;
         }
 
-        this.item.on('item-select', this._onSelect);
-        this.item.on('item-deselect', this._onSelect);
+        this.inputContainer = document.createElement('div');
+        this.element.appendChild(this.inputContainer);
 
-        this._onSelect();
+        this.multiple = multiple;
+        this.deselectOn = deselectOn;
+        this.multiSelectOn = multiSelectOn;
+        this.rangeSelectOn = rangeSelectOn;
+        this.selectOn = selectOn;
+
+        this._lastItemSelected = null;
+
+        this._onClick = this.onClick.bind(this);
+        this.element.addEventListener('click', this._onClick);
     }
 
-    getLabels() {
+    onClick(event) {
+        let item = event.target.closest('.c-menuitem'),
+            isItemSelected = item.classList.contains('selected');
+
+        if(item && this.element.contains(item)) {
+            if(this.multiple && event.shiftKey) {
+                if(!this._lastItemSelected) {
+                    this.selectItem(item, true);
+                } else {
+                    let items = this.getItems(),
+                        from = items.indexOf(this._lastItemSelected),
+                        to = items.indexOf(item);
+
+                    if(from > to) {
+                        [to, from] = [from, to];
+                    }
+
+                    for(let i = from; i <= to; i++) {
+                        this.selectItem(items[i], true);
+                    }
+                }
+            } else if(!isItemSelected) {
+                this.selectItem(item, this.multiple && event.ctrlKey);
+            } else {
+                if(this.multiple) {
+                    if(event.ctrlKey) {
+                        this.deselectItem(item);
+                    } else {
+                        this.selectItem(item, false);
+                    }
+                } else {
+
+                }
+            }
+        }
+    }
+
+    selectItem(item, multiple=false) {
+        if(!multiple) {
+            for (let selectedItem of this.getSelectedItems()) {
+                if (selectedItem !== item) {
+                    this.deselectItem(selectedItem);
+                }
+            }
+        }
+
+        item.classList.add('selected');
+        this._lastItemSelected = item;
+        this._onChange();
+    }
+
+    deselectItem(item) {
+        item.classList.remove('selected');
+        this._lastItemSelected = null;
+        this._onChange();
+    }
+
+    getItems() {
+        return Array.prototype.slice.call(this.element.querySelectorAll('.c-menuitem'));
+    }
+
+    getSelectedItems() {
+        return Array.prototype.slice.call(this.element.querySelectorAll('.c-menuitem.selected'));
+    }
+
+    _onChange() {
+        let event = new CustomEvent('selection-change', {
+            bubbles: true,
+            detail: {
+                selectable: this
+            }
+        });
+
+        this.element.dispatchEvent(event);
+    }
+
+    getValue() {
         let r = [];
 
-        for(let child of this.getSelectedChildren()) {
-            r.push(child.buttonElement.textContent);
+        for(let item of this.getSelectedItems()) {
+            if(item.dataset.value) {
+                r.push(item.dataset.value);
+            }
         }
 
         return r;
     }
 
-    getSelectedChildren() {
-        return this.item.submenu.getSelectedChildren();
+    setValue(value) {
+        for(let child of this.getSelectedItems()) {
+            child.classList.remove('selected');
+        }
+
+        let children = this.getItems();
+
+        for(let val of value) {
+            let child = children.find((item) => item.dataset.value === val);
+
+            if(child) {
+                child.classList.add('selected');
+            }
+        }
+    }
+
+    static isSelected(item) {
+        return item.classList.contains('selected');
     }
 }
 
@@ -111,14 +138,25 @@ export default class Selectable {
 AutoLoader.register('selectable', (element) => {
     let options = {};
 
-    options.delimiter = element.dataset.delimiter || ', ';
-    options.placeholder = element.dataset.placeholder || '';
-    options.displayType = element.dataset.selectDisplayType || 'csv';
-
-    if(element.dataset.maxItems) {
-        options.maxItems = parseInt(element.dataset.maxItems, 10);
+    if(element.dataset.multiple) {
+        options.multiple = element.dataset.multiple === true;
     }
 
-    let item = getMenuItem(element);
-    new Selectable(item, options);
+    if(element.dataset.deselectOn) {
+        options.deselectOn = element.dataset.deselectOn;
+    }
+
+    if(element.dataset.multiSelectOn) {
+        options.multiSelectOn = element.dataset.multiSelectOn;
+    }
+
+    if(element.dataset.rangeSelectOn) {
+        options.rangeSelectOn = element.dataset.rangeSelectOn;
+    }
+
+    if(element.dataset.selectOn) {
+        options.selectOn = element.dataset.selectOn;
+    }
+
+    return new Selectable(element, options);
 });

@@ -97,9 +97,9 @@ const regWhitespace = /\s+/;
 export default class Menu extends MenuNode {
     static POSITIONERS = {};
 
-    constructor({target=null, selectable=false, bindActiveToSelect=true, closeOnBlur=false,
-                    timeout=false, timein=0, autoActivate=true, multiple=false, toggle=null, toggleMenu='none',
-                    closeOnSelect=false, nodeName='div', position=null, deactivateOnItemHover=false, classNames, id}={}) {
+    constructor({target=null, closeOnBlur=false, timeout=false, timein=0, autoActivate=true, multiple=false,
+                    toggle='on', toggleMenu='none', closeOnSelect=false, nodeName='div', position=null,
+                    deactivateOnItemHover=false, classNames, id}={}) {
         let element;
 
         if(!target) {
@@ -115,14 +115,6 @@ export default class Menu extends MenuNode {
 
         super(element, 'menu', {classNames, id});
 
-        this.on('item-select', (topic, message) => {
-            this.onItemSelect(message);
-        });
-
-        this.on('item-deselect', (topic, message) => {
-            this.onItemDeselect(message);
-        });
-
         this._timeoutTimer = null;
         this._activateItemTimer = null;
 
@@ -135,18 +127,8 @@ export default class Menu extends MenuNode {
         this.toggleMenu = toggleMenu;
         this.closeOnSelect = closeOnSelect;
         this.position = position;
-        this.selectable = selectable;
-        this.bindActiveToSelect = bindActiveToSelect;
 
         this.deactivateOnItemHover = deactivateOnItemHover;
-
-        if(toggle === null) {
-            if(this.selectable) {
-                this.toggle = specialToggle.select;
-            } else {
-                this.toggle = specialToggle.on;
-            }
-        }
 
         /**
          * Gets or sets the visibility of the menu.  This only updates the css classes.  It does not trigger events.
@@ -199,7 +181,7 @@ export default class Menu extends MenuNode {
             let parent = this.parent;
 
             if(parent) {
-                parent.trigger('submenu-activate', this);
+                parent.trigger('submenu.activate', this);
             }
 
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -217,7 +199,7 @@ export default class Menu extends MenuNode {
                 doc.addEventListener('click', this._captureDocumentClick.onDocumentClick);
             }
 
-            this.trigger('activate', this);
+            this.trigger('menu.activate', this);
         }
     }
 
@@ -231,7 +213,7 @@ export default class Menu extends MenuNode {
             let parent = this.parent;
 
             if(parent) {
-                parent.trigger('submenu-deactivate', this);
+                parent.trigger('submenu.deactivate', this);
             }
 
             if(this._captureDocumentClick) {
@@ -250,7 +232,7 @@ export default class Menu extends MenuNode {
 
             this.clearActiveItems();
 
-            this.trigger('deactivate', this);
+            this.trigger('menu.deactivate', this);
         }
     }
 
@@ -260,14 +242,6 @@ export default class Menu extends MenuNode {
     show() {
         if(!this.visible) {
             this.visible = true;
-
-            if(this.selectable && this.bindActiveToSelect) {
-                for(let child of this.getSelectedChildren()) {
-                    if(!child.isActive && child.isSelected) {
-                        child.activate();
-                    }
-                }
-            }
 
             if(this.position) {
                 let position = this.position;
@@ -279,7 +253,7 @@ export default class Menu extends MenuNode {
                 position.call(this, this);
             }
 
-            this.trigger('show', this);
+            this.trigger('menu.show', this);
         }
     }
 
@@ -289,7 +263,7 @@ export default class Menu extends MenuNode {
     hide() {
         if(this.visible) {
             this.visible = false;
-            this.trigger("hide", this);
+            this.trigger("menu.hide", this);
         }
     }
 
@@ -369,7 +343,13 @@ export default class Menu extends MenuNode {
         this._activateItemTimer = setTimeout(() => {
             this._activateItemTimer = null;
             this._activateItemTimerTarget = null;
-            item.activate();
+
+            if(!item.getDisabled()) {
+                item.activate();
+            } else {
+                let parent = item.parent;
+                if(parent && !parent.multiple) parent.clearActiveItems();
+            }
         }, time);
     }
 
@@ -437,18 +417,10 @@ export default class Menu extends MenuNode {
         } else if(target && isMenuItem(target) && target.getController() === this) {
             target.onClick(event);
         }
-    }
 
-    onItemSelect(message) {
-        if(this.closeOnSelect === true || (this.closeOnSelect === 'child' && message.parent === this)) {
+        if(isMenuItem(target) && !target.hasOverlay() && this.isActive && this.closeOnSelect) {
             this.deactivate();
         }
-
-        this.lastItemSelect = message.item;
-    }
-
-    onItemDeselect(message) {
-        this.lastItemSelect = null;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -585,12 +557,6 @@ export default class Menu extends MenuNode {
         }
         if(selector.dataset.deactivateOnItemHover) {
             dataset.deactivateOnItemHover = parseBoolean(selector.dataset.deactivateOnItemHover);
-        }
-        if(selector.dataset.selectable) {
-            dataset.selectable = parseBoolean(selector.dataset.selectable);
-        }
-        if(selector.dataset.bindActiveToSelect) {
-            dataset.bindActiveToSelect = parseBoolean(selector.dataset.bindActiveToSelect);
         }
 
         return new this({target: selector, ...dataset, ...config});

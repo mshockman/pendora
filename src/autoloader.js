@@ -31,8 +31,8 @@ export default class AutoLoader {
             for(let c of components) {
                 let parts = c.split(':'),
                     cls = this.registry[parts[0]],
-                    namespace = parts.length > 1 ? c[1] : '',
-                    key = namespace ? `${c[0]}.${namespace}` : cls;
+                    namespace = parts.length > 1 ? parts[1] : '',
+                    key = namespace ? `${parts[0]}.${parts[1]}` : parts[0];
 
                 if(cls) {
                     let initialized = privateCache.get(element, 'initialized');

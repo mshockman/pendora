@@ -1,106 +1,87 @@
 @import "../variables";
 
 
+.c-menuitem {
+  position: relative;
+  user-select: none;
+}
+
+
 .c-menu {
   position: absolute;
-  min-width: 200px;
-  border-radius: 4px;
-  margin: 0;
-  list-style: none;
-  padding: 0;
-  background-clip: padding-box;
-  box-shadow: 0 3px 12px rgba(27,31,35,.15), 0 0 1px rgba(27,31,35,.2);
-  border: 1px solid #ccc;
-  background-color: #fff;
   z-index: $menu-z-layer;
-  visibility: hidden;
+  background-color: #fff;
+  min-width: 16rem;
+  box-shadow: 0 0 3px #3a3a3a;
+  border-radius: 0.25rem;
+  background-clip: border-box;
+  border: 1px solid #ccc;
+
+  .c-menuitem.active > a {
+    background-color: #0366d6;
+    color: #fff;
+  }
 
   .c-menu {
     left: 100%;
     top: 0;
+    visibility: hidden;
   }
-}
 
-
-.c-menu.c-menu--inline {
-  position: static;
-  visibility: visible;
-  z-index: 0;
-}
-
-
-.c-menuitem {
-  display: block;
-  position: relative;
-  user-select: none;
-
-  & > a, .c-menuitem__button {
+  .c-menuitem > a {
     display: block;
-    line-height: 2rem;
-    padding: 0 0.5rem;
-    cursor: pointer;
+    padding: 0.5rem;
   }
 
-  &.active > a, &.active > .c-menuitem__button {
-    background-color: royalblue;
+  .c-menuitem.disabled > a {
+    color: #d0d0d0;
+  }
+}
+
+
+.c-menubar {
+  @extend .c-menu;
+
+  position: static;
+  border: 1px solid #ccc;
+
+  .c-menu {
+    left: 0;
+    top: 100%;
+
+    .c-menu {
+      left: 100%;
+      top: 0;
+    }
+  }
+
+  & > .c-menuitem {
+    display: inline-block;
+    position: relative;
+    user-select: none;
+
+    & > a {
+      display: inline-block;
+      padding: 0.5rem;
+    }
+  }
+}
+
+
+.c-select-menu {
+  @extend .c-menu;
+
+  position: static;
+
+  .c-menuitem.selected > a {
+    background-color: #0366d6;
     color: #fff;
   }
 }
 
 
 .c-dropdown {
-  display: inline-block;
-  position: relative;
-}
-
-
-.c-menubar {
-  display: block;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #ccc;
-
-  & > .c-menuitem {
-    display: inline-block;
-  }
-}
-
-
-.c-menu__filter {
-  background: #fafafa;
-  padding: 0.5rem;
-  border-bottom: 1px solid #ccc;
-
-  .c-filter {
-    width: 100%;
-    padding: 0.25rem;
-    font-size: 1rem;
-    color: #101010;
-  }
-}
-
-
-.c-pill-label {
-  display: inline-block;
-  margin: 0.25rem;
-  border: 1px solid #ccc;
-  user-select: none;
-  background-color: #f0f0f0;
-  padding: 0.125rem 0.25rem;
-  vertical-align: middle;
-}
-
-
-.c-pill-label__deselect {
-  display: inline;
-  margin-right: 0.25rem;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.9rem;
-  vertical-align: baseline;
-  margin-top: -2px;
-
-  &:hover {
-    color: #991111;
+  .c-menu {
+    visibility: hidden;
   }
 }

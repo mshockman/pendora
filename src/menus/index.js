@@ -3,4 +3,4 @@ export Menu from './Menu';
 export MenuItem from './MenuItem';
 export MenuNode from './MenuNode';
 export DropDown from './DropDown';
-export Selectable from './Selectable';
+export {Selectable} from './Selectable';
