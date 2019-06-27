@@ -7,25 +7,34 @@
 }
 
 
-.c-menu {
+@mixin submenu-mixin {
   position: absolute;
   z-index: $menu-z-layer;
-  background-color: #fff;
   min-width: 16rem;
   box-shadow: 0 0 3px #3a3a3a;
   border-radius: 0.25rem;
   background-clip: border-box;
   border: 1px solid #ccc;
+  visibility: hidden;
 
   .c-menuitem.active > a {
     background-color: #0366d6;
     color: #fff;
   }
+}
+
+
+.c-menu {
+  background-color: #fff;
+  border-radius: 0.25rem;
+  background-clip: border-box;
+  border: 1px solid #ccc;
 
   .c-menu {
+    @include submenu-mixin;
+
     left: 100%;
     top: 0;
-    visibility: hidden;
   }
 
   .c-menuitem > a {
@@ -45,7 +54,14 @@
   position: static;
   border: 1px solid #ccc;
 
+  .c-menuitem.active > a {
+    background-color: #0366d6;
+    color: #fff;
+  }
+
   .c-menu {
+    @include submenu-mixin;
+
     left: 0;
     top: 100%;
 
@@ -69,9 +85,17 @@
 
 
 .c-select-menu {
-  @extend .c-menu;
+  background-color: #fff;
+  min-width: 16rem;
+  box-shadow: 0 0 3px #3a3a3a;
+  border-radius: 0.25rem;
+  background-clip: border-box;
+  border: 1px solid #ccc;
 
-  position: static;
+  .c-menuitem > a {
+    display: block;
+    padding: 0.5rem;
+  }
 
   .c-menuitem.selected > a {
     background-color: #0366d6;
@@ -82,6 +106,20 @@
 
 .c-dropdown {
   .c-menu {
-    visibility: hidden;
+    @include submenu-mixin;
+  }
+}
+
+
+.c-menu__filter {
+  background: #fafafa;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ccc;
+
+  .c-filter {
+    width: 100%;
+    padding: 0.25rem;
+    font-size: 1rem;
+    color: #101010;
   }
 }

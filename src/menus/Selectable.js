@@ -1,5 +1,7 @@
 import AutoLoader from 'autoloader';
-import {emptyElement} from 'core/utility';
+import Menu from './Menu';
+import {Attribute} from 'core/attributes';
+import {parseBoolean} from 'core/utility';
 
 
 export class Selectable {
@@ -135,6 +137,14 @@ export class Selectable {
 }
 
 
+export class SelectMenu extends Menu {
+    constructor({multiple=false, selectOn='click', deselectOn="ctrl-click", multiSelectOn="ctrl-click", rangeSelectOn="shift-click", ...kwargs}) {
+        super({multiple, ...kwargs});
+        this.selectable = new Selectable(this.element, {multiple, selectOn, deselectOn, multiSelectOn, rangeSelectOn});
+    }
+}
+
+
 AutoLoader.register('selectable', (element) => {
     let options = {};
 
@@ -159,4 +169,18 @@ AutoLoader.register('selectable', (element) => {
     }
 
     return new Selectable(element, options);
+});
+
+
+
+AutoLoader.register('select-menu', (element) => {
+    let options = Attribute.deserialize(element.dataset, {
+        multiple: new Attribute(parseBoolean, false, null),
+        deselectOn: null,
+        multiSelectOn: null,
+        rangeSelectOn: null,
+        selectOn: null
+    });
+
+    return new SelectMenu({target: element, ...options});
 });
