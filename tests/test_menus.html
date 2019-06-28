@@ -26,7 +26,7 @@
     <h1>MenuBar</h1>
     <p>Creates a horizontal aligned series of menu items that can be nested.</p>
 
-    <div class="c-menubar" data-init="menubar">
+    <div class="c-menubar c-menu c-menu--active-items" data-init="menubar">
 
         <div class="c-menuitem" data-role="menuitem">
             <a>Item #1</a>
@@ -351,7 +351,7 @@
 
     <p></p>
 
-    <div data-init="dropdown" class="c-dropdown">
+    <div data-init="dropdown" class="c-dropdown c-menu--active-items">
         <button class="c-btn">DropDown</button>
         <div data-role="menu" class="c-menu">
             <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
@@ -387,7 +387,7 @@
     <h3>Timeout</h3>
     <p>If you want your dropdown menu to automatically deactivate after a set period of time after the user leaves the item, you can set it's timeout property.  The timeout property takes an integer greater then or equal to 0.  After the user leaves the item the dropdown is deactivated after that many milliseconds.  If the user hover back over the dropdown before it expires the timer is cleared.</p>
 
-    <div data-init="dropdown" data-timeout="2000" class="c-dropdown">
+    <div data-init="dropdown" data-timeout="2000" class="c-dropdown c-menu--active-items">
         <button class="c-btn">DropDown</button>
         <div data-role="menu" class="c-menu">
             <div data-role="menuitem" class="c-menuitem"><a href="http://google.com">Google</a></div>
@@ -419,7 +419,7 @@
 </div>
 
 
-<div>
+<div class="mb-4">
     <div data-init="select-menu" data-name="test" class="c-select-menu visible c-menu" data-multiple="true">
         <div class="c-menu__filter">
             <input type="text" placeholder="filter" class="c-filter" />
@@ -437,6 +437,41 @@
             <div class="c-menuitem" data-role="menuitem" data-value="item10"><a>Item #10</a></div>
         </div>
     </div>
+</div>
+
+
+<div class="mb-4">
+    <div data-init="select" class="c-dropdown" data-placeholder="States" data-multiple="true" data-max-items="3">
+        <button class="c-btn" type="button" data-role="button"><span data-role="label">States</span> X</button>
+        <div class="c-select-menu c-menu" data-role="menu">
+            <div class="c-menu__filter">
+                <input type="text" placeholder="filter" class="c-filter" />
+            </div>
+            <div class="c-menu__body">
+                <div class="c-menuitem" data-role="menuitem" data-value="item1"><a>Item #1</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item2"><a>Item #2</a></div>
+                <div class="c-menuitem disabled" data-role="menuitem" data-value="item3"><a>Item #3</a></div>
+                <div class="c-menuitem disabled" data-role="menuitem" data-value="item4"><a>Item #4</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item5"><a>Item #5</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item6"><a>Item #6</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item7"><a>Item #7</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item8"><a>Item #8</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item9"><a>Item #9</a></div>
+                <div class="c-menuitem" data-role="menuitem" data-value="item10"><a>Item #10</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="mb-4">
+    <select name="test01" data-init="select" multiple>
+        <option value="test01">Test 01</option>
+        <option value="test02">Test 02</option>
+        <option value="test03">Test 03</option>
+        <option value="test04">Test 04</option>
+        <option value="test05">Test 05</option>
+    </select>
 </div>
 
 

@@ -492,6 +492,17 @@ export function validateChoice(value, choices, defaultValue=TypeError) {
 }
 
 
+export function choice(...args) {
+    return function(value) {
+        if(args.indexOf(value) === -1) {
+            throw new TypeError("Invalid Choice");
+        }
+
+        return value;
+    }
+}
+
+
 /**
  * Returns first child element that matches the test function.
  * @param element - Parent element

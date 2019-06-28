@@ -23,8 +23,8 @@
     margin-bottom: $size !important;
   }
 
-  @each $property in (left, right, top, bottom) {
-    $char: str-slice($property, 0, 0);
+  @each $property in ('left', 'right', 'top', 'bottom') {
+    $char: str-slice($property, 0, 1);
 
     .p#{$char}-#{$index} {
       padding-#{$property}: $size !important;

@@ -26,6 +26,11 @@ export class KeyError extends ExtendableError {
 }
 
 
+export class ValueError extends ExtendableError {
+
+}
+
+
 export class NotImplemented extends ExtendableError {
 
 }

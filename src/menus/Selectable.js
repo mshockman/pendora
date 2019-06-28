@@ -2,10 +2,13 @@ import AutoLoader from 'autoloader';
 import Menu from './Menu';
 import {Attribute} from 'core/attributes';
 import {parseBoolean} from 'core/utility';
+import Observable from 'core/interface/Observable';
 
 
-export class Selectable {
+export class Selectable extends Observable {
     constructor(target, {multiple=true, selectOn='click', deselectOn="ctrl-click", multiSelectOn="ctrl-click", rangeSelectOn="shift-click"}={}) {
+        super();
+
         if(typeof target === 'string') {
             this.element = document.querySelector(target);
         } else {
@@ -76,12 +79,14 @@ export class Selectable {
         item.classList.add('selected');
         this._lastItemSelected = item;
         this._onChange();
+        this.trigger('selectable.change', this);
     }
 
     deselectItem(item) {
         item.classList.remove('selected');
         this._lastItemSelected = null;
         this._onChange();
+        this.trigger('selectable.change', this);
     }
 
     getItems() {
@@ -129,6 +134,8 @@ export class Selectable {
                 child.classList.add('selected');
             }
         }
+
+        this.trigger('selectable.change', this);
     }
 
     static isSelected(item) {
@@ -138,9 +145,21 @@ export class Selectable {
 
 
 export class SelectMenu extends Menu {
-    constructor({multiple=false, selectOn='click', deselectOn="ctrl-click", multiSelectOn="ctrl-click", rangeSelectOn="shift-click", ...kwargs}) {
+    constructor({multiple=false, selectOn='click', deselectOn="ctrl-click", multiSelectOn="ctrl-click", rangeSelectOn="shift-click", ...kwargs}={}) {
         super({multiple, ...kwargs});
         this.selectable = new Selectable(this.element, {multiple, selectOn, deselectOn, multiSelectOn, rangeSelectOn});
+
+        this.selectable.on('selectable.change', () => {
+            this.trigger('selectable.change', this);
+        });
+    }
+
+    setValue(value) {
+        this.selectable.setValue(value);
+    }
+
+    getValue() {
+        return this.selectable.getValue();
     }
 }
 

@@ -1,17 +1,26 @@
 import MenuNode from "./MenuNode";
 import Menu from "./Menu";
 import {getMenu, getMenuNode} from "./core";
-import {findChild, parseBoolean, parseBooleanOrInt, validateChoice} from 'core/utility';
+import {
+    findChild,
+    parseBoolean,
+    parseBooleanOrInt,
+    validateChoice,
+    choice,
+    emptyElement,
+    parseIntValue
+} from 'core/utility';
 import MenuItem from "./MenuItem";
 import AutoLoader from 'autoloader';
+import {SelectMenu} from "./Selectable";
+import {Attribute} from "core/attributes";
 
 
 export default class DropDown extends MenuNode {
     constructor({target=null, text='', closeOnBlur=true, timeout=false, autoActivate=false, toggle="both",
                     closeOnSelect=true, position=null}={}) {
         let element,
-            btn,
-            menu;
+            btn;
 
         if(!target) {
             element = document.createElement('div');
@@ -20,10 +29,6 @@ export default class DropDown extends MenuNode {
             btn.innerHTML = text;
 
             element.appendChild(btn);
-            menu = new Menu();
-
-            element.appendChild(btn);
-            element.appendChild(menu.element);
         } else if(typeof target === 'string') {
             element = document.querySelector(target);
         } else {
@@ -360,6 +365,181 @@ export default class DropDown extends MenuNode {
 }
 
 
+class SelectDropDown extends DropDown {
+    constructor({delimiter=', ', placeholder='', maxItems=-1, ...props}) {
+        super(props);
+
+        this.delimiter = delimiter;
+        this.placeholder = placeholder;
+        this.maxItems = maxItems;
+
+        this._onSubmenuChange = () => {
+            this._refreshLabel();
+        };
+    }
+
+    _refreshLabel() {
+        let selectedItems = this.submenu.selectable.getSelectedItems(),
+            labels = [],
+            btn = this.buttonElement;
+
+        for(let item of selectedItems) {
+            labels.push(SelectDropDown.getItemLabel(item));
+        }
+
+        if(!labels.length) {
+            this.setText(this.placeholder);
+            btn.classList.add('has-placeholder');
+        } else {
+            if(this.maxItems >= 0 && this.maxItems < labels.length) {
+                if(labels.length === 1) {
+                    this.setText("1 Item Selected")
+                } else {
+                    this.setText(`${labels.length} Items Selected`);
+                }
+            } else {
+                this.setText(labels.join(this.delimiter));
+            }
+
+            btn.classList.remove('has-placeholder');
+        }
+    }
+
+    setText(value) {
+        let button = this.buttonElement,
+            label = button.querySelector('label, [data-role="label"]');
+
+        label = label || button;
+
+        emptyElement(label);
+        label.appendChild(document.createTextNode(value));
+    }
+
+    attachMenu(submenu) {
+        submenu.on('selectable.change', this._onSubmenuChange);
+        this._refreshLabel();
+    }
+
+    detachMenu() {
+        let submenu = this.submenu;
+
+        if(submenu) {
+            submenu.off('selectable.change', this._onSubmenuChange);
+        }
+
+        return submenu;
+    }
+
+    static getItemLabel(item) {
+        let button = findChild(item, (child) => child.matches('button, input[type="button"], a, [data-role="button"]')),
+            label = button.querySelector('[data-role="label"]');
+
+        if(label) {
+            return label.textContent;
+        } else {
+            return button.textContent;
+        }
+    }
+
+    get multiple() {
+        return this.submenu.selectable.multiple;
+    }
+
+    set multiple(value) {
+        this.submenu.selectable.multiple = value;
+    }
+
+    get deselectOn() {
+        return this.submenu.selectable.deselectOn;
+    }
+
+    set deselectOn(value) {
+        this.submenu.selectable.deselectOn = value;
+    }
+
+    get multiSelectOn() {
+        return this.submenu.selectable.multiSelectOn;
+    }
+
+    set multiSelectOn(value) {
+        this.submenu.selectable.multiSelectOn = value;
+    }
+
+    get rangeSelectOn() {
+        return this.submenu.selectable.rangeSelectOn;
+    }
+
+    set rangeSelectOn(value) {
+        this.submenu.selectable.rangeSelectOn = value;
+    }
+
+    getValue() {
+        return this.submenu.getValue();
+    }
+
+    setValue(value) {
+        this.submenu.setValue(value);
+    }
+
+    /**
+     *
+     * @param element
+     * @constructor
+     */
+    static FromSelect(element) {
+        console.log("Building from select.");
+    }
+
+    static FromHTML(element) {
+        console.log("Building select dropdown from markup");
+
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        let options = Attribute.deserialize(element.dataset, {
+            closeOnBlur: new Attribute(parseBoolean),
+            closeOnSelect: new Attribute(parseBoolean),
+            timeout: new Attribute(parseBooleanOrInt),
+            autoActivate: new Attribute(parseBooleanOrInt),
+            toggle: new Attribute(choice("on", "off", "both")),
+            delimiter: null,
+            placeholder: null,
+            multiple: new Attribute(parseBoolean),
+            maxItems: new Attribute(parseIntValue)
+        });
+
+        options.target = element;
+
+        let multiple = options.multiple || false;
+        delete options.multiple;
+
+        let menu = findChild(element, (child) => child.dataset.role === 'menu');
+
+        if(!menu) {
+            throw new Error("Couldn't initialize select.  Couldn't find child menu.  Did you forget to add data-role?");
+        }
+
+        let select = new SelectDropDown(options);
+        select.attachMenu(new SelectMenu({target: menu}));
+
+        console.log(multiple);
+        select.multiple = multiple;
+
+        return select;
+    }
+}
+
+
 AutoLoader.register('dropdown', (element) => {
     return DropDown.widget({target: element});
+});
+
+
+AutoLoader.register('select', (element) => {
+    if(element.nodeName === "SELECT") {
+        return SelectDropDown.FromSelect(element);
+    } else {
+        return SelectDropDown.FromHTML(element);
+    }
 });
