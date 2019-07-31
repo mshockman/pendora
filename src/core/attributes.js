@@ -19,7 +19,7 @@ export class Attribute {
     constructor(type, missing=DROP, nullable=null, validator=null) {
         this.type = type;
         this.missing = missing;
-        self.validator = validator;
+        this.validator = validator;
         this.nullable = nullable;
     }
 

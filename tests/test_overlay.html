@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_overlay.bundle.js"></script>
+
+    <style type="text/css">
+        .test-box {
+            background-color: #333;
+            width: 200px;
+            height: 200px;
+            box-sizing: border-box;
+            position: absolute;
+            color: #fff;
+            cursor: move;
+            user-select: none;
+
+            left: 100px;
+            top: 100px;
+        }
+
+        .test-box__content-wrapper {
+            border: 4px dashed #aaa;
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+        }
+
+        .test-box__content {
+            border: 2px solid #555;
+            background-color: #777;
+            padding: 5px;
+            width: 100px;
+            height: 100px;
+            vertical-align: middle;
+            margin: auto auto;
+        }
+
+        #mouse-outputs {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+        }
+
+        .test-window {
+            position: absolute;
+            border: 1px solid #000;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .test-window .toolbar {
+            background-color: #333;
+            color: #fff;
+            user-select: none;
+            font-weight: bold;
+            font-size: 1.25rem;
+            line-height: 1.25;
+            padding: 0.3rem;
+            cursor: move;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .test-window .content {
+            flex: 1;
+            padding: 0.3rem;
+        }
+
+        #test-window1 {
+            width: 400px;
+            height: 330px;
+            z-index: 2;
+            left: 400px;
+            top: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="mouse-outputs">
+        <div>Mouse Position: <span id="mouse-output">(0, 0)</span></div>
+        <div>Offset Position: <span id="offset-output">(0, 0)</span></div>
+        <div>Mouse Offset Position: <span id="mouse-offset-output">(0, 0)</span></div>
+        <div>POS XY: <span id="output-pos-xy">(0, 0)</span></div>
+        <div>min/max X: <span id="mmx">[0, 0]</span></div>
+        <div>min/max Y: <span id="mmy">[0, 0]</span></div>
+    </div>
+    <div class="test-box" id="test-draggable1">
+        <div class="test-box__content-wrapper">
+            <div class="test-box__content">Drag Me!</div>
+        </div>
+    </div>
+
+    <div class="test-window" id="test-window1">
+        <div class="toolbar drag-handle">
+            <div style="margin-right: auto;">Test Draggable Window</div>
+            <button type="button">Excluded Test</button>
+        </div>
+        <div class="content">
+            <strong>Hello World!</strong>
+        </div>
+    </div>
+</body>
+</body>
+</html>
