@@ -1,6 +1,34 @@
 const reg_whitespace = /\s+/;
 
 
+function returnFalse() {
+    return false;
+}
+
+
+function returnTrue() {
+    return true;
+}
+
+
+export class OEvent {
+    constructor(name, options) {
+        this.timestamp = Date.now();
+        this.name = name;
+        this.scope = null;
+        this.isImmediatePropagtionStopped = returnFalse;
+
+        if(options) {
+            Object.assign(this, options);
+        }
+    }
+
+    stopImmediatePropagation() {
+        this.isImmediatePropagtionStopped = returnTrue;
+    }
+}
+
+
 /**
  * Provides an interface for Observable objects.  This class should be extended.
  *
@@ -101,7 +129,7 @@ export default class Observable {
             events = events.split(reg_whitespace);
 
             for(let eventName of events) {
-                if(eventName.endsWith('.*')) {
+                if(eventName.endsWith('*')) {
                     eventName = eventName.substr(0, eventName.length-1); // Remove the last character, so *, from the string.
 
                     // Iterate over every event matching the once start start with the event name.
@@ -181,6 +209,52 @@ export default class Observable {
     clearEvent(eventName) {
         this.off(eventName);
         this.off(`${eventName}.*`);
+    }
+
+    /**
+     * Triggers an event that gets passed the OEvent object as it's only parameter.
+     * @param name
+     * @param options
+     * @param reverse
+     */
+    fireEvent(name, options, reverse=false) {
+        let event,
+            events = ['*'];
+
+        // User can pass an object as the only parameter.
+        // In these cases the object should have a name property that will be used
+        // as the event name.
+        if(typeof name === 'object') {
+            event = name;
+            name = event.name;
+        } else {
+            event = new OEvent(name, options);
+        }
+
+        if(name !== '*') {
+            let parts = name.split('.');
+
+            for(let i = 0, l = parts.length; i < l; i++) {
+                events.push(parts.slice(0, i+1).join('.'));
+            }
+        }
+
+        if(reverse) {
+            events.reverse();
+        }
+
+        for(let e of events) {
+            if(this._events[e]) {
+                let listener = this._events[e];
+                event.scope = e;
+
+                if(listener(event) === Observable.BREAK || (event.isImmediatePropagtionStopped && event.isImmediatePropagtionStopped())) {
+                    break;
+                }
+            }
+        }
+
+        return event;
     }
 }
 
