@@ -1,4 +1,5 @@
 import {addClasses} from 'core/utility';
+import Observable from "core/interface/Observable";
 
 
 export function offsetCursor({cursorX, cursorY, boundingRect}) {
@@ -41,12 +42,13 @@ function debug_output(selector, message) {
 }
 
 
-export default class Draggable {
+export default class Draggable extends Observable {
     static CLONE = clone;
     static OFFSET_CURSOR = offsetCursor;
 
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, cursor=offsetCursor, disabled=false,
         distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null}={}) {
+        super();
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
