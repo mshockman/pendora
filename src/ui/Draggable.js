@@ -20,21 +20,6 @@ export function clone(opacity=null) {
 }
 
 
-/**
- * Calculates the distance the x and y coordinates are from the origin.
- * @param x
- * @param y
- * @returns {number}
- */
-function calcDistanceFromOrigin(x, y) {
-    x = Math.abs(x);
-    // noinspection JSSuspiciousNameCombination
-    y = Math.abs(y);
-
-    return Math.sqrt(x**2 + y**2);
-}
-
-
 function debug_output(selector, message) {
     // todo remove debug
     let output = document.querySelector(selector);
@@ -77,6 +62,10 @@ export default class Draggable extends Observable {
         this._top = 0;
     }
 
+    /**
+     * Responsible for detecting dragging and starting the drag depending on delay and distance.
+     * @param event
+     */
     onMouseDown(event) {
         if(this.isDragging || this.disabled) {
             return;
@@ -99,30 +88,70 @@ export default class Draggable extends Observable {
 
         event.preventDefault();
 
-        if(typeof this.delay === 'number' && this.delay >= 0) {
-            // Delays that starting of the drag function for the given amount of milliseconds.
-            let doc = document,
-                onMouseUp,
-                timer;
+        let distance = this.distance || 0,
+            delay = typeof this.delay === 'number' ? this.delay : -1,
+            doc = document,
+            x = event.clientX,
+            y = event.clientY;
 
-            let fn = () => {
+        // Tests to see that delay and distance was met before dragging.
+        let startDragging = () => {
+            if(distance === 0 && delay < 0) {
+                this.startDrag(x, y);
+            }
+        };
+
+        // Delay dragging.
+        if(delay >= 0) {
+            let timer;
+
+            let onTimeout = () => {
+                delay = -1;
                 doc.removeEventListener('mouseup', onMouseUp);
-                this.startDrag(event.clientX, event.clientY);
+                startDragging();
             };
 
-            onMouseUp = () => {
-                // Cancel drag on mouse up.
+            let onMouseUp = () => {
                 doc.removeEventListener('mouseup', onMouseUp);
                 clearTimeout(timer);
             };
 
             doc.addEventListener('mouseup', onMouseUp);
-            timer = setTimeout(fn, this.delay);
-        } else {
-            this.startDrag(event.clientX, event.clientY);
+            timer = setTimeout(onTimeout, delay);
         }
+
+        // Delay by distance.
+        if(distance > 0) {
+            let onMouseUp = () => {
+                doc.removeEventListener('mouseup', onMouseUp);
+                doc.removeEventListener('mousemove', onMouseMove);
+            };
+
+            let onMouseMove = (event) => {
+                let delta = Math.sqrt(
+                    (event.clientY - y)**2 + (event.clientX - x)**2
+                );
+
+                if(delta > distance) {
+                    distance = 0;
+                    doc.removeEventListener('mouseup', onMouseUp);
+                    doc.removeEventListener('mousemove', onMouseMove);
+                    startDragging();
+                }
+            };
+
+            doc.addEventListener('mouseup', onMouseUp);
+            doc.addEventListener('mousemove', onMouseMove);
+        }
+
+        startDragging();
     }
 
+    /**
+     * Starts the drag animation at the given x, y origin.
+     * @param startMouseX
+     * @param startMouseY
+     */
     startDrag(startMouseX, startMouseY) {
         if(this.isDragging) {
             return;
@@ -131,8 +160,7 @@ export default class Draggable extends Observable {
         this.isDragging = true;
 
         let doc = document,
-            target,
-            dragging = true;
+            target;
 
         if(!this.helper || this.helper === 'self') {
             target = this.element;
@@ -140,11 +168,7 @@ export default class Draggable extends Observable {
             target = this.helper(this);
         }
 
-        if(this.distance !== null) {
-            dragging = false;
-        }
-
-        if(dragging && target !== this.element) {
+        if(target !== this.element) {
             this.element.parentElement.appendChild(target);
         }
 
@@ -197,15 +221,6 @@ export default class Draggable extends Observable {
             // todo remove debug
             debug_output('#mouse-output', `(${deltaX}, ${deltaY})`);
 
-            // Turn on dragging if distance broken.
-            if(!dragging) {
-                let distance = calcDistanceFromOrigin(deltaX, deltaY);
-
-                if(distance >= this.distance) {
-                    dragging = true;
-                }
-            }
-
             let posX = mouseOffsetX + offsetX + deltaX + this._left,
                 posY = mouseOffsetY + offsetY + deltaY + this._top;
 
@@ -233,15 +248,9 @@ export default class Draggable extends Observable {
         let onMouseMove = (event) => {
             event.preventDefault();
 
-            if(dragging && !target.parentElement) {
-                this.element.parentElement.appendChild(target);
-            }
-
             let [posX, posY] = getPosition(event.clientX, event.clientY);
 
-            if(dragging) {
-                target.style.transform = `translate(${posX}px, ${posY}px)`;
-            }
+            target.style.transform = `translate(${posX}px, ${posY}px)`;
         };
 
         let onMouseUp = (event) => {
@@ -253,12 +262,9 @@ export default class Draggable extends Observable {
 
             let [posX, posY] = getPosition(event.clientX, event.clientY);
 
-            if(dragging) {
-                this._left = posX;
-                this._top = posY;
-
-                this.element.style.transform = `translate(${this._left}px, ${this._top}px)`;
-            }
+            this._left = posX;
+            this._top = posY;
+            this.element.style.transform = `translate(${this._left}px, ${this._top}px)`;
 
             if(target !== this.element && target.parentElement) {
                 target.parentElement.removeChild(target);
