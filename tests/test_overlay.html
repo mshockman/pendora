@@ -18,7 +18,7 @@
             cursor: move;
             user-select: none;
 
-            left: 100px;
+            left: 250px;
             top: 100px;
         }
 
@@ -78,8 +78,21 @@
             width: 400px;
             height: 330px;
             z-index: 2;
-            left: 400px;
+            left: 800px;
             top: 300px;
+        }
+
+        #drag-list-test {
+            width: 200px;
+        }
+
+        #drag-list-test .drag-list-item {
+            background-color: #fafafa;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 5px;
+            cursor: move;
+            user-select: none;
         }
     </style>
 </head>
@@ -106,6 +119,14 @@
         <div class="content">
             <strong>Hello World!</strong>
         </div>
+    </div>
+
+    <div id="drag-list-test">
+        <div class="drag-list-item">Item #1</div>
+        <div class="drag-list-item">Item #2</div>
+        <div class="drag-list-item">Item #3</div>
+        <div class="drag-list-item">Item #4</div>
+        <div class="drag-list-item">Item #5</div>
     </div>
 </body>
 </body>

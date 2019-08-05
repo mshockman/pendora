@@ -1,10 +1,17 @@
 import Draggable from 'ui/Draggable';
+import Animation from 'core/Animation';
 
 
+window.Animation = Animation;
 
+window.test = new Animation({left: 0}, {left: 200}, 200000);
 
 
 window.addEventListener('load', () => {
-    window.d1 = new Draggable("#test-draggable1", {container: 'viewport', helper: Draggable.CLONE(0.5), distance: 100});
-    window.d1 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle', delay: 1000});
+    window.d1 = new Draggable("#test-draggable1", {container: 'viewport', helper: Draggable.CLONE(0.5), revert: 500});
+    window.d1 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle', delay: 1000, revert: 3000});
+
+    for(let item of document.querySelectorAll('#drag-list-test .drag-list-item')) {
+        new Draggable(item, {revert: 10000});
+    }
 });

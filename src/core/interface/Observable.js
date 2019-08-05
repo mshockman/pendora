@@ -11,20 +11,23 @@ function returnTrue() {
 }
 
 
-export class OEvent {
-    constructor(name, options) {
+export class Message {
+    constructor(address, options, target, sender) {
         this.timestamp = Date.now();
-        this.name = name;
-        this.scope = null;
-        this.isImmediatePropagtionStopped = returnFalse;
+        this.address = address;
+        this.topic = null;
+        this.target = target;
+        this.sender = sender;
+        this.forward = null;
+        this.isMessageIntercepted = returnFalse;
 
         if(options) {
             Object.assign(this, options);
         }
     }
 
-    stopImmediatePropagation() {
-        this.isImmediatePropagtionStopped = returnTrue;
+    interceptMessage() {
+        this.isMessageIntercepted = returnTrue;
     }
 }
 
@@ -213,26 +216,27 @@ export default class Observable {
 
     /**
      * Triggers an event that gets passed the OEvent object as it's only parameter.
-     * @param name
+     * @param topic
      * @param options
+     * @param sender
      * @param reverse
      */
-    fireEvent(name, options, reverse=false) {
-        let event,
+    sendMessage(topic, options, sender=null, reverse=false) {
+        let message,
             events = ['*'];
 
         // User can pass an object as the only parameter.
         // In these cases the object should have a name property that will be used
         // as the event name.
         if(typeof name === 'object') {
-            event = name;
-            name = event.name;
+            message = topic;
+            message.target = this;
         } else {
-            event = new OEvent(name, options);
+            message = new Message(topic, options, this, sender);
         }
 
-        if(name !== '*') {
-            let parts = name.split('.');
+        if(topic !== '*') {
+            let parts = topic.split('.');
 
             for(let i = 0, l = parts.length; i < l; i++) {
                 events.push(parts.slice(0, i+1).join('.'));
@@ -246,15 +250,30 @@ export default class Observable {
         for(let e of events) {
             if(this._events[e]) {
                 let listener = this._events[e];
-                event.scope = e;
+                message.topic = e;
 
-                if(listener(event) === Observable.BREAK || (event.isImmediatePropagtionStopped && event.isImmediatePropagtionStopped())) {
+                if(listener(message) === Observable.BREAK || (message.isMessageIntercepted && message.isMessageIntercepted())) {
                     break;
                 }
             }
         }
 
-        return event;
+        if(message.forward) {
+            let forward;
+
+            if(typeof message.forward === 'function') {
+                forward = message.forward(this);
+            } else {
+                forward = message.forward;
+                message.forward = null;
+            }
+
+            if(forward && forward !== this) {
+                forward.sendMessage(message);
+            }
+        }
+
+        return message;
     }
 }
 
