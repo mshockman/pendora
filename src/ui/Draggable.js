@@ -175,6 +175,11 @@ export default class Draggable extends Observable {
 
         this.isDragging = true;
 
+        if(this._revertFX) {
+            this._revertFX.cancel();
+            this._revertFX = null;
+        }
+
         let doc = document,
             target;
 
@@ -182,15 +187,12 @@ export default class Draggable extends Observable {
             target = this.element;
         } else if(typeof this.helper === 'function') {
             target = this.helper(this);
+        } else if(this.helper) {
+            target = this.helper;
         }
 
-        if(target !== this.element) {
+        if(target !== this.element && !target.parentElement) {
             this.element.parentElement.appendChild(target);
-        }
-
-        if(this._revertFX) {
-            this._revertFX.stop();
-            this._revertFX = null;
         }
 
         let container,
@@ -274,7 +276,7 @@ export default class Draggable extends Observable {
 
             let [posX, posY] = getPosition(event.clientX, event.clientY);
 
-            this._setPosition(posX, posY);
+            this._setPosition(target, posX, posY);
 
             this.sendMessage('drag', {
                 startMouseX,
@@ -313,12 +315,14 @@ export default class Draggable extends Observable {
             this._tx = posX;
             this._ty = posY;
 
-            this.element.style.transform = `translate(${posX}px, ${posY}px)`;
-
             if(this.revert === true) {
-                this._setPosition(this._left, this._top);
+                this._setPosition(target, this._left, this._top);
                 this._tx = 0;
                 this._ty = 0;
+
+                if(target !== this.element && target.parentElement) {
+                    target.parentElement.removeChild(target);
+                }
             } else if(typeof this.revert === 'number') {
                 let animation = new Animation({
                     left: posX,
@@ -326,21 +330,36 @@ export default class Draggable extends Observable {
                 }, {
                     left: this._left,
                     top: this._top
-                }, this.revert, (frame) => {
-                    this._setPosition(frame.left, frame.top);
+                }, this.revert, (fx) => {
+                    this._setPosition(target, fx.frame.left, fx.frame.top);
                 });
+
+                animation.onComplete = () => {
+                    if(target !== this.element && target.parentElement) {
+                        target.parentElement.removeChild(target);
+                    }
+                };
+
+                animation.onCancel = () => {
+                    if(target !== this.element && target.parentElement) {
+                        target.parentElement.removeChild(target);
+                        this._tx = 0;
+                        this._ty = 0;
+                    }
+                };
 
                 animation.play();
                 this._revertFX = animation;
             } else {
+                this._setPosition(this.element, posX, posY);
                 this._left = posX;
                 this._top = posY;
                 this._tx = 0;
                 this._ty = 0;
-            }
 
-            if(target !== this.element && target.parentElement) {
-                target.parentElement.removeChild(target);
+                if(target !== this.element && target.parentElement) {
+                    target.parentElement.removeChild(target);
+                }
             }
 
             this.sendMessage('drag-end', {
@@ -373,7 +392,7 @@ export default class Draggable extends Observable {
         doc.addEventListener('mouseup', onMouseUp);
 
         let [px, py] = getPosition(posX, posY);
-        this._setPosition(px, py);
+        this._setPosition(target, px, py);
 
         this.sendMessage('drag-start', {
             startMouseX,
@@ -401,11 +420,11 @@ export default class Draggable extends Observable {
         this.element.dispatchEvent(customEvent);
     }
 
-    _setPosition(x, y) {
+    _setPosition(target, x, y) {
         window.requestAnimationFrame(() => {
             this._tx = x;
             this._ty = y;
-            this.element.style.transform = `translate(${x}px, ${y}px)`;
+            target.style.transform = `translate(${x}px, ${y}px)`;
         });
     }
 }

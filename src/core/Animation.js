@@ -46,6 +46,9 @@ export default class Animation {
         this.easing = EASING[easing];
         this.duration = duration;
         this.onFrame = onFrame;
+        this.onComplete = null;
+        this.onCancel = null;
+        this.onPause = null;
 
         this.status = 'pending';
 
@@ -87,8 +90,13 @@ export default class Animation {
      * Starts the animation.
      */
     play() {
+        if(this.status === 'canceled') {
+            throw new Error("Animation as been canceled");
+        }
+
         let start = performance.now(),
-            end = start + (this.duration - (this.duration * this._position));
+            end = start + (this.duration - (this.duration * this._position)),
+            lastFrame = null;
 
         this._start = start;
         this._end = end;
@@ -100,6 +108,13 @@ export default class Animation {
             running = false;
             this._stop = null;
             this.status = 'paused';
+
+            if(this.onPause) {
+                this.onPause({
+                    animation: this,
+                    frame: lastFrame
+                });
+            }
         };
 
         this._stop = stopFN;
@@ -107,8 +122,12 @@ export default class Animation {
         let frame = (t) => {
             if(running) {
                 this._position = Math.min(1, (t-this._start) / (this._end - this._start));
-                let f = this.getFrame(this._position);
-                this.onFrame(f, this);
+                lastFrame = this.getFrame(this._position);
+
+                this.onFrame({
+                    animation: this,
+                    frame: lastFrame
+                });
 
                 if(this._position >= 1) {
                     this.status = 'complete';
@@ -117,6 +136,15 @@ export default class Animation {
 
                     if(this._stop === stopFN) {
                         this._stop = null;
+                    }
+
+                    if(this.onComplete) {
+                        window.requestAnimationFrame(() => {
+                            this.onComplete({
+                                animation: this,
+                                frame: lastFrame
+                            });
+                        });
                     }
                 } else {
                     window.requestAnimationFrame(frame);
@@ -133,6 +161,17 @@ export default class Animation {
     stop() {
         if(this._stop) {
             this._stop();
+        }
+    }
+
+    cancel() {
+        this.stop();
+        this.status = 'canceled';
+
+        if(this.onCancel) {
+            this.onCancel({
+                animation: this
+            });
         }
     }
 
