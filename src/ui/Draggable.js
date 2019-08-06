@@ -324,34 +324,43 @@ export default class Draggable extends Observable {
                     target.parentElement.removeChild(target);
                 }
             } else if(typeof this.revert === 'number') {
-                let animation = new Animation({
-                    left: posX,
-                    top: posY
-                }, {
-                    left: this._left,
-                    top: this._top
-                }, this.revert, (fx) => {
-                    this._setPosition(target, fx.frame.left, fx.frame.top);
-                });
+                let animation = new Animation(
+                    {
+                        left: posX,
+                        top: posY
+                    }, {
+                        left: this._left,
+                        top: this._top
+                    },
+                    this.revert,
+                    {
+                        onFrame: (fx) => {
+                            this._setPosition(target, fx.frame.left, fx.frame.top);
+                        },
 
-                animation.onComplete = () => {
-                    if(target !== this.element && target.parentElement) {
-                        target.parentElement.removeChild(target);
-                    }
-                };
+                        onComplete: () => {
+                            if (target !== this.element && target.parentElement) {
+                                target.parentElement.removeChild(target);
+                            }
+                        },
 
-                animation.onCancel = () => {
-                    if(target !== this.element && target.parentElement) {
-                        target.parentElement.removeChild(target);
-                        this._tx = 0;
-                        this._ty = 0;
+                        onCancel: () => {
+                            if (target !== this.element && target.parentElement) {
+                                target.parentElement.removeChild(target);
+                                this._tx = 0;
+                                this._ty = 0;
+                            }
+                        }
                     }
-                };
+                );
 
                 animation.play();
                 this._revertFX = animation;
             } else {
-                this._setPosition(this.element, posX, posY);
+                window.requestAnimationFrame(() => {
+                    target.style.transform = `translate(${posX}px, ${posY}px)`;
+                });
+
                 this._left = posX;
                 this._top = posY;
                 this._tx = 0;
@@ -421,10 +430,30 @@ export default class Draggable extends Observable {
     }
 
     _setPosition(target, x, y) {
+        this._tx = x;
+        this._ty = y;
+
         window.requestAnimationFrame(() => {
-            this._tx = x;
-            this._ty = y;
             target.style.transform = `translate(${x}px, ${y}px)`;
         });
+    }
+
+    // todo debug _tx and _ty
+    set _tx(value) {
+        this.__tx = value;
+        debug_output('#txy', `(${this._tx}, ${this._ty})`);
+    }
+
+    get _tx() {
+        return this.__tx;
+    }
+
+    set _ty(value) {
+        this.__ty = value;
+        debug_output('#txy', `(${this._tx}, ${this._ty})`);
+    }
+
+    get _ty() {
+        return this.__ty;
     }
 }

@@ -38,17 +38,20 @@ export default class Animation {
      * @param keyframe2 The ending keyframe
      * @param duration The duration of the animation.
      * @param onFrame Callback handle to handle "drawing" the frame.
+     * @param onCancel
+     * @param onComplete
+     * @param onPause
      * @param easing An easing function.  Linear by default.
      */
-    constructor(keyframe1, keyframe2, duration, onFrame, easing='linear') {
+    constructor(keyframe1, keyframe2, duration, {onFrame, onCancel, onComplete, onPause, easing='linear'}={}) {
         this.keyframe1 = keyframe1;
         this.keyframe2 = keyframe2;
         this.easing = EASING[easing];
         this.duration = duration;
         this.onFrame = onFrame;
-        this.onComplete = null;
-        this.onCancel = null;
-        this.onPause = null;
+        this.onComplete = onComplete;
+        this.onCancel = onCancel;
+        this.onPause = onPause;
 
         this.status = 'pending';
 
