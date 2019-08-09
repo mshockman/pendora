@@ -15,3 +15,18 @@ window.addEventListener('load', () => {
         new Draggable(item, {revert: 2000});
     }
 });
+
+
+window.addEventListener('mousemove', (event) => {
+    let output = document.getElementById('mouse-pos-client-output');
+    output.innerText = `(${event.clientX}, ${event.clientY})`;
+
+    output = document.getElementById('mouse-pos-screen-output');
+    output.innerText = `(${event.screenX}, ${event.screenY})`;
+
+    output = document.getElementById('mouse-pos-page-output');
+    output.innerText = `(${event.pageX}, ${event.pageY})`;
+
+    output = document.getElementById('mouse-pos-client-scroll-output');
+    output.innerText = `(${event.pageX + window.scrollX}, ${event.pageY + window.scrollY})`;
+});

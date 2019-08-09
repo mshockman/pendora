@@ -3,8 +3,8 @@ import Observable from "core/interface/Observable";
 import Animation from "core/Animation";
 
 
-export function offsetCursor({cursorX, cursorY, boundingRect}) {
-    return [boundingRect.left - cursorX, boundingRect.top - cursorY];
+export function cursor({cursorX, cursorY, boundingRect}) {
+    return [cursorX - boundingRect.left, cursorY - boundingRect.top];
 }
 
 
@@ -21,6 +21,18 @@ export function clone(opacity=null) {
 }
 
 
+function _getClientRect(element) {
+    let box = element.getBoundingClientRect();
+
+    return {
+        left: box.left + window.scrollX,
+        top: box.top + window.scrollY,
+        width: box.width,
+        height: box.height
+    };
+}
+
+
 function debug_output(selector, message) {
     // todo remove debug
     let output = document.querySelector(selector);
@@ -30,9 +42,9 @@ function debug_output(selector, message) {
 
 export default class Draggable extends Observable {
     static CLONE = clone;
-    static OFFSET_CURSOR = offsetCursor;
+    static OFFSET_CURSOR = cursor;
 
-    constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, cursor=offsetCursor, disabled=false,
+    constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
         distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null}={}) {
         super();
 
@@ -49,7 +61,7 @@ export default class Draggable extends Observable {
         this._onMouseDown = this.onMouseDown.bind(this);
         this.disabled = disabled;
         this.helper = helper;
-        this.cursor = cursor;
+        this.offset = offset;
         this.axis = axis;
         this.delay = delay;
         this.distance = distance;
@@ -100,8 +112,8 @@ export default class Draggable extends Observable {
         let distance = this.distance || 0,
             delay = typeof this.delay === 'number' ? this.delay : -1,
             doc = document,
-            startX = event.clientX,
-            startY = event.clientY,
+            startX = event.clientX + window.scrollX,
+            startY = event.clientY + window.scrollY,
             posX = startX,
             posY = startY;
 
@@ -139,8 +151,8 @@ export default class Draggable extends Observable {
             };
 
             let onMouseMove = (event) => {
-                posX = event.clientX;
-                posY = event.clientY;
+                posX = event.clientX + window.scrollX;
+                posY = event.clientY + window.scrollY;
 
                 let delta = Math.sqrt(
                     (posX - startX)**2 + (posY - startY)**2
@@ -196,87 +208,93 @@ export default class Draggable extends Observable {
         }
 
         let container,
-            startBoundingBox = this.element.getBoundingClientRect(),
-            mouseOffsetX = startMouseX - startBoundingBox.left,
-            mouseOffsetY = startMouseY - startBoundingBox.top,
-            offsetX = 0,
-            offsetY = 0;
+            startBoundingBox = _getClientRect(this.element);
 
-        if(this.cursor) {
-            [offsetX, offsetY] = this.cursor({
-                target: target,
-                draggable: this,
-                cursorX: startMouseX,
-                cursorY: startMouseY,
-                boundingRect: startBoundingBox
-            });
+        let mouseOffsetX = posX - startBoundingBox.left,
+            mouseOffsetY = posY - startBoundingBox.top,
+            offsetX = mouseOffsetX, // offset top left corner to mouse position by default.
+            offsetY = mouseOffsetY; // offset top left corner to mouse position by default.
+
+        // Remember starting x, y position for reverting.
+        let startLeft = this._left,
+            startTop = this._top;
+
+        if(this.offset) {
+            let offset = this.offset;
+
+            if(typeof offset === 'function') {
+                offset = this.offset({
+                    target: target,
+                    draggable: this,
+                    cursorX: startMouseX,
+                    cursorY: startMouseY,
+                    boundingRect: startBoundingBox
+                });
+            }
+
+            if(offset) {
+                offsetX -= offset[0];
+                offsetY -= offset[1];
+            }
         }
 
-        offsetX += this._tx;
-        offsetY += this._ty;
-
-        // todo remove debug
-        let output = document.querySelector("#offset-output");
-        output.innerText = `(${offsetX}, ${offsetY})`;
-
-        let m_output = document.querySelector('#mouse-offset-output');
-        m_output.innerText = `(${mouseOffsetX}, ${mouseOffsetY})`;
+        debug_output('#output-offset', `(${offsetX}, ${offsetY})`);
 
         if(this.container === 'viewport') {
-            container = {
-                left: 0,
-                top: 0,
-                width: window.innerWidth,
-                height: window.innerHeight
+            // todo: fix bug
+            // this mostly likely needs to recalulated every update to viewport because of scrolling.
+            container = () => {
+                return {
+                    left: window.scrollX,
+                    top: window.scrollY,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
             };
         }
 
-        let getPosition = (clientX, clientY) => {
-            // Calculate the mouse position relative to the starting position.
+        let getPosition = (mouseX, mouseY) => {
+            // Calculate the change is mouse position.
             let deltaX = 0,
-                deltaY = 0;
+                deltaY = 0,
+                x, y;
 
             if(this.axis === 'x' || this.axis === 'xy') {
-                deltaX = clientX - startMouseX;
+                deltaX = mouseX - startMouseX;
             }
 
             if(this.axis === 'y' || this.axis === 'xy') {
-                deltaY = clientY - startMouseY;
+                deltaY = mouseY - startMouseY;
             }
 
-            // todo remove debug
-            debug_output('#mouse-output', `(${deltaX}, ${deltaY})`);
+            x = startLeft + offsetX + deltaX + (startBoundingBox.left - startLeft);
+            y = startTop + offsetY + deltaY + (startBoundingBox.top - startTop);
 
-            let posX = mouseOffsetX + offsetX + deltaX + this._left,
-                posY = mouseOffsetY + offsetY + deltaY + this._top;
-
-            // todo remove debug
-            debug_output('#output-pos-xy', `(${posX}, ${posY})`);
+            let boundingBox = target.getBoundingClientRect();
 
             if(container) {
-                let minX = container.left - startBoundingBox.left + this._left,
-                    maxX = container.left + container.width - startBoundingBox.left + this._left - startBoundingBox.width,
-                    minY = container.top - startBoundingBox.top + this._top,
-                    maxY = container.top + container.height - startBoundingBox.top + this._top - startBoundingBox.height;
+                if(typeof container === 'function') {
+                    container = container(this);
+                }
 
-                debug_output('#mmx', `[${minX}, ${maxX}]`);
-                debug_output('#mmy', `[${minY}, ${maxY}]`);
-
-                posX = Math.max(minX, posX);
-                posX = Math.min(maxX, posX);
-                posY = Math.max(minY, posY);
-                posY = Math.min(maxY, posY);
+                x = Math.max(container.left, Math.min(x, container.left + container.width - boundingBox.width));
+                y = Math.max(container.top, Math.min(y, container.top + container.height - boundingBox.height));
             }
 
-            return [posX, posY];
+            x -= (startBoundingBox.left - startLeft);
+            y -= (startBoundingBox.top - startTop);
+
+            debug_output('#output-xy', `(${x}, ${y})`);
+
+            return [x, y];
         };
 
         let onMouseMove = (event) => {
             event.preventDefault();
 
-            let [posX, posY] = getPosition(event.clientX, event.clientY);
+            let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
 
-            this._setPosition(target, posX, posY);
+            this.translate(target, x, y);
 
             this.sendMessage('drag', {
                 startMouseX,
@@ -311,14 +329,10 @@ export default class Draggable extends Observable {
             doc = null;
             this.isDragging = false;
 
-            let [posX, posY] = getPosition(event.clientX, event.clientY);
-            this._tx = posX;
-            this._ty = posY;
+            let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
 
             if(this.revert === true) {
-                this._setPosition(target, this._left, this._top);
-                this._tx = 0;
-                this._ty = 0;
+                this.translate(target, this._tx, this._ty);
 
                 if(target !== this.element && target.parentElement) {
                     target.parentElement.removeChild(target);
@@ -326,29 +340,31 @@ export default class Draggable extends Observable {
             } else if(typeof this.revert === 'number') {
                 let animation = new Animation(
                     {
-                        left: posX,
-                        top: posY
+                        left: x,
+                        top: y
                     }, {
-                        left: this._left,
-                        top: this._top
+                        left: this._tx,
+                        top: this._ty
                     },
                     this.revert,
                     {
                         onFrame: (fx) => {
-                            this._setPosition(target, fx.frame.left, fx.frame.top);
+                            this.translate(target, fx.frame.left, fx.frame.top);
                         },
 
                         onComplete: () => {
                             if (target !== this.element && target.parentElement) {
                                 target.parentElement.removeChild(target);
+                                this._left = this._tx;
+                                this._top = this._ty;
                             }
                         },
 
                         onCancel: () => {
                             if (target !== this.element && target.parentElement) {
                                 target.parentElement.removeChild(target);
-                                this._tx = 0;
-                                this._ty = 0;
+                                this._left = this._tx;
+                                this._top = this._ty;
                             }
                         }
                     }
@@ -357,14 +373,9 @@ export default class Draggable extends Observable {
                 animation.play();
                 this._revertFX = animation;
             } else {
-                window.requestAnimationFrame(() => {
-                    target.style.transform = `translate(${posX}px, ${posY}px)`;
-                });
-
-                this._left = posX;
-                this._top = posY;
-                this._tx = 0;
-                this._ty = 0;
+                this.translate(this.element, x, y);
+                this._tx = x;
+                this._ty = y;
 
                 if(target !== this.element && target.parentElement) {
                     target.parentElement.removeChild(target);
@@ -401,7 +412,7 @@ export default class Draggable extends Observable {
         doc.addEventListener('mouseup', onMouseUp);
 
         let [px, py] = getPosition(posX, posY);
-        this._setPosition(target, px, py);
+        this.translate(target, px, py);
 
         this.sendMessage('drag-start', {
             startMouseX,
@@ -429,12 +440,12 @@ export default class Draggable extends Observable {
         this.element.dispatchEvent(customEvent);
     }
 
-    _setPosition(target, x, y) {
-        this._tx = x;
-        this._ty = y;
+    translate(target, x, y) {
+        this._left = x;
+        this._top = y;
 
         window.requestAnimationFrame(() => {
-            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         });
     }
 

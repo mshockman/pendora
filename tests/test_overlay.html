@@ -8,6 +8,11 @@
     <script type="text/javascript" src="dist/test_overlay.bundle.js"></script>
 
     <style type="text/css">
+        body {
+            width: 9000px;
+            height: 9000px;
+        }
+
         .test-box {
             background-color: #333;
             width: 200px;
@@ -43,7 +48,7 @@
         }
 
         #mouse-outputs {
-            position: absolute;
+            position: fixed;
             right: 5px;
             top: 5px;
         }
@@ -98,13 +103,15 @@
 </head>
 <body>
     <div id="mouse-outputs">
-        <div>Mouse Position: <span id="mouse-output">(0, 0)</span></div>
-        <div>Offset Position: <span id="offset-output">(0, 0)</span></div>
-        <div>Mouse Offset Position: <span id="mouse-offset-output">(0, 0)</span></div>
-        <div>POS XY: <span id="output-pos-xy">(0, 0)</span></div>
-        <div>min/max X: <span id="mmx">[0, 0]</span></div>
-        <div>min/max Y: <span id="mmy">[0, 0]</span></div>
-        <div>TX / TY: <span id="txy">(0, 0)</span></div>
+        <div>Client XY Position: <span id="mouse-pos-client-output">(0, 0)</span></div>
+        <div>Screen XY Position: <span id="mouse-pos-screen-output">(0, 0)</span></div>
+        <div>Page XY Position: <span id="mouse-pos-page-output">(0, 0)</span></div>
+        <div>Client Scroll XY Position: <span id="mouse-pos-client-scroll-output">(0, 0)</span></div>
+        <div>TXY: <span id="txy">(0, 0)</span></div>
+        <hr>
+        <div>Offset XY: <span id="output-offset">(0, 0)</span></div>
+        <div>XY: <span id="output-xy">(0, 0)</span></div>
+        <div>CLAMP: <span id="clamp-xy">(0, 0) - (0, 0)</span></div>
     </div>
     <div class="test-box" id="test-draggable1">
         <div class="test-box__content-wrapper">
