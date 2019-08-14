@@ -1,6 +1,6 @@
 import {addClasses} from 'core/utility';
-import Observable from "core/interface/Observable";
 import Animation from "core/Animation";
+import {privateCache} from "core/data";
 
 
 export function cursor({cursorX, cursorY, boundingRect}) {
@@ -40,13 +40,12 @@ function debug_output(selector, message) {
 }
 
 
-export default class Draggable extends Observable {
+export default class Draggable {
     static CLONE = clone;
     static OFFSET_CURSOR = cursor;
 
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
-        distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null}={}) {
-        super();
+        distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null, selector=null}={}) {
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -69,6 +68,7 @@ export default class Draggable extends Observable {
         this.handle = handle;
         this.exclude = exclude;
         this.revert = revert;
+        this.selector = selector;
 
         this.element.addEventListener('mousedown', this._onMouseDown);
         this.isDragging = false;
@@ -88,13 +88,28 @@ export default class Draggable extends Observable {
      * @param event
      */
     onMouseDown(event) {
-        if(this.isDragging || this.disabled) {
+        let element = this.element;
+
+        if(this.selector) {
+            element = event.target.closest(this.selector);
+
+            if(!this.element.contains(element)) {
+                element = null;
+            }
+        }
+
+        if(!element) return;
+
+        let data = privateCache.cache(element);
+
+        if(data.isDragging || this.disabled) {
             return;
         }
 
         if(this.handle) {
             let handle = event.target.closest(this.handle);
-            if(!handle || !this.element.contains(handle)) {
+
+            if(!handle || !element.contains(handle)) {
                 return;
             }
         }
@@ -102,7 +117,7 @@ export default class Draggable extends Observable {
         if(this.exclude) {
             let excluded = event.target.closest(this.exclude);
 
-            if(excluded) {
+            if(excluded && element.contains(excluded)) {
                 return;
             }
         }
@@ -120,7 +135,7 @@ export default class Draggable extends Observable {
         // Tests to see that delay and distance was met before dragging.
         let startDragging = () => {
             if(distance === 0 && delay < 0) {
-                this.startDrag(startX, startY, posX, posY);
+                this.startDrag(element, startX, startY, posX, posY);
             }
         };
 
@@ -175,17 +190,20 @@ export default class Draggable extends Observable {
 
     /**
      * Starts the drag animation at the given x, y origin.
+     * @param element
      * @param startMouseX
      * @param startMouseY
      * @param posX
      * @param posY
      */
-    startDrag(startMouseX, startMouseY, posX, posY) {
+    startDrag(element, startMouseX, startMouseY, posX, posY) {
         if(this.isDragging) {
             return;
         }
 
-        this.isDragging = true;
+        let cache = privateCache.cache(element);
+
+        cache.isDragging = true;
 
         if(this._revertFX) {
             this._revertFX.cancel();
@@ -196,19 +214,19 @@ export default class Draggable extends Observable {
             target;
 
         if(!this.helper || this.helper === 'self') {
-            target = this.element;
+            target = element;
         } else if(typeof this.helper === 'function') {
             target = this.helper(this);
         } else if(this.helper) {
             target = this.helper;
         }
 
-        if(target !== this.element && !target.parentElement) {
-            this.element.parentElement.appendChild(target);
+        if(target !== element && !target.parentElement) {
+            element.parentElement.appendChild(target);
         }
 
         let container,
-            startBoundingBox = _getClientRect(this.element);
+            startBoundingBox = _getClientRect(element);
 
         let mouseOffsetX = posX - startBoundingBox.left,
             mouseOffsetY = posY - startBoundingBox.top,
@@ -216,8 +234,8 @@ export default class Draggable extends Observable {
             offsetY = mouseOffsetY; // offset top left corner to mouse position by default.
 
         // Remember starting x, y position for reverting.
-        let startLeft = this._left,
-            startTop = this._top;
+        let startLeft = cache._left || 0,
+            startTop = cache._top || 0;
 
         if(this.offset) {
             let offset = this.offset;
@@ -296,30 +314,21 @@ export default class Draggable extends Observable {
 
             this.translate(target, x, y);
 
-            this.sendMessage('drag', {
-                startMouseX,
-                startMouseY,
-                offsetX,
-                offsetY,
-                mouseX: event.mouseX,
-                mouseY: event.mouseY
-            }, this);
+            let dragEvent = new CustomEvent("drag-move", {
+                bubbles: true,
 
-            let customEvent = new CustomEvent('drag', {
                 detail: {
+                    mouseX: event.mouseX,
+                    mouseY: event.mouseY,
                     startMouseX,
                     startMouseY,
                     offsetX,
                     offsetY,
-                    mouseX: event.mouseX,
-                    mouseY: event.mouseY,
                     draggable: this
-                },
-
-                bubbles: true
+                }
             });
 
-            this.element.dispatchEvent(customEvent);
+            element.dispatchEvent(dragEvent);
         };
 
         let onMouseUp = (event) => {
@@ -327,24 +336,48 @@ export default class Draggable extends Observable {
             doc.removeEventListener('mousemove', onMouseMove);
             doc.removeEventListener('mouseup', onMouseUp);
             doc = null;
-            this.isDragging = false;
+            cache.isDragging = false;
 
             let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
+            this.translate(target, x, y);
 
-            if(this.revert === true) {
-                this.translate(target, this._tx, this._ty);
+            let accepted = false;
 
-                if(target !== this.element && target.parentElement) {
+            let dragEnd = new CustomEvent('drag-end', {
+                bubbles: true,
+
+                detail: {
+                    startMouseX,
+                    startMouseY,
+                    offsetX,
+                    offsetY,
+                    mouseX: event.mouseX,
+                    mouseY: event.mouseY,
+                    originalEvent: event,
+                    draggable: this,
+
+                    accept: () => accepted = true,
+
+                    isAccepted: () => { return accepted; }
+                }
+            });
+
+            element.dispatchEvent(dragEnd);
+
+            if(!accepted && this.revert === true) {
+                this.translate(target, cache._tx || 0, cache._ty || 0);
+
+                if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
-            } else if(typeof this.revert === 'number') {
+            } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation(
                     {
                         left: x,
                         top: y
                     }, {
-                        left: this._tx,
-                        top: this._ty
+                        left: cache._tx || 0,
+                        top: cache._ty || 0
                     },
                     this.revert,
                     {
@@ -353,18 +386,18 @@ export default class Draggable extends Observable {
                         },
 
                         onComplete: () => {
-                            if (target !== this.element && target.parentElement) {
+                            if (target !== element && target.parentElement) {
                                 target.parentElement.removeChild(target);
-                                this._left = this._tx;
-                                this._top = this._ty;
+                                cache._left = cache._tx || 0;
+                                cache._top = cache._ty || 0;
                             }
                         },
 
                         onCancel: () => {
-                            if (target !== this.element && target.parentElement) {
+                            if (target !== element && target.parentElement) {
                                 target.parentElement.removeChild(target);
-                                this._left = this._tx;
-                                this._top = this._ty;
+                                cache._left = cache._tx || 0;
+                                cache._top = cache._ty || 0;
                             }
                         }
                     }
@@ -373,39 +406,14 @@ export default class Draggable extends Observable {
                 animation.play();
                 this._revertFX = animation;
             } else {
-                this.translate(this.element, x, y);
-                this._tx = x;
-                this._ty = y;
+                this.translate(element, x, y);
+                cache._tx = x || 0;
+                cache._ty = y || 0;
 
-                if(target !== this.element && target.parentElement) {
+                if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
             }
-
-            this.sendMessage('drag-end', {
-                startMouseX,
-                startMouseY,
-                offsetX,
-                offsetY,
-                mouseX: event.clientX,
-                mouseY: event.clientY
-            }, this);
-
-            let customEvent = new CustomEvent('drag-end', {
-                detail: {
-                    startMouseX,
-                    startMouseY,
-                    offsetX,
-                    offsetY,
-                    mouseX: event.mouseX,
-                    mouseY: event.mouseY,
-                    draggable: this
-                },
-
-                bubbles: true
-            });
-
-            this.element.dispatchEvent(customEvent);
         };
 
         doc.addEventListener('mousemove', onMouseMove);
@@ -414,35 +422,25 @@ export default class Draggable extends Observable {
         let [px, py] = getPosition(posX, posY);
         this.translate(target, px, py);
 
-        this.sendMessage('drag-start', {
-            startMouseX,
-            startMouseY,
-            offsetX,
-            offsetY,
-            mouseX: posX,
-            mouseY: posY
-        }, this);
-
-        let customEvent = new CustomEvent('drag-start', {
+        let dragStart = new CustomEvent('drag-start', {
+            bubbles: true,
             detail: {
-                startMouseX,
                 startMouseY,
-                offsetX,
+                startMouseX,
                 offsetY,
-                mouseX: posX,
-                mouseY: posY,
+                offsetX,
                 draggable: this
-            },
-
-            bubbles: true
+            }
         });
 
-        this.element.dispatchEvent(customEvent);
+        element.dispatchEvent(dragStart);
     }
 
     translate(target, x, y) {
-        this._left = x;
-        this._top = y;
+        let cache = privateCache.cache(target);
+
+        cache._left = x;
+        cache._top = y;
 
         window.requestAnimationFrame(() => {
             target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
