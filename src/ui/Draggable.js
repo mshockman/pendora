@@ -1,6 +1,7 @@
-import {addClasses} from 'core/utility';
+import {addClasses, clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
+import {getTranslation} from "core/position";
 
 
 export function cursor({cursorX, cursorY, boundingRect}) {
@@ -72,13 +73,6 @@ export default class Draggable {
 
         this.element.addEventListener('mousedown', this._onMouseDown);
         this.isDragging = false;
-        // The final position.
-        this._left = 0;
-        this._top = 0;
-
-        // The position why being dragged or animated.
-        this._tx = 0;
-        this._ty = 0;
 
         this._revertFX = null;
     }
@@ -127,15 +121,15 @@ export default class Draggable {
         let distance = this.distance || 0,
             delay = typeof this.delay === 'number' ? this.delay : -1,
             doc = document,
-            startX = event.clientX + window.scrollX,
-            startY = event.clientY + window.scrollY,
-            posX = startX,
-            posY = startY;
+            startMouseDocumentX = event.clientX + window.scrollX,
+            startMouseDocumentY = event.clientY + window.scrollY,
+            mouseDocumentX = startMouseDocumentX,
+            mouseDocumentY = startMouseDocumentY;
 
         // Tests to see that delay and distance was met before dragging.
         let startDragging = () => {
             if(distance === 0 && delay < 0) {
-                this.startDrag(element, startX, startY, posX, posY);
+                this.startDrag(element, startMouseDocumentX, startMouseDocumentY, mouseDocumentX, mouseDocumentY);
             }
         };
 
@@ -166,11 +160,11 @@ export default class Draggable {
             };
 
             let onMouseMove = (event) => {
-                posX = event.clientX + window.scrollX;
-                posY = event.clientY + window.scrollY;
+                mouseDocumentX = event.clientX + window.scrollX;
+                mouseDocumentY = event.clientY + window.scrollY;
 
                 let delta = Math.sqrt(
-                    (posX - startX)**2 + (posY - startY)**2
+                    (mouseDocumentX - startMouseDocumentX)**2 + (mouseDocumentY - startMouseDocumentY)**2
                 );
 
                 if(delta > distance) {
@@ -197,14 +191,14 @@ export default class Draggable {
      * @param posY
      */
     startDrag(element, startMouseX, startMouseY, posX, posY) {
+        // todo is this doing anything?  Check to make sure flag gets set.
         if(this.isDragging) {
             return;
         }
 
-        let cache = privateCache.cache(element);
+        this.isDragging = true;
 
-        cache.isDragging = true;
-
+        // Cancel any animation that are running.
         if(this._revertFX) {
             this._revertFX.cancel();
             this._revertFX = null;
@@ -221,22 +215,25 @@ export default class Draggable {
             target = this.helper;
         }
 
-        if(target !== element && !target.parentElement) {
+        // If the target doesn't have a parentElement it needs to be added to the page.
+        if(!target.parentElement) {
             element.parentElement.appendChild(target);
         }
 
         let container,
             startBoundingBox = _getClientRect(element);
 
-        let mouseOffsetX = posX - startBoundingBox.left,
-            mouseOffsetY = posY - startBoundingBox.top,
-            offsetX = mouseOffsetX, // offset top left corner to mouse position by default.
-            offsetY = mouseOffsetY; // offset top left corner to mouse position by default.
+        // mouseOffsetX and mouseOffsetY is the mouses offset relative to the top left corner of the element
+        // being dragged.
 
-        // Remember starting x, y position for reverting.
-        let startLeft = cache._left || 0,
-            startTop = cache._top || 0;
+        // offsetX and offsetY is how much the dragged element is offset from the cursor.
+        // By default it is at the top left of the element.
+        let offsetX = 0, // offset top left corner to mouse position by default.
+            offsetY = 0, // offset top left corner to mouse position by default.
+            startingTranslation = getTranslation(target);
 
+        // The offset property controls how much the dragged element is offset from top left corner of the element.
+        // By default it is [0, 0] but a function can be or array can be passed to control this behavior.
         if(this.offset) {
             let offset = this.offset;
 
@@ -256,11 +253,8 @@ export default class Draggable {
             }
         }
 
-        debug_output('#output-offset', `(${offsetX}, ${offsetY})`);
-
+        // The container property constrains the draggable element to a specific area.
         if(this.container === 'viewport') {
-            // todo: fix bug
-            // this mostly likely needs to recalulated every update to viewport because of scrolling.
             container = () => {
                 return {
                     left: window.scrollX,
@@ -271,40 +265,30 @@ export default class Draggable {
             };
         }
 
+        // Takes mouse position relative to document.
         let getPosition = (mouseX, mouseY) => {
-            // Calculate the change is mouse position.
-            let deltaX = 0,
-                deltaY = 0,
-                x, y;
+            let translation = getTranslation(target),
+                bb = target.getBoundingClientRect();
 
-            if(this.axis === 'x' || this.axis === 'xy') {
-                deltaX = mouseX - startMouseX;
-            }
-
-            if(this.axis === 'y' || this.axis === 'xy') {
-                deltaY = mouseY - startMouseY;
-            }
-
-            x = startLeft + offsetX + deltaX + (startBoundingBox.left - startLeft);
-            y = startTop + offsetY + deltaY + (startBoundingBox.top - startTop);
-
-            let boundingBox = target.getBoundingClientRect();
+            let x = mouseX + offsetX,
+                y = mouseY + offsetY;
 
             if(container) {
                 if(typeof container === 'function') {
-                    container = container(this);
+                    container = container();
                 }
 
-                x = Math.max(container.left, Math.min(x, container.left + container.width - boundingBox.width));
-                y = Math.max(container.top, Math.min(y, container.top + container.height - boundingBox.height));
+                x = clamp(x, container.left, container.left + container.width - bb.width);
+                y = clamp(y, container.top, container.top + container.height - bb.height);
             }
 
-            x -= (startBoundingBox.left - startLeft);
-            y -= (startBoundingBox.top - startTop);
+            let deltaX = (bb.left + window.scrollX) - x,
+                deltaY = (bb.top + window.scrollY) - y;
 
-            debug_output('#output-xy', `(${x}, ${y})`);
-
-            return [x, y];
+            return [
+                translation.x - deltaX,
+                translation.y - deltaY
+            ];
         };
 
         let onMouseMove = (event) => {
@@ -318,13 +302,17 @@ export default class Draggable {
                 bubbles: true,
 
                 detail: {
-                    mouseX: event.mouseX,
-                    mouseY: event.mouseY,
+                    mouseX: event.clientX + window.scrollX,
+                    mouseY: event.clientY + window.scrollY,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
                     startMouseX,
                     startMouseY,
                     offsetX,
                     offsetY,
-                    draggable: this
+                    draggable: this,
+                    helper: target,
+                    originalEvent: event
                 }
             });
 
@@ -336,12 +324,24 @@ export default class Draggable {
             doc.removeEventListener('mousemove', onMouseMove);
             doc.removeEventListener('mouseup', onMouseUp);
             doc = null;
-            cache.isDragging = false;
+            this.isDragging = false;
 
             let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
             this.translate(target, x, y);
 
-            let accepted = false;
+            let accepted = null;
+
+            function accept(element) {
+                if(!accepted) {
+                    accepted = element;
+                } else {
+                    throw new Error("Draggable has already been accepted.");
+                }
+            }
+
+            function isAccepted() {
+                return !!accepted;
+            }
 
             let dragEnd = new CustomEvent('drag-end', {
                 bubbles: true,
@@ -351,33 +351,48 @@ export default class Draggable {
                     startMouseY,
                     offsetX,
                     offsetY,
-                    mouseX: event.mouseX,
-                    mouseY: event.mouseY,
+                    mouseX: event.clientX + window.scrollX,
+                    mouseY: event.clientY + window.scrollY,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+
                     originalEvent: event,
                     draggable: this,
+                    helper: target,
 
-                    accept: () => accepted = true,
-
-                    isAccepted: () => { return accepted; }
+                    accept: accept,
+                    isAccepted: isAccepted
                 }
             });
+
+            dragEnd.accept = accept;
+            dragEnd.isAccepted = isAccepted;
 
             element.dispatchEvent(dragEnd);
 
             if(!accepted && this.revert === true) {
-                this.translate(target, cache._tx || 0, cache._ty || 0);
+                this.translate(target, startingTranslation.x, startingTranslation.y);
 
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
+
+                let dragComplete = new CustomEvent('drag-complete', {
+                    bubbles: true,
+                    detail: {
+                        draggable: this
+                    }
+                });
+
+                element.dispatchEvent(dragComplete);
             } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation(
                     {
                         left: x,
                         top: y
                     }, {
-                        left: cache._tx || 0,
-                        top: cache._ty || 0
+                        left: startingTranslation.x,
+                        top: startingTranslation.y
                     },
                     this.revert,
                     {
@@ -388,16 +403,21 @@ export default class Draggable {
                         onComplete: () => {
                             if (target !== element && target.parentElement) {
                                 target.parentElement.removeChild(target);
-                                cache._left = cache._tx || 0;
-                                cache._top = cache._ty || 0;
                             }
+
+                            let dragComplete = new CustomEvent('drag-complete', {
+                                bubbles: true,
+                                detail: {
+                                    draggable: this
+                                }
+                            });
+
+                            element.dispatchEvent(dragComplete);
                         },
 
                         onCancel: () => {
                             if (target !== element && target.parentElement) {
                                 target.parentElement.removeChild(target);
-                                cache._left = cache._tx || 0;
-                                cache._top = cache._ty || 0;
                             }
                         }
                     }
@@ -407,12 +427,19 @@ export default class Draggable {
                 this._revertFX = animation;
             } else {
                 this.translate(element, x, y);
-                cache._tx = x || 0;
-                cache._ty = y || 0;
 
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
+
+                let dragComplete = new CustomEvent('drag-complete', {
+                    bubbles: true,
+                    detail: {
+                        draggable: this
+                    }
+                });
+
+                element.dispatchEvent(dragComplete);
             }
         };
 
@@ -429,40 +456,20 @@ export default class Draggable {
                 startMouseX,
                 offsetY,
                 offsetX,
-                draggable: this
+                mouseX: posX,
+                mouseY: posY,
+                clientX: posX - window.scrollX,
+                clientY: posY - window.scrollY,
+                draggable: this,
+                helper: target
             }
         });
 
         element.dispatchEvent(dragStart);
     }
 
+    // noinspection JSMethodCanBeStatic
     translate(target, x, y) {
-        let cache = privateCache.cache(target);
-
-        cache._left = x;
-        cache._top = y;
-
-        window.requestAnimationFrame(() => {
-            target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        });
-    }
-
-    // todo debug _tx and _ty
-    set _tx(value) {
-        this.__tx = value;
-        debug_output('#txy', `(${this._tx}, ${this._ty})`);
-    }
-
-    get _tx() {
-        return this.__tx;
-    }
-
-    set _ty(value) {
-        this.__ty = value;
-        debug_output('#txy', `(${this._tx}, ${this._ty})`);
-    }
-
-    get _ty() {
-        return this.__ty;
+        target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     }
 }

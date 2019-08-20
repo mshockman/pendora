@@ -1,6 +1,8 @@
 import Draggable from 'ui/Draggable';
+import Sortable from 'ui/Sortable';
 import Animation from 'core/Animation';
 import {privateCache} from "../../src/core/data";
+import {getTranslation} from "core/position";
 
 
 window.Animation = Animation;
@@ -9,21 +11,16 @@ window.privateCache = privateCache;
 window.test = new Animation({left: 0}, {left: 200}, 200000);
 
 
+window.getTranslation = getTranslation;
+
+
 window.addEventListener('load', () => {
     window.d1 = new Draggable("#test-draggable1", {container: 'viewport', helper: Draggable.CLONE(0.5), revert: 5000});
     window.d2 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle'});
 
-    document.body.addEventListener('drag', (event) => {
-        console.log(event);
-    });
-
-    document.body.addEventListener('drag-end', (event) => {
-        if(Math.round(Math.random())) {
-            event.detail.accept();
-        }
-    });
-
     new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item'});
+
+    new Sortable('#drag-list-test');
 });
 
 
