@@ -19,8 +19,10 @@ window.addEventListener('load', () => {
     window.d2 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle'});
 
     new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item'});
+    new Draggable(document.querySelector('#sortable-grid'), {selector: '.grid-item'});
 
-    new Sortable('#drag-list-test');
+    window.tl = new Sortable('#drag-list-test');
+    new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy'});
 });
 
 

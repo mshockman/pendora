@@ -1,8 +1,15 @@
 import {getTranslation} from "core/position";
 
 
+function debug_output(selector, message) {
+    // todo remove debug
+    let output = document.querySelector(selector);
+    output.innerText = message;
+}
+
+
 export default class Sortable {
-    constructor(element, {items=".ui-sortable", helper=null}={}) {
+    constructor(element, {items=".ui-sortable", helper=null, layout='y'}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -11,24 +18,28 @@ export default class Sortable {
 
         this.items = items;
         this.isSorting = false;
+        this.layout = layout;
 
         this.initEvents();
     }
 
     initEvents() {
-        let items = null;
-
         this.element.addEventListener('drag-start', (event) => {
-            items = this.element.querySelectorAll(this.items);
             this.isSorting = true;
         });
 
         this.element.addEventListener('drag-move', (event) => {
-            let before = Sortable.getElementBefore(items, event.detail.clientX, event.detail.clientY, event.target),
-                beforeBB = event.detail.helper.getBoundingClientRect();
+            let items = Array.prototype.slice.call(this.element.querySelectorAll(this.items)),
+                dropTarget = this.getDropTarget(items, event.detail.clientX, event.detail.clientY, event.target),
+                beforeBB = event.detail.helper.getBoundingClientRect(),
+                index = items.indexOf(event.target) - items.indexOf(dropTarget);
 
-            if(before !== event.target.previousElementSibling) {
-                event.target.parentElement.insertBefore(event.target, before ? before.nextSibling : event.target.parentElement.firstChild);
+            if(dropTarget) {
+                if(index < 0) {
+                    event.target.parentElement.insertBefore(event.target, dropTarget.nextSibling);
+                } else {
+                    event.target.parentElement.insertBefore(event.target, dropTarget);
+                }
 
                 let afterBB = event.detail.helper.getBoundingClientRect(),
                     deltaLeft = afterBB.left - beforeBB.left,
@@ -42,8 +53,23 @@ export default class Sortable {
         this.element.addEventListener('drag-complete', (event) => {
             this.isSorting = false;
             event.target.style.transform = "translate3d(0px, 0px, 0px)";
-            console.dir(event);
         });
+    }
+
+    getRelativePosition(element, x, y) {
+        let box = element.getBoundingClientRect(),
+            mx = box.left + (box.width / 2),
+            my = box.top + (box.height / 2);
+
+        if(this.layout === 'x') {
+            return mx < x ? 'after' : 'before';
+        } else if(this.layout === 'y') {
+            return my < y ? 'after' : 'before';
+        } else if(this.layout === 'xy') {
+            return (box.bottom < y) || (mx < x && box.bottom > y && box.top < y) ? 'after' : 'before';
+        }
+
+        return null;
     }
 
     /**
@@ -52,23 +78,41 @@ export default class Sortable {
      * @param x
      * @param y
      * @param target
-     * @returns {Element|null}
+     * @returns {Element|null|Boolean}
      */
-    static getElementBefore(elements, x, y, target) {
-        let before = null;
+    getDropTarget(elements, x, y, target) {
+        let r,
+            index = elements.indexOf(target),
+            dropIndex;
 
-        for(let item of elements) {
-            if(item === target) continue;
+        for(let i = 0; i < elements.length; i++) {
+            let element = elements[i];
 
-            let box = item.getBoundingClientRect();
+            console.log(i);
 
-            if(box.bottom > y) {
-                break;
-            } else {
-                before = item;
+            if(i < index) {
+                if(this.getRelativePosition(element, x, y) === 'before' && !r) {
+                    r = element;
+                    dropIndex = i;
+                }
+            } else if(i > index) {
+                if(this.getRelativePosition(element, x, y) === 'after') {
+                    r = element;
+                    dropIndex = i;
+                }
             }
         }
 
-        return before;
+        if(r) {
+            let box = r.getBoundingClientRect();
+
+            if(this.layout === 'x' && box.top >= y && box.bottom <= y) {
+                return r;
+            } else if((this.layout === 'y' || this.layout === 'xy') && box.left <= x && box.right >= x) {
+                return r;
+            }
+        }
+
+        return null;
     }
 }

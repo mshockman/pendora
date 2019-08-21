@@ -83,7 +83,7 @@
             width: 400px;
             height: 330px;
             z-index: 2;
-            left: 800px;
+            left: 1000px;
             top: 300px;
         }
 
@@ -99,6 +99,30 @@
             cursor: move;
             user-select: none;
         }
+
+        #sortable-grid {
+            border: 1px solid #ccc;
+            background-color: #999;
+            position: absolute;
+            left: 500px;
+            top: 500px;
+            width: 382px;
+            box-sizing: border-box;
+        }
+
+        .grid-item {
+            width: 75px;
+            height: 75px;
+            margin: 10px;
+            font-size: 4rem;
+            border: 1px solid #333;
+            background-color: #ccc;
+            float: left;
+            box-sizing: border-box;
+            text-align: center;
+            user-select: none;
+            cursor: move;
+        }
     </style>
 </head>
 <body>
@@ -112,6 +136,7 @@
         <div>Offset XY: <span id="output-offset">(0, 0)</span></div>
         <div>XY: <span id="output-xy">(0, 0)</span></div>
         <div>CLAMP: <span id="clamp-xy">(0, 0) - (0, 0)</span></div>
+        <div>Drop Target: <span id="drop-target"></span></div>
     </div>
     <div class="test-box" id="test-draggable1">
         <div class="test-box__content-wrapper">
@@ -135,6 +160,22 @@
         <div class="drag-list-item ui-sortable">Item #3</div>
         <div class="drag-list-item ui-sortable">Item #4</div>
         <div class="drag-list-item ui-sortable">Item #5</div>
+    </div>
+
+
+    <div id="sortable-grid">
+        <div class="grid-item">1</div>
+        <div class="grid-item">2</div>
+        <div class="grid-item">3</div>
+        <div class="grid-item">4</div>
+        <div class="grid-item">5</div>
+        <div class="grid-item">6</div>
+        <div class="grid-item">7</div>
+        <div class="grid-item">8</div>
+        <div class="grid-item">9</div>
+        <div class="grid-item">10</div>
+        <div class="grid-item">11</div>
+        <div class="grid-item">12</div>
     </div>
 </body>
 </body>
