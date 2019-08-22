@@ -21,7 +21,7 @@ window.addEventListener('load', () => {
     new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item'});
     new Draggable(document.querySelector('#sortable-grid'), {selector: '.grid-item'});
 
-    window.tl = new Sortable('#drag-list-test');
+    window.tl = new Sortable('#drag-list-test', {placeholder: true});
     new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy'});
 });
 

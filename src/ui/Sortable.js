@@ -8,8 +8,24 @@ function debug_output(selector, message) {
 }
 
 
+export function placeholder(className, nodeName=null) {
+    return function(element) {
+        let placeholder = document.createElement(nodeName || element.nodeName),
+            box = element.getBoundingClientRect();
+
+        placeholder.style.boxSizing = "border-box";
+        box.style.width = `${box.width}px`;
+        box.style.height = `${box.height}px`;
+
+        if(className) {
+            placeholder.className = className;
+        }
+    }
+}
+
+
 export default class Sortable {
-    constructor(element, {items=".ui-sortable", helper=null, layout='y'}={}) {
+    constructor(element, {items=".ui-sortable", placeholder=null, layout='y'}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -19,13 +35,33 @@ export default class Sortable {
         this.items = items;
         this.isSorting = false;
         this.layout = layout;
+        this.placeholder = placeholder;
 
         this.initEvents();
     }
 
     initEvents() {
+        let placeholder;
+
         this.element.addEventListener('drag-start', (event) => {
             this.isSorting = true;
+            event.target.classList.add('ui-sorting');
+
+            if(this.placeholder) {
+                if(typeof this.placeholder === 'string') {
+                    placeholder = document.createElement(event.target.nodeName);
+                    placeholder.className = this.placeholder;
+                } else if(typeof this.placeholder === 'function') {
+                    placeholder = this.placeholder(event.target, this);
+                } else if(this.placeholder === true) {
+                    placeholder = document.createElement(event.target.nodeName);
+                } else {
+                    placeholder = this.placeholder;
+                }
+
+                placeholder.classList.add('ui-placeholder');
+                event.target.parentElement.insertBefore(placeholder, event.target);
+            }
         });
 
         this.element.addEventListener('drag-move', (event) => {
@@ -37,8 +73,10 @@ export default class Sortable {
             if(dropTarget) {
                 if(index < 0) {
                     event.target.parentElement.insertBefore(event.target, dropTarget.nextSibling);
+                    if(placeholder) event.target.parentElement.insertBefore(placeholder, event.target);
                 } else {
                     event.target.parentElement.insertBefore(event.target, dropTarget);
+                    if(placeholder) event.target.parentElement.insertBefore(placeholder, event.target);
                 }
 
                 let afterBB = event.detail.helper.getBoundingClientRect(),
@@ -53,6 +91,11 @@ export default class Sortable {
         this.element.addEventListener('drag-complete', (event) => {
             this.isSorting = false;
             event.target.style.transform = "translate3d(0px, 0px, 0px)";
+            event.target.classList.remove('ui-sorting');
+
+            if(placeholder) {
+                placeholder.parentElement.removeChild(placeholder);
+            }
         });
     }
 
