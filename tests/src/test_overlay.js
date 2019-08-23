@@ -18,10 +18,11 @@ window.addEventListener('load', () => {
     window.d1 = new Draggable("#test-draggable1", {container: 'viewport', helper: Draggable.CLONE(0.5), revert: 5000});
     window.d2 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle'});
 
-    new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item'});
+    window.d3 = new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item', droppables: '.drop-list'});
     new Draggable(document.querySelector('#sortable-grid'), {selector: '.grid-item'});
 
     window.tl = new Sortable('#drag-list-test', {placeholder: true});
+    new Sortable('#drag-list-test2', {placeholder: true});
     new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy'});
 });
 

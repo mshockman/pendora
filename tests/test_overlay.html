@@ -23,8 +23,8 @@
             cursor: move;
             user-select: none;
 
-            left: 250px;
-            top: 100px;
+            left: 50px;
+            top: 400px;
         }
 
         .test-box__content-wrapper {
@@ -139,6 +139,21 @@
         #drag-list-test > div {
 
         }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .mr-4 {
+            margin-right: 2rem;
+        }
+
+        .drop-list {
+            min-width: 190px;
+            min-height: 50px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body>
@@ -170,12 +185,18 @@
         </div>
     </div>
 
-    <div id="drag-list-test">
-        <div class="drag-list-item ui-sortable">Item #1</div>
-        <div class="drag-list-item ui-sortable">Item #2</div>
-        <div class="drag-list-item ui-sortable">Item #3</div>
-        <div class="drag-list-item ui-sortable">Item #4</div>
-        <div class="drag-list-item ui-sortable">Item #5</div>
+    <div class="row">
+        <div id="drag-list-test" class="mr-4 drop-list">
+            <div class="drag-list-item ui-sortable">Item #1</div>
+            <div class="drag-list-item ui-sortable">Item #2</div>
+            <div class="drag-list-item ui-sortable">Item #3</div>
+            <div class="drag-list-item ui-sortable">Item #4</div>
+            <div class="drag-list-item ui-sortable">Item #5</div>
+        </div>
+
+        <div id="drag-list-test2" class="drop-list">
+
+        </div>
     </div>
 
 

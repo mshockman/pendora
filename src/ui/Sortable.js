@@ -41,42 +41,56 @@ export default class Sortable {
     }
 
     initEvents() {
-        let placeholder;
+        let placeholder,
+            isOver = false,
+            init = false;
 
-        this.element.addEventListener('drag-start', (event) => {
-            this.isSorting = true;
-            event.target.classList.add('ui-sorting');
 
-            if(this.placeholder) {
+        let initialize = (event) => {
+            init = true;
+            event.detail.item.addEventListener('drag-move', onDragMove);
+            event.detail.item.addEventListener('drag-complete', onDragComplete);
+
+            if(!placeholder && this.placeholder) {
                 if(typeof this.placeholder === 'string') {
-                    placeholder = document.createElement(event.target.nodeName);
+                    placeholder = document.createElement(event.detail.item.nodeName);
                     placeholder.className = this.placeholder;
                 } else if(typeof this.placeholder === 'function') {
-                    placeholder = this.placeholder(event.target, this);
+                    placeholder = this.placeholder(event.detail.item, this);
                 } else if(this.placeholder === true) {
-                    placeholder = document.createElement(event.target.nodeName);
+                    placeholder = document.createElement(event.detail.item.nodeName);
                 } else {
                     placeholder = this.placeholder;
                 }
 
                 placeholder.classList.add('ui-placeholder');
-                event.target.parentElement.insertBefore(placeholder, event.target);
+                event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
             }
-        });
+        };
 
-        this.element.addEventListener('drag-move', (event) => {
-            let items = Array.prototype.slice.call(this.element.querySelectorAll(this.items)),
-                dropTarget = this.getDropTarget(items, event.detail.clientX, event.detail.clientY, event.target),
+
+        let onDragMove = (event) => {
+            // If the sortable is the direct target and the sortable contains the draggable item then don't run
+            // the event listener because it already ran because of the bubbling of the original event.
+            if(this.element.contains(event.detail.item) && event.target === this.element) {
+                return;
+            }
+
+            let items = Array.prototype.slice.call(this.element.querySelectorAll(this.items));
+
+            let dropTarget = this.getDropTarget(items, event.detail.clientX, event.detail.clientY, event.detail.item),
                 beforeBB = event.detail.helper.getBoundingClientRect(),
-                index = items.indexOf(event.target) - items.indexOf(dropTarget);
+                index = items.indexOf(event.detail.item) - items.indexOf(dropTarget);
 
             if(dropTarget) {
-                if(index < 0) {
-                    event.target.parentElement.insertBefore(event.target, dropTarget.nextSibling);
-                    if(placeholder) event.target.parentElement.insertBefore(placeholder, event.target);
+                if(dropTarget === true) {
+                    this.element.appendChild(event.detail.item);
+                } else if(index < 0) {
+                    event.detail.item.parentElement.insertBefore(event.detail.item, dropTarget.nextSibling);
+                    if(placeholder) event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
                 } else {
-                    event.target.parentElement.insertBefore(event.target, dropTarget);
-                    if(placeholder) event.target.parentElement.insertBefore(placeholder, event.target);
+                    event.detail.item.parentElement.insertBefore(event.detail.item, dropTarget);
+                    if(placeholder) event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
                 }
 
                 let afterBB = event.detail.helper.getBoundingClientRect(),
@@ -86,15 +100,44 @@ export default class Sortable {
 
                 event.detail.helper.style.transform = `translate3d(${translation.x - deltaLeft}px, ${translation.y - deltaTop}px, 0)`;
             }
+        };
+
+
+        let onDragComplete = (event) => {
+            event.detail.item.removeEventListener('drag-move', onDragMove);
+            event.detail.item.removeEventListener('drag-complete', onDragComplete);
+            init = false;
+            isOver = false;
+
+            if(placeholder && placeholder.parentElement) {
+                placeholder.parentElement.removeChild(placeholder);
+            }
+
+            placeholder = null;
+
+            event.detail.item.style.transform = "translate3d(0px, 0px, 0px)";
+            event.detail.item.classList.remove('ui-sorting');
+        };
+
+
+        this.element.addEventListener('drag-enter', event => {
+            isOver = true;
+            event.detail.item.classList.add('ui-sorting');
+            console.log("Drag Enter " + event.target.id);
+
+            if(!init) {
+                initialize(event);
+            }
         });
 
-        this.element.addEventListener('drag-complete', (event) => {
-            this.isSorting = false;
-            event.target.style.transform = "translate3d(0px, 0px, 0px)";
-            event.target.classList.remove('ui-sorting');
+        this.element.addEventListener('drag-leave', event => {
+            isOver = false;
+            console.log("Drag Leave " + event.target.id);
+        });
 
-            if(placeholder) {
-                placeholder.parentElement.removeChild(placeholder);
+        this.element.addEventListener('drag-start', (event) => {
+            if(!init) {
+                initialize(event);
             }
         });
     }
@@ -128,10 +171,13 @@ export default class Sortable {
             index = elements.indexOf(target),
             dropIndex;
 
+        // Return true if their is not elements.
+        if(!elements.length) {
+            return true;
+        }
+
         for(let i = 0; i < elements.length; i++) {
             let element = elements[i];
-
-            console.log(i);
 
             if(i < index) {
                 if(this.getRelativePosition(element, x, y) === 'before' && !r) {

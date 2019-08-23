@@ -2,6 +2,7 @@ import {addClasses, clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
 import {getTranslation} from "core/position";
+import {drop} from "../service/Model";
 
 
 export function cursor({cursorX, cursorY, boundingRect}) {
@@ -41,12 +42,76 @@ function debug_output(selector, message) {
 }
 
 
+// Takes mouse position relative to document.
+function getPosition(target, clientX, clientY, offset, container) {
+    let translation = getTranslation(target),
+        bb = target.getBoundingClientRect();
+
+    let mouseX = clientX + window.scrollX,
+        mouseY = clientY + window.scrollY,
+        x = mouseX + offset.x,
+        y = mouseY + offset.y;
+
+    if(container) {
+        if(typeof container === 'function') {
+            container = container();
+        }
+
+        x = clamp(x, container.left, container.left + container.width - bb.width);
+        y = clamp(y, container.top, container.top + container.height - bb.height);
+    }
+
+    // The change is position of the element.
+    let deltaX = (bb.left + window.scrollX) - x,
+        deltaY = (bb.top + window.scrollY) - y;
+
+    return {
+        // The starting position
+        startingBoundingClientRect: bb,
+
+        // The starting transformation that has been applied.
+        startingTranslation: translation,
+
+        // The change in position.
+        deltaX: deltaX,
+        deltaY: deltaY,
+
+        // The ending transformation that needs to be applied.
+        tx: translation.x - deltaX,
+        ty: translation.y - deltaY,
+
+        // The scroll of the window.
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+
+        // Position of the mouse relative to the client window.
+        clientX: clientX,
+        clientY: clientY,
+
+        // Position of the mouse relative to the document.
+        mouseX: mouseX,
+        mouseY: mouseY,
+
+        endingBoundingClientRect: {
+            left: bb.left - deltaX,
+            top: bb.top - deltaY,
+            right: bb.right - deltaX,
+            bottom: bb.bottom - deltaY,
+            width: bb.width,
+            height: bb.height
+        },
+
+        target: target
+    };
+}
+
+
 export default class Draggable {
     static CLONE = clone;
     static OFFSET_CURSOR = cursor;
 
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
-        distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null, selector=null}={}) {
+        distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null, selector=null, droppables=null, tolerance='intersect'}={}) {
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -70,11 +135,25 @@ export default class Draggable {
         this.exclude = exclude;
         this.revert = revert;
         this.selector = selector;
+        this.droppables = [];
+        this.tolerance = tolerance;
+
+        if(droppables) {
+            this.addDroppables(droppables);
+        }
 
         this.element.addEventListener('mousedown', this._onMouseDown);
         this.isDragging = false;
 
         this._revertFX = null;
+    }
+
+    addDroppables(droppables) {
+        if(Array.isArray(droppables)) {
+            this.droppables = this.droppables.concat(droppables);
+        } else {
+            this.droppables.push(droppables);
+        }
     }
 
     /**
@@ -205,7 +284,8 @@ export default class Draggable {
         }
 
         let doc = document,
-            target;
+            target,
+            droppables = this.getDropTargets();
 
         if(!this.helper || this.helper === 'self') {
             target = element;
@@ -228,17 +308,16 @@ export default class Draggable {
 
         // offsetX and offsetY is how much the dragged element is offset from the cursor.
         // By default it is at the top left of the element.
-        let offsetX = 0, // offset top left corner to mouse position by default.
-            offsetY = 0, // offset top left corner to mouse position by default.
-            startingTranslation = getTranslation(target);
+        let startingTranslation = getTranslation(target),
+            offset = {x: 0, y: 0};
 
         // The offset property controls how much the dragged element is offset from top left corner of the element.
         // By default it is [0, 0] but a function can be or array can be passed to control this behavior.
         if(this.offset) {
-            let offset = this.offset;
+            let _offset = this.offset;
 
-            if(typeof offset === 'function') {
-                offset = this.offset({
+            if(typeof _offset === 'function') {
+                _offset = this.offset({
                     target: target,
                     draggable: this,
                     cursorX: startMouseX,
@@ -247,9 +326,9 @@ export default class Draggable {
                 });
             }
 
-            if(offset) {
-                offsetX -= offset[0];
-                offsetY -= offset[1];
+            if(_offset) {
+                offset.x -= _offset[0];
+                offset.y -= _offset[1];
             }
         }
 
@@ -265,58 +344,25 @@ export default class Draggable {
             };
         }
 
-        // Takes mouse position relative to document.
-        let getPosition = (mouseX, mouseY) => {
-            let translation = getTranslation(target),
-                bb = target.getBoundingClientRect();
-
-            let x = mouseX + offsetX,
-                y = mouseY + offsetY;
-
-            if(container) {
-                if(typeof container === 'function') {
-                    container = container();
-                }
-
-                x = clamp(x, container.left, container.left + container.width - bb.width);
-                y = clamp(y, container.top, container.top + container.height - bb.height);
-            }
-
-            let deltaX = (bb.left + window.scrollX) - x,
-                deltaY = (bb.top + window.scrollY) - y;
-
-            return [
-                translation.x - deltaX,
-                translation.y - deltaY
-            ];
-        };
-
         let onMouseMove = (event) => {
             event.preventDefault();
 
-            let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
+            let position = getPosition(target, event.clientX, event.clientY, offset, container);
 
-            this.translate(target, x, y);
+            this._triggerEnterLeaveEvents(droppables, position);
+            this.translate(target, position.tx, position.ty);
 
-            let dragEvent = new CustomEvent("drag-move", {
-                bubbles: true,
-
-                detail: {
-                    mouseX: event.clientX + window.scrollX,
-                    mouseY: event.clientY + window.scrollY,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    startMouseX,
-                    startMouseY,
-                    offsetX,
-                    offsetY,
-                    draggable: this,
-                    helper: target,
-                    originalEvent: event
-                }
+            this._triggerEvent(element, 'drag-move', {
+                mouseX: event.clientX + window.scrollX,
+                mouseY: event.clientY + window.scrollY,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                startMouseX,
+                startMouseY,
+                offset,
+                helper: target,
+                originalEvent: event
             });
-
-            element.dispatchEvent(dragEvent);
         };
 
         let onMouseUp = (event) => {
@@ -326,10 +372,8 @@ export default class Draggable {
             doc = null;
             this.isDragging = false;
 
-            let [x, y] = getPosition(event.clientX + window.scrollX, event.clientY + window.scrollY);
-            this.translate(target, x, y);
-
-            let accepted = null;
+            let position = getPosition(target, event.clientX, event.clientY, offset, container),
+                accepted = null;
 
             function accept(element) {
                 if(!accepted) {
@@ -343,32 +387,21 @@ export default class Draggable {
                 return !!accepted;
             }
 
-            let dragEnd = new CustomEvent('drag-end', {
-                bubbles: true,
+            this._triggerEvent(element, 'drag-end', {
+                startMouseX,
+                startMouseY,
+                offset,
+                mouseX: event.clientX + window.scrollX,
+                mouseY: event.clientY + window.scrollY,
+                clientX: event.clientX,
+                clientY: event.clientY,
 
-                detail: {
-                    startMouseX,
-                    startMouseY,
-                    offsetX,
-                    offsetY,
-                    mouseX: event.clientX + window.scrollX,
-                    mouseY: event.clientY + window.scrollY,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
+                originalEvent: event,
+                helper: target,
 
-                    originalEvent: event,
-                    draggable: this,
-                    helper: target,
-
-                    accept: accept,
-                    isAccepted: isAccepted
-                }
-            });
-
-            dragEnd.accept = accept;
-            dragEnd.isAccepted = isAccepted;
-
-            element.dispatchEvent(dragEnd);
+                accept,
+                isAccepted
+            },true, {accept, isAccepted});
 
             if(!accepted && this.revert === true) {
                 this.translate(target, startingTranslation.x, startingTranslation.y);
@@ -377,19 +410,12 @@ export default class Draggable {
                     target.parentElement.removeChild(target);
                 }
 
-                let dragComplete = new CustomEvent('drag-complete', {
-                    bubbles: true,
-                    detail: {
-                        draggable: this
-                    }
-                });
-
-                element.dispatchEvent(dragComplete);
+                this._triggerEvent(element, 'drag-complete');
             } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation(
                     {
-                        left: x,
-                        top: y
+                        left: position.tx,
+                        top: position.ty
                     }, {
                         left: startingTranslation.x,
                         top: startingTranslation.y
@@ -405,14 +431,7 @@ export default class Draggable {
                                 target.parentElement.removeChild(target);
                             }
 
-                            let dragComplete = new CustomEvent('drag-complete', {
-                                bubbles: true,
-                                detail: {
-                                    draggable: this
-                                }
-                            });
-
-                            element.dispatchEvent(dragComplete);
+                            this._triggerEvent(element, 'drag-complete');
                         },
 
                         onCancel: () => {
@@ -426,50 +445,171 @@ export default class Draggable {
                 animation.play();
                 this._revertFX = animation;
             } else {
-                this.translate(element, x, y);
+                this.translate(element, position.tx, position.ty);
 
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
 
-                let dragComplete = new CustomEvent('drag-complete', {
-                    bubbles: true,
-                    detail: {
-                        draggable: this
-                    }
-                });
-
-                element.dispatchEvent(dragComplete);
+                this._triggerEvent(element, 'drag-complete');
             }
         };
 
         doc.addEventListener('mousemove', onMouseMove);
         doc.addEventListener('mouseup', onMouseUp);
 
-        let [px, py] = getPosition(posX, posY);
-        this.translate(target, px, py);
+        // let position = getPosition(posX - window.scrollX, posY - window.scrollY);
+        // this.translate(target, position.tx, position.ty);
+        // this._triggerEnterLeaveEvents(droppables, position);
 
-        let dragStart = new CustomEvent('drag-start', {
-            bubbles: true,
-            detail: {
-                startMouseY,
-                startMouseX,
-                offsetY,
-                offsetX,
-                mouseX: posX,
-                mouseY: posY,
-                clientX: posX - window.scrollX,
-                clientY: posY - window.scrollY,
-                draggable: this,
-                helper: target
-            }
+        this._triggerEvent(element, 'drag-start', {
+            startMouseY,
+            startMouseX,
+            offset,
+            mouseX: posX,
+            mouseY: posY,
+            clientX: posX - window.scrollX,
+            clientY: posY - window.scrollY,
+            helper: target
         });
-
-        element.dispatchEvent(dragStart);
     }
 
     // noinspection JSMethodCanBeStatic
     translate(target, x, y) {
         target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
+
+    getDropTargets() {
+        let r = [],
+            items = [];
+
+        for(let droppable of this.droppables) {
+            let type = typeof droppable;
+
+            if(type === 'string') {
+                for(let target of document.querySelectorAll(droppable)) {
+                    if(items.indexOf(target) !== -1) continue;
+                    items.push(target);
+                    let box = target.getBoundingClientRect();
+
+                    r.push({
+                        target: target,
+                        left: box.left + window.scrollX,
+                        top: box.top + window.scrollY,
+                        width: box.width,
+                        height: box.height,
+                        right: box.left + window.scrollX + box.width,
+                        bottom: box.top + window.scrollY + box.height
+                    });
+                }
+            } else if(type === 'function') {
+                droppable = droppable.call(this, this);
+                if(items.indexOf(droppable) !== -1) continue;
+                items.push(droppable);
+                let box = droppable.getBoundingClientRect();
+                r.push({
+                    target: droppable,
+                    left: box.left + window.scrollX,
+                    top: box.top + window.scrollY,
+                    width: box.width,
+                    height: box.height,
+                    right: box.left + window.scrollX + box.width,
+                    bottom: box.top + window.scrollY + box.height
+                });
+            } else {
+                if(items.indexOf(droppable) !== -1) continue;
+                items.push(droppable);
+                let box = droppable.getBoundingClientRect();
+                r.push({
+                    target: droppable,
+                    left: box.left + window.scrollX,
+                    top: box.top + window.scrollY,
+                    width: box.width,
+                    height: box.height,
+                    right: box.left + window.scrollX + box.width,
+                    bottom: box.top + window.scrollY + box.height
+                });
+            }
+        }
+
+        return r;
+    }
+
+    _triggerEvent(item, eventName, details, bubbles=true, assign=null) {
+        details = {
+            draggable: this,
+            item: item,
+
+            ...details
+        };
+
+        let event = new CustomEvent(eventName, {
+            bubbles: bubbles,
+            detail: details
+        });
+
+        if(assign) {
+            Object.assign(event, assign);
+        }
+
+        item.dispatchEvent(event);
+    }
+
+    _intersects(droppable, item) {
+        let tolerance = droppable.target.dataset.tolerance || this.tolerance;
+
+        let origin = {
+            x: item.left + (item.width / 2),
+            y: item.top + (item.height / 2)
+        };
+
+        return origin.x >= droppable.left
+            && origin.x <= droppable.right
+            && origin.y >= droppable.top
+            && origin.y <= droppable.bottom;
+    }
+
+    _triggerEnterLeaveEvents(droppables, position) {
+        // startingBoundingClientRect, endingBoundingClientRect
+
+        for(let droppable of droppables) {
+            // Convert to client space.
+            let dropBox = {
+                left: droppable.left - window.scrollX,
+                right: droppable.right - window.scrollX,
+                top: droppable.top - window.scrollY,
+                bottom: droppable.bottom - window.scrollY,
+                width: droppable.width,
+                height: droppable.height,
+                target: droppable.target
+            };
+
+            let intersectsBefore = this._intersects(dropBox, position.startingBoundingClientRect),
+                intersectsAfter = this._intersects(dropBox, position.endingBoundingClientRect);
+
+            if(!intersectsBefore && intersectsAfter) {
+                // drag-enter
+                let event = new CustomEvent('drag-enter', {
+                    bubbles: true,
+                    detail: {
+                        draggable: this,
+                        item: position.target
+                    }
+                });
+
+                droppable.target.dispatchEvent(event);
+            } else if(intersectsBefore && !intersectsAfter) {
+                // drag-leave
+                let event = new CustomEvent('drag-leave', {
+                    bubbles: true,
+                    detail: {
+                        draggable: this,
+                        item: position.target
+                    }
+                });
+
+                droppable.target.dispatchEvent(event);
+            }
+        }
     }
 }
