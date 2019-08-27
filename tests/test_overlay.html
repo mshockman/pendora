@@ -91,7 +91,7 @@
             width: 200px;
         }
 
-        #drag-list-test .drag-list-item {
+        .dlt .drag-list-item {
             background-color: #fafafa;
             border: 1px solid #ccc;
             padding: 5px;
@@ -110,6 +110,10 @@
             box-sizing: border-box;
         }
 
+        #sortable-grid .ui-sorting {
+            z-index: 2;
+        }
+
         .grid-item {
             width: 75px;
             height: 75px;
@@ -124,12 +128,13 @@
             cursor: move;
         }
 
-        #drag-list-test .ui-sorting {
+        .dlt .ui-sorting {
             position: absolute;
             width: 180px;
+            z-index: 2;
         }
 
-        #drag-list-test .ui-placeholder {
+        .dlt .ui-placeholder {
             background-color: #d8d128;
             border: 1px solid #665f16;
             margin: 5px;
@@ -186,15 +191,21 @@
     </div>
 
     <div class="row">
-        <div id="drag-list-test" class="mr-4 drop-list">
+        <div id="drag-list-test" class="mr-4 drop-list dlt">
             <div class="drag-list-item ui-sortable">Item #1</div>
             <div class="drag-list-item ui-sortable">Item #2</div>
             <div class="drag-list-item ui-sortable">Item #3</div>
             <div class="drag-list-item ui-sortable">Item #4</div>
             <div class="drag-list-item ui-sortable">Item #5</div>
+            <div class="drag-list-item ui-sortable">Item #5</div>
+            <div class="drag-list-item ui-sortable">Item #6</div>
+            <div class="drag-list-item ui-sortable">Item #7</div>
+            <div class="drag-list-item ui-sortable">Item #8</div>
+            <div class="drag-list-item ui-sortable">Item #9</div>
+            <div class="drag-list-item ui-sortable">Item #10</div>
         </div>
 
-        <div id="drag-list-test2" class="drop-list">
+        <div id="drag-list-test2" class="drop-list dlt">
 
         </div>
     </div>

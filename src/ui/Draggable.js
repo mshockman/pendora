@@ -2,7 +2,6 @@ import {addClasses, clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
 import {getTranslation} from "core/position";
-import {drop} from "../service/Model";
 
 
 export function cursor({cursorX, cursorY, boundingRect}) {
@@ -347,10 +346,27 @@ export default class Draggable {
         let onMouseMove = (event) => {
             event.preventDefault();
 
-            let position = getPosition(target, event.clientX, event.clientY, offset, container);
+            let position = getPosition(target, event.clientX, event.clientY, offset, container),
+                dropData;
 
-            this._triggerEnterLeaveEvents(droppables, position);
             this.translate(target, position.tx, position.ty);
+            dropData = this._getDropData(droppables, position);
+
+            for(let droppable of dropData) {
+                if(!droppable.intersectsBefore && droppable.intersectsAfter) {
+                    // drag-enter
+                    let event = new CustomEvent('drag-enter', {
+                        bubbles: true,
+
+                        detail: {
+                            draggable: this,
+                            item: position.target
+                        }
+                    });
+
+                    droppable.target.dispatchEvent(event);
+                }
+            }
 
             this._triggerEvent(element, 'drag-move', {
                 mouseX: event.clientX + window.scrollX,
@@ -363,6 +379,24 @@ export default class Draggable {
                 helper: target,
                 originalEvent: event
             });
+
+            // Refresh dropData incase something moved.
+            dropData = this._getDropData(droppables, position);
+
+            for(let droppable of dropData) {
+                if(droppable.intersectsBefore && !droppable.intersectsAfter) {
+                    // drag-leave
+                    let event = new CustomEvent('drag-leave', {
+                        bubbles: true,
+                        detail: {
+                            draggable: this,
+                            item: position.target
+                        }
+                    });
+
+                    droppable.target.dispatchEvent(event);
+                }
+            }
         };
 
         let onMouseUp = (event) => {
@@ -480,59 +514,48 @@ export default class Draggable {
     }
 
     getDropTargets() {
-        let r = [],
-            items = [];
+        let r = [];
 
         for(let droppable of this.droppables) {
             let type = typeof droppable;
 
             if(type === 'string') {
                 for(let target of document.querySelectorAll(droppable)) {
-                    if(items.indexOf(target) !== -1) continue;
-                    items.push(target);
-                    let box = target.getBoundingClientRect();
-
-                    r.push({
-                        target: target,
-                        left: box.left + window.scrollX,
-                        top: box.top + window.scrollY,
-                        width: box.width,
-                        height: box.height,
-                        right: box.left + window.scrollX + box.width,
-                        bottom: box.top + window.scrollY + box.height
-                    });
+                    if(r.indexOf(target) !== -1) continue;
+                    r.push(target);
                 }
             } else if(type === 'function') {
                 droppable = droppable.call(this, this);
-                if(items.indexOf(droppable) !== -1) continue;
-                items.push(droppable);
-                let box = droppable.getBoundingClientRect();
-                r.push({
-                    target: droppable,
-                    left: box.left + window.scrollX,
-                    top: box.top + window.scrollY,
-                    width: box.width,
-                    height: box.height,
-                    right: box.left + window.scrollX + box.width,
-                    bottom: box.top + window.scrollY + box.height
-                });
+                if(r.indexOf(droppable) !== -1) continue;
+                r.push(droppable);
             } else {
-                if(items.indexOf(droppable) !== -1) continue;
-                items.push(droppable);
-                let box = droppable.getBoundingClientRect();
-                r.push({
-                    target: droppable,
-                    left: box.left + window.scrollX,
-                    top: box.top + window.scrollY,
-                    width: box.width,
-                    height: box.height,
-                    right: box.left + window.scrollX + box.width,
-                    bottom: box.top + window.scrollY + box.height
-                });
+                if(r.indexOf(droppable) !== -1) continue;
+                r.push(droppable);
             }
         }
 
         return r;
+    }
+
+    _getDropData(droppables, position) {
+        let dropData = [];
+
+        for(let droppable of droppables) {
+            // Convert to client space.
+            let dropBox = droppable.getBoundingClientRect();
+
+            let intersectsBefore = this._intersects(dropBox, position.startingBoundingClientRect),
+                intersectsAfter = this._intersects(dropBox, position.endingBoundingClientRect);
+
+            dropData.push({
+                intersectsBefore,
+                intersectsAfter,
+                target: droppable,
+                ...dropBox
+            });
+        }
+
+        return dropData;
     }
 
     _triggerEvent(item, eventName, details, bubbles=true, assign=null) {
@@ -556,7 +579,10 @@ export default class Draggable {
     }
 
     _intersects(droppable, item) {
-        let tolerance = droppable.target.dataset.tolerance || this.tolerance;
+        // todo tolerance should be used to determine if two objects are intersecting.
+        // right now it just defaults to the middle point.  It should also being when they are touching
+        // or when one completely contains the other, etc.
+        // let tolerance = droppable.target.dataset.tolerance || this.tolerance;
 
         let origin = {
             x: item.left + (item.width / 2),
@@ -567,49 +593,5 @@ export default class Draggable {
             && origin.x <= droppable.right
             && origin.y >= droppable.top
             && origin.y <= droppable.bottom;
-    }
-
-    _triggerEnterLeaveEvents(droppables, position) {
-        // startingBoundingClientRect, endingBoundingClientRect
-
-        for(let droppable of droppables) {
-            // Convert to client space.
-            let dropBox = {
-                left: droppable.left - window.scrollX,
-                right: droppable.right - window.scrollX,
-                top: droppable.top - window.scrollY,
-                bottom: droppable.bottom - window.scrollY,
-                width: droppable.width,
-                height: droppable.height,
-                target: droppable.target
-            };
-
-            let intersectsBefore = this._intersects(dropBox, position.startingBoundingClientRect),
-                intersectsAfter = this._intersects(dropBox, position.endingBoundingClientRect);
-
-            if(!intersectsBefore && intersectsAfter) {
-                // drag-enter
-                let event = new CustomEvent('drag-enter', {
-                    bubbles: true,
-                    detail: {
-                        draggable: this,
-                        item: position.target
-                    }
-                });
-
-                droppable.target.dispatchEvent(event);
-            } else if(intersectsBefore && !intersectsAfter) {
-                // drag-leave
-                let event = new CustomEvent('drag-leave', {
-                    bubbles: true,
-                    detail: {
-                        draggable: this,
-                        item: position.target
-                    }
-                });
-
-                droppable.target.dispatchEvent(event);
-            }
-        }
     }
 }

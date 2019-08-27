@@ -43,102 +43,127 @@ export default class Sortable {
     initEvents() {
         let placeholder,
             isOver = false,
-            init = false;
+            init = false,
+            target;
 
 
         let initialize = (event) => {
             init = true;
-            event.detail.item.addEventListener('drag-move', onDragMove);
-            event.detail.item.addEventListener('drag-complete', onDragComplete);
+            target = event.detail.item;
+            target.addEventListener('drag-move', onDragMove);
+            target.addEventListener('drag-complete', onDragComplete);
+            target.addEventListener('sort-append', onSortAppend);
+            target.classList.add('ui-sorting');
 
             if(!placeholder && this.placeholder) {
                 if(typeof this.placeholder === 'string') {
-                    placeholder = document.createElement(event.detail.item.nodeName);
+                    placeholder = document.createElement(target.nodeName);
                     placeholder.className = this.placeholder;
                 } else if(typeof this.placeholder === 'function') {
-                    placeholder = this.placeholder(event.detail.item, this);
+                    placeholder = this.placeholder(target, this);
                 } else if(this.placeholder === true) {
-                    placeholder = document.createElement(event.detail.item.nodeName);
+                    placeholder = document.createElement(target.nodeName);
                 } else {
                     placeholder = this.placeholder;
                 }
 
                 placeholder.classList.add('ui-placeholder');
-                event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
+
+                if(this.element.contains(target)) {
+                    target.parentElement.insertBefore(placeholder, target);
+                }
+            }
+        };
+
+
+        let destroy = () => {
+            if(target) {
+                target.removeEventListener('drag-move', onDragMove);
+                target.removeEventListener('drag-complete', onDragComplete);
+                target.removeEventListener('sort-append', onSortAppend);
+                init = false;
+                isOver = false;
+
+                if(placeholder && placeholder.parentElement) {
+                    placeholder.parentElement.removeChild(placeholder);
+                }
+
+                placeholder = null;
+
+                target.style.transform = "";
+                target.classList.remove('ui-sorting');
+                target = null;
+            }
+        };
+
+
+        let onSortAppend = event => {
+            if(event.detail !== this && placeholder && placeholder.parentElement) {
+                placeholder.parentElement.removeChild(placeholder);
             }
         };
 
 
         let onDragMove = (event) => {
-            // If the sortable is the direct target and the sortable contains the draggable item then don't run
-            // the event listener because it already ran because of the bubbling of the original event.
-            if(this.element.contains(event.detail.item) && event.target === this.element) {
-                return;
-            }
+            if(!isOver) return;
 
-            let items = Array.prototype.slice.call(this.element.querySelectorAll(this.items));
+            let target = event.detail.item,
+                items = Array.prototype.slice.call(this.getItems()).filter(i => i !== target);
 
-            let dropTarget = this.getDropTarget(items, event.detail.clientX, event.detail.clientY, event.detail.item),
-                beforeBB = event.detail.helper.getBoundingClientRect(),
-                index = items.indexOf(event.detail.item) - items.indexOf(dropTarget);
+            let before = this.getItemBeforePoint(event.detail.clientX, event.detail.clientY, items),
+                after = this.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
+                beforeBB = event.detail.helper.getBoundingClientRect();
 
-            if(dropTarget) {
-                if(dropTarget === true) {
-                    this.element.appendChild(event.detail.item);
-                } else if(index < 0) {
-                    event.detail.item.parentElement.insertBefore(event.detail.item, dropTarget.nextSibling);
-                    if(placeholder) event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
-                } else {
-                    event.detail.item.parentElement.insertBefore(event.detail.item, dropTarget);
-                    if(placeholder) event.detail.item.parentElement.insertBefore(placeholder, event.detail.item);
-                }
+            console.log(event.detail.clientX, event.detail.clientY);
+            console.log(before);
+            console.log(after);
 
-                let afterBB = event.detail.helper.getBoundingClientRect(),
-                    deltaLeft = afterBB.left - beforeBB.left,
-                    deltaTop = afterBB.top - beforeBB.top,
-                    translation = getTranslation(event.detail.helper);
-
-                event.detail.helper.style.transform = `translate3d(${translation.x - deltaLeft}px, ${translation.y - deltaTop}px, 0)`;
+            if(!items.length) {
+                this.element.appendChild(target);
+                if(placeholder) target.parentElement.insertBefore(placeholder, target);
+                this._refreshPositions(event.detail.helper, beforeBB);
+                this._triggerSortAppendEvent(target);
+            } else if(before && before !== target) {
+                before.parentElement.insertBefore(target, before.nextSibling);
+                if(placeholder) target.parentElement.insertBefore(placeholder, target);
+                this._refreshPositions(event.detail.helper, beforeBB);
+                this._triggerSortAppendEvent(target);
+            } else if(after && after !== target) {
+                after.parentElement.insertBefore(target, after);
+                if(placeholder) target.parentElement.insertBefore(placeholder, target);
+                this._refreshPositions(event.detail.helper, beforeBB);
+                this._triggerSortAppendEvent(target);
             }
         };
 
 
-        let onDragComplete = (event) => {
-            event.detail.item.removeEventListener('drag-move', onDragMove);
-            event.detail.item.removeEventListener('drag-complete', onDragComplete);
-            init = false;
-            isOver = false;
-
-            if(placeholder && placeholder.parentElement) {
-                placeholder.parentElement.removeChild(placeholder);
-            }
-
-            placeholder = null;
-
-            event.detail.item.style.transform = "translate3d(0px, 0px, 0px)";
-            event.detail.item.classList.remove('ui-sorting');
+        let onDragComplete = () => {
+            destroy();
         };
 
 
         this.element.addEventListener('drag-enter', event => {
             isOver = true;
-            event.detail.item.classList.add('ui-sorting');
-            console.log("Drag Enter " + event.target.id);
 
             if(!init) {
                 initialize(event);
             }
+
+            console.log("Drag Enter");
         });
 
         this.element.addEventListener('drag-leave', event => {
             isOver = false;
-            console.log("Drag Leave " + event.target.id);
+
+            console.log("Drag Leave");
         });
 
         this.element.addEventListener('drag-start', (event) => {
             if(!init) {
                 initialize(event);
             }
+
+            isOver = true;
         });
     }
 
@@ -152,7 +177,7 @@ export default class Sortable {
         } else if(this.layout === 'y') {
             return my < y ? 'after' : 'before';
         } else if(this.layout === 'xy') {
-            return (box.bottom < y) || (mx < x && box.bottom > y && box.top < y) ? 'after' : 'before';
+            return (box.bottom < y) || (mx < x && box.bottom >= y && box.top <= y) ? 'after' : 'before';
         }
 
         return null;
@@ -203,5 +228,82 @@ export default class Sortable {
         }
 
         return null;
+    }
+
+    getItemBeforePoint(x, y, items) {
+        if(!items) items = this.getItems();
+
+        let r = null;
+
+        for(let i = 0; i < items.length; i++) {
+            let item = items[i];
+
+            if(this.getRelativePosition(item, x, y) === 'after') {
+                r = item;
+            } else {
+                break;
+            }
+        }
+
+        if(r) {
+            let box = r.getBoundingClientRect();
+
+            if((this.layout === 'x' || this.layout === 'xy') && box.top <= y && box.bottom >= y) {
+                return r;
+            } else if(this.layout === 'y' && box.left <= x && box.right >= x) {
+                return r;
+            }
+        }
+    }
+
+    getItemAfterPoint(x, y, items) {
+        if(!items) items = this.getItems();
+
+        let r = null;
+
+        for(let i = items.length - 1; i >= 0; i--) {
+            let item = items[i];
+
+            if(this.getRelativePosition(item, x, y) === 'before') {
+                r = item;
+            } else {
+                break;
+            }
+        }
+
+        if(r) {
+            let box = r.getBoundingClientRect();
+
+            if((this.layout === 'x' || this.layout === 'xy') && box.top <= y && box.bottom >= y) {
+                return r;
+            } else if(this.layout === 'y' && box.left <= x && box.right >= x) {
+                return r;
+            }
+        }
+
+        return null;
+    }
+
+    getItems() {
+        return this.element.querySelectorAll(this.items);
+    }
+
+    _refreshPositions(target, position) {
+        // helper
+        let current = target.getBoundingClientRect(),
+            deltaLeft = current.left - position.left,
+            deltaTop = current.top - position.top,
+            translation = getTranslation(target);
+
+        target.style.transform = `translate3d(${translation.x - deltaLeft}px, ${translation.y - deltaTop}px, 0)`;
+    }
+
+    _triggerSortAppendEvent(target) {
+        let event = new CustomEvent('sort-append', {
+            bubbles: false,
+            detail: this
+        });
+
+        target.dispatchEvent(event);
     }
 }
