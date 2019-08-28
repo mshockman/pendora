@@ -41,6 +41,8 @@ window.addEventListener('load', () => {
     new Sortable('#drag-list-test2', {placeholder: true, setPlaceholderSize: true, selector: '.drag-list-item', droppables: '.drop-list'});
     new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy', setPlaceholderSize: true});
 
+    new Draggable(document.querySelector("#scroll-draggable-test"), {scroll: 1});
+
     testGetElementByPositionFunctions(sortable1, 100, 0, null, 'Item #1');
     testGetElementByPositionFunctions(sortable1, 100, 43, 'Item #1', 'Item #2');
     testGetElementByPositionFunctions(sortable1, 100, 81, 'Item #2', 'Item #3');

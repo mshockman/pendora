@@ -1,7 +1,7 @@
-import {addClasses, clamp} from 'core/utility';
+import {clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
-import {getTranslation} from "core/position";
+import {getTranslation, setElementClientPosition} from "core/position";
 
 
 export function cursor({cursorX, cursorY, boundingRect}) {
@@ -31,6 +31,21 @@ function _getClientRect(element) {
         width: box.width,
         height: box.height
     };
+}
+
+
+function _getScrollParent(element) {
+    let o = element.parentElement;
+
+    while(o) {
+        if (o.scrollWidth > o.clientWidth || o.scrollHeight > o.clientHeight) {
+            return o;
+        }
+
+        o = o.parentElement;
+    }
+
+    return null;
 }
 
 
@@ -142,6 +157,7 @@ export default class Draggable {
         this.droppables = [];
         this.tolerance = tolerance;
         this.setHelperSize = setHelperSize;
+        this.scroll = scroll;
 
         if(droppables) {
             this.addDroppables(droppables);
@@ -275,7 +291,6 @@ export default class Draggable {
      * @param posY
      */
     startDrag(element, startMouseX, startMouseY, posX, posY) {
-        // todo is this doing anything?  Check to make sure flag gets set.
         if(this.isDragging) {
             return;
         }
@@ -292,7 +307,8 @@ export default class Draggable {
             target,
             droppables = this.getDropTargets(),
             startBoundingBox = _getClientRect(element),
-            helper;
+            helper,
+            scrollTick;
 
         if(!this.helper || this.helper === 'self') {
             target = element;
@@ -420,6 +436,60 @@ export default class Draggable {
                     });
 
                     droppable.target.dispatchEvent(event);
+                }
+            }
+
+            if(this.scroll && !scrollTick) {
+                let parent = _getScrollParent(element);
+
+                if(parent) {
+                    let lastTick = performance.now(),
+                        scrollX = parent.scrollLeft,
+                        scrollY = parent.scrollTop;
+
+                    scrollTick = timestamp => {
+                        let parentBB = parent.getBoundingClientRect(),
+                            helperBB = target.getBoundingClientRect(),
+                            x, y,
+                            delta = timestamp - lastTick,
+                            isOOB = false;
+
+                        lastTick = timestamp;
+
+                        if (helperBB.right > parentBB.right) {
+                            x = (helperBB.right - parentBB.right) / helperBB.width;
+                            isOOB = true;
+                            scrollX += delta * x * this.scroll;
+                            parent.scrollLeft = scrollX;
+                        } else if (helperBB.left < parentBB.left) {
+                            x = (parentBB.left - helperBB.left) / helperBB.width;
+                            isOOB = true;
+                            scrollX -= delta * x * this.scroll;
+                            parent.scrollLeft = scrollX;
+                        }
+
+                        if (helperBB.bottom > parentBB.bottom) {
+                            y = (helperBB.bottom - parentBB.bottom) / helperBB.height;
+                            isOOB = true;
+                            scrollY += delta * y * this.scroll;
+                            parent.scrollTop = scrollY;
+                        } else if (helperBB.top < parentBB.top) {
+                            y = (parentBB.top - helperBB.top) / helperBB.height;
+                            isOOB = true;
+                            scrollY -= delta * y * this.scroll;
+                            parent.scrollTop = scrollY;
+                        }
+
+                        setElementClientPosition(target, helperBB, 'translate3d');
+
+                        if (isOOB && this.isDragging) {
+                            window.requestAnimationFrame(scrollTick);
+                        } else {
+                            scrollTick = null;
+                        }
+                    };
+
+                    window.requestAnimationFrame(scrollTick);
                 }
             }
         };
@@ -608,5 +678,42 @@ export default class Draggable {
     _intersects(tolerance, droppable, item) {
         tolerance = tolerance || this.tolerance;
         return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
+    }
+
+    _scrollParent(element, helper) {
+        let parent = _getScrollParent(element);
+        if(!parent) return;
+
+        let lastTick = performance.now(),
+            scrollX = parent.scrollLeft,
+            scrollY = parent.scrollTop;
+
+        let tick = timestamp => {
+            let parentBB = parent.getBoundingClientRect(),
+                helperBB = helper.getBoundingClientRect(),
+                x = (helperBB.right - parentBB.right) / helperBB.width,
+                y = (helperBB.bottom - parentBB.bottom) / helperBB.height,
+                delta = timestamp - lastTick;
+
+            lastTick = timestamp;
+
+            if(x > 0) {
+                scrollX += delta * x * this.scroll;
+                parent.scrollLeft = scrollX;
+            }
+
+            if(y > 0) {
+                scrollY += delta * y * this.scroll;
+                parent.scrollTop = scrollY;
+            }
+
+            setElementClientPosition(helper, helperBB, 'translate3d');
+
+            if(x > 0 || y > 0) {
+                window.requestAnimationFrame(tick);
+            }
+        };
+
+        window.requestAnimationFrame(tick);
     }
 }

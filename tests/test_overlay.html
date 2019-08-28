@@ -159,6 +159,23 @@
             min-height: 50px;
             border: 1px solid #ccc;
         }
+
+        #test-scroll {
+            width: 800px;
+            height: 800px;
+            overflow: scroll;
+            border: 1px solid #ccc;
+            position: absolute;
+            background-color: #fff;
+            left: 100px;
+            top: 1200px;
+        }
+
+        #test-scroll .spacer {
+            position: absolute;
+            width: 16000px;
+            height: 16000px;
+        }
     </style>
 </head>
 <body>
@@ -224,6 +241,17 @@
         <div class="grid-item">10</div>
         <div class="grid-item">11</div>
         <div class="grid-item">12</div>
+    </div>
+
+
+    <div id="test-scroll">
+        <div class="spacer"></div>
+
+        <div class="test-box" id="scroll-draggable-test">
+            <div class="test-box__content-wrapper">
+                <div class="test-box__content">Drag Me!</div>
+            </div>
+        </div>
     </div>
 </body>
 </body>
