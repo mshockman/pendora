@@ -118,16 +118,13 @@ export default class Draggable {
     static OFFSET_CURSOR = cursor;
 
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
-        distance=null, handle=null, helper=null, revert=null, scroll=null, classes=null, selector=null, droppables=null, tolerance='intersect'}={}) {
+        distance=null, handle=null, helper=null, revert=null, scroll=null, selector=null, droppables=null, tolerance='intersect',
+        setHelperSize=false}={}) {
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
             this.element = element;
-        }
-
-        if(classes) {
-            addClasses(element, classes);
         }
 
         this._onMouseDown = this.onMouseDown.bind(this);
@@ -144,6 +141,7 @@ export default class Draggable {
         this.selector = selector;
         this.droppables = [];
         this.tolerance = tolerance;
+        this.setHelperSize = setHelperSize;
 
         if(droppables) {
             this.addDroppables(droppables);
@@ -292,14 +290,34 @@ export default class Draggable {
 
         let doc = document,
             target,
-            droppables = this.getDropTargets();
+            droppables = this.getDropTargets(),
+            startBoundingBox = _getClientRect(element),
+            helper;
 
         if(!this.helper || this.helper === 'self') {
             target = element;
         } else if(typeof this.helper === 'function') {
             target = this.helper(this);
+            helper = target;
         } else if(this.helper) {
             target = this.helper;
+            helper = target;
+        }
+
+        if(helper) {
+            if(this.setHelperSize) {
+                if(this.setHelperSize === true) {
+                    helper.style.width = `${startBoundingBox.width}px`;
+                    helper.style.height = `${startBoundingBox.height}px`;
+                    helper.style.boxSizing = 'border-box';
+                } else if(Array.isArray(this.setHelperSize)) {
+                    helper.style.width = `${this.setHelperSize[0]}px`;
+                    helper.style.height = `${this.setHelperSize[1]}px`;
+                } else {
+                    helper.style.width = `${this.setHelperSize.width}px`;
+                    helper.style.height = `${this.setHelperSize.height}px`;
+                }
+            }
         }
 
         // If the target doesn't have a parentElement it needs to be added to the page.
@@ -307,8 +325,7 @@ export default class Draggable {
             element.parentElement.appendChild(target);
         }
 
-        let container,
-            startBoundingBox = _getClientRect(element);
+        let container;
 
         // mouseOffsetX and mouseOffsetY is the mouses offset relative to the top left corner of the element
         // being dragged.
@@ -413,6 +430,7 @@ export default class Draggable {
             doc.removeEventListener('mouseup', onMouseUp);
             doc = null;
             this.isDragging = false;
+            element.classList.remove('ui-dragging');
 
             let position = getPosition(target, event.clientX, event.clientY, offset, container),
                 accepted = null;
@@ -499,6 +517,7 @@ export default class Draggable {
 
         doc.addEventListener('mousemove', onMouseMove);
         doc.addEventListener('mouseup', onMouseUp);
+        element.classList.add('ui-dragging');
 
         // let position = getPosition(posX - window.scrollX, posY - window.scrollY);
         // this.translate(target, position.tx, position.ty);

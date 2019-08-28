@@ -1,4 +1,4 @@
-import {getTranslation} from "core/position";
+import {getTranslation, setElementClientPosition} from "core/position";
 
 
 export function placeholder(className, nodeName=null) {
@@ -18,7 +18,7 @@ export function placeholder(className, nodeName=null) {
 
 
 export default class Sortable {
-    constructor(element, {items=".ui-sortable", placeholder=null, layout='y', dropOnEmpty=true, accepts=null}={}) {
+    constructor(element, {items=".ui-sortable", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -30,6 +30,7 @@ export default class Sortable {
         this.placeholder = placeholder;
         this.dropOnEmpty = dropOnEmpty;
         this.accepts = accepts;
+        this.setPlaceholderSize = setPlaceholderSize;
 
         this.initEvents();
     }
@@ -46,6 +47,7 @@ export default class Sortable {
             target.addEventListener('drag-move', onDragMove);
             target.addEventListener('drag-complete', onDragComplete);
             target.addEventListener('sort-append', onSortAppend);
+            let startBB = target.getBoundingClientRect();
             target.classList.add('ui-sorting');
 
             if(!placeholder && this.placeholder) {
@@ -62,10 +64,26 @@ export default class Sortable {
 
                 placeholder.classList.add('ui-placeholder');
 
+                if(this.setPlaceholderSize) {
+                    if(this.setPlaceholderSize === true) {
+                        placeholder.style.width = `${startBB.width}px`;
+                        placeholder.style.height = `${startBB.height}px`;
+                        placeholder.style.boxSizing = 'border-box';
+                    } else if(Array.isArray(this.setPlaceholderSize)) {
+                        placeholder.style.width = `${this.setPlaceholderSize[0]}px`;
+                        placeholder.style.height = `${this.setPlaceholderSize[1]}px`;
+                    } else {
+                        placeholder.style.width = `${this.setPlaceholderSize.width}px`;
+                        placeholder.style.height = `${this.setPlaceholderSize.height}px`;
+                    }
+                }
+
                 if(this.element.contains(target)) {
                     target.parentElement.insertBefore(placeholder, target);
                 }
             }
+
+            setElementClientPosition(target, startBB, 'translate3d');
         };
 
 
@@ -109,10 +127,6 @@ export default class Sortable {
                 after = this.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
                 beforeBB = event.detail.helper.getBoundingClientRect(),
                 dropOnEmpty = target.dataset.dropOnEmpty !== null && target.dataset.dropOnEmpty !== undefined ? target.dataset.dropOnEmpty === 'true' : this.dropOnEmpty; // Allow overriding on item level.
-
-            console.log(event.detail.clientX, event.detail.clientY);
-            console.log(before);
-            console.log(after);
 
             if(!items.length) {
                 if(dropOnEmpty) {

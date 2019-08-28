@@ -37,9 +37,9 @@ window.addEventListener('load', () => {
     window.d4 = new Draggable(document.querySelector('#drag-list-test2'), {selector: '.drag-list-item', droppables: '.drop-list'});
     new Draggable(document.querySelector('#sortable-grid'), {selector: '.grid-item'});
 
-    let sortable1 = window.s1 = new Sortable('#drag-list-test', {placeholder: true});
-    new Sortable('#drag-list-test2', {placeholder: true, selector: '.drag-list-item', droppables: '.drop-list', accepts: '.doesnt-exist'});
-    new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy'});
+    let sortable1 = window.s1 = new Sortable('#drag-list-test', {placeholder: true, setPlaceholderSize: true});
+    new Sortable('#drag-list-test2', {placeholder: true, setPlaceholderSize: true, selector: '.drag-list-item', droppables: '.drop-list'});
+    new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy', setPlaceholderSize: true});
 
     testGetElementByPositionFunctions(sortable1, 100, 0, null, 'Item #1');
     testGetElementByPositionFunctions(sortable1, 100, 43, 'Item #1', 'Item #2');
