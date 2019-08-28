@@ -4,11 +4,25 @@ import {privateCache} from "core/data";
 import {getTranslation, setElementClientPosition} from "core/position";
 
 
-export function cursor({cursorX, cursorY, boundingRect}) {
-    return [cursorX - boundingRect.left, cursorY - boundingRect.top];
+/**
+ * Draggable option for offset that offsets the position by the cursor.
+ *
+ * @param clientX
+ * @param clientY
+ * @param boundingRect
+ * @returns {number[]}
+ */
+export function cursor({clientX, clientY, boundingRect}) {
+    return [clientX - boundingRect.left, clientY - boundingRect.top];
 }
 
 
+/**
+ * Draggable option that clones the draggable element for the helper element.
+ *
+ * @param opacity
+ * @returns {function(*): (ActiveX.IXMLDOMNode | Node)}
+ */
 export function clone(opacity=null) {
     return function(draggable) {
         let helper = draggable.element.cloneNode(true);
@@ -22,18 +36,13 @@ export function clone(opacity=null) {
 }
 
 
-function _getClientRect(element) {
-    let box = element.getBoundingClientRect();
-
-    return {
-        left: box.left + window.scrollX,
-        top: box.top + window.scrollY,
-        width: box.width,
-        height: box.height
-    };
-}
-
-
+/**
+ * Returns the first scrollable parent.
+ *
+ * @param element
+ * @returns {HTMLElement|null}
+ * @private
+ */
 function _getScrollParent(element) {
     let o = element.parentElement;
 
@@ -49,6 +58,22 @@ function _getScrollParent(element) {
 }
 
 
+/**
+ * Sets the target elements x and y position by setting the translate3d translation matrix.
+ *
+ * @param target
+ * @param x
+ * @param y
+ * @private
+ */
+function _translate(target, x, y) {
+    target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+}
+
+
+// Group of function that can be passed to Draggables container property that will contain a dragged element to within
+// the given parameters.  Function should return a rect with {left, top, width, and height} properties relative to the
+// client.  Similiar to Element.getBoundingClientRect().
 export const CONTAINERS = {
     client: function() {
         return {
@@ -73,6 +98,16 @@ export const CONTAINERS = {
 };
 
 
+/**
+ * Takes a bounding client rect and constrains the left and top position to within the container.  Returns a new rect.
+ *
+ * @param rect
+ * @param container
+ * @param element
+ * @param helper
+ * @returns {{top: *, left: *}}
+ * @private
+ */
 function _clampPositionToContainer(rect, container, element, helper) {
     let bb = helper.getBoundingClientRect();
 
@@ -129,10 +164,12 @@ function getPosition(element, helper, clientX, clientY, offset, container) {
         target: helper
     };
 
-    return _clampPositionToContainer(r, container, element, helper);
+    return {...r, ..._clampPositionToContainer(r, container, element, helper)};
 }
 
 
+// Group of function that can be passed to the tolerance property of Draggable to control when an item is considered
+// intersecting another for drop events.
 const TOLARANCE_FUNCTIONS = {
     intersect: function(droppable, item) {
         let origin = {
@@ -148,6 +185,9 @@ const TOLARANCE_FUNCTIONS = {
 };
 
 
+/**
+ * Behavior class to add the draggable behavior to an element for group of elements.
+ */
 export default class Draggable {
     static CLONE = clone;
     static OFFSET_CURSOR = cursor;
@@ -326,7 +366,7 @@ export default class Draggable {
         let doc = document,
             target,
             droppables = this.getDropTargets(),
-            startBoundingBox = _getClientRect(element),
+            startBoundingBox = element.getBoundingClientRect(),
             helper,
             scrollTick;
 
@@ -378,8 +418,8 @@ export default class Draggable {
                 _offset = this.offset({
                     target: target,
                     draggable: this,
-                    cursorX: startMouseX,
-                    cursorY: startMouseY,
+                    clientX: startMouseX - window.scrollX,
+                    clientY: startMouseY - window.scrollY,
                     boundingRect: startBoundingBox
                 });
             }
@@ -542,7 +582,7 @@ export default class Draggable {
             },true, {accept, isAccepted});
 
             if(!accepted && this.revert === true) {
-                this.translate(target, startingTranslation.x, startingTranslation.y);
+                _translate(target, startingTranslation.x, startingTranslation.y);
 
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
@@ -561,7 +601,7 @@ export default class Draggable {
                     this.revert,
                     {
                         onFrame: (fx) => {
-                            this.translate(target, fx.frame.left, fx.frame.top);
+                            _translate(target, fx.frame.left, fx.frame.top);
                         },
 
                         onComplete: () => {
@@ -607,11 +647,6 @@ export default class Draggable {
             clientY: posY - window.scrollY,
             helper: target
         });
-    }
-
-    // noinspection JSMethodCanBeStatic
-    translate(target, x, y) {
-        target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     }
 
     getDropTargets() {
