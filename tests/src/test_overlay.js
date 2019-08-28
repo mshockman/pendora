@@ -38,7 +38,7 @@ window.addEventListener('load', () => {
     new Draggable(document.querySelector('#sortable-grid'), {selector: '.grid-item'});
 
     let sortable1 = window.s1 = new Sortable('#drag-list-test', {placeholder: true});
-    new Sortable('#drag-list-test2', {placeholder: true, selector: '.drag-list-item', droppables: '.drop-list'});
+    new Sortable('#drag-list-test2', {placeholder: true, selector: '.drag-list-item', droppables: '.drop-list', accepts: '.doesnt-exist'});
     new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy'});
 
     testGetElementByPositionFunctions(sortable1, 100, 0, null, 'Item #1');
@@ -47,7 +47,6 @@ window.addEventListener('load', () => {
     testGetElementByPositionFunctions(sortable1, 100, 115, 'Item #3', 'Item #4');
     testGetElementByPositionFunctions(sortable1, 100, 150, 'Item #4', 'Item #5');
     testGetElementByPositionFunctions(sortable1, 100, 192, 'Item #5', null);
-
 });
 
 

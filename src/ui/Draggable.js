@@ -34,13 +34,6 @@ function _getClientRect(element) {
 }
 
 
-function debug_output(selector, message) {
-    // todo remove debug
-    let output = document.querySelector(selector);
-    output.innerText = message;
-}
-
-
 // Takes mouse position relative to document.
 function getPosition(target, clientX, clientY, offset, container) {
     let translation = getTranslation(target),
@@ -103,6 +96,21 @@ function getPosition(target, clientX, clientY, offset, container) {
         target: target
     };
 }
+
+
+const TOLARANCE_FUNCTIONS = {
+    intersect: function(droppable, item) {
+        let origin = {
+            x: item.left + (item.width / 2),
+            y: item.top + (item.height / 2)
+        };
+
+        return origin.x >= droppable.left
+            && origin.x <= droppable.right
+            && origin.y >= droppable.top
+            && origin.y <= droppable.bottom;
+    }
+};
 
 
 export default class Draggable {
@@ -544,8 +552,8 @@ export default class Draggable {
             // Convert to client space.
             let dropBox = droppable.getBoundingClientRect();
 
-            let intersectsBefore = this._intersects(dropBox, position.startingBoundingClientRect),
-                intersectsAfter = this._intersects(dropBox, position.endingBoundingClientRect);
+            let intersectsBefore = this._intersects(droppable.dataset.tolerance, dropBox, position.startingBoundingClientRect),
+                intersectsAfter = this._intersects(droppable.dataset.tolerance, dropBox, position.endingBoundingClientRect);
 
             dropData.push({
                 intersectsBefore,
@@ -578,20 +586,8 @@ export default class Draggable {
         item.dispatchEvent(event);
     }
 
-    _intersects(droppable, item) {
-        // todo tolerance should be used to determine if two objects are intersecting.
-        // right now it just defaults to the middle point.  It should also being when they are touching
-        // or when one completely contains the other, etc.
-        // let tolerance = droppable.target.dataset.tolerance || this.tolerance;
-
-        let origin = {
-            x: item.left + (item.width / 2),
-            y: item.top + (item.height / 2)
-        };
-
-        return origin.x >= droppable.left
-            && origin.x <= droppable.right
-            && origin.y >= droppable.top
-            && origin.y <= droppable.bottom;
+    _intersects(tolerance, droppable, item) {
+        tolerance = tolerance || this.tolerance;
+        return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
     }
 }

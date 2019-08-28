@@ -1,13 +1,6 @@
 import {getTranslation} from "core/position";
 
 
-function debug_output(selector, message) {
-    // todo remove debug
-    let output = document.querySelector(selector);
-    output.innerText = message;
-}
-
-
 export function placeholder(className, nodeName=null) {
     return function(element) {
         let placeholder = document.createElement(nodeName || element.nodeName),
@@ -25,7 +18,7 @@ export function placeholder(className, nodeName=null) {
 
 
 export default class Sortable {
-    constructor(element, {items=".ui-sortable", placeholder=null, layout='y'}={}) {
+    constructor(element, {items=".ui-sortable", placeholder=null, layout='y', dropOnEmpty=true, accepts=null}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -33,9 +26,10 @@ export default class Sortable {
         }
 
         this.items = items;
-        this.isSorting = false;
         this.layout = layout;
         this.placeholder = placeholder;
+        this.dropOnEmpty = dropOnEmpty;
+        this.accepts = accepts;
 
         this.initEvents();
     }
@@ -45,7 +39,6 @@ export default class Sortable {
             isOver = false,
             init = false,
             target;
-
 
         let initialize = (event) => {
             init = true;
@@ -105,24 +98,29 @@ export default class Sortable {
 
 
         let onDragMove = (event) => {
-            if(!isOver) return;
+            if(!isOver || (this.accepts && !event.detail.item.matches(this.accepts))) {
+                return;
+            }
 
             let target = event.detail.item,
                 items = Array.prototype.slice.call(this.getItems()).filter(i => i !== target);
 
             let before = this.getItemBeforePoint(event.detail.clientX, event.detail.clientY, items),
                 after = this.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
-                beforeBB = event.detail.helper.getBoundingClientRect();
+                beforeBB = event.detail.helper.getBoundingClientRect(),
+                dropOnEmpty = target.dataset.dropOnEmpty !== null && target.dataset.dropOnEmpty !== undefined ? target.dataset.dropOnEmpty === 'true' : this.dropOnEmpty; // Allow overriding on item level.
 
             console.log(event.detail.clientX, event.detail.clientY);
             console.log(before);
             console.log(after);
 
             if(!items.length) {
-                this.element.appendChild(target);
-                if(placeholder) target.parentElement.insertBefore(placeholder, target);
-                this._refreshPositions(event.detail.helper, beforeBB);
-                this._triggerSortAppendEvent(target);
+                if(dropOnEmpty) {
+                    this.element.appendChild(target);
+                    if(placeholder) target.parentElement.insertBefore(placeholder, target);
+                    this._refreshPositions(event.detail.helper, beforeBB);
+                    this._triggerSortAppendEvent(target);
+                }
             } else if(before && before !== target) {
                 before.parentElement.insertBefore(target, before.nextSibling);
                 if(placeholder) target.parentElement.insertBefore(placeholder, target);
@@ -143,19 +141,19 @@ export default class Sortable {
 
 
         this.element.addEventListener('drag-enter', event => {
+            if(this.accepts && !event.detail.item.matches(this.accepts)) {
+                return;
+            }
+
             isOver = true;
 
             if(!init) {
                 initialize(event);
             }
-
-            console.log("Drag Enter");
         });
 
-        this.element.addEventListener('drag-leave', event => {
+        this.element.addEventListener('drag-leave', () => {
             isOver = false;
-
-            console.log("Drag Leave");
         });
 
         this.element.addEventListener('drag-start', (event) => {
