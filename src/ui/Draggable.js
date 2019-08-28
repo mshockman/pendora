@@ -49,67 +49,87 @@ function _getScrollParent(element) {
 }
 
 
-// Takes mouse position relative to document.
-function getPosition(target, clientX, clientY, offset, container) {
-    let translation = getTranslation(target),
-        bb = target.getBoundingClientRect();
+export const CONTAINERS = {
+    client: function() {
+        return {
+            left: 0,
+            top: 0,
+            height: window.innerHeight,
+            width: window.innerWidth
+        };
+    },
 
-    let mouseX = clientX + window.scrollX,
-        mouseY = clientY + window.scrollY,
-        x = mouseX + offset.x,
-        y = mouseY + offset.y;
+    viewport: function(element) {
+        let parent = _getScrollParent(element),
+            bb = parent.getBoundingClientRect();
+
+        return {
+            left: bb.left - parent.scrollLeft,
+            top: bb.top - parent.scrollTop,
+            width: parent.scrollWidth,
+            height: parent.scrollHeight
+        };
+    }
+};
+
+
+function _clampPositionToContainer(rect, container, element, helper) {
+    let bb = helper.getBoundingClientRect();
+
+    let x = rect.left,
+        y = rect.top;
 
     if(container) {
         if(typeof container === 'function') {
-            container = container();
+            container = container(element, helper);
+        } else if(container.getBoundingClientRect) {
+            container = container.getBoundingClientRect();
+        } else {
+            container = element.closest(container);
+            container = container.getBoundingClientRect();
         }
 
-        x = clamp(x, container.left, container.left + container.width - bb.width);
-        y = clamp(y, container.top, container.top + container.height - bb.height);
+        console.log(container);
+
+        if(container) {
+            x = clamp(x, container.left, container.left + container.width - bb.width);
+            y = clamp(y, container.top, container.top + container.height - bb.height);
+        }
     }
 
-    // The change is position of the element.
-    let deltaX = (bb.left + window.scrollX) - x,
-        deltaY = (bb.top + window.scrollY) - y;
-
     return {
-        // The starting position
-        startingBoundingClientRect: bb,
-
-        // The starting transformation that has been applied.
-        startingTranslation: translation,
-
-        // The change in position.
-        deltaX: deltaX,
-        deltaY: deltaY,
-
-        // The ending transformation that needs to be applied.
-        tx: translation.x - deltaX,
-        ty: translation.y - deltaY,
-
-        // The scroll of the window.
-        scrollX: window.scrollX,
-        scrollY: window.scrollY,
-
-        // Position of the mouse relative to the client window.
-        clientX: clientX,
-        clientY: clientY,
-
-        // Position of the mouse relative to the document.
-        mouseX: mouseX,
-        mouseY: mouseY,
-
-        endingBoundingClientRect: {
-            left: bb.left - deltaX,
-            top: bb.top - deltaY,
-            right: bb.right - deltaX,
-            bottom: bb.bottom - deltaY,
-            width: bb.width,
-            height: bb.height
-        },
-
-        target: target
+        ...rect,
+        left: x,
+        top: y
     };
+}
+
+
+/**
+ * Retrieves the expected bound box of the helper element at the given mouse coordinates.
+ *
+ * @param element
+ * @param helper
+ * @param clientX
+ * @param clientY
+ * @param offset
+ * @param container
+ * @returns {{top: *, left: *, bottom: *, width: number, right: *, height: number, target: *}}
+ */
+function getPosition(element, helper, clientX, clientY, offset, container) {
+    let bb = helper.getBoundingClientRect();
+
+    let r = {
+        left: clientX + offset.x,
+        top: clientY + offset.y,
+        width: bb.width,
+        height: bb.height,
+        right: (clientX + offset.x) + bb.width,
+        bottom: (clientY + offset.y) + bb.height,
+        target: helper
+    };
+
+    return _clampPositionToContainer(r, container, element, helper);
 }
 
 
@@ -341,8 +361,6 @@ export default class Draggable {
             element.parentElement.appendChild(target);
         }
 
-        let container;
-
         // mouseOffsetX and mouseOffsetY is the mouses offset relative to the top left corner of the element
         // being dragged.
 
@@ -372,26 +390,15 @@ export default class Draggable {
             }
         }
 
-        // The container property constrains the draggable element to a specific area.
-        if(this.container === 'viewport') {
-            container = () => {
-                return {
-                    left: window.scrollX,
-                    top: window.scrollY,
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                };
-            };
-        }
-
         let onMouseMove = (event) => {
             event.preventDefault();
 
-            let position = getPosition(target, event.clientX, event.clientY, offset, container),
+            let startingRect = target.getBoundingClientRect(),
+                position = getPosition(element, target, event.clientX, event.clientY, offset, this.container),
                 dropData;
 
-            this.translate(target, position.tx, position.ty);
-            dropData = this._getDropData(droppables, position);
+            setElementClientPosition(target, position, 'translate3d');
+            dropData = this._getDropData(droppables, startingRect, position);
 
             for(let droppable of dropData) {
                 if(!droppable.intersectsBefore && droppable.intersectsAfter) {
@@ -401,7 +408,7 @@ export default class Draggable {
 
                         detail: {
                             draggable: this,
-                            item: position.target
+                            item: target
                         }
                     });
 
@@ -422,7 +429,7 @@ export default class Draggable {
             });
 
             // Refresh dropData incase something moved.
-            dropData = this._getDropData(droppables, position);
+            dropData = this._getDropData(droppables, startingRect, position);
 
             for(let droppable of dropData) {
                 if(droppable.intersectsBefore && !droppable.intersectsAfter) {
@@ -431,7 +438,7 @@ export default class Draggable {
                         bubbles: true,
                         detail: {
                             draggable: this,
-                            item: position.target
+                            item: target
                         }
                     });
 
@@ -480,6 +487,7 @@ export default class Draggable {
                             parent.scrollTop = scrollY;
                         }
 
+                        helperBB = _clampPositionToContainer(helperBB, this.container, element, target);
                         setElementClientPosition(target, helperBB, 'translate3d');
 
                         if (isOOB && this.isDragging) {
@@ -502,7 +510,9 @@ export default class Draggable {
             this.isDragging = false;
             element.classList.remove('ui-dragging');
 
-            let position = getPosition(target, event.clientX, event.clientY, offset, container),
+            let startingRect = target.getBoundingClientRect(),
+                position = getPosition(element, target, event.clientX, event.clientY, offset, this.container),
+                translation = getTranslation(target),
                 accepted = null;
 
             function accept(element) {
@@ -518,11 +528,9 @@ export default class Draggable {
             }
 
             this._triggerEvent(element, 'drag-end', {
-                startMouseX,
+                startX: startMouseX - window.scrollX,
                 startMouseY,
                 offset,
-                mouseX: event.clientX + window.scrollX,
-                mouseY: event.clientY + window.scrollY,
                 clientX: event.clientX,
                 clientY: event.clientY,
 
@@ -544,8 +552,8 @@ export default class Draggable {
             } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation(
                     {
-                        left: position.tx,
-                        top: position.ty
+                        left: translation.x + (position.left - startingRect.left),
+                        top: translation.y + (position.top - startingRect.top)
                     }, {
                         left: startingTranslation.x,
                         top: startingTranslation.y
@@ -575,7 +583,7 @@ export default class Draggable {
                 animation.play();
                 this._revertFX = animation;
             } else {
-                this.translate(element, position.tx, position.ty);
+                setElementClientPosition(target, position, 'translate3d');
 
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
@@ -588,10 +596,6 @@ export default class Draggable {
         doc.addEventListener('mousemove', onMouseMove);
         doc.addEventListener('mouseup', onMouseUp);
         element.classList.add('ui-dragging');
-
-        // let position = getPosition(posX - window.scrollX, posY - window.scrollY);
-        // this.translate(target, position.tx, position.ty);
-        // this._triggerEnterLeaveEvents(droppables, position);
 
         this._triggerEvent(element, 'drag-start', {
             startMouseY,
@@ -634,15 +638,15 @@ export default class Draggable {
         return r;
     }
 
-    _getDropData(droppables, position) {
+    _getDropData(droppables, startingRect, endingRect) {
         let dropData = [];
 
         for(let droppable of droppables) {
             // Convert to client space.
             let dropBox = droppable.getBoundingClientRect();
 
-            let intersectsBefore = this._intersects(droppable.dataset.tolerance, dropBox, position.startingBoundingClientRect),
-                intersectsAfter = this._intersects(droppable.dataset.tolerance, dropBox, position.endingBoundingClientRect);
+            let intersectsBefore = this._intersects(droppable.dataset.tolerance, dropBox, startingRect),
+                intersectsAfter = this._intersects(droppable.dataset.tolerance, dropBox, endingRect);
 
             dropData.push({
                 intersectsBefore,
@@ -678,42 +682,5 @@ export default class Draggable {
     _intersects(tolerance, droppable, item) {
         tolerance = tolerance || this.tolerance;
         return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
-    }
-
-    _scrollParent(element, helper) {
-        let parent = _getScrollParent(element);
-        if(!parent) return;
-
-        let lastTick = performance.now(),
-            scrollX = parent.scrollLeft,
-            scrollY = parent.scrollTop;
-
-        let tick = timestamp => {
-            let parentBB = parent.getBoundingClientRect(),
-                helperBB = helper.getBoundingClientRect(),
-                x = (helperBB.right - parentBB.right) / helperBB.width,
-                y = (helperBB.bottom - parentBB.bottom) / helperBB.height,
-                delta = timestamp - lastTick;
-
-            lastTick = timestamp;
-
-            if(x > 0) {
-                scrollX += delta * x * this.scroll;
-                parent.scrollLeft = scrollX;
-            }
-
-            if(y > 0) {
-                scrollY += delta * y * this.scroll;
-                parent.scrollTop = scrollY;
-            }
-
-            setElementClientPosition(helper, helperBB, 'translate3d');
-
-            if(x > 0 || y > 0) {
-                window.requestAnimationFrame(tick);
-            }
-        };
-
-        window.requestAnimationFrame(tick);
     }
 }

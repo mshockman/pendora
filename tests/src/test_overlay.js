@@ -1,4 +1,5 @@
 import Draggable from 'ui/Draggable';
+import {CONTAINERS} from 'ui/Draggable';
 import Sortable from 'ui/Sortable';
 import Animation from 'core/Animation';
 import {privateCache} from "../../src/core/data";
@@ -30,8 +31,8 @@ function testGetElementByPositionFunctions(sortable, x, y, before, after) {
 
 
 window.addEventListener('load', () => {
-    window.d1 = new Draggable("#test-draggable1", {container: 'viewport', helper: Draggable.CLONE(0.5), revert: 300});
-    window.d2 = new Draggable("#test-window1", {container: 'viewport', helper: null, handle: '.drag-handle'});
+    window.d1 = new Draggable("#test-draggable1", {container: CONTAINERS.client, helper: Draggable.CLONE(0.5), revert: 300});
+    window.d2 = new Draggable("#test-window1", {container: CONTAINERS.client, helper: null, handle: '.drag-handle'});
 
     window.d3 = new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item', droppables: '.drop-list'});
     window.d4 = new Draggable(document.querySelector('#drag-list-test2'), {selector: '.drag-list-item', droppables: '.drop-list'});
@@ -41,7 +42,7 @@ window.addEventListener('load', () => {
     new Sortable('#drag-list-test2', {placeholder: true, setPlaceholderSize: true, selector: '.drag-list-item', droppables: '.drop-list'});
     new Sortable('#sortable-grid', {items: '.grid-item', layout: 'xy', setPlaceholderSize: true});
 
-    new Draggable(document.querySelector("#scroll-draggable-test"), {scroll: 1});
+    new Draggable(document.querySelector("#scroll-draggable-test"), {scroll: 1, container: CONTAINERS.viewport});
 
     testGetElementByPositionFunctions(sortable1, 100, 0, null, 'Item #1');
     testGetElementByPositionFunctions(sortable1, 100, 43, 'Item #1', 'Item #2');
