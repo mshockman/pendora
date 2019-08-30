@@ -136,8 +136,6 @@ function _clampPositionToContainer(rect, container, element, helper) {
             container = container.getBoundingClientRect();
         }
 
-        console.log(container);
-
         if(container) {
             x = clamp(x, container.left, container.left + container.width - bb.width);
             y = clamp(y, container.top, container.top + container.height - bb.height);
@@ -154,7 +152,7 @@ function _clampPositionToContainer(rect, container, element, helper) {
 
 // Group of function that can be passed to the tolerance property of Draggable to control when an item is considered
 // intersecting another for drop events.
-const TOLARANCE_FUNCTIONS = {
+const TOLERANCE_FUNCTIONS = {
     intersect: function(droppable, item) {
         let origin = {
             x: item.left + (item.width / 2),
@@ -799,7 +797,7 @@ export default class Draggable {
      */
     _intersects(tolerance, droppable, item) {
         tolerance = tolerance || this.tolerance;
-        return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
+        return TOLERANCE_FUNCTIONS[tolerance](droppable, item);
     }
 
     /**

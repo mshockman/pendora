@@ -1,4 +1,5 @@
 import {getTranslation, setElementClientPosition} from "core/position";
+import Draggable, {cursor} from './Draggable';
 
 
 export function placeholder(className, nodeName=null) {
@@ -21,12 +22,18 @@ export function placeholder(className, nodeName=null) {
  * Creates a sortable list of items.
  */
 export default class Sortable {
-    constructor(element, {items=".ui-sortable", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false}={}) {
+    constructor(element, {items=".ui-sort-item", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false,
+        container=null, axis='xy', exclude=null, delay=null, offset=cursor, disabled=false,
+        distance=null, handle=null, helper=null, revert=null, scroll=null, droppables=null, tolerance='intersect',
+        setHelperSize=false, grid=null}={}) {
+
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
             this.element = element;
         }
+
+        this.draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, disabled, distance, handle, helper, revert, scroll, selector: items, droppables, tolerance, setHelperSize, grid});
 
         this.items = items;
         this.layout = layout;
