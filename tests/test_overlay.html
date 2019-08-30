@@ -176,6 +176,27 @@
             width: 16000px;
             height: 16000px;
         }
+
+        #drop-test-zone {
+            position: absolute;
+            left: 0;
+            top: 2200px;
+        }
+
+        #drop-zone-test1 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            left: 600px;
+            top: 0;
+            background-color: #f00;
+        }
+
+        #drop-test1-droppable {
+            left: 0;
+            top: 0;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +265,15 @@
                 <div class="test-box__content">Drag Me!</div>
             </div>
         </div>
+    </div>
+
+    <div id="drop-test-zone">
+        <div id="drop-test1-droppable" class="test-box" style="left: 35px; z-index: 2;">
+            <div class="test-box__content-wrapper">
+                <div class="test-box__content">Drag Me to DropZone!</div>
+            </div>
+        </div>
+        <div id="drop-zone-test1"></div>
     </div>
 </body>
 </body>

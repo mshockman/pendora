@@ -169,3 +169,35 @@ export function setElementClientPosition(element, position, method='position') {
         });
     }
 }
+
+
+/**
+ * Transforms the coordinates of a BoundingClientRect like object from client space to document space.
+ * @param rect
+ */
+export function rectToDocumentSpace(rect) {
+    let r = {...rect};
+
+    r.left += window.scrollX;
+    r.right += window.scrollX;
+    if(typeof r.top === 'number') r.top += window.top;
+    if(typeof r.bottom === 'number') r.top += window.bottom;
+
+    return r;
+}
+
+
+/**
+ * Transforms the coordinates of a BoundingClientRect like object from document space to client space.
+ * @param rect
+ */
+export function rectToClientSpace(rect) {
+    let r = {...rect};
+
+    r.left -= window.scrollX;
+    r.right -= window.scrollX;
+    if(typeof r.top === 'number') r.top -= window.top;
+    if(typeof r.bottom === 'number') r.top -= window.bottom;
+
+    return r;
+}

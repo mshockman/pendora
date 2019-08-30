@@ -1,7 +1,7 @@
 import {clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
-import {getTranslation, setElementClientPosition} from "core/position";
+import {getTranslation, setElementClientPosition, rectToClientSpace, rectToDocumentSpace} from "core/position";
 
 
 /**
@@ -408,6 +408,7 @@ export default class Draggable {
             target,
             droppables = this.getDropTargets(),
             startBoundingBox = element.getBoundingClientRect(),
+            startBBDocument = rectToDocumentSpace(startBoundingBox),
             helper,
             scrollTick;
 
@@ -673,7 +674,32 @@ export default class Draggable {
 
                 setElementClientPosition(element, position, 'translate3d');
 
-                this._triggerEvent(element, 'drag-complete');
+                let startingRect = rectToClientSpace(startBBDocument),
+                    dropped = [];
+
+                for(let droppable of droppables) {
+                    if(this._intersects(element.dataset.tolerance, droppable.getBoundingClientRect(), position)) {
+                        let dropEvent = new CustomEvent('drop', {
+                            bubbles: true,
+                            detail: {
+                                draggable: this,
+                                originalEvent: event,
+                                startingBoundingClientRect: startingRect,
+                                droppable: droppable
+                            }
+                        });
+
+                        dropEvent.clientX = event.clientX;
+                        dropEvent.clientY = event.clientY;
+                        dropEvent.relatedTarget = element;
+
+                        droppable.dispatchEvent(dropEvent);
+                    }
+                }
+
+                this._triggerEvent(element, 'drag-complete', {
+                    dropped
+                });
             }
         };
 
