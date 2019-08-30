@@ -17,6 +17,9 @@ export function placeholder(className, nodeName=null) {
 }
 
 
+/**
+ * Creates a sortable list of items.
+ */
 export default class Sortable {
     constructor(element, {items=".ui-sortable", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false}={}) {
         if(typeof element === 'string') {
@@ -35,12 +38,16 @@ export default class Sortable {
         this.initEvents();
     }
 
+    /**
+     * Initializes event listeners.
+     */
     initEvents() {
         let placeholder,
             isOver = false,
             init = false,
             target;
 
+        // Attaches temporary events when drag starts.
         let initialize = (event) => {
             init = true;
             target = event.detail.item;
@@ -86,7 +93,7 @@ export default class Sortable {
             setElementClientPosition(target, startBB, 'translate3d');
         };
 
-
+        // Cleanup after sorting finishes.
         let destroy = () => {
             if(target) {
                 target.removeEventListener('drag-move', onDragMove);
@@ -107,14 +114,14 @@ export default class Sortable {
             }
         };
 
-
+        // Ensures that the placeholder is removed if the item gets moves to another sortable.
         let onSortAppend = event => {
             if(event.detail !== this && placeholder && placeholder.parentElement) {
                 placeholder.parentElement.removeChild(placeholder);
             }
         };
 
-
+        // Moves the item to the correct position on mouse move.
         let onDragMove = (event) => {
             if(!isOver || (this.accepts && !event.detail.item.matches(this.accepts))) {
                 return;
@@ -148,12 +155,12 @@ export default class Sortable {
             }
         };
 
-
+        // Cleanup
         let onDragComplete = () => {
             destroy();
         };
 
-
+        // Initialize sorting.
         this.element.addEventListener('drag-enter', event => {
             if(this.accepts && !event.detail.item.matches(this.accepts)) {
                 return;
@@ -166,10 +173,12 @@ export default class Sortable {
             }
         });
 
+        // Mark isOver state false.
         this.element.addEventListener('drag-leave', () => {
             isOver = false;
         });
 
+        // Initialize sorting that started on another sortable.
         this.element.addEventListener('drag-start', (event) => {
             if(!init) {
                 initialize(event);
@@ -179,6 +188,14 @@ export default class Sortable {
         });
     }
 
+    /**
+     * Tests to see if the given (x, y) point is before or after the element.  Uses layout to determine if the test
+     * is for the x layout, the y layout or the xy layout.
+     * @param element
+     * @param x
+     * @param y
+     * @returns {string|null}
+     */
     getRelativePosition(element, x, y) {
         let box = element.getBoundingClientRect(),
             mx = box.left + (box.width / 2),
@@ -196,52 +213,12 @@ export default class Sortable {
     }
 
     /**
-     *
-     * @param elements
+     * Returns the item immediately before the given x, y point.
      * @param x
      * @param y
-     * @param target
-     * @returns {Element|null|Boolean}
+     * @param items
+     * @returns {*}
      */
-    getDropTarget(elements, x, y, target) {
-        let r,
-            index = elements.indexOf(target),
-            dropIndex;
-
-        // Return true if their is not elements.
-        if(!elements.length) {
-            return true;
-        }
-
-        for(let i = 0; i < elements.length; i++) {
-            let element = elements[i];
-
-            if(i < index) {
-                if(this.getRelativePosition(element, x, y) === 'before' && !r) {
-                    r = element;
-                    dropIndex = i;
-                }
-            } else if(i > index) {
-                if(this.getRelativePosition(element, x, y) === 'after') {
-                    r = element;
-                    dropIndex = i;
-                }
-            }
-        }
-
-        if(r) {
-            let box = r.getBoundingClientRect();
-
-            if(this.layout === 'x' && box.top >= y && box.bottom <= y) {
-                return r;
-            } else if((this.layout === 'y' || this.layout === 'xy') && box.left <= x && box.right >= x) {
-                return r;
-            }
-        }
-
-        return null;
-    }
-
     getItemBeforePoint(x, y, items) {
         if(!items) items = this.getItems();
 
@@ -268,6 +245,13 @@ export default class Sortable {
         }
     }
 
+    /**
+     * Returns the item immediately after the given (x, y) point.
+     * @param x
+     * @param y
+     * @param items
+     * @returns {null|*}
+     */
     getItemAfterPoint(x, y, items) {
         if(!items) items = this.getItems();
 
@@ -296,12 +280,21 @@ export default class Sortable {
         return null;
     }
 
+    /**
+     * Returns a list of all items for the sortable.
+     * @returns {NodeListOf<SVGElementTagNameMap[string]> | NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element>}
+     */
     getItems() {
         return this.element.querySelectorAll(this.items);
     }
 
+    /**
+     * helper method that translates the target to the provided client position.
+     * @param target {{getBoundingClientRect, style} | Element}
+     * @param position {{left[Number], top[Number]}}
+     * @private
+     */
     _refreshPositions(target, position) {
-        // helper
         let current = target.getBoundingClientRect(),
             deltaLeft = current.left - position.left,
             deltaTop = current.top - position.top,
@@ -310,6 +303,11 @@ export default class Sortable {
         target.style.transform = `translate3d(${translation.x - deltaLeft}px, ${translation.y - deltaTop}px, 0)`;
     }
 
+    /**
+     * Triggers the default sort-append event on the target.
+     * @param target {Element}
+     * @private
+     */
     _triggerSortAppendEvent(target) {
         let event = new CustomEvent('sort-append', {
             bubbles: false,

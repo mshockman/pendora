@@ -10,10 +10,13 @@ import {getTranslation, setElementClientPosition} from "core/position";
  * @param clientX
  * @param clientY
  * @param boundingRect
- * @returns {number[]}
+ * @returns {{x, y}}
  */
 export function cursor({clientX, clientY, boundingRect}) {
-    return [clientX - boundingRect.left, clientY - boundingRect.top];
+    return {
+        x: boundingRect.left - clientX,
+        y: boundingRect.top - clientY
+    }
 }
 
 
@@ -75,6 +78,10 @@ function _translate(target, x, y) {
 // the given parameters.  Function should return a rect with {left, top, width, and height} properties relative to the
 // client.  Similiar to Element.getBoundingClientRect().
 export const CONTAINERS = {
+    /**
+     * Constrains to client area.
+     * @returns {{top: number, left: number, width: number, height: number}}
+     */
     client: function() {
         return {
             left: 0,
@@ -84,6 +91,11 @@ export const CONTAINERS = {
         };
     },
 
+    /**
+     * Constrains to viewport.
+     * @param element
+     * @returns {{top: number, left: number, width: number, height: number}}
+     */
     viewport: function(element) {
         let parent = _getScrollParent(element),
             bb = parent.getBoundingClientRect();
@@ -192,6 +204,44 @@ export default class Draggable {
     static CLONE = clone;
     static OFFSET_CURSOR = cursor;
 
+    /**
+     * @param element {Element|String}
+     *  The element to attach the draggable behavior to.
+     * @param container {string|CONTAINERS.client|CONTAINERS.viewport|function}
+     *  Constrains the draggable into the given area.  `container` can either be a css selector to match a parent element,
+     *  a Function(element, helper) that should return a bounding box.  Or an element who's bounding box will be used.
+     * @param axis {'x'|'y'|'xy'}
+     *  Controls what axis the item is draggable.  x can be dragged horizontally, y vertically, and xy can be freely dragged.
+     * @param exclude {String}
+     *  Prevents dragging from starting on matching elements.
+     * @param delay {Number}
+     *  The time in milliseconds after the mouse down event occurs that dragging will begin.
+     * @param offset {{x, y}|[x, y]|Function}
+     *  By default when an item is dragged is position will be set relative to the drop left corner of the item.
+     *  Offset is used to offset the element from the cursor.  You can pass an {x, y} object, an array with [x, y] pair,
+     *  or a Function({target, draggable, clientX, clientY, boundingRect}) that will be called that return an {x, y} object.
+     * @param disabled {Boolean}
+     *  Disables dragging.
+     * @param distance {Number}
+     *  Adds resistance to drag starting.  The users must move at least `distance` amount of pixels away from the
+     *  starting position for drag to start.
+     * @param handle {String}
+     *  If dragging will only start if the user clicks an element that matches the css selectors.
+     * @param helper {Function|Element}
+     *  An element to use as a helper for dragging.  Can be a Element or a Function that returns an element.
+     * @param revert {Number|Boolean}
+     *  Controls if the draggable reverts back to the starting position if no droppable accepts the target.
+     * @param scroll {Number}
+     *  Controls the speed that the draggable will scroll the scrollParent when the draggable leaves the viewable area.
+     * @param selector {String}
+     *  Used to delegate dragging to sub items.
+     * @param droppables
+     *  An array of css selectors or elements that will be used as drop targets for the draggable.
+     * @param tolerance {String}
+     *  Controls the function that determines if an item intersects a drop target.
+     * @param setHelperSize {Boolean}
+     *  If true the helpers width and height will be set by javascript to match the original element.
+     */
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
         distance=null, handle=null, helper=null, revert=null, scroll=null, selector=null, droppables=null, tolerance='intersect',
         setHelperSize=false}={}) {
@@ -229,6 +279,10 @@ export default class Draggable {
         this._revertFX = null;
     }
 
+    /**
+     * Adds a drop target item.  A `droppable` can be an element, a css selector or an array of those.
+     * @param droppables
+     */
     addDroppables(droppables) {
         if(Array.isArray(droppables)) {
             this.droppables = this.droppables.concat(droppables);
@@ -344,6 +398,7 @@ export default class Draggable {
 
     /**
      * Starts the drag animation at the given x, y origin.
+     *
      * @param element
      * @param startMouseX
      * @param startMouseY
@@ -415,7 +470,7 @@ export default class Draggable {
             let _offset = this.offset;
 
             if(typeof _offset === 'function') {
-                _offset = this.offset({
+                offset = this.offset({
                     target: target,
                     draggable: this,
                     clientX: startMouseX - window.scrollX,
@@ -423,11 +478,14 @@ export default class Draggable {
                     boundingRect: startBoundingBox
                 });
             }
+        }
 
-            if(_offset) {
-                offset.x -= _offset[0];
-                offset.y -= _offset[1];
-            }
+        // Offset should be {x, y} not an array.
+        if(Array.isArray(offset)) {
+            offset = {
+                x: offset[0],
+                y: offset[1]
+            };
         }
 
         let onMouseMove = (event) => {
@@ -649,6 +707,12 @@ export default class Draggable {
         });
     }
 
+    /**
+     * Gets an array of elements of all the drop targets.
+     * If the drop target is a string, it queries for those elements.
+     *
+     * @returns {Array}
+     */
     getDropTargets() {
         let r = [];
 
@@ -673,6 +737,18 @@ export default class Draggable {
         return r;
     }
 
+    /**
+     * Takes an array of drop targets and tests to see if the target intersects the start and ending rectangles.
+     *
+     * Rects are objects that have the left, right, top, bottom, width and height properties defined.
+     * Similar to the results received from Element.getBoundingClientRect().
+     *
+     * @param droppables - Array of elements to tests.
+     * @param startingRect - Starting rect.
+     * @param endingRect - Ending rect.
+     * @returns {Array}
+     * @private
+     */
     _getDropData(droppables, startingRect, endingRect) {
         let dropData = [];
 
@@ -694,6 +770,16 @@ export default class Draggable {
         return dropData;
     }
 
+    /**
+     * Triggers an event on the current item.
+     *
+     * @param item
+     * @param eventName
+     * @param details
+     * @param bubbles
+     * @param assign
+     * @private
+     */
     _triggerEvent(item, eventName, details, bubbles=true, assign=null) {
         details = {
             draggable: this,
@@ -714,6 +800,15 @@ export default class Draggable {
         item.dispatchEvent(event);
     }
 
+    /**
+     * Tests to see if the item intersects the droppable with the given tolerance function.
+     *
+     * @param tolerance
+     * @param droppable
+     * @param item
+     * @returns {*}
+     * @private
+     */
     _intersects(tolerance, droppable, item) {
         tolerance = tolerance || this.tolerance;
         return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
