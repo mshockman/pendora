@@ -31,8 +31,8 @@ function testGetElementByPositionFunctions(sortable, x, y, before, after) {
 
 
 window.addEventListener('load', () => {
-    window.d1 = new Draggable("#test-draggable1", {container: CONTAINERS.client, helper: Draggable.CLONE(0.5), revert: 300});
-    window.d2 = new Draggable("#test-window1", {container: CONTAINERS.client, helper: null, handle: '.drag-handle'});
+    window.d1 = new Draggable("#test-draggable1", {container: CONTAINERS.client, helper: Draggable.CLONE(0.5), revert: 1000});
+    window.d2 = new Draggable("#test-window1", {container: CONTAINERS.client, handle: '.drag-handle'});
 
     window.d3 = new Draggable(document.querySelector('#drag-list-test'), {selector: '.drag-list-item', droppables: '.drop-list'});
     window.d4 = new Draggable(document.querySelector('#drag-list-test2'), {selector: '.drag-list-item', droppables: '.drop-list'});

@@ -152,34 +152,6 @@ function _clampPositionToContainer(rect, container, element, helper) {
 }
 
 
-/**
- * Retrieves the expected bound box of the helper element at the given mouse coordinates.
- *
- * @param element
- * @param helper
- * @param clientX
- * @param clientY
- * @param offset
- * @param container
- * @returns {{top: *, left: *, bottom: *, width: number, right: *, height: number, target: *}}
- */
-function getPosition(element, helper, clientX, clientY, offset, container) {
-    let bb = helper.getBoundingClientRect();
-
-    let r = {
-        left: clientX + offset.x,
-        top: clientY + offset.y,
-        width: bb.width,
-        height: bb.height,
-        right: (clientX + offset.x) + bb.width,
-        bottom: (clientY + offset.y) + bb.height,
-        target: helper
-    };
-
-    return {...r, ..._clampPositionToContainer(r, container, element, helper)};
-}
-
-
 // Group of function that can be passed to the tolerance property of Draggable to control when an item is considered
 // intersecting another for drop events.
 const TOLARANCE_FUNCTIONS = {
@@ -205,11 +177,11 @@ export default class Draggable {
     static OFFSET_CURSOR = cursor;
 
     /**
-     * @param element {Element|String}
-     *  The element to attach the draggable behavior to.
+     * @param element {Element|String} The element to attach the draggable behavior to.
      * @param container {string|CONTAINERS.client|CONTAINERS.viewport|function}
-     *  Constrains the draggable into the given area.  `container` can either be a css selector to match a parent element,
-     *  a Function(element, helper) that should return a bounding box.  Or an element who's bounding box will be used.
+     *  Constrains the draggable into the given area.
+     *  `container` can either be a css selector to match a parent element, a Function(element, helper)
+     *  that should return a bounding box.  Or an element who's bounding box will be used.
      * @param axis {'x'|'y'|'xy'}
      *  Controls what axis the item is draggable.  x can be dragged horizontally, y vertically, and xy can be freely dragged.
      * @param exclude {String}
@@ -241,10 +213,12 @@ export default class Draggable {
      *  Controls the function that determines if an item intersects a drop target.
      * @param setHelperSize {Boolean}
      *  If true the helpers width and height will be set by javascript to match the original element.
+     * @param grid {{x, y} | [x, y] | Number}
+     *  Snaps draggable movement to a grid with the given x, y dimensions.
      */
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
         distance=null, handle=null, helper=null, revert=null, scroll=null, selector=null, droppables=null, tolerance='intersect',
-        setHelperSize=false}={}) {
+        setHelperSize=false, grid=null}={}) {
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -268,6 +242,20 @@ export default class Draggable {
         this.tolerance = tolerance;
         this.setHelperSize = setHelperSize;
         this.scroll = scroll;
+
+        if(typeof grid === 'number') {
+            this.grid = {
+                x: grid,
+                y: grid
+            };
+        } else if(Array.isArray(grid)) {
+            this.grid = {
+                x: grid[0],
+                y: grid[1]
+            };
+        } else {
+            this.grid = grid;
+        }
 
         if(droppables) {
             this.addDroppables(droppables);
@@ -492,7 +480,7 @@ export default class Draggable {
             event.preventDefault();
 
             let startingRect = target.getBoundingClientRect(),
-                position = getPosition(element, target, event.clientX, event.clientY, offset, this.container),
+                position = this._getPosition(element, target, event.clientX, event.clientY, offset, this.container),
                 dropData;
 
             setElementClientPosition(target, position, 'translate3d');
@@ -609,7 +597,7 @@ export default class Draggable {
             element.classList.remove('ui-dragging');
 
             let startingRect = target.getBoundingClientRect(),
-                position = getPosition(element, target, event.clientX, event.clientY, offset, this.container),
+                position = this._getPosition(element, target, event.clientX, event.clientY, offset, this.container),
                 translation = getTranslation(target),
                 accepted = null;
 
@@ -681,11 +669,11 @@ export default class Draggable {
                 animation.play();
                 this._revertFX = animation;
             } else {
-                setElementClientPosition(target, position, 'translate3d');
-
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
                 }
+
+                setElementClientPosition(element, position, 'translate3d');
 
                 this._triggerEvent(element, 'drag-complete');
             }
@@ -812,5 +800,41 @@ export default class Draggable {
     _intersects(tolerance, droppable, item) {
         tolerance = tolerance || this.tolerance;
         return TOLARANCE_FUNCTIONS[tolerance](droppable, item);
+    }
+
+    /**
+     * Retrieves the expected bound box of the helper element at the given mouse coordinates.
+     *
+     * @param element
+     * @param helper
+     * @param clientX
+     * @param clientY
+     * @param offset
+     * @param container
+     * @returns {{top: *, left: *, bottom: *, width: number, right: *, height: number, target: *}}
+     */
+    _getPosition(element, helper, clientX, clientY, offset, container) {
+        let bb = helper.getBoundingClientRect();
+
+        if(this.grid) {
+            if(this.grid.x) {
+                clientX = Math.floor(clientX / this.grid.x) * this.grid.x;
+            }
+            if(this.grid.y) {
+                clientY = Math.floor(clientY / this.grid.y) * this.grid.y;
+            }
+        }
+
+        let r = {
+            left: clientX + offset.x,
+            top: clientY + offset.y,
+            width: bb.width,
+            height: bb.height,
+            right: (clientX + offset.x) + bb.width,
+            bottom: (clientY + offset.y) + bb.height,
+            target: helper
+        };
+
+        return {...r, ..._clampPositionToContainer(r, container, element, helper)};
     }
 }
