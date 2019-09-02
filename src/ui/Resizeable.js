@@ -1,6 +1,6 @@
 import {isSuperset} from 'core/set';
-import {rectToDocumentSpace, getTranslation, setElementClientPosition, setTranslation} from 'core/position';
-import {clamp} from 'core/utility';
+import {rectToDocumentSpace, setElementClientPosition} from 'core/position';
+import {addClasses, clamp} from 'core/utility';
 
 
 const DIRECTIONS = new Set([
@@ -15,6 +15,9 @@ const DIRECTIONS = new Set([
 ]);
 
 
+/**
+ * Behavior class that makes an element resizeable.
+ */
 export default class Resizeable {
     constructor(element, {handles="bottom-right", helper=null, minWidth=null, maxWidth=null, minHeight=null, maxHeight=null, keepAspectRatio=false, autoHide=false, container=null}={}) {
         if(typeof element === 'string') {
@@ -57,7 +60,6 @@ export default class Resizeable {
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
         this.keepAspectRatio = keepAspectRatio;
-        this.container = container;
         this.isResizing = false;
     }
 
@@ -68,11 +70,33 @@ export default class Resizeable {
         let resizeable = handle.closest('.ui-resizeable');
         if(!resizeable || resizeable !== this.element) return;
 
+        event.preventDefault();
+
         let direction = handle.dataset.direction,
             startPosX = event.clientX + window.scrollX,
             startPosY = event.clientY + window.scrollY,
             doc = document,
-            startBox = rectToDocumentSpace(this.element.getBoundingClientRect());
+            startingClientRect = this.element.getBoundingClientRect(),
+            startBox = rectToDocumentSpace(startingClientRect),
+            target = this.element,
+            rect = {left: startBox.left, top: startBox.top, width: startBox.width, height: startBox.height};
+
+        if(this.helper) {
+            if(typeof this.helper === 'function') {
+                target = this.helper.call(this, this.element);
+            } else {
+                target = document.createElement('div');
+                addClasses(target, this.helper);
+            }
+
+            target.classList.add('ui-resizeable-helper');
+            target.style.width = startBox.width + 'px';
+            target.style.height = startBox.height + 'px';
+            target.style.boxSizing = getComputedStyle(this.element).boxSizing;
+            this.element.parentElement.appendChild(target);
+            setElementClientPosition(target, startingClientRect, 'translate3d');
+            setElementClientPosition(target, this.element.getBoundingClientRect(), 'translate3d');
+        }
 
         let onMouseMove = event => {
             let width = startBox.width,
@@ -117,19 +141,85 @@ export default class Resizeable {
                 top = bottom - height;
             }
 
-            setElementClientPosition(this.element, {left, top}, 'translate3d');
-            this.element.style.width = `${width}px`;
-            this.element.style.height = `${height}px`;
+            setElementClientPosition(target, {left, top}, 'translate3d');
+            target.style.width = `${width}px`;
+            target.style.height = `${height}px`;
+
+            rect.left = left + window.scrollX;
+            rect.top = top + window.scrollY;
+            rect.width = width;
+            rect.height = height;
+
+            this.element.dispatchEvent(new CustomEvent('resizing', {
+                bubbles: true,
+                detail: {
+                    resizeable: this,
+                    target: target,
+                    originalEvent: event,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    element: this.element,
+
+                    targetClientRect: {
+                        left: left,
+                        top: top,
+                        right: left + width,
+                        bottom: top + height,
+                        width: width,
+                        height: height,
+                        x: left,
+                        y: top
+                    }
+                }
+            }));
         };
 
         let onMouseUp = event => {
             doc.removeEventListener('mousemove', onMouseMove);
             doc.removeEventListener('mouseup', onMouseUp);
+
+            if(this.element !== target) {
+                target.parentElement.removeChild(target);
+
+                setElementClientPosition(this.element, {
+                    left: rect.left - window.scrollX,
+                    top: rect.top - window.scrollY
+                }, 'translate3d');
+
+                this.element.style.width = `${rect.width}px`;
+                this.element.style.height = `${rect.height}px`;
+            }
+
+            this.element.classList.remove('ui-resizing');
             this.isResizing = false;
+
+            this.element.dispatchEvent(new CustomEvent('resize-end', {
+                bubbles: true,
+                detail: {
+                    resizeable: this,
+                    element: this.element,
+                    originalEvent: event,
+                    clientX: event.clientX,
+                    clientY: event.clientY
+                }
+            }));
         };
 
         this.isResizing = true;
+        this.element.classList.add('ui-resizing');
         doc.addEventListener('mousemove', onMouseMove);
         doc.addEventListener('mouseup', onMouseUp);
+
+        this.element.dispatchEvent(new CustomEvent('resize-start', {
+            bubbles: true,
+            detail: {
+                resizeable: this,
+                target: target,
+                originalEvent: event,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                element: this.element
+            }
+        }));
     }
 }
