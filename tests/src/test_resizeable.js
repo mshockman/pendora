@@ -16,7 +16,7 @@ export default class ResizeableTestPage {
         let element1 = document.querySelector('#test-resizeable1');
 
         this.draggable = new Draggable(element1, {exclude: '.ui-resizeable-handle'});
-        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper'});
+        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper', grid: 20});
         this.element1 = element1;
     }
 }

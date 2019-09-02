@@ -19,7 +19,8 @@ const DIRECTIONS = new Set([
  * Behavior class that makes an element resizeable.
  */
 export default class Resizeable {
-    constructor(element, {handles="bottom-right", helper=null, minWidth=null, maxWidth=null, minHeight=null, maxHeight=null, keepAspectRatio=false, autoHide=false, container=null}={}) {
+    constructor(element, {handles="bottom-right", helper=null, minWidth=null, maxWidth=null, minHeight=null, maxHeight=null,
+        keepAspectRatio=false, autoHide=false, container=null, grid=null}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -53,6 +54,20 @@ export default class Resizeable {
         };
 
         this.element.addEventListener('mousedown', this._onMouseDown);
+
+        if(typeof grid === 'number') {
+            this.grid = {
+                x: grid,
+                y: grid
+            };
+        } else if(Array.isArray(grid)) {
+            this.grid = {
+                x: grid[0],
+                y: grid[1]
+            };
+        } else {
+            this.grid = grid;
+        }
 
         this.helper = helper;
         this.minWidth = minWidth;
@@ -101,8 +116,23 @@ export default class Resizeable {
         let onMouseMove = event => {
             let width = startBox.width,
                 height = startBox.height,
-                deltaX = event.clientX - (startPosX - window.scrollX),
-                deltaY = event.clientY - (startPosY - window.scrollY),
+                clientX = event.clientX,
+                clientY = event.clientY;
+
+            if(this.grid) {
+                if(this.grid.x) {
+                    clientX = Math.floor(clientX / this.grid.x) * this.grid.x;
+                }
+
+                if(this.grid.y) {
+                    clientY = Math.floor(clientY / this.grid.y) * this.grid.y;
+                }
+            }
+
+            console.log(clientX, clientY);
+
+            let deltaX = clientX - (startPosX - window.scrollX),
+                deltaY = clientY - (startPosY - window.scrollY),
                 left = startBox.left,
                 top = startBox.top,
                 right = startBox.right - window.scrollX,
