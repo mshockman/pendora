@@ -176,12 +176,21 @@ export function setElementClientPosition(element, position, method='position') {
  * @param rect
  */
 export function rectToDocumentSpace(rect) {
-    let r = {...rect};
+    let r = {
+        left: rect.left,
+        top: rect.top,
+        bottom: rect.bottom,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+    };
 
     r.left += window.scrollX;
     r.right += window.scrollX;
-    if(typeof r.top === 'number') r.top += window.top;
-    if(typeof r.bottom === 'number') r.top += window.bottom;
+    if(typeof r.top === 'number') r.top += window.scrollY;
+    if(typeof r.bottom === 'number') r.bottom += window.scrollY;
 
     return r;
 }
@@ -192,12 +201,21 @@ export function rectToDocumentSpace(rect) {
  * @param rect
  */
 export function rectToClientSpace(rect) {
-    let r = {...rect};
+    let r = {
+        left: rect.left,
+        top: rect.top,
+        bottom: rect.bottom,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+    };
 
     r.left -= window.scrollX;
     r.right -= window.scrollX;
-    if(typeof r.top === 'number') r.top -= window.top;
-    if(typeof r.bottom === 'number') r.top -= window.bottom;
+    if(typeof r.top === 'number') r.top -= window.scrollY;
+    if(typeof r.bottom === 'number') r.bottom -= window.scrollY;
 
     return r;
 }

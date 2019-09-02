@@ -18,7 +18,8 @@ export default {
         'testDataGrid': ["@babel/polyfill", './tests/src/test_data_grid.js'],
         'testPaginator': './tests/src/test_paginator.js',
         'test_pages': ["@babel/polyfill", 'polyfills', './tests/src/test_pages.js'],
-        'test_overlay': ['./tests/src/test_overlay.js']
+        'test_overlay': ['./tests/src/test_overlay.js'],
+        'test_resizeable': ['./tests/src/test_resizeable.js']
     },
 
     resolve: {
