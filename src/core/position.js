@@ -222,7 +222,7 @@ export function rectToClientSpace(rect) {
 
 
 export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
-    if(gridSize !== null && gridSize !== undefined) {
+    if(gridSize !== null && gridSize !== undefined && !Number.isNaN(gridSize)) {
         return roundingFunction(value / gridSize) * gridSize;
     }
 

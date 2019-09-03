@@ -192,14 +192,16 @@ export default class Resizeable {
                         right: container.right
                     };
 
-                    if(this.grid.x) {
-                        _container.left = snapToGrid(container.left, this.grid.x, Math.ceil);
-                        _container.right = snapToGrid(container.right, this.grid.x, Math.floor);
-                    }
+                    if(this.grid) {
+                        if (this.grid.x) {
+                            _container.left = snapToGrid(container.left, this.grid.x, Math.ceil);
+                            _container.right = snapToGrid(container.right, this.grid.x, Math.floor);
+                        }
 
-                    if(this.grid.y) {
-                        _container.top = snapToGrid(container.top, this.grid.y, Math.ceil);
-                        _container.bottom = snapToGrid(container.bottom, this.grid.y, Math.floor);
+                        if (this.grid.y) {
+                            _container.top = snapToGrid(container.top, this.grid.y, Math.ceil);
+                            _container.bottom = snapToGrid(container.bottom, this.grid.y, Math.floor);
+                        }
                     }
 
                     container = _container;
