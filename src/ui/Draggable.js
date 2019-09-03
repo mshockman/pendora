@@ -1,7 +1,13 @@
 import {clamp} from 'core/utility';
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
-import {getTranslation, setElementClientPosition, rectToClientSpace, rectToDocumentSpace} from "core/position";
+import {
+    getTranslation,
+    setElementClientPosition,
+    rectToClientSpace,
+    rectToDocumentSpace,
+    snapToGrid
+} from "core/position";
 
 
 /**
@@ -840,22 +846,21 @@ export default class Draggable {
     _getPosition(element, helper, clientX, clientY, offset, container) {
         let bb = helper.getBoundingClientRect();
 
+        let left = clientX + offset.x,
+            top = clientY + offset.y;
+
         if(this.grid) {
-            if(this.grid.x) {
-                clientX = Math.floor(clientX / this.grid.x) * this.grid.x;
-            }
-            if(this.grid.y) {
-                clientY = Math.floor(clientY / this.grid.y) * this.grid.y;
-            }
+            left = snapToGrid(left, this.grid.x);
+            top = snapToGrid(top, this.grid.y);
         }
 
         let r = {
-            left: clientX + offset.x,
-            top: clientY + offset.y,
+            left: left,
+            top: top,
             width: bb.width,
             height: bb.height,
-            right: (clientX + offset.x) + bb.width,
-            bottom: (clientY + offset.y) + bb.height,
+            right: left + bb.width,
+            bottom: top + bb.height,
             target: helper
         };
 

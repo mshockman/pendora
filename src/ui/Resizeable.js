@@ -1,5 +1,5 @@
 import {isSuperset} from 'core/set';
-import {rectToDocumentSpace, setElementClientPosition} from 'core/position';
+import {rectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/position';
 import {addClasses, clamp} from 'core/utility';
 
 
@@ -50,15 +50,6 @@ export const CONTAINERS = {
         };
     }
 };
-
-
-function snapToGrid(value, gridSize, roundingFunction=Math.round) {
-    if(gridSize !== null && gridSize !== undefined) {
-        return roundingFunction(value / gridSize) * gridSize;
-    }
-
-    return value;
-}
 
 
 /**
@@ -277,8 +268,6 @@ export default class Resizeable {
 
             if(this.element !== target) {
                 target.parentElement.removeChild(target);
-
-                console.log(rect);
 
                 setElementClientPosition(this.element, {
                     left: rect.left - window.scrollX,

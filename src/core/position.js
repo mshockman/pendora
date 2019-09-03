@@ -219,3 +219,12 @@ export function rectToClientSpace(rect) {
 
     return r;
 }
+
+
+export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
+    if(gridSize !== null && gridSize !== undefined) {
+        return roundingFunction(value / gridSize) * gridSize;
+    }
+
+    return value;
+}
