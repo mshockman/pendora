@@ -16,7 +16,7 @@ export default class ResizeableTestPage {
         let element1 = document.querySelector('#test-resizeable1');
 
         this.draggable = new Draggable(element1, {exclude: '.ui-resizeable-handle', container: CONTAINERS.client, grid: 20});
-        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper', grid: 20, container: CONTAINERS.client});
+        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper', grid: 20, container: CONTAINERS.client, keepAspectRatio: 0.5625});
         this.element1 = element1;
     }
 }

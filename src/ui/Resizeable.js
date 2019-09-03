@@ -224,7 +224,13 @@ export default class Resizeable {
             }
 
             if(this.keepAspectRatio) {
-                bottom = top + ((right - left) * this.keepAspectRatio);
+                if(direction === 'top-left' || direction === 'top-right') {
+                    top = bottom - ((right - left) * this.keepAspectRatio);
+                } else if(direction === 'bottom-left' || direction === 'bottom-right' || direction === 'left' || direction === 'right') {
+                    bottom = top + ((right - left) * this.keepAspectRatio);
+                } else if(direction === 'bottom' || direction === 'top') {
+                    right = left + ((bottom - top) / this.keepAspectRatio);
+                }
             }
 
             setElementClientPosition(target, {left, top}, 'translate3d');
