@@ -1,5 +1,5 @@
 import {isSuperset} from 'core/set';
-import {rectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/position';
+import {clientRectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/position';
 import {addClasses, clamp} from 'core/utility';
 
 
@@ -130,7 +130,7 @@ export default class Resizeable {
             startPosY = event.clientY + window.scrollY,
             doc = document,
             startingClientRect = this.element.getBoundingClientRect(),
-            startBox = rectToDocumentSpace(startingClientRect),
+            startBox = clientRectToDocumentSpace(startingClientRect),
             target = this.element,
             rect = {left: startBox.left, top: startBox.top, width: startBox.width, height: startBox.height};
 

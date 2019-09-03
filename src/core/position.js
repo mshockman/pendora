@@ -22,18 +22,53 @@ export function getOffsetElement(element) {
 
 
 /**
- * Returns the position of the element relative to the document.
- *
+ * Returns a bounding rect who's positions are relative to the provided offsetParent.
+ * If offsetParent is null then the targets natural offsetParent is used as returned by the getOffsetElement function.
  * @param element
- * @returns {Vec2}
+ * @param offsetParent
+ * @returns {{top: number, left: number, bottom: number, width: number, right: number, height: number}}
  */
-export function getDocumentPosition(element) {
-    let box = element.getBoundingClientRect();
+export function getBoundingOffsetRect(element, offsetParent=null) {
+    if(!offsetParent) offsetParent = getOffsetElement(element);
 
-    return new Vec2(
-        box.left + window.scrollX,
-        box.top + window.scrollY
-        );
+    let offsetRect = offsetParent.getBoundingClientRect(),
+        rect = element.getBoundingClientRect(),
+        left = rect.left - offsetRect.left,
+        top = rect.top - offsetRect.top;
+
+    return {
+        left: left,
+        top: top,
+        right: rect.right - offsetRect.right,
+        bottom: rect.bottom - offsetRect.bottom,
+        width: rect.width,
+        height: rect.height,
+        x: left,
+        y: top
+    };
+}
+
+
+/**
+ * Returns a bounding rect who's positions are relative to the document.
+ * @param element
+ * @returns {{top: number, left: number, bottom: number, width: number, x: number, y: number, right: number, height: number}}
+ */
+export function getBoundingDocumentRect(element) {
+    let rect = element.getBoundingClientRect(),
+        left = rect.left + window.scrollX,
+        top = rect.top + window.scrollY;
+
+    return {
+        left: left,
+        top: top,
+        right: rect.right + window.scrollX,
+        bottom: rect.bottom + window.scrollY,
+        width: rect.width,
+        height: rect.height,
+        x: left,
+        y: top
+    };
 }
 
 
@@ -175,7 +210,7 @@ export function setElementClientPosition(element, position, method='position') {
  * Transforms the coordinates of a BoundingClientRect like object from client space to document space.
  * @param rect
  */
-export function rectToDocumentSpace(rect) {
+export function clientRectToDocumentSpace(rect) {
     let r = {
         left: rect.left,
         top: rect.top,
@@ -200,7 +235,7 @@ export function rectToDocumentSpace(rect) {
  * Transforms the coordinates of a BoundingClientRect like object from document space to client space.
  * @param rect
  */
-export function rectToClientSpace(rect) {
+export function documentRectToClientSpace(rect) {
     let r = {
         left: rect.left,
         top: rect.top,
@@ -221,6 +256,13 @@ export function rectToClientSpace(rect) {
 }
 
 
+/**
+ * Snaps the value to the specified grid using the provided rounding function.
+ * @param value
+ * @param gridSize
+ * @param roundingFunction
+ * @returns {number|*}
+ */
 export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
     if(gridSize !== null && gridSize !== undefined && !Number.isNaN(gridSize)) {
         return roundingFunction(value / gridSize) * gridSize;

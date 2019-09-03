@@ -1,10 +1,10 @@
 import Resizeable, {CONTAINERS} from 'ui/Resizeable';
 import Draggable from 'ui/Draggable';
-import {rectToDocumentSpace, rectToClientSpace} from 'core/position';
+import {clientRectToDocumentSpace, documentRectToClientSpace} from 'core/position';
 
 
-window.rectToDocumentSpace = rectToDocumentSpace;
-window.rectToClientSpace = rectToClientSpace;
+window.clientRectToDocumentSpace = clientRectToDocumentSpace;
+window.documentRectToClientSpace = documentRectToClientSpace;
 
 
 export default class ResizeableTestPage {

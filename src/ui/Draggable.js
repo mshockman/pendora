@@ -4,8 +4,8 @@ import {privateCache} from "core/data";
 import {
     getTranslation,
     setElementClientPosition,
-    rectToClientSpace,
-    rectToDocumentSpace,
+    documentRectToClientSpace,
+    clientRectToDocumentSpace,
     snapToGrid
 } from "core/position";
 
@@ -414,7 +414,7 @@ export default class Draggable {
             target,
             droppables = this.getDropTargets(),
             startBoundingBox = element.getBoundingClientRect(),
-            startBBDocument = rectToDocumentSpace(startBoundingBox),
+            startBBDocument = clientRectToDocumentSpace(startBoundingBox),
             helper,
             scrollTick;
 
@@ -680,7 +680,7 @@ export default class Draggable {
 
                 setElementClientPosition(element, position, 'translate3d');
 
-                let startingRect = rectToClientSpace(startBBDocument),
+                let startingRect = documentRectToClientSpace(startBBDocument),
                     dropped = [];
 
                 for(let droppable of droppables) {
