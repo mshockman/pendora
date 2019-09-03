@@ -15,6 +15,52 @@ const DIRECTIONS = new Set([
 ]);
 
 
+export const CONTAINERS = {
+    /**
+     * Constrains to client area.
+     * @returns {{top: number, left: number, width: number, height: number}}
+     */
+    client: function() {
+        return {
+            left: 0,
+            top: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            height: window.innerHeight,
+            width: window.innerWidth
+        };
+    },
+
+    /**
+     * Constrains to viewport.
+     * @param element
+     * @returns {{top: number, left: number, width: number, height: number}}
+     */
+    viewport: function(element) {
+        let parent = _getScrollParent(element),
+            bb = parent.getBoundingClientRect();
+
+        return {
+            left: bb.left - parent.scrollLeft,
+            top: bb.top - parent.scrollTop,
+            width: parent.scrollWidth,
+            height: parent.scrollHeight,
+            right: (bb.left - parent.scrollLeft) + parent.scrollWidth,
+            bottom: (bb.top - parent.scrollTop) + parent.scrollHeight
+        };
+    }
+};
+
+
+function snapToGrid(value, gridSize, roundingFunction=Math.round) {
+    if(gridSize !== null && gridSize !== undefined) {
+        return roundingFunction(value / gridSize) * gridSize;
+    }
+
+    return value;
+}
+
+
 /**
  * Behavior class that makes an element resizeable.
  */
@@ -76,6 +122,7 @@ export default class Resizeable {
         this.maxHeight = maxHeight;
         this.keepAspectRatio = keepAspectRatio;
         this.isResizing = false;
+        this.container = container;
     }
 
     _startResizing(event) {
@@ -114,71 +161,91 @@ export default class Resizeable {
         }
 
         let onMouseMove = event => {
-            let width = startBox.width,
-                height = startBox.height,
-                clientX = event.clientX,
-                clientY = event.clientY;
-
-            if(this.grid) {
-                if(this.grid.x) {
-                    clientX = Math.floor(clientX / this.grid.x) * this.grid.x;
-                }
-
-                if(this.grid.y) {
-                    clientY = Math.floor(clientY / this.grid.y) * this.grid.y;
-                }
-            }
-
-            console.log(clientX, clientY);
-
-            let deltaX = clientX - (startPosX - window.scrollX),
-                deltaY = clientY - (startPosY - window.scrollY),
+            let deltaX = event.clientX - (startPosX - window.scrollX),
+                deltaY = event.clientY - (startPosY - window.scrollY),
                 left = startBox.left,
                 top = startBox.top,
                 right = startBox.right - window.scrollX,
-                bottom = startBox.bottom - window.scrollY;
+                bottom = startBox.bottom - window.scrollY,
+                minWidth = this.minWidth !== null && this.minWidth !== undefined ? this.minWidth : 0,
+                maxWidth = this.maxWidth !== null && this.maxWidth !== undefined ? this.maxWidth : Infinity,
+                minHeight = this.minHeight !== null && this.maxHeight !== undefined ? this.minHeight : 0,
+                maxHeight = this.maxHeight !== null && this.maxHeight !== undefined ? this.maxHeight : Infinity;
 
             if(direction === 'right' || direction === 'bottom-right' || direction === 'top-right') {
-                width += deltaX;
-                width = clamp(width, this.minWidth, this.maxWidth);
-                width = Math.max(0, width);
+                right += deltaX;
+                right = clamp(right, left + minWidth, left + maxWidth);
             } else if(direction === 'left' || direction === 'top-left' || direction === 'bottom-left') {
-                width -= deltaX;
-                width = clamp(width, this.minWidth, this.maxWidth);
-                width = Math.max(0, width);
-                left = right - width;
+                left += deltaX;
+                left = clamp(left, right - maxWidth, right - minWidth);
             }
 
             if(direction === 'bottom' || direction === 'bottom-right' || direction === 'bottom-left') {
-                height += deltaY;
-
-                if(this.keepAspectRatio) {
-                    height = width * this.keepAspectRatio;
-                } else {
-                    height = clamp(height, this.minHeight, this.maxHeight);
-                    height = Math.max(0, height);
-                }
+                bottom = clamp(bottom + deltaY, top + minHeight, top + maxHeight);
             } else if(direction === 'top' || direction === 'top-left' || direction === 'top-right') {
-                height -= deltaY;
+                top = clamp(top + deltaY, bottom - maxHeight, bottom - minHeight);
+            }
 
-                if(this.keepAspectRatio) {
-                    height = width * this.keepAspectRatio;
-                } else {
-                    height = clamp(height, this.minHeight, this.maxHeight);
-                    height = Math.max(0, height);
+            let container;
+
+            if(this.container) {
+                container = this.container.call(this, this.element, event);
+
+                if(container) {
+                    // I need to make my own object because the objects returned by Element.getBoundClientRect are readonly
+                    // and Object.assign({}, rect) doesn't map over the properties.
+                    let _container = {
+                        left: container.left,
+                        top: container.top,
+                        bottom: container.bottom,
+                        right: container.right
+                    };
+
+                    if(this.grid.x) {
+                        _container.left = snapToGrid(container.left, this.grid.x, Math.ceil);
+                        _container.right = snapToGrid(container.right, this.grid.x, Math.floor);
+                    }
+
+                    if(this.grid.y) {
+                        _container.top = snapToGrid(container.top, this.grid.y, Math.ceil);
+                        _container.bottom = snapToGrid(container.bottom, this.grid.y, Math.floor);
+                    }
+
+                    container = _container;
                 }
+            }
 
-                top = bottom - height;
+            if(this.grid) {
+                left = snapToGrid(left, this.grid.x);
+                top = snapToGrid(top, this.grid.y);
+                right = snapToGrid(right, this.grid.x);
+                bottom = snapToGrid(bottom, this.grid.y);
+            }
+
+            console.log(left, right, bottom, top);
+            console.log(container);
+
+            if(container) {
+                left = clamp(left, container.left, container.right);
+                right = clamp(right, container.left, container.right);
+                bottom = clamp(bottom, container.top, container.bottom);
+                top = clamp(top, container.top, container.bottom);
+            }
+
+            if(this.keepAspectRatio) {
+                bottom = top + ((right - left) * this.keepAspectRatio);
             }
 
             setElementClientPosition(target, {left, top}, 'translate3d');
-            target.style.width = `${width}px`;
-            target.style.height = `${height}px`;
+            target.style.width = `${right - left}px`;
+            target.style.height = `${bottom - top}px`;
 
             rect.left = left + window.scrollX;
             rect.top = top + window.scrollY;
-            rect.width = width;
-            rect.height = height;
+            rect.width = right - left;
+            rect.height = bottom - top;
+            rect.right = right + window.scrollX;
+            rect.bottom = bottom + window.scrollY;
 
             this.element.dispatchEvent(new CustomEvent('resizing', {
                 bubbles: true,
@@ -193,10 +260,10 @@ export default class Resizeable {
                     targetClientRect: {
                         left: left,
                         top: top,
-                        right: left + width,
-                        bottom: top + height,
-                        width: width,
-                        height: height,
+                        right: right,
+                        bottom: bottom,
+                        width: right - left,
+                        height: bottom - top,
                         x: left,
                         y: top
                     }
@@ -210,6 +277,8 @@ export default class Resizeable {
 
             if(this.element !== target) {
                 target.parentElement.removeChild(target);
+
+                console.log(rect);
 
                 setElementClientPosition(this.element, {
                     left: rect.left - window.scrollX,

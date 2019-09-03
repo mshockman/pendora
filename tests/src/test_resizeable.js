@@ -1,4 +1,4 @@
-import Resizeable from 'ui/Resizeable';
+import Resizeable, {CONTAINERS} from 'ui/Resizeable';
 import Draggable from 'ui/Draggable';
 import {rectToDocumentSpace, rectToClientSpace} from 'core/position';
 
@@ -15,8 +15,8 @@ export default class ResizeableTestPage {
     load() {
         let element1 = document.querySelector('#test-resizeable1');
 
-        this.draggable = new Draggable(element1, {exclude: '.ui-resizeable-handle'});
-        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper', grid: 20});
+        this.draggable = new Draggable(element1, {exclude: '.ui-resizeable-handle', container: CONTAINERS.client});
+        this.resizeable = new Resizeable(element1, {handles: 'all', helper: 'test-helper', grid: 20, container: CONTAINERS.client, keepAspectRatio: 0.5});
         this.element1 = element1;
     }
 }
