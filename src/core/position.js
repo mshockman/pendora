@@ -1,4 +1,4 @@
-import {Vec2, Vec3} from "./vectors";
+import {Vec2, Vec3, Vec4} from "./vectors";
 import {clamp} from "./utility";
 
 
@@ -33,20 +33,14 @@ export function getBoundingOffsetRect(element, offsetParent=null) {
     if(!offsetParent) offsetParent = getOffsetElement(element);
 
     let offsetRect = offsetParent.getBoundingClientRect(),
-        rect = element.getBoundingClientRect(),
-        left = rect.left - offsetRect.left,
-        top = rect.top - offsetRect.top;
+        rect = element.getBoundingClientRect();
 
-    return {
-        left: left,
-        top: top,
-        right: rect.right - offsetRect.right,
-        bottom: rect.bottom - offsetRect.bottom,
-        width: rect.width,
-        height: rect.height,
-        x: left,
-        y: top
-    };
+    return new Vec4(
+        rect.left - offsetRect.left,
+        rect.top - offsetRect.top,
+        rect.right - offsetRect.right,
+        rect.bottom - offsetRect.bottom
+    );
 }
 
 
@@ -56,20 +50,14 @@ export function getBoundingOffsetRect(element, offsetParent=null) {
  * @returns {{top: number, left: number, bottom: number, width: number, x: number, y: number, right: number, height: number}}
  */
 export function getBoundingDocumentRect(element) {
-    let rect = element.getBoundingClientRect(),
-        left = rect.left + window.scrollX,
-        top = rect.top + window.scrollY;
+    let rect = element.getBoundingClientRect();
 
-    return {
-        left: left,
-        top: top,
-        right: rect.right + window.scrollX,
-        bottom: rect.bottom + window.scrollY,
-        width: rect.width,
-        height: rect.height,
-        x: left,
-        y: top
-    };
+    return new Vec4(
+        rect.left + window.scrollX,
+        rect.top + window.scrollY,
+        rect.right + window.scrollX,
+        rect.bottom + window.scrollY
+    );
 }
 
 
@@ -212,16 +200,7 @@ export function setElementClientPosition(element, position, method='position') {
  * @param rect
  */
 export function clientRectToDocumentSpace(rect) {
-    let r = {
-        left: rect.left,
-        top: rect.top,
-        bottom: rect.bottom,
-        right: rect.right,
-        width: rect.width,
-        height: rect.height,
-        x: rect.x,
-        y: rect.y
-    };
+    let r = Vec4.fromRect(rect);
 
     r.left += window.scrollX;
     r.right += window.scrollX;
@@ -237,16 +216,7 @@ export function clientRectToDocumentSpace(rect) {
  * @param rect
  */
 export function documentRectToClientSpace(rect) {
-    let r = {
-        left: rect.left,
-        top: rect.top,
-        bottom: rect.bottom,
-        right: rect.right,
-        width: rect.width,
-        height: rect.height,
-        x: rect.x,
-        y: rect.y
-    };
+    let r = Vec4.fromRect(rect);
 
     r.left -= window.scrollX;
     r.right -= window.scrollX;
@@ -273,17 +243,15 @@ export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
 }
 
 
+/**
+ * Deprecated in favor of calling Vec4.fromRect() class method.
+ *
+ * @deprecated
+ * @param domRect
+ * @returns {Vec4}
+ */
 export function convertDomRectToObject(domRect) {
-    return {
-        width: domRect.width,
-        height: domRect.height,
-        x: domRect.x,
-        y: domRect.y,
-        left: domRect.left,
-        top: domRect.top,
-        right: domRect.right,
-        bottom: domRect.bottom
-    };
+    return Vec4.fromRect(domRect);
 }
 
 

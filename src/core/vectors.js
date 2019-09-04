@@ -91,6 +91,10 @@ export class Vec2 {
         }
     }
 
+    clone() {
+        return Vec2(this[0], this[1]);
+    }
+
     get x() {
         return this[0];
     }
@@ -137,6 +141,14 @@ export class Vec2 {
 
     set height(value) {
         this[1] = value;
+    }
+
+    toTranslate() {
+        return `translate(${this.x}px, ${this.y}px)`;
+    }
+
+    toTranslate3d() {
+        return `translate3d(${this.x}px, ${this.y}px, 0)`;
     }
 }
 
@@ -293,5 +305,341 @@ export class Vec3 {
                 this[2] % vec3[2]
             );
         }
+    }
+
+    clone() {
+        return new Vec3(this[0], this[1], this[2]);
+    }
+
+    toHex() {
+        let r = this.r.toString(16),
+            g = this.g.toString(16),
+            b = this.b.toString(16);
+
+        return `#${r}${g}${b}`;
+    }
+
+    toRGB() {
+        return `rgb(${this.r}, ${this.g}, ${this.b})`;
+    }
+
+    toTranslate3d() {
+        return `translate3d(${this.x}px, ${this.y}px, ${this.z}px)`;
+    }
+
+    static fromHex(hex) {
+        let m = /^#?([0-9a-f]{3})$/i.exec(hex);
+
+        if(m) {
+            hex = m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2];
+        } else {
+            m = /^#?([0-9a-f]{6})$/i.exec(hex);
+
+            if(m) {
+                hex = m[1];
+            } else {
+                throw new Error(`Could not parse value ${hex}`);
+            }
+        }
+
+        hex = parseInt(hex, 16);
+
+        // r, g, b
+        return new Vec3(
+            hex & 0xff0000 >> 16,
+            hex & 0x00ff00 >> 8,
+            hex & 0x0000ff
+        );
+    }
+
+    static fromRGB(value) {
+        let m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(value);
+
+        if(!m) {
+            throw new Error(`Could not parse rgb value ${value}`);
+        }
+
+        return new Vec3(
+            parseInt(m[1], 10),
+            parseInt(m[2], 10),
+            parseInt(m[3], 10),
+        );
+    }
+}
+
+
+/**
+ * Class to store a 4 value vector.
+ * Provides DOMRect interface.
+ */
+export class Vec4 {
+    /**
+     * r, g, b, a
+     * left, top, right, bottom
+     *
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
+    constructor(left, top, right, bottom) {
+        this[0] = left;
+        this[1] = top;
+        this[2] = right;
+        this[3] = bottom;
+    }
+
+    get width() {
+        return this.right - this.left;
+    }
+
+    get height() {
+        return this.bottom - this.top;
+    }
+
+    get x() {
+        return this.left;
+    }
+
+    get y() {
+        return this.top;
+    }
+
+    set x(value) {
+        this.left = value;
+    }
+
+    set y(value) {
+        this.top = value;
+    }
+
+    get left() {
+        return this[0];
+    }
+
+    get top() {
+        return this[1];
+    }
+
+    get right() {
+        return this[2];
+    }
+
+    get bottom() {
+        return this[3];
+    }
+
+    set left(value) {
+        this[0] = value;
+    }
+
+    set top(value) {
+        this[1] = value;
+    }
+
+    set right(value) {
+        this[2] = value;
+    }
+
+    set bottom(value) {
+        this[3] = value;
+    }
+
+    get r() {
+        return this[0];
+    }
+
+    set r(value) {
+        this[0] = value;
+    }
+
+    get g() {
+        return this[1];
+    }
+
+    set g(value) {
+        this[1] = value;
+    }
+
+    get b() {
+        return this[2];
+    }
+
+    set b(value) {
+        this[2] = value;
+    }
+
+    get a() {
+        return this[3];
+    }
+
+    set a(value) {
+        this[3] = value;
+    }
+
+    set(value) {
+        if(typeof value !== 'object') {
+            this[0] = value;
+            this[1] = value;
+            this[2] = value;
+            this[3] = value;
+        } else {
+            this[0] = value[0];
+            this[1] = value[1];
+            this[2] = value[2];
+            this[3] = value[3];
+        }
+    }
+
+    add(rect) {
+        if(typeof rect === 'number') {
+            return new Vec4(
+                this[0] + rect,
+                this[1] + rect,
+                this[2] + rect,
+                this[3] + rect
+            );
+        } else {
+            return new Vec4(
+                this[0] + rect[0],
+                this[1] + rect[1],
+                this[2] + rect[2],
+                this[3] + rect[3]
+            );
+        }
+    }
+
+    subtract(rect) {
+        if(typeof rect === 'number') {
+            return new Vec4(
+                this[0] - rect,
+                this[1] - rect,
+                this[2] - rect,
+                this[3] - rect
+            );
+        } else {
+            return new Vec4(
+                this[0] - rect[0],
+                this[1] - rect[1],
+                this[2] - rect[2],
+                this[3] - rect[3]
+            );
+        }
+    }
+
+    divide(rect) {
+        if(typeof rect === 'number') {
+            return new Vec4(
+                this[0] / rect,
+                this[1] / rect,
+                this[2] / rect,
+                this[3] / rect
+            );
+        } else {
+            return new Vec4(
+                this[0] / rect[0],
+                this[1] / rect[1],
+                this[2] / rect[2],
+                this[3] / rect[3]
+            );
+        }
+    }
+
+    multiply(rect) {
+        if(typeof rect === 'number') {
+            return new Vec4(
+                this[0] * rect,
+                this[1] * rect,
+                this[2] * rect,
+                this[3] * rect
+            );
+        } else {
+            return new Vec4(
+                this[0] * rect[0],
+                this[1] * rect[1],
+                this[2] * rect[2],
+                this[3] * rect[3]
+            );
+        }
+    }
+
+    equals(rect) {
+        return rect === this || (rect[0] === this[0] && rect[1] === this[1] && rect[2] === this[2] && rect[3] === this[3]);
+    }
+
+    mod(rect) {
+        if(typeof rect === 'number') {
+            return new Vec4(
+                this[0] % rect,
+                this[1] % rect,
+                this[2] % rect,
+                this[3] % rect,
+            );
+        } else {
+            return new Vec4(
+                this[0] % rect[0],
+                this[1] % rect[1],
+                this[2] % rect[2],
+                this[3] % rect[3]
+            );
+        }
+    }
+
+    translate(x, y) {
+        if(typeof x === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+
+        return new Vec4(
+            this[0] + x,
+            this[1] + y,
+            this[2] + x,
+            this[3] + y
+        );
+    }
+
+    intersection(rect) {
+        let left = Math.max(this.left, rect.left),
+            right = Math.min(this.right, rect.right),
+            bottom = Math.min(this.bottom, rect.bottom),
+            top = Math.max(this.top, rect.top);
+
+        if(left > right || top > bottom) {
+            return null;
+        }
+
+        return new Vec4(left, top, right, bottom);
+    }
+
+    toRGBA() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    }
+
+    clone() {
+        return new Vec4(this[0], this[1], this[2], this[3]);
+    }
+
+    static fromRect({left, top, right, bottom}) {
+        return new Vec4(left, top, right, bottom);
+    }
+
+    static fromRGBAObject({r, g, b, a}) {
+        return new Vec4(r, g, b, a);
+    }
+
+    static fromRGBA(value) {
+        let m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
+
+        if(!m) {
+            throw new Error(`Could not parse rgba value ${value}`);
+        }
+
+        return new Vec4(
+            parseInt(m[1], 10),
+            parseInt(m[2], 10),
+            parseInt(m[3], 10),
+            parseFloat(m[4]),
+        );
     }
 }
