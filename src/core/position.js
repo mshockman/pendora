@@ -1,4 +1,5 @@
 import {Vec2, Vec3} from "./vectors";
+import {clamp} from "./utility";
 
 
 const regMatrix = /matrix(3d)?\(([^)]+)\)/;
@@ -269,4 +270,124 @@ export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
     }
 
     return value;
+}
+
+
+export function convertDomRectToObject(domRect) {
+    return {
+        width: domRect.width,
+        height: domRect.height,
+        x: domRect.x,
+        y: domRect.y,
+        left: domRect.left,
+        top: domRect.top,
+        right: domRect.right,
+        bottom: domRect.bottom
+    };
+}
+
+
+/**
+ * Returns the {x, y} point calculated relative to the reference element.
+ *
+ * @param referenceElement
+ * @param point
+ * @param offset
+ * @param constrain
+ * @returns {Vec2}
+ */
+export function getPointOnElement(referenceElement, point, offset=null, constrain=null) {
+    let rect = referenceElement;
+
+    if(rect.getBoundingClientRect) {
+        rect = rect.getBoundingClientRect();
+    }
+
+    if(constrain) {
+        if (typeof constrain === 'string') {
+            constrain = document.querySelector(constrain);
+        }
+
+        if (constrain.getBoundingClientRect) {
+            constrain = convertDomRectToObject(constrain.getBoundingClientRect());
+        }
+    }
+
+    // Convert array to {x, y} object.
+    if(Array.isArray(point)) {
+        point = {
+            x: point[0],
+            y: point[1]
+        };
+    } else if(typeof point === 'string') {
+        if(point === 'top-left') {
+            point = {x: 0, y: 0};
+        } else if(point === 'top') {
+            point = {x: '50%', y: 0};
+        } else if(point === 'top-right') {
+            point = {x: '100%', y: 0};
+        } else if(point === 'right') {
+            point = {x: '100%', y: '50%'};
+        } else if(point === 'bottom-right') {
+            point = {x: '100%', y: '100%'};
+        } else if(point === 'bottom') {
+            point = {x: '50%', y: '100%'};
+        } else if(point === 'bottom-left') {
+            point = {x: 0, y: '100%'};
+        } else if(point === 'left') {
+            point = {x: 0, y: '50%'};
+        } else if(point === 'middle') {
+            point = {x: '50%', y: '50%'};
+        } else {
+            throw new Error(`Unknown point option ${point}`);
+        }
+    }
+
+    if(typeof point.x === 'string') {
+        point.x = (rect.right - rect.left) * (parseFloat(point.x) / 100);
+    }
+
+    if(typeof point.y === 'string') {
+        point.y = (rect.bottom - rect.top) * (parseFloat(point.y) / 100);
+    }
+
+    if(constrain) {
+        if(typeof constrain.left === 'string') {
+            constrain.left = (rect.right - rect.left) * (parseFloat(constrain.left) / 100);
+        }
+
+        if(typeof constrain.right === 'string') {
+            constrain.right = (rect.right - rect.left) * (parseFloat(constrain.right) / 100);
+        }
+
+        if(typeof constrain.top === 'string') {
+            constrain.top = (rect.bottom - rect.top) * (parseFloat(constrain.top) / 100);
+        }
+
+        if(typeof constrain.bottom === 'string') {
+            constrain.bottom = (rect.bottom - rect.top) * (parseFloat(constrain.bottom) / 100);
+        }
+
+        point.x = clamp(point.x, constrain.left, constrain.right);
+        point.y = clamp(point.y, constrain.top, constrain.bottom);
+    }
+
+    if(offset) {
+        if(Array.isArray(offset)) {
+            offset = {
+                x: offset[0],
+                y: offset[1]
+            };
+        }
+
+        if(offset.x !== null) {
+            point.x += offset.x;
+        }
+
+        if(offset.y !== null) {
+            point.y += offset.y;
+        }
+    }
+
+    return new Vec2(rect.left + point.x, rect.top + point.y);
 }
