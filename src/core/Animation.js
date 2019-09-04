@@ -81,8 +81,13 @@ export default class Animation {
                 let from = this.keyframe1[key],
                     to = this.keyframe2[key];
 
-                let delta = to - from;
-                frame[key] = from + (position * delta);
+                if(typeof to === 'object') {
+                    let delta = to.subtract(from);
+                    frame[key] = from.add(delta.multiply(delta));
+                } else {
+                    let delta = to - from;
+                    frame[key] = from + (position * delta);
+                }
             }
         }
 
