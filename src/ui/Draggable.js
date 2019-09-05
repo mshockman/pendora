@@ -93,7 +93,9 @@ export const CONTAINERS = {
             left: 0,
             top: 0,
             height: window.innerHeight,
-            width: window.innerWidth
+            width: window.innerWidth,
+            right: window.innerWidth,
+            bottom: window.innerHeight
         };
     },
 

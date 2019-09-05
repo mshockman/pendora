@@ -8,54 +8,37 @@
     <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
 
     <style type="text/css">
-        #test_overlay_viewport1 {
-            border: 1px solid #ccc;
-            width: 800px;
-            height: 800px;
-            overflow: auto;
-            position: relative;
-        }
-
-        #test_overlay_viewport1 > .spacer {
-            width: 16000px;
-            height: 16000px;
+        #overlay-reference1 {
+            border: 4px solid #000;
+            background-color: #333;
             position: absolute;
-            visibility: hidden;
-            left: 0;
-            top: 0;
-        }
-
-        #test_overlay1 {
-            position: absolute;
-            left: 400px;
-            top: 400px;
-        }
-
-        #test_popup1 {
-            position: absolute;
-            border: 2px solid #000;
-            font-weight: bold;
-            background-color: #fcc;
-            left: -100px;
-            top: -100px;
-            padding: 5px;
-            white-space: nowrap;
-            user-select: none;
-        }
-
-        #test-post-box {
-            position: absolute;
-            box-sizing: border-box;
             left: 200px;
             top: 200px;
-            width: 200px;
             height: 200px;
-            border: 5px solid #000;
-            background-color: #333;
+            box-sizing: border-box;
+            user-select: none;
+            cursor: move;
+            width: 200px;
         }
 
-        #test_overlay1__button {
-            width: 200px;
+        #tooltip1 {
+            position: absolute;
+            border: 1px solid #000;
+            background-color: #fcc;
+            font-weight: bold;
+            white-space: nowrap;
+            padding: 5px;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #overlay-container {
+            width: 800px;
+            height: 800px;
+            border: 1px solid #ccc;
+            position: absolute;
+            left: 100px;
+            top: 50px;
         }
     </style>
 </head>
@@ -63,17 +46,12 @@
 
 
 
-
-<div id="test_overlay_viewport1">
-    <div class="spacer"></div>
-
-
-    <div id="test_overlay1">
-        <div id="test_popup1">Hello World!</div>
-        <button type="button" id="test_overlay1__button">Test</button>
-    </div>
-
+<div id="overlay-container">
+<div id="overlay-reference1">
+    <div id="tooltip1">Hello World!</div>
 </div>
+</div>
+
 
 
 <script type="text/javascript">
