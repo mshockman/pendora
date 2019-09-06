@@ -14,27 +14,26 @@
             position: absolute;
             left: 200px;
             top: 200px;
-            height: 200px;
+            height: 50px;
             box-sizing: border-box;
             user-select: none;
             cursor: move;
-            width: 200px;
+            width: 50px;
         }
 
         #tooltip1 {
             position: absolute;
-            border: 1px solid #000;
             background-color: #fcc;
             font-weight: bold;
             white-space: nowrap;
-            padding: 5px;
+            padding: 15px;
             border-radius: 5px;
             box-sizing: border-box;
         }
 
         #overlay-container {
-            width: 800px;
-            height: 800px;
+            width: 500px;
+            height: 500px;
             border: 1px solid #ccc;
             position: absolute;
             left: 500px;
@@ -55,7 +54,7 @@
 
 <div id="overlay-container">
 <div id="overlay-reference1">
-    <div id="tooltip1">Hello World!</div>
+    <div id="tooltip1" class="js-no-drag">Hello World!</div>
 </div>
 </div>
 

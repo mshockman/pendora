@@ -1,3 +1,6 @@
+import {clamp} from './utility';
+
+
 /**
  * Stores a 2 value Vector.
  */
@@ -149,6 +152,13 @@ export class Vec2 {
 
     toTranslate3d() {
         return `translate3d(${this.x}px, ${this.y}px, 0)`;
+    }
+
+    clamp(vec4) {
+        return new Vec2(
+            clamp(this.left, vec4.left, vec4.right),
+            clamp(this.top, vec4.top, vec4.bottom)
+        );
     }
 
     static fromVertex(vertex) {
@@ -628,6 +638,14 @@ export class Vec4 {
 
     clone() {
         return new Vec4(this[0], this[1], this[2], this[3]);
+    }
+
+    contains(rect) {
+        return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+
+    toPoint() {
+        return new Vec2(this[0], this[1]);
     }
 
     static fromRect({left, top, right, bottom}) {

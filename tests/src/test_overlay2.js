@@ -19,9 +19,9 @@ export default class OverlayTestPage {
         this.draggable = new Draggable('#overlay-reference1');
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
             positions: [
-                {my: 'bottom', at: 'bottom', of: 'border-top'}
+                'top', 'left', 'bottom', 'right'
             ],
-            sticky: false,
+            sticky: true,
             container: '#overlay-container'
         });
 

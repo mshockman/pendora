@@ -277,7 +277,7 @@ export function getPointOnElement(referenceElement, point, offset=null, constrai
         }
 
         if (constrain.getBoundingClientRect) {
-            constrain = convertDomRectToObject(constrain.getBoundingClientRect());
+            constrain = Vec4.fromRect(constrain.getBoundingClientRect());
         }
     }
 
@@ -414,6 +414,8 @@ export function getSubBoundingBox(element, position) {
             position = {left: '50%', right: '50%', top: '100%', bottom: '100%'};
         } else if(position === 'bottom-right') {
             position = {left: '100%', right: '100%', top: '100%', bottom: '100%'};
+        } else if(position === 'right') {
+            position = {left: '100%', right: '100%', top: '50%', bottom: '50%'};
         }
     }
 
