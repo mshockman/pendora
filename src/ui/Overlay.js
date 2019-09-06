@@ -29,6 +29,8 @@ export default class Overlay {
         this.container = container;
         this.margins = margins;
         this.sticky = sticky;
+
+        this._currentIndex = 0;
     }
 
     refresh() {
@@ -54,13 +56,10 @@ export default class Overlay {
             container.bottom -= (elementBB.bottom - elementBB.top);
         }
 
-        let startingIndex,
-            flag = false;
+        let flag = false;
 
-        if(this.sticky) {
-            startingIndex = this._currentIndex = this._currentIndex || 0;
-        } else {
-            startingIndex = this._currentIndex = 0;
+        if(!this.sticky) {
+            this._currentIndex = 0;
         }
 
         for(let i = 0; i < this.positions.length; i++) {
@@ -83,7 +82,7 @@ export default class Overlay {
         }
 
         if(!flag && !this._oob) {
-            let position = this.positions[startingIndex];
+            let position = this.positions[this._currentIndex];
 
             if(typeof position === 'string') {
                 position = DIRECTIONS[position];
