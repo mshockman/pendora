@@ -359,3 +359,92 @@ export function getPointOnElement(referenceElement, point, offset=null, constrai
 
     return new Vec2(rect.left + point.x, rect.top + point.y);
 }
+
+
+/**
+ * Gets the bounding client rect for a rectangle defined by the position rectangle with left, top, right and bottom
+ * properties relative to the element's position.
+ *
+ * @param element {{getBoundingClientRect}|Element|String|{left, top, right, bottom}}
+ * @param position {{left, top, bottom, right}}
+ * @return {Vec4}
+ */
+export function getSubBoundingBox(element, position) {
+    let rect;
+
+    // Get the bounding client rect of the element.   The user should have passed either a css selector, an object with a
+    // getBoundingClientRect interface.  Or a bounding client rect directly.
+    if(element.getBoundingClientRect) {
+        rect = element.getBoundingClientRect();
+    } else if(typeof element === 'string') {
+        rect = document.querySelector(element).getBoundingClientRect();
+    } else {
+        rect = element;
+    }
+
+    let width = rect.right - rect.left,
+        height = rect.bottom - rect.top;
+
+    // The user can pass a vec4 with left, top, right and bottom properties.  The value can either be the desired
+    // coordinates relative to the top-left corner of the reference element or a percentage.  Another possibility
+    // is that the user passes one of the keyword properties that coorispond to a specific section of the element.
+    // Map those keywords to their rectangle.
+    if(typeof position === 'string') {
+        if(position === 'border-top') {
+            position = {left: 0, right: '100%', top: 0, bottom: 0};
+        } else if(position === 'border-right') {
+            position = {left: '100%', right: '100%', top: 0, bottom: '100%'};
+        } else if(position === 'border-bottom') {
+            position = {left: 0, right: '100%', top: '100%', bottom: '100%'};
+        } else if(position === 'border-left') {
+            position = {left: 0, top: 0, right: 0, bottom: '100%'};
+        } else if(position === 'top-left') {
+            position = {left: 0, top: 0, right: 0, bottom: 0};
+        } else if(position === 'top') {
+            position = {top: 0, left: '50%', right: '50%', bottom: 0};
+        } else if(position === 'top-right') {
+            position = {top: 0, left: '100%', right: '100%', bottom: 0};
+        } else if(position === 'left') {
+            position = {left: 0, top: '50%', bottom: '50%', right: 0};
+        } else if(position === 'origin') {
+            position = {left: '50%', right: '50%', top: '50%', bottom: '50%'};
+        } else if(position === 'bottom-left') {
+            position = {left: 0, right: 0, top: '100%', bottom: '100%'};
+        } else if(position === 'bottom') {
+            position = {left: '50%', right: '50%', top: '100%', bottom: '100%'};
+        } else if(position === 'bottom-right') {
+            position = {left: '100%', right: '100%', top: '100%', bottom: '100%'};
+        }
+    }
+
+    position.left = position.left || 0;
+    position.right = position.right || 0;
+    position.top = position.top || 0;
+    position.bottom = position.bottom || 0;
+
+    // left and right percentages are a percentage of the elements width.
+    // top and bottom percentages are a percentage of the elements height.
+    if(typeof position.left === 'string') {
+        position.left = (parseFloat(position.left) / 100) * width;
+    }
+
+    if(typeof position.right === 'string') {
+        position.right = (parseFloat(position.right) / 100) * width;
+    }
+
+    if(typeof position.bottom === 'string') {
+        position.bottom = (parseFloat(position.bottom) / 100) * height;
+    }
+
+    if(typeof position.top === 'string') {
+        position.top = (parseFloat(position.top) / 100) * height;
+    }
+
+    // Convert to client space.
+    return new Vec4(
+        rect.left + position.left,
+        rect.top + position.top,
+        rect.left + position.right,
+        rect.top + position.bottom
+    );
+}

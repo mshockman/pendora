@@ -150,6 +150,16 @@ export class Vec2 {
     toTranslate3d() {
         return `translate3d(${this.x}px, ${this.y}px, 0)`;
     }
+
+    static fromVertex(vertex) {
+        if(Array.isArray(vertex)) {
+            return new Vec2(vertex[0], vertex[1]);
+        } else if(vertex.hasOwnProperty('left')) {
+            return new Vec2(vertex.left, vertex.top);
+        } else {
+            return new Vec2(vertex.x, vertex.y);
+        }
+    }
 }
 
 

@@ -1,10 +1,13 @@
 import Overlay from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
-import {getPointOnElement} from 'core/position';
+import {getPointOnElement, getSubBoundingBox} from 'core/position';
+import {Vec2} from "core/vectors";
 
 
 // noinspection JSUnusedGlobalSymbols
 window.getPointOnElement = getPointOnElement;
+window.getSubBoundingBox = getSubBoundingBox;
+window.Vec2 = Vec2;
 
 
 export default class OverlayTestPage {
@@ -15,7 +18,9 @@ export default class OverlayTestPage {
     load() {
         this.draggable = new Draggable('#overlay-reference1');
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
-            positions: ['top', 'left', 'bottom', 'right'],
+            positions: [
+                {my: 'bottom', at: 'bottom', of: 'border-top'}
+            ],
             sticky: false,
             container: '#overlay-container'
         });
@@ -24,7 +29,15 @@ export default class OverlayTestPage {
             this.overlay1.refresh();
         });
 
+        let cordsOutput = document.querySelector('#cords-output');
+
+        window.addEventListener('mousemove', (event) => {
+            cordsOutput.innerText = `(${event.clientX}, ${event.clientY})`;
+        });
+
         window.overlay = this.overlay1;
         this.overlay1.refresh();
+
+
     }
 }
