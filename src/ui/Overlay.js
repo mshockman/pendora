@@ -1,5 +1,4 @@
-import {clamp} from 'core/utility';
-import {getPointOnElement, setElementClientPosition, getSubBoundingBox} from 'core/position';
+import {setElementClientPosition, getSubBoundingBox} from 'core/position';
 import {Vec4, Vec2} from "core/vectors";
 
 
@@ -34,10 +33,79 @@ export default class Overlay {
     }
 
     refresh() {
-        let container;
+        let rect = Vec4.fromRect(this.referenceObject.getBoundingClientRect()),
+            elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
+            container = this._getContainer(elementBB);
 
-        let rect = this.referenceObject.getBoundingClientRect(),
-            elementBB = this.element.getBoundingClientRect();
+        let flag = false;
+
+        if(!this.sticky) {
+            this._currentIndex = 0;
+        }
+
+        for(let i = 0; i < this.positions.length; i++) {
+            let index = (this._currentIndex + i) % this.positions.length;
+            let position = this.positions[index];
+
+            if(typeof position === 'string') {
+                position = DIRECTIONS[position];
+            }
+
+            let reference = getSubBoundingBox(rect, position.of),
+                anchor = getSubBoundingBox(elementBB, position.my),
+                offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top)),
+                space = _calculatePositionSpace(position, elementBB, container, reference, offset);
+
+            if(space) {
+                let pos = getSubBoundingBox(reference, position.at).toPoint();
+                pos = pos.clamp(space).add(offset);
+                setElementClientPosition(this.element, pos, 'translate3d');
+                this._currentIndex = index;
+                flag = true;
+                this._oob = false;
+                break;
+            }
+        }
+
+        if(!flag && !this._oob) {
+            let position = this.positions[this._currentIndex];
+
+            if(typeof position === 'string') {
+                position = DIRECTIONS[position];
+            }
+
+            let reference = getSubBoundingBox(rect, position.of),
+                anchor = getSubBoundingBox(elementBB, position.my),
+                offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top)),
+                space = _calculatePositionSpace(position, elementBB, null, reference, offset);
+
+            if(container.top >= reference.bottom) {
+                space.top = space.bottom;
+            } else if(container.bottom <= reference.top) {
+                space.bottom = space.top;
+            }
+
+            if(container.left >= reference.right) {
+                space.left = space.right;
+            } else if(container.right <= reference.left) {
+                space.right = space.left;
+            }
+
+            let pos = getSubBoundingBox(reference, position.at).toPoint();
+            setElementClientPosition(this.element, pos.clamp(space).add(offset), 'translate3d');
+            this._oob = true;
+        }
+    }
+
+    /**
+     * Returns the bounding client rect that defines the container space.
+     * Returns null if unbounded.
+     * @param elementBB
+     * @returns {null|{Vec4}}
+     * @private
+     */
+    _getContainer(elementBB) {
+        let container = null;
 
         if(this.container) {
             if(typeof this.container === 'function') {
@@ -56,139 +124,61 @@ export default class Overlay {
             container.bottom -= (elementBB.bottom - elementBB.top);
         }
 
-        let flag = false;
+        return container;
+    }
+}
 
-        if(!this.sticky) {
-            this._currentIndex = 0;
-        }
 
-        for(let i = 0; i < this.positions.length; i++) {
-            let index = (this._currentIndex + i) % this.positions.length;
-            let position = this.positions[index];
+function _calculateVec4WithPercentages(padding, elementBB) {
+    let width = elementBB.right - elementBB.left,
+        height = elementBB.bottom - elementBB.top,
+        r = new Vec4(padding.left || 0, padding.top || 0, padding.right || 0, padding.bottom || 0);
 
-            if(typeof position === 'string') {
-                position = DIRECTIONS[position];
-            }
-
-            let pos = this._calculatePosition(position, rect, elementBB, container);
-
-            if(pos) {
-                setElementClientPosition(this.element, pos, 'translate3d');
-                this._currentIndex = index;
-                flag = true;
-                this._oob = false;
-                break;
-            }
-        }
-
-        if(!flag && !this._oob) {
-            let position = this.positions[this._currentIndex];
-
-            if(typeof position === 'string') {
-                position = DIRECTIONS[position];
-            }
-
-            let reference = getSubBoundingBox(rect, position.of),
-                anchor = Vec2.fromVertex(getSubBoundingBox(elementBB, position.my)),
-                padding = position.padding;
-
-            let offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top));
-
-            // Adds extra spacing for the overlay to move around in.
-            if(padding) {
-                padding = this._calculateVec4WithPercentages(padding, elementBB);
-            } else {
-                padding = new Vec4(0, 0, 0, 0);
-            }
-
-            let at = getSubBoundingBox(reference, position.at).toPoint();
-
-            let space = reference.add(new Vec4(
-                -padding.left,
-                -padding.top,
-                padding.right,
-                padding.bottom
-            ));
-
-            if(container.top >= reference.bottom) {
-                space.top = space.bottom;
-            } else if(container.bottom <= reference.top) {
-                space.bottom = space.top;
-            }
-
-            if(container.left >= reference.right) {
-                space.left = space.right;
-            } else if(container.right <= reference.left) {
-                space.right = space.left;
-            }
-
-            setElementClientPosition(this.element, at.clamp(space).add(offset), 'translate3d');
-            this._oob = true;
-        }
+    if(typeof r.left === 'string') {
+        r.left = ((parseFloat(r.left) / 100) * width);
     }
 
-    _calculateVec4WithPercentages(padding, elementBB) {
-        let width = elementBB.right - elementBB.left,
-            height = elementBB.bottom - elementBB.top,
-            r = new Vec4(padding.left || 0, padding.top || 0, padding.right || 0, padding.bottom || 0);
-
-        if(typeof r.left === 'string') {
-            r.left = ((parseFloat(r.left) / 100) * width);
-        }
-
-        if(typeof r.right === 'string') {
-            r.right = ((parseFloat(r.right) / 100) * width);
-        }
-
-        if(typeof r.top === 'string') {
-            r.top = ((parseFloat(r.top) / 100) * height);
-        }
-
-        if(typeof r.bottom === 'string') {
-            r.bottom = ((parseFloat(r.bottom) / 100) * height);
-        }
-
-        return r;
+    if(typeof r.right === 'string') {
+        r.right = ((parseFloat(r.right) / 100) * width);
     }
 
-    _calculatePosition(position, rect, elementBB, container) {
-        if(typeof position === 'string') {
-            position = DIRECTIONS[position];
-        }
-
-        let reference = getSubBoundingBox(rect, position.of),
-            anchor = Vec2.fromVertex(getSubBoundingBox(elementBB, position.my)),
-            limit = reference,
-            padding = position.padding;
-
-        let offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top));
-
-        // Adds extra spacing for the overlay to move around in.
-        if(padding) {
-            padding = this._calculateVec4WithPercentages(padding, elementBB);
-        } else {
-            padding = new Vec4(0, 0, 0, 0);
-        }
-
-        limit = limit.add(new Vec4(
-            -padding.left,
-            -padding.top,
-            padding.right,
-            padding.bottom
-        ));
-
-        if(container) {
-            limit = limit.translate(offset).intersection(container);
-
-            // If limit is null at this point no valid space is available.
-            if(!limit) return null;
-
-            limit = limit.translate(offset.multiply(-1));
-        }
-
-        let at = getSubBoundingBox(reference, position.at).toPoint();
-        at = at.clamp(limit).add(offset);
-
-        return at;
+    if(typeof r.top === 'string') {
+        r.top = ((parseFloat(r.top) / 100) * height);
     }
+
+    if(typeof r.bottom === 'string') {
+        r.bottom = ((parseFloat(r.bottom) / 100) * height);
+    }
+
+    return r;
+}
+
+
+function _calculatePositionSpace(position, overlay, container, reference, offset) {
+    let padding = position.padding;
+
+    // Adds extra spacing for the overlay to move around in.
+    if(padding) {
+        padding = _calculateVec4WithPercentages(padding, overlay);
+    } else {
+        padding = new Vec4(0, 0, 0, 0);
+    }
+
+    let space = reference.add(new Vec4(
+        -padding.left,
+        -padding.top,
+        padding.right,
+        padding.bottom
+    ));
+
+    if(container) {
+        space = space.translate(offset).intersection(container);
+
+        // If limit is null at this point no valid space is available.
+        if(!space) return null;
+
+        space = space.translate(offset.multiply(-1));
+    }
+
+    return space;
 }
