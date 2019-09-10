@@ -24,7 +24,8 @@ export default class OverlayTestPage {
                 // {my: 'right', at: 'left', of: 'border-left'}
             ],
             sticky: true,
-            container: '#overlay-container'
+            container: '#overlay-container',
+            arrow: {width: 20, height: 20}
         });
 
         this.overlay1.referenceObject.addEventListener('drag-move', () => {

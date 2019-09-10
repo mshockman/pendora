@@ -3,11 +3,44 @@ import {Vec4, Vec2} from "core/vectors";
 
 
 const DIRECTIONS = {
-    top: {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}},
-    right: {my: 'left', at: 'right', of: 'border-right', padding: {top: '50%', bottom: '50%'}},
-    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', padding: {left: '50%', right: '50%'}},
-    left: {my: 'right', at: 'left', of: 'border-left', padding: {top: '50%', bottom: '50%'}},
+    top: {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}, point: 'down'},
+    right: {my: 'left', at: 'right', of: 'border-right', padding: {top: '50%', bottom: '50%'}, point: 'left'},
+    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', padding: {left: '50%', right: '50%'}, point: 'up'},
+    left: {my: 'right', at: 'left', of: 'border-left', padding: {top: '50%', bottom: '50%'}, point: 'right'},
 };
+
+
+// todo remove debug
+let _dr = {};
+function _debug_draw_rect(rect, id, color='#000000', zIndex=-10) {
+    let e;
+
+    if(_dr[id]) {
+        e = _dr[id];
+    } else {
+        e = document.createElement('div');
+        e.id = id;
+        _dr[id] = e;
+        e.classList.add('debug-rect');
+    }
+
+    let width = rect.right - rect.left,
+        height = rect.bottom - rect.top;
+
+    e.style.position = 'fixed';
+    e.style.zIndex = '' + zIndex;
+    e.style.backgroundColor = color;
+    e.style.left = `${rect.left}px`;
+    e.style.top = `${rect.top}px`;
+    e.style.width = `${width}px`;
+    e.style.height = `${height}px`;
+
+    if(!e.parentElement) {
+        document.body.appendChild(e);
+    }
+
+    return e;
+}
 
 
 export default class Overlay {
@@ -29,6 +62,13 @@ export default class Overlay {
         this.margins = margins;
         this.sticky = sticky;
         this.arrow = arrow;
+        this.arrowElement = null;
+
+        if(this.arrow) {
+            this.arrowElement = document.createElement('div');
+            this.arrowElement.classList.add('arrow-element');
+            this.element.appendChild(this.arrowElement);
+        }
 
         this._currentIndex = 0;
     }
@@ -37,15 +77,6 @@ export default class Overlay {
         let rect = Vec4.fromRect(this.referenceObject.getBoundingClientRect()),
             elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB);
-
-        if(container) {
-            container = container.subtract(new Vec4(
-                0,
-                0,
-                elementBB.right - elementBB.left,
-                elementBB.bottom - elementBB.top
-            ))
-        }
 
         let flag = false;
 
@@ -62,14 +93,30 @@ export default class Overlay {
             }
 
             let reference = getSubBoundingBox(rect, position.of),
-                anchor = getSubBoundingBox(elementBB, position.my),
-                offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top)),
-                space = _calculatePositionSpace(position, elementBB, container, reference, offset);
+                collisionBox = this._getCollisionBox(position, elementBB),
+                anchor = getSubBoundingBox(collisionBox, position.my),
+                offset = new Vec2(-(anchor.left - collisionBox.left), -(anchor.top - collisionBox.top)),
+                containerSpace = container;
+
+            if(containerSpace) {
+                containerSpace = containerSpace.subtract(new Vec4(
+                    0,
+                    0,
+                    collisionBox.right - collisionBox.left,
+                    collisionBox.bottom - collisionBox.top
+                ));
+            }
+
+            let space = _calculatePositionSpace(position, collisionBox, containerSpace, reference, offset);
 
             if(space) {
                 let pos = getSubBoundingBox(reference, position.at).toPoint();
                 pos = pos.clamp(space).add(offset);
-                setElementClientPosition(this.element, pos, 'translate3d');
+                pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
+                let overlay = elementBB.moveTo(pos);
+
+                this._positionArrow(overlay, reference);
+                setElementClientPosition(this.element, overlay, 'translate3d');
                 this._currentIndex = index;
                 flag = true;
                 this._oob = false;
@@ -85,24 +132,41 @@ export default class Overlay {
             }
 
             let reference = getSubBoundingBox(rect, position.of),
-                anchor = getSubBoundingBox(elementBB, position.my),
-                offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top)),
-                space = _calculatePositionSpace(position, elementBB, null, reference, offset);
+                collisionBox = this._getCollisionBox(position, elementBB),
+                anchor = getSubBoundingBox(collisionBox, position.my),
+                offset = new Vec2(-(anchor.left - collisionBox.left), -(anchor.top - collisionBox.top));
 
-            if(container.top - offset.y >= reference.bottom) {
-                space.top = space.bottom;
-            } else if(container.bottom <= reference.top) {
-                space.bottom = space.top;
+            let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
+
+            if(this.arrow) {
+                // Create space for the arrow.
+                space.left += this.arrow.width;
+                space.right -= this.arrow.width;
+                space.top += this.arrow.height;
+                space.bottom -= this.arrow.height;
+
+                if((space.right - space.left) < 0) {
+                    let amount = (space.right - space.left) / 2;
+                    space.left -= amount;
+                    space.right -= amount;
+                }
+
+                if((space.bottom - space.top) < 0) {
+                    let amount = (space.bottom - space.top) / 2;
+                    space.top += amount;
+                    space.bottom -= amount;
+                }
             }
 
-            if((container.left - offset.x) >= reference.right) {
-                space.left = space.right;
-            } else if(container.right <= reference.left) {
-                space.right = space.left;
-            }
+            space = _clampToMinimumDistance(space, offset, reference, container);
 
             let pos = getSubBoundingBox(reference, position.at).toPoint();
-            setElementClientPosition(this.element, pos.clamp(space).add(offset), 'translate3d');
+            pos = pos.clamp(space).add(offset).add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
+
+            let overlay = elementBB.moveTo(pos);
+
+            setElementClientPosition(this.element, overlay, 'translate3d');
+            this._positionArrow(overlay, reference);
             this._oob = true;
         }
     }
@@ -132,6 +196,37 @@ export default class Overlay {
         }
 
         return container;
+    }
+
+    _getCollisionBox(position, elementBB) {
+        let collisionBox = elementBB;
+        let offsetX = 0,
+            offsetY = 0;
+
+        if(this.arrow) {
+            if(position.point === 'down') {
+                collisionBox = collisionBox.add(new Vec4(0, 0, 0, this.arrow.height));
+            } else if(position.point === 'right') {
+                collisionBox = collisionBox.add(new Vec4(0, 0, this.arrow.width, 0));
+            } else if(position.point === 'up') {
+                collisionBox = collisionBox.add(new Vec4(0, 0, 0, this.arrow.height));
+                offsetY += this.arrow.height;
+            } else if(position.point === 'left') {
+                collisionBox = collisionBox.add(new Vec4(0, 0, this.arrow.width, 0));
+                offsetX += this.arrow.width;
+            }
+        }
+
+        // The offset of the element inside the collision box.
+        collisionBox.paddingLeft = offsetX;
+        collisionBox.paddingTop = offsetY;
+
+        return collisionBox;
+    }
+
+    _positionArrow(overlay, reference) {
+        _debug_draw_rect(overlay, 'overlay-rect', 'rgba(00, 00, 255, 0.5)', 100);
+        _debug_draw_rect(reference, 'reference-rect', 'rgba(00, 255, 00, 0.5)', 100);
     }
 }
 
@@ -185,6 +280,25 @@ function _calculatePositionSpace(position, overlay, container, reference, offset
         if(!space) return null;
 
         space = space.translate(offset.multiply(-1));
+    }
+
+    return space;
+}
+
+
+function _clampToMinimumDistance(space, offset, reference, container) {
+    space = space.clone();
+
+    if(container.top - offset.y >= reference.bottom) {
+        space.top = space.bottom;
+    } else if(container.bottom <= reference.top) {
+        space.bottom = space.top;
+    }
+
+    if((container.left - offset.x) >= reference.right) {
+        space.left = space.right;
+    } else if(container.right <= reference.left) {
+        space.right = space.left;
     }
 
     return space;

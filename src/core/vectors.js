@@ -619,6 +619,18 @@ export class Vec4 {
         );
     }
 
+    moveTo(vec2) {
+        let deltaX = vec2.left - this.left,
+            deltaY = vec2.top - this.top;
+
+        return new Vec4(
+            this.left + deltaX,
+            this.top + deltaY,
+            this.right + deltaX,
+            this.bottom + deltaY
+        );
+    }
+
     intersection(rect) {
         let left = Math.max(this.left, rect.left),
             right = Math.min(this.right, rect.right),
