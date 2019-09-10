@@ -20,6 +20,8 @@ export default class OverlayTestPage {
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
             positions: [
                 'top', 'left', 'bottom', 'right'
+                // {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}}
+                // {my: 'right', at: 'left', of: 'border-left'}
             ],
             sticky: true,
             container: '#overlay-container'

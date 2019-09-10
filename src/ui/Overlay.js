@@ -28,6 +28,7 @@ export default class Overlay {
         this.container = container;
         this.margins = margins;
         this.sticky = sticky;
+        this.arrow = arrow;
 
         this._currentIndex = 0;
     }
@@ -36,6 +37,15 @@ export default class Overlay {
         let rect = Vec4.fromRect(this.referenceObject.getBoundingClientRect()),
             elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB);
+
+        if(container) {
+            container = container.subtract(new Vec4(
+                0,
+                0,
+                elementBB.right - elementBB.left,
+                elementBB.bottom - elementBB.top
+            ))
+        }
 
         let flag = false;
 
@@ -79,13 +89,13 @@ export default class Overlay {
                 offset = new Vec2(-(anchor.left - elementBB.left), -(anchor.top - elementBB.top)),
                 space = _calculatePositionSpace(position, elementBB, null, reference, offset);
 
-            if(container.top >= reference.bottom) {
+            if(container.top - offset.y >= reference.bottom) {
                 space.top = space.bottom;
             } else if(container.bottom <= reference.top) {
                 space.bottom = space.top;
             }
 
-            if(container.left >= reference.right) {
+            if((container.left - offset.x) >= reference.right) {
                 space.left = space.right;
             } else if(container.right <= reference.left) {
                 space.right = space.left;
@@ -119,9 +129,6 @@ export default class Overlay {
             }
 
             container = Vec4.fromRect(container);
-
-            container.right -= (elementBB.right - elementBB.left);
-            container.bottom -= (elementBB.bottom - elementBB.top);
         }
 
         return container;
