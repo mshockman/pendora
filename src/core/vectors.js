@@ -660,6 +660,10 @@ export class Vec4 {
         return new Vec2(this[0], this[1]);
     }
 
+    getArea() {
+        return this.width * this.height;
+    }
+
     static fromRect({left, top, right, bottom}) {
         return new Vec4(left, top, right, bottom);
     }
