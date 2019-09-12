@@ -192,18 +192,7 @@ export default class Overlay {
             anchor = getSubBoundingBox(collisionBox, position.my).toPoint();
 
         let offset = new Vec2(-(anchor.left - collisionBox.left), -(anchor.top - collisionBox.top)),
-            space = containerRect;
-
-        if(space) {
-            // We are positioning the element from the top left corner so we need to remove
-            // the width and the height from the available space so the item doesn't move offscreen.
-            space = space.subtract(new Vec4(
-                0,
-                0,
-                collisionBox.right - collisionBox.left,
-                collisionBox.bottom - collisionBox.top
-            ));
-        }
+            containerSpace = containerRect;
 
         let arrowPadding = null;
 
@@ -216,23 +205,30 @@ export default class Overlay {
         }
 
         if(!applyMaxPos) {
-            space = _calculatePositionSpace(position, collisionBox, space, reference, offset);
-            let spaceTest = _calculatePositionSpace(position, collisionBox, null, reference, offset);
+            let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
+
+            _debug_draw_rect(space, 'space', 'rgba(0, 0, 255, 1.0)', 10, 4, 4);
 
             if(space && arrowPadding) {
                 space = space.add(arrowPadding);
-                spaceTest = spaceTest.add(arrowPadding);
-                _debug_draw_rect(space, 'space', 'rgba(0, 0, 255, 1)', 10, 0, 4);
-                _debug_draw_rect(spaceTest, 'space-test', 'rgba(255, 0, 0, 1)', 100, 0, 4);
-                //space = space.intersection(arrowSpace);
-                //_debug_draw_rect(space, 'space-after', 'rgba(255, 0, 0, 1)', 12, 0, 4);
+                _debug_draw_rect(space, 'space-sub1', 'rgba(255, 0, 0, 1.0)', 10, 4, 4);
             }
 
+            containerSpace = containerSpace.add(new Vec4(
+                -offset.left,
+                -offset.top,
+                -(collisionBox.right - collisionBox.left) - offset.left,
+                -(collisionBox.bottom - collisionBox.top) - offset.top
+            ));
+
+            space = space.intersection(containerSpace);
+
             if (space && space.getArea() >= 0) {
+                _debug_draw_rect(space, 'space-sub2', 'rgba(0, 255, 0, 1.0)', 10, 4, 4);
                 let pos = getSubBoundingBox(reference, position.at).toPoint();
                 pos = pos.clamp(space);
-                // pos = pos.add(offset);
-                // pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
+                pos = pos.add(offset);
+                pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
                 let overlay = overlayElementRect.moveTo(pos);
 
                 this._positionArrow(overlay, reference);
@@ -241,19 +237,6 @@ export default class Overlay {
             }
 
             return false;
-        } else {
-            space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
-            space = _clampToMinimumDistance(space, offset, reference, containerRect);
-
-            let pos = getSubBoundingBox(reference, position.at).toPoint();
-            pos = pos.clamp(space).add(offset);
-            pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
-            let overlay = overlayElementRect.moveTo(pos);
-
-            this._positionArrow(overlay, reference);
-            setElementClientPosition(this.element, overlay, 'translate3d');
-
-            return true;
         }
     }
 }
