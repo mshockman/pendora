@@ -19,12 +19,13 @@ export default class OverlayTestPage {
         this.draggable = new Draggable('#overlay-reference1');
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
             positions: [
-                // 'top', 'left', 'bottom', 'right'
-                'top'
+                'top', 'left', 'bottom', 'right',
+                // 'left'
+                // 'top'
                 // {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}}
                 // {my: 'right', at: 'left', of: 'border-left'}
             ],
-            sticky: true,
+            sticky: false,
             container: '#overlay-container',
             arrow: {width: 20, height: 20}
         });

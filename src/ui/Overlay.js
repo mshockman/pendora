@@ -1,12 +1,13 @@
-import {setElementClientPosition, getSubBoundingBox} from 'core/position';
+import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects, getCssPosition} from 'core/position';
 import {Vec4, Vec2} from "core/vectors";
+import {clamp} from "core/utility";
 
 
 const DIRECTIONS = {
-    top: {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}, point: 'down'},
-    right: {my: 'left', at: 'right', of: 'border-right', padding: {top: '50%', bottom: '50%'}, point: 'left'},
-    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', padding: {left: '50%', right: '50%'}, point: 'up'},
-    left: {my: 'right', at: 'left', of: 'border-left', padding: {top: '50%', bottom: '50%'}, point: 'right'},
+    top: {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}, point: 'down', arrowAlign: 'middle'},
+    right: {my: 'left', at: 'right', of: 'border-right', padding: {top: '50%', bottom: '50%'}, point: 'left', arrowAlign: 'middle'},
+    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', padding: {left: '50%', right: '50%'}, point: 'up', arrowAlign: 'middle'},
+    left: {my: 'right', at: 'left', of: 'border-left', padding: {top: '50%', bottom: '50%'}, point: 'right', arrowAlign: 'middle'},
 };
 
 
@@ -81,7 +82,9 @@ export default class Overlay {
             elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB);
 
-        let flag = false;
+        let flag = false,
+            closestPosition = null,
+            closestPositionDistance = null;
 
         if(!this.sticky) {
             this._currentIndex = 0;
@@ -95,22 +98,23 @@ export default class Overlay {
                 position = DIRECTIONS[position];
             }
 
-            if(this._applyPosition(position, rect, elementBB, container)) {
+            let applied = this._applyPosition(position, rect, elementBB, container);
+
+            if(applied === -1) {
                 this._currentIndex = index;
                 flag = true;
                 this._oob = false;
                 break;
+            } else {
+                if(closestPositionDistance === null || (applied < closestPositionDistance)) {
+                    closestPositionDistance = applied;
+                    closestPosition = position;
+                }
             }
         }
 
-        if(!flag && !this._oob) {
-            let position = this.positions[this._currentIndex];
-
-            if(typeof position === 'string') {
-                position = DIRECTIONS[position];
-            }
-
-            // this._applyPosition(position, rect, elementBB, container, true);
+        if(!flag) {
+            this._applyPosition(closestPosition, rect, elementBB, container, true);
             this._oob = true;
         }
     }
@@ -181,12 +185,59 @@ export default class Overlay {
         return collisionBox;
     }
 
-    _positionArrow(overlay, reference) {
-        // _debug_draw_rect(overlay, 'overlay-rect', 'rgba(00, 00, 255, 0.5)', 100);
-        // _debug_draw_rect(reference, 'reference-rect', 'rgba(00, 255, 00, 0.5)', 100);
+    _positionArrow(position, overlay, reference) {
+        if(!this.arrowElement || !this.arrow) return;
+        let arrowBox = this.arrowElement.getBoundingClientRect(),
+            style = {left: null, right: null, top: null, bottom: null},
+            pos = getCssPosition(this.arrowElement),
+            arrowPosition = 0;
+
+        if(position.point === 'down') {
+            style.bottom = -this.arrow.height;
+        } else if(position.point === 'up') {
+            style.top = -this.arrow.height;
+        } else if(position.point === 'left') {
+            style.left = -this.arrow.width;
+        } else if(position.point === 'right') {
+            style.right = -this.arrow.width;
+        }
+
+        if(position.point === 'up' || position.point === 'down') {
+            if(position.arrowAlign === 'middle') {
+                arrowPosition = ((overlay.right - overlay.left) / 2) - ((this.arrow.width) / 2);
+            } else if(position.arrowAlign === 'start') {
+                arrowPosition = 0;
+            } else if(position.arrowAlign === 'end') {
+                arrowPosition = overlay.right - overlay.left - (this.arrow.width);
+            }
+
+            let min = Math.max(0, reference.left - overlay.left),
+                max = Math.min(overlay.right - overlay.left, reference.right - overlay.left) - (this.arrow.width);
+
+            style.left = Math.round(clamp(arrowPosition, min, max));
+        } else if(position.point === 'left' || position.point === 'right') {
+            if(position.arrowAlign === 'middle') {
+                arrowPosition = ((overlay.bottom - overlay.top) / 2) - ((this.arrow.height) / 2);
+            } else if(position.arrowAlign === 'start') {
+                arrowPosition = 0;
+            } else if(position.arrowAlign === 'end') {
+                arrowPosition = overlay.bottom - overlay.top - (this.arrow.height);
+            }
+
+            let min = Math.max(0, reference.top - overlay.top),
+                max = Math.min(overlay.bottom - overlay.top, reference.bottom - overlay.top) - (this.arrow.height);
+
+            style.top = Math.round(clamp(arrowPosition, min, max));
+        }
+
+        this.arrowElement.dataset.direction = position.point;
+        this.arrowElement.style.left = style.left !== null ? `${style.left}px` : '';
+        this.arrowElement.style.right = style.right !== null ? `${style.right}px` : '';
+        this.arrowElement.style.top = style.top !== null ? `${style.top}px` : '';
+        this.arrowElement.style.bottom = style.bottom !== null ? `${style.bottom}px` : '';
     }
 
-    _applyPosition(position, referenceElementRect, overlayElementRect, containerRect, applyMaxPos=false) {
+    _applyPosition(position, referenceElementRect, overlayElementRect, containerRect, applyMinPos=false) {
         let reference = getSubBoundingBox(referenceElementRect, position.of), // Bounding of of the object we are being position relative to.
             collisionBox = this._getCollisionBox(position, overlayElementRect), // Collision box of the overlay element.
             anchor = getSubBoundingBox(collisionBox, position.my).toPoint();
@@ -204,39 +255,48 @@ export default class Overlay {
             }
         }
 
-        if(!applyMaxPos) {
-            let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
+        let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
 
-            _debug_draw_rect(space, 'space', 'rgba(0, 0, 255, 1.0)', 10, 4, 4);
+        if(space && arrowPadding) {
+            space = space.add(arrowPadding);
+        }
 
-            if(space && arrowPadding) {
-                space = space.add(arrowPadding);
-                _debug_draw_rect(space, 'space-sub1', 'rgba(255, 0, 0, 1.0)', 10, 4, 4);
-            }
+        containerSpace = containerSpace.add(new Vec4(
+            -offset.left,
+            -offset.top,
+            -(collisionBox.right - collisionBox.left) - offset.left,
+            -(collisionBox.bottom - collisionBox.top) - offset.top
+        ));
 
-            containerSpace = containerSpace.add(new Vec4(
-                -offset.left,
-                -offset.top,
-                -(collisionBox.right - collisionBox.left) - offset.left,
-                -(collisionBox.bottom - collisionBox.top) - offset.top
-            ));
+        if(!applyMinPos) {
+            let unboundedSpace = space;
 
             space = space.intersection(containerSpace);
 
             if (space && space.getArea() >= 0) {
-                _debug_draw_rect(space, 'space-sub2', 'rgba(0, 255, 0, 1.0)', 10, 4, 4);
                 let pos = getSubBoundingBox(reference, position.at).toPoint();
                 pos = pos.clamp(space);
                 pos = pos.add(offset);
                 pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
                 let overlay = overlayElementRect.moveTo(pos);
 
-                this._positionArrow(overlay, reference);
+                this._positionArrow(position, overlay, reference);
                 setElementClientPosition(this.element, overlay, 'translate3d');
-                return true;
+                return -1;
             }
 
-            return false;
+            return getDistanceBetweenRects(unboundedSpace, containerSpace);
+        } else {
+            space = _clampToMinimumDistance(space, offset, reference, containerSpace);
+            let pos = getSubBoundingBox(reference, position.at).toPoint();
+            pos = pos.clamp(space);
+            pos = pos.add(offset);
+            pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
+            let overlay = overlayElementRect.moveTo(pos);
+
+            this._positionArrow(position, overlay, reference);
+            setElementClientPosition(this.element, overlay, 'translate3d');
+            return -2;
         }
     }
 }

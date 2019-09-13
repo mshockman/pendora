@@ -47,6 +47,42 @@
             top: 0;
             padding: 5px;
         }
+
+        .arrow-element {
+            position: absolute;
+        }
+
+        .arrow-element[data-direction='down'] {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 20px solid #fcc;
+        }
+
+        .arrow-element[data-direction='up'] {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #fcc;
+        }
+
+        .arrow-element[data-direction='left'] {
+             width: 0;
+             height: 0;
+             border-top: 10px solid transparent;
+             border-bottom: 10px solid transparent;
+             border-right: 20px solid #fcc;
+         }
+
+        .arrow-element[data-direction='right'] {
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 20px solid #fcc;
+        }
     </style>
 </head>
 <body>
