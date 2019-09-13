@@ -664,6 +664,14 @@ export class Vec4 {
         return this.width * this.height;
     }
 
+    isXOverlapping(vec4) {
+        return (vec4.left <= this.right && vec4.right >= this.left);
+    }
+
+    isYOverlapping(vec4) {
+        return (vec4.top <= this.bottom && vec4.bottom >= this.top);
+    }
+
     static fromRect({left, top, right, bottom}) {
         return new Vec4(left, top, right, bottom);
     }

@@ -1,6 +1,6 @@
 import Overlay from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
-import {getPointOnElement, getSubBoundingBox} from 'core/position';
+import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec2} from "core/vectors";
 
 
@@ -33,10 +33,16 @@ export default class OverlayTestPage {
             this.overlay1.refresh();
         });
 
-        let cordsOutput = document.querySelector('#cords-output');
+        let cordsOutput = document.querySelector('#cords-output'),
+            distanceOutput = document.querySelector('#distance-output'),
+            container = document.querySelector('#overlay-container'),
+            reference = document.querySelector('#overlay-reference1');
 
         window.addEventListener('mousemove', (event) => {
+            let distance = getDistanceBetweenRects(reference.getBoundingClientRect(), container.getBoundingClientRect());
+
             cordsOutput.innerText = `(${event.clientX}, ${event.clientY})`;
+            distanceOutput.innerText = `${distance} px`;
         });
 
         window.overlay = this.overlay1;

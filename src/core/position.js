@@ -450,3 +450,56 @@ export function getSubBoundingBox(element, position) {
         rect.top + position.bottom
     );
 }
+
+
+/**
+ * Returns the distance in between the provided Vec4 objects.  If the objects are touching or overlapping 0
+ * will be returned.
+ *
+ * @param rect1 {{left, top, right, bottom}}
+ * @param rect2 {{left, top, right, bottom}}
+ * @returns {Number}
+ */
+export function getDistanceBetweenRects(rect1, rect2) {
+    let vec1 = Vec4.fromRect(rect1),
+        vec2 = Vec4.fromRect(rect2);
+
+    let isXOverlapping = vec1.isXOverlapping(vec2),
+        isYOverlapping = vec1.isYOverlapping(vec2);
+
+    if(isXOverlapping && isYOverlapping) {
+        // Items are overlapping
+        return 0;
+    } else if(isXOverlapping) {
+        return Math.min(
+            Math.abs(vec1.bottom - vec2.top),
+            Math.abs(vec1.top - vec2.bottom)
+        );
+    } else if(isYOverlapping) {
+        return Math.min(
+            Math.abs(vec1.right - vec2.left),
+            Math.abs(vec1.left - vec2.right)
+        );
+    } else {
+        let x1, y1, x2, y2;
+
+        if(vec1.right <= vec2.left) {
+            x1 = vec1.right;
+            x2 = vec2.left;
+        } else {
+            x1 = vec1.left;
+            x2 = vec2.right;
+        }
+
+        if(vec1.bottom <= vec2.top) {
+            y1 = vec1.bottom;
+            y2 = vec2.top;
+        } else {
+            y1 = vec1.top;
+            y2 = vec2.bottom;
+        }
+
+        // Use distance formula to calculate distance.
+        return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+    }
+}
