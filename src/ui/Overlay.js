@@ -1,4 +1,4 @@
-import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects, getCssPosition} from 'core/position';
+import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec4, Vec2} from "core/vectors";
 import {clamp} from "core/utility";
 
@@ -11,44 +11,129 @@ const DIRECTIONS = {
 };
 
 
-// todo remove debug
-let _dr = {};
-function _debug_draw_rect(rect, id, color='#000000', zIndex=-10, minWidth=0, minHeight=0) {
-    // Draws the provided Vec4 rectangle on the screen.
-    let e;
-
-    if(_dr[id]) {
-        e = _dr[id];
-    } else {
-        e = document.createElement('div');
-        e.id = id;
-        _dr[id] = e;
-        e.classList.add('debug-rect');
-    }
-
-    let width = Math.max(minWidth, rect.right - rect.left),
-        height = Math.max(minHeight, rect.bottom - rect.top);
-
-    e.style.position = 'fixed';
-    e.style.zIndex = '' + zIndex;
-    e.style.backgroundColor = color;
-    e.style.left = `${rect.left}px`;
-    e.style.top = `${rect.top}px`;
-    e.style.width = `${width}px`;
-    e.style.height = `${height}px`;
-
-    if(!e.parentElement && width > 0 && height > 0) {
-        document.body.appendChild(e);
-    } else if(e.parentElement && (width <= 0 || height <= 0)) {
-        e.parentElement.removeChild(e);
-    }
-
-    return e;
-}
-
-
+/**
+ * #Overlay
+ *
+ * A class that positions an element relative to a another reference element.  This "Overlay" can be configured to
+ * position itself within the specified bounds provided by the container parameter.  Container is responsible for
+ * providing a DomRect like object that defines the containing rect in client space.  Container by be one of several
+ * types.  First it can be a css selector string that will be used to find the containing element and call it's
+ * getBoundingClientRect method.  Next, it can be a function that will be called with the parameters
+ * function.call(overlayClass, overlayElement, overlayClass).  This function should return a DomRect like object.
+ * Next, it can be any object with the getBoundingClientRect interface.  This can be an element or a custom object
+ * as long as it has the method.  Finally, it can be a DomRect directly.  This probably should not be used as client
+ * space will only be static if the page has now scrolling.  One of the other methods are better.
+ *
+ * ---
+ *
+ * #Positioning
+ *
+ * The position of the element is determined by the positions parameter.  "positions" accepts an array of positioning
+ * objects with the following properties: {my, at, of, padding, point, arrowAlign} or one of the following strings
+ * top, right, bottom or left.
+ *
+ * left - Overlay is positioned left of the reference with arrow pointing right.
+ * right - Overlay is positioned right of the reference with arrow pointing left.
+ * bottom - Overlay is positioned at the bottom of the reference with arrow pointing up.
+ * top - Overlay is positioned at the top of the reference with arrow pointing down.
+ *
+ * ##my
+ * <i>Determines the anchor point on the element we are positioning from.  Defaults to the top-left point.</i>
+ *
+ * <b>Options</b>
+ * - top-left
+ * - top
+ * - top-right
+ * - left
+ * - middle
+ * - right
+ * - bottom-left
+ * - bottom
+ * - bottom-right
+ *
+ * Or it can be a Vec2 object the with offset x and y position of the anchor set relative to the top-left corner of the
+ * element.
+ *
+ * ##at
+ * <i>Similar to my, but determines the anchor on the reference element.</i>
+ *
+ * <b>Options</b>
+ * - top-left
+ * - top
+ * - top-right
+ * - left
+ * - middle
+ * - right
+ * - bottom-left
+ * - bottom
+ * - bottom-right
+ *
+ * Or it can be a Vec2 object the with offset x and y position of the anchor set relative to the top-left corner of the
+ * element.
+ *
+ * ##of
+ * <i>Used to determine a subspace on the reference element.</i>
+ *
+ * <b>Options</b>
+ * - border-top
+ * - border-left
+ * - border-right
+ * - border-bottom
+ *
+ * ##padding
+ * <i>Used to add additional space in pixels to the reference rect.</i>
+ *
+ * Percentage strings are calculated as a percent of the width and height of the overlay element.
+ *
+ * ##point
+ * <i>Determines what direction the arrow is pointing if an arrow is available.</i>
+ *
+ * ##arrowAlign
+ * <i>Determines the desired position of the arrow before being constrained by the position of the reference and overlay element.</i>
+ *
+ * <b>Options:</b>
+ * - start
+ * - middle
+ * - end
+ *
+ * ---
+ *
+ * #arrow
+ * <i>Determines the amount of spacing that is needed for the arrow.</i>
+ *
+ * Property should be set to an {width, height} object.  If null no arrow will be added.
+ *
+ * ---
+ * #sticky
+ * <i>If true, on refresh the element will determine it's position with the first valid position starting at the last available index.</i>
+ *
+ * For example if false, when determining the position, position object will be checked starting from the begging.
+ *
+ * ---
+ * #Styling the arrow
+ *
+ * When styling the arrow of the overlay a div element will be created with the class "arrow-element".  The
+ * data-direction attribute will be set to whatever direction the arrow is pointing.  Possible values for data-direction
+ * are:
+ *
+ * - down
+ * - left
+ * - up
+ * - right
+ *
+ * @class
+ */
 export default class Overlay {
-    constructor(element, reference, {positions=null, container=null, arrow=null, margins=null, sticky=false}={}) {
+    /**
+     * @constructor
+     * @param element
+     * @param reference
+     * @param positions
+     * @param container
+     * @param arrow
+     * @param sticky
+     */
+    constructor(element, reference, {positions=null, container=null, arrow=null, sticky=false}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -63,7 +148,6 @@ export default class Overlay {
 
         this.positions = positions;
         this.container = container;
-        this.margins = margins;
         this.sticky = sticky;
         this.arrow = arrow;
         this.arrowElement = null;
@@ -103,7 +187,6 @@ export default class Overlay {
             if(applied === -1) {
                 this._currentIndex = index;
                 flag = true;
-                this._oob = false;
                 break;
             } else {
                 if(closestPositionDistance === null || (applied < closestPositionDistance)) {
@@ -115,7 +198,6 @@ export default class Overlay {
 
         if(!flag) {
             this._applyPosition(closestPosition, rect, elementBB, container, true);
-            this._oob = true;
         }
     }
 
@@ -185,11 +267,17 @@ export default class Overlay {
         return collisionBox;
     }
 
+    /**
+     * Sets the position of the arrow.
+     *
+     * @param position
+     * @param overlay
+     * @param reference
+     * @private
+     */
     _positionArrow(position, overlay, reference) {
         if(!this.arrowElement || !this.arrow) return;
-        let arrowBox = this.arrowElement.getBoundingClientRect(),
-            style = {left: null, right: null, top: null, bottom: null},
-            pos = getCssPosition(this.arrowElement),
+        let style = {left: null, right: null, top: null, bottom: null},
             arrowPosition = 0;
 
         if(position.point === 'down') {
@@ -237,6 +325,21 @@ export default class Overlay {
         this.arrowElement.style.bottom = style.bottom !== null ? `${style.bottom}px` : '';
     }
 
+    /**
+     * Applies the position to the overlay element if it falls within the containing space.
+     *
+     * If it doesn't fall inside the containing space the distance in pixels outside of the containing space will be
+     * returned.  If inside the space -1 will be returned.  If applyMinPos is true then the overlay will be positioned
+     * at the closest possible position and -2 will be returned.
+     *
+     * @param position
+     * @param referenceElementRect
+     * @param overlayElementRect
+     * @param containerRect
+     * @param applyMinPos
+     * @returns {Number|number}
+     * @private
+     */
     _applyPosition(position, referenceElementRect, overlayElementRect, containerRect, applyMinPos=false) {
         let reference = getSubBoundingBox(referenceElementRect, position.of), // Bounding of of the object we are being position relative to.
             collisionBox = this._getCollisionBox(position, overlayElementRect), // Collision box of the overlay element.
