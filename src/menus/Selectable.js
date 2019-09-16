@@ -31,8 +31,11 @@ export class Selectable extends Observable {
     }
 
     onClick(event) {
-        let item = event.target.closest('.c-menuitem'),
-            isItemSelected = item.classList.contains('selected');
+        let item = event.target.closest('.c-menuitem');
+
+        if(!item) return;
+
+        let isItemSelected = item.classList.contains('selected');
 
         if(item && this.element.contains(item)) {
             if(this.multiple && event.shiftKey) {
