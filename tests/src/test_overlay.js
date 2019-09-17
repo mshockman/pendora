@@ -1,41 +1,54 @@
-import Draggable from 'ui/Draggable';
-import {CONTAINERS} from 'ui/Draggable';
-import Sortable from 'ui/Sortable';
-import Animation from 'core/Animation';
-import {privateCache} from "../../src/core/data";
-import {getTranslation} from "core/position";
+import Overlay from 'ui/Overlay';
+import Draggable, {CONTAINERS} from 'ui/Draggable';
+import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
+import {Vec2} from "core/vectors";
 
 
-window.Animation = Animation;
-window.privateCache = privateCache;
-
-window.test = new Animation({left: 0}, {left: 200}, 200000);
-
-
-window.getTranslation = getTranslation;
+// noinspection JSUnusedGlobalSymbols
+window.getPointOnElement = getPointOnElement;
+window.getSubBoundingBox = getSubBoundingBox;
+window.Vec2 = Vec2;
 
 
-window.addEventListener('load', () => {
-    window.draggableBox1 = new Draggable("#test-draggable1", {container: CONTAINERS.client, helper: Draggable.CLONE(0.5), revert: 1000});
-    window.draggableWindow1 = new Draggable("#test-window1", {container: CONTAINERS.client, handle: '.drag-handle'});
-    window.draggableBox2 = new Draggable('#drop-test1-droppable', {droppables: '#drop-zone-test1'});
+export default class OverlayTestPage {
+    constructor() {
 
-    window.draggableScrollable = new Draggable(document.querySelector("#scroll-draggable-test"), {scroll: 1, container: CONTAINERS.viewport});
+    }
 
-    window.sortableGrid = new Sortable("#sortable-grid", {layout: 'xy', setPlaceholderSize: true});
-    window.sortableList1 = new Sortable('#drag-list-test', {droppables: '.drop-list', placeholder: true, setPlaceholderSize: true});
-    window.sortableList2 = new Sortable('#drag-list-test2', {droppables: '.drop-list', placeholder: true, setPlaceholderSize: true});
+    load() {
+        this.draggable = new Draggable('#overlay-reference1');
+        this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
+            positions: [
+                'top', 'left', 'bottom', 'right',
+                // 'left'
+                // 'top'
+                // {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}}
+                // {my: 'right', at: 'left', of: 'border-left'}
+            ],
+            sticky: false,
+            container: '#overlay-container',
+            arrow: {width: 10, height: 10}
+        });
 
-    document.querySelector('#drop-zone-test1').addEventListener('drop', event => {
-        event.target.style.backgroundColor = '#00ff00';
-    });
-});
+        this.overlay1.referenceObject.addEventListener('drag-move', () => {
+            this.overlay1.refresh();
+        });
+
+        let cordsOutput = document.querySelector('#cords-output'),
+            distanceOutput = document.querySelector('#distance-output'),
+            container = document.querySelector('#overlay-container'),
+            reference = document.querySelector('#overlay-reference1');
+
+        window.addEventListener('mousemove', (event) => {
+            let distance = getDistanceBetweenRects(reference.getBoundingClientRect(), container.getBoundingClientRect());
+
+            cordsOutput.innerText = `(${event.clientX}, ${event.clientY})`;
+            distanceOutput.innerText = `${distance} px`;
+        });
+
+        window.overlay = this.overlay1;
+        this.overlay1.refresh();
 
 
-window.addEventListener('mousemove', (event) => {
-    let output = document.getElementById('mouse-pos-client-output');
-    output.innerText = `(${event.clientX}, ${event.clientY})`;
-
-    output = document.getElementById('document-position-output');
-    output.innerText = `(${event.clientX + window.scrollX}, ${event.clientY + window.scrollY})`;
-});
+    }
+}
