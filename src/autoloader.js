@@ -90,6 +90,22 @@ export default class AutoLoader {
  * Example Usage:
  *
  * <button type="button" data-init="toggle" data-target="#myModalId" data-toggle="modal">Show Modal</button>
+ *
+ * ---
+ *
+ * # Toggle classes on and off
+ *
+ * If you want to toggle a class on the target element on or off the toggle needs to be a css class string.  For
+ * example to toggle the class "test" with a button you can use the following code:
+ *
+ * <button type="button" data-init="toggle" data-target="#mytarget" data-toggle=".test">Toggle Class</button>
+ *
+ * ---
+ * # Target self
+ *
+ * If you an element to target itself, specify the string "self" as the target.
+ *
+ * <button type="button" data-init="toggle" data-target="self" data-toggle=".test">Toggle Class</button>
  */
 export class Toggle {
     constructor(element) {
@@ -98,8 +114,6 @@ export class Toggle {
         } else {
             this.element = element;
         }
-
-        console.log("Here");
 
         this._onClick = (event) => {
             this.onClick(event);
@@ -114,20 +128,27 @@ export class Toggle {
     }
 
     onClick() {
-        let target = document.querySelector(this.element.dataset.target),
+        let target = this.element.dataset.target,
             toggle = this.element.dataset.toggle,
             method = this.element.dataset.method || 'toggle';
 
-        let instance = AutoLoader.getInitializedInstance(target, toggle);
-
-        if(Array.isArray(instance)) {
-            for(let item of instance) {
-                item[method](this.element);
-            }
-        } else if(instance) {
-            instance[method](this.element);
+        if(target === 'self') {
+            target = this.element;
         } else {
-            throw new Error("Could not find initialized instance during toggle action.");
+            target = document.querySelector(target);
+        }
+
+        if(toggle.startsWith('.')) {
+            toggle = toggle.substr(1);
+            target.classList.toggle(toggle);
+        } else {
+            let instance = AutoLoader.getInitializedInstance(target, toggle);
+
+            if(instance) {
+                instance[method](this.element);
+            } else {
+                throw new Error("Could not find initialized instance during toggle action.");
+            }
         }
     }
 }
