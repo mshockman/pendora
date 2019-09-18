@@ -50,9 +50,23 @@
             margin: 4rem 0;
             overflow: hidden;
         }
+        
+        @keyframes fadeIn {
+            0% {
+                visibility: visible;
+            }
+
+            100% {
+                visibility: hidden;
+            }
+        }
 
         .c-modal.fade-in {
             transition: opacity 250ms linear;
+        }
+
+        .c-modal.fade-in.hidden {
+            animation: 250ms linear fadeIn;
         }
 
         .c-modal.fade-in .c-modal-window {
@@ -107,15 +121,15 @@
     </style>
 </head>
 <body>
-    <button type="button" id="btn1" onclick="Modal.getInstance('#test-modal').show()">Show Modal</button>
+    <button type="button" id="btn1" data-init="toggle" data-target="#test-modal" data-toggle="modal">Show Modal</button>
 
-    <div id="test-modal" class="c-modal hidden fade-in">
+    <div id="test-modal" class="c-modal hidden fade-in" data-init="modal">
         <div class="c-modal-window">
             <div class="c-modal-window__header">
                 <div class="c-modal-window__titlebar">
                     <div class="c-modal-window__title">Test Modal Window</div>
                     <div class="c-modal-window__actions">
-                        <button type="button" class="c-modal-window__exit" data-dismiss><i class="fas fa-times"></i></button>
+                        <button type="button" class="c-modal-window__exit" data-action="dismiss"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
             </div>

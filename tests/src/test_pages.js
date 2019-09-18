@@ -4,6 +4,7 @@ import AutoLoader from 'autoloader';
 import "menus";
 import "filters";
 import {privateCache} from "core/data";
+import Modal from 'ui/modal';
 
 
 __webpack_public_path__ = "dist/";
@@ -19,4 +20,3 @@ let app = new Application({
 
 window.app = app;
 window.privateCache = privateCache;
-AutoLoader.load();

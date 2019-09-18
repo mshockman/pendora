@@ -1,4 +1,5 @@
 import {privateCache} from 'core/data';
+import AutoLoader from 'autoloader';
 
 
 export default class Modal {
@@ -29,8 +30,20 @@ export default class Modal {
         this.hideClassName = hideClassName;
 
         this._onClick = (event) => {
-            if(event.target === this.element && this.hideOnClick && this.isVisible) {
-                this.hide();
+            if(this.isOpen) {
+                if(event.target === this.element && this.hideOnClick) {
+                    this.close();
+                }
+
+                // Hide the modal if the dismiss action is clicked
+                // Make sure to check that the action doesn't come from a child modal and
+                // that for whatever reason the dismiss action isn't a ancestor.
+                let dismiss = event.target.closest('[data-action="dismiss"]'),
+                    targetModal = dismiss ? dismiss.closest('.c-modal') : null;
+
+                if(dismiss && targetModal && targetModal === this.element) {
+                    this.close();
+                }
             }
         };
 
@@ -47,11 +60,11 @@ export default class Modal {
         }
     }
 
-    show() {
-        if(!this.isVisible) {
+    open() {
+        if(!this.isOpen) {
             this.element.classList.remove(this.hideClassName);
 
-            let event = new CustomEvent('modal-show', {
+            let event = new CustomEvent('modal.open', {
                 bubbles: true,
                 detail: this
             });
@@ -60,11 +73,11 @@ export default class Modal {
         }
     }
 
-    hide() {
-        if(this.isVisible) {
+    close() {
+        if(this.isOpen) {
             this.element.classList.add(this.hideClassName);
 
-            let event = new CustomEvent('modal-hide', {
+            let event = new CustomEvent('modal.close', {
                 bubbles: true,
                 detail: this
             });
@@ -73,7 +86,15 @@ export default class Modal {
         }
     }
 
-    get isVisible() {
+    toggle() {
+        if(this.isOpen) {
+            this.close();
+        } else {
+            this.open();
+        }
+    }
+
+    get isOpen() {
         return !this.element.classList.contains(this.hideClassName);
     }
 
@@ -84,4 +105,25 @@ export default class Modal {
 
         return privateCache.get(element, 'modal');
     }
+
+    static buildFromElement(element) {
+        let args = {};
+
+        if(element.dataset.hideOnClick) {
+            args.hideOnClick = element.dataset.hideOnClick === 'true';
+        }
+
+        if(element.dataset.hideClassName) {
+            args.hideClassName = element.dataset.hideClassName;
+        }
+
+        args.element = element;
+
+        return new Modal(args);
+    }
 }
+
+
+AutoLoader.register('modal', (element) => {
+    return Modal.buildFromElement(element);
+});
