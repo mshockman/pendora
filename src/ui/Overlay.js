@@ -132,8 +132,13 @@ export default class Overlay {
      * @param container
      * @param arrow
      * @param sticky
+     * @param clampTop
+     * @param clampBottom
+     * @param clampLeft
+     * @param clampRight
+     * @param magnetic
      */
-    constructor(element, reference, {positions=null, container=null, arrow=null, sticky=false}={}) {
+    constructor(element, reference, {positions=null, container=null, arrow=null, sticky=false, clampTop=false, clampBottom=false, clampLeft=false, clampRight=false, magnetic=false}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -151,6 +156,13 @@ export default class Overlay {
         this.sticky = sticky;
         this.arrow = arrow;
         this.arrowElement = null;
+        this.clampTop = clampTop;
+        this.clampBottom = clampBottom;
+        this.clampLeft = clampLeft;
+        this.clampRight = clampRight;
+        this.magnetic = magnetic;
+
+        this._insideContainer = false;
 
         if(this.arrow) {
             this.arrowElement = document.createElement('div');
@@ -189,6 +201,7 @@ export default class Overlay {
                 flag = true;
                 break;
             } else {
+                // Determine which space had the closest position.
                 if(closestPositionDistance === null || (applied < closestPositionDistance)) {
                     closestPositionDistance = applied;
                     closestPosition = position;
@@ -278,7 +291,9 @@ export default class Overlay {
     _positionArrow(position, overlay, reference) {
         if(!this.arrowElement || !this.arrow) return;
         let style = {left: null, right: null, top: null, bottom: null},
-            arrowPosition = 0;
+            arrowPosition = 0,
+            paddingX = this.arrow.paddingX || 0,
+            paddingY = this.arrow.paddingY || 0;
 
         if(position.point === 'down') {
             style.bottom = -this.arrow.height;
@@ -302,7 +317,7 @@ export default class Overlay {
             let min = Math.max(0, reference.left - overlay.left),
                 max = Math.min(overlay.right - overlay.left, reference.right - overlay.left) - (this.arrow.width);
 
-            style.left = Math.round(clamp(arrowPosition, min, max));
+            style.left = clamp(Math.round(clamp(arrowPosition, min, max)), paddingX, overlay.width - paddingX - this.arrow.width);
         } else if(position.point === 'left' || position.point === 'right') {
             if(position.arrowAlign === 'middle') {
                 arrowPosition = ((overlay.bottom - overlay.top) / 2) - ((this.arrow.height) / 2);
@@ -315,7 +330,7 @@ export default class Overlay {
             let min = Math.max(0, reference.top - overlay.top),
                 max = Math.min(overlay.bottom - overlay.top, reference.bottom - overlay.top) - (this.arrow.height);
 
-            style.top = Math.round(clamp(arrowPosition, min, max));
+            style.top = clamp(Math.round(clamp(arrowPosition, min, max)), paddingY, overlay.height - paddingY - this.arrow.height);
         }
 
         this.arrowElement.dataset.direction = position.point;
@@ -348,22 +363,26 @@ export default class Overlay {
         let offset = new Vec2(-(anchor.left - collisionBox.left), -(anchor.top - collisionBox.top)),
             containerSpace = containerRect;
 
-        let arrowPadding = null;
+        let arrowPadding = new Vec4(0, 0, 0, 0);
 
         if(this.arrow) {
+            let paddingX = this.arrow.paddingX || 0,
+                paddingY = this.arrow.paddingY || 0;
+
             if(position.point === 'down' || position.point === 'up') {
-                arrowPadding = new Vec4(this.arrow.width, 0, -this.arrow.width, 0);
+                arrowPadding = new Vec4(this.arrow.width + paddingX, 0, -this.arrow.width - paddingX, 0);
             } else if(position.point === 'left' || position.point === 'right') {
-                arrowPadding = new Vec4(0, this.arrow.height, 0, -this.arrow.height);
+                arrowPadding = new Vec4(0, this.arrow.height + paddingY, 0, -this.arrow.height - paddingY);
             }
         }
 
         let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
 
-        if(space && arrowPadding) {
+        if(space) {
             space = space.add(arrowPadding);
         }
 
+        // Pad so that the top left corner never goes outside the true space.
         containerSpace = containerSpace.add(new Vec4(
             -offset.left,
             -offset.top,
@@ -376,6 +395,7 @@ export default class Overlay {
 
             space = space.intersection(containerSpace);
 
+            // Overlay within container.
             if (space && space.getArea() >= 0) {
                 let pos = getSubBoundingBox(reference, position.at).toPoint();
                 pos = pos.clamp(space);
@@ -385,9 +405,11 @@ export default class Overlay {
 
                 this._positionArrow(position, overlay, reference);
                 setElementClientPosition(this.element, overlay, 'translate3d');
+                this._insideContainer = true;
                 return -1;
             }
 
+            // Overlay not in container, return distance outside.
             return getDistanceBetweenRects(unboundedSpace, containerSpace);
         } else {
             space = _clampToMinimumDistance(space, offset, reference, containerSpace);
@@ -397,10 +419,63 @@ export default class Overlay {
             pos = pos.add(new Vec2(collisionBox.paddingLeft, collisionBox.paddingTop));
             let overlay = overlayElementRect.moveTo(pos);
 
+            overlay = this._clampToContainer(position, overlay, containerRect);
             this._positionArrow(position, overlay, reference);
+
+            this._insideContainer = containerRect.contains(overlay);
+
             setElementClientPosition(this.element, overlay, 'translate3d');
             return -2;
         }
+    }
+
+    _clampToContainer(position, overlayRect, containerRect) {
+        // if(!this._insideContainer && !this.magnetic) return overlayRect;
+
+        let space = new Vec4(-Infinity, -Infinity, Infinity, Infinity);
+
+        let arrowPadding = new Vec4(0, 0, 0, 0, 0);
+
+        if(this.arrow) {
+            if(position.point === 'down') {
+                arrowPadding = new Vec4(0, 0, 0, -this.arrow.height);
+            } else if(position.point === 'up') {
+                arrowPadding = new Vec4(0, this.arrow.height, 0, 0);
+            } else if(position.point === 'left') {
+                arrowPadding = new Vec4(this.arrow.width, 0, 0, 0);
+            } else if(position.point === 'right') {
+                arrowPadding = new Vec4(0, 0, -this.arrow.width, 0);
+            }
+        }
+
+        containerRect = containerRect.add(new Vec4(
+            0, 0,
+            -overlayRect.width,
+            -overlayRect.height
+        )).add(arrowPadding);
+
+        let deltaLeft = overlayRect.left - containerRect.left,
+            deltaRight = containerRect.right - overlayRect.left,
+            deltaTop = overlayRect.top - containerRect.top,
+            deltaBottom = containerRect.bottom - overlayRect.top;
+
+        if(deltaLeft < 0 && (this.clampLeft === true || (typeof this.clampLeft === 'number' && Math.abs(deltaLeft) < this.clampLeft))) {
+            space.left = containerRect.left;
+        }
+
+        if(deltaRight < 0 && (this.clampRight === true || (typeof this.clampRight === 'number' && Math.abs(deltaRight) < this.clampRight))) {
+            space.right = containerRect.right;
+        }
+
+        if(deltaTop < 0 && (this.clampTop === true || (typeof this.clampTop === 'number' && Math.abs(deltaTop) < this.clampTop))) {
+            space.top = containerRect.top;
+        }
+
+        if(deltaBottom < 0 && (this.clampBottom === true || (typeof this.clampBottom === 'number' && Math.abs(deltaBottom) < this.clampBottom))) {
+            space.bottom = containerRect.bottom;
+        }
+
+        return overlayRect.clampXY(space);
     }
 }
 

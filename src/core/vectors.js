@@ -672,6 +672,15 @@ export class Vec4 {
         return (vec4.top <= this.bottom && vec4.bottom >= this.top);
     }
 
+    clampXY(vec4) {
+        let width = this.right - this.left,
+            height = this.bottom - this.top,
+            left = clamp(this.left, vec4.left, vec4.right),
+            top = clamp(this.top, vec4.top, vec4.bottom);
+
+        return new Vec4(left, top, left + width, top + height);
+    }
+
     static fromRect({left, top, right, bottom}) {
         return new Vec4(left, top, right, bottom);
     }

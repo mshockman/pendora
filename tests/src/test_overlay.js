@@ -25,9 +25,13 @@ export default class OverlayTestPage {
                 // {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}}
                 // {my: 'right', at: 'left', of: 'border-left'}
             ],
-            sticky: false,
+            sticky: true,
             container: '#overlay-container',
-            arrow: {width: 10, height: 10}
+            arrow: {width: 10, height: 10, paddingX: 5, paddingY: 5},
+            // clampLeft: 200,
+            clampTop: Infinity,
+            clampBottom: Infinity,
+            // clampRight: 200
         });
 
         this.overlay1.referenceObject.addEventListener('drag-move', () => {
