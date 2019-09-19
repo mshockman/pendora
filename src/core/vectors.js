@@ -332,15 +332,27 @@ export class Vec3 {
     }
 
     toHex() {
-        let r = this.r.toString(16),
-            g = this.g.toString(16),
-            b = this.b.toString(16);
+        let r = Math.round(this.r).toString(16),
+            g = Math.round(this.g).toString(16),
+            b = Math.round(this.b).toString(16);
+
+        if(r.length === 1) {
+            r = '0' + r;
+        }
+
+        if(g.length === 1) {
+            g = '0' + g;
+        }
+
+        if(b.length === 1) {
+            b = '0' + b;
+        }
 
         return `#${r}${g}${b}`;
     }
 
     toRGB() {
-        return `rgb(${this.r}, ${this.g}, ${this.b})`;
+        return `rgb(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)})`;
     }
 
     toTranslate3d() {

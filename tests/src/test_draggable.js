@@ -9,8 +9,6 @@ import {getTranslation} from "core/position";
 window.Animation = Animation;
 window.privateCache = privateCache;
 
-window.test = new Animation({left: 0}, {left: 200}, 200000);
-
 
 window.getTranslation = getTranslation;
 
