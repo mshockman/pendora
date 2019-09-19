@@ -358,7 +358,8 @@ export default class Overlay {
     _applyPosition(position, referenceElementRect, overlayElementRect, containerRect, applyMinPos=false) {
         let reference = getSubBoundingBox(referenceElementRect, position.of), // Bounding of of the object we are being position relative to.
             collisionBox = this._getCollisionBox(position, overlayElementRect), // Collision box of the overlay element.
-            anchor = getSubBoundingBox(collisionBox, position.my).toPoint();
+            anchor = getSubBoundingBox(collisionBox, position.my).toPoint(),
+            method = 'top-left'; // The method to position by. See setElementClientPosition()
 
         let offset = new Vec2(-(anchor.left - collisionBox.left), -(anchor.top - collisionBox.top)),
             containerSpace = containerRect;
@@ -374,6 +375,16 @@ export default class Overlay {
             } else if(position.point === 'left' || position.point === 'right') {
                 arrowPadding = new Vec4(0, this.arrow.height + paddingY, 0, -this.arrow.height - paddingY);
             }
+        }
+
+        if(position.my === 'left' || position.my === 'top-left' || position.my === 'middle' || position.my === 'top') {
+            method = 'top-left';
+        } else if(position.my === 'right' || position.my === 'top-right') {
+            method = 'top-right';
+        } else if(position.my === 'bottom-right') {
+            method = 'bottom-right';
+        } else if(position.my === 'bottom-left' || position.my === 'bottom') {
+            method = 'bottom-left';
         }
 
         let space = _calculatePositionSpace(position, collisionBox, null, reference, offset);
@@ -404,7 +415,7 @@ export default class Overlay {
                 let overlay = overlayElementRect.moveTo(pos);
 
                 this._positionArrow(position, overlay, reference);
-                setElementClientPosition(this.element, overlay, 'translate3d');
+                setElementClientPosition(this.element, overlay, method);
                 this._insideContainer = true;
                 return -1;
             }
@@ -424,7 +435,7 @@ export default class Overlay {
 
             this._insideContainer = containerRect.contains(overlay);
 
-            setElementClientPosition(this.element, overlay, 'translate3d');
+            setElementClientPosition(this.element, overlay, method);
             return -2;
         }
     }

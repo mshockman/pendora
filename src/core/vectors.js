@@ -697,6 +697,10 @@ export class Vec4 {
         return new Vec4(left, top, right, bottom);
     }
 
+    static getBoundingClientRect(element) {
+        return Vec4.fromRect(element.getBoundingClientRect());
+    }
+
     static fromRGBAObject({r, g, b, a}) {
         return new Vec4(r, g, b, a);
     }

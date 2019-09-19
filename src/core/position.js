@@ -157,25 +157,61 @@ export function setCssPosition(element, {left=null, top=null}) {
 
 /**
  * Sets the elements position relative to the client window.  The `method` parameter controls how the elements position
- * is modified.  The options are 'position' and 'translate'.  Position uses the standard left and top properties of the
- * elements style.  'translate' uses the transform property.
+ * is modified.  The options are 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'translate', and 'translate3d'.
+ *
+ * top-left, top-right, bottom-left and bottom-right set the css left, top, right, and bottom properties of the element.
+ * translate and translate3d position the element by setting the transform property.
  *
  * @param element
  * @param position
  * @param method
  */
-export function setElementClientPosition(element, position, method='position') {
-    let box = element.getBoundingClientRect(),
+export function setElementClientPosition(element, position, method='top-left') {
+    let box = Vec4.getBoundingClientRect(element),
         deltaX = position.left - box.left,
         deltaY = position.top - box.top;
 
-    if(method === 'position') {
-        let cssPosition = getCssPosition(element);
+    position = Vec2.fromVertex(position);
 
-        setCssPosition(element, {
-            left: cssPosition.left + deltaX,
-            top: cssPosition.top + deltaY
-        });
+    if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
+        let offsetParent = element.offsetParent,
+            offsetBB = Vec4.getBoundingClientRect(offsetParent);
+
+        let style = getComputedStyle(element),
+            offsetStyle = getComputedStyle(offsetParent);
+
+        if(style.position === 'static') {
+            element.style.position = 'relative';
+        }
+
+        let border = {
+            left: parseInt(offsetStyle.borderLeftWidth, 10),
+            top: parseInt(offsetStyle.borderTopWidth, 10),
+            right: parseInt(offsetStyle.borderRightWidth, 10),
+            bottom: parseInt(offsetStyle.borderBottomWidth, 10),
+        };
+
+        if(method === 'top-left') {
+            element.style.left = (position.x - offsetBB.left - border.left) + 'px';
+            element.style.top = (position.y - offsetBB.top - border.top) + 'px';
+            element.style.right = '';
+            element.style.bottom = '';
+        } else if(method === 'top-right') {
+            element.style.right = (offsetBB.right - position.x) - (box.right - box.left) - border.right + 'px';
+            element.style.top = (position.y - offsetBB.top) - border.top + 'px';
+            element.style.left = '';
+            element.style.bottom = '';
+        } else if(method === 'bottom-left') {
+            element.style.left = (position.x - offsetBB.left) - border.left + 'px';
+            element.style.bottom = (offsetBB.bottom - position.y) - (box.bottom - box.top) - border.bottom + 'px';
+            element.style.right = '';
+            element.style.top = '';
+        } else { // bottom-right
+            element.style.right = (offsetBB.right - position.x) - (box.right - box.left) - border.right + 'px';
+            element.style.bottom = (offsetBB.bottom - position.y) - (box.bottom - box.top) - border.bottom + 'px';
+            element.style.left = '';
+            element.style.top = '';
+        }
     } else if(method === 'translate') {
         let cssPosition = getTranslation(element);
 
