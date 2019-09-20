@@ -631,6 +631,24 @@ export class Vec4 {
         );
     }
 
+    addMargins(vec4) {
+        return new Vec4(
+            this.left - vec4.left,
+            this.top - vec4.top,
+            this.right + vec4.right,
+            this.bottom + vec4.bottom
+        );
+    }
+
+    addPaddings(vec4) {
+        return new Vec4(
+            this.left + vec4.left,
+            this.top + vec4.top,
+            this.right - vec4.right,
+            this.bottom - vec4.bottom
+        );
+    }
+
     moveTo(vec2) {
         let deltaX = vec2.left - this.left,
             deltaY = vec2.top - this.top;
@@ -666,6 +684,14 @@ export class Vec4 {
 
     contains(rect) {
         return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+
+    containsX(rect) {
+        return this.left <= rect.left && this.right >= rect.right;
+    }
+
+    containsY(rect) {
+        return this.top <= rect.top && this.bottom >= rect.bottom;
     }
 
     toPoint() {
@@ -727,7 +753,7 @@ export class Vec4 {
         vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
 
         let height = this.height,
-            top = clamp(this.top, vec4.bottom, vec4.top);
+            top = clamp(this.top, vec4.top, vec4.bottom);
 
         return new Vec4(
             this.left,

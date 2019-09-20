@@ -1,7 +1,7 @@
 import Overlay from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
 import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
-import {Vec2} from "core/vectors";
+import {Vec2, Vec4} from "core/vectors";
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -20,17 +20,18 @@ export default class OverlayTestPage {
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
             positions: [
                 'top', 'left', 'bottom', 'right',
-                // 'left'
+                // 'left', 'bottom'
                 // 'top'
                 // {my: 'bottom', at: 'top', of: 'border-top', padding: {left: '50%', right: '50%'}}
                 // {my: 'right', at: 'left', of: 'border-left'}
             ],
             sticky: true,
             container: '#overlay-container',
-            arrow: {width: 10, height: 10, paddingX: 5, paddingY: 5},
+            arrow: false,
             // clampLeft: 200,
             clampTop: Infinity,
             clampBottom: Infinity,
+            magnetic: new Vec4(Infinity, 0, Infinity, 0)
             // clampRight: 200
         });
 
