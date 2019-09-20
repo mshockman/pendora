@@ -657,7 +657,7 @@ export class Vec4 {
     }
 
     toRGBA() {
-        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+        return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
     }
 
     clone() {
@@ -691,6 +691,93 @@ export class Vec4 {
             top = clamp(this.top, vec4.top, vec4.bottom);
 
         return new Vec4(left, top, left + width, top + height);
+    }
+
+    clamp(vec4) {
+        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
+
+        let width = this.width,
+            height = this.height,
+            left = clamp(this.left, vec4.left, vec4.right),
+            top = clamp(this.top, vec4.top, vec4.bottom);
+
+        return new Vec4(
+            left,
+            top,
+            left + width,
+            top + height
+        );
+    }
+
+    clampX(vec4) {
+        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
+
+        let width = this.width,
+            left = clamp(this.left, vec4.left, vec4.right);
+
+        return new Vec4(
+            left,
+            this.top,
+            left + width,
+            this.bottom
+        );
+    }
+
+    clampY(vec4) {
+        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
+
+        let height = this.height,
+            top = clamp(this.top, vec4.bottom, vec4.top);
+
+        return new Vec4(
+            this.left,
+            top,
+            this.right,
+            top + height
+        );
+    }
+
+    getDistanceBetween(vec4) {
+        vec4 = Vec4.fromRect(vec4);
+
+        let isXOverlapping = this.isXOverlapping(vec4),
+            isYOverlapping = this.isYOverlapping(vec4);
+
+        if(isXOverlapping && isYOverlapping) {
+            // Items are overlapping
+            return 0;
+        } else if(isXOverlapping) {
+            return Math.min(
+                Math.abs(this.bottom - vec4.top),
+                Math.abs(this.top - vec4.bottom)
+            );
+        } else if(isYOverlapping) {
+            return Math.min(
+                Math.abs(this.right - vec4.left),
+                Math.abs(this.left - vec4.right)
+            );
+        } else {
+            let x1, y1, x2, y2;
+
+            if(this.right <= vec4.left) {
+                x1 = this.right;
+                x2 = vec4.left;
+            } else {
+                x1 = this.left;
+                x2 = vec4.right;
+            }
+
+            if(this.bottom <= vec4.top) {
+                y1 = this.bottom;
+                y2 = vec4.top;
+            } else {
+                y1 = this.top;
+                y2 = vec4.bottom;
+            }
+
+            // Use distance formula to calculate distance.
+            return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+        }
     }
 
     static fromRect({left, top, right, bottom}) {
