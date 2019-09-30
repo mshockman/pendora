@@ -33,7 +33,7 @@ export const EASING = {
 
 
 export default class Animation {
-    constructor(frames, {getStartingFrame=null, applyFrame=null, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrame=false}={}) {
+    constructor(frames, {getStartingFrame=null, applyFrame=null, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false}={}) {
         this.frames = [];
 
         for(let key in frames) {
@@ -60,7 +60,7 @@ export default class Animation {
         this.onStart = onStart;
         this.onFrame = onFrame;
         this.onEnd = onEnd;
-        this.bubbleFrame = bubbleFrame;
+        this.bubbleFrameEvent = bubbleFrameEvent;
 
         this.frames.sort((a, b) => a.position - b.pos);
     }
@@ -191,7 +191,7 @@ export default class Animation {
                     return running;
                 },
 
-                cancel() {
+                cancel(complete=false) {
                     running = false;
                     animation.endTimestamp = performance.now();
                 }
@@ -219,7 +219,7 @@ export default class Animation {
                 if(this.onFrame) this.onFrame.call(this, animation);
 
                 let event = new CustomEvent('animation.frame', {
-                    bubbles: this.bubbleFrame,
+                    bubbles: this.bubbleFrameEvent,
                     detail: animation
                 });
 

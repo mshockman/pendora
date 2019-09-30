@@ -108,6 +108,46 @@
         #tooltip1[data-direction="right"]  .tooltip-body {
             margin-left: 7px;
         }
+
+        #tooltip-testarea1 {
+            position: absolute;
+            top: 800px;
+            border: 1px solid #ccc;
+            margin: 4rem;
+            padding: 4rem;
+            width: 1000px;
+        }
+
+        .tooltip {
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .tooltip .tooltip__body {
+            background-color: #cfc;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .tooltip[data-direction="top"] .tooltip__body {
+            margin-bottom: 7px;
+            position: relative;
+        }
+
+        .tooltip[data-direction="top"] .arrow-element {
+            width: 0;
+            height: 0;
+            position: absolute;
+            bottom: -7px;
+            border-top: 7px solid #cfc;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+        }
+
+        .tooltip.hidden {
+            visibility: hidden;
+        }
     </style>
 </head>
 <body>
@@ -144,6 +184,10 @@
 <div id="debug_output">
     <div id="cords-output">(0, 0)</div>
     <div id="distance-output">n/a px</div>
+</div>
+
+<div id="tooltip-testarea1">
+    <button type="button" id="test-tt-btn1">Display Tooltip</button>
 </div>
 
 <script type="text/javascript">

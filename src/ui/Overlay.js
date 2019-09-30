@@ -1,5 +1,6 @@
 import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec4, Vec2} from "core/vectors";
+import Animation from "core/Animation";
 
 
 const DIRECTIONS = {
@@ -70,6 +71,7 @@ export default class Overlay {
                 position = DIRECTIONS[position];
             }
 
+            // This forces a reflow.
             this.element.dataset.direction = position.direction;
 
             let overlay = Vec4.getBoundingClientRect(this.element),
@@ -135,6 +137,7 @@ export default class Overlay {
         }
 
         if(!flag && closestPosition) {
+            // This forces a reflow.
             this.element.dataset.direction = closestPosition.position.direction;
 
             let overlay;
@@ -293,4 +296,147 @@ function getArrowSide(align) {
 function getArrowFloat(align) {
     let s = align.split('-');
     return s[1] || 'middle';
+}
+
+
+function slideOutEffectFactory(time) {
+    return function slideOut(element, callback) {
+        let direction = element.dataset.direction;
+
+        if(direction === 'top') {
+            let box = Vec4.getBoundingClientRect(element),
+                height = box.bottom - box.top;
+
+            let animation = new Animation({
+                '0%': {
+                    height: height,
+                },
+
+                '100%': {
+                    height: 0
+                }
+            }, {
+                applyFrame(element, frame) {
+                    element.style.height = `${frame.height}px`;
+                },
+
+                onComplete() {
+                    callback();
+                    element.style.height = '';
+                }
+            });
+
+            return animation.animate(element, time);
+        }
+    }
+}
+
+
+
+function slideIn(element, callback) {
+
+}
+
+
+
+export class Tooltip {
+    constructor({text, reference, positions=['top'], container=null, magnetic=true, showFX=slideIn, hideFX=slideOutEffectFactory(1000), className=null,
+                timeout=null}) {
+        this.element = document.createElement('div');
+        this.tooltipBody = document.createElement('div');
+        this.tooltipBody.className = "tooltip__body";
+        this.textElement = document.createElement('div');
+        this.textElement.className = "tooltip__text";
+        this.textElement.innerHTML = text;
+        this.tooltipBody.appendChild(this.textElement);
+
+        let arrowElement = document.createElement('div');
+        arrowElement.className = 'arrow-element';
+        this.tooltipBody.appendChild(arrowElement);
+
+        this.element.appendChild(this.tooltipBody);
+        this.showFX = showFX;
+        this.hideFX = hideFX;
+        this.element.className = "tooltip hidden";
+        this.isVisible = false;
+
+        if(className) {
+            this.element.classList.add(className);
+        }
+
+        this.overlay = new Overlay(this.element, reference, {positions, container, magnetic});
+
+        if(reference && reference.offsetParent) {
+            reference.offsetParent.appendChild(this.element);
+        }
+    }
+
+    destroy() {
+
+    }
+
+    appendTo(element) {
+        if(typeof element === 'string') {
+            document.querySelector(element).appendChild(this.element);
+        } else if(element.appendChild) {
+            element.appendChild(this.element);
+        } else if(element.append) {
+            element.append(this.element);
+        }
+    }
+
+    show() {
+        if(!this.isVisible) {
+            this.isVisible = true;
+            this.element.classList.remove('hidden');
+
+            if(this._fx) {
+                this._fx.cancel();
+                this._fx = null;
+            }
+
+            if(typeof this.hideFX === 'string') {
+                this.element.classList.remove(this.hideFX);
+            }
+
+            this.overlay.refresh();
+
+            if(this.showFX) {
+                if(typeof this.showFX === 'string') {
+                    this.element.classList.add(this.showFX);
+                } else if(typeof this.showFX === 'function') {
+                    this._fx = this.showFX(this.element);
+                }
+            }
+        }
+    }
+
+    hide() {
+        if(this.isVisible) {
+            this.isVisible = false;
+
+            if(typeof this.showFX === 'string') {
+                this.element.classList.remove(this.showFX);
+            }
+
+            if(typeof this.hideFX === 'string') {
+                this.element.classList.add(this.hideFX);
+                this.element.classList.add('hidden');
+            } else if(typeof this.hideFX === 'function') {
+                this.hideFX(this.element, () => {
+                    this.element.classList.add('hidden');
+                });
+            } else {
+                this.element.classList.add('hidden');
+            }
+        }
+    }
+
+    toggle() {
+        if(this.isVisible) {
+            return this.hide();
+        } else {
+            return this.show();
+        }
+    }
 }

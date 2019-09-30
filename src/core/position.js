@@ -162,65 +162,66 @@ export function setCssPosition(element, {left=null, top=null}) {
  * top-left, top-right, bottom-left and bottom-right set the css left, top, right, and bottom properties of the element.
  * translate and translate3d position the element by setting the transform property.
  *
- * @param element
- * @param position
- * @param method
+ * @param element {HTMLElement}
+ * @param position {{x, y}|{left, top}|Array|Vec2}
+ * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'}
  */
 export function setElementClientPosition(element, position, method='top-left') {
-    let box = Vec4.getBoundingClientRect(element),
-        deltaX = position.left - box.left,
-        deltaY = position.top - box.top;
-
     position = Vec2.fromVertex(position);
 
     if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
-        let offsetParent = element.offsetParent,
-            offsetBB = Vec4.getBoundingClientRect(offsetParent);
+        let style = getComputedStyle(element);
 
-        let style = getComputedStyle(element),
-            offsetStyle = getComputedStyle(offsetParent);
-
+        // position can't be static for this operation.  Switch to relative.
         if(style.position === 'static') {
             element.style.position = 'relative';
+            style = getComputedStyle(element);
         }
 
-        let border = {
-            left: parseInt(offsetStyle.borderLeftWidth, 10),
-            top: parseInt(offsetStyle.borderTopWidth, 10),
-            right: parseInt(offsetStyle.borderRightWidth, 10),
-            bottom: parseInt(offsetStyle.borderBottomWidth, 10),
-        };
+        let left = parseInt(style.left, 10),
+            top = parseInt(style.top, 10),
+            right = parseInt(style.right, 10),
+            bottom = parseInt(style.bottom, 10),
+            box = Vec4.getBoundingClientRect(element),
+            deltaX = position.left - box.left,
+            deltaY = position.top - box.top;
 
         if(method === 'top-left') {
-            element.style.left = (position.x - offsetBB.left - border.left) + 'px';
-            element.style.top = (position.y - offsetBB.top - border.top) + 'px';
+            element.style.left = (left + deltaX) + 'px';
+            element.style.top = (top + deltaY) + 'px';
             element.style.right = '';
             element.style.bottom = '';
         } else if(method === 'top-right') {
-            element.style.right = (offsetBB.right - position.x) - (box.right - box.left) - border.right + 'px';
-            element.style.top = (position.y - offsetBB.top) - border.top + 'px';
+            element.style.right = (right - deltaX) + 'px';
+            element.style.top = (top + deltaY) + 'px';
             element.style.left = '';
             element.style.bottom = '';
         } else if(method === 'bottom-left') {
-            element.style.left = (position.x - offsetBB.left) - border.left + 'px';
-            element.style.bottom = (offsetBB.bottom - position.y) - (box.bottom - box.top) - border.bottom + 'px';
+            element.style.left = (left + deltaX) + 'px';
+            element.style.bottom = (bottom - deltaY) + 'px';
             element.style.right = '';
             element.style.top = '';
         } else { // bottom-right
-            element.style.right = (offsetBB.right - position.x) - (box.right - box.left) - border.right + 'px';
-            element.style.bottom = (offsetBB.bottom - position.y) - (box.bottom - box.top) - border.bottom + 'px';
+            element.style.right = (right - deltaX) + 'px';
+            element.style.bottom = (bottom - deltaY) + 'px';
             element.style.left = '';
             element.style.top = '';
         }
     } else if(method === 'translate') {
-        let cssPosition = getTranslation(element);
+        let box = Vec4.getBoundingClientRect(element),
+            deltaX = position.left - box.left,
+            deltaY = position.top - box.top,
+            cssPosition = getTranslation(element);
 
         setTranslation(element, {
             x: cssPosition.x + deltaX,
             y: cssPosition.y + deltaY
         });
     } else if(method === 'translate3d') {
-        let cssPosition = getTranslation(element);
+        let box = Vec4.getBoundingClientRect(element),
+            deltaX = position.left - box.left,
+            deltaY = position.top - box.top,
+            cssPosition = getTranslation(element);
 
         setTranslation(element, {
             x: cssPosition.x + deltaX,

@@ -1,4 +1,4 @@
-import Overlay from 'ui/Overlay';
+import Overlay, {Tooltip} from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
 import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec2, Vec4} from "core/vectors";
@@ -28,11 +28,7 @@ export default class OverlayTestPage {
             sticky: true,
             container: '#overlay-container',
             arrow: false,
-            // clampLeft: 200,
-            clampTop: Infinity,
-            clampBottom: Infinity,
-            magnetic: new Vec4(Infinity, 0, Infinity, 0)
-            // clampRight: 200
+            // magnetic: new Vec4(Infinity, 0, Infinity, 0)
         });
 
         this.overlay1.referenceObject.addEventListener('drag-move', () => {
@@ -54,6 +50,18 @@ export default class OverlayTestPage {
         window.overlay = this.overlay1;
         this.overlay1.refresh();
 
+        this.initTooltipTest();
+    }
 
+    initTooltipTest() {
+        let btn = document.getElementById('test-tt-btn1'),
+            container = document.getElementById('tooltip-testarea1');
+
+        let tooltip = new Tooltip({text: "Hello World", reference: btn, className: "success"});
+
+        btn.addEventListener('click', event => {
+            tooltip.toggle();
+            console.log("toggling");
+        });
     }
 }
