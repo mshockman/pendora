@@ -1,8 +1,13 @@
 import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec4, Vec2} from "core/vectors";
 import Animation from "core/Animation";
+import {privateCache} from "core/data";
 
 
+// arrow controls the alignment of the arrow.
+// position control the property that is used to position the element.
+// direction is an attribute that is applied to the element.
+// of is used to in a sub box of the bounding box.
 const DIRECTIONS = {
     top: {my: 'bottom', at: 'top', of: 'border-top', arrow: 'bottom', direction: 'top', position: 'bottom-left'},
     right: {my: 'left', at: 'right', of: 'border-right', arrow: 'left', direction: 'right', position: 'top-left'},
@@ -299,32 +304,81 @@ function getArrowFloat(align) {
 }
 
 
-function slideOutEffectFactory(time) {
-    return function slideOut(element, callback) {
-        let direction = element.dataset.direction;
+export function slideOutEffectFactory(time) {
+    return function slideOut(element, {onEnd=null}={}) {
+        let direction = element.dataset.direction,
+            cache = privateCache.cache(element);
 
-        if(direction === 'top') {
-            let box = Vec4.getBoundingClientRect(element),
-                height = box.bottom - box.top;
+        if(cache.fxSlideDirection !== direction) {
+            // Get max width and height
+            element.style.maxWidth = '';
+            element.style.maxHeight = '';
 
+            let box = Vec4.getBoundingClientRect(element);
+            cache.fxMaxHeight = box.bottom - box.top;
+            cache.fxMaxWidth = box.right - box.left;
+
+            // When slide in starts, fxWidth and fxHeight are set to 0 at first so that the first animation
+            // starts at the beginning.
+            cache.fxHeight = cache.fxMaxHeight;
+            cache.fxWidth = cache.fxMaxWidth;
+
+            // Set the current direction so we no when the overlay changes position
+            // and fx data needs to be recalculated.
+            cache.fxSlideDirection = direction;
+        }
+
+        if(cache.slideFX) {
+            cache.slideFX.cancel(false);
+            cache.slideFX = null;
+        }
+
+        if(direction === 'top' || direction === 'bottom') {
             let animation = new Animation({
                 '0%': {
-                    height: height,
+                    maxHeight: cache.fxHeight,
                 },
 
                 '100%': {
-                    height: 0
+                    maxHeight: 0
                 }
             }, {
                 applyFrame(element, frame) {
-                    element.style.height = `${frame.height}px`;
+                    element.style.maxHeight = `${frame.maxHeight}px`;
+                    cache.fxHeight = frame.maxHeight;
                 },
 
-                onComplete() {
-                    callback();
-                    element.style.height = '';
+                onEnd() {
+                    if(onEnd) onEnd();
+                    cache.slideFX = null;
                 }
             });
+
+            cache.slideFX = animation;
+
+            return animation.animate(element, time);
+        } else {
+            let animation = new Animation({
+                '0%': {
+                    maxWidth: cache.fxWidth,
+                },
+
+                '100%': {
+                    maxWidth: 0
+                }
+            }, {
+                applyFrame(element, frame) {
+                    element.style.maxWidth = `${frame.maxWidth}px`;
+                    cache.fxWidth = frame.maxWidth;
+                },
+
+                onEnd() {
+                    if(onEnd) onEnd();
+                    cache.slideFX = null;
+                }
+            });
+
+            cache.slideFX = animation;
 
             return animation.animate(element, time);
         }
@@ -333,15 +387,91 @@ function slideOutEffectFactory(time) {
 
 
 
-function slideIn(element, callback) {
+export function slideInEffectFactory(time) {
+    return function(element, {onEnd=null, onStart=null}={}) {
+        let cache = privateCache.cache(element),
+            direction = element.dataset.direction;
 
+        if(cache.slideFX) {
+            cache.slideFX.cancel(false);
+            cache.slideFX = null;
+        }
+
+        if(cache.fxSlideDirection !== direction) {
+            // Get max width and height
+            element.style.maxWidth = '';
+            element.style.maxHeight = '';
+
+            let box = Vec4.getBoundingClientRect(element);
+            cache.fxMaxHeight = box.bottom - box.top;
+            cache.fxMaxWidth = box.right - box.left;
+
+            // When slide in starts, fxWidth and fxHeight are set to 0 at first so that the first animation
+            // starts at the beginning.
+            cache.fxHeight = 0;
+            cache.fxWidth = 0;
+
+            // Set the current direction so we no when the overlay changes position
+            // and fx data needs to be recalculated.
+            cache.fxSlideDirection = direction;
+        }
+
+        if(direction === 'top' || direction === 'bottom') {
+            let animation = new Animation({
+                '0%': {
+                    maxHeight: cache.fxHeight,
+                },
+
+                '100%': {
+                    maxHeight: cache.fxMaxHeight
+                }
+            }, {
+                applyFrame(element, frame) {
+                    element.style.maxHeight = `${frame.maxHeight}px`;
+                    cache.fxHeight = frame.maxHeight;
+                },
+
+                onEnd() {
+                    if(onEnd) onEnd();
+                    cache.slideFX = null;
+                }
+            });
+
+            cache.slideFX = animation;
+
+            return animation.animate(element, time);
+        } else {
+            let animation = new Animation({
+                '0%': {
+                    maxWidth: cache.fxWidth,
+                },
+
+                '100%': {
+                    maxWidth: cache.fxMaxWidth
+                }
+            }, {
+                applyFrame(element, frame) {
+                    element.style.maxWidth = `${frame.maxWidth}px`;
+                    cache.fxWidth = frame.maxWidth;
+                },
+
+                onEnd() {
+                    if(onEnd) onEnd();
+                    cache.slideFX = null;
+                }
+            });
+
+            cache.slideFX = animation;
+
+            return animation.animate(element, time);
+        }
+    }
 }
 
 
 
 export class Tooltip {
-    constructor({text, reference, positions=['top'], container=null, magnetic=true, showFX=slideIn, hideFX=slideOutEffectFactory(1000), className=null,
-                timeout=null}) {
+    constructor({text, reference, positions=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null}) {
         this.element = document.createElement('div');
         this.tooltipBody = document.createElement('div');
         this.tooltipBody.className = "tooltip__body";
@@ -371,10 +501,6 @@ export class Tooltip {
         }
     }
 
-    destroy() {
-
-    }
-
     appendTo(element) {
         if(typeof element === 'string') {
             document.querySelector(element).appendChild(this.element);
@@ -387,25 +513,45 @@ export class Tooltip {
 
     show() {
         if(!this.isVisible) {
-            this.isVisible = true;
-            this.element.classList.remove('hidden');
-
             if(this._fx) {
-                this._fx.cancel();
+                this._fx.cancel(true);
                 this._fx = null;
             }
+
+            this.isVisible = true;
+            this.element.classList.remove('hidden');
 
             if(typeof this.hideFX === 'string') {
                 this.element.classList.remove(this.hideFX);
             }
 
+            // In order to calculate the position.  We need to clear any style properties effecting the true
+            // width and height of the element.  Slide in and slide out effects should use the maxWidth and maxHeight
+            // properties to control it's size.  Save and then clear them off the element; then calculate the position;
+            // finally restore the original properties.
+            let properties = ['maxWidth', 'maxHeight'],
+                save = {};
+
+            for(let p of properties) {
+                save[p] = this.element.style[p];
+                this.element.style[p] = '';
+            }
+
             this.overlay.refresh();
+
+            for(let p of properties) {
+                this.element.style[p] = save[p];
+            }
 
             if(this.showFX) {
                 if(typeof this.showFX === 'string') {
                     this.element.classList.add(this.showFX);
                 } else if(typeof this.showFX === 'function') {
-                    this._fx = this.showFX(this.element);
+                    this._fx = this.showFX(this.element, {
+                        onEnd: () => {
+
+                        }
+                    });
                 }
             }
         }
@@ -415,6 +561,11 @@ export class Tooltip {
         if(this.isVisible) {
             this.isVisible = false;
 
+            if(this._fx) {
+                this._fx.cancel(true);
+                this._fx = null;
+            }
+
             if(typeof this.showFX === 'string') {
                 this.element.classList.remove(this.showFX);
             }
@@ -423,8 +574,11 @@ export class Tooltip {
                 this.element.classList.add(this.hideFX);
                 this.element.classList.add('hidden');
             } else if(typeof this.hideFX === 'function') {
-                this.hideFX(this.element, () => {
-                    this.element.classList.add('hidden');
+                this._fx = this.hideFX(this.element, {
+                    onEnd: () => {
+                        this.element.classList.add('hidden');
+                        this._fx = null;
+                    }
                 });
             } else {
                 this.element.classList.add('hidden');

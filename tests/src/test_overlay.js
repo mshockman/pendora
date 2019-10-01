@@ -55,13 +55,20 @@ export default class OverlayTestPage {
 
     initTooltipTest() {
         let btn = document.getElementById('test-tt-btn1'),
-            container = document.getElementById('tooltip-testarea1');
+            container = document.getElementById('tooltip-testarea1'),
+            directionControl = document.getElementById('tt1-direction-control');
 
-        let tooltip = new Tooltip({text: "Hello World", reference: btn, className: "success"});
+        let tooltip = new Tooltip({text: "Hello World How Are You!!!", reference: btn, className: "success"});
 
         btn.addEventListener('click', event => {
             tooltip.toggle();
-            console.log("toggling");
+        });
+
+
+        directionControl.addEventListener('change', event => {
+            let direction = directionControl.querySelector('input:checked').value;
+            tooltip.overlay.positions = [direction];
+            tooltip.overlay.refresh();
         });
     }
 }

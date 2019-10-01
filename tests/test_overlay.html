@@ -114,8 +114,19 @@
             top: 800px;
             border: 1px solid #ccc;
             margin: 4rem;
-            padding: 4rem;
+            padding: 4rem 4rem 4rem 24rem;
             width: 1000px;
+        }
+
+
+        #tooltip-testarea1 .controls {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
         }
 
         .tooltip {
@@ -124,8 +135,9 @@
         }
 
         .tooltip .tooltip__body {
-            background-color: #cfc;
+            background-color: #9f9;
             font-weight: bold;
+            white-space: nowrap;
             padding: 10px;
             border-radius: 5px;
         }
@@ -140,13 +152,65 @@
             height: 0;
             position: absolute;
             bottom: -7px;
-            border-top: 7px solid #cfc;
+            border-top: 7px solid #9f9;
             border-left: 7px solid transparent;
             border-right: 7px solid transparent;
         }
 
+        .tooltip[data-direction="bottom"] .tooltip__body {
+            margin-top: 7px;
+            position: relative;
+        }
+
+        .tooltip[data-direction="bottom"] .arrow-element {
+            width: 0;
+            height: 0;
+            position: absolute;
+            top: -7px;
+            border-bottom: 7px solid #9f9;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+        }
+
+
+        .tooltip[data-direction="left"] .tooltip__body {
+            margin-right: 7px;
+            position: relative;
+        }
+
+        .tooltip[data-direction="left"] .arrow-element {
+            width: 0;
+            height: 0;
+            position: absolute;
+            right: -7px;
+            border-left: 7px solid #9f9;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+
+
+        .tooltip[data-direction="right"] .tooltip__body {
+            margin-left: 7px;
+            position: relative;
+        }
+
+        .tooltip[data-direction="right"] .arrow-element {
+            width: 0;
+            height: 0;
+            position: absolute;
+            left: -7px;
+            border-right: 7px solid #afa;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+
+
         .tooltip.hidden {
             visibility: hidden;
+        }
+
+        .pl {
+            padding-left: 1rem;
         }
     </style>
 </head>
@@ -187,6 +251,17 @@
 </div>
 
 <div id="tooltip-testarea1">
+    <div class="controls">
+        <div id="tt1-direction-control">
+            <div><strong>Direction:</strong></div>
+            <div class="pl">
+                <div><label><input type="radio" name="dtt-direction" value="top" checked> Top</label></div>
+                <div><label><input type="radio" name="dtt-direction" value="right"> Right</label></div>
+                <div><label><input type="radio" name="dtt-direction" value="bottom"> Bottom</label></div>
+                <div><label><input type="radio" name="dtt-direction" value="left"> Left</label></div>
+            </div>
+        </div>
+    </div>
     <button type="button" id="test-tt-btn1">Display Tooltip</button>
 </div>
 
