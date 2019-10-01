@@ -187,65 +187,65 @@ export default class Animation {
                 position: null,
                 easedPosition: null,
 
-                isRunning() {
+                get isRunning() {
                     return running;
                 },
 
-                cancel(complete=false) {
+                cancel: (complete=false) => {
                     running = false;
-                    animation.endTimestamp = performance.now();
-                }
-            };
 
-        let frameFN = () => {
-            if(running) {
-                let timestamp = performance.now(),
-                    pos = Math.min((timestamp - start) / duration, 1.0),
-                    position = pos;
+                    if(animation.frameId) {
+                        window.cancelAnimationFrame(animation.frameId);
+                        animation.frameId = null;
+                    }
 
-                if (animation.easing) {
-                    position = animation.easing(position);
-                }
+                    // Trigger canceled event.
+                    animation.status = "canceled";
+                    if(this.onCancel) this.onCancel.call(this, animation);
 
-                // The position after the easing function is applied.
-                animation.easedPosition = position;
-                animation.position = pos; // Position before easing function.
-                animation.status = "playing";
+                    let event = new CustomEvent('animation.canceled', {
+                        bubbles: true,
+                        detail: animation
+                    });
 
-                let frame = this.getFrame(element, position);
-                this.applyFrame.call(this, element, frame, animation);
-                animation.lastFrame = frame;
+                    // run final frame if complete is true.
+                    // Will trigger frame and complete events.
+                    if(complete) {
+                        this.runFrame(animation, 1.0);
+                    }
 
-                if(this.onFrame) this.onFrame.call(this, animation);
+                    // Trigger end event.
+                    element.dispatchEvent(event);
 
-                let event = new CustomEvent('animation.frame', {
-                    bubbles: this.bubbleFrameEvent,
-                    detail: animation
-                });
+                    if(this.onEnd) this.onEnd.call(this, animation);
 
-                element.dispatchEvent(event);
-
-                if(pos < 1) {
-                    animation.frameId = window.requestAnimationFrame(frameFN);
-                    return;
-                } else {
-                    animation.status = "complete";
-                    animation.endTimestamp = timestamp;
-
-                    if(this.onComplete) this.onComplete.call(this, animation);
-
-                    let event = new CustomEvent('animation.complete', {
+                    event = new CustomEvent('animation.end', {
                         bubbles: true,
                         detail: animation
                     });
 
                     element.dispatchEvent(event);
                 }
-            } else {
-                animation.status = "canceled";
-                if(this.onCancel) this.onCancel.call(this, animation);
+            };
 
-                let event = new CustomEvent('animation.canceled', {
+        let frameFN = () => {
+            if(running) {
+                let timestamp = performance.now(),
+                    pos = Math.min((timestamp - start) / duration, 1.0);
+
+                pos = Math.max(0, Math.min(1.0, pos));
+                animation.status = 'playing';
+
+                this.runFrame(animation, pos, timestamp);
+
+                if(pos < 1.0) {
+                    animation.frameId = window.requestAnimationFrame(frameFN);
+                    return;
+                }
+
+                if(this.onEnd) this.onEnd.call(this, animation);
+
+                let event = new CustomEvent('animation.end', {
                     bubbles: true,
                     detail: animation
                 });
@@ -253,14 +253,7 @@ export default class Animation {
                 element.dispatchEvent(event);
             }
 
-            if(this.onEnd) this.onEnd.call(this, animation);
-
-            let event = new CustomEvent('animation.end', {
-                bubbles: true,
-                detail: animation
-            });
-
-            element.dispatchEvent(event);
+            animation.frameId = null;
         };
 
         animation.frameId = window.requestAnimationFrame(frameFN);
@@ -275,5 +268,60 @@ export default class Animation {
         });
 
         element.dispatchEvent(event);
+
+        return animation;
+    }
+
+    runFrame(animation, pos, timestamp=null) {
+        if(animation.isRunning) {
+            // Percentage string.
+            if (typeof pos === 'string') {
+                pos = parseFloat(pos) / 100;
+            }
+
+            if(timestamp === null) {
+                timestamp = performance.now();
+            }
+
+            // Position must be between 0.0 and 1.0.
+            pos = Math.max(0, Math.min(1.0, pos));
+
+            let position = pos;
+
+            if (animation.easing) {
+                position = animation.easing(position);
+            }
+
+            // The position after the easing function is applied.
+            animation.easedPosition = position;
+            animation.position = pos; // Position before easing function.
+
+            let frame = this.getFrame(animation.element, position);
+            this.applyFrame.call(this, animation.element, frame, animation);
+            animation.lastFrame = frame;
+
+            if (this.onFrame) this.onFrame.call(this, animation);
+
+            let event = new CustomEvent('animation.frame', {
+                bubbles: this.bubbleFrameEvent,
+                detail: animation
+            });
+
+            animation.element.dispatchEvent(event);
+
+            if(pos === 1.0) {
+                animation.status = "complete";
+                animation.endTimestamp = timestamp;
+
+                if(this.onComplete) this.onComplete.call(this, animation);
+
+                let event = new CustomEvent('animation.complete', {
+                    bubbles: true,
+                    detail: animation
+                });
+
+                animation.element.dispatchEvent(event);
+            }
+        }
     }
 }
