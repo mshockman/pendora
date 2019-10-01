@@ -18,7 +18,7 @@ export default class OverlayTestPage {
     load() {
         this.draggable = new Draggable('#overlay-reference1');
         this.overlay1 = new Overlay(document.querySelector('#tooltip1'), document.querySelector('#overlay-reference1'), {
-            positions: [
+            placements: [
                 'top', 'left', 'bottom', 'right',
                 // 'left', 'bottom'
                 // 'top'
@@ -67,7 +67,7 @@ export default class OverlayTestPage {
 
         directionControl.addEventListener('change', event => {
             let direction = directionControl.querySelector('input:checked').value;
-            tooltip.overlay.positions = [direction];
+            tooltip.overlay.placements = [direction];
             tooltip.overlay.refresh();
         });
     }

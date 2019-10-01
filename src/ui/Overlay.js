@@ -22,13 +22,15 @@ export default class Overlay {
      * @constructor
      * @param element
      * @param reference
-     * @param positions
+     * @param placements
      * @param container
      * @param arrow
      * @param sticky
      * @param magnetic
+     * @param hideFX
+     * @param showFX
      */
-    constructor(element, reference, {positions=null, container=null, arrow=null, sticky=false, magnetic=false}={}) {
+    constructor(element, reference, {placements=null, container=null, arrow=null, sticky=false, magnetic=false, hideFX=null, showFX=null}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -41,10 +43,22 @@ export default class Overlay {
             this.referenceObject = reference;
         }
 
-        this.positions = positions;
+        this.placements = null;
+
+        if(placements) {
+            if(!Array.isArray(placements)) {
+                placements = [placements];
+            }
+
+            this.placements = placements;
+        }
+
         this.container = container;
         this.sticky = sticky;
         this.magnetic = magnetic;
+        this.isVisible = false;
+        this.hideFX = hideFX;
+        this.showFX = showFX;
 
         if(arrow) {
             let arrowElement = document.createElement('div');
@@ -53,6 +67,19 @@ export default class Overlay {
         }
 
         this._currentIndex = 0;
+    }
+
+    setPlacements(placements) {
+        if(!Array.isArray(placements)) {
+            placements = [placements];
+        }
+
+        this.placements = placements;
+        this.refresh();
+    }
+
+    getBoundingClientRect() {
+        return Vec4.getBoundingClientRect(this.element);
     }
 
     refresh() {
@@ -68,9 +95,9 @@ export default class Overlay {
             this._currentIndex = 0;
         }
 
-        for(let i = 0; i < this.positions.length; i++) {
-            let index = (this._currentIndex + i) % this.positions.length;
-            let position = this.positions[index];
+        for(let i = 0; i < this.placements.length; i++) {
+            let index = (this._currentIndex + i) % this.placements.length;
+            let position = this.placements[index];
 
             if(typeof position === 'string') {
                 position = DIRECTIONS[position];
@@ -171,6 +198,124 @@ export default class Overlay {
             }
 
             this._applyPosition(closestPosition.position, overlay, closestPosition.arrowElement, closestPosition.arrowBB, closestPosition.rect);
+        }
+    }
+
+    appendTo(element) {
+        if(typeof element === 'string') {
+            document.querySelector(element).appendChild(this.element);
+        } else if(element.appendChild) {
+            element.appendChild(this.element);
+        } else if(element.append) {
+            element.append(this.element);
+        }
+    }
+
+    remove() {
+        if(this.element && this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
+            return true;
+        }
+
+        return false;
+    }
+
+    show(callback) {
+        if(!this.isVisible) {
+            if(this._fx) {
+                this._fx.cancel(true);
+                this._fx = null;
+            }
+
+            this.isVisible = true;
+            this.element.classList.remove('hidden');
+
+            if(typeof this.hideFX === 'string') {
+                this.element.classList.remove(this.hideFX);
+            }
+
+            // In order to calculate the position.  We need to clear any style properties effecting the true
+            // width and height of the element.  Slide in and slide out effects should use the maxWidth and maxHeight
+            // properties to control it's size.  Save and then clear them off the element; then calculate the position;
+            // finally restore the original properties.
+            let properties = ['maxWidth', 'maxHeight'],
+                save = {};
+
+            for(let p of properties) {
+                save[p] = this.element.style[p];
+                this.element.style[p] = '';
+            }
+
+            this.refresh();
+
+            for(let p of properties) {
+                this.element.style[p] = save[p];
+            }
+
+            if(this.showFX) {
+                if(typeof this.showFX === 'string') {
+                    this.element.classList.add(this.showFX);
+                    if(callback) callback.call(this);
+                } else if(typeof this.showFX === 'function') {
+                    this._fx = this.showFX(this.element, {
+                        onEnd: (animation) => {
+                            if(callback) callback.call(this, animation);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    hide(callback) {
+        if(this.isVisible) {
+            this.isVisible = false;
+
+            if(this._fx) {
+                this._fx.cancel(true);
+                this._fx = null;
+            }
+
+            if(typeof this.showFX === 'string') {
+                this.element.classList.remove(this.showFX);
+            }
+
+            if(typeof this.hideFX === 'string') {
+                this.element.classList.add(this.hideFX);
+                this.element.classList.add('hidden');
+                if(callback) callback.call(this);
+            } else if(typeof this.hideFX === 'function') {
+                this._fx = this.hideFX(this.element, {
+                    onEnd: (animation) => {
+                        this.element.classList.add('hidden');
+                        this._fx = null;
+                        if(callback) callback.call(this, animation);
+                    }
+                });
+            } else {
+                this.element.classList.add('hidden');
+                if(callback) callback.call(this);
+            }
+        }
+    }
+
+    toggle(callback) {
+        if(this.isVisible) {
+            if(callback) {
+                callback = () => {
+                    callback.call(this, 'hide');
+                };
+            }
+
+            return this.hide(callback);
+        } else {
+            if(callback) {
+                callback = () => {
+                    callback.call(this, 'show');
+                };
+            }
+
+            return this.show(callback);
         }
     }
 
@@ -471,7 +616,7 @@ export function slideInEffectFactory(time) {
 
 
 export class Tooltip {
-    constructor({text, reference, positions=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null}) {
+    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null}) {
         this.element = document.createElement('div');
         this.tooltipBody = document.createElement('div');
         this.tooltipBody.className = "tooltip__body";
@@ -485,8 +630,6 @@ export class Tooltip {
         this.tooltipBody.appendChild(arrowElement);
 
         this.element.appendChild(this.tooltipBody);
-        this.showFX = showFX;
-        this.hideFX = hideFX;
         this.element.className = "tooltip hidden";
         this.isVisible = false;
 
@@ -494,7 +637,7 @@ export class Tooltip {
             this.element.classList.add(className);
         }
 
-        this.overlay = new Overlay(this.element, reference, {positions, container, magnetic});
+        this.overlay = new Overlay(this.element, reference, {placements, container, magnetic, showFX, hideFX});
 
         if(reference && reference.offsetParent) {
             reference.offsetParent.appendChild(this.element);
@@ -502,95 +645,18 @@ export class Tooltip {
     }
 
     appendTo(element) {
-        if(typeof element === 'string') {
-            document.querySelector(element).appendChild(this.element);
-        } else if(element.appendChild) {
-            element.appendChild(this.element);
-        } else if(element.append) {
-            element.append(this.element);
-        }
+        return this.overlay.appendTo(element);
     }
 
-    show() {
-        if(!this.isVisible) {
-            if(this._fx) {
-                this._fx.cancel(true);
-                this._fx = null;
-            }
-
-            this.isVisible = true;
-            this.element.classList.remove('hidden');
-
-            if(typeof this.hideFX === 'string') {
-                this.element.classList.remove(this.hideFX);
-            }
-
-            // In order to calculate the position.  We need to clear any style properties effecting the true
-            // width and height of the element.  Slide in and slide out effects should use the maxWidth and maxHeight
-            // properties to control it's size.  Save and then clear them off the element; then calculate the position;
-            // finally restore the original properties.
-            let properties = ['maxWidth', 'maxHeight'],
-                save = {};
-
-            for(let p of properties) {
-                save[p] = this.element.style[p];
-                this.element.style[p] = '';
-            }
-
-            this.overlay.refresh();
-
-            for(let p of properties) {
-                this.element.style[p] = save[p];
-            }
-
-            if(this.showFX) {
-                if(typeof this.showFX === 'string') {
-                    this.element.classList.add(this.showFX);
-                } else if(typeof this.showFX === 'function') {
-                    this._fx = this.showFX(this.element, {
-                        onEnd: () => {
-
-                        }
-                    });
-                }
-            }
-        }
+    show(callback) {
+        return this.overlay.show(callback);
     }
 
-    hide() {
-        if(this.isVisible) {
-            this.isVisible = false;
-
-            if(this._fx) {
-                this._fx.cancel(true);
-                this._fx = null;
-            }
-
-            if(typeof this.showFX === 'string') {
-                this.element.classList.remove(this.showFX);
-            }
-
-            if(typeof this.hideFX === 'string') {
-                this.element.classList.add(this.hideFX);
-                this.element.classList.add('hidden');
-            } else if(typeof this.hideFX === 'function') {
-                this._fx = this.hideFX(this.element, {
-                    onEnd: () => {
-                        this.element.classList.add('hidden');
-                        this._fx = null;
-                    }
-                });
-            } else {
-                this.element.classList.add('hidden');
-            }
-        }
+    hide(callback) {
+        return this.overlay.hide(callback);
     }
 
-    toggle() {
-        if(this.isVisible) {
-            return this.hide();
-        } else {
-            return this.show();
-        }
+    toggle(callback) {
+        return this.overlay.toggle(callback);
     }
 }
