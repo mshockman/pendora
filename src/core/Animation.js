@@ -32,40 +32,49 @@ export const EASING = {
 };
 
 
-export default class Animation {
-    constructor(frames, {getStartingFrame=null, applyFrame=null, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false}={}) {
+export class FX {
+    constructor(element, frames, applyFrame, duration, {animation=null, easing=null, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false}={}) {
         this.frames = [];
+
+        this.element = element;
+
+        this.applyFrame = applyFrame;
+        this.onComplete = onComplete;
+        this.onCancel = onCancel;
+        this.onFrame = onFrame;
+        this.onStart = onStart;
+        this.onEnd = onEnd;
+        this.bubbleFrameEvent = bubbleFrameEvent;
+        this.easing = easing;
+        this.animation = animation;
+
+        this.frameId = null;
+        this.lastFrame = null;
+
+        this.status = 'pending';
+        this._position = 0;
+        this.duration = duration;
 
         for(let key in frames) {
             if(frames.hasOwnProperty(key)) {
-                let value = frames[key];
-                key = parseFloat(key) / 100;
+                let frame = frames[key],
+                    pos = parseFloat(key) / 100;
+
+                if(typeof frame === 'function') {
+                    frame = frame.call(this, this.element);
+                }
+
                 this.frames.push({
-                    position: key,
-                    properties: value
+                    position: pos,
+                    properties: frame
                 });
             }
         }
 
-        if(getStartingFrame !== null) {
-            this.getStartingFrame = getStartingFrame;
-        }
-
-        if(applyFrame !== null) {
-            this.applyFrame = applyFrame;
-        }
-
-        this.onComplete = onComplete;
-        this.onCancel = onCancel;
-        this.onStart = onStart;
-        this.onFrame = onFrame;
-        this.onEnd = onEnd;
-        this.bubbleFrameEvent = bubbleFrameEvent;
-
         this.frames.sort((a, b) => a.position - b.pos);
     }
 
-    getFXKeys() {
+    getProperties() {
         let keys = [];
 
         for(let frame of this.frames) {
@@ -81,67 +90,56 @@ export default class Animation {
         return keys;
     }
 
-    /**
-     * Returns the frame properties at the given position.
-     *
-     * Position given is decimal format where 1.0 is 100% and 0.0 is 0%.
-     * @param element
-     * @param position
-     */
-    getFrameFX(element, position) {
+    getFrameFX(position) {
+        // position can either be a percentage string (aka 50%) or the time in milliseconds into the animation
+        // which will be converted into a percentage.
         if(typeof position === 'string') {
             position = parseFloat(position) / 100;
+        } else {
+            position = position / this.duration;
         }
 
-        let properties = {};
+        // At this point position should be a value between 0.0 and 1.0.
+        // Easing functions specify that rate of change in the properties.
+        // It takes the position and maps it to another value between 0.0f and 1.0f.
+        // By default linear easing is used.
+        if(this.easing) {
+            position = this.easing(position);
+        }
 
-        for(let frame of this.getFrames(element)) {
+        let r = {};
+
+        for(let frame of this.frames) {
             for(let key in frame.properties) {
                 if(frame.properties.hasOwnProperty(key)) {
                     let value = frame.properties[key];
 
-                    if(!properties[key]) {
-                        properties[key] = {startPosition: null, startValue: null, endPosition: null, endValue: null};
+                    if(!r[key]) {
+                        r[key] = {startPosition: null, startValue: null, endPosition: null, endValue: null};
                     }
 
                     if(frame.position <= position) {
-                        properties[key].startPosition = frame.position;
-                        properties[key].startValue = value;
-                    } else if(frame.position > position && properties[key].endPosition === null) {
-                        properties[key].endPosition = frame.position;
-                        properties[key].endValue = value;
+                        r[key].startPosition = frame.position;
+                        r[key].startValue = value;
+                    } else if(frame.position > position && r[key].endPosition === null) {
+                        r[key].endPosition = frame.position;
+                        r[key].endValue = value;
                     }
                 }
             }
         }
 
-        return properties;
+        return r;
     }
 
-    /**
-     * Returns all frame including starting properties of the element if needed.
-     * @param element
-     */
-    getFrames(element) {
-        let frames = [];
-
-        if(this.getStartingFrame && element) {
-            let frame = this.getStartingFrame(element);
-            if(frame) frames.push({
-                position: -Infinity, // position of starting value on the object are -Infinity so they are always the first values.
-                properties: frame
-            });
-        }
-
-        return frames.concat(this.frames);
-    }
-
-    getFrame(element, position) {
-        let frame = this.getFrameFX(element, position),
+    getFrame(position) {
+        let frame = this.getFrameFX(position),
             r = {};
 
-        if(position < 0 || position > 1) {
-            throw new Error("Animation can only animation between 0% and 100%");
+        if(typeof position === 'string') {
+            position = parseFloat(position) / 100;
+        } else {
+            position = position / this.duration;
         }
 
         for(let property in frame) {
@@ -152,15 +150,16 @@ export default class Animation {
                     r[property] = options.startValue;
                 } else if(options.startValue !== null) {
                     if(typeof options.startValue === 'object') {
-                        let pos = (position - options.startPosition),
-                            delta = options.endValue.subtract(options.startValue).divide(options.endPosition - options.startPosition);
+                        let p = (position - options.startPosition) / (options.endPosition - options.startPosition),
+                            delta = options.endValue.subtract(options.startValue);
 
-                        r[property] = options.startValue.add(delta.multiply(pos));
+                        r[property] = options.startValue.add(delta.multiply(p));
                     } else if(typeof options.startValue === 'number') {
-                        let pos = (position - options.startPosition),
-                            delta = (options.endValue - options.startValue) / (options.endPosition - options.startPosition);
+                        let duration = (options.endPosition - options.startPosition),
+                            p = (position - options.startPosition) / duration,
+                            delta = options.endValue - options.startValue;
 
-                        r[property] = options.startValue + (delta * pos);
+                        r[property] = options.startValue + (delta * p);
                     } else {
                         r[property] = options.startValue;
                     }
@@ -171,157 +170,164 @@ export default class Animation {
         return r;
     }
 
-    animate(element, duration, easing) {
-        let start = performance.now(),
-            running = true,
-            animation = {
-                status: 'pending',
-                frameId: null,
-                element: element,
-                duration: duration,
-                easing: easing,
-                lastFrame: null,
-                startTimestamp: start,
-                animation: this,
-                endTimestamp: null,
-                position: null,
-                easedPosition: null,
+    play() {
+        if(this.frameId === null) {
+            let tick = performance.now();
 
-                get isRunning() {
-                    return running;
-                },
+            let frameFN = () => {
+                let timestamp = performance.now(),
+                    delta = timestamp - tick,
+                    position = this.position + delta;
 
-                cancel: (complete=false) => {
-                    running = false;
+                tick = timestamp;
+                this.runFrame(position);
 
-                    if(animation.frameId) {
-                        window.cancelAnimationFrame(animation.frameId);
-                        animation.frameId = null;
-                    }
-
-                    // Trigger canceled event.
-                    animation.status = "canceled";
-                    if(this.onCancel) this.onCancel.call(this, animation);
-
-                    let event = new CustomEvent('animation.canceled', {
-                        bubbles: true,
-                        detail: animation
-                    });
-
-                    // run final frame if complete is true.
-                    // Will trigger frame and complete events.
-                    if(complete) {
-                        this.runFrame(animation, 1.0);
-                    }
-
-                    // Trigger end event.
-                    element.dispatchEvent(event);
-
-                    if(this.onEnd) this.onEnd.call(this, animation);
-
-                    event = new CustomEvent('animation.end', {
-                        bubbles: true,
-                        detail: animation
-                    });
-
-                    element.dispatchEvent(event);
+                if (this.position < this.duration) {
+                    this.frameId = window.requestAnimationFrame(frameFN);
+                } else {
+                    this._triggerEndEvent();
+                    this.frameId = null;
                 }
             };
 
-        let frameFN = () => {
-            if(running) {
-                let timestamp = performance.now(),
-                    pos = Math.min((timestamp - start) / duration, 1.0);
-
-                pos = Math.max(0, Math.min(1.0, pos));
-                animation.status = 'playing';
-
-                this.runFrame(animation, pos, timestamp);
-
-                if(pos < 1.0) {
-                    animation.frameId = window.requestAnimationFrame(frameFN);
-                    return;
-                }
-
-                if(this.onEnd) this.onEnd.call(this, animation);
-
-                let event = new CustomEvent('animation.end', {
-                    bubbles: true,
-                    detail: animation
-                });
-
-                element.dispatchEvent(event);
+            if(this.onStart) {
+                this.onStart.call(this, this);
             }
 
-            animation.frameId = null;
-        };
+            this.element.dispatchEvent(new CustomEvent('animation.start', {
+                bubbles: true,
+                detail: this
+            }));
 
-        animation.frameId = window.requestAnimationFrame(frameFN);
-
-        if(this.onStart) {
-            this.onStart.call(this, animation);
+            this.frameId = window.requestAnimationFrame(frameFN);
         }
 
-        let event = new CustomEvent('animation.start', {
-            bubbles: true,
-            detail: animation
-        });
-
-        element.dispatchEvent(event);
-
-        return animation;
+        return this;
     }
 
-    runFrame(animation, pos, timestamp=null) {
-        if(animation.isRunning) {
-            // Percentage string.
-            if (typeof pos === 'string') {
-                pos = parseFloat(pos) / 100;
-            }
+    pause() {
+        if(this.frameId) {
+            window.cancelAnimationFrame(this.frameId);
+            this.frameId = null;
+            this.status = 'paused';
 
-            if(timestamp === null) {
-                timestamp = performance.now();
-            }
+            this.element.dispatchEvent(new CustomEvent('animation.paused', {
+                bubbles: true,
+                detail: this
+            }));
 
-            // Position must be between 0.0 and 1.0.
-            pos = Math.max(0, Math.min(1.0, pos));
-
-            let position = pos;
-
-            if (animation.easing) {
-                position = animation.easing(position);
-            }
-
-            // The position after the easing function is applied.
-            animation.easedPosition = position;
-            animation.position = pos; // Position before easing function.
-
-            let frame = this.getFrame(animation.element, position);
-            this.applyFrame.call(this, animation.element, frame, animation);
-            animation.lastFrame = frame;
-
-            if (this.onFrame) this.onFrame.call(this, animation);
-
-            let event = new CustomEvent('animation.frame', {
-                bubbles: this.bubbleFrameEvent,
-                detail: animation
-            });
-
-            animation.element.dispatchEvent(event);
-
-            if(pos === 1.0) {
-                animation.status = "complete";
-                animation.endTimestamp = timestamp;
-
-                if(this.onComplete) this.onComplete.call(this, animation);
-
-                let event = new CustomEvent('animation.complete', {
-                    bubbles: true,
-                    detail: animation
-                });
-
-                animation.element.dispatchEvent(event);
-            }
+            this._triggerEndEvent();
         }
+
+        return this;
+    }
+
+    restart() {
+        this.cancel(false);
+        this.position = 0;
+        this.play();
+        return this;
+    }
+
+    cancel(complete=false) {
+        if(this.frameId) {
+            window.cancelAnimationFrame(this.frameId);
+            this.frameId = null;
+
+            if(complete) {
+                this.runFrame('100%');
+            }
+
+            this.status = 'canceled';
+
+            if(this.onCancel) this.onCancel.call(this, this);
+
+            this.element.dispatchEvent(new CustomEvent('animation.canceled', {
+                bubbles: true,
+                detail: this
+            }));
+
+            this._triggerEndEvent();
+        }
+
+        return this;
+    }
+
+    runFrame(position) {
+        this.position = position;
+        let frame = this.getFrame(this.position);
+
+        this.status = 'playing';
+        this.applyFrame.call(this, this.element, frame, this);
+        this.lastFrame = frame;
+
+        if (this.onFrame) this.onFrame.call(this, this);
+
+        this.element.dispatchEvent(new CustomEvent('animation.frame', {
+            bubbles: this.bubbleFrameEvent,
+            detail: this
+        }));
+
+        if(this.position === this.duration) {
+            this.status = "complete";
+
+            if(this.onComplete) this.onComplete.call(this, this);
+
+            this.element.dispatchEvent(new CustomEvent('animation.complete', {
+                bubbles: true,
+                detail: this
+            }));
+        }
+    }
+
+    set position(value) {
+        if(typeof value === 'string') {
+            value = (parseFloat(value) / 100) * this.duration;
+        }
+
+        this._position = Math.max(0.0, Math.min(this.duration, value));
+    }
+
+    get position() {
+        return this._position;
+    }
+
+    _triggerEndEvent() {
+        if(this.onEnd) this.onEnd.call(this, this);
+
+        this.element.dispatchEvent(new CustomEvent('animation.end', {
+            bubbles: true,
+            detail: this
+        }));
+    }
+}
+
+
+export default class Animation {
+    constructor(frames, applyFrame, prepare=null, bubbleFrameEvent=false) {
+        this.frames = frames;
+        this.applyFrame = applyFrame;
+        this.bubbleFrameEvent = bubbleFrameEvent;
+        this.prepare = prepare;
+    }
+
+    animate(element, duration, easing=null, {onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null}={}) {
+        if(this.prepare) {
+            this.prepare.call(this, element, this);
+        }
+
+        let fx = new FX(element, this.frames, this.applyFrame, duration, {
+            easing,
+            animation: this,
+            onStart,
+            onFrame,
+            onPause,
+            onCancel,
+            onEnd,
+            onComplete,
+            bubbleFrameEvent: this.bubbleFrameEvent
+        });
+
+        return fx.play();
     }
 }
