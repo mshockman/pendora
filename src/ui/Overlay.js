@@ -6,13 +6,13 @@ import {privateCache} from "core/data";
 
 // arrow controls the alignment of the arrow.
 // position control the property that is used to position the element.
-// direction is an attribute that is applied to the element.
+// placement is an attribute that is applied to the element.
 // of is used to in a sub box of the bounding box.
-const DIRECTIONS = {
-    top: {my: 'bottom', at: 'top', of: 'border-top', arrow: 'bottom', direction: 'top', position: 'bottom-left'},
-    right: {my: 'left', at: 'right', of: 'border-right', arrow: 'left', direction: 'right', position: 'top-left'},
-    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', arrow: 'top', direction: 'bottom', position: 'top-left'},
-    left: {my: 'right', at: 'left', of: 'border-left', arrow: 'right', direction: 'left', position: 'top-right'}
+const PLACEMENTS = {
+    top: {my: 'bottom', at: 'top', of: 'border-top', arrow: 'bottom', placement: 'top', position: 'bottom-left'},
+    right: {my: 'left', at: 'right', of: 'border-right', arrow: 'left', placement: 'right', position: 'top-left'},
+    bottom: {my: 'top', at: 'bottom', of: 'border-bottom', arrow: 'top', placement: 'bottom', position: 'top-left'},
+    left: {my: 'right', at: 'left', of: 'border-left', arrow: 'right', placement: 'left', position: 'top-right'}
 };
 
 
@@ -100,11 +100,11 @@ export default class Overlay {
             let position = this.placements[index];
 
             if(typeof position === 'string') {
-                position = DIRECTIONS[position];
+                position = PLACEMENTS[position];
             }
 
             // This forces a reflow.
-            this.element.dataset.direction = position.direction;
+            this.element.dataset.placement = position.placement;
 
             let overlay = Vec4.getBoundingClientRect(this.element),
                 arrowBB = Vec4.getBoundingClientRect(arrowElement),
@@ -170,7 +170,7 @@ export default class Overlay {
 
         if(!flag && closestPosition) {
             // This forces a reflow.
-            this.element.dataset.direction = closestPosition.position.direction;
+            this.element.dataset.placement = closestPosition.position.placement;
 
             let overlay;
 
@@ -457,10 +457,10 @@ function getArrowFloat(align) {
 
 export function slideOutEffectFactory(time) {
     return function slideOut(element, {onEnd=null}={}) {
-        let direction = element.dataset.direction,
+        let placement = element.dataset.placement,
             cache = privateCache.cache(element);
 
-        if(cache.fxSlideDirection !== direction) {
+        if(cache.fxSlidePlacement!== placement) {
             // Get max width and height
             element.style.maxWidth = '';
             element.style.maxHeight = '';
@@ -469,22 +469,22 @@ export function slideOutEffectFactory(time) {
             cache.fxMaxHeight = box.bottom - box.top;
             cache.fxMaxWidth = box.right - box.left;
 
-            // When slide in starts, fxWidth and fxHeight are set to 0 at first so that the first animation
-            // starts at the beginning.
+            // Start at max height and width.
             cache.fxHeight = cache.fxMaxHeight;
             cache.fxWidth = cache.fxMaxWidth;
 
-            // Set the current direction so we no when the overlay changes position
+            // Set the current placement so we no when the overlay changes position
             // and fx data needs to be recalculated.
-            cache.fxSlideDirection = direction;
+            cache.fxSlidePlacement = placement;
         }
 
+        // Only one slide in / out effect can be animating at a time.
         if(cache.slideFX) {
             cache.slideFX.cancel(false);
             cache.slideFX = null;
         }
 
-        if(direction === 'top' || direction === 'bottom') {
+        if(placement === 'top' || placement === 'bottom') {
             let animation = new Animation({
                 '0%': {
                     maxHeight: cache.fxHeight,
@@ -541,14 +541,14 @@ export function slideOutEffectFactory(time) {
 export function slideInEffectFactory(time) {
     return function(element, {onEnd=null, onStart=null}={}) {
         let cache = privateCache.cache(element),
-            direction = element.dataset.direction;
+            placement = element.dataset.placement;
 
         if(cache.slideFX) {
             cache.slideFX.cancel(false);
             cache.slideFX = null;
         }
 
-        if(cache.fxSlideDirection !== direction) {
+        if(cache.fxSlidePlacement !== placement) {
             // Get max width and height
             element.style.maxWidth = '';
             element.style.maxHeight = '';
@@ -562,12 +562,12 @@ export function slideInEffectFactory(time) {
             cache.fxHeight = 0;
             cache.fxWidth = 0;
 
-            // Set the current direction so we no when the overlay changes position
+            // Set the current placement so we no when the overlay changes position
             // and fx data needs to be recalculated.
-            cache.fxSlideDirection = direction;
+            cache.fxSlidePlacement = placement;
         }
 
-        if(direction === 'top' || direction === 'bottom') {
+        if(placement === 'top' || placement === 'bottom') {
             let animation = new Animation({
                 '0%': {
                     maxHeight: cache.fxHeight,
