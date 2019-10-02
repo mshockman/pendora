@@ -107,7 +107,7 @@ export default class Overlay {
             this.element.dataset.placement = position.placement;
 
             let overlay = Vec4.getBoundingClientRect(this.element),
-                arrowBB = Vec4.getBoundingClientRect(arrowElement),
+                arrowBB = arrowElement ? Vec4.getBoundingClientRect(arrowElement) : null,
                 anchorPoint = getSubBoundingBox(overlay, position.my).subtract(overlay).toPoint(),
                 space = getSubBoundingBox(rect, position.of),
                 unBoundedSubspace = this._getAllowedSubspace(position, space, rect, arrowElement, overlay, anchorPoint, arrowBB),
@@ -126,7 +126,7 @@ export default class Overlay {
             }
 
             if(!subspace) {
-                let anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, arrowBB, anchorPoint);
+                let anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, anchorPoint);
 
                 let paddedSpace = unBoundedSubspace.subtract(anchorSpacePadding);
 
@@ -355,38 +355,40 @@ export default class Overlay {
     _applyPosition(position, overlay, arrowElement, arrowBB, reference) {
         setElementClientPosition(this.element, overlay, position.position);
 
-        let arrowPos = new Vec2(arrowBB.left, arrowBB.top),
-            arrowSide = getArrowSide(position.arrow),
-            arrowAlign = getArrowFloat(position.arrow);
+        if(arrowElement && arrowBB) {
+            let arrowPos = new Vec2(arrowBB.left, arrowBB.top),
+                arrowSide = getArrowSide(position.arrow),
+                arrowAlign = getArrowFloat(position.arrow);
 
-        if(arrowSide === 'top' || arrowSide === 'bottom') {
-            arrowPos.left = overlay.left;
+            if (arrowSide === 'top' || arrowSide === 'bottom') {
+                arrowPos.left = overlay.left;
 
-            if(arrowAlign === 'middle') {
-                arrowPos.left += (overlay.width / 2) - (arrowBB.width / 2);
-            } else if(arrowAlign === 'end') {
-                arrowPos.left += (overlay.width - arrowBB.width);
+                if (arrowAlign === 'middle') {
+                    arrowPos.left += (overlay.width / 2) - (arrowBB.width / 2);
+                } else if (arrowAlign === 'end') {
+                    arrowPos.left += (overlay.width - arrowBB.width);
+                }
+            } else if (arrowSide === 'left' || arrowSide === 'right') {
+                arrowPos.top = overlay.top;
+
+                if (arrowAlign === 'middle') {
+                    arrowPos.top += (overlay.height / 2) - (arrowBB.height / 2);
+                } else if (arrowAlign === 'end') {
+                    arrowPos.top += (overlay.height - arrowBB.height);
+                }
             }
-        } else if(arrowSide === 'left' || arrowSide === 'right') {
-            arrowPos.top = overlay.top;
 
-            if(arrowAlign === 'middle') {
-                arrowPos.top += (overlay.height / 2) - (arrowBB.height / 2);
-            } else if(arrowAlign === 'end') {
-                arrowPos.top += (overlay.height - arrowBB.height);
+            arrowPos = arrowPos.clamp(reference.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
+            arrowPos = arrowPos.clamp(overlay.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
+            arrowPos = arrowPos.subtract(overlay);
+
+            if (arrowSide === 'top' || arrowSide === 'bottom') {
+                arrowElement.style.left = arrowPos.left + 'px';
+                arrowElement.style.top = '';
+            } else if (arrowSide === 'left' || arrowSide === 'right') {
+                arrowElement.style.top = arrowPos.top + 'px';
+                arrowElement.style.left = '';
             }
-        }
-
-        arrowPos = arrowPos.clamp(reference.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
-        arrowPos = arrowPos.clamp(overlay.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
-        arrowPos = arrowPos.subtract(overlay);
-
-        if(arrowSide === 'top' || arrowSide === 'bottom') {
-            arrowElement.style.left = arrowPos.left + 'px';
-            arrowElement.style.top = '';
-        } else if(arrowSide === 'left' || arrowSide === 'right') {
-            arrowElement.style.top = arrowPos.top + 'px';
-            arrowElement.style.left = '';
         }
     }
 
@@ -399,12 +401,12 @@ export default class Overlay {
 
     _getAllowedSubspace(position, space, referenceBB, arrowElement, overlay, anchorPoint, arrowBB) {
         let arrowSpacePadding = this._getArrowSpacePadding(position, arrowBB),
-            anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, arrowBB, anchorPoint);
+            anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, anchorPoint);
 
         return space.add(arrowSpacePadding).add(anchorSpacePadding);
     }
 
-    _getAnchorSpacePadding(position, overlay, arrowBB, anchorPoint) {
+    _getAnchorSpacePadding(position, overlay, anchorPoint) {
         let anchorSpacePadding = new Vec4(0, 0, 0, 0);
 
         // Calculate container padding because of arrows and the offset of the overlays anchor point.
@@ -680,7 +682,7 @@ export class Tooltip {
             if(callback) callback();
         };
 
-        return this.overlay.hide(callback);
+        return this.overlay.hide(onHide);
     }
 
     cancelTimeout() {
