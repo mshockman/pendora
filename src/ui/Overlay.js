@@ -487,53 +487,57 @@ export function slideOutEffectFactory(time) {
         }
 
         if(placement === 'top' || placement === 'bottom') {
-            let animation = new Animation({
-                '0%': {
-                    maxHeight: cache.fxHeight,
+            let animation = new Animation(
+                {
+                    '0%': {
+                        maxHeight: cache.fxHeight,
+                    },
+
+                    '100%': {
+                        maxHeight: 0
+                    }
                 },
 
-                '100%': {
-                    maxHeight: 0
-                }
-            }, {
-                applyFrame(element, frame) {
+                function (element, frame) {
                     element.style.maxHeight = `${frame.maxHeight}px`;
                     cache.fxHeight = frame.maxHeight;
-                },
+                }
+            );
 
+            cache.slideFX = animation;
+
+            return animation.animate(element, time, null, {
                 onEnd() {
                     if(onEnd) onEnd();
                     cache.slideFX = null;
                 }
             });
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time);
         } else {
-            let animation = new Animation({
-                '0%': {
-                    maxWidth: cache.fxWidth,
+            let animation = new Animation(
+                {
+                    '0%': {
+                        maxWidth: cache.fxWidth,
+                    },
+
+                    '100%': {
+                        maxWidth: 0
+                    }
                 },
 
-                '100%': {
-                    maxWidth: 0
-                }
-            }, {
-                applyFrame(element, frame) {
+                function(element, frame) {
                     element.style.maxWidth = `${frame.maxWidth}px`;
                     cache.fxWidth = frame.maxWidth;
-                },
+                }
+            );
 
+            cache.slideFX = animation;
+
+            return animation.animate(element, time, null, {
                 onEnd() {
                     if(onEnd) onEnd();
                     cache.slideFX = null;
                 }
             });
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time);
         }
     }
 }
@@ -570,53 +574,57 @@ export function slideInEffectFactory(time) {
         }
 
         if(placement === 'top' || placement === 'bottom') {
-            let animation = new Animation({
-                '0%': {
-                    maxHeight: cache.fxHeight,
+            let animation = new Animation(
+                {
+                    '0%': {
+                        maxHeight: cache.fxHeight,
+                    },
+
+                    '100%': {
+                        maxHeight: cache.fxMaxHeight
+                    }
                 },
 
-                '100%': {
-                    maxHeight: cache.fxMaxHeight
-                }
-            }, {
-                applyFrame(element, frame) {
+                function(element, frame) {
                     element.style.maxHeight = `${frame.maxHeight}px`;
                     cache.fxHeight = frame.maxHeight;
-                },
+                }
+            );
 
+            cache.slideFX = animation;
+
+            return animation.animate(element, time, null, {
                 onEnd() {
                     if(onEnd) onEnd();
                     cache.slideFX = null;
                 }
             });
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time);
         } else {
-            let animation = new Animation({
-                '0%': {
-                    maxWidth: cache.fxWidth,
+            let animation = new Animation(
+                {
+                    '0%': {
+                        maxWidth: cache.fxWidth,
+                    },
+
+                    '100%': {
+                        maxWidth: cache.fxMaxWidth
+                    }
                 },
 
-                '100%': {
-                    maxWidth: cache.fxMaxWidth
-                }
-            }, {
-                applyFrame(element, frame) {
+                function(element, frame) {
                     element.style.maxWidth = `${frame.maxWidth}px`;
                     cache.fxWidth = frame.maxWidth;
-                },
+                }
+            );
 
+            cache.slideFX = animation;
+
+            return animation.animate(element, time, null, {
                 onEnd() {
                     if(onEnd) onEnd();
                     cache.slideFX = null;
                 }
             });
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time);
         }
     }
 }
@@ -702,5 +710,12 @@ export class Tooltip {
 
     get isVisible() {
         return this.overlay.isVisible;
+    }
+}
+
+
+export class Notification {
+    constructor(title, className, timeout, closeOnClick) {
+
     }
 }
