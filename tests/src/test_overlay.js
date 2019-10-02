@@ -61,7 +61,7 @@ export default class OverlayTestPage {
         let tooltip = new Tooltip({text: "Hello World How Are You!!!", reference: btn, className: "success"});
 
         btn.addEventListener('click', event => {
-            tooltip.toggle();
+            tooltip.toggle(2000);
         });
 
 

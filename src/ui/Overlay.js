@@ -228,6 +228,12 @@ export default class Overlay {
             }
 
             this.isVisible = true;
+
+            // Append to document if not in tree.
+            if(!this.element.parentElement && this.referenceObject && this.referenceObject.offsetParent) {
+                this.referenceObject.offsetParent.appendChild(this.element);
+            }
+
             this.element.classList.remove('hidden');
 
             if(typeof this.hideFX === 'string') {
@@ -616,7 +622,7 @@ export function slideInEffectFactory(time) {
 
 
 export class Tooltip {
-    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null}) {
+    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null, removeOnHide=false}) {
         this.element = document.createElement('div');
         this.tooltipBody = document.createElement('div');
         this.tooltipBody.className = "tooltip__body";
@@ -631,7 +637,7 @@ export class Tooltip {
 
         this.element.appendChild(this.tooltipBody);
         this.element.className = "tooltip hidden";
-        this.isVisible = false;
+        this.removeOnHide = removeOnHide;
 
         if(className) {
             this.element.classList.add(className);
@@ -648,15 +654,51 @@ export class Tooltip {
         return this.overlay.appendTo(element);
     }
 
-    show(callback) {
-        return this.overlay.show(callback);
+    remove() {
+        return this.overlay.remove();
+    }
+
+    show(timeout=null, callback=null) {
+        if(typeof timeout === 'number' && timeout >= 0) {
+            this._timeoutTimer = setTimeout(() => {
+                this._timeoutTimer = null;
+                this.hide();
+            }, timeout);
+        }
+
+        this.overlay.show(callback);
     }
 
     hide(callback) {
+        this.cancelTimeout();
+
+        let onHide = () => {
+            if(this.removeOnHide) {
+                this.remove();
+            }
+
+            if(callback) callback();
+        };
+
         return this.overlay.hide(callback);
     }
 
-    toggle(callback) {
-        return this.overlay.toggle(callback);
+    cancelTimeout() {
+        if(this._timeoutTimer) {
+            clearTimeout(this._timeoutTimer);
+            this._timeoutTimer = null;
+        }
+    }
+
+    toggle(timeout=null, callback=null) {
+        if(this.isVisible) {
+            return this.hide(callback);
+        } else {
+            return this.show(timeout, callback);
+        }
+    }
+
+    get isVisible() {
+        return this.overlay.isVisible;
     }
 }
