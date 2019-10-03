@@ -1,3 +1,92 @@
+const regNumberWithUnit = /^(\d+)([a-z]+|%)$/i,
+    regColor = /^(?:#([a-f0-9]{3})|#([a-f0-9]{6})|#([a-f0-9]{8}))$/i,
+    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i;
+
+
+export class NumberWithUnit {
+    constructor(value, unit) {
+        this.value = value;
+        this.unit = unit;
+    }
+
+    add(value) {
+        if(typeof value !== "number") {
+            if(!(value instanceof NumberWithUnit)) {
+                throw new TypeError("Cannot perform action on invalid type.");
+            }
+
+            if(this.unit !== value.unit) {
+                throw new Error("Mismatched units");
+            }
+
+            value = value.value;
+        }
+
+
+        return new NumberWithUnit(this.value + value, this.unit);
+    }
+
+    subtract(value) {
+        if(typeof value !== "number") {
+            if(!(value instanceof NumberWithUnit)) {
+                throw new TypeError("Cannot perform action on invalid type.");
+            }
+
+            if(this.unit !== value.unit) {
+                throw new Error("Mismatched units");
+            }
+
+            value = value.value;
+        }
+
+        return new NumberWithUnit(this.value - value, this.unit);
+    }
+
+    multiply(value) {
+        if(typeof value !== "number") {
+            if(!(value instanceof NumberWithUnit)) {
+                throw new TypeError("Cannot perform action on invalid type.");
+            }
+
+            if(this.unit !== value.unit) {
+                throw new Error("Mismatched units");
+            }
+
+            value = value.value;
+        }
+
+        return new NumberWithUnit(this.value * value, this.unit);
+    }
+
+    divide(value) {
+        if(typeof value !== "number") {
+            if(!(value instanceof NumberWithUnit)) {
+                throw new TypeError("Cannot perform action on invalid type.");
+            }
+
+            if(this.unit !== value.unit) {
+                throw new Error("Mismatched units");
+            }
+
+            value = value.value;
+        }
+
+        return new NumberWithUnit(this.value / value, this.unit);
+    }
+
+    toString() {
+        return `${this.value}${this.unit}`;
+    }
+}
+
+
+export class Color {
+    constructor() {
+
+    }
+}
+
+
 /**
  * Simple animation library that transitions properties from keyframe 1 to keyframe 2 over the duration.
  *
@@ -16,6 +105,8 @@
  * @author Matthew J. Shockman
  */
 
+
+import {privateCache} from "./data";
 
 /**
  *
@@ -304,7 +395,7 @@ export class FX {
 
 
 export default class Animation {
-    constructor(frames, applyFrame, init=null, destroy=null, bubbleFrameEvent=false) {
+    constructor({frames, applyFrame, init=null, destroy=null, bubbleFrameEvent=false}) {
         this.frames = frames;
         this.applyFrame = applyFrame;
         this.bubbleFrameEvent = bubbleFrameEvent;
@@ -315,7 +406,7 @@ export default class Animation {
     /**
      * Animates the given element.  Returns the FX object that can be used to control the animation.
      *
-     * @param element {HTMLElement} The element to animate.
+     * @param element {HTMLElement|Element} The element to animate.
      * @param duration {Number} The duration of the animation in milliseconds.
      * @param easing {function(Number)} An easing function that controls the rate of change for the animation.  If null linear animation is used.
      * @param onStart {function(FX)} A callback function that is called right before the animation starts playing.
@@ -394,10 +485,41 @@ export default class Animation {
     }
 
     getFrames(element) {
+        let frames,
+            r = {};
+
         if(typeof this.frames === 'function') {
-            return this.frames.call(this, element, this);
+            frames = this.frames.call(this, element, this);
         } else {
-            return this.frames;
+            frames = this.frames;
         }
+
+        for(let keyframeIndex in frames) {
+            if(!frames.hasOwnProperty(keyframeIndex)) continue;
+
+            let frame = frames[keyframeIndex];
+            r[keyframeIndex] = {};
+
+            for(let property in frame) {
+                if(!frame.hasOwnProperty(property)) continue;
+                r[keyframeIndex][property] = this._prepareValue(frame[property]);
+            }
+        }
+
+        return r;
+    }
+
+    _prepareValue(value) {
+        if(typeof value === 'string') {
+            value = value.trim();
+
+            let m = regNumberWithUnit.exec(value);
+
+            if(m) {
+                value = new NumberWithUnit(m[1], m[1]);
+            }
+        }
+
+        return value;
     }
 }

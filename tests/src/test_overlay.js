@@ -1,4 +1,4 @@
-import Overlay, {Tooltip} from 'ui/Overlay';
+import Overlay, {Tooltip, Notification} from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
 import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
 import {Vec2, Vec4} from "core/vectors";
@@ -51,6 +51,7 @@ export default class OverlayTestPage {
         this.overlay1.refresh();
 
         this.initTooltipTest();
+        this.initNotificationTest();
     }
 
     initTooltipTest() {
@@ -64,11 +65,14 @@ export default class OverlayTestPage {
             tooltip.toggle(2000);
         });
 
-
         directionControl.addEventListener('change', event => {
             let direction = directionControl.querySelector('input:checked').value;
             tooltip.overlay.placements = [direction];
             tooltip.overlay.refresh();
         });
+    }
+
+    initNotificationTest() {
+        Notification.notify("Hello World!", "top", "success");
     }
 }

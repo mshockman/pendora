@@ -79,8 +79,16 @@ export default class Overlay {
         return Vec4.getBoundingClientRect(this.element);
     }
 
+    getReferenceRect() {
+        if(this.referenceObject) {
+            return Vec4.fromRect(this.referenceObject.getBoundingClientRect());
+        } else {
+            return null;
+        }
+    }
+
     refresh() {
-        let rect = Vec4.fromRect(this.referenceObject.getBoundingClientRect()),
+        let rect = this.getReferenceRect(),
             elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB),
             arrowElement = this.element.querySelector('.arrow-element');
@@ -122,7 +130,21 @@ export default class Overlay {
                 subspace = subspace.intersection(paddedContainer);
             }
 
-            if(!subspace) {
+            if(subspace) {
+                let pos = this._getDefaultPosition(position, rect);
+
+                pos = pos.clamp(subspace);
+
+                pos = pos.subtract(anchorPoint);
+                overlay = overlay.moveTo(pos);
+
+                this._applyPosition(position, overlay, arrowElement, arrowBB, rect);
+                flag = true;
+                this._currentIndex = index;
+
+                break;
+            } else {
+                // No subspace.  See if it's the closest position.
                 let anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, anchorPoint);
 
                 let paddedSpace = unBoundedSubspace.subtract(anchorSpacePadding);
@@ -147,22 +169,7 @@ export default class Overlay {
                         container: container
                     };
                 }
-
-                continue;
             }
-
-            let pos = this._getDefaultPosition(position, rect);
-
-            pos = pos.clamp(subspace);
-
-            pos = pos.subtract(anchorPoint);
-            overlay = overlay.moveTo(pos);
-
-            this._applyPosition(position, overlay, arrowElement, arrowBB, rect);
-            flag = true;
-            this._currentIndex = index;
-
-            break;
         }
 
         if(!flag && closestPosition) {
@@ -227,8 +234,8 @@ export default class Overlay {
             this.isVisible = true;
 
             // Append to document if not in tree.
-            if(!this.element.parentElement && this.referenceObject && this.referenceObject.offsetParent) {
-                this.referenceObject.offsetParent.appendChild(this.element);
+            if(!this.element.parentElement && this.referenceObject && this.referenceObject.parentElement) {
+                this.referenceObject.parentElement.appendChild(this.element);
             }
 
             this.element.classList.remove('hidden');
@@ -468,12 +475,12 @@ function getArrowFloat(align) {
 }
 
 
-const slideInFX = new Animation(
-    function(element) {
+const slideInFX = new Animation({
+    frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(placement === 'top' || placement === 'bottom') {
+        if (placement === 'top' || placement === 'bottom') {
             return {
                 '0%': {
                     maxHeight: cache.fxHeight,
@@ -496,11 +503,11 @@ const slideInFX = new Animation(
         }
     },
 
-    function(element, frame) {
+    applyFrame(element, frame) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(placement === 'top' || placement === 'bottom') {
+        if (placement === 'top' || placement === 'bottom') {
             element.style.maxHeight = `${frame.maxHeight}px`;
             cache.fxHeight = frame.maxHeight;
         } else {
@@ -509,11 +516,11 @@ const slideInFX = new Animation(
         }
     },
 
-    function(element, animation) {
+    init(element, animation) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(cache.fxSlidePlacement !== placement) {
+        if (cache.fxSlidePlacement !== placement) {
             // Get max width and height
             element.style.maxWidth = '';
             element.style.maxHeight = '';
@@ -535,19 +542,19 @@ const slideInFX = new Animation(
         cache.slideFX = animation;
     },
 
-    function(element) {
+    destroy(element) {
         let cache = privateCache.cache(element);
         cache.slideFX = null;
     }
-);
+});
 
 
-const slideOutFX = new Animation(
-    function(element) {
+const slideOutFX = new Animation({
+    frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(placement === 'top' || placement === 'bottom') {
+        if (placement === 'top' || placement === 'bottom') {
             return {
                 '0%': {
                     maxHeight: cache.fxHeight,
@@ -570,11 +577,11 @@ const slideOutFX = new Animation(
         }
     },
 
-    function(element, frame) {
+    applyFrame(element, frame) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(placement === 'top' || placement === 'bottom') {
+        if (placement === 'top' || placement === 'bottom') {
             element.style.maxHeight = `${frame.maxHeight}px`;
             cache.fxHeight = frame.maxHeight;
         } else {
@@ -583,11 +590,11 @@ const slideOutFX = new Animation(
         }
     },
 
-    function(element, animation) {
+    init(element, animation) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(cache.fxSlidePlacement !== placement) {
+        if (cache.fxSlidePlacement !== placement) {
             // Get max width and height
             element.style.maxWidth = '';
             element.style.maxHeight = '';
@@ -608,11 +615,11 @@ const slideOutFX = new Animation(
         cache.slideFX = animation;
     },
 
-    function(element) {
+    destroy(element) {
         let cache = privateCache.cache(element);
         cache.slideFX = null;
     }
-);
+});
 
 
 export class Tooltip {
@@ -698,19 +705,50 @@ export class Tooltip {
 }
 
 
+export function basicNotificationTemplate(context) {
+    let element = document.createElement('div'),
+        textContainer = document.createElement('div');
+
+    element.className = 'notification';
+
+    element.appendChild(textContainer);
+    textContainer.innerHTML = context.title;
+
+    return element;
+}
+
+
 export class Notification {
-    constructor(title, classes=null, timeout=false, closeOnClick=true, destroy=true, showFX=null, hideFX=null, showDuration=null, hideDuration=null) {
-        this.element = document.createElement('div');
-        this.element.className = "notification";
+    constructor({title, classes=null, timeout=false, closeOnClick=true, showFX=null, hideFX=null, showDuration=null, hideDuration=null, template=basicNotificationTemplate}) {
+        this.element = template.call(this, arguments[0]);
 
         if(classes) addClasses(this.element, classes);
 
-        this.destroy = destroy;
         this.closeOnClick = closeOnClick;
+        this.timeout = timeout;
+        this.showFX = showFX;
+        this.showDuration = showDuration;
+        this.hideFX = hideFX;
+        this.hideDuration = hideDuration;
     }
 
     appendTo(element) {
+        if(typeof element === 'string') {
+            document.querySelector(element).appendChild(this.element);
+        } else if(element.appendChild) {
+            element.appendChild(this.element);
+        } else if(element.append) {
+            element.append(this.element);
+        }
+    }
 
+    remove() {
+        if(this.element && this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
+            return true;
+        }
+
+        return false;
     }
 
     show() {
@@ -719,5 +757,28 @@ export class Notification {
 
     hide() {
 
+    }
+
+    static notify(title, placement, classes, {timeout=2000, closeOnClick=true, ...options}={}) {
+        let placementId = `ui-notification-${placement}`,
+            container = document.getElementById(placementId);
+
+        if(!container) {
+            container = document.createElement('div');
+            container.id = placementId;
+            document.body.appendChild(container);
+        }
+
+        let notification = new Notification({
+            ...options,
+            timeout,
+            closeOnClick,
+            title,
+            classes
+        });
+
+        notification.appendTo(container);
+        notification.show();
+        return notification;
     }
 }
