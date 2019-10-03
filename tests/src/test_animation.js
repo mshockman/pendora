@@ -59,6 +59,6 @@ export default class TestAnimationPage {
     load() {
         let box1 = document.querySelector('#test_box1');
 
-        testAnimation.animate(box1, 5000, null);
+        testAnimation.animate(box1, 5000);
     }
 }

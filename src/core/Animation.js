@@ -261,7 +261,7 @@ export class FX {
         this.applyFrame.call(this, this.element, frame, this);
         this.lastFrame = frame;
 
-        if (this.onFrame) this.onFrame.call(this, this);
+        if (this.onFrame) this.onFrame.call(this, this, frame);
 
         this.element.dispatchEvent(new CustomEvent('animation.frame', {
             bubbles: this.bubbleFrameEvent,
@@ -304,30 +304,100 @@ export class FX {
 
 
 export default class Animation {
-    constructor(frames, applyFrame, prepare=null, bubbleFrameEvent=false) {
+    constructor(frames, applyFrame, init=null, destroy=null, bubbleFrameEvent=false) {
         this.frames = frames;
         this.applyFrame = applyFrame;
         this.bubbleFrameEvent = bubbleFrameEvent;
-        this.prepare = prepare;
+        this.init = init;
+        this.destroy = destroy;
     }
 
-    animate(element, duration, easing=null, {onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null}={}) {
-        if(this.prepare) {
-            this.prepare.call(this, element, this);
+    /**
+     * Animates the given element.  Returns the FX object that can be used to control the animation.
+     *
+     * @param element {HTMLElement} The element to animate.
+     * @param duration {Number} The duration of the animation in milliseconds.
+     * @param easing {function(Number)} An easing function that controls the rate of change for the animation.  If null linear animation is used.
+     * @param onStart {function(FX)} A callback function that is called right before the animation starts playing.
+     * @param onFrame {function(FX, frame)} A callback that is called per frame.
+     * @param onPause {function(FX)} A callback that is called when the FX pauses.
+     * @param onCancel {function(FX)} A callback that is called when the FX cancels.
+     * @param onEnd {function(FX)} A callback that is called when the animation ends.  Whether by completing, pausing, or canceling.  See Fx.status to determine what happened.
+     * @param onComplete {function(FX)} A callback that is called when the animation complete successfully.
+     * @param autoStart {Boolean} If true the animation will play immediately.
+     * @returns {FX}
+     */
+    animate(element, duration, {easing=null, onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null, autoStart=true}={}) {
+        if(this.init) {
+            this.init.call(this, element, this);
         }
 
-        let fx = new FX(element, this.frames, this.applyFrame, duration, {
+        let that = this;
+
+        function _onEnd(fx) {
+            if(onEnd) onEnd.call(this, fx);
+            if(that.destroy) that.destroy(element, fx);
+        }
+
+        let fx = new FX(element, this.getFrames(element), this.applyFrame, duration, {
             easing,
             animation: this,
             onStart,
             onFrame,
             onPause,
             onCancel,
-            onEnd,
+            onEnd: _onEnd,
             onComplete,
             bubbleFrameEvent: this.bubbleFrameEvent
         });
 
-        return fx.play();
+        if(autoStart) {
+            return fx.play();
+        } else {
+            return fx;
+        }
+    }
+
+    /**
+     * Creates a function that calls the animate method with the bound parameters.
+     * Parameters can be overridden in the created function when called.
+     * Method has the same signature as the animate method.
+     *
+     * Usage:
+     * let animation = new Animation(...),
+     *     fx = animation.bind(null, 2000);
+     *
+     * fx(element) // Animation the element over 2000 milliseconds.
+     *
+     * @param element
+     * @param duration
+     * @param config
+     * @returns {function(*=, *=, *=): *}
+     */
+    bind(element=null, duration=null, config=null) {
+        let defaults = {
+            element,
+            duration,
+            config
+        };
+
+        return (element=null, duration=null, config) => {
+            element = element || defaults.element;
+            duration = duration === null ? defaults.duration : duration;
+
+            let _options = {};
+            if(defaults.config) Object.assign(_options, defaults.config);
+            if(config) Object.assign(_options, config);
+
+            return this.animate(element, duration, _options);
+        };
+    }
+
+    getFrames(element) {
+        if(typeof this.frames === 'function') {
+            return this.frames.call(this, element, this);
+        } else {
+            return this.frames;
+        }
     }
 }
