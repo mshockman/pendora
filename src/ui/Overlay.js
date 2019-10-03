@@ -2,6 +2,7 @@ import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} fr
 import {Vec4, Vec2} from "core/vectors";
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
+import {addClasses} from "core/utility";
 
 
 // arrow controls the alignment of the arrow.
@@ -30,7 +31,7 @@ export default class Overlay {
      * @param hideFX
      * @param showFX
      */
-    constructor(element, reference, {placements=null, container=null, arrow=null, sticky=false, magnetic=false, hideFX=null, showFX=null}={}) {
+    constructor(element, reference, {placements=null, container=null, sticky=false, magnetic=false, hideFX=null, showFX=null, showDuration=null, hideDuration=null}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -59,12 +60,8 @@ export default class Overlay {
         this.isVisible = false;
         this.hideFX = hideFX;
         this.showFX = showFX;
-
-        if(arrow) {
-            let arrowElement = document.createElement('div');
-            arrowElement.classList.add('arrow-element');
-            this.element.appendChild(arrowElement);
-        }
+        this.showDuration = showDuration;
+        this.hideDuration = hideDuration;
 
         this._currentIndex = 0;
     }
@@ -263,7 +260,13 @@ export default class Overlay {
                     this.element.classList.add(this.showFX);
                     if(callback) callback.call(this);
                 } else if(typeof this.showFX === 'function') {
-                    this._fx = this.showFX(this.element, {
+                    this._fx = this.showFX(this.element, this.showDuration, {
+                        onEnd: (animation) => {
+                            if(callback) callback.call(this, animation);
+                        }
+                    });
+                } else {
+                    this._fx = this.showFX.animate(this.element, this.showDuration, {
                         onEnd: (animation) => {
                             if(callback) callback.call(this, animation);
                         }
@@ -291,7 +294,15 @@ export default class Overlay {
                 this.element.classList.add('hidden');
                 if(callback) callback.call(this);
             } else if(typeof this.hideFX === 'function') {
-                this._fx = this.hideFX(this.element, {
+                this._fx = this.hideFX(this.element, this.hideDuration, {
+                    onEnd: (animation) => {
+                        this.element.classList.add('hidden');
+                        this._fx = null;
+                        if(callback) callback.call(this, animation);
+                    }
+                });
+            } else if(this.hideFX && typeof this.hideFX.animate === 'function') {
+                this._fx = this.hideFX.animate(this.element, this.hideDuration, {
                     onEnd: (animation) => {
                         this.element.classList.add('hidden');
                         this._fx = null;
@@ -457,102 +468,50 @@ function getArrowFloat(align) {
 }
 
 
-export function slideOutEffectFactory(time) {
-    return function slideOut(element, {onEnd=null}={}) {
-        let placement = element.dataset.placement,
-            cache = privateCache.cache(element);
-
-        if(cache.fxSlidePlacement!== placement) {
-            // Get max width and height
-            element.style.maxWidth = '';
-            element.style.maxHeight = '';
-
-            let box = Vec4.getBoundingClientRect(element);
-            cache.fxMaxHeight = box.bottom - box.top;
-            cache.fxMaxWidth = box.right - box.left;
-
-            // Start at max height and width.
-            cache.fxHeight = cache.fxMaxHeight;
-            cache.fxWidth = cache.fxMaxWidth;
-
-            // Set the current placement so we no when the overlay changes position
-            // and fx data needs to be recalculated.
-            cache.fxSlidePlacement = placement;
-        }
-
-        // Only one slide in / out effect can be animating at a time.
-        if(cache.slideFX) {
-            cache.slideFX.cancel(false);
-            cache.slideFX = null;
-        }
-
-        if(placement === 'top' || placement === 'bottom') {
-            let animation = new Animation(
-                {
-                    '0%': {
-                        maxHeight: cache.fxHeight,
-                    },
-
-                    '100%': {
-                        maxHeight: 0
-                    }
-                },
-
-                function (element, frame) {
-                    element.style.maxHeight = `${frame.maxHeight}px`;
-                    cache.fxHeight = frame.maxHeight;
-                }
-            );
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time, null, {
-                onEnd() {
-                    if(onEnd) onEnd();
-                    cache.slideFX = null;
-                }
-            });
-        } else {
-            let animation = new Animation(
-                {
-                    '0%': {
-                        maxWidth: cache.fxWidth,
-                    },
-
-                    '100%': {
-                        maxWidth: 0
-                    }
-                },
-
-                function(element, frame) {
-                    element.style.maxWidth = `${frame.maxWidth}px`;
-                    cache.fxWidth = frame.maxWidth;
-                }
-            );
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time, null, {
-                onEnd() {
-                    if(onEnd) onEnd();
-                    cache.slideFX = null;
-                }
-            });
-        }
-    }
-}
-
-
-
-export function slideInEffectFactory(time) {
-    return function(element, {onEnd=null, onStart=null}={}) {
+const slideInFX = new Animation(
+    function(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
 
-        if(cache.slideFX) {
-            cache.slideFX.cancel(false);
-            cache.slideFX = null;
+        if(placement === 'top' || placement === 'bottom') {
+            return {
+                '0%': {
+                    maxHeight: cache.fxHeight,
+                },
+
+                '100%': {
+                    maxHeight: cache.fxMaxHeight
+                }
+            };
+        } else {
+            return {
+                '0%': {
+                    maxWidth: cache.fxWidth,
+                },
+
+                '100%': {
+                    maxWidth: cache.fxMaxWidth
+                }
+            };
         }
+    },
+
+    function(element, frame) {
+        let cache = privateCache.cache(element),
+            placement = element.dataset.placement;
+
+        if(placement === 'top' || placement === 'bottom') {
+            element.style.maxHeight = `${frame.maxHeight}px`;
+            cache.fxHeight = frame.maxHeight;
+        } else {
+            element.style.maxWidth = `${frame.maxWidth}px`;
+            cache.fxWidth = frame.maxWidth;
+        }
+    },
+
+    function(element, animation) {
+        let cache = privateCache.cache(element),
+            placement = element.dataset.placement;
 
         if(cache.fxSlidePlacement !== placement) {
             // Get max width and height
@@ -573,66 +532,91 @@ export function slideInEffectFactory(time) {
             cache.fxSlidePlacement = placement;
         }
 
-        if(placement === 'top' || placement === 'bottom') {
-            let animation = new Animation(
-                {
-                    '0%': {
-                        maxHeight: cache.fxHeight,
-                    },
+        cache.slideFX = animation;
+    },
 
-                    '100%': {
-                        maxHeight: cache.fxMaxHeight
-                    }
-                },
-
-                function(element, frame) {
-                    element.style.maxHeight = `${frame.maxHeight}px`;
-                    cache.fxHeight = frame.maxHeight;
-                }
-            );
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time, null, {
-                onEnd() {
-                    if(onEnd) onEnd();
-                    cache.slideFX = null;
-                }
-            });
-        } else {
-            let animation = new Animation(
-                {
-                    '0%': {
-                        maxWidth: cache.fxWidth,
-                    },
-
-                    '100%': {
-                        maxWidth: cache.fxMaxWidth
-                    }
-                },
-
-                function(element, frame) {
-                    element.style.maxWidth = `${frame.maxWidth}px`;
-                    cache.fxWidth = frame.maxWidth;
-                }
-            );
-
-            cache.slideFX = animation;
-
-            return animation.animate(element, time, null, {
-                onEnd() {
-                    if(onEnd) onEnd();
-                    cache.slideFX = null;
-                }
-            });
-        }
+    function(element) {
+        let cache = privateCache.cache(element);
+        cache.slideFX = null;
     }
-}
+);
 
+
+const slideOutFX = new Animation(
+    function(element) {
+        let cache = privateCache.cache(element),
+            placement = element.dataset.placement;
+
+        if(placement === 'top' || placement === 'bottom') {
+            return {
+                '0%': {
+                    maxHeight: cache.fxHeight,
+                },
+
+                '100%': {
+                    maxHeight: 0
+                }
+            };
+        } else {
+            return {
+                '0%': {
+                    maxWidth: cache.fxWidth,
+                },
+
+                '100%': {
+                    maxWidth: 0
+                }
+            };
+        }
+    },
+
+    function(element, frame) {
+        let cache = privateCache.cache(element),
+            placement = element.dataset.placement;
+
+        if(placement === 'top' || placement === 'bottom') {
+            element.style.maxHeight = `${frame.maxHeight}px`;
+            cache.fxHeight = frame.maxHeight;
+        } else {
+            element.style.maxWidth = `${frame.maxWidth}px`;
+            cache.fxWidth = frame.maxWidth;
+        }
+    },
+
+    function(element, animation) {
+        let cache = privateCache.cache(element),
+            placement = element.dataset.placement;
+
+        if(cache.fxSlidePlacement !== placement) {
+            // Get max width and height
+            element.style.maxWidth = '';
+            element.style.maxHeight = '';
+
+            let box = Vec4.getBoundingClientRect(element);
+            cache.fxMaxHeight = box.bottom - box.top;
+            cache.fxMaxWidth = box.right - box.left;
+
+            // Start at max height and width.
+            cache.fxHeight = cache.fxMaxHeight;
+            cache.fxWidth = cache.fxMaxWidth;
+
+            // Set the current placement so we no when the overlay changes position
+            // and fx data needs to be recalculated.
+            cache.fxSlidePlacement = placement;
+        }
+
+        cache.slideFX = animation;
+    },
+
+    function(element) {
+        let cache = privateCache.cache(element);
+        cache.slideFX = null;
+    }
+);
 
 
 export class Tooltip {
-    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInEffectFactory(200), hideFX=slideOutEffectFactory(200), className=null, removeOnHide=false}) {
+    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInFX, hideFX=slideOutFX, showDuration=200, hideDuration=200, className=null, removeOnHide=false}) {
         this.element = document.createElement('div');
         this.tooltipBody = document.createElement('div');
         this.tooltipBody.className = "tooltip__body";
@@ -653,7 +637,7 @@ export class Tooltip {
             this.element.classList.add(className);
         }
 
-        this.overlay = new Overlay(this.element, reference, {placements, container, magnetic, showFX, hideFX});
+        this.overlay = new Overlay(this.element, reference, {placements, container, magnetic, showFX, hideFX, showDuration, hideDuration});
 
         if(reference && reference.offsetParent) {
             reference.offsetParent.appendChild(this.element);
@@ -715,7 +699,25 @@ export class Tooltip {
 
 
 export class Notification {
-    constructor(title, className, timeout, closeOnClick) {
+    constructor(title, classes=null, timeout=false, closeOnClick=true, destroy=true, showFX=null, hideFX=null, showDuration=null, hideDuration=null) {
+        this.element = document.createElement('div');
+        this.element.className = "notification";
+
+        if(classes) addClasses(this.element, classes);
+
+        this.destroy = destroy;
+        this.closeOnClick = closeOnClick;
+    }
+
+    appendTo(element) {
+
+    }
+
+    show() {
+
+    }
+
+    hide() {
 
     }
 }
