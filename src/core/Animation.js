@@ -198,8 +198,6 @@ export class NumberWithUnit {
  */
 
 
-import {privateCache} from "./data";
-
 /**
  *
  * @param p
@@ -487,6 +485,14 @@ export class FX {
 
 
 export default class Animation {
+    /**
+     *
+     * @param frames {{}|function(Element element, Animation animation):{}}
+     * @param applyFrame
+     * @param init
+     * @param destroy
+     * @param bubbleFrameEvent
+     */
     constructor({frames, applyFrame=null, init=null, destroy=null, bubbleFrameEvent=false}) {
         this.frames = frames;
         this.applyFrame = applyFrame || Animation.defaultApplyFrame;

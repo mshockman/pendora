@@ -18,6 +18,18 @@ const PLACEMENTS = {
 
 
 
+function getArrowSide(align) {
+    return align.split('-')[0];
+}
+
+
+function getArrowFloat(align) {
+    let s = align.split('-');
+    return s[1] || 'middle';
+}
+
+
+
 export default class Overlay {
     /**
      * @constructor
@@ -31,7 +43,7 @@ export default class Overlay {
      * @param hideFX
      * @param showFX
      */
-    constructor(element, reference, {placements=null, container=null, sticky=false, magnetic=false, hideFX=null, showFX=null, showDuration=null, hideDuration=null}={}) {
+    constructor(element, reference, {timeout=false, placements=null, container=null, sticky=false, magnetic=false, hideFX=null, showFX=null, showDuration=null, hideDuration=null, removeOnHide=false}={}) {
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
         } else {
@@ -52,6 +64,8 @@ export default class Overlay {
             }
 
             this.placements = placements;
+        } else {
+            this.placements = [];
         }
 
         this.container = container;
@@ -62,6 +76,8 @@ export default class Overlay {
         this.showFX = showFX;
         this.showDuration = showDuration;
         this.hideDuration = hideDuration;
+        this.removeOnHide = removeOnHide;
+        this.timeout = timeout;
 
         this._currentIndex = 0;
     }
@@ -226,6 +242,8 @@ export default class Overlay {
 
     show(callback) {
         if(!this.isVisible) {
+            this.clearTimeout();
+
             if(this._fx) {
                 this._fx.cancel(true);
                 this._fx = null;
@@ -280,6 +298,13 @@ export default class Overlay {
                     });
                 }
             }
+
+            if (typeof this.timeout === 'number' && this.timeout >= 0) {
+                this._timeoutTimer = setTimeout(() => {
+                    this._timeoutTimer = null;
+                    this.hide();
+                }, this.timeout);
+            }
         }
     }
 
@@ -300,12 +325,20 @@ export default class Overlay {
                 this.element.classList.add(this.hideFX);
                 this.element.classList.add('hidden');
                 if(callback) callback.call(this);
+
+                if(this.removeOnHide) {
+                    this.remove();
+                }
             } else if(typeof this.hideFX === 'function') {
                 this._fx = this.hideFX(this.element, this.hideDuration, {
                     onEnd: (animation) => {
                         this.element.classList.add('hidden');
                         this._fx = null;
                         if(callback) callback.call(this, animation);
+
+                        if(this.removeOnHide) {
+                            this.remove();
+                        }
                     }
                 });
             } else if(this.hideFX && typeof this.hideFX.animate === 'function') {
@@ -314,12 +347,29 @@ export default class Overlay {
                         this.element.classList.add('hidden');
                         this._fx = null;
                         if(callback) callback.call(this, animation);
+
+                        if(this.removeOnHide) {
+                            this.remove();
+                        }
                     }
                 });
             } else {
                 this.element.classList.add('hidden');
                 if(callback) callback.call(this);
+
+                if(this.removeOnHide) {
+                    this.remove();
+                }
             }
+
+            this.clearTimeout();
+        }
+    }
+
+    clearTimeout() {
+        if(this._timeoutTimer) {
+            clearTimeout(this._timeoutTimer);
+            this._timeoutTimer = null;
         }
     }
 
@@ -461,21 +511,161 @@ export default class Overlay {
 
         return arrowSpacePadding;
     }
+
+    static notification(title, {classes=null, timeout=5000, template=notificationTemplate, placement='top-right',
+        showFX=slideDownFX, showDuration=1000, hideFX=slideUpFX, hideDuration=200, removeOnHide=true,
+        closeOnClick=false, ...context}={}) {
+
+        let element = template({
+            title,
+            ...context
+        });
+
+        if(classes) addClasses(element, classes);
+
+        let overlay = new Overlay(
+            element,
+            null,
+            {
+                timeout,
+                hideFX,
+                showFX,
+                hideDuration,
+                showDuration,
+                removeOnHide,
+                closeOnClick
+            }
+        );
+
+        if(typeof placement === 'string') {
+            placement = placement.trim();
+
+            if(placement[0] === '.' || placement[0] === '#') {
+                overlay.appendTo(placement);
+            } else {
+                let parentId = `nc-${placement}`;
+
+                let parent = document.getElementById(parentId);
+
+                if(!parent) {
+                    parent = document.createElement('div');
+                    parent.id = parentId;
+                    parent.className = 'notification-container';
+                }
+
+                document.body.appendChild(parent);
+                overlay.appendTo(parent);
+            }
+        } else if(placement) {
+            overlay.appendTo(placement);
+        }
+
+        overlay.show();
+        return overlay;
+    }
+
+    static tooltip(target, title, {classes=null, template=tooltipTemplate, container=null, placements=['top'], magnetic=true,
+        showFX=slideInTooltipFX, showDuration=200, hideFX=slideOutTooltipFX, hideDuration=200, removeOnHide=true, sticky, closeOnClick=false, arrow=true,
+        timeout=2000, ...context}={}) {
+
+        let element = template({
+            title,
+            arrow,
+            ...context
+        });
+
+        if(classes) addClasses(element, classes);
+        element.classList.add('tooltip');
+
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        let last = privateCache.get(target, 'tooltip');
+
+        if(last) {
+            last.remove();
+            privateCache.set(target, 'tooltip', null);
+        }
+
+        let overlay = new Overlay(
+            element,
+            target,
+            {
+                timeout,
+                placements,
+                container,
+                sticky,
+                magnetic,
+                hideFX,
+                showFX,
+                hideDuration,
+                showDuration,
+                removeOnHide,
+                closeOnClick
+            }
+        );
+
+        privateCache.set(target, 'tooltip', overlay);
+
+        overlay.appendTo(target.parentElement);
+        overlay.show();
+        return overlay;
+    }
 }
 
 
-function getArrowSide(align) {
-    return align.split('-')[0];
+export function notificationTemplate(context) {
+    let element = document.createElement('div'),
+        body = document.createElement('div'),
+        textContainer = document.createElement('div');
+
+
+    element.className = 'notification';
+    body.className = 'notification__body';
+    textContainer.className = 'notification__text';
+    textContainer.innerHTML = context.title;
+
+    body.appendChild(textContainer);
+
+    if(context.arrow) {
+        let arrowElement = document.createElement('div');
+        arrowElement.className = 'arrow-element notification__arrow';
+        body.appendChild(arrowElement);
+    }
+
+    element.appendChild(body);
+
+    return element;
 }
 
 
-function getArrowFloat(align) {
-    let s = align.split('-');
-    return s[1] || 'middle';
+export function tooltipTemplate(context) {
+    let element = document.createElement('div'),
+        body = document.createElement('div'),
+        textContainer = document.createElement('div');
+
+
+    element.className = 'tooltip';
+    body.className = 'tooltip__body';
+    textContainer.className = 'tooltip__text';
+    textContainer.innerHTML = context.title;
+
+    body.appendChild(textContainer);
+
+    if(context.arrow) {
+        let arrowElement = document.createElement('div');
+        arrowElement.className = 'arrow-element tooltip__arrow';
+        body.appendChild(arrowElement);
+    }
+
+    element.appendChild(body);
+
+    return element;
 }
 
 
-const slideInFX = new Animation({
+const slideInTooltipFX = new Animation({
     frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
@@ -549,7 +739,7 @@ const slideInFX = new Animation({
 });
 
 
-const slideOutFX = new Animation({
+const slideOutTooltipFX = new Animation({
     frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
@@ -622,8 +812,95 @@ const slideOutFX = new Animation({
 });
 
 
+export const slideDownFX = new Animation({
+    /**
+     *
+     * @param element {HTMLElement}
+     */
+    frames: (element) => {
+        let cache = privateCache.cache(element),
+            style = getComputedStyle(element);
+
+        return {
+            '0%': {
+                maxHeight: style.maxHeight,
+            },
+
+            '100%': {
+                maxHeight: cache.fxCache.maxHeight
+            }
+        };
+    },
+
+    init(element) {
+        let cache = privateCache.cache(element);
+
+        if(!cache.fxCache) {
+            cache.fxCache = {};
+
+            let maxHeight = element.style.maxHeight,
+                maxWidth = element.style.maxWidth;
+
+            element.style.maxHeight = '';
+            element.style.maxWidth = '';
+
+            let box = Vec4.getBoundingClientRect(element);
+
+            cache.fxCache.maxWidth = box.width+'px';
+            cache.fxCache.maxHeight = box.height+'px';
+
+            element.style.maxWidth = maxWidth;
+            element.style.maxHeight = maxHeight;
+        }
+    }
+});
+
+
+export const slideUpFX = new Animation({
+    /**
+     *
+     * @param element {HTMLElement}
+     */
+    frames: (element) => {
+        let box = Vec4.getBoundingClientRect(element);
+
+        return {
+            '0%': {
+                maxHeight: box.height + 'px'
+            },
+
+            '100%': {
+                maxHeight: '0px'
+            }
+        };
+    }
+});
+
+
+//----------------------------------------------------------------------------------------------------------------------
+//
+
+
+export function basicNotificationTemplate(context) {
+    let element = document.createElement('div'),
+        wrapper = document.createElement('div'),
+        textContainer = document.createElement('div');
+
+    element.className = 'notification';
+    wrapper.className = 'notification__wrapper';
+    textContainer.className = 'notification__text';
+
+    textContainer.innerHTML = context.title;
+
+    wrapper.appendChild(textContainer);
+    element.appendChild(wrapper);
+
+    return element;
+}
+
+
 export class Tooltip {
-    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInFX, hideFX=slideOutFX, showDuration=200, hideDuration=200, className=null, removeOnHide=false}) {
+    constructor({text, reference, placements=['top'], container=null, magnetic=true, showFX=slideInTooltipFX, hideFX=slideOutTooltipFX, showDuration=200, hideDuration=200, className=null, removeOnHide=false}) {
         this.element = document.createElement('div');
         this.tooltipBody = document.createElement('div');
         this.tooltipBody.className = "tooltip__body";
@@ -705,31 +982,28 @@ export class Tooltip {
 }
 
 
-export function basicNotificationTemplate(context) {
-    let element = document.createElement('div'),
-        textContainer = document.createElement('div');
-
-    element.className = 'notification';
-
-    element.appendChild(textContainer);
-    textContainer.innerHTML = context.title;
-
-    return element;
-}
-
-
 export class Notification {
-    constructor({title, classes=null, timeout=false, closeOnClick=true, showFX=null, hideFX=null, showDuration=null, hideDuration=null, template=basicNotificationTemplate}) {
+    constructor({title, classes=null, placements=['top'], container=null, magnetic=true, timeout=false, removeOnHide=true, closeOnClick=true, showFX=slideDownFX, hideFX=slideUpFX, showDuration=250, hideDuration=250, template=basicNotificationTemplate}) {
         this.element = template.call(this, arguments[0]);
 
         if(classes) addClasses(this.element, classes);
+        this.element.style.maxHeight = '0';
 
         this.closeOnClick = closeOnClick;
         this.timeout = timeout;
         this.showFX = showFX;
+        this.removeOnHide = removeOnHide;
         this.showDuration = showDuration;
         this.hideFX = hideFX;
         this.hideDuration = hideDuration;
+
+        this.overlay = new Overlay(this.element, null, {showFX, showDuration, hideFX, hideDuration, placements, container, magnetic});
+
+        this.element.addEventListener('click', () => {
+            if(this.closeOnClick) {
+                this.hide();
+            }
+        });
     }
 
     appendTo(element) {
@@ -751,12 +1025,57 @@ export class Notification {
         return false;
     }
 
-    show() {
-
+    clearTimeout() {
+        if(this._timeoutTimer) {
+            clearTimeout(this._timeoutTimer);
+            this._timeoutTimer = null;
+        }
     }
 
-    hide() {
+    show(callback) {
+        if(!this.isVisible) {
+            this.clearTimeout();
 
+            let r = this.overlay.show(callback);
+
+            if (typeof this.timeout === 'number' && this.timeout >= 0) {
+                this._timeoutTimer = setTimeout(() => {
+                    this._timeoutTimer = null;
+                    this.hide();
+                }, this.timeout);
+            }
+
+            return r;
+        }
+    }
+
+    hide(callback) {
+        if(this.isVisible) {
+            let that = this;
+
+            let _callback = function() {
+                if(callback) callback.apply(this, arguments);
+
+                if(that.removeOnHide) {
+                    that.remove();
+                }
+            };
+
+            this.clearTimeout();
+            return this.overlay.hide(_callback);
+        }
+    }
+
+    toggle(callback=null) {
+        if(this.isVisible) {
+            return this.hide(callback);
+        } else {
+            return this.show(callback);
+        }
+    }
+
+    get isVisible() {
+        return this.overlay.isVisible;
     }
 
     static notify(title, placement, classes, {timeout=2000, closeOnClick=true, ...options}={}) {

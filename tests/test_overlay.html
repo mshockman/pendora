@@ -220,17 +220,38 @@
             left: 0;
             right: 0;
             top: 0;
+            z-index: 1000;
         }
 
-        #ui-notification-top .notification {
-            margin: 1rem auto;
+        #nc-top-right {
+            position: fixed;
+            display: flex;
+            right: 0.5rem;
+            top: 0.5rem;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .notification {
+            overflow: hidden;
+            display: inline-block;
+            margin-bottom: 0.2rem;
             min-width: 30rem;
+            z-index: 1000;
+        }
+
+        .notification .notification__body {
+            /*display: inline-block;*/
 
             background-color: #ddd;
             border: 1px solid #aaa;
             padding: 0.4rem;
             font-size: 1rem;
             border-radius: 0.25rem;
+        }
+
+        .notification.hidden {
+            display: none;
         }
     </style>
 </head>

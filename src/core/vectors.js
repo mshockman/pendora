@@ -381,6 +381,14 @@ export class Vec4 {
         return this.bottom - this.top;
     }
 
+    set width(value) {
+        this.right = this.left + value;
+    }
+
+    set height(value) {
+        this.bottom = this.top + value;
+    }
+
     get x() {
         return this.left;
     }
