@@ -38,32 +38,8 @@ export class Vec2 {
         }
     }
 
-    multiply(vec2) {
-        if(typeof vec2 === 'number') {
-            return new Vec2(
-                this[0] * vec2,
-                this[1] * vec2
-            );
-        } else {
-            return new Vec2(
-                this[0] * vec2[0],
-                this[1] * vec2[1]
-            );
-        }
-    }
-
-    divide(vec2) {
-        if(typeof vec2 === 'number') {
-            return new Vec2(
-                this[0] / vec2,
-                this[1] / vec2
-            );
-        } else {
-            return new Vec2(
-                this[0] / vec2[0],
-                this[1] / vec2[1]
-            );
-        }
+    scalar(value) {
+        return new Vec2(this[0] * value, this[1] * value);
     }
 
     mod(vec2) {
@@ -275,36 +251,12 @@ export class Vec3 {
         }
     }
 
-    divide(vec3) {
-        if(typeof vec3 === 'number') {
-            return new Vec3(
-                this[0] / vec3,
-                this[1] / vec3,
-                this[2] / vec3
-            );
-        } else {
-            return new Vec3(
-                this[0] / vec3[0],
-                this[1] / vec3[1],
-                this[2] / vec3[2]
-            );
-        }
-    }
-
-    multiply(vec3) {
-        if(typeof vec3 === 'number') {
-            return new Vec3(
-                this[0] * vec3,
-                this[1] * vec3,
-                this[2] * vec3
-            );
-        } else {
-            return new Vec3(
-                this[0] * vec3[0],
-                this[1] * vec3[1],
-                this[2] * vec3[2]
-            );
-        }
+    scalar(value) {
+        return new Vec3(
+            this[0] * value,
+            this[1] * value,
+            this[2] * value
+        );
     }
 
     equals(vec3) {
@@ -559,40 +511,13 @@ export class Vec4 {
         }
     }
 
-    divide(rect) {
-        if(typeof rect === 'number') {
-            return new Vec4(
-                this[0] / rect,
-                this[1] / rect,
-                this[2] / rect,
-                this[3] / rect
-            );
-        } else {
-            return new Vec4(
-                this[0] / rect[0],
-                this[1] / rect[1],
-                this[2] / rect[2],
-                this[3] / rect[3]
-            );
-        }
-    }
-
-    multiply(rect) {
-        if(typeof rect === 'number') {
-            return new Vec4(
-                this[0] * rect,
-                this[1] * rect,
-                this[2] * rect,
-                this[3] * rect
-            );
-        } else {
-            return new Vec4(
-                this[0] * rect[0],
-                this[1] * rect[1],
-                this[2] * rect[2],
-                this[3] * rect[3]
-            );
-        }
+    scalar(value) {
+        return new Vec4(
+            this[0] * value,
+            this[1] * value,
+            this[2] * value,
+            this[3] * value
+        );
     }
 
     equals(rect) {

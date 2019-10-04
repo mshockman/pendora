@@ -1,6 +1,105 @@
-const regNumberWithUnit = /^(\d+)([a-z]+|%)$/i,
+import {Vec4} from "./vectors";
+
+
+const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
     regColor = /^(?:#([a-f0-9]{3})|#([a-f0-9]{6})|#([a-f0-9]{8}))$/i,
-    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i;
+    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i,
+    regPercentage = /^(\d+\.?\d*)%$/;
+
+
+export class Color extends Vec4 {
+    toString() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    }
+
+    static parseRGBAColorStringArgs(value) {
+        value = value.trim().split(/\s+/);
+
+        let r = value[0],
+            g = value[1],
+            b = value[2],
+            a = value[3];
+
+        if(r) {
+            if(regPercentage.test(r)) {
+                r = (parseFloat(r) / 100) * 255;
+            } else {
+                r = parseInt(r, 10);
+            }
+        }
+
+        if(g) {
+            if(regPercentage.test(g)) {
+                g = (parseFloat(g) / 100) * 255;
+            } else {
+                g = parseInt(g, 10);
+            }
+        }
+
+        if(b) {
+            if(regPercentage.test(b)) {
+                b = (parseFloat(b) / 100) * 255;
+            } else {
+                b = parseInt(b, 10);
+            }
+        }
+
+        if(a) {
+            if(regPercentage.test(a)) {
+                a = (parseFloat(a) / 100);
+            } else {
+                a = parseFloat(a);
+            }
+        }
+
+        a = a || 1.0;
+
+        return new Color(r, g, b, a);
+    }
+
+    static parseHexColorStringArg(value) {
+        value = value.trim().substring(1);
+
+        let r, g, b, a = 1.0;
+
+        if(value.length === 3) {
+            r = value[0];
+            g = value[1];
+            b = value[2];
+
+            r = parseInt(r+r, 16);
+            g = parseInt(g+g, 16);
+            b = parseInt(b+b, 16);
+        } else if(value.length === 6) {
+            r = value.substr(0, 2);
+            g = value.substr(2, 2);
+            b = value.substr(4, 2);
+
+            r = parseInt(r, 16);
+            g = parseInt(g, 16);
+            b = parseInt(b, 16);
+        } else if(value.length === 8) {
+            r = value.substr(0, 2);
+            g = value.substr(2, 2);
+            b = value.substr(4, 2);
+            a = value.substr(6, 2);
+
+            r = parseInt(r, 16);
+            g = parseInt(g, 16);
+            b = parseInt(b, 16);
+            a = parseInt(a, 16) / 255;
+        }
+
+        return new Color(r, g, b, a);
+    }
+}
+
+
+const TYPE_FUNCTIONS = {
+    hex: Color.parseHexColorStringArg,
+    rgb: Color.parseRGBAColorStringArgs,
+    rgba: Color.parseRGBAColorStringArgs
+};
 
 
 export class NumberWithUnit {
@@ -42,7 +141,7 @@ export class NumberWithUnit {
         return new NumberWithUnit(this.value - value, this.unit);
     }
 
-    multiply(value) {
+    scalar(value) {
         if(typeof value !== "number") {
             if(!(value instanceof NumberWithUnit)) {
                 throw new TypeError("Cannot perform action on invalid type.");
@@ -76,13 +175,6 @@ export class NumberWithUnit {
 
     toString() {
         return `${this.value}${this.unit}`;
-    }
-}
-
-
-export class Color {
-    constructor() {
-
     }
 }
 
@@ -244,7 +336,7 @@ export class FX {
                         let p = (position - options.startPosition) / (options.endPosition - options.startPosition),
                             delta = options.endValue.subtract(options.startValue);
 
-                        r[property] = options.startValue.add(delta.multiply(p));
+                        r[property] = options.startValue.add(delta.scalar(p));
                     } else if(typeof options.startValue === 'number') {
                         let duration = (options.endPosition - options.startPosition),
                             p = (position - options.startPosition) / duration,
@@ -395,12 +487,19 @@ export class FX {
 
 
 export default class Animation {
-    constructor({frames, applyFrame, init=null, destroy=null, bubbleFrameEvent=false}) {
+    constructor({frames, applyFrame=null, init=null, destroy=null, bubbleFrameEvent=false}) {
         this.frames = frames;
-        this.applyFrame = applyFrame;
+        this.applyFrame = applyFrame || Animation.defaultApplyFrame;
         this.bubbleFrameEvent = bubbleFrameEvent;
         this.init = init;
         this.destroy = destroy;
+    }
+
+    static defaultApplyFrame(element, frame) {
+        for(let key in frame) {
+            if(!frame.hasOwnProperty(key)) continue;
+            element.style[key] = frame[key].toString();
+        }
     }
 
     /**
@@ -516,7 +615,19 @@ export default class Animation {
             let m = regNumberWithUnit.exec(value);
 
             if(m) {
-                value = new NumberWithUnit(m[1], m[1]);
+                return  new NumberWithUnit(parseFloat(m[1]), m[2]);
+            }
+
+            m = regColor.exec(value);
+
+            if(m) {
+                return TYPE_FUNCTIONS.hex(m[0]);
+            }
+
+            m = regFunction.exec(value);
+
+            if(m) {
+                return TYPE_FUNCTIONS[m[1]](m[2]);
             }
         }
 

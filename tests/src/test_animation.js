@@ -8,8 +8,8 @@ window.Animation = Animation;
 window.testAnimation = new Animation({
     frames: {
         '0%': {
-            left: 0,
-            top: 0,
+            left: '0px',
+            top: '0px',
             rotation: 0,
             scale: 1,
             opacity: 1,
@@ -18,14 +18,14 @@ window.testAnimation = new Animation({
         },
 
         '50%': {
-            left: 500,
-            top: 500,
+            left: '500px',
+            top: '500px',
             scale: 0.25,
         },
 
         '90%': {
-            left: 700,
-            top: 100
+            left: '700px',
+            top: '100px'
         },
 
         '65%': {
@@ -33,8 +33,8 @@ window.testAnimation = new Animation({
         },
 
         '100%': {
-            left: 1200,
-            top: 100,
+            left: '1200px',
+            top: '100px',
             rotation: 1440,
             scale: 2,
             opacity: 0,
@@ -44,7 +44,8 @@ window.testAnimation = new Animation({
     },
 
     applyFrame(element, frame) {
-        element.style.transform = `translate(${frame.left}px, ${frame.top}px) rotate(${frame.rotation}deg) scale(${frame.scale})`;
+        console.log(frame);
+        element.style.transform = `translate(${frame.left}, ${frame.top}) rotate(${frame.rotation}deg) scale(${frame.scale})`;
         element.style.display = frame.display;
         element.style.background = frame.backgroundColor.toHex();
         if(frame.opacity) element.style.opacity = frame.opacity;
