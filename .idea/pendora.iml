@@ -9,7 +9,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="jquery" level="application" />
     <orderEntry type="library" name="43fafd7b08" level="application" />
     <orderEntry type="library" name="43fafd7b08" level="application" />
   </component>

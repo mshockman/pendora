@@ -59,21 +59,23 @@ export default class OverlayTestPage {
             container = document.getElementById('tooltip-testarea1'),
             directionControl = document.getElementById('tt1-direction-control');
 
-        // let tooltip = new Tooltip({text: "Hello World How Are You!!!", reference: btn, className: "success"});
-        let tooltip =
+        let tooltip = new Tooltip({text: "Hello World How Are You!!!", classes: "success", timeout: 2000});
+        tooltip.setReferenceTarget(btn);
+        tooltip.appendTo(btn.parentElement);
 
         btn.addEventListener('click', event => {
             let direction = directionControl.querySelector('input:checked').value;
-            Overlay.tooltip(btn, "Hello World How Are You?", {classes: "success", timeout: 2000, placements: [direction]});
+            tooltip.setPlacements(direction);
+            // Overlay.tooltip(btn, "Hello World How Are You?", {classes: "success", timeout: 2000, placements: [direction]});
+            tooltip.toggle();
         });
     }
 
     initNotificationTest() {
-        Overlay.notification("Hello World!");
-        Overlay.notification("Hello World!");
-        Overlay.notification("Hello World!");
-        Overlay.notification("Hello World!");
-        Overlay.notification("Hello World!");
-        Overlay.notification("Hello World!");
+        Notification.notify("Hello World!");
+        Notification.notify("Hello World!");
+        Notification.notify("Hello World!");
+        Notification.notify("Hello World!");
+        Notification.notify("Hello World!");
     }
 }
