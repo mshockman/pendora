@@ -175,6 +175,20 @@ export function removeClasses(element, classes) {
 
 
 /**
+ * Assigns attributes in an object to an element.
+ * @param element
+ * @param attributes
+ */
+export function assignAttributes(element, attributes) {
+    for(let key in attributes) {
+        if(attributes.hasOwnProperty(key)) {
+            element.setAttribute(key, attributes[key]);
+        }
+    }
+}
+
+
+/**
  * Sets an elements position relative to the document.
  *
  * @param element
