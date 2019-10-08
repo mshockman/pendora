@@ -65,17 +65,14 @@ export default class OverlayTestPage {
 
         btn.addEventListener('click', event => {
             let direction = directionControl.querySelector('input:checked').value;
-            tooltip.setPlacements(direction);
-            // Overlay.tooltip(btn, "Hello World How Are You?", {classes: "success", timeout: 2000, placements: [direction]});
-            tooltip.toggle();
+            // tooltip.setPlacements(direction);
+            // tooltip.toggle();
+
+            Tooltip.notify(btn, "Hello World 2!", 'success', {timeout: 2000, placements: direction});
         });
     }
 
     initNotificationTest() {
-        Notification.notify("Hello World!");
-        Notification.notify("Hello World!");
-        Notification.notify("Hello World!");
-        Notification.notify("Hello World!");
-        Notification.notify("Hello World!");
+        Notification.notify("Hello World!", 'success', 'top-right', {timeout: false, closeOnClick: true, button: "Confirm"});
     }
 }

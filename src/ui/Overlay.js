@@ -2,7 +2,7 @@ import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} fr
 import {Vec4, Vec2} from "core/vectors";
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
-import {addClasses} from "core/utility";
+import {addClasses, assignAttributes} from "core/utility";
 
 
 // arrow controls the alignment of the arrow.
@@ -276,30 +276,33 @@ export default class Overlay {
                 this.element.style[p] = save[p];
             }
 
+            let onEnd = (animation) => {
+                if(callback) callback.call(this, animation);
+
+                if (typeof this.timeout === 'number' && this.timeout >= 0) {
+                    this._timeoutTimer = setTimeout(() => {
+                        this._timeoutTimer = null;
+                        this.hide();
+                    }, this.timeout);
+                }
+            };
+
             if(this.showFX) {
                 if(typeof this.showFX === 'string') {
                     this.element.classList.add(this.showFX);
                     if(callback) callback.call(this);
-                } else if(typeof this.showFX === 'function') {
-                    this._fx = this.showFX(this.element, this.showDuration, {
-                        onEnd: (animation) => {
-                            if(callback) callback.call(this, animation);
-                        }
-                    });
-                } else {
-                    this._fx = this.showFX.animate(this.element, this.showDuration, {
-                        onEnd: (animation) => {
-                            if(callback) callback.call(this, animation);
-                        }
-                    });
-                }
-            }
 
-            if (typeof this.timeout === 'number' && this.timeout >= 0) {
-                this._timeoutTimer = setTimeout(() => {
-                    this._timeoutTimer = null;
-                    this.hide();
-                }, this.timeout);
+                    if (typeof this.timeout === 'number' && this.timeout >= 0) {
+                        this._timeoutTimer = setTimeout(() => {
+                            this._timeoutTimer = null;
+                            this.hide();
+                        }, this.timeout);
+                    }
+                } else if(typeof this.showFX === 'function') {
+                    this._fx = this.showFX(this.element, this.showDuration, {onEnd});
+                } else {
+                    this._fx = this.showFX.animate(this.element, this.showDuration, {onEnd});
+                }
             }
         }
     }
@@ -523,6 +526,24 @@ export function notificationTemplate(context) {
 
     body.appendChild(textContainer);
 
+    if(context.button) {
+        let cancel = document.createElement('button'),
+            confirm = document.createElement('button'),
+            controls = document.createElement('div');
+
+        cancel.type = 'button';
+        confirm.type = 'button';
+
+        cancel.dataset.action = 'dismiss';
+        cancel.innerHTML = 'Cancel';
+        confirm.innerHTML = context.button;
+
+        controls.className = 'notifications__controls';
+        controls.appendChild(cancel);
+        controls.appendChild(confirm);
+        body.appendChild(controls);
+    }
+
     if(context.arrow) {
         let arrowElement = document.createElement('div');
         arrowElement.className = 'arrow-element notification__arrow';
@@ -561,6 +582,10 @@ export function tooltipTemplate(context) {
 
 
 const slideInTooltipFX = new Animation({
+    /**
+     * @param element {HTMLElement}
+     * @returns {{"100%": {maxWidth: *}, "0%": {maxWidth: *}}|{"100%": {maxHeight: *}, "0%": {maxHeight: *}}}
+     */
     frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
@@ -635,6 +660,10 @@ const slideInTooltipFX = new Animation({
 
 
 const slideOutTooltipFX = new Animation({
+    /**
+     * @param element {HTMLElement}
+     * @returns {{"100%": {maxWidth: number}, "0%": {maxWidth: *}}|{"100%": {maxHeight: number}, "0%": {maxHeight: *}}}
+     */
     frames(element) {
         let cache = privateCache.cache(element),
             placement = element.dataset.placement;
@@ -733,9 +762,6 @@ export const slideDownFX = new Animation({
         if(!cache.fxCache) {
             cache.fxCache = {};
 
-            let maxHeight = element.style.maxHeight,
-                maxWidth = element.style.maxWidth;
-
             element.style.maxHeight = '';
             element.style.maxWidth = '';
 
@@ -744,8 +770,8 @@ export const slideDownFX = new Animation({
             cache.fxCache.maxWidth = box.width+'px';
             cache.fxCache.maxHeight = box.height+'px';
 
-            element.style.maxWidth = maxWidth;
-            element.style.maxHeight = maxHeight;
+            element.style.maxWidth = '0px';
+            element.style.maxHeight = '0px';
         }
     }
 });
@@ -777,9 +803,17 @@ export const slideUpFX = new Animation({
 
 
 export class Tooltip extends Overlay {
+    static styles = {};
+
     // noinspection JSCheckFunctionSignatures
-    constructor({text, reference, template=tooltipTemplate, placements=['top'], container=null, magnetic=true, showFX=slideInTooltipFX, hideFX=slideOutTooltipFX, showDuration=200, hideDuration=200, classes=null, removeOnHide=false, arrow=true, sticky=true, timeout=2000, ...context}) {
-        let element = template({text, arrow, ...context});
+    constructor({text, reference, style='success', placements=['top'], container=null, magnetic=true, showFX=slideInTooltipFX, hideFX=slideOutTooltipFX, showDuration=200, hideDuration=200, classes=null, removeOnHide=false, arrow=true, sticky=true, timeout=2000, ...context}) {
+        let template = Tooltip.styles[style],
+            templateFN = template.template || tooltipTemplate,
+            element = templateFN({text, arrow, template, ...context});
+
+        if(template.className) addClasses(element, template.className);
+        if(template.style) Object.assign(element.style, template.style);
+        if(template.attributes) assignAttributes(element, template.attributes);
 
         if(classes) addClasses(element, classes);
         element.classList.add('hidden');
@@ -792,20 +826,79 @@ export class Tooltip extends Overlay {
             reference.offsetParent.appendChild(this.element);
         }
     }
+
+    static notify(target, message, style, config) {
+        let tooltip = new Tooltip({text: message, reference: target, classes: style, ...config});
+
+        let currentTooltip = privateCache.get(target, 'tooltip');
+
+        if(currentTooltip) {
+            currentTooltip.remove();
+        }
+
+        privateCache.set(target, 'tooltip', tooltip);
+
+        tooltip.appendTo(target);
+        tooltip.show();
+        return tooltip;
+    }
 }
 
 
-export class Notification extends Overlay {
-    constructor({message, classes=null, timeout=5000, template=notificationTemplate, showFX=slideDownFX,
-                    showDuration=1000, hideFX=slideUpFX, hideDuration=200, removeOnHide=true, closeOnClick=false,
-                    ...context}) {
+Tooltip.styles.success = {
+    template: tooltipTemplate,
+    className: 'success',
+    style: null,
+    attributes: null
+};
 
-        let element = template({
+
+Tooltip.styles.error = {
+    template: tooltipTemplate,
+    className: 'error',
+    style: null,
+    attributes: null
+};
+
+
+Tooltip.styles.warning = {
+    template: tooltipTemplate,
+    className: 'warning',
+    style: null,
+    attributes: null
+};
+
+
+Tooltip.styles.info = {
+    template: tooltipTemplate,
+    className: 'info',
+    style: null,
+    attributes: null
+};
+
+
+export class Notification extends Overlay {
+    static styles = {};
+
+    // noinspection JSCheckFunctionSignatures
+    constructor({message, classes=null, timeout=5000, style='success', showFX=slideDownFX,
+                    showDuration=200, hideFX=slideUpFX, hideDuration=200, removeOnHide=true, closeOnClick=false,
+                    onConfirm=null, ...context}) {
+        let template = Notification.styles[style],
+            templateFN = template.template || notificationTemplate;
+
+        let element = templateFN({
             message,
+            template,
             ...context
         });
 
+        if(template.className) addClasses(element, template.className);
+        if(template.style) Object.assign(element.style, template.style);
+        if(template.attributes) assignAttributes(element, template.attributes);
+
         if(classes) addClasses(element, classes);
+        element.classList.add('hidden');
 
         super(
             element,
@@ -820,6 +913,41 @@ export class Notification extends Overlay {
                 closeOnClick
             }
         );
+
+        this.closeOnClick = closeOnClick;
+        this.onConfirm = onConfirm;
+
+        this.element.addEventListener('click', (event) => {
+            let btn = event.target.closest('button, .btn');
+
+            if(btn) {
+                if(btn.dataset.action === 'dismiss') {
+                    this.hide();
+                    return;
+                }
+
+                let value = btn.value || btn.dataset.value;
+
+                if(this.onConfirm) {
+                    this.onConfirm(event, value);
+                }
+
+                this.element.dispatchEvent(new CustomEvent('notification.confirm', {
+                    bubbles: true,
+                    detail: {
+                        notification: this,
+                        value: value
+                    }
+                }));
+
+                this.hide();
+                return;
+            }
+
+            if(this.closeOnClick) {
+                this.hide();
+            }
+        });
     }
 
     appendTo(element) {
@@ -855,14 +983,45 @@ export class Notification extends Overlay {
         }
 
         let notification = new Notification({
-            title: message,
+            message,
             classes: style,
             ...config
         });
 
         notification.appendTo(placement);
+        notification.show();
         return notification;
     }
 }
 
 
+Notification.styles.success = {
+    template: notificationTemplate,
+    className: 'success',
+    style: null,
+    attributes: null
+};
+
+
+Notification.styles.error = {
+    template: notificationTemplate,
+    className: 'error',
+    style: null,
+    attributes: null
+};
+
+
+Notification.styles.warning = {
+    template: notificationTemplate,
+    className: 'warning',
+    style: null,
+    attributes: null
+};
+
+
+Notification.styles.info = {
+    template: notificationTemplate,
+    className: 'info',
+    style: null,
+    attributes: null
+};
