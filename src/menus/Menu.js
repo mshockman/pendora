@@ -175,6 +175,13 @@ export default class Menu extends MenuNode {
      * Activates the menu.
      */
     activate() {
+        // If not active
+        //  Set isActive to true.
+        //  Notify parent that a submenu activated by triggering menu.activate event.
+        //  Check to see if the menu is listening for global document clicks
+        //      If they aren't register a global document click listener that deactivates the menu if the target
+        //      of the click was not inside the menu.
+        //  Trigger menu.activate event.
         if(!this.isActive) {
             this.isActive = true;
 
@@ -207,6 +214,14 @@ export default class Menu extends MenuNode {
      * Deactivates the menu.
      */
     deactivate() {
+        // If isActive
+        //      Set isActive flag to false.
+        //      Notify parent of deactivation by triggering submenu.deactivate event on parent.
+        //      If the global mouse click handler is registered to track for user clicks outside the menu, remove it.
+        //      Clear timeout timer.  The menu is closed.
+        //      Clear activate item timer.  The menu is closed.
+        //      Deactivate any active child items.
+
         if(this.isActive) {
             this.isActive = false;
 

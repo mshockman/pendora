@@ -1,0 +1,101 @@
+---
+title: MenuBar Example
+description: A library for creating nested menus & ribbons.
+layout: default
+---
+
+<h3>From Markup</h3>
+
+<p>
+    To create a Menubar using markup you need to add the <strong>data-init="menubar"</strong> attribute to the top level
+    node of the menu. From there it will crawl though the tree and register any items or menus.
+</p>
+<p>
+    A Menu or MenuItem is defined when an element is labeled with the <strong>data-role="menu"</strong> or
+    <strong>data-role="menuitem"</strong> attribute.
+</p>
+
+{% highlight html linenos %}<ul class="menubar" data-init="menubar">
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #1</a>
+        <ul class="menu" data-role="menu">
+            <li class="menuitem"><a href="url">Sub Item #1</a></li>
+            <li class="menuitem"><a href="url">Sub Item #2</a></li>
+            <li class="menuitem"><a href="url">Sub Item #3</a></li>
+            <li class="menuitem"><a href="url">Sub Item #4</a></li>
+            <li class="menuitem"><a href="url">Sub Item #5</a></li>
+        </ul>
+    </li>
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #2</a>
+        <ul class="menu" data-role="menu">
+            <li class="menuitem"><a href="url">Sub Item #1</a></li>
+            <li class="menuitem"><a href="url">Sub Item #2</a></li>
+            <li class="menuitem"><a href="url">Sub Item #3</a></li>
+            <li class="menuitem"><a href="url">Sub Item #4</a></li>
+            <li class="menuitem"><a href="url">Sub Item #5</a></li>
+        </ul>
+    </li>
+</ul>
+{% endhighlight %}
+
+
+<h3>Using JSON</h3>
+{% highlight javascript linenos %}
+let menubar = new MenuBar();
+
+menubar.createItems([
+    {
+        text: "Root #1",
+        children: [
+            { text: "Sub Item #1" href: "url"},
+            { text: "Sub Item #2" href: "url"},
+            { text: "Sub Item #3" href: "url"},
+            { text: "Sub Item #4" href: "url"},
+            { text: "Sub Item #5" href: "url"}
+        ]
+    },
+
+    {
+        text: "Root #1",
+        children: [
+            { text: "Sub Item #1" href: "url"},
+            { text: "Sub Item #2" href: "url"},
+            { text: "Sub Item #3" href: "url"},
+            { text: "Sub Item #4" href: "url"},
+            { text: "Sub Item #5" href: "url"}
+        ]
+    }
+]);
+
+menubar.appendTo(container);
+
+{% endhighlight %}
+
+
+<h3>Using Javascript</h3>
+{% highlight javascript linenos %}
+
+let menubar = new MenuBar();
+
+// Create root 1 branch
+let root1 = menubar.addItem("Root #1");
+
+root1.addItem("Sub Item #1", "url");
+root1.addItem("Sub Item #2", "url");
+root1.addItem("Sub Item #3", "url");
+root1.addItem("Sub Item #4", "url");
+root1.addItem("Sub Item #5", "url");
+
+// Create root 2 branch
+let root2 = menubar.addItem("Root #1");
+
+root2.addItem("Sub Item #1", "url");
+root2.addItem("Sub Item #2", "url");
+root2.addItem("Sub Item #3", "url");
+root2.addItem("Sub Item #4", "url");
+root2.addItem("Sub Item #5", "url");
+
+menubar.appendTo(container);
+
+{% endhighlight %}

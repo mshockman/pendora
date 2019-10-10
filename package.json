@@ -8,7 +8,8 @@
     "jsc": "webpack -w",
     "sc": "sass --watch scss:dist/css",
     "sc:tests": "sass --watch scss:tests/dist",
-    "jsc:tests": "webpack -w --config test.config.babel.js"
+    "jsc:tests": "webpack -w --config test.config.babel.js",
+    "jekyll": "jekyll serve --source=jekyll --destination=docs"
   },
   "repository": {
     "type": "git",

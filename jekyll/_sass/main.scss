@@ -1,3 +1,5 @@
+@import "github";
+
 body {
   margin: 0;
   padding: 0;
@@ -62,7 +64,7 @@ body {
 
 
 #splash header {
-  padding: 12rem 0 10rem 0;
+  padding: 4rem 0 2rem 0;
   text-align: center;
 }
 
@@ -81,4 +83,41 @@ body {
 
 .mr-auto {
   margin-right: auto !important;
+}
+
+
+a {
+  color: #114062;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+.module-table {
+  $border: 1px solid #333;
+
+  border: $border;
+  width: 100%;
+  border-collapse: collapse;
+
+  .module-name {
+    border: $border;
+    vertical-align: top;
+    padding: 0.3rem;
+    width: 1%;
+  }
+
+  .module-description {
+    border: $border;
+    vertical-align: top;
+    padding: 0.3rem;
+  }
+}
+
+
+.property-display {
+  margin-bottom: 1rem;
 }
