@@ -99,15 +99,26 @@ a {
 .module-table {
   $border: 1px solid #333;
 
+  td {
+    border: $border;
+    white-space: nowrap;
+    padding: 0.3rem;
+  }
+
   border: $border;
   width: 100%;
   border-collapse: collapse;
+
+  .var-type {
+    width: 1%;
+  }
 
   .module-name {
     border: $border;
     vertical-align: top;
     padding: 0.3rem;
     width: 1%;
+    white-space: nowrap;
   }
 
   .module-description {
@@ -120,4 +131,34 @@ a {
 
 .property-display {
   margin-bottom: 1rem;
+}
+
+
+p {
+  line-height: 1.5;
+}
+
+
+.property-info__kv {
+  display: inline-flex;
+  border: 1px solid #ccc;
+
+  .key {
+    padding: 0.5rem;
+    border-right: 1px solid #ccc;
+  }
+
+  .value {
+    padding: 0.5rem;
+  }
+}
+
+
+.property-info {
+  margin-bottom: 2rem;
+
+  h4 {
+    border-bottom: 2px solid #2a7ae2;
+    padding-bottom: 0.4rem;
+  }
 }
