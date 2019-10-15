@@ -12,13 +12,13 @@ function returnTrue() {
 
 
 export class Message {
-    constructor(address, options, target, sender) {
+    constructor(topic, options, sender) {
         this.timestamp = Date.now();
-        this.address = address;
-        this.topic = null;
-        this.target = target;
+        this.topic = topic;
+        this.target = null;
         this.sender = sender;
         this.forward = null;
+        this.reverse = false;
         this.isMessageIntercepted = returnFalse;
 
         if(options) {
@@ -214,6 +214,16 @@ export default class Observable {
         this.off(`${eventName}.*`);
     }
 
+    handleMessage(message) {
+        let topics = ["*"];
+
+        for(let _topic of message.address.split('.')) {
+            if(topics.indexOf(_topic) === -1) {
+                topics.push(_topic);
+            }
+        }
+    }
+
     /**
      * Triggers an event that gets passed the OEvent object as it's only parameter.
      * @param topic
@@ -232,7 +242,8 @@ export default class Observable {
             message = topic;
             message.target = this;
         } else {
-            message = new Message(topic, options, this, sender);
+            message = new Message(topic, options, sender);
+            message.target = this;
         }
 
         if(topic !== '*') {

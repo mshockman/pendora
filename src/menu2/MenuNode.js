@@ -1,12 +1,15 @@
 import {getMenuInstance, setMenuInstance} from './utility';
-import Observable from "../core/interface/Observable";
+import Publisher from "core/Publisher";
+import {KeyError} from "core/errors";
+import {addClasses, removeClasses} from "core/utility";
 
 
-export default class MenuNode extends Observable {
+export default class MenuNode extends Publisher {
     constructor() {
         super();
         this._parent = null;
         this._children = [];
+        this._timers = {};
         /**
          * @type {undefined|null|HTMLElement}
          * @private
@@ -18,6 +21,53 @@ export default class MenuNode extends Observable {
         this._isDisabled = false;
 
         this.nodeType = null;
+        this.isController = false;
+    }
+
+    init() {
+        if(this.boundEvents) return;
+
+        this.boundEvents = {};
+
+        this.boundEvents.onMouseOver = (event) => {
+            this.publish('onMouseOver', event, this);
+            this.onMouseOver(event);
+
+            if(!this.element.contains(event.relatedTarget)) {
+                this.publish('onMouseEnter', event, this);
+                if(this.onMouseEnter) this.onMouseEnter(event);
+            }
+        };
+
+        this.boundEvents.onMouseOut = (event) => {
+            this.publish('onMouseOut', event, this);
+            this.onMouseOut(event);
+
+            if(!this.element.contains(event.relatedTarget)) {
+                this.publish('onMouseLeave', event, this);
+                if(this.onMouseLeave) this.onMouseLeave(event);
+            }
+        };
+
+        this.boundEvents.onClick = (event) => {
+            this.publish('onClick', event, this);
+            this.onClick(event);
+        };
+
+        this.element.addEventListener('click', this.boundEvents.onClick);
+        this.element.addEventListener('onMouseOut', this.boundEvents.onMouseOut);
+        this.element.addEventListener('onMouseOver', this.boundEvents.onMouseOver);
+        this.isController = true;
+    }
+
+    destroy() {
+        if(this.events && this.hasElement()) {
+            this.element.removeEventListener('click', this.boundEvents.onClick);
+            this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
+            this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
+            this.events = null;
+            this.isController = false;
+        }
     }
 
     /**
@@ -143,6 +193,10 @@ export default class MenuNode extends Observable {
         }
     }
 
+    hasElement() {
+        return !!this._element;
+    }
+
     get element() {
         if(this._element === undefined) {
             this.element = this.render();
@@ -198,6 +252,12 @@ export default class MenuNode extends Observable {
         }
     }
 
+    remove() {
+        if(this._element && this._element.parentElement) {
+            this._element.parentElement.removeChild(this._element);
+        }
+    }
+
     closest(fn) {
         let o = this;
 
@@ -217,5 +277,135 @@ export default class MenuNode extends Observable {
                 yield grandchild;
             }
         }
+    }
+
+    /**
+     * Creates a timer with the given name.  Only one timer with that name can be active per object.
+     * If another timer with the same name is created the previous one will be cleared if `clear` is true.
+     * Otherwise if `clear` is false a KeyError with be thrown.  The callback function for the timer is called
+     * with the current object as it's `this` and the timer object as it's only parameter following the pattern
+     *
+     * this::fn(timer);
+     *
+     * @param name {String} The name of the timer.
+     * @param fn {function(timer)} Function to call.
+     * @param time {Number} The time to wait.
+     * @param interval If true setInterval will be used instead of setTimeout
+     * @param clear If true an previous timers of the same name will be canceled before creating a new one.  Otherwise a KeyError will be thrown.
+     * @returns {{status, id, cancel, type}}
+     */
+    startTimer(name, fn, time, interval=false, clear=true) {
+        if(clear && this._timers[name]) {
+            this._timers[name].cancel();
+        } else if(this._timers[name]) {
+            throw new KeyError("Timer already exists.");
+        }
+
+        let timer = this._timers[name] = {
+            status: 'running',
+            id: null,
+            cancel: null,
+            type: null,
+        };
+
+        if(interval) {
+            let id = timer.id = setInterval((timer) => {
+                fn.call(this, timer);
+            }, time, timer);
+
+            timer.type = 'interval';
+
+            timer.cancel = () => {
+                if(this._timers[name] === timer) {
+                    clearInterval(id);
+                    delete this._timers[name];
+                    timer.status = 'canceled';
+                }
+            };
+        } else {
+            let id = timer.id = setTimeout((timer) => {
+                delete this._timers[name];
+                timer.status = 'complete';
+                fn.call(this, timer);
+            }, time, timer);
+
+            timer.type = 'timeout';
+
+            timer.cancel = () => {
+                if(this._timers[name] === timer) {
+                    clearTimeout(id);
+                    delete this._timers[name];
+                    timer.status = 'canceled';
+                }
+            };
+        }
+
+        return timer;
+    }
+
+    /**
+     * Clears the timer with the given name.
+     *
+     * @param name
+     * @returns {boolean} True if a timer was canceled. False if not timer exists.
+     */
+    clearTimer(name) {
+        if(this._timers[name]) {
+            this._timers[name].cancel();
+            return true;
+        }
+
+        return false;
+    }
+
+    getEventDelegator(target) {
+
+    }
+
+    getTargetNode(target) {
+
+    }
+
+    getTargetItem(target) {
+
+    }
+
+    getTargetMenu(target) {
+
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Getters and Setters
+
+    get id() {
+        return this.element.id;
+    }
+
+    set id(id) {
+        if(this.element) this.element.id = id;
+    }
+
+    get classList() {
+        return this.element.classList;
+    }
+
+    get dataset() {
+        return this.element.dataset;
+    }
+
+    get style() {
+        return this.element.style;
+    }
+
+    set style(style) {
+        this.element.style = style;
+    }
+
+    addClass(classes) {
+        return addClasses(this.element, classes);
+    }
+
+    removeClass(classes) {
+        return removeClasses(this.element, classes);
     }
 }
