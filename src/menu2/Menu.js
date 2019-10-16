@@ -1,12 +1,14 @@
 import MenuNode from "./MenuNode";
+import MenuItem from "./MenuItem";
 
 
 export default class Menu extends MenuNode {
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=false, multiple=false, openOnHover=false,
-                    toggle="both", closeOnSelect=true, deactivateOnItemHover=true}={}) {
+                    toggle="both", closeOnSelect=true, deactivateOnItemHover=true, ...context}={}) {
         super();
         this.menuNodeType = "menu";
         this.events = null;
+        this.MenuItemClass = MenuItem;
 
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
@@ -20,21 +22,25 @@ export default class Menu extends MenuNode {
         if(target) {
             this.element = target;
         } else {
-            this.element = this.render();
+            this.element = this.render(context);
         }
     }
 
-    render() {
-        return `
-            <div class="menu">
-                <div class="menu__arrow"></div>
-                <ul class="menu__body">
-                    {% for item in this.children %}
-                        {{ item }}
-                    {% endfor %}
-                </ul>
-            </div>
-        `;
+    render({arrow=false}={}) {
+        let element = document.createElement('div'),
+            body = document.createElement('div');
+
+        element.className = "menu";
+        body.classname = "menu__body";
+
+        if(arrow) {
+            let arrow = document.createElement('div');
+            arrow.className = "menu__arrow";
+            element.appendChild(arrow);
+        }
+
+        element.appendChild(body);
+        return element;
     }
 
     activate() {
@@ -88,8 +94,12 @@ export default class Menu extends MenuNode {
                 this._captureDocumentClick = null;
             }
 
-            // todo clear timers.
+            // clear timers
             this.clearTimer('timeout');
+
+            for(let child of this.children) {
+                child.clearTimer('activateItem');
+            }
 
             // Notify parent that submenu deactivated.
             let parent = this.parent;
@@ -113,6 +123,11 @@ export default class Menu extends MenuNode {
 
             if(this.parent) this.parent.publish('submenu.shown', this);
             this.publish('menu.shown', this);
+
+            this.element.dispatchEvent(new CustomEvent('menu.show', {
+                detail: this,
+                bubbles: true
+            }));
         }
     }
 
@@ -122,30 +137,69 @@ export default class Menu extends MenuNode {
 
             if(this.parent) this.parent.publish('submenu.hidden', this);
             this.publish('menu.hidden', this);
+
+            this.element.dispatchEvent(new CustomEvent('menu.hide', {
+                detail: this,
+                bubbles: true
+            }));
         }
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    //
+    // Tree methods.
 
     addItem(text, action) {
-
+        let item = new this.MenuItemClass({text, action});
+        this.append(item);
+        return this;
     }
 
     removeItem(item) {
-
+        let index = this._children.indexOf(item);
+        if(index !== -1) {
+            this._children.splice(index, 1);
+            if(item.element.parentElement) item.element.parentElement.removeChild(item.element);
+        }
     }
 
     hasItem(item) {
-
+        return this._children.indexOf(item) !== -1;
     }
 
     append(item) {
+        let body = this.getMenuBody();
 
+        body = body[body.length - 1];
+
+        if(item.nodeType) {
+            body.appendChild(item);
+            return this;
+        }
+
+        if(item.parent) {
+            item.parent.removeItem(item);
+        }
+
+        item.appendTo(body);
+
+        if(item.isMenuItem && item.isMenuItem()) {
+            item._parent = this;
+            this._children.push(item);
+        }
+
+        return this;
     }
 
     get activeItems() {
+        let r = [];
 
+        for(let item of this.children) {
+            if(item.isActive) {
+                r.push(item);
+            }
+        }
+
+        return r;
     }
 
     clearItems() {
@@ -154,31 +208,50 @@ export default class Menu extends MenuNode {
         }
     }
 
+    setActiveItem(item) {
+        if(!item.isActive) {
+            item.activate();
+            return;
+        }
+
+        if(!this.multiple) {
+            for(let activeItem of this.activeItems) {
+                if(activeItem.isActive && activeItem !== item) {
+                    activeItem.deactivate();
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns list of all menu bodies for the menu.
+     *
+     * Menu bodies are where item are appended when using function like addItem or append.  They will be added to the
+     * last menu body in the menu.
+     *
+     * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]>}
+     */
+    getMenuBody() {
+        return this.element.querySelectorAll(':scope > .menu__body');
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Event Handlers
 
     onMouseOver(event) {
         this.clearTimer('timeout');
+        this._isMouseOver = true;
 
         let item = this.getTargetItem(event.target);
 
         if(item && item.getEventDelegator() === this) {
             item.onMouseOver(event);
         }
-
-        if(this.deactivateOnItemHover && !this.multiple) {
-            let targetChild = this.getTargetChild(event.target),
-                activeItems = this.activeItems;
-
-            for(let item of activeItems) {
-                if(item !== targetChild) {
-                    item.deactivate();
-                }
-            }
-        }
     }
 
     onMouseOut(event) {
+        this._isMouseOver = false;
+
         if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
             this.startTimer('timeout', () => {
                 this.deactivate();
@@ -212,11 +285,21 @@ export default class Menu extends MenuNode {
         }
     }
 
+    /**
+     * Will return true if menu items should toggle on.
+     *
+     * @returns {boolean}
+     */
     get toggleOn() {
-
+        return this.toggle === 'on' || this.toggle === 'both';
     }
 
+    /**
+     * Will return true if menu items should toggle off.
+     *
+     * @returns {boolean}
+     */
     get toggleOff() {
-
+        return this.toggle === 'off' || this.toggle === 'both';
     }
 }

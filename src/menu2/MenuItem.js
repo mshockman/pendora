@@ -14,6 +14,8 @@ export default class MenuItem extends MenuNode {
         if(classes) {
             this.addClass(classes);
         }
+
+        if(action) this.addAction(action);
     }
 
     render({text, nodeName="div"}) {
@@ -31,15 +33,15 @@ export default class MenuItem extends MenuNode {
     activate() {
         if(this.isActive) return;
 
-        this.clearTimer('autoActivate');
-
         if(this.parent) {
             if(!this.parent.isActive) {
                 this.parent.activate();
             }
 
-            this.parent.setActiveItem(this, true);
+            this.parent.setActiveItem(this);
         }
+
+        this.clearTimer('activateItem');
 
         if(this.submenu) {
             this.submenu.show();
@@ -86,6 +88,10 @@ export default class MenuItem extends MenuNode {
             detail: this,
             bubbles: true
         }));
+    }
+
+    isMenuItem() {
+        return true;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -142,11 +148,43 @@ export default class MenuItem extends MenuNode {
     }
 
     onMouseOver(event) {
+        if(!this.element.contains(event.relatedTarget)) return;
 
+        let parent = this.parent;
+
+        if(!this.isActive && !this.isDisabled) {
+            if(parent.isActive) {
+                if(parent.openOnHover === true) {
+                    this.activate();
+                } else if(typeof parent.openOnHover === 'number' && parent.openOnHover >= 0) {
+                    this.startTimer('activateItem', () => {
+                        if(!this.isDisabled) {
+                            this.activate();
+                        }
+                    }, parent.openOnHover);
+                }
+            } else {
+                if(parent.autoActivate === true) {
+                    this.activate();
+                } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
+                    this.startTimer('activateItem', () => {
+                        if(!this.isDisabled) {
+                            this.activate();
+                        }
+                    }, parent.autoActivate);
+                }
+            }
+        }
+
+        if(!parent.multiple && parent.deactivateOnItemHover) {
+            this.clearItems();
+        }
     }
 
     onMouseOut(event) {
+        if(this.isActive && !this.hasSubMenu()) {
 
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------

@@ -1,7 +1,9 @@
-import {getMenuInstance, setMenuInstance} from './utility';
 import Publisher from "core/Publisher";
 import {KeyError} from "core/errors";
 import {addClasses, removeClasses} from "core/utility";
+
+
+export const MENU_MAP = new WeakMap();
 
 
 export default class MenuNode extends Publisher {
@@ -35,7 +37,7 @@ export default class MenuNode extends Publisher {
 
             if(!this.element.contains(event.relatedTarget)) {
                 this.publish('onMouseEnter', event, this);
-                if(this.onMouseEnter) this.onMouseEnter(event);
+                // if(this.onMouseEnter) this.onMouseEnter(event);
             }
         };
 
@@ -45,7 +47,7 @@ export default class MenuNode extends Publisher {
 
             if(!this.element.contains(event.relatedTarget)) {
                 this.publish('onMouseLeave', event, this);
-                if(this.onMouseLeave) this.onMouseLeave(event);
+                // if(this.onMouseLeave) this.onMouseLeave(event);
             }
         };
 
@@ -68,6 +70,8 @@ export default class MenuNode extends Publisher {
             this.events = null;
             this.isController = false;
         }
+
+        this.element = null;
     }
 
     /**
@@ -207,19 +211,21 @@ export default class MenuNode extends Publisher {
 
     set element(value) {
         if(this._element) {
-            privateCache.set(this._element, 'menunode', undefined);
+            MENU_MAP.delete(this._element);
             this._element = undefined;
         }
 
         if(typeof value === 'string') {
             this._element = document.querySelector(value);
+            MENU_MAP.set(this._element, this);
         } else if(typeof value === 'function') {
             this._element = value.call(this);
+            MENU_MAP.set(this._element, this);
         } else if(value) {
             this._element = value;
-            privateCache.set(this._element, 'menunode', this);
+            MENU_MAP.set(this._element, this);
         } else {
-            this._element = value;
+            this._element = value; // null or undefined
         }
     }
 
@@ -249,12 +255,6 @@ export default class MenuNode extends Publisher {
             selector.appendChild(this.element);
         } else if(selector.append) {
             selector.append(this.element);
-        }
-    }
-
-    remove() {
-        if(this._element && this._element.parentElement) {
-            this._element.parentElement.removeChild(this._element);
         }
     }
 
@@ -358,20 +358,103 @@ export default class MenuNode extends Publisher {
         return false;
     }
 
-    getEventDelegator(target) {
+    /**
+     * Returns the timer object if it exists.
+     *
+     * @param name
+     * @returns {*}
+     */
+    getTimer(name) {
+        return this._timers[name];
+    }
 
+    /**
+     * Returns the MenuNode that is responsible for delegating the events.
+     *
+     * @returns {null|{isController}|any}
+     */
+    getEventDelegator() {
+        let o = this.element;
+
+        while(o) {
+            let instance = MENU_MAP.get(o);
+
+            if(instance && instance.isController) {
+                return instance;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
     }
 
     getTargetNode(target) {
+        let o = target;
 
+        while(o) {
+            let instance = MENU_MAP.get(o);
+
+            if(instance) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
     }
 
     getTargetItem(target) {
+        let o = target;
 
+        while(o) {
+            let instance = MENU_MAP.get(o);
+
+            if(instance && instance.isMenuItem()) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
     }
 
     getTargetMenu(target) {
+        let o = target;
 
+        while(o) {
+            let instance = MENU_MAP.get(o);
+
+            if(instance && instance.isMenu()) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
+    }
+
+    isMenuItem() {
+        return false;
+    }
+
+    isMenu() {
+        return false;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -407,5 +490,9 @@ export default class MenuNode extends Publisher {
 
     removeClass(classes) {
         return removeClasses(this.element, classes);
+    }
+
+    static getInstance(element) {
+        return MENU_MAP.get(element);
     }
 }

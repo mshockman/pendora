@@ -9,6 +9,7 @@
     "sc": "sass --watch scss:dist/css",
     "sc:tests": "sass --watch scss:tests/dist",
     "jsc:tests": "webpack -w --config test.config.babel.js",
+    "jsc:docs": "webpack -w --config docs.config.babel.js",
     "jekyll": "jekyll serve --source=jekyll --destination=docs"
   },
   "repository": {
