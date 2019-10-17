@@ -10,6 +10,18 @@ export default class MenuBar extends Menu {
             toggle, closeOnSelect, deactivateOnItemHover
         });
 
-        this.element.className = "menubar";
+        this.isVisible = true;
+    }
+
+    render(context) {
+        let element = document.createElement('div');
+
+        element.className = "menubar";
+
+        return element;
+    }
+
+    getMenuBody() {
+        return [this.element];
     }
 }

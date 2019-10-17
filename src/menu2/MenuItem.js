@@ -2,13 +2,13 @@ import MenuNode from "./MenuNode";
 
 
 export default class MenuItem extends MenuNode {
-    constructor({text, action, target, classes, nodeName="div"}={}) {
+    constructor({text, action, href=null, target, classes, nodeName="div", ...context}={}) {
         super();
 
         if(target) {
             this.element = target;
         } else {
-            this.element = this.render({text, nodeName});
+            this.element = this.render({text, nodeName, href, ...context});
         }
 
         if(classes) {
@@ -18,16 +18,21 @@ export default class MenuItem extends MenuNode {
         if(action) this.addAction(action);
     }
 
-    render({text, nodeName="div"}) {
+    render({text, nodeName="div", href=null}={}) {
         let element = document.createElement(nodeName),
             button = document.createElement('a');
 
         element.className = "menuitem";
         button.type = "button";
         button.innerHTML = text;
-        a.className = "menuitem__button";
+        button.className = "menuitem__button";
+
+        if(href) {
+            button.href = href;
+        }
 
         element.appendChild(button);
+        return element;
     }
 
     activate() {
@@ -117,19 +122,40 @@ export default class MenuItem extends MenuNode {
     // Manage submenu
 
     attachSubMenu(submenu) {
+        if(this.submenu) {
+            throw new Error("MenuItem can only have one submenu.");
+        }
 
+        if(submenu.parent) {
+            submenu.parent.detachSubMenu();
+        }
+
+        submenu._parent = this;
+        this._children = [submenu];
+
+        if(!submenu.element.parentElement) {
+            submenu.appendTo(this.element);
+        }
     }
 
-    detachSubMenu() {
+    detachSubMenu(remove=true) {
+        let submenu = this.submenu;
 
+        if(submenu) {
+            this._children = [];
+            submenu._parent = null;
+            if(remove) submenu.remove();
+        }
+
+        return submenu;
     }
 
     hasSubMenu() {
-
+        return !!this.submenu;
     }
 
     get submenu() {
-
+        return this._children[0];
     }
 
     set submenu(value) {
@@ -144,7 +170,25 @@ export default class MenuItem extends MenuNode {
     // Event handlers
 
     onClick(event) {
+        console.log("click");
 
+        if(this.isDisabled) {
+            event.preventDefault();
+        }
+
+        if(this.hasSubMenu()) {
+            if(this.isActive && this.toggleOff) {
+                this.deactivate();
+            } else if(!this.isActive && this.toggleOn) {
+                this.activate();
+            }
+        } else {
+            if(!this.isActive && this.toggleOn) {
+                this.activate();
+            }
+
+            this.select();
+        }
     }
 
     onMouseOver(event) {
@@ -189,4 +233,52 @@ export default class MenuItem extends MenuNode {
 
     //------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
+
+    get autoActivate() {
+
+    }
+
+    set autoActivate(value) {
+
+    }
+
+    get openOnHover() {
+
+    }
+
+    set openOnHover(value) {
+
+    }
+
+    get timeout() {
+
+    }
+
+    set timeout(value) {
+
+    }
+
+    get closeOnBlur() {
+
+    }
+
+    set closeOnBlur(value) {
+
+    }
+
+    get toggle() {
+
+    }
+
+    set toggle(value) {
+
+    }
+
+    get closeOnSelect() {
+
+    }
+
+    set closeOnSelect(value) {
+
+    }
 }

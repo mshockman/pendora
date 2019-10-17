@@ -6,11 +6,40 @@ import {addClasses, removeClasses} from "core/utility";
 export const MENU_MAP = new WeakMap();
 
 
+function inheritable(target) {
+    let key = target.key;
+
+    target.descriptor.get = function() {
+        let value = this._props[key];
+
+        if(value === 'inherit') {
+            return this._parent ? this._parent[key] : undefined;
+        } else if(value === 'root') {
+            let root = this.root;
+            return root ? root[key] : undefined;
+        } else {
+            return value;
+        }
+    };
+
+    target.descriptor.set = function(value) {
+        this._props[key] = value;
+    };
+
+    return {
+        
+    };
+}
+
+
 export default class MenuNode extends Publisher {
+    @inheritable test;
+
     constructor() {
         super();
         this._parent = null;
         this._children = [];
+        this._props = {};
         this._timers = {};
         /**
          * @type {undefined|null|HTMLElement}
@@ -19,7 +48,7 @@ export default class MenuNode extends Publisher {
         this._element = undefined;
 
         this._isActive = false;
-        this._isVisible = false;
+        this._isVisible = true;
         this._isDisabled = false;
 
         this.nodeType = null;
@@ -256,6 +285,14 @@ export default class MenuNode extends Publisher {
         } else if(selector.append) {
             selector.append(this.element);
         }
+    }
+
+    remove() {
+        if(this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
+        }
+
+        return this;
     }
 
     closest(fn) {

@@ -24,6 +24,10 @@ export default class Menu extends MenuNode {
         } else {
             this.element = this.render(context);
         }
+
+        this.isVisible = false;
+
+        this.init();
     }
 
     render({arrow=false}={}) {
@@ -31,7 +35,7 @@ export default class Menu extends MenuNode {
             body = document.createElement('div');
 
         element.className = "menu";
-        body.classname = "menu__body";
+        body.className = "menu__body";
 
         if(arrow) {
             let arrow = document.createElement('div');
@@ -147,6 +151,20 @@ export default class Menu extends MenuNode {
 
     //------------------------------------------------------------------------------------------------------------------
     // Tree methods.
+
+    createItems(data) {
+        for(let {children, ...args} of data) {
+            let item = new this.MenuItemClass(args);
+
+            if(children && children.length) {
+                let submenu = new Menu();
+                item.attachSubMenu(submenu);
+                submenu.createItems(children);
+            }
+
+            this.append(item);
+        }
+    }
 
     addItem(text, action) {
         let item = new this.MenuItemClass({text, action});

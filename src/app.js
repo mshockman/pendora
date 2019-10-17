@@ -43,19 +43,27 @@ export default class Application {
      * @param page
      * @param context
      */
-    init(page, context) {
+    async init(page, context) {
         if(this.page) {
             throw new Error("Page is already loaded");
         }
 
-        window.addEventListener('load', async () => {
-            this.isLoaded = true;
+        // window.addEventListener('load', async () => {
+        //     this.isLoaded = true;
+        //
+        //     const pageClassImporter = this.classes[page],
+        //         PageClass = (await pageClassImporter()).default;
+        //
+        //     this.page = new PageClass(context);
+        //     if(this.page.load) this.page.load();
+        // });
 
-            const pageClassImporter = this.classes[page],
-                PageClass = (await pageClassImporter()).default;
+        this.isLoaded = true;
 
-            this.page = new PageClass(context);
-            if(this.page.load) this.page.load();
-        });
+        const pageClassImporter = this.classes[page],
+            PageClass = (await pageClassImporter()).default;
+
+        this.page = new PageClass(context);
+        if(this.page.load) this.page.load();
     }
 }

@@ -1,11 +1,19 @@
+import "@babel/polyfill";
 import Application from "app";
 
 
-__webpack_public_path__ = "assets/js/";
+__webpack_public_path__ = "/assets/js/";
 
 
 let app = new Application({
+    'menubar': () =>  import("./pages/menubar_example.js")
+});
 
+
+window.addEventListener('load', async () => {
+    if(document.body.dataset.page) {
+        await app.init(document.body.dataset.page);
+    }
 });
 
 
