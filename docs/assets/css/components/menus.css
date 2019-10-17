@@ -1,0 +1,27 @@
+.menubar, .menu {
+  user-select: none;
+  cursor: default;
+}
+
+.menuitem {
+  cursor: pointer;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: row;
+  background-color: #d7dce1;
+}
+.menubar .menuitem {
+  padding: 0.5rem;
+}
+
+.menu {
+  position: absolute;
+}
+
+.menu.hidden {
+  visibility: hidden;
+}
+
+/*# sourceMappingURL=menus.css.map */
