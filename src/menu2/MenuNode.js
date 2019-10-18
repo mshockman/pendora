@@ -6,35 +6,7 @@ import {addClasses, removeClasses} from "core/utility";
 export const MENU_MAP = new WeakMap();
 
 
-function inheritable(target) {
-    let key = target.key;
-
-    target.descriptor.get = function() {
-        let value = this._props[key];
-
-        if(value === 'inherit') {
-            return this._parent ? this._parent[key] : undefined;
-        } else if(value === 'root') {
-            let root = this.root;
-            return root ? root[key] : undefined;
-        } else {
-            return value;
-        }
-    };
-
-    target.descriptor.set = function(value) {
-        this._props[key] = value;
-    };
-
-    return {
-        
-    };
-}
-
-
 export default class MenuNode extends Publisher {
-    @inheritable test;
-
     constructor() {
         super();
         this._parent = null;
@@ -60,34 +32,21 @@ export default class MenuNode extends Publisher {
 
         this.boundEvents = {};
 
-        this.boundEvents.onMouseOver = (event) => {
-            this.publish('onMouseOver', event, this);
-            this.onMouseOver(event);
+        let handleEvent = (event) => {
+            let target = this.getTargetNode(event.target);
 
-            if(!this.element.contains(event.relatedTarget)) {
-                this.publish('onMouseEnter', event, this);
-                // if(this.onMouseEnter) this.onMouseEnter(event);
+            if(target.getEventDelegator() === this) {
+                target.dispatchTopic(`event.${event.type}`, this, event);
             }
         };
 
-        this.boundEvents.onMouseOut = (event) => {
-            this.publish('onMouseOut', event, this);
-            this.onMouseOut(event);
-
-            if(!this.element.contains(event.relatedTarget)) {
-                this.publish('onMouseLeave', event, this);
-                // if(this.onMouseLeave) this.onMouseLeave(event);
-            }
-        };
-
-        this.boundEvents.onClick = (event) => {
-            this.publish('onClick', event, this);
-            this.onClick(event);
-        };
+        this.boundEvents.onMouseOver = handleEvent;
+        this.boundEvents.onMouseOut = handleEvent;
+        this.boundEvents.onClick = handleEvent;
 
         this.element.addEventListener('click', this.boundEvents.onClick);
-        this.element.addEventListener('onMouseOut', this.boundEvents.onMouseOut);
-        this.element.addEventListener('onMouseOver', this.boundEvents.onMouseOver);
+        this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
+        this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
         this.isController = true;
     }
 
@@ -96,10 +55,10 @@ export default class MenuNode extends Publisher {
             this.element.removeEventListener('click', this.boundEvents.onClick);
             this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
             this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
-            this.events = null;
-            this.isController = false;
         }
 
+        this.isController = false;
+        this.boundEvents = null;
         this.element = null;
     }
 
@@ -110,6 +69,13 @@ export default class MenuNode extends Publisher {
 
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    // Actions
+
+    /**
+     * Returns the parent MenuNode
+     * @returns {null|MenuNode}
+     */
     get parent() {
         return this._parent || null;
     }
@@ -258,6 +224,12 @@ export default class MenuNode extends Publisher {
         }
     }
 
+    /**
+     * Return the sibling offset from the current node.
+     *
+     * @param offset
+     * @returns {null|MenuNode}
+     */
     getOffsetSibling(offset=1) {
         let parent = this.parent;
 
@@ -277,6 +249,11 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Appends the component to the target selector.
+     *
+     * @param selector {string|HTMLElement|{append}}
+     */
     appendTo(selector) {
         if(typeof selector === 'string') {
             document.querySelector(selector).appendChild(this.element);
@@ -287,6 +264,11 @@ export default class MenuNode extends Publisher {
         }
     }
 
+    /**
+     * Removes the component from the dom.
+     *
+     * @returns {MenuNode}
+     */
     remove() {
         if(this.element.parentElement) {
             this.element.parentElement.removeChild(this.element);
@@ -295,6 +277,12 @@ export default class MenuNode extends Publisher {
         return this;
     }
 
+    /**
+     * Returns the closest MenuNode up the tree that matches the provided test function.
+     *
+     * @param fn {function(node)}
+     * @returns {MenuNode|null}
+     */
     closest(fn) {
         let o = this;
 
@@ -306,6 +294,11 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Yields all descendants.
+     *
+     * @returns {IterableIterator<MenuNode>}
+     */
     *getDescendants() {
         for(let child of this.children) {
             yield child;
@@ -492,6 +485,17 @@ export default class MenuNode extends Publisher {
 
     isMenu() {
         return false;
+    }
+
+    dispatchTopic(topic, ...args) {
+        let o = this;
+
+        while(o) {
+            o.publish(topic, ...args);
+            o = o.parent;
+        }
+
+        return this;
     }
 
     //------------------------------------------------------------------------------------------------------------------

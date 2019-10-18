@@ -1,7 +1,12 @@
 import MenuNode from "./MenuNode";
+import {inherit, publishTargetEvent} from "./decorators";
 
 
 export default class MenuItem extends MenuNode {
+    @inherit toggle;
+    @inherit autoActivate;
+    @inherit openOnHover;
+
     constructor({text, action, href=null, target, classes, nodeName="div", ...context}={}) {
         super();
 
@@ -16,6 +21,14 @@ export default class MenuItem extends MenuNode {
         }
 
         if(action) this.addAction(action);
+
+        this.toggle = 'inherit';
+        this.autoActivate = 'inherit';
+        this.openOnHover = 'inherit';
+
+        this.on('event.click', (target, event) => this.onClick(target, event));
+        this.on('event.mouseover', (target, event) => this.onMouseOver(target, event));
+        this.on('event.mouseout', (target, event) => this.onMouseOut(target, event));
     }
 
     render({text, nodeName="div", href=null}={}) {
@@ -37,14 +50,7 @@ export default class MenuItem extends MenuNode {
 
     activate() {
         if(this.isActive) return;
-
-        if(this.parent) {
-            if(!this.parent.isActive) {
-                this.parent.activate();
-            }
-
-            this.parent.setActiveItem(this);
-        }
+        this.isActive = true;
 
         this.clearTimer('activateItem');
 
@@ -55,7 +61,7 @@ export default class MenuItem extends MenuNode {
         this.publish('activate', this);
 
         if(this.parent) {
-            this.publish('menuitem.activate', this);
+            this.parent.publish('activate', this);
         }
 
         this.element.dispatchEvent(new CustomEvent('menuitem.activate', {
@@ -66,6 +72,7 @@ export default class MenuItem extends MenuNode {
 
     deactivate() {
         if(!this.isActive) return;
+        this.isActive = false;
 
         if(this.submenu) {
             this.submenu.deactivate();
@@ -73,7 +80,7 @@ export default class MenuItem extends MenuNode {
         }
 
         this.publish('deactivate', this);
-        if(this.parent) this.parent.publish('menuitem.deactivate', this);
+        if(this.parent) this.parent.publish('deactivate', this);
 
         this.element.dispatchEvent(new CustomEvent('menuitem.deactivate', {
             detail: this,
@@ -82,12 +89,8 @@ export default class MenuItem extends MenuNode {
     }
 
     select() {
-        let o = this;
-
-        while(o) {
-            o.publish('menuitem.selected', this);
-            o = o.parent;
-        }
+        this.publish('selected');
+        this.dispatchTopic('menuitem.selected', this);
 
         this.element.dispatchEvent(new CustomEvent('menuitem.selected', {
             detail: this,
@@ -103,19 +106,29 @@ export default class MenuItem extends MenuNode {
     // Action management
 
     addAction(action) {
+        if(typeof action === 'string') {
+            let fn = () => {
+                window.location = action;
+            };
 
+            this.on('selected', fn);
+            return fn;
+        } else {
+            this.on('selected', action);
+            return action;
+        }
     }
 
     removeAction(action) {
-
+        this.off('selected', action);
     }
 
     hasAction(action) {
-
+        return this.hasEvent('selected', action);
     }
 
     clearActions() {
-
+        this.off('selected');
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -154,6 +167,95 @@ export default class MenuItem extends MenuNode {
         return !!this.submenu;
     }
 
+    //------------------------------------------------------------------------------------------------------------------
+    // Event handlers
+
+    onClick(target, event) {
+        console.log("hello");
+
+        if(this.isDisabled) {
+            event.preventDefault();
+        }
+
+        if(target !== this) return;
+
+        if(this.parent) {
+            this.parent.publish('click-item', this, event);
+        }
+
+        if(!this.isActive && this.toggleOn) {
+            this.activate();
+        } else if(this.isActive && this.toggleOff && this.hasSubMenu()) {
+            this.deactivate();
+        }
+
+        if(this.isActive && !this.hasSubMenu()) {
+            this.select();
+        }
+    }
+
+    onMouseOver(target, event) {
+        if(this.element.contains(event.relatedTarget)) return;
+
+        // When the mouse moves on an item clear any active items in it's submenu.
+        if(this.submenu) {
+            this.submenu.clearItems();
+        }
+
+        let activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
+
+        if(this.parent) {
+            this.parent.publish('mouse-enter-item', this, event);
+        }
+
+        if(!this.isActive && !this.isDisabled) {
+            if(activate === true) {
+                this.activate();
+            } else if(typeof activate === 'number' && activate >= 0) {
+                this.startTimer('activateItem', () => {
+                    if(!this.isDisabled) {
+                        this.activate();
+                    }
+                }, activate);
+            }
+        }
+    }
+
+    onMouseOut(target, event) {
+        if(this.element.contains(event.relatedTarget)) return;
+
+        this.clearTimer('activateItem');
+
+        if(this.parent) {
+            this.parent.publish('mouse-leave-item', this, event);
+        }
+
+        if(!this.hasSubMenu() && this.isActive) {
+            this.deactivate();
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Getters and Setters
+
+    /**
+     * Will return true if menu items should toggle on.
+     *
+     * @returns {boolean}
+     */
+    get toggleOn() {
+        return this.toggle === 'on' || this.toggle === 'both';
+    }
+
+    /**
+     * Will return true if menu items should toggle off.
+     *
+     * @returns {boolean}
+     */
+    get toggleOff() {
+        return this.toggle === 'off' || this.toggle === 'both';
+    }
+
     get submenu() {
         return this._children[0];
     }
@@ -164,121 +266,5 @@ export default class MenuItem extends MenuNode {
         } else {
             this.attachSubMenu(value);
         }
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Event handlers
-
-    onClick(event) {
-        console.log("click");
-
-        if(this.isDisabled) {
-            event.preventDefault();
-        }
-
-        if(this.hasSubMenu()) {
-            if(this.isActive && this.toggleOff) {
-                this.deactivate();
-            } else if(!this.isActive && this.toggleOn) {
-                this.activate();
-            }
-        } else {
-            if(!this.isActive && this.toggleOn) {
-                this.activate();
-            }
-
-            this.select();
-        }
-    }
-
-    onMouseOver(event) {
-        if(!this.element.contains(event.relatedTarget)) return;
-
-        let parent = this.parent;
-
-        if(!this.isActive && !this.isDisabled) {
-            if(parent.isActive) {
-                if(parent.openOnHover === true) {
-                    this.activate();
-                } else if(typeof parent.openOnHover === 'number' && parent.openOnHover >= 0) {
-                    this.startTimer('activateItem', () => {
-                        if(!this.isDisabled) {
-                            this.activate();
-                        }
-                    }, parent.openOnHover);
-                }
-            } else {
-                if(parent.autoActivate === true) {
-                    this.activate();
-                } else if(typeof parent.autoActivate === 'number' && parent.autoActivate >= 0) {
-                    this.startTimer('activateItem', () => {
-                        if(!this.isDisabled) {
-                            this.activate();
-                        }
-                    }, parent.autoActivate);
-                }
-            }
-        }
-
-        if(!parent.multiple && parent.deactivateOnItemHover) {
-            this.clearItems();
-        }
-    }
-
-    onMouseOut(event) {
-        if(this.isActive && !this.hasSubMenu()) {
-
-        }
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Getters and Setters
-
-    get autoActivate() {
-
-    }
-
-    set autoActivate(value) {
-
-    }
-
-    get openOnHover() {
-
-    }
-
-    set openOnHover(value) {
-
-    }
-
-    get timeout() {
-
-    }
-
-    set timeout(value) {
-
-    }
-
-    get closeOnBlur() {
-
-    }
-
-    set closeOnBlur(value) {
-
-    }
-
-    get toggle() {
-
-    }
-
-    set toggle(value) {
-
-    }
-
-    get closeOnSelect() {
-
-    }
-
-    set closeOnSelect(value) {
-
     }
 }

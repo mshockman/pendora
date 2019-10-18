@@ -3,7 +3,7 @@ import MenuItem from "./MenuItem";
 
 
 export default class Menu extends MenuNode {
-    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=false, multiple=false, openOnHover=false,
+    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
                     toggle="both", closeOnSelect=true, deactivateOnItemHover=true, ...context}={}) {
         super();
         this.menuNodeType = "menu";
@@ -28,6 +28,32 @@ export default class Menu extends MenuNode {
         this.isVisible = false;
 
         this.init();
+
+        // On child is activate
+        // deactivate siblings if multiple is false.
+        this.on('activate', (target) => {
+            if(target.parent === this) {
+                if (!this.isActive) {
+                    this.activate();
+                }
+
+                if (!this.multiple) {
+                    for (let activeItem of this.activeItems) {
+                        if (activeItem !== target) {
+                            activeItem.deactivate();
+                        }
+                    }
+                }
+            }
+        });
+
+        this.on('deactivate', (target) => {
+            if(target.parent === this) {
+                if (this.isActive && this.activeItems.length === 0) {
+                    this.deactivate();
+                }
+            }
+        });
     }
 
     render({arrow=false}={}) {
@@ -53,6 +79,8 @@ export default class Menu extends MenuNode {
 
             // Set isActivate flag and add active classes.
             this.isActive = true;
+
+            console.log("Activate menu");
 
             // Register document click handler
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -88,6 +116,8 @@ export default class Menu extends MenuNode {
         if(this.isActive) {
             // Set flag and remove active classes.
             this.isActive = false;
+
+            console.trace("Deactivate menu");
 
             // Clear any active child items.
             this.clearItems();
@@ -226,21 +256,6 @@ export default class Menu extends MenuNode {
         }
     }
 
-    setActiveItem(item) {
-        if(!item.isActive) {
-            item.activate();
-            return;
-        }
-
-        if(!this.multiple) {
-            for(let activeItem of this.activeItems) {
-                if(activeItem.isActive && activeItem !== item) {
-                    activeItem.deactivate();
-                }
-            }
-        }
-    }
-
     /**
      * Returns list of all menu bodies for the menu.
      *
@@ -258,28 +273,25 @@ export default class Menu extends MenuNode {
 
     onMouseOver(event) {
         this.clearTimer('timeout');
-        this._isMouseOver = true;
 
-        let item = this.getTargetItem(event.target);
+        let targetNode = this.getTargetNode(event.target);
 
-        if(item && item.getEventDelegator() === this) {
-            item.onMouseOver(event);
+        if(targetNode && targetNode.getEventDelegator() === this) {
+            targetNode.onMouseOver(event);
         }
     }
 
     onMouseOut(event) {
-        this._isMouseOver = false;
-
         if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
             this.startTimer('timeout', () => {
                 this.deactivate();
             }, this.timeout);
         }
 
-        let targetItem = this.getTargetItem(event.target);
+        let targetNode = this.getTargetNode(event.target);
 
-        if(targetItem && targetItem.getEventDelegator() === this) {
-            this.onMouseOut(event);
+        if(targetNode && targetNode.getEventDelegator() === this) {
+            targetNode.onMouseOut(event);
         }
     }
 

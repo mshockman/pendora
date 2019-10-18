@@ -3,14 +3,29 @@
   cursor: default;
 }
 
+.menu .menu {
+  left: 100%;
+  top: 0;
+}
+
 .menuitem {
   cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+}
+.menuitem > a {
+  text-decoration: none;
+}
+
+.menuitem.active {
+  background-color: #ccc;
 }
 
 .menubar {
   display: flex;
   flex-direction: row;
   background-color: #d7dce1;
+  position: relative;
 }
 .menubar .menuitem {
   padding: 0.5rem;
@@ -18,6 +33,10 @@
 
 .menu {
   position: absolute;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  top: 100%;
+  left: 0;
 }
 
 .menu.hidden {

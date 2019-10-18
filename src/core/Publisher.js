@@ -6,7 +6,7 @@ export default class Publisher {
     }
 
     on(topic, callback) {
-        if(!this._topics[topic]) topic = [];
+        if(!this._topics[topic]) this._topics[topic] = [];
         this._topics[topic].push(callback);
         return this;
     }
