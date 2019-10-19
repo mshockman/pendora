@@ -36,7 +36,10 @@ export default class MenuNode extends Publisher {
             let target = this.getTargetNode(event.target);
 
             if(target.getEventDelegator() === this) {
-                target.dispatchTopic(`event.${event.type}`, this, event);
+                target.dispatchTopic(`event.${event.type}`, {
+                    target,
+                    originalEvent: event
+                });
             }
         };
 

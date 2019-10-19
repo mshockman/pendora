@@ -26,9 +26,10 @@ export default class MenuItem extends MenuNode {
         this.autoActivate = 'inherit';
         this.openOnHover = 'inherit';
 
-        this.on('event.click', (target, event) => this.onClick(target, event));
-        this.on('event.mouseover', (target, event) => this.onMouseOver(target, event));
-        this.on('event.mouseout', (target, event) => this.onMouseOut(target, event));
+        this.on('event.click', (event) => this.onClick(event));
+        this.on('event.mouseover', (event) => this.onMouseOver(event));
+        this.on('event.mouseout', (event) => this.onMouseOut(event));
+        this.on('menuitem.selected', (event) => this.onSelect(event));
     }
 
     render({text, nodeName="div", href=null}={}) {
@@ -90,7 +91,7 @@ export default class MenuItem extends MenuNode {
 
     select() {
         this.publish('selected');
-        this.dispatchTopic('menuitem.selected', this);
+        this.dispatchTopic('menuitem.selected', {target: this});
 
         this.element.dispatchEvent(new CustomEvent('menuitem.selected', {
             detail: this,
@@ -170,14 +171,18 @@ export default class MenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Event handlers
 
-    onClick(target, event) {
-        console.log("hello");
+    onSelect(event) {
+        if(this.closeOnSelect && this.isActive) {
+            this.deactivate();
+        }
+    }
 
+    onClick(event) {
         if(this.isDisabled) {
             event.preventDefault();
         }
 
-        if(target !== this) return;
+        if(event.target !== this) return;
 
         if(this.parent) {
             this.parent.publish('click-item', this, event);
@@ -194,35 +199,38 @@ export default class MenuItem extends MenuNode {
         }
     }
 
-    onMouseOver(target, event) {
-        if(this.element.contains(event.relatedTarget)) return;
+    onMouseOver(event) {
+        this.clearTimer('timeout');
+        if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
-        // When the mouse moves on an item clear any active items in it's submenu.
-        if(this.submenu) {
-            this.submenu.clearItems();
-        }
+        if(event.target === this) {
+            // When the mouse moves on an item clear any active items in it's submenu.
+            if (this.submenu) {
+                this.submenu.clearItems();
+            }
 
-        let activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
+            let activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
 
-        if(this.parent) {
-            this.parent.publish('mouse-enter-item', this, event);
-        }
+            if (this.parent) {
+                this.parent.publish('mouse-enter-item', this, event);
+            }
 
-        if(!this.isActive && !this.isDisabled) {
-            if(activate === true) {
-                this.activate();
-            } else if(typeof activate === 'number' && activate >= 0) {
-                this.startTimer('activateItem', () => {
-                    if(!this.isDisabled) {
-                        this.activate();
-                    }
-                }, activate);
+            if (!this.isActive && !this.isDisabled) {
+                if (activate === true) {
+                    this.activate();
+                } else if (typeof activate === 'number' && activate >= 0) {
+                    this.startTimer('activateItem', () => {
+                        if (!this.isDisabled) {
+                            this.activate();
+                        }
+                    }, activate);
+                }
             }
         }
     }
 
-    onMouseOut(target, event) {
-        if(this.element.contains(event.relatedTarget)) return;
+    onMouseOut(event) {
+        if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
         this.clearTimer('activateItem');
 
@@ -232,6 +240,12 @@ export default class MenuItem extends MenuNode {
 
         if(!this.hasSubMenu() && this.isActive) {
             this.deactivate();
+        }
+
+        if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+            this.startTimer('timeout', () => {
+                this.deactivate();
+            }, this.timeout);
         }
     }
 

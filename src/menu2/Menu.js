@@ -54,6 +54,11 @@ export default class Menu extends MenuNode {
                 }
             }
         });
+
+        this.on('event.click', (event) => this.onClick(event));
+        this.on('event.mouseover', (event) => this.onMouseOver(event));
+        this.on('event.mouseout', (event) => this.onMouseOut(event));
+        this.on('menuitem.selected', (event) => this.onSelect(event));
     }
 
     render({arrow=false}={}) {
@@ -79,8 +84,6 @@ export default class Menu extends MenuNode {
 
             // Set isActivate flag and add active classes.
             this.isActive = true;
-
-            console.log("Activate menu");
 
             // Register document click handler
             if(this.closeOnBlur && !this._captureDocumentClick) {
@@ -114,10 +117,9 @@ export default class Menu extends MenuNode {
 
     deactivate() {
         if(this.isActive) {
+            console.trace("Menu deactivate");
             // Set flag and remove active classes.
             this.isActive = false;
-
-            console.trace("Deactivate menu");
 
             // Clear any active child items.
             this.clearItems();
@@ -273,45 +275,31 @@ export default class Menu extends MenuNode {
 
     onMouseOver(event) {
         this.clearTimer('timeout');
-
-        let targetNode = this.getTargetNode(event.target);
-
-        if(targetNode && targetNode.getEventDelegator() === this) {
-            targetNode.onMouseOver(event);
-        }
     }
 
     onMouseOut(event) {
-        if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
-            this.startTimer('timeout', () => {
-                this.deactivate();
-            }, this.timeout);
-        }
-
-        let targetNode = this.getTargetNode(event.target);
-
-        if(targetNode && targetNode.getEventDelegator() === this) {
-            targetNode.onMouseOut(event);
+        if(!this.element.contains(event.originalEvent.relatedTarget)) {
+            if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+                this.startTimer('timeout', () => {
+                    this.deactivate();
+                }, this.timeout);
+            }
         }
     }
 
     onClick(event) {
-        let target = this.getTargetNode(event.target);
-
-        if(target === this) {
+        if(event.target === this) {
             if(this.isActive && this.toggleOff) {
                 this.deactivate();
             } else if(!this.isActive && this.toggleOn) {
                 this.activate();
             }
-        } else if(target.isMenuItem()) {
-            if(target.getEventDelegator() === this) {
-                target.onClick(event);
-            }
+        }
+    }
 
-            if(this.isActive && !target.hasSubMenu()) {
-                this.deactivate();
-            }
+    onSelect(event) {
+        if(this.closeOnSelect && this.isActive) {
+            this.deactivate();
         }
     }
 

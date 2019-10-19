@@ -1364,6 +1364,22 @@ function (_MenuNode) {
       }
     });
 
+    _this.on('event.click', function (event) {
+      return _this.onClick(event);
+    });
+
+    _this.on('event.mouseover', function (event) {
+      return _this.onMouseOver(event);
+    });
+
+    _this.on('event.mouseout', function (event) {
+      return _this.onMouseOut(event);
+    });
+
+    _this.on('menuitem.selected', function (event) {
+      return _this.onSelect(event);
+    });
+
     return _this;
   }
 
@@ -1397,8 +1413,7 @@ function (_MenuNode) {
       if (!this.isActive) {
         var parent = this.parent; // Set isActivate flag and add active classes.
 
-        this.isActive = true;
-        console.log("Activate menu"); // Register document click handler
+        this.isActive = true; // Register document click handler
 
         if (this.closeOnBlur && !this._captureDocumentClick) {
           this._captureDocumentClick = {
@@ -1430,9 +1445,9 @@ function (_MenuNode) {
     key: "deactivate",
     value: function deactivate() {
       if (this.isActive) {
-        // Set flag and remove active classes.
-        this.isActive = false;
-        console.trace("Deactivate menu"); // Clear any active child items.
+        console.trace("Menu deactivate"); // Set flag and remove active classes.
+
+        this.isActive = false; // Clear any active child items.
 
         this.clearItems(); // Remove document click handler that tracks user clicks outside of menu tree.
 
@@ -1647,48 +1662,36 @@ function (_MenuNode) {
     key: "onMouseOver",
     value: function onMouseOver(event) {
       this.clearTimer('timeout');
-      var targetNode = this.getTargetNode(event.target);
-
-      if (targetNode && targetNode.getEventDelegator() === this) {
-        targetNode.onMouseOver(event);
-      }
     }
   }, {
     key: "onMouseOut",
     value: function onMouseOut(event) {
       var _this3 = this;
 
-      if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0 && !this.element.contains(event.relatedTarget)) {
-        this.startTimer('timeout', function () {
-          _this3.deactivate();
-        }, this.timeout);
-      }
-
-      var targetNode = this.getTargetNode(event.target);
-
-      if (targetNode && targetNode.getEventDelegator() === this) {
-        targetNode.onMouseOut(event);
+      if (!this.element.contains(event.originalEvent.relatedTarget)) {
+        if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+          this.startTimer('timeout', function () {
+            _this3.deactivate();
+          }, this.timeout);
+        }
       }
     }
   }, {
     key: "onClick",
     value: function onClick(event) {
-      var target = this.getTargetNode(event.target);
-
-      if (target === this) {
+      if (event.target === this) {
         if (this.isActive && this.toggleOff) {
           this.deactivate();
         } else if (!this.isActive && this.toggleOn) {
           this.activate();
         }
-      } else if (target.isMenuItem()) {
-        if (target.getEventDelegator() === this) {
-          target.onClick(event);
-        }
-
-        if (this.isActive && !target.hasSubMenu()) {
-          this.deactivate();
-        }
+      }
+    }
+  }, {
+    key: "onSelect",
+    value: function onSelect(event) {
+      if (this.closeOnSelect && this.isActive) {
+        this.deactivate();
       }
     }
     /**
@@ -1964,16 +1967,20 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       _this.autoActivate = 'inherit';
       _this.openOnHover = 'inherit';
 
-      _this.on('event.click', function (target, event) {
-        return _this.onClick(target, event);
+      _this.on('event.click', function (event) {
+        return _this.onClick(event);
       });
 
-      _this.on('event.mouseover', function (target, event) {
-        return _this.onMouseOver(target, event);
+      _this.on('event.mouseover', function (event) {
+        return _this.onMouseOver(event);
       });
 
-      _this.on('event.mouseout', function (target, event) {
-        return _this.onMouseOut(target, event);
+      _this.on('event.mouseout', function (event) {
+        return _this.onMouseOut(event);
+      });
+
+      _this.on('menuitem.selected', function (event) {
+        return _this.onSelect(event);
       });
 
       return _this;
@@ -2071,7 +2078,9 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       key: "select",
       value: function select() {
         this.publish('selected');
-        this.dispatchTopic('menuitem.selected', this);
+        this.dispatchTopic('menuitem.selected', {
+          target: this
+        });
         this.element.dispatchEvent(new CustomEvent('menuitem.selected', {
           detail: this,
           bubbles: true
@@ -2165,15 +2174,21 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
     }, {
       kind: "method",
+      key: "onSelect",
+      value: function onSelect(event) {
+        if (this.closeOnSelect && this.isActive) {
+          this.deactivate();
+        }
+      }
+    }, {
+      kind: "method",
       key: "onClick",
-      value: function onClick(target, event) {
-        console.log("hello");
-
+      value: function onClick(event) {
         if (this.isDisabled) {
           event.preventDefault();
         }
 
-        if (target !== this) return;
+        if (event.target !== this) return;
 
         if (this.parent) {
           this.parent.publish('click-item', this, event);
@@ -2192,38 +2207,44 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
     }, {
       kind: "method",
       key: "onMouseOver",
-      value: function onMouseOver(target, event) {
+      value: function onMouseOver(event) {
         var _this2 = this;
 
-        if (this.element.contains(event.relatedTarget)) return; // When the mouse moves on an item clear any active items in it's submenu.
+        this.clearTimer('timeout');
+        if (this.element.contains(event.originalEvent.relatedTarget)) return;
 
-        if (this.submenu) {
-          this.submenu.clearItems();
-        }
+        if (event.target === this) {
+          // When the mouse moves on an item clear any active items in it's submenu.
+          if (this.submenu) {
+            this.submenu.clearItems();
+          }
 
-        var activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
+          var activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
 
-        if (this.parent) {
-          this.parent.publish('mouse-enter-item', this, event);
-        }
+          if (this.parent) {
+            this.parent.publish('mouse-enter-item', this, event);
+          }
 
-        if (!this.isActive && !this.isDisabled) {
-          if (activate === true) {
-            this.activate();
-          } else if (typeof activate === 'number' && activate >= 0) {
-            this.startTimer('activateItem', function () {
-              if (!_this2.isDisabled) {
-                _this2.activate();
-              }
-            }, activate);
+          if (!this.isActive && !this.isDisabled) {
+            if (activate === true) {
+              this.activate();
+            } else if (typeof activate === 'number' && activate >= 0) {
+              this.startTimer('activateItem', function () {
+                if (!_this2.isDisabled) {
+                  _this2.activate();
+                }
+              }, activate);
+            }
           }
         }
       }
     }, {
       kind: "method",
       key: "onMouseOut",
-      value: function onMouseOut(target, event) {
-        if (this.element.contains(event.relatedTarget)) return;
+      value: function onMouseOut(event) {
+        var _this3 = this;
+
+        if (this.element.contains(event.originalEvent.relatedTarget)) return;
         this.clearTimer('activateItem');
 
         if (this.parent) {
@@ -2232,6 +2253,12 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (!this.hasSubMenu() && this.isActive) {
           this.deactivate();
+        }
+
+        if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+          this.startTimer('timeout', function () {
+            _this3.deactivate();
+          }, this.timeout);
         }
       } //------------------------------------------------------------------------------------------------------------------
       // Getters and Setters
@@ -2362,7 +2389,10 @@ function (_Publisher) {
         var target = _this2.getTargetNode(event.target);
 
         if (target.getEventDelegator() === _this2) {
-          target.dispatchTopic("event.".concat(event.type), _this2, event);
+          target.dispatchTopic("event.".concat(event.type), {
+            target: target,
+            originalEvent: event
+          });
         }
       };
 
