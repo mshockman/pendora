@@ -1,5 +1,28 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
+import Menu from './Menu';
+import {parseAny, parseBoolean, parseIntValue} from "../core/utility";
+import Attribute, {DROP, TRUE} from "core/attributes";
+
+
+const parseBooleanOrInt = (value) => parseAny(value, parseBoolean, parseIntValue),
+    timeAttribute = new Attribute(parseBooleanOrInt, DROP, TRUE),
+    boolAttribute = new Attribute(parseBoolean, DROP, TRUE),
+    stringAttribute = new Attribute(null, DROP, TRUE);
+
+
+export const ITEM_ATTRIBUTES = {
+    closeOnBlur: timeAttribute,
+    timeout: timeAttribute,
+    autoActivate: timeAttribute,
+    multiple: boolAttribute,
+    openOnHover: timeAttribute,
+    closeOnSelect: boolAttribute,
+    deactivateOnItemHover: boolAttribute,
+    delay: timeAttribute,
+    position: stringAttribute,
+    toggle: stringAttribute
+};
 
 
 export default class MenuItem extends MenuNode {
@@ -8,8 +31,13 @@ export default class MenuItem extends MenuNode {
     @inherit openOnHover;
     /**@type{boolean|Number|"inherit"|"root"}*/
     @inherit delay = false;
+    @inherit position;
 
-    constructor({text, action, href=null, target, classes, nodeName="div", ...context}={}) {
+    static __attributes__ = ITEM_ATTRIBUTES;
+
+    constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
+                    delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
+                    nodeName="div", position="inherit", multiple=false, ...context}={}) {
         super();
 
         if(target) {
@@ -24,10 +52,17 @@ export default class MenuItem extends MenuNode {
 
         if(action) this.addAction(action);
 
-        this.toggle = 'inherit';
-        this.autoActivate = 'inherit';
-        this.openOnHover = 'inherit';
-        this.delay = 'inherit';
+        this.toggle = toggle;
+        this.autoActivate = autoActivate;
+        this.openOnHover = openOnHover;
+        this.delay = delay;
+        this.closeOnSelect = closeOnSelect;
+        this.closeOnBlur = closeOnBlur;
+        this.timeout = timeout;
+        this.position = position;
+        this.multiple = multiple;
+        this.MenuItemClass = MenuItem;
+        this.SubMenuClass = Menu;
 
         this.on('event.click', (event) => this.onClick(event));
         this.on('event.mouseover', (event) => this.onMouseOver(event));
@@ -72,6 +107,21 @@ export default class MenuItem extends MenuNode {
             }
         }
 
+        // Register document click handler
+        if(this.closeOnBlur && !this._captureDocumentClick) {
+            this._captureDocumentClick = {
+                target: document,
+
+                onDocumentClick: (event) => {
+                    if(!this.element.contains(event.target)) {
+                        this.deactivate();
+                    }
+                }
+            };
+
+            this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
+        }
+
         this.publish('activate', this);
 
         if(this.parent) {
@@ -92,6 +142,12 @@ export default class MenuItem extends MenuNode {
         if(this.submenu) {
             this.submenu.deactivate();
             this.submenu.hide();
+        }
+
+        // Remove document click handler that tracks user clicks outside of menu tree.
+        if(this._captureDocumentClick) {
+            this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
+            this._captureDocumentClick = null;
         }
 
         this.publish('deactivate', this);

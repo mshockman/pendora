@@ -1,13 +1,64 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 import {addClasses} from "core/utility";
-import {inherit} from "./decorators";
+import {parseBoolean, parseIntValue, parseAny} from "core/utility";
+import * as iter from "core/iter";
+import {inherit} from './decorators';
+import AutoLoader from "autoloader";
+import Attribute, {DROP, TRUE} from "core/attributes";
+
+
+const parseBooleanOrInt = (value) => parseAny(value, parseBoolean, parseIntValue),
+    timeAttribute = new Attribute(parseBooleanOrInt, DROP, TRUE),
+    boolAttribute = new Attribute(parseBoolean, DROP, TRUE),
+    stringAttribute = new Attribute(null, DROP, TRUE);
+
+
+export const MENU_PARAMETERS = {
+    closeOnBlur: timeAttribute,
+    timeout: timeAttribute,
+    autoActivate: timeAttribute,
+    multiple: boolAttribute,
+    openOnHover: timeAttribute,
+    closeOnSelect: boolAttribute,
+    deactivateOnItemHover: boolAttribute,
+    delay: timeAttribute,
+    position: stringAttribute,
+    toggle: stringAttribute,
+    visible: boolAttribute
+};
 
 
 export default class Menu extends MenuNode {
+    @inherit position;
+    @inherit multiple;
+
+    // Used to parse attributes on elements to their correct type during initializing by
+    // parsing the DOM tree.
+    static __attributes__ = MENU_PARAMETERS;
+
+    /**
+     *
+     * @param target {String|HTMLElement}
+     * @param closeOnBlur {Boolean|Number}
+     * @param timeout {Boolean|Number}
+     * @param autoActivate {Boolean|Number}
+     * @param multiple {Boolean|"inherit"|"root"}
+     * @param openOnHover {Boolean|Number}
+     * @param toggle {"on"|"off"|"both"|"none"}
+     * @param closeOnSelect {Boolean}
+     * @param deactivateOnItemHover {Boolean}
+     * @param delay {Boolean|Number}
+     * @param id {String}
+     * @param classes {String}
+     * @param children {Array}
+     * @param visible
+     * @param position {function|"inherit"|"root"|null|undefined}
+     * @param context
+     */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
                     toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=false, id=null, classes=null,
-                    children=null, ...context}={}) {
+                    children=null, visible=false, position="inherit", ...context}={}) {
         super();
         this.menuNodeType = "menu";
         this.events = null;
@@ -23,6 +74,7 @@ export default class Menu extends MenuNode {
         this.closeOnSelect = closeOnSelect;
         this.deactivateOnItemHover = deactivateOnItemHover;
         this.delay = delay;
+        this.position = position;
 
         if(target) {
             this.element = target;
@@ -30,7 +82,7 @@ export default class Menu extends MenuNode {
             this.element = this.render(context);
         }
 
-        this.isVisible = false;
+        this.isVisible = visible;
 
         this.init();
 
@@ -168,6 +220,10 @@ export default class Menu extends MenuNode {
         if(!this.isVisible) {
             this.isVisible = true;
 
+            if(this.position) {
+                this.position.call(this, this);
+            }
+
             if(this.parent) this.parent.publish('submenu.show', this);
             this.publish('menu.show', this);
 
@@ -283,7 +339,7 @@ export default class Menu extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Event Handlers
 
-    onMouseOver(event) {
+    onMouseOver() {
         this.clearTimer('timeout');
     }
 
@@ -307,7 +363,7 @@ export default class Menu extends MenuNode {
         }
     }
 
-    onSelect(event) {
+    onSelect() {
         if(this.closeOnSelect && this.isActive) {
             this.deactivate();
         }
@@ -331,3 +387,8 @@ export default class Menu extends MenuNode {
         return this.toggle === 'off' || this.toggle === 'both';
     }
 }
+
+
+AutoLoader.register('menu', (element) => {
+    return Menu.FromHTML(element);
+});

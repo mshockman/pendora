@@ -1,4 +1,5 @@
 import Menu from "./Menu";
+import AutoLoader from "autoloader";
 
 
 export default class MenuBar extends Menu {
@@ -35,3 +36,6 @@ export default class MenuBar extends Menu {
         return [this.element];
     }
 }
+
+
+AutoLoader.register('menubar', (element) => MenuBar.FromHTML(element));

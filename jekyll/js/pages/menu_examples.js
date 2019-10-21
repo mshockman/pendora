@@ -1,4 +1,4 @@
-import {MenuBar, Menu} from "menu2";
+import {MenuBar, Menu, MenuItem} from "menu2";
 
 
 export default class MenuBarExamplePage {
@@ -44,6 +44,25 @@ export default class MenuBarExamplePage {
         window.menu = menu;
 
         this.initFromJsonExample();
+        this.initImperativelyExample();
+    }
+
+    initImperativelyExample() {
+        let container = document.getElementById('init-menu-imperatively');
+
+        let menu = new Menu();
+
+        menu.append(new MenuItem({text: "Item #1", action: () => alert("Item #1 Clicked")}));
+        menu.append(new MenuItem({text: "Item #2", action: () => alert("Item #2 Clicked")}));
+        menu.append(new MenuItem({text: "Item #3", action: () => alert("Item #3 Clicked")}));
+        menu.append(new MenuItem({text: "Item #4", action: () => alert("Item #4 Clicked")}));
+        menu.append(new MenuItem({text: "Item #5", action: () => alert("Item #5 Clicked")}));
+
+        menu.isVisible = true;
+        menu.addClass('vertical-menu');
+        menu.removeClass('menu');
+
+        menu.appendTo(container);
     }
 
     initFromJsonExample() {

@@ -1,4 +1,4 @@
-(window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[0],{
+(window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[1],{
 
 /***/ "./jekyll/js/pages/menu_examples.js":
 /*!******************************************!*\
@@ -83,47 +83,6 @@ function () {
       menu.appendTo("#menubar_1");
       window.menu = menu;
       this.initFromJsonExample();
-      this.initImperativelyExample();
-    }
-  }, {
-    key: "initImperativelyExample",
-    value: function initImperativelyExample() {
-      var container = document.getElementById('init-menu-imperatively');
-      var menu = new menu2__WEBPACK_IMPORTED_MODULE_0__["Menu"]();
-      menu.append(new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuItem"]({
-        text: "Item #1",
-        action: function action() {
-          return alert("Item #1 Clicked");
-        }
-      }));
-      menu.append(new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuItem"]({
-        text: "Item #2",
-        action: function action() {
-          return alert("Item #2 Clicked");
-        }
-      }));
-      menu.append(new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuItem"]({
-        text: "Item #3",
-        action: function action() {
-          return alert("Item #3 Clicked");
-        }
-      }));
-      menu.append(new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuItem"]({
-        text: "Item #4",
-        action: function action() {
-          return alert("Item #4 Clicked");
-        }
-      }));
-      menu.append(new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuItem"]({
-        text: "Item #5",
-        action: function action() {
-          return alert("Item #5 Clicked");
-        }
-      }));
-      menu.isVisible = true;
-      menu.addClass('vertical-menu');
-      menu.removeClass('menu');
-      menu.appendTo(container);
     }
   }, {
     key: "initFromJsonExample",
@@ -248,4 +207,4 @@ function () {
 /***/ })
 
 }]);
-//# sourceMappingURL=chunk-0.bundle.js.map
+//# sourceMappingURL=chunk-1.bundle.js.map

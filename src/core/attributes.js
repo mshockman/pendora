@@ -1,16 +1,16 @@
 import {KeyError, ValueError} from './errors';
 
 
-const DROP = {};
-const REQUIRED = {};
-const FALSE = {};
-const TRUE = {};
+export const DROP = {};
+export const REQUIRED = {};
+export const FALSE = {};
+export const TRUE = {};
 
 
 /**
  * Used to help deserialize attributes on an element.
  */
-export class Attribute {
+export default class Attribute {
     static DROP = DROP;
     static REQUIRED = REQUIRED;
     static FALSE = FALSE;

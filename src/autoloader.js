@@ -52,6 +52,12 @@ export default class AutoLoader {
         }
     }
 
+    /**
+     *  Registers a loader function will the global autoloader instance.
+     *
+     * @param name {String}
+     * @param fn {function(HTMLElement) : Object}
+     */
     static register(name, fn) {
         return this.loader.register(name, fn);
     }

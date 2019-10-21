@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MenuBar Widget</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+    <script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+</head>
+<body data-page="menubar">
+    <header id="header">
+        <nav>
+            <ul>
+                <li>Pendora</li>
+                <li>Examples</li>
+                <li>Download</li>
+                <li>Documentation</li>
+                <li class="mr-auto">Changelog</li>
+                <li><i class="fab fa-github"></i> Github</li>
+            </ul>
+        </nav>
+    </header>
+    <article id="splash">
+        <header>
+            <h2>MenuBar Widget</h2>
+            <p>A widget for implementing toplevel pull down menus.</p>
+        </header>
+    </article>
+    <main id="main">
+        <article id="content">
+            <h1>MenuBar</h1>
+
+<p>Provides a window like top level pull down menus.</p>
+
+<table>
+    <tr>
+        <td>Header:</td>
+        <td>import {MenuBar} from menus/MenuBar</td>
+    </tr>
+    <tr>
+        <td>Class: </td>
+        <td>MenuBar</td>
+    </tr>
+    <tr>
+        <td>Inherits: </td>
+        <td>Publisher/MenuNode/Menu</td>
+    </tr>
+    <tr>
+        <td>Auto Loader:</td>
+        <td>menubar</td>
+    </tr>
+</table>
+
+<h2>Detailed Description</h2>
+
+<p>
+    A menu bar consists of a hierarchy of pull down menu items.  Menus can best nested into submenus that the user can navigate.
+    A menu bar can be defined in one of three ways.  The first is by importing all items via a json document using menubar.createItems(data)
+    method;  The second is by parsing element in the DOM; The final way is imperatively by building a menu using the
+    classes MenuBar, Menu, MenuItem or any other class that descends from MenuNode.
+</p>
+
+<h2>Configuration</h2>
+
+<article class="property-display">
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="code"><pre><span class="kd">let</span> <span class="nx">menubar</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MenuBar</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="nx">target</span><span class="o">=</span><span class="kc">null</span><span class="p">,</span>
+        <span class="nx">closeOnBlur</span><span class="o">=</span><span class="kc">true</span><span class="p">,</span>
+        <span class="nx">timeout</span><span class="o">=</span><span class="kc">false</span><span class="p">,</span>
+        <span class="nx">autoActivate</span><span class="o">=</span><span class="kc">false</span><span class="p">,</span>
+        <span class="nx">multiple</span><span class="o">=</span><span class="kc">false</span><span class="p">,</span>
+        <span class="nx">openOnHover</span><span class="o">=</span><span class="kc">true</span><span class="p">,</span>
+        <span class="nx">toggle</span><span class="o">=</span><span class="dl">"</span><span class="s2">both</span><span class="dl">"</span><span class="p">,</span>
+        <span class="nx">closeOnSelect</span><span class="o">=</span><span class="kc">true</span><span class="p">,</span>
+        <span class="nx">deactivateOnItemHover</span><span class="o">=</span><span class="kc">true</span><span class="p">,</span>
+        <span class="nx">delay</span><span class="o">=</span><span class="kc">false</span><span class="p">,</span>
+        <span class="p">...</span><span class="nx">context</span>
+    <span class="p">}</span><span class="o">=</span><span class="p">{}</span>
+<span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+    <h3>Options</h3>
+    <table class="module-table">
+        <tbody>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">closeOnBlur</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">timeout</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">autoActivate</a></td></tr>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">multiple</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">openOnHover</a></td></tr>
+        <tr><td class="var-type">{"on"|"off"|"none"|"both"}</td><td class="module-name"><a href="#">toggle</a></td></tr>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">closeOnSelect</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">delay</a></td></tr>
+        <tr><td class="var-type">{Object}</td><td class="module-name"><a href="#">...context</a></td></tr>
+        </tbody>
+    </table>
+</article>
+
+
+<h2>States</h2>
+
+<h2>Creating from JSON Data</h2>
+
+<h2>Creating from DOM</h2>
+
+<h2>Creating Imperatively</h2>
+
+<h2>Methods</h2>
+
+<h2>Related Classes</h2>
+
+<div id="menubar_1" class="example-container"></div>
+        </article>
+    </main>
+    <footer id="footer">
+
+    </footer>
+</body>
+</html>

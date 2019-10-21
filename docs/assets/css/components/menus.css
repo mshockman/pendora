@@ -12,6 +12,7 @@
   cursor: pointer;
   position: relative;
   white-space: nowrap;
+  padding: 0.5rem;
 }
 .menuitem > a {
   text-decoration: none;
@@ -37,10 +38,25 @@
   background-color: #ffffff;
   top: 100%;
   left: 0;
+  list-style: none;
+  padding: 0;
+  min-width: 15rem;
 }
 
 .menu.hidden {
   visibility: hidden;
+}
+
+.vertical-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 10rem;
+  border: 1px solid #ccc;
+}
+.vertical-menu .menu {
+  left: 100%;
+  top: 0;
 }
 
 /*# sourceMappingURL=menus.css.map */

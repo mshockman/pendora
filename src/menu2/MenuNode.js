@@ -1,9 +1,8 @@
 import Publisher from "core/Publisher";
 import {KeyError} from "core/errors";
 import {addClasses, removeClasses} from "core/utility";
-
-
-export const MENU_MAP = new WeakMap();
+import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance} from "./utility";
+import Attribute from "../core/attributes";
 
 
 export default class MenuNode extends Publisher {
@@ -24,6 +23,9 @@ export default class MenuNode extends Publisher {
 
         this.nodeType = null;
         this.isController = false;
+
+        this.SubMenuClass = null;
+        this.MenuItemClass = null;
     }
 
     init() {
@@ -232,16 +234,16 @@ export default class MenuNode extends Publisher {
 
         if(this._element === element) return;
 
-        if(MENU_MAP.get(element)) {
+        if(hasMenuInstance(element)) {
             throw new Error("Element is already bound to menu controller");
         }
 
         if(this._element) {
-            MENU_MAP.delete(this._element);
+            detachMenuInstance(this._element);
             this._element = undefined;
         }
 
-        MENU_MAP.set(element, this);
+        attachMenuInstance(element, this);
         this._element = element;
     }
 
@@ -440,7 +442,7 @@ export default class MenuNode extends Publisher {
         let o = this.element;
 
         while(o) {
-            let instance = MENU_MAP.get(o);
+            let instance = getMenuInstance(o);
 
             if(instance && instance.isController) {
                 return instance;
@@ -456,7 +458,7 @@ export default class MenuNode extends Publisher {
         let o = target;
 
         while(o) {
-            let instance = MENU_MAP.get(o);
+            let instance = getMenuInstance(o);
 
             if(instance) {
                 return instance;
@@ -476,7 +478,7 @@ export default class MenuNode extends Publisher {
         let o = target;
 
         while(o) {
-            let instance = MENU_MAP.get(o);
+            let instance = getMenuInstance(o);
 
             if(instance && instance.isMenuItem()) {
                 return instance;
@@ -496,7 +498,7 @@ export default class MenuNode extends Publisher {
         let o = target;
 
         while(o) {
-            let instance = MENU_MAP.get(o);
+            let instance = getMenuInstance(o);
 
             if(instance && instance.isMenu()) {
                 return instance;
@@ -529,6 +531,54 @@ export default class MenuNode extends Publisher {
         }
 
         return this;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Tree functions
+
+    parseDOM() {
+        if(this._children.length) {
+            for(let child of this._children) {
+                child.invalidateTree();
+            }
+        }
+
+        let walk = (node) => {
+            for(let child of node.children) {
+                let role = child.dataset.role;
+
+                if(hasMenuInstance(child)) {
+                    let instance = getMenuInstance(child);
+                    instance._parent = this;
+                    this._children.push(instance);
+                    instance.parseDOM();
+                } else if(role === 'menu') {
+                    let menu = this.SubMenuClass.FromHTML(child);
+                    this._children.push(menu);
+                    menu._parent = this;
+                    menu.parseDOM();
+                } else if(role === 'menuitem') {
+                    let item = this.MenuItemClass.FromHTML(child);
+                    this._children.push(item);
+                    item._parent = this;
+                    item.parseDOM();
+                } else {
+                    walk(child);
+                }
+            }
+        };
+
+        walk(this.element);
+    }
+
+    invalidateTree() {
+        this._parent = null;
+
+        for(let child of this.children) {
+            child.invalidateTree();
+        }
+
+        this._children = [];
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -567,6 +617,22 @@ export default class MenuNode extends Publisher {
     }
 
     static getInstance(element) {
-        return MENU_MAP.get(element);
+        return getMenuInstance(element);
+    }
+
+    static FromHTML(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        let parameters = Attribute.deserialize(element.dataset, this.__attributes__);
+
+        parameters.target = element;
+
+        let instance = new this(parameters);
+
+        instance.parseDOM();
+
+        return instance;
     }
 }

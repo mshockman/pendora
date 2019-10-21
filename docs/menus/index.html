@@ -288,7 +288,7 @@
 50
 51
 52
-</pre></td><td class="code"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"vertical-menu"</span> <span class="na">data-init=</span><span class="s">"test"</span><span class="nt">&gt;</span>
+</pre></td><td class="code"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"vertical-menu"</span> <span class="na">data-init=</span><span class="s">"menu"</span><span class="nt">&gt;</span>
     <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
         <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/button&gt;</span>
         <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
@@ -343,9 +343,9 @@
 </pre></td></tr></tbody></table></code></pre></figure>
     <h4>Result</h4>
     <div class="result">
-        <ul id="test-init-from-dom" class="vertical-menu">
+        <ul id="test-init-from-dom" class="vertical-menu" data-init="menu" data-timeout="1000" data-close-on-blur="true" data-auto-activate="false">
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #1</button>
+                <a type="button">Item #1</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -355,7 +355,7 @@
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #2</button>
+                <a type="button">Item #2</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -365,7 +365,7 @@
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #3</button>
+                <a type="button">Item #3</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -375,7 +375,7 @@
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #4</button>
+                <a type="button">Item #4</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -385,7 +385,7 @@
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #5</button>
+                <a type="button">Item #5</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -399,6 +399,48 @@
 </article>
 
 <h2>Initializing Imperatively</h2>
+
+<article class="example">
+    <h4>Javascript</h4>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="code"><pre><span class="k">import</span> <span class="p">{</span><span class="nx">MenuBar</span><span class="p">,</span> <span class="nx">Menu</span><span class="p">,</span> <span class="nx">MenuItem</span><span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">menus</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="kd">let</span> <span class="nx">container</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">init-menu-imperatively</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="kd">let</span> <span class="nx">menu</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Menu</span><span class="p">();</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="k">new</span> <span class="nx">MenuItem</span><span class="p">({</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">action</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Item #1 Clicked</span><span class="dl">"</span><span class="p">)}));</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="k">new</span> <span class="nx">MenuItem</span><span class="p">({</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">action</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Item #2 Clicked</span><span class="dl">"</span><span class="p">)}));</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="k">new</span> <span class="nx">MenuItem</span><span class="p">({</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">action</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Item #3 Clicked</span><span class="dl">"</span><span class="p">)}));</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="k">new</span> <span class="nx">MenuItem</span><span class="p">({</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">action</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Item #4 Clicked</span><span class="dl">"</span><span class="p">)}));</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="k">new</span> <span class="nx">MenuItem</span><span class="p">({</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">action</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Item #5 Clicked</span><span class="dl">"</span><span class="p">)}));</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">isVisible</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addClass</span><span class="p">(</span><span class="dl">'</span><span class="s1">vertical-menu</span><span class="dl">'</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">removeClass</span><span class="p">(</span><span class="dl">'</span><span class="s1">menu</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">appendTo</span><span class="p">(</span><span class="nx">container</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+    <h4>Result</h4>
+    <div class="result" id="init-menu-imperatively"></div>
+</article>
+
 <h2>MenuBar</h2>
 <h2>Vertical Menu</h2>
 <h2>DropDown</h2>

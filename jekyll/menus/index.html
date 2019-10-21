@@ -139,7 +139,7 @@ menu.appendTo("#init-menu-from-json");
 <article class="example">
     <h4>HTML</h4>
 {% highlight html linenos %}
-<ul class="vertical-menu" data-init="test">
+<ul class="vertical-menu" data-init="menu">
     <li data-role="menuitem" class="menuitem">
         <button type="button">Item #1</button>
         <ul data-role="menu" class="menu hidden">
@@ -194,9 +194,9 @@ menu.appendTo("#init-menu-from-json");
 {% endhighlight %}
     <h4>Result</h4>
     <div class="result">
-        <ul id="test-init-from-dom" class="vertical-menu">
+        <ul id="test-init-from-dom" class="vertical-menu" data-init="menu" data-timeout="1000" data-close-on-blur="true" data-auto-activate="false">
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #1</button>
+                <a type="button">Item #1</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -206,7 +206,7 @@ menu.appendTo("#init-menu-from-json");
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #2</button>
+                <a type="button">Item #2</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -216,7 +216,7 @@ menu.appendTo("#init-menu-from-json");
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #3</button>
+                <a type="button">Item #3</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -226,7 +226,7 @@ menu.appendTo("#init-menu-from-json");
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #4</button>
+                <a type="button">Item #4</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -236,7 +236,7 @@ menu.appendTo("#init-menu-from-json");
                 </ul>
             </li>
             <li data-role="menuitem" class="menuitem">
-                <button type="button">Item #5</button>
+                <a type="button">Item #5</a>
                 <ul data-role="menu" class="menu hidden">
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
                     <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
@@ -250,6 +250,33 @@ menu.appendTo("#init-menu-from-json");
 </article>
 
 <h2>Initializing Imperatively</h2>
+
+<article class="example">
+    <h4>Javascript</h4>
+{% highlight javascript linenos %}
+import {MenuBar, Menu, MenuItem} from "menus";
+
+let container = document.getElementById('init-menu-imperatively');
+
+let menu = new Menu();
+
+menu.append(new MenuItem({text: "Item #1", action: () => alert("Item #1 Clicked")}));
+menu.append(new MenuItem({text: "Item #2", action: () => alert("Item #2 Clicked")}));
+menu.append(new MenuItem({text: "Item #3", action: () => alert("Item #3 Clicked")}));
+menu.append(new MenuItem({text: "Item #4", action: () => alert("Item #4 Clicked")}));
+menu.append(new MenuItem({text: "Item #5", action: () => alert("Item #5 Clicked")}));
+
+menu.isVisible = true;
+menu.addClass('vertical-menu');
+menu.removeClass('menu');
+
+menu.appendTo(container);
+
+{% endhighlight %}
+    <h4>Result</h4>
+    <div class="result" id="init-menu-imperatively"></div>
+</article>
+
 <h2>MenuBar</h2>
 <h2>Vertical Menu</h2>
 <h2>DropDown</h2>
