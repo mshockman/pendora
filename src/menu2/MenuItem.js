@@ -1,11 +1,13 @@
 import MenuNode from "./MenuNode";
-import {inherit, publishTargetEvent} from "./decorators";
+import {inherit} from "./decorators";
 
 
 export default class MenuItem extends MenuNode {
     @inherit toggle;
     @inherit autoActivate;
     @inherit openOnHover;
+    /**@type{boolean|Number|"inherit"|"root"}*/
+    @inherit delay = false;
 
     constructor({text, action, href=null, target, classes, nodeName="div", ...context}={}) {
         super();
@@ -25,6 +27,7 @@ export default class MenuItem extends MenuNode {
         this.toggle = 'inherit';
         this.autoActivate = 'inherit';
         this.openOnHover = 'inherit';
+        this.delay = 'inherit';
 
         this.on('event.click', (event) => this.onClick(event));
         this.on('event.mouseover', (event) => this.onMouseOver(event));
@@ -49,14 +52,24 @@ export default class MenuItem extends MenuNode {
         return element;
     }
 
-    activate() {
+    /**
+     *
+     * @param show {boolean|number}
+     */
+    activate(show=true) {
         if(this.isActive) return;
         this.isActive = true;
 
         this.clearTimer('activateItem');
 
         if(this.submenu) {
-            this.submenu.show();
+            if(show === true) {
+                this.submenu.show();
+            } else if(typeof show === 'number' && show >= 0) {
+                this.startTimer('showTimer', () => {
+                    this.submenu.show();
+                }, show);
+            }
         }
 
         this.publish('activate', this);
@@ -74,6 +87,7 @@ export default class MenuItem extends MenuNode {
     deactivate() {
         if(!this.isActive) return;
         this.isActive = false;
+        this.clearTimer('showTimer');
 
         if(this.submenu) {
             this.submenu.deactivate();
@@ -168,17 +182,23 @@ export default class MenuItem extends MenuNode {
         return !!this.submenu;
     }
 
+    isSubMenuVisible() {
+        return this.hasSubMenu() ? this.submenu.isVisible : false;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Event handlers
 
-    onSelect(event) {
+    onSelect() {
         if(this.closeOnSelect && this.isActive) {
             this.deactivate();
         }
     }
 
     onClick(event) {
-        if(this.isDisabled) {
+        let isDisabled = this.getDisabled();
+
+        if(isDisabled) {
             event.preventDefault();
         }
 
@@ -188,26 +208,31 @@ export default class MenuItem extends MenuNode {
             this.parent.publish('click-item', this, event);
         }
 
-        if(!this.isActive && this.toggleOn) {
-            this.activate();
-        } else if(this.isActive && this.toggleOff && this.hasSubMenu()) {
-            this.deactivate();
-        }
+        if(!isDisabled) {
+            if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
+                this.submenu.show();
+            } else if (!this.isActive && this.toggleOn) {
+                this.activate();
+            } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
+                this.deactivate();
+            }
 
-        if(this.isActive && !this.hasSubMenu()) {
-            this.select();
+            if (this.isActive && !this.hasSubMenu()) {
+                this.select();
+            }
         }
     }
 
     onMouseOver(event) {
         this.clearTimer('timeout');
-        if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
         if(event.target === this) {
             // When the mouse moves on an item clear any active items in it's submenu.
             if (this.submenu) {
                 this.submenu.clearItems();
             }
+
+            if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
             let activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
 
@@ -217,11 +242,11 @@ export default class MenuItem extends MenuNode {
 
             if (!this.isActive && !this.isDisabled) {
                 if (activate === true) {
-                    this.activate();
+                    this.activate(typeof this.delay === 'boolean' ? !this.delay : this.delay);
                 } else if (typeof activate === 'number' && activate >= 0) {
                     this.startTimer('activateItem', () => {
                         if (!this.isDisabled) {
-                            this.activate();
+                            this.activate(typeof this.delay === 'boolean' ? !this.delay : this.delay);
                         }
                     }, activate);
                 }
@@ -238,7 +263,7 @@ export default class MenuItem extends MenuNode {
             this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if(!this.hasSubMenu() && this.isActive) {
+        if(event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
             this.deactivate();
         }
 

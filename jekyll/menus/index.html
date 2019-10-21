@@ -2,30 +2,260 @@
 title: Menu Overview
 description: A library for creating nested menus & ribbons.
 layout: default
+pageClass: menu_examples
 ---
 
-<h2>All Classes</h2>
+<h1>Menu</h1>
+
+<p>
+    A flexible menu component that can be used to create common navigation and control patterns.
+</p>
+
+<p>
+    Menus can be initialized in three different ways.  Imperatively, from JSON data or from the DOM.  Building your menu
+    imperatively by constructing the classes manually will provide you with the most amount of control but is unnessary
+    for most situations.  The menus module comes with several intelligent sub classes which construct the most common
+    uses cases.
+</p>
+
+<h2>Example</h2>
+<div id="menubar_1" class="example-container"></div>
+<br>
+
+<h2>Classes</h2>
+
 <ul>
-    <li><a href="class_menunode.html">MenuBase</a></li>
-    <li><a href="class_menu.html">Menu</a></li>
-    <li><a href="class_menuitem.html">MenuItem</a></li>
-    <li><a href="class_menubar.html">MenuBar</a></li>
-    <li><a href="class_menubar.html">SideMenu</a></li>
-    <li><a href="class_menubar.html">ContextMenu</a></li>
-    <li><a href="class_dropdown.html">DropDown</a></li>
-    <li><a href="class_dropdown.html">Ribbon</a></li>
-    <li><a href="class_dropdown.html">Select</a></li>
-    <li><a href="class_dropdown.html">SlideMenu</a></li>
+    <li>
+        MenuNode
+        <ul>
+            <li>
+                Menu
+                <ul>
+                    <li>MenuBar</li>
+                    <li>VerticalMenu</li>
+                    <li>ContextMenu</li>
+                </ul>
+            </li>
+            <li>
+                MenuItem
+                <ul>
+                    <li>DropDown</li>
+                </ul>
+            </li>
+        </ul>
+    </li>
 </ul>
 
 
-<h3>Construct From Markup, JSON or with Classes</h3>
-<h3>Nestable</h3>
-<h3>Show & Hide Animations</h3>
-<h3>Smart Positioning</h3>
-<h3>Context Menus</h3>
-<h3>Ribbons</h3>
-<h3>DropDowns</h3>
-<h3>Select Replacement</h3>
-<h3>Filterable</h3>
-<h3>Multi-select</h3>
+<h2>Configuration Options</h2>
+
+<h2>Initializing from JSON</h2>
+
+<article class="example">
+    <h4>JSON</h4>
+{% highlight javascript linenos %}
+let menu = new Menu({
+    closeOnBlur: true,
+    closeOnSelect: true
+});
+
+menu.isVisible = true;
+
+menu.createItems([
+    {
+        text: "Item #1",
+        submenu: {
+            children: [
+                {text: "SubItem #1", href: "#"},
+                {text: "SubItem #2", href: "#"},
+                {text: "SubItem #3", href: "#"},
+                {text: "SubItem #4", href: "#"},
+                {text: "SubItem #5", href: "#"}
+            ]
+        }
+    },
+    {
+        text: "Item #2",
+        submenu: {
+            children: [
+                {text: "SubItem #1", href: "#"},
+                {text: "SubItem #2", href: "#"},
+                {text: "SubItem #3", href: "#"},
+                {text: "SubItem #4", href: "#"},
+                {text: "SubItem #5", href: "#"}
+            ]
+        }
+    },
+    {
+        text: "Item #3",
+        submenu: {
+            children: [
+                {text: "SubItem #1", href: "#"},
+                {text: "SubItem #2", href: "#"},
+                {text: "SubItem #3", href: "#"},
+                {text: "SubItem #4", href: "#"},
+                {text: "SubItem #5", href: "#"}
+            ]
+        }
+    },
+    {
+        text: "Item #4",
+        submenu: {
+            children: [
+                {text: "SubItem #1", href: "#"},
+                {text: "SubItem #2", href: "#"},
+                {text: "SubItem #3", href: "#"},
+                {text: "SubItem #4", href: "#"},
+                {text: "SubItem #5", href: "#"}
+            ]
+        }
+    },
+    {
+        text: "Item #5",
+        submenu: {
+            children: [
+                {text: "SubItem #1", href: "#"},
+                {text: "SubItem #2", href: "#"},
+                {text: "SubItem #3", href: "#"},
+                {text: "SubItem #4", href: "#"},
+                {text: "SubItem #5", href: "#"}
+            ]
+        }
+    }
+]);
+
+menu.style.position = 'static';
+menu.style.width = '16rem';
+
+menu.appendTo("#init-menu-from-json");
+
+{% endhighlight %}
+    <h4>Result</h4>
+    <div class="result" id="init-menu-from-json"></div>
+</article>
+
+<h2>Initializing from DOM</h2>
+
+<article class="example">
+    <h4>HTML</h4>
+{% highlight html linenos %}
+<ul class="vertical-menu" data-init="test">
+    <li data-role="menuitem" class="menuitem">
+        <button type="button">Item #1</button>
+        <ul data-role="menu" class="menu hidden">
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+        </ul>
+    </li>
+    <li data-role="menuitem" class="menuitem">
+        <button type="button">Item #2</button>
+        <ul data-role="menu" class="menu hidden">
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+        </ul>
+    </li>
+    <li data-role="menuitem" class="menuitem">
+        <button type="button">Item #3</button>
+        <ul data-role="menu" class="menu hidden">
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+        </ul>
+    </li>
+    <li data-role="menuitem" class="menuitem">
+        <button type="button">Item #4</button>
+        <ul data-role="menu" class="menu hidden">
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+        </ul>
+    </li>
+    <li data-role="menuitem" class="menuitem">
+        <button type="button">Item #5</button>
+        <ul data-role="menu" class="menu hidden">
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+        </ul>
+    </li>
+</ul>
+{% endhighlight %}
+    <h4>Result</h4>
+    <div class="result">
+        <ul id="test-init-from-dom" class="vertical-menu">
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #1</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #2</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #3</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #4</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #5</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</article>
+
+<h2>Initializing Imperatively</h2>
+<h2>MenuBar</h2>
+<h2>Vertical Menu</h2>
+<h2>DropDown</h2>
+<h2>ContextMenu</h2>
+<h2>Positioning</h2>
+
+<p>
+
+</p>

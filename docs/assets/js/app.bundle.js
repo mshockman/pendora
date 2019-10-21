@@ -255,7 +255,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 __webpack_require__.p = "/assets/js/";
 var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
   'menubar': function menubar() {
-    return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./pages/menubar_example.js */ "./jekyll/js/pages/menubar_example.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3)]).then(__webpack_require__.bind(null, /*! ./pages/menubar_example.js */ "./jekyll/js/pages/menubar_example.js"));
+  },
+  'menu_examples': function menu_examples() {
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(2)]).then(__webpack_require__.bind(null, /*! ./pages/menu_examples.js */ "./jekyll/js/pages/menu_examples.js"));
   }
 });
 window.addEventListener('load',

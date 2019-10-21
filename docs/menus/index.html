@@ -10,7 +10,7 @@
     <script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
     <script type="text/javascript" src="/assets/js/app.bundle.js"></script>
 </head>
-<body>
+<body data-page="menu_examples">
     <header id="header">
         <nav>
             <ul>
@@ -31,31 +31,383 @@
     </article>
     <main id="main">
         <article id="content">
-            <h2>All Classes</h2>
+            <h1>Menu</h1>
+
+<p>
+    A flexible menu component that can be used to create common navigation and control patterns.
+</p>
+
+<p>
+    Menus can be initialized in three different ways.  Imperatively, from JSON data or from the DOM.  Building your menu
+    imperatively by constructing the classes manually will provide you with the most amount of control but is unnessary
+    for most situations.  The menus module comes with several intelligent sub classes which construct the most common
+    uses cases.
+</p>
+
+<h2>Example</h2>
+<div id="menubar_1" class="example-container"></div>
+<br>
+
+<h2>Classes</h2>
+
 <ul>
-    <li><a href="class_menunode.html">MenuBase</a></li>
-    <li><a href="class_menu.html">Menu</a></li>
-    <li><a href="class_menuitem.html">MenuItem</a></li>
-    <li><a href="class_menubar.html">MenuBar</a></li>
-    <li><a href="class_menubar.html">SideMenu</a></li>
-    <li><a href="class_menubar.html">ContextMenu</a></li>
-    <li><a href="class_dropdown.html">DropDown</a></li>
-    <li><a href="class_dropdown.html">Ribbon</a></li>
-    <li><a href="class_dropdown.html">Select</a></li>
-    <li><a href="class_dropdown.html">SlideMenu</a></li>
+    <li>
+        MenuNode
+        <ul>
+            <li>
+                Menu
+                <ul>
+                    <li>MenuBar</li>
+                    <li>VerticalMenu</li>
+                    <li>ContextMenu</li>
+                </ul>
+            </li>
+            <li>
+                MenuItem
+                <ul>
+                    <li>DropDown</li>
+                </ul>
+            </li>
+        </ul>
+    </li>
 </ul>
 
 
-<h3>Construct From Markup, JSON or with Classes</h3>
-<h3>Nestable</h3>
-<h3>Show & Hide Animations</h3>
-<h3>Smart Positioning</h3>
-<h3>Context Menus</h3>
-<h3>Ribbons</h3>
-<h3>DropDowns</h3>
-<h3>Select Replacement</h3>
-<h3>Filterable</h3>
-<h3>Multi-select</h3>
+<h2>Configuration Options</h2>
+
+<h2>Initializing from JSON</h2>
+
+<article class="example">
+    <h4>JSON</h4>
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+</pre></td><td class="code"><pre><span class="kd">let</span> <span class="nx">menu</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Menu</span><span class="p">({</span>
+    <span class="na">closeOnBlur</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">closeOnSelect</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">});</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">isVisible</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">createItems</span><span class="p">([</span>
+    <span class="p">{</span>
+        <span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #1</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">submenu</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">children</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #2</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">submenu</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">children</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #3</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">submenu</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">children</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #4</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">submenu</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">children</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">Item #5</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">submenu</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">children</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #1</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #2</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #3</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #4</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">},</span>
+                <span class="p">{</span><span class="na">text</span><span class="p">:</span> <span class="dl">"</span><span class="s2">SubItem #5</span><span class="dl">"</span><span class="p">,</span> <span class="na">href</span><span class="p">:</span> <span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">]);</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">static</span><span class="dl">'</span><span class="p">;</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">16rem</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">appendTo</span><span class="p">(</span><span class="dl">"</span><span class="s2">#init-menu-from-json</span><span class="dl">"</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+    <h4>Result</h4>
+    <div class="result" id="init-menu-from-json"></div>
+</article>
+
+<h2>Initializing from DOM</h2>
+
+<article class="example">
+    <h4>HTML</h4>
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+</pre></td><td class="code"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"vertical-menu"</span> <span class="na">data-init=</span><span class="s">"test"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/button&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/button&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/button&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/button&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/button&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">data-role=</span><span class="s">"menu"</span> <span class="na">class=</span><span class="s">"menu hidden"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">data-role=</span><span class="s">"menuitem"</span> <span class="na">class=</span><span class="s">"menuitem"</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+<span class="nt">&lt;/ul&gt;</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+    <h4>Result</h4>
+    <div class="result">
+        <ul id="test-init-from-dom" class="vertical-menu">
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #1</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #2</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #3</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #4</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+            <li data-role="menuitem" class="menuitem">
+                <button type="button">Item #5</button>
+                <ul data-role="menu" class="menu hidden">
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
+                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</article>
+
+<h2>Initializing Imperatively</h2>
+<h2>MenuBar</h2>
+<h2>Vertical Menu</h2>
+<h2>DropDown</h2>
+<h2>ContextMenu</h2>
+<h2>Positioning</h2>
+
+<p>
+
+</p>
         </article>
     </main>
     <footer id="footer">

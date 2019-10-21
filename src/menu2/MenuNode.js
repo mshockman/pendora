@@ -21,7 +21,6 @@ export default class MenuNode extends Publisher {
 
         this._isActive = false;
         this._isVisible = true;
-        this._isDisabled = false;
 
         this.nodeType = null;
         this.isController = false;
@@ -33,13 +32,14 @@ export default class MenuNode extends Publisher {
         this.boundEvents = {};
 
         let handleEvent = (event) => {
-            let target = this.getTargetNode(event.target);
-
-            if(target.getEventDelegator() === this) {
-                target.dispatchTopic(`event.${event.type}`, {
+            let target = this.getTargetNode(event.target),
+                wrappedEvent = {
                     target,
                     originalEvent: event
-                });
+                };
+
+            if(target.getEventDelegator() === this) {
+                target.dispatchTopic(`event.${event.type}`, wrappedEvent);
             }
         };
 
@@ -160,21 +160,37 @@ export default class MenuNode extends Publisher {
     }
 
     get isDisabled() {
-        return this._isDisabled;
+        return this.element.classList.contains('disabled');
     }
 
     set isDisabled(value) {
         value = !!value;
 
-        if(value !== this._isDisabled) {
+        if(value !== this.isDisabled) {
             if(value) {
                 this.element.classList.add('disabled');
             } else {
                 this.element.classList.remove('disabled');
             }
-
-            this._isDisabled = value;
         }
+    }
+
+    /**
+     * Returns true if the current node is disabled or if any ancestor node is disabled.
+     * @returns {boolean}
+     */
+    getDisabled() {
+        let o = this;
+
+        while(o) {
+            if(o.isDisabled) {
+                return true;
+            }
+
+            o = o.parent;
+        }
+
+        return false;
     }
 
     get isVisible() {
@@ -207,24 +223,26 @@ export default class MenuNode extends Publisher {
         return this._element;
     }
 
-    set element(value) {
+    set element(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        } else if(typeof element === 'function') {
+            element = element.call(this);
+        }
+
+        if(this._element === element) return;
+
+        if(MENU_MAP.get(element)) {
+            throw new Error("Element is already bound to menu controller");
+        }
+
         if(this._element) {
             MENU_MAP.delete(this._element);
             this._element = undefined;
         }
 
-        if(typeof value === 'string') {
-            this._element = document.querySelector(value);
-            MENU_MAP.set(this._element, this);
-        } else if(typeof value === 'function') {
-            this._element = value.call(this);
-            MENU_MAP.set(this._element, this);
-        } else if(value) {
-            this._element = value;
-            MENU_MAP.set(this._element, this);
-        } else {
-            this._element = value; // null or undefined
-        }
+        MENU_MAP.set(element, this);
+        this._element = element;
     }
 
     /**
@@ -295,6 +313,18 @@ export default class MenuNode extends Publisher {
         }
 
         return null;
+    }
+
+    contains(node) {
+        while(node) {
+            if(node.parent === this) {
+                return true;
+            }
+
+            node = node.parent;
+        }
+
+        return false;
     }
 
     /**

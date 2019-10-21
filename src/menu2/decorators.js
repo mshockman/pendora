@@ -28,16 +28,18 @@ export function inherit(target) {
 
             get() {
                 let value = this._props[key];
-                if(value === undefined) value = initializer();  // todo set to init
 
-                if(value === 'inherit') {
-                    return this.parent ? this.parent[key] : undefined;
+                if(value === 'inherit' || value === undefined) {
+                    value = this.parent ? this.parent[key] : undefined;
                 } else if(value === 'root') {
                     let root = this.root;
-                    return root ? root[key] : undefined;
+                    value = root ? root[key] : undefined;
                 } else {
                     return value;
                 }
+
+                if(value === undefined) value = initializer ? initializer() : undefined;
+                return value;
             },
 
             set(value) {

@@ -21,6 +21,7 @@ export default class MenuBarExamplePage {
                 node.children = this.buildTestMenu(deep, items, _n + 1);
             } else {
                 node.href = '#';
+                node.action = () => alert(`${node.text} clicked`);
             }
 
             r.push(node);
@@ -32,13 +33,15 @@ export default class MenuBarExamplePage {
     load() {
         let main = document.getElementById('content');
 
-        let menu = new MenuBar();
+        let menu = new MenuBar({timeout: 2000, delay: 1000, autoActivate: false, multiple: false});
 
         menu.createItems(
             this.buildTestMenu(3, 5)
         );
 
-        menu.appendTo(main);
+        menu.children[0].submenu.children[2].isDisabled = true;
+
+        menu.appendTo("#menubar_1");
         window.menu = menu;
     }
 }

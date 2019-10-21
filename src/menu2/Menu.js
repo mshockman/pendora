@@ -1,14 +1,18 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
+import {addClasses} from "core/utility";
+import {inherit} from "./decorators";
 
 
 export default class Menu extends MenuNode {
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
-                    toggle="both", closeOnSelect=true, deactivateOnItemHover=true, ...context}={}) {
+                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=false, id=null, classes=null,
+                    children=null, ...context}={}) {
         super();
         this.menuNodeType = "menu";
         this.events = null;
         this.MenuItemClass = MenuItem;
+        this.SubMenuClass = Menu;
 
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
@@ -18,6 +22,7 @@ export default class Menu extends MenuNode {
         this.toggle = toggle;
         this.closeOnSelect = closeOnSelect;
         this.deactivateOnItemHover = deactivateOnItemHover;
+        this.delay = delay;
 
         if(target) {
             this.element = target;
@@ -59,6 +64,13 @@ export default class Menu extends MenuNode {
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
+
+        if(classes) addClasses(this.element, classes);
+        if(id) this.element.id = id;
+
+        if(children) {
+            this.createItems(children);
+        }
     }
 
     render({arrow=false}={}) {
@@ -117,7 +129,6 @@ export default class Menu extends MenuNode {
 
     deactivate() {
         if(this.isActive) {
-            console.trace("Menu deactivate");
             // Set flag and remove active classes.
             this.isActive = false;
 
@@ -157,8 +168,8 @@ export default class Menu extends MenuNode {
         if(!this.isVisible) {
             this.isVisible = true;
 
-            if(this.parent) this.parent.publish('submenu.shown', this);
-            this.publish('menu.shown', this);
+            if(this.parent) this.parent.publish('submenu.show', this);
+            this.publish('menu.show', this);
 
             this.element.dispatchEvent(new CustomEvent('menu.show', {
                 detail: this,
@@ -171,8 +182,8 @@ export default class Menu extends MenuNode {
         if(this.isVisible) {
             this.isVisible = false;
 
-            if(this.parent) this.parent.publish('submenu.hidden', this);
-            this.publish('menu.hidden', this);
+            if(this.parent) this.parent.publish('submenu.hide', this);
+            this.publish('menu.hide', this);
 
             this.element.dispatchEvent(new CustomEvent('menu.hide', {
                 detail: this,
@@ -185,13 +196,12 @@ export default class Menu extends MenuNode {
     // Tree methods.
 
     createItems(data) {
-        for(let {children, ...args} of data) {
+        for(let {submenu, ...args} of data) {
             let item = new this.MenuItemClass(args);
 
-            if(children && children.length) {
-                let submenu = new Menu();
-                item.attachSubMenu(submenu);
-                submenu.createItems(children);
+            if(submenu) {
+                let _submenu = new this.SubMenuClass(submenu);
+                item.attachSubMenu(_submenu);
             }
 
             this.append(item);

@@ -1,0 +1,90 @@
+---
+title: MenuBar Widget
+description: A widget for implementing toplevel pull down menus.
+layout: default
+pageClass: menubar
+---
+
+<h1>MenuBar</h1>
+
+<p>Provides a window like top level pull down menus.</p>
+
+<table>
+    <tr>
+        <td>Header:</td>
+        <td>import {MenuBar} from menus/MenuBar</td>
+    </tr>
+    <tr>
+        <td>Class: </td>
+        <td>MenuBar</td>
+    </tr>
+    <tr>
+        <td>Inherits: </td>
+        <td>Publisher/MenuNode/Menu</td>
+    </tr>
+    <tr>
+        <td>Auto Loader:</td>
+        <td>menubar</td>
+    </tr>
+</table>
+
+<h2>Detailed Description</h2>
+
+<p>
+    A menu bar consists of a hierarchy of pull down menu items.  Menus can best nested into submenus that the user can navigate.
+    A menu bar can be defined in one of three ways.  The first is by importing all items via a json document using menubar.createItems(data)
+    method;  The second is by parsing element in the DOM; The final way is imperatively by building a menu using the
+    classes MenuBar, Menu, MenuItem or any other class that descends from MenuNode.
+</p>
+
+<h2>Configuration</h2>
+
+<article class="property-display">
+{% highlight javascript linenos %}
+let menubar = new MenuBar(
+    {
+        target=null,
+        closeOnBlur=true,
+        timeout=false,
+        autoActivate=false,
+        multiple=false,
+        openOnHover=true,
+        toggle="both",
+        closeOnSelect=true,
+        deactivateOnItemHover=true,
+        delay=false,
+        ...context
+    }={}
+);
+{% endhighlight %}
+
+    <h3>Options</h3>
+    <table class="module-table">
+        <tbody>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">closeOnBlur</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">timeout</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">autoActivate</a></td></tr>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">multiple</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">openOnHover</a></td></tr>
+        <tr><td class="var-type">{"on"|"off"|"none"|"both"}</td><td class="module-name"><a href="#">toggle</a></td></tr>
+        <tr><td class="var-type">{bool}</td><td class="module-name"><a href="#">closeOnSelect</a></td></tr>
+        <tr><td class="var-type">{bool|Number}</td><td class="module-name"><a href="#">delay</a></td></tr>
+        <tr><td class="var-type">{Object}</td><td class="module-name"><a href="#">...context</a></td></tr>
+        </tbody>
+    </table>
+</article>
+
+
+<h2>States</h2>
+
+<h2>Creating from JSON Data</h2>
+
+<h2>Creating from DOM</h2>
+
+<h2>Creating Imperatively</h2>
+
+<h2>Methods</h2>
+
+<h2>Related Classes</h2>
+
+<div id="menubar_1" class="example-container"></div>

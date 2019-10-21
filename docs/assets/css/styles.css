@@ -222,7 +222,7 @@ a:hover { text-decoration: underline; }
 
 .module-table .module-description { border: 1px solid #333; vertical-align: top; padding: 0.3rem; }
 
-.property-display { margin-bottom: 1rem; }
+.property-display { margin-bottom: 1rem; width: 100%; }
 
 p { line-height: 1.5; }
 
@@ -235,5 +235,17 @@ p { line-height: 1.5; }
 .property-info { margin-bottom: 2rem; }
 
 .property-info h4 { border-bottom: 2px solid #2a7ae2; padding-bottom: 0.4rem; }
+
+.example { margin-bottom: 1rem; }
+
+.example figure { margin: 0 0 1rem 0; }
+
+.example pre { margin: 0; }
+
+.example h4 { display: block; background-color: #1F2833; color: #ffffff; padding: 0.25rem; margin: 0; }
+
+.example code { max-height: 25rem; display: block; overflow: auto; border: 1px solid #ccc; background-color: #fff; }
+
+.example .result { border: 1px solid #ccc; background-color: #ffffff; padding: 1rem; }
 
 /*# sourceMappingURL=styles.css.map */

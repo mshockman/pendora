@@ -1,79 +1,5 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[0],{
 
-/***/ "./jekyll/js/pages/menubar_example.js":
-/*!********************************************!*\
-  !*** ./jekyll/js/pages/menubar_example.js ***!
-  \********************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBarExamplePage; });
-/* harmony import */ var menu2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! menu2 */ "./src/menu2/index.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-
-var MenuBarExamplePage =
-/*#__PURE__*/
-function () {
-  function MenuBarExamplePage() {
-    _classCallCheck(this, MenuBarExamplePage);
-  }
-
-  _createClass(MenuBarExamplePage, [{
-    key: "buildTestMenu",
-    value: function buildTestMenu(deep, items) {
-      var _n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-      var text = function text(x) {
-        return "Child Item #".concat(x);
-      };
-
-      if (_n === 0) text = function text(x) {
-        return "Root Item #".concat(x);
-      };
-      var r = [];
-
-      for (var i = 0; i < items; i++) {
-        var node = {
-          text: text(i)
-        };
-
-        if (_n < deep) {
-          node.children = this.buildTestMenu(deep, items, _n + 1);
-        } else {
-          node.href = '#';
-        }
-
-        r.push(node);
-      }
-
-      return r;
-    }
-  }, {
-    key: "load",
-    value: function load() {
-      var main = document.getElementById('content');
-      var menu = new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuBar"]();
-      menu.createItems(this.buildTestMenu(3, 5));
-      menu.appendTo(main);
-      window.menu = menu;
-    }
-  }]);
-
-  return MenuBarExamplePage;
-}();
-
-
-
-/***/ }),
-
 /***/ "./src/core/Publisher.js":
 /*!*******************************!*\
   !*** ./src/core/Publisher.js ***!
@@ -1238,6 +1164,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu2/MenuNode.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
+/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./decorators */ "./src/menu2/decorators.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
@@ -1259,6 +1187,8 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
 
 
 
@@ -1285,12 +1215,20 @@ function (_MenuNode) {
         _ref$openOnHover = _ref.openOnHover,
         openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
         _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
+        toggle = _ref$toggle === void 0 ? "on" : _ref$toggle,
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
         _ref$deactivateOnItem = _ref.deactivateOnItemHover,
         deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "deactivateOnItemHover"]);
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === void 0 ? false : _ref$delay,
+        _ref$id = _ref.id,
+        id = _ref$id === void 0 ? null : _ref$id,
+        _ref$classes = _ref.classes,
+        classes = _ref$classes === void 0 ? null : _ref$classes,
+        _ref$children = _ref.children,
+        children = _ref$children === void 0 ? null : _ref$children,
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "deactivateOnItemHover", "delay", "id", "classes", "children"]);
 
     _classCallCheck(this, Menu);
 
@@ -1298,6 +1236,7 @@ function (_MenuNode) {
     _this.menuNodeType = "menu";
     _this.events = null;
     _this.MenuItemClass = _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"];
+    _this.SubMenuClass = Menu;
     _this.closeOnBlur = closeOnBlur;
     _this.timeout = timeout;
     _this.autoActivate = autoActivate;
@@ -1306,6 +1245,7 @@ function (_MenuNode) {
     _this.toggle = toggle;
     _this.closeOnSelect = closeOnSelect;
     _this.deactivateOnItemHover = deactivateOnItemHover;
+    _this.delay = delay;
 
     if (target) {
       _this.element = target;
@@ -1380,6 +1320,13 @@ function (_MenuNode) {
       return _this.onSelect(event);
     });
 
+    if (classes) Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(_this.element, classes);
+    if (id) _this.element.id = id;
+
+    if (children) {
+      _this.createItems(children);
+    }
+
     return _this;
   }
 
@@ -1445,8 +1392,7 @@ function (_MenuNode) {
     key: "deactivate",
     value: function deactivate() {
       if (this.isActive) {
-        console.trace("Menu deactivate"); // Set flag and remove active classes.
-
+        // Set flag and remove active classes.
         this.isActive = false; // Clear any active child items.
 
         this.clearItems(); // Remove document click handler that tracks user clicks outside of menu tree.
@@ -1503,8 +1449,8 @@ function (_MenuNode) {
     value: function show() {
       if (!this.isVisible) {
         this.isVisible = true;
-        if (this.parent) this.parent.publish('submenu.shown', this);
-        this.publish('menu.shown', this);
+        if (this.parent) this.parent.publish('submenu.show', this);
+        this.publish('menu.show', this);
         this.element.dispatchEvent(new CustomEvent('menu.show', {
           detail: this,
           bubbles: true
@@ -1516,8 +1462,8 @@ function (_MenuNode) {
     value: function hide() {
       if (this.isVisible) {
         this.isVisible = false;
-        if (this.parent) this.parent.publish('submenu.hidden', this);
-        this.publish('menu.hidden', this);
+        if (this.parent) this.parent.publish('submenu.hide', this);
+        this.publish('menu.hide', this);
         this.element.dispatchEvent(new CustomEvent('menu.hide', {
           detail: this,
           bubbles: true
@@ -1536,15 +1482,15 @@ function (_MenuNode) {
       try {
         for (var _iterator3 = data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
           var _step3$value = _step3.value,
-              children = _step3$value.children,
-              args = _objectWithoutProperties(_step3$value, ["children"]);
+              submenu = _step3$value.submenu,
+              args = _objectWithoutProperties(_step3$value, ["submenu"]);
 
           var item = new this.MenuItemClass(args);
 
-          if (children && children.length) {
-            var submenu = new Menu();
-            item.attachSubMenu(submenu);
-            submenu.createItems(children);
+          if (submenu) {
+            var _submenu = new this.SubMenuClass(submenu);
+
+            item.attachSubMenu(_submenu);
           }
 
           this.append(item);
@@ -1771,6 +1717,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu2/Menu.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1815,11 +1771,14 @@ function (_Menu) {
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
         _ref$deactivateOnItem = _ref.deactivateOnItemHover,
-        deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem;
+        deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem,
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === void 0 ? false : _ref$delay,
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "deactivateOnItemHover", "delay"]);
 
     _classCallCheck(this, MenuBar);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, {
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, _objectSpread({
       target: target,
       closeOnBlur: closeOnBlur,
       timeout: timeout,
@@ -1828,8 +1787,32 @@ function (_Menu) {
       openOnHover: openOnHover,
       toggle: toggle,
       closeOnSelect: closeOnSelect,
-      deactivateOnItemHover: deactivateOnItemHover
-    }));
+      deactivateOnItemHover: deactivateOnItemHover,
+      delay: false
+    }, context)));
+
+    _this.SubMenuClass =
+    /*#__PURE__*/
+    function (_Menu2) {
+      _inherits(SubMenu, _Menu2);
+
+      function SubMenu() {
+        var _this2;
+
+        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, SubMenu);
+
+        _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SubMenu).call(this, _objectSpread({
+          delay: delay
+        }, args)));
+        _this2.SubMenuClass = SubMenu;
+        return _this2;
+      }
+
+      return SubMenu;
+    }(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
     _this.isVisible = true;
     return _this;
   }
@@ -1928,6 +1911,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
   function (_MenuNode2) {
     _inherits(MenuItem, _MenuNode2);
 
+    /**@type{boolean|Number|"inherit"|"root"}*/
     function MenuItem() {
       var _this;
 
@@ -1966,6 +1950,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       _this.toggle = 'inherit';
       _this.autoActivate = 'inherit';
       _this.openOnHover = 'inherit';
+      _this.delay = 'inherit';
 
       _this.on('event.click', function (event) {
         return _this.onClick(event);
@@ -2007,6 +1992,13 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       key: "openOnHover",
       value: void 0
     }, {
+      kind: "field",
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
+      key: "delay",
+      value: function value() {
+        return false;
+      }
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
@@ -2031,16 +2023,30 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
         element.appendChild(button);
         return element;
       }
+      /**
+       *
+       * @param show {boolean|number}
+       */
+
     }, {
       kind: "method",
       key: "activate",
       value: function activate() {
+        var _this2 = this;
+
+        var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
         if (this.isActive) return;
         this.isActive = true;
         this.clearTimer('activateItem');
 
         if (this.submenu) {
-          this.submenu.show();
+          if (show === true) {
+            this.submenu.show();
+          } else if (typeof show === 'number' && show >= 0) {
+            this.startTimer('showTimer', function () {
+              _this2.submenu.show();
+            }, show);
+          }
         }
 
         this.publish('activate', this);
@@ -2060,6 +2066,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       value: function deactivate() {
         if (!this.isActive) return;
         this.isActive = false;
+        this.clearTimer('showTimer');
 
         if (this.submenu) {
           this.submenu.deactivate();
@@ -2169,13 +2176,19 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       key: "hasSubMenu",
       value: function hasSubMenu() {
         return !!this.submenu;
+      }
+    }, {
+      kind: "method",
+      key: "isSubMenuVisible",
+      value: function isSubMenuVisible() {
+        return this.hasSubMenu() ? this.submenu.isVisible : false;
       } //------------------------------------------------------------------------------------------------------------------
       // Event handlers
 
     }, {
       kind: "method",
       key: "onSelect",
-      value: function onSelect(event) {
+      value: function onSelect() {
         if (this.closeOnSelect && this.isActive) {
           this.deactivate();
         }
@@ -2184,7 +2197,9 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "onClick",
       value: function onClick(event) {
-        if (this.isDisabled) {
+        var isDisabled = this.getDisabled();
+
+        if (isDisabled) {
           event.preventDefault();
         }
 
@@ -2194,24 +2209,27 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.parent.publish('click-item', this, event);
         }
 
-        if (!this.isActive && this.toggleOn) {
-          this.activate();
-        } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
-          this.deactivate();
-        }
+        if (!isDisabled) {
+          if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
+            this.submenu.show();
+          } else if (!this.isActive && this.toggleOn) {
+            this.activate();
+          } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
+            this.deactivate();
+          }
 
-        if (this.isActive && !this.hasSubMenu()) {
-          this.select();
+          if (this.isActive && !this.hasSubMenu()) {
+            this.select();
+          }
         }
       }
     }, {
       kind: "method",
       key: "onMouseOver",
       value: function onMouseOver(event) {
-        var _this2 = this;
+        var _this3 = this;
 
         this.clearTimer('timeout');
-        if (this.element.contains(event.originalEvent.relatedTarget)) return;
 
         if (event.target === this) {
           // When the mouse moves on an item clear any active items in it's submenu.
@@ -2219,6 +2237,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
             this.submenu.clearItems();
           }
 
+          if (this.element.contains(event.originalEvent.relatedTarget)) return;
           var activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
 
           if (this.parent) {
@@ -2227,11 +2246,11 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
           if (!this.isActive && !this.isDisabled) {
             if (activate === true) {
-              this.activate();
+              this.activate(typeof this.delay === 'boolean' ? !this.delay : this.delay);
             } else if (typeof activate === 'number' && activate >= 0) {
               this.startTimer('activateItem', function () {
-                if (!_this2.isDisabled) {
-                  _this2.activate();
+                if (!_this3.isDisabled) {
+                  _this3.activate(typeof _this3.delay === 'boolean' ? !_this3.delay : _this3.delay);
                 }
               }, activate);
             }
@@ -2242,7 +2261,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "onMouseOut",
       value: function onMouseOut(event) {
-        var _this3 = this;
+        var _this4 = this;
 
         if (this.element.contains(event.originalEvent.relatedTarget)) return;
         this.clearTimer('activateItem');
@@ -2251,13 +2270,13 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if (!this.hasSubMenu() && this.isActive) {
+        if (event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
           this.deactivate();
         }
 
         if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
           this.startTimer('timeout', function () {
-            _this3.deactivate();
+            _this4.deactivate();
           }, this.timeout);
         }
       } //------------------------------------------------------------------------------------------------------------------
@@ -2371,7 +2390,6 @@ function (_Publisher) {
     _this._element = undefined;
     _this._isActive = false;
     _this._isVisible = true;
-    _this._isDisabled = false;
     _this.nodeType = null;
     _this.isController = false;
     return _this;
@@ -2386,13 +2404,14 @@ function (_Publisher) {
       this.boundEvents = {};
 
       var handleEvent = function handleEvent(event) {
-        var target = _this2.getTargetNode(event.target);
+        var target = _this2.getTargetNode(event.target),
+            wrappedEvent = {
+          target: target,
+          originalEvent: event
+        };
 
         if (target.getEventDelegator() === _this2) {
-          target.dispatchTopic("event.".concat(event.type), {
-            target: target,
-            originalEvent: event
-          });
+          target.dispatchTopic("event.".concat(event.type), wrappedEvent);
         }
       };
 
@@ -2431,6 +2450,26 @@ function (_Publisher) {
      * @returns {null|MenuNode}
      */
 
+  }, {
+    key: "getDisabled",
+
+    /**
+     * Returns true if the current node is disabled or if any ancestor node is disabled.
+     * @returns {boolean}
+     */
+    value: function getDisabled() {
+      var o = this;
+
+      while (o) {
+        if (o.isDisabled) {
+          return true;
+        }
+
+        o = o.parent;
+      }
+
+      return false;
+    }
   }, {
     key: "hasElement",
     value: function hasElement() {
@@ -2514,6 +2553,19 @@ function (_Publisher) {
       }
 
       return null;
+    }
+  }, {
+    key: "contains",
+    value: function contains(node) {
+      while (node) {
+        if (node.parent === this) {
+          return true;
+        }
+
+        node = node.parent;
+      }
+
+      return false;
     }
     /**
      * Yields all descendants.
@@ -2976,19 +3028,17 @@ function (_Publisher) {
   }, {
     key: "isDisabled",
     get: function get() {
-      return this._isDisabled;
+      return this.element.classList.contains('disabled');
     },
     set: function set(value) {
       value = !!value;
 
-      if (value !== this._isDisabled) {
+      if (value !== this.isDisabled) {
         if (value) {
           this.element.classList.add('disabled');
         } else {
           this.element.classList.remove('disabled');
         }
-
-        this._isDisabled = value;
       }
     }
   }, {
@@ -3018,24 +3068,26 @@ function (_Publisher) {
 
       return this._element;
     },
-    set: function set(value) {
+    set: function set(element) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      } else if (typeof element === 'function') {
+        element = element.call(this);
+      }
+
+      if (this._element === element) return;
+
+      if (MENU_MAP.get(element)) {
+        throw new Error("Element is already bound to menu controller");
+      }
+
       if (this._element) {
         MENU_MAP["delete"](this._element);
         this._element = undefined;
       }
 
-      if (typeof value === 'string') {
-        this._element = document.querySelector(value);
-        MENU_MAP.set(this._element, this);
-      } else if (typeof value === 'function') {
-        this._element = value.call(this);
-        MENU_MAP.set(this._element, this);
-      } else if (value) {
-        this._element = value;
-        MENU_MAP.set(this._element, this);
-      } else {
-        this._element = value; // null or undefined
-      }
+      MENU_MAP.set(element, this);
+      this._element = element;
     }
   }, {
     key: "id",
@@ -3129,16 +3181,18 @@ function inherit(target) {
       enumerable: false,
       get: function get() {
         var value = this._props[key];
-        if (value === undefined) value = initializer(); // todo set to init
 
-        if (value === 'inherit') {
-          return this.parent ? this.parent[key] : undefined;
+        if (value === 'inherit' || value === undefined) {
+          value = this.parent ? this.parent[key] : undefined;
         } else if (value === 'root') {
           var root = this.root;
-          return root ? root[key] : undefined;
+          value = root ? root[key] : undefined;
         } else {
           return value;
         }
+
+        if (value === undefined) value = initializer ? initializer() : undefined;
+        return value;
       },
       set: function set(value) {
         this._props[key] = value;
