@@ -259,7 +259,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 __webpack_require__.p = "/assets/js/";
 var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
   'menubar': function menubar() {
-    return __webpack_require__.e(/*! import() */ 3).then(__webpack_require__.bind(null, /*! ./pages/menubar_example.js */ "./jekyll/js/pages/menubar_example.js"));
+    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./pages/menubar_example.js */ "./jekyll/js/pages/menubar_example.js"));
   },
   'menu_examples': function menu_examples() {
     return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./pages/menu_examples.js */ "./jekyll/js/pages/menu_examples.js"));
@@ -3858,6 +3858,11 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+/**
+ * The base class for Menu and MenuItem.  Provides the utilities that are necessary to manage and transverse the menu tree
+ * and propagate events throughout it.
+ * @extends {Publisher}
+ */
 
 var MenuNode =
 /*#__PURE__*/
@@ -3888,6 +3893,12 @@ function (_Publisher) {
     _this.MenuItemClass = null;
     return _this;
   }
+  /**
+   * Initializes the event listeners for the menu tree.  Click, mouse-over and mouse-out are bound.  Events are
+   * delegated to their child nodes as needed.  If an event is received where the node is the direct controller of
+   * the event will be ignored.
+   */
+
 
   _createClass(MenuNode, [{
     key: "init",
@@ -3917,6 +3928,10 @@ function (_Publisher) {
       this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
       this.isController = true;
     }
+    /**
+     * Unbinds all event listeners.
+     */
+
   }, {
     key: "destroy",
     value: function destroy() {
@@ -3932,15 +3947,19 @@ function (_Publisher) {
     }
     /**
      * Renders the component.
+     *
+     * @param context {Object} Dictionary of values that may be used to render the component during templating.
+     * @abstract
      */
 
   }, {
     key: "render",
-    value: function render() {} //------------------------------------------------------------------------------------------------------------------
+    value: function render(context) {} //------------------------------------------------------------------------------------------------------------------
     // Actions
 
     /**
-     * Returns the parent MenuNode
+     * Reference to the nodes parent or null if it is the root node of the tree.
+     *
      * @returns {null|MenuNode}
      */
 
@@ -3949,6 +3968,7 @@ function (_Publisher) {
 
     /**
      * Returns true if the current node is disabled or if any ancestor node is disabled.
+     *
      * @returns {boolean}
      */
     value: function getDisabled() {
@@ -3964,11 +3984,29 @@ function (_Publisher) {
 
       return false;
     }
+    /**
+     * Returns true if the current node is visible.
+     *
+     * @returns {boolean}
+     */
+
   }, {
     key: "hasElement",
+
+    /**
+     * Returns true if the nodes element is defined.
+     *
+     * @returns {boolean}
+     */
     value: function hasElement() {
       return !!this._element;
     }
+    /**
+     * Gets the root HTMLElement of the node.
+     *
+     * @returns {HTMLElement}
+     */
+
   }, {
     key: "getOffsetSibling",
 
@@ -4048,6 +4086,13 @@ function (_Publisher) {
 
       return null;
     }
+    /**
+     * Returns true if the provided node is a descendant of the current node.
+     *
+     * @param node
+     * @returns {boolean}
+     */
+
   }, {
     key: "contains",
     value: function contains(node) {
@@ -4319,6 +4364,13 @@ function (_Publisher) {
 
       return null;
     }
+    /**
+     * Returns the target node for the given HTMLElement in the current menu tree.
+     *
+     * @param target {HTMLElement}
+     * @returns {null|MenuNode}
+     */
+
   }, {
     key: "getTargetNode",
     value: function getTargetNode(target) {
@@ -4340,6 +4392,13 @@ function (_Publisher) {
 
       return null;
     }
+    /**
+     * Returns the target item for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+
   }, {
     key: "getTargetItem",
     value: function getTargetItem(target) {
@@ -4361,6 +4420,13 @@ function (_Publisher) {
 
       return null;
     }
+    /**
+     * Returns the target menu for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+
   }, {
     key: "getTargetMenu",
     value: function getTargetMenu(target) {
@@ -4382,16 +4448,36 @@ function (_Publisher) {
 
       return null;
     }
+    /**
+     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
+     *
+     * @returns {boolean}
+     */
+
   }, {
     key: "isMenuItem",
     value: function isMenuItem() {
       return false;
     }
+    /**
+     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
+     *
+     * @returns {boolean}
+     */
+
   }, {
     key: "isMenu",
     value: function isMenu() {
       return false;
     }
+    /**
+     * Publishes the topic to itself and bubbles up the menu tree.
+     *
+     * @param topic
+     * @param args
+     * @returns {MenuNode}
+     */
+
   }, {
     key: "dispatchTopic",
     value: function dispatchTopic(topic) {
@@ -4412,6 +4498,10 @@ function (_Publisher) {
       return this;
     } //------------------------------------------------------------------------------------------------------------------
     // Tree functions
+
+    /**
+     * Parses the dom and initializes any menu or menuitem elements that are found.
+     */
 
   }, {
     key: "parseDOM",
@@ -4497,6 +4587,10 @@ function (_Publisher) {
 
       walk(this.element);
     }
+    /**
+     * Invalidates all parent and child references.
+     */
+
   }, {
     key: "invalidateTree",
     value: function invalidateTree() {
@@ -4539,13 +4633,20 @@ function (_Publisher) {
     value: function removeClass(classes) {
       return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["removeClasses"])(this.element, classes);
     }
+    /**
+     * Returns the bound menu controller for the provided node.
+     *
+     * @static
+     * @param element {HTMLElement}
+     */
+
   }, {
     key: "parent",
     get: function get() {
       return this._parent || null;
     }
     /**
-     * Returns the root node of the menu tree.
+     * Reference to the root node of the tree.
      *
      * @returns {MenuNode}
      */
@@ -4567,7 +4668,8 @@ function (_Publisher) {
       return r;
     }
     /**
-     * Returns the closest parent menu.
+     * Reference to the first ancestor node in the menu tree who is a menu.  Returns null if it does not exist.
+     *
      * @returns {MenuNode|null}
      */
 
@@ -4580,7 +4682,8 @@ function (_Publisher) {
       });
     }
     /**
-     * Returns the closest parent item.
+     * Reference to the first ancestor node in the menu tree who is an item. Returns null if it does not exist.
+     *
      * @returns {MenuNode|null}
      */
 
@@ -4593,7 +4696,8 @@ function (_Publisher) {
       });
     }
     /**
-     * Returns the next sibling node.
+     * Reference to the next sibling node in the menu tree.
+     *
      * @returns {MenuNode|null}
      */
 
@@ -4603,7 +4707,8 @@ function (_Publisher) {
       return this.getOffsetSibling(1);
     }
     /**
-     * Returns the previous sibling node.
+     * Reference to the previous sibling node in the menu tree.
+     *
      * @returns {MenuNode|null}
      */
 
@@ -4612,16 +4717,36 @@ function (_Publisher) {
     get: function get() {
       return this.getOffsetSibling(-1);
     }
+    /**
+     * A list of all children for the node.
+     *
+     * @returns {[]}
+     */
+
   }, {
     key: "children",
     get: function get() {
       return this._children.slice(0);
     }
+    /**
+     * True if the node is active.
+     *
+     * @returns {boolean}
+     */
+
   }, {
     key: "isActive",
     get: function get() {
       return this._isActive;
-    },
+    }
+    /**
+     * Sets the isActive state for the node.
+     *
+     * Will toggle the active class on the root element as needed.
+     *
+     * @param value
+     */
+    ,
     set: function set(value) {
       value = !!value;
 
@@ -4635,11 +4760,23 @@ function (_Publisher) {
         this._isActive = value;
       }
     }
+    /**
+     * Returns true if the current node is disabled.
+     *
+     * @returns {boolean}
+     */
+
   }, {
     key: "isDisabled",
     get: function get() {
       return this.element.classList.contains('disabled');
-    },
+    }
+    /**
+     * Sets the disabled state for the current node.
+     *
+     * @param value
+     */
+    ,
     set: function set(value) {
       value = !!value;
 
@@ -4655,7 +4792,13 @@ function (_Publisher) {
     key: "isVisible",
     get: function get() {
       return this._isVisible;
-    },
+    }
+    /**
+     * Sets the visible state of the node.
+     *
+     * @param value
+     */
+    ,
     set: function set(value) {
       value = !!value;
 
@@ -4673,11 +4816,17 @@ function (_Publisher) {
     key: "element",
     get: function get() {
       if (this._element === undefined) {
-        this.element = this.render();
+        this.element = this.render({});
       }
 
       return this._element;
-    },
+    }
+    /**
+     * Sets the root HTMLElement of the node.
+     *
+     * @param element
+     */
+    ,
     set: function set(element) {
       if (typeof element === 'string') {
         element = document.querySelector(element);
@@ -4730,6 +4879,13 @@ function (_Publisher) {
     value: function getInstance(element) {
       return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(element);
     }
+    /**
+     * Constructs a menu node element for an HTMLElement.
+     * @param element {HTMLElement|string}
+     * @returns {MenuNode}
+     * @constructor
+     */
+
   }, {
     key: "FromHTML",
     value: function FromHTML(element) {

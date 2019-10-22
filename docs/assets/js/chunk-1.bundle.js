@@ -1,9 +1,9 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[1],{
 
-/***/ "./jekyll/js/pages/menu_examples.js":
-/*!******************************************!*\
-  !*** ./jekyll/js/pages/menu_examples.js ***!
-  \******************************************/
+/***/ "./jekyll/js/pages/menubar_example.js":
+/*!********************************************!*\
+  !*** ./jekyll/js/pages/menubar_example.js ***!
+  \********************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -48,9 +48,7 @@ function () {
         };
 
         if (_n < deep) {
-          node.submenu = {
-            children: _this.buildTestMenu(deep, items, _n + 1)
-          };
+          node.children = _this.buildTestMenu(deep, items, _n + 1);
         } else {
           node.href = '#';
 
@@ -78,124 +76,10 @@ function () {
         autoActivate: false,
         multiple: false
       });
-      var data = this.buildTestMenu(3, 5);
-      menu.createItems(data);
+      menu.createItems(this.buildTestMenu(3, 5));
+      menu.children[0].submenu.children[2].isDisabled = true;
       menu.appendTo("#menubar_1");
       window.menu = menu;
-      this.initFromJsonExample();
-    }
-  }, {
-    key: "initFromJsonExample",
-    value: function initFromJsonExample() {
-      var menu = new menu2__WEBPACK_IMPORTED_MODULE_0__["Menu"]({
-        closeOnBlur: true,
-        closeOnSelect: true
-      });
-      menu.isVisible = true;
-      menu.createItems([{
-        text: "Item #1",
-        submenu: {
-          children: [{
-            text: "SubItem #1",
-            href: "#"
-          }, {
-            text: "SubItem #2",
-            href: "#"
-          }, {
-            text: "SubItem #3",
-            href: "#"
-          }, {
-            text: "SubItem #4",
-            href: "#"
-          }, {
-            text: "SubItem #5",
-            href: "#"
-          }]
-        }
-      }, {
-        text: "Item #2",
-        submenu: {
-          children: [{
-            text: "SubItem #1",
-            href: "#"
-          }, {
-            text: "SubItem #2",
-            href: "#"
-          }, {
-            text: "SubItem #3",
-            href: "#"
-          }, {
-            text: "SubItem #4",
-            href: "#"
-          }, {
-            text: "SubItem #5",
-            href: "#"
-          }]
-        }
-      }, {
-        text: "Item #3",
-        submenu: {
-          children: [{
-            text: "SubItem #1",
-            href: "#"
-          }, {
-            text: "SubItem #2",
-            href: "#"
-          }, {
-            text: "SubItem #3",
-            href: "#"
-          }, {
-            text: "SubItem #4",
-            href: "#"
-          }, {
-            text: "SubItem #5",
-            href: "#"
-          }]
-        }
-      }, {
-        text: "Item #4",
-        submenu: {
-          children: [{
-            text: "SubItem #1",
-            href: "#"
-          }, {
-            text: "SubItem #2",
-            href: "#"
-          }, {
-            text: "SubItem #3",
-            href: "#"
-          }, {
-            text: "SubItem #4",
-            href: "#"
-          }, {
-            text: "SubItem #5",
-            href: "#"
-          }]
-        }
-      }, {
-        text: "Item #5",
-        submenu: {
-          children: [{
-            text: "SubItem #1",
-            href: "#"
-          }, {
-            text: "SubItem #2",
-            href: "#"
-          }, {
-            text: "SubItem #3",
-            href: "#"
-          }, {
-            text: "SubItem #4",
-            href: "#"
-          }, {
-            text: "SubItem #5",
-            href: "#"
-          }]
-        }
-      }]);
-      menu.style.position = 'static';
-      menu.style.width = '16rem';
-      menu.appendTo("#init-menu-from-json");
     }
   }]);
 

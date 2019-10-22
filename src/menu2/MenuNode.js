@@ -5,6 +5,11 @@ import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance
 import Attribute from "../core/attributes";
 
 
+/**
+ * The base class for Menu and MenuItem.  Provides the utilities that are necessary to manage and transverse the menu tree
+ * and propagate events throughout it.
+ * @extends {Publisher}
+ */
 export default class MenuNode extends Publisher {
     constructor() {
         super();
@@ -28,6 +33,11 @@ export default class MenuNode extends Publisher {
         this.MenuItemClass = null;
     }
 
+    /**
+     * Initializes the event listeners for the menu tree.  Click, mouse-over and mouse-out are bound.  Events are
+     * delegated to their child nodes as needed.  If an event is received where the node is the direct controller of
+     * the event will be ignored.
+     */
     init() {
         if(this.boundEvents) return;
 
@@ -55,6 +65,9 @@ export default class MenuNode extends Publisher {
         this.isController = true;
     }
 
+    /**
+     * Unbinds all event listeners.
+     */
     destroy() {
         if(this.events && this.hasElement()) {
             this.element.removeEventListener('click', this.boundEvents.onClick);
@@ -69,8 +82,11 @@ export default class MenuNode extends Publisher {
 
     /**
      * Renders the component.
+     *
+     * @param context {Object} Dictionary of values that may be used to render the component during templating.
+     * @abstract
      */
-    render() {
+    render(context) {
 
     }
 
@@ -78,7 +94,8 @@ export default class MenuNode extends Publisher {
     // Actions
 
     /**
-     * Returns the parent MenuNode
+     * Reference to the nodes parent or null if it is the root node of the tree.
+     *
      * @returns {null|MenuNode}
      */
     get parent() {
@@ -86,7 +103,7 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the root node of the menu tree.
+     * Reference to the root node of the tree.
      *
      * @returns {MenuNode}
      */
@@ -106,7 +123,8 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the closest parent menu.
+     * Reference to the first ancestor node in the menu tree who is a menu.  Returns null if it does not exist.
+     *
      * @returns {MenuNode|null}
      */
     get parentMenu() {
@@ -115,7 +133,8 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the closest parent item.
+     * Reference to the first ancestor node in the menu tree who is an item. Returns null if it does not exist.
+     *
      * @returns {MenuNode|null}
      */
     get parentItem() {
@@ -124,7 +143,8 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the next sibling node.
+     * Reference to the next sibling node in the menu tree.
+     *
      * @returns {MenuNode|null}
      */
     get nextSibling() {
@@ -132,21 +152,39 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the previous sibling node.
+     * Reference to the previous sibling node in the menu tree.
+     *
      * @returns {MenuNode|null}
      */
     get previousSibling() {
         return this.getOffsetSibling(-1);
     }
 
+    /**
+     * A list of all children for the node.
+     *
+     * @returns {[]}
+     */
     get children() {
         return this._children.slice(0);
     }
 
+    /**
+     * True if the node is active.
+     *
+     * @returns {boolean}
+     */
     get isActive() {
         return this._isActive;
     }
 
+    /**
+     * Sets the isActive state for the node.
+     *
+     * Will toggle the active class on the root element as needed.
+     *
+     * @param value
+     */
     set isActive(value) {
         value = !!value;
 
@@ -161,10 +199,20 @@ export default class MenuNode extends Publisher {
         }
     }
 
+    /**
+     * Returns true if the current node is disabled.
+     *
+     * @returns {boolean}
+     */
     get isDisabled() {
         return this.element.classList.contains('disabled');
     }
 
+    /**
+     * Sets the disabled state for the current node.
+     *
+     * @param value
+     */
     set isDisabled(value) {
         value = !!value;
 
@@ -179,6 +227,7 @@ export default class MenuNode extends Publisher {
 
     /**
      * Returns true if the current node is disabled or if any ancestor node is disabled.
+     *
      * @returns {boolean}
      */
     getDisabled() {
@@ -195,10 +244,20 @@ export default class MenuNode extends Publisher {
         return false;
     }
 
+    /**
+     * Returns true if the current node is visible.
+     *
+     * @returns {boolean}
+     */
     get isVisible() {
         return this._isVisible;
     }
 
+    /**
+     * Sets the visible state of the node.
+     *
+     * @param value
+     */
     set isVisible(value) {
         value = !!value;
 
@@ -213,18 +272,33 @@ export default class MenuNode extends Publisher {
         }
     }
 
+    /**
+     * Returns true if the nodes element is defined.
+     *
+     * @returns {boolean}
+     */
     hasElement() {
         return !!this._element;
     }
 
+    /**
+     * Gets the root HTMLElement of the node.
+     *
+     * @returns {HTMLElement}
+     */
     get element() {
         if(this._element === undefined) {
-            this.element = this.render();
+            this.element = this.render({});
         }
 
         return this._element;
     }
 
+    /**
+     * Sets the root HTMLElement of the node.
+     *
+     * @param element
+     */
     set element(element) {
         if(typeof element === 'string') {
             element = document.querySelector(element);
@@ -317,6 +391,12 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Returns true if the provided node is a descendant of the current node.
+     *
+     * @param node
+     * @returns {boolean}
+     */
     contains(node) {
         while(node) {
             if(node.parent === this) {
@@ -454,6 +534,12 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Returns the target node for the given HTMLElement in the current menu tree.
+     *
+     * @param target {HTMLElement}
+     * @returns {null|MenuNode}
+     */
     getTargetNode(target) {
         let o = target;
 
@@ -474,6 +560,12 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Returns the target item for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
     getTargetItem(target) {
         let o = target;
 
@@ -494,6 +586,12 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Returns the target menu for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
     getTargetMenu(target) {
         let o = target;
 
@@ -514,14 +612,31 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    /**
+     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
+     *
+     * @returns {boolean}
+     */
     isMenuItem() {
         return false;
     }
 
+    /**
+     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
+     *
+     * @returns {boolean}
+     */
     isMenu() {
         return false;
     }
 
+    /**
+     * Publishes the topic to itself and bubbles up the menu tree.
+     *
+     * @param topic
+     * @param args
+     * @returns {MenuNode}
+     */
     dispatchTopic(topic, ...args) {
         let o = this;
 
@@ -536,6 +651,9 @@ export default class MenuNode extends Publisher {
     //------------------------------------------------------------------------------------------------------------------
     // Tree functions
 
+    /**
+     * Parses the dom and initializes any menu or menuitem elements that are found.
+     */
     parseDOM() {
         if(this._children.length) {
             for(let child of this._children) {
@@ -571,6 +689,9 @@ export default class MenuNode extends Publisher {
         walk(this.element);
     }
 
+    /**
+     * Invalidates all parent and child references.
+     */
     invalidateTree() {
         this._parent = null;
 
@@ -616,10 +737,22 @@ export default class MenuNode extends Publisher {
         return removeClasses(this.element, classes);
     }
 
+    /**
+     * Returns the bound menu controller for the provided node.
+     *
+     * @static
+     * @param element {HTMLElement}
+     */
     static getInstance(element) {
         return getMenuInstance(element);
     }
 
+    /**
+     * Constructs a menu node element for an HTMLElement.
+     * @param element {HTMLElement|string}
+     * @returns {MenuNode}
+     * @constructor
+     */
     static FromHTML(element) {
         if(typeof element === 'string') {
             element = document.querySelector(element);
