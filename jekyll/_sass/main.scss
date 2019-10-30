@@ -19,7 +19,7 @@ h1, h2, h3, h4, h5, h6 {
 
 body {
   font-family: "Open Sans",Helvetica,sans-serif;
-  font-size: 15pt;
+  font-size: 1rem;
   font-weight: 400;
   background-color: #f0f0f1;
 }
@@ -228,4 +228,18 @@ p {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 2px solid #9aa;
+
+  .parameters {
+    margin-bottom: 1rem;
+
+    table {
+      border: 1px solid #ccc;
+      box-shadow: 0 0 8px #ccc;
+      font-size: 1rem;
+    }
+
+    td {
+      padding: 0.25rem;
+    }
+  }
 }

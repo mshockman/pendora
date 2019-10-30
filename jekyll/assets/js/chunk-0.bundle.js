@@ -34,11 +34,11 @@ function () {
       var _n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
       var text = function text(x) {
-        return "Child Item #".concat(x);
+        return "#Child Item #".concat(x);
       };
 
       if (_n === 0) text = function text(x) {
-        return "Root Item #".concat(x);
+        return "#Root Item #".concat(x);
       };
       var r = [];
 
@@ -74,7 +74,6 @@ function () {
       var main = document.getElementById('content');
       var menu = new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuBar"]({
         timeout: 2000,
-        delay: 1000,
         autoActivate: false,
         multiple: false
       });

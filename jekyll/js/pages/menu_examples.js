@@ -7,8 +7,8 @@ export default class MenuBarExamplePage {
     }
 
     buildTestMenu(deep, items, _n=0) {
-        let text = (x) => `Child Item #${x}`;
-        if(_n === 0) text = (x) => `Root Item #${x}`;
+        let text = (x) => `#Child Item #${x}`;
+        if(_n === 0) text = (x) => `#Root Item #${x}`;
 
         let r = [];
 
@@ -35,7 +35,7 @@ export default class MenuBarExamplePage {
     load() {
         let main = document.getElementById('content');
 
-        let menu = new MenuBar({timeout: 2000, delay: 1000, autoActivate: false, multiple: false});
+        let menu = new MenuBar({timeout: 2000, autoActivate: false, multiple: false});
 
         let data = this.buildTestMenu(3, 5);
         menu.createItems(data);
