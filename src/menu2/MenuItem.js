@@ -70,6 +70,14 @@ export default class MenuItem extends MenuNode {
         this.on('menuitem.selected', (event) => this.onSelect(event));
     }
 
+    /**
+     * Renders the domElement.
+     *
+     * @param text
+     * @param nodeName
+     * @param href
+     * @returns {HTMLDivElement}
+     */
     render({text, nodeName="div", href=null}={}) {
         let element = document.createElement(nodeName),
             button = document.createElement('a');
@@ -88,8 +96,9 @@ export default class MenuItem extends MenuNode {
     }
 
     /**
+     * Activates the item.
      *
-     * @param show {boolean|number}
+     * @param show {boolean|number} - The number of milliseconds after the item activates that the submenu will display.
      */
     activate(show=true) {
         if(this.isActive) return;
@@ -134,6 +143,9 @@ export default class MenuItem extends MenuNode {
         }));
     }
 
+    /**
+     * Deactivates the item.
+     */
     deactivate() {
         if(!this.isActive) return;
         this.isActive = false;
@@ -159,6 +171,9 @@ export default class MenuItem extends MenuNode {
         }));
     }
 
+    /**
+     * Triggers a select item event.
+     */
     select() {
         this.publish('selected');
         this.dispatchTopic('menuitem.selected', {target: this});
@@ -169,6 +184,11 @@ export default class MenuItem extends MenuNode {
         }));
     }
 
+    /**
+     * Returns true if the menu node is a menu item.
+     *
+     * @returns {boolean}
+     */
     isMenuItem() {
         return true;
     }
@@ -176,6 +196,12 @@ export default class MenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Action management
 
+    /**
+     * Adds an action that will be called when the user selects the item.
+     *
+     * @param action {Function|String} - A callback to call when the action occurs.
+     * @returns {Function}
+     */
     addAction(action) {
         if(typeof action === 'string') {
             let fn = () => {
@@ -190,14 +216,26 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Removes an action.
+     * @param action
+     */
     removeAction(action) {
         this.off('selected', action);
     }
 
+    /**
+     * Tests to see if the item has an action.
+     * @param action
+     * @returns {boolean}
+     */
     hasAction(action) {
         return this.hasEvent('selected', action);
     }
 
+    /**
+     * Removes all actions from the item.
+     */
     clearActions() {
         this.off('selected');
     }
@@ -205,6 +243,11 @@ export default class MenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Manage submenu
 
+    /**
+     * Attaches a submenu to the menuitem.
+     *
+     * @param submenu
+     */
     attachSubMenu(submenu) {
         if(this.submenu) {
             throw new Error("MenuItem can only have one submenu.");
@@ -222,6 +265,11 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Detaches the submenu from the item.
+     * @param remove {Boolean} If true the submenu will be removed from the dom.
+     * @returns {*} The detached submenu.
+     */
     detachSubMenu(remove=true) {
         let submenu = this.submenu;
 
@@ -234,10 +282,18 @@ export default class MenuItem extends MenuNode {
         return submenu;
     }
 
+    /**
+     * Returns true if the menu item has a submenu.
+     * @returns {boolean}
+     */
     hasSubMenu() {
         return !!this.submenu;
     }
 
+    /**
+     * Returns true if the item has a submenu and that submenu is visible.
+     * @returns {boolean}
+     */
     isSubMenuVisible() {
         return this.hasSubMenu() ? this.submenu.isVisible : false;
     }
@@ -245,12 +301,19 @@ export default class MenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Event handlers
 
+    /**
+     * Handles select events.
+     */
     onSelect() {
         if(this.closeOnSelect && this.isActive) {
             this.deactivate();
         }
     }
 
+    /**
+     * Handles click events.
+     * @param event
+     */
     onClick(event) {
         let isDisabled = this.getDisabled();
 
@@ -279,6 +342,10 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Handles on mouse over events.
+     * @param event
+     */
     onMouseOver(event) {
         this.clearTimer('timeout');
 
@@ -310,6 +377,11 @@ export default class MenuItem extends MenuNode {
         }
     }
 
+    /**
+     * Handles on mouse out events.
+     *
+     * @param event
+     */
     onMouseOut(event) {
         if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
@@ -355,6 +427,10 @@ export default class MenuItem extends MenuNode {
         return this._children[0];
     }
 
+    /**
+     * Property wrapper around attachSubMenu and detachSubMenu methods.
+     * @param value
+     */
     set submenu(value) {
         if(!value) {
             this.detachSubMenu();

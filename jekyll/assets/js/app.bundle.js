@@ -2681,6 +2681,13 @@ var Menu = _decorate(null, function (_initialize, _MenuNode) {
 
       return _this;
     }
+    /**
+     * Renders the domElement of the widget.
+     *
+     * @param arrow
+     * @returns {HTMLDivElement}
+     */
+
 
     return Menu;
   }(_MenuNode);
@@ -3427,6 +3434,15 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
       return _this;
     }
+    /**
+     * Renders the domElement.
+     *
+     * @param text
+     * @param nodeName
+     * @param href
+     * @returns {HTMLDivElement}
+     */
+
 
     return MenuItem;
   }(_MenuNode);
@@ -3493,8 +3509,9 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
         return element;
       }
       /**
+       * Activates the item.
        *
-       * @param show {boolean|number}
+       * @param show {boolean|number} - The number of milliseconds after the item activates that the submenu will display.
        */
 
     }, {
@@ -3543,6 +3560,10 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           bubbles: true
         }));
       }
+      /**
+       * Deactivates the item.
+       */
+
     }, {
       kind: "method",
       key: "deactivate",
@@ -3570,6 +3591,10 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           bubbles: true
         }));
       }
+      /**
+       * Triggers a select item event.
+       */
+
     }, {
       kind: "method",
       key: "select",
@@ -3583,6 +3608,12 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           bubbles: true
         }));
       }
+      /**
+       * Returns true if the menu node is a menu item.
+       *
+       * @returns {boolean}
+       */
+
     }, {
       kind: "method",
       key: "isMenuItem",
@@ -3590,6 +3621,13 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
         return true;
       } //------------------------------------------------------------------------------------------------------------------
       // Action management
+
+      /**
+       * Adds an action that will be called when the user selects the item.
+       *
+       * @param action {Function|String} - A callback to call when the action occurs.
+       * @returns {Function}
+       */
 
     }, {
       kind: "method",
@@ -3607,18 +3645,33 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           return action;
         }
       }
+      /**
+       * Removes an action.
+       * @param action
+       */
+
     }, {
       kind: "method",
       key: "removeAction",
       value: function removeAction(action) {
         this.off('selected', action);
       }
+      /**
+       * Tests to see if the item has an action.
+       * @param action
+       * @returns {boolean}
+       */
+
     }, {
       kind: "method",
       key: "hasAction",
       value: function hasAction(action) {
         return this.hasEvent('selected', action);
       }
+      /**
+       * Removes all actions from the item.
+       */
+
     }, {
       kind: "method",
       key: "clearActions",
@@ -3626,6 +3679,12 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
         this.off('selected');
       } //------------------------------------------------------------------------------------------------------------------
       // Manage submenu
+
+      /**
+       * Attaches a submenu to the menuitem.
+       *
+       * @param submenu
+       */
 
     }, {
       kind: "method",
@@ -3646,6 +3705,12 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           submenu.appendTo(this.element);
         }
       }
+      /**
+       * Detaches the submenu from the item.
+       * @param remove {Boolean} If true the submenu will be removed from the dom.
+       * @returns {*} The detached submenu.
+       */
+
     }, {
       kind: "method",
       key: "detachSubMenu",
@@ -3661,12 +3726,22 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         return submenu;
       }
+      /**
+       * Returns true if the menu item has a submenu.
+       * @returns {boolean}
+       */
+
     }, {
       kind: "method",
       key: "hasSubMenu",
       value: function hasSubMenu() {
         return !!this.submenu;
       }
+      /**
+       * Returns true if the item has a submenu and that submenu is visible.
+       * @returns {boolean}
+       */
+
     }, {
       kind: "method",
       key: "isSubMenuVisible",
@@ -3674,6 +3749,10 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
         return this.hasSubMenu() ? this.submenu.isVisible : false;
       } //------------------------------------------------------------------------------------------------------------------
       // Event handlers
+
+      /**
+       * Handles select events.
+       */
 
     }, {
       kind: "method",
@@ -3683,6 +3762,11 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.deactivate();
         }
       }
+      /**
+       * Handles click events.
+       * @param event
+       */
+
     }, {
       kind: "method",
       key: "onClick",
@@ -3713,6 +3797,11 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
       }
+      /**
+       * Handles on mouse over events.
+       * @param event
+       */
+
     }, {
       kind: "method",
       key: "onMouseOver",
@@ -3747,6 +3836,12 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
       }
+      /**
+       * Handles on mouse out events.
+       *
+       * @param event
+       */
+
     }, {
       kind: "method",
       key: "onMouseOut",
@@ -3802,6 +3897,11 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       value: function submenu() {
         return this._children[0];
       }
+      /**
+       * Property wrapper around attachSubMenu and detachSubMenu methods.
+       * @param value
+       */
+
     }, {
       kind: "set",
       key: "submenu",

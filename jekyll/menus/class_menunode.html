@@ -1,6 +1,552 @@
 ---
-title: MenuBase class
-description: Base class that all DropDown, Menu, and MenuItem inherit from.
+title: MenuNode
+description: Base Class for MenuItems and Menus.
 layout: default
 ---
 
+
+<article class="page-info">
+    <h1>MenuNode</h1>
+    <section>
+        <p>
+            Base class for Menu and MenuItems.
+        </p>
+    </section>
+</article>
+
+
+<article class="info-table methods">
+    <h4>Public Methods</h4>
+    <table>
+        <tr><td></td><td><a href="#constructor">constructor</a>()</td></tr>
+        <tr><td>void</td><td><a href="#init">init</a>()</td></tr>
+        <tr><td>void</td><td><a href="#destroy">destroy</a>()</td></tr>
+        <tr><td>HTMLElement</td><td><a href="#render">render</a>()</td></tr>
+        <tr><td>boolean</td><td><a href="#getDisabled">getDisabled</a>()</td></tr>
+        <tr><td>boolean</td><td><a href="#hasElement">hasElement</a>()</td></tr>
+        <tr><td>HTMLElement</td><td><a href="#element-prop">get element</a>()</td></tr>
+        <tr><td>MenuNode</td><td><a href="#getOffsetSibling">getOffsetSibling</a>(Number offset)</td></tr>
+        <tr><td>void</td><td><a href="#appendTo">appendTo</a>({string|HTMLElement|{append}} selector)</td></tr>
+        <tr><td>void</td><td><a href="#remove">remove</a>()</td></tr>
+        <tr><td>MenuNode</td><td><a href="#closest">closest</a>(fn)</td></tr>
+        <tr><td>boolean</td><td><a href="#contains">contains</a>(MenuNode node)</td></tr>
+        <tr><td>IterableIterator&lt;MenuNode&gt;</td><td><a href="#getDescendants">*getDescendants</a>()</td></tr>
+        <tr><td>{status, id, cancel(), type}</td><td><a href="#startTimer">startTimer</a>(String name, {function(timer)} fn, Number time, bool interval=false, bool clear=true)</td></tr>
+        <tr><td>boolean</td><td><a href="#clearTimer">clearTimer</a>(String name)</td></tr>
+        <tr><td>{status, id, cancel(), type}</td><td><a href="#getTimer">getTimer</a>(String name)</td></tr>
+        <tr><td>MenuNode</td><td><a href="#getEventDelegator">getEventDelegator</a>()</td></tr>
+        <tr><td>MenuNode</td><td><a href="#getTargetNode">getTargetNode</a>(HTMLElement target)</td></tr>
+        <tr><td>MenuNode</td><td><a href="#getTargetItem">getTargetItem</a>(HTMLElement target)</td></tr>
+        <tr><td>MenuNode</td><td><a href="#getTargetMenu">getTargetMenu</a>(HTMLElement target)</td></tr>
+        <tr><td>bool</td><td><a href="#isMenuItem">isMenuItem</a>()</td></tr>
+        <tr><td>bool</td><td><a href="#isMenu">isMenu</a>()</td></tr>
+        <tr><td>void</td><td><a href="#dispatchTopic">dispatchTopic</a>(String topic, ...args)</td></tr>
+        <tr><td>void</td><td><a href="#parseDOM">parseDOM</a>()</td></tr>
+        <tr><td>void</td><td><a href="#invalidateTree">invalidateTree</a>()</td></tr>
+        <tr><td>void</td><td><a href="#addClass">addClass</a>(String classes)</td></tr>
+        <tr><td>void</td><td><a href="#removeClass">removeClass</a>(String classes)</td></tr>
+        <tr><td>(static) MenuNode</td><td><a href="#getInstance">getInstance</a>(HTMLElement element)</td></tr>
+        <tr><td>(static) FromHTML</td><td><a href="#FromHTML">FromHTML</a>(HTMLElement element)</td></tr>
+    </table>
+</article>
+
+
+<article class="info-table properties">
+    <h4>Public Methods</h4>
+    <table>
+        <tr><td><a href="#parent-prop">@readonly MenuNode parent</a></td></tr>
+        <tr><td><a href="#root-prop">@readonly MenuNode root</a></td></tr>
+        <tr><td><a href="#parent-item-prop">@readonly MenuNode parentItem</a></td></tr>
+        <tr><td><a href="#parent-menu-prop">@readonly MenuNode parentMenu</a></td></tr>
+        <tr><td><a href="#next-sibling-prop">@readonly MenuNode nextSibling</a></td></tr>
+        <tr><td><a href="#previous-sibling-prop">@readonly MenuNode previousSibling</a></td></tr>
+        <tr><td><a href="#children-prop">@readonly MenuNode[] children</a></td></tr>
+        <tr><td><a href="#is-active-prop">boolean isActive</a></td></tr>
+        <tr><td><a href="#is-disabled-prop">boolean isDisabled</a></td></tr>
+        <tr><td><a href="#is-visible-prop">boolean isVisible</a></td></tr>
+        <tr><td><a href="#id-prop">String id</a></td></tr>
+        <tr><td><a href="#classList-prop">ClassList classList</a></td></tr>
+        <tr><td><a href="#dataset-prop">DataSet dataset</a></td></tr>
+        <tr><td><a href="#style-prop">Object style</a></td></tr>
+    </table>
+</article>
+
+
+<article class="page-detail" id="detailed-description">
+    <h2>Detailed Description</h2>
+    <section>
+        <p>
+            Base class for Menu and MenuItems.
+        </p>
+        <p>
+            The MenuNode class is the base class for all nodes that can make up a menu tree.  It is inherited by both
+            the Menu and MenuItem classes and by all of their subclasses.  MenuNode is responsible for delegating
+            events, managing timers, managing and transversing the menu tree, and binding the menu controller classes
+            to the dom elements for reverse lookup.
+        </p>
+        <h2>Timers</h2>
+        <p>
+            Timers are used to delay actions until after a specified amount of time as passed.  Timers are given name that
+            are unique to their menu nodes.  Only one timer per name can be active at a time.  If another timer with
+            the same name is created it destroys the previous timer.
+        </p>
+        <h2>Event Delegation</h2>
+        <p>
+            One of the goals of the menu library was to register as few events as needed.  To accomplish this events
+            are only registered on root nodes and menu nodes and are delegated to their menu items.  Every MenuNode
+            has the potential to be an event delegater.  To enable event delegation on a node you can call the init()
+            method.  This will add the necessary event listeners to the root element and mark that node as a controller.
+        </p>
+        <p>
+            Once an event has been encountered the targeted event delegater is looked up.  Only the targeted delegater
+            will delegate events into the virtual menu tree event system.  Any all delegater the encounters the event
+            will skip it.  This ensures that an event is only published once to the event system not matter how many
+            delegaters that tree may have.  Events are published with the name in the format `event.${event.name}` using
+            the dispatchTopic method.
+        </p>
+        <h2>Menu Tree</h2>
+        <p>
+            MenuNodes are organized into a tree structure and are designed to behave like the DOM tree as much as possible.
+            Events can be published and bubbled up the tree using dispatchTopic and getter properties are defined like
+            parent, root, nextSibling, previousSibling and children so that the tree can easily be traversed.
+        </p>
+        <h2>Menu Map</h2>
+        <p>
+            MenuNode keeps an internal map of element to their menu controllers for easy lookup of a menu instance by
+            it's element.  This map uses weak references so you don't have to worry about deallocating the memory once
+            the element is lost.
+        </p>
+    </section>
+</article>
+
+
+<h1>Methods & Properties:</h1>
+
+
+<article class="method-info" id="constructor">
+    <h3>constructor() : void</h3>
+    <section>
+        <p>Initializes all base MenuNode properties.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="init">
+    <h3>init() : void</h3>
+    <section>
+        <p>
+            Initializes the event listeners for the menu tree.  Click, mouse-over and mouse-out are bound.  Events are
+            delegated to their child nodes as needed.  If an event is received where the node is the direct controller of
+            the event will be ignored.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="destroy">
+    <h3>destroy() : void</h3>
+    <section>
+        <p>Unregisters events and unbinds root element from controller class.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="render">
+    <h3>render(context : Object) : void</h3>
+    <section>
+        <p>Renders the component if a target is not passed.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="parent-prop">
+    <h3>@readonly parent : MenuNode</h3>
+    <section>
+        <p>Reference to the nodes parent or null if it is the root node of the tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="root-prop">
+    <h3>@readonly root : MenuNode</h3>
+    <section>
+        <p>Reference to the root node of the menu tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="parent-menu-prop">
+    <h3>@readonly parentMenu : MenuNode</h3>
+    <section>
+        <p>Reference to the closest parent menu from the current node in the menu tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="parent-item-prop">
+    <h3>@readonly parentItem : MenuNode</h3>
+    <section>
+        <p>Reference to the closest parent item from the current node in the menu tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="next-sibling-prop">
+    <h3>@readonly nextSibling : MenuNode</h3>
+    <section>
+        <p>Returns the next sibling in the menu tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="previous-sibling-prop">
+    <h3>@readonly previousSibling : MenuNode</h3>
+    <section>
+        <p>Returns the previous sibling in the menu tree.</p>
+    </section>
+</article>
+
+
+<article class="method-info" id="children-prop">
+    <h3>@readonly children : MenuNode[]</h3>
+    <section>
+        <p>
+            Returns a list of all children of the current node.  This property is read only and cannot be used to add or
+            remove children from a node.  For that you need to use the add and remove methods unique to subclasses of MenuNode.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="is-active-prop">
+    <h3>isActive : boolean</h3>
+    <section>
+        <p>
+            Determines if the node is active or not. Active nodes have the active class and behave differently the unactive
+            nodes.  For more details see specific subclasses of MenuNode.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="is-disabled-prop">
+    <h3>isDisabled : boolean</h3>
+    <section>
+        <p>Determines if the node is disabled.  Disabled nodes are given the disabled class and won't respond to user events.</p>
+        <p>
+            A node is considered disabled if itself or any parent is disabled.  This property only controls if the current
+            node is disabled.  Event if this property is false it may still be disabled if any parent is disabled.  The
+            method getDisabled() is used to determine is the method is disabled or not.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getDisabled">
+    <h3>getDisabled() : boolean</h3>
+    <section>
+        <p>
+            Returns true if the current node is disabled or any of it's parent are.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="is-visible-prop">
+    <h3>isVisible : boolean</h3>
+    <section>
+        <p>
+            Controls if the node is visible or not.  Hidden nodes are given the hidden class.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="hasElement">
+    <h3>hasElement() : boolean</h3>
+    <section>
+        <p>
+            Returns true the element of the node have been initialized.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="element-prop">
+    <h3>element : HTMLElement</h3>
+    <section>
+        <p>
+            Reference to the root html element that represents the menu node.  On set the instance is bound to the
+            element for reverse lookups and removed if the element changes or is set to null.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getOffsetSibling">
+    <h3>getOffsetSibling(Number index=1) : MenuNode</h3>
+    <section>
+        <p>
+            Returns the sibling offset by the given amount from the current nodes position.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="appendTo">
+    <h3>appendTo({String|HTMLElement|{append}} selector) : void</h3>
+    <section>
+        <p>
+            Appends the component to the specified HTMLElement or object.  If a string is passed method will attempt
+            to lookup an HTMLElement using document.querySelector and append to that.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="remove">
+    <h3>remove() : void</h3>
+    <section>
+        <p>
+            Remove the node from the page.  This method doesn't remove the node from the menu tree.  For that see the
+            methods unique to the subclass.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="closest">
+    <h3>closest({function(node) : bool} fn) : MenuNode</h3>
+    <section>
+        <p>
+            Walks up the tree and and returns the first MenuNode that matches the provided test function.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="contains">
+    <h3>contains(MenuNode node) : boolean</h3>
+    <section>
+        <p>
+            Returns true if the provided node is a descendant of the current node.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getDescendants">
+    <h3>*getDescendants() : IterableIterator&lt;MenuNode&gt;</h3>
+    <section>
+        <p>
+            Iterates through every descendant node in the menu tree.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="startTimer">
+    <h3>startTimer(String name, function(timer) fn, Number time, Boolean interval=false, clear=true) : {status, id, cancel(), type} timer</h3>
+    <section>
+        <p>
+            Creates named timer unique to the node.  Timers are used to enact actions after a specific amount of time
+            has elapsed.  If a timer with the same name is created it will be canceled if clear is true otherwise an
+            error will be thrown.  The timer object is passed to the callback function through it's first parameter.
+        </p>
+        <p>
+            If interval is true then the callback function will be called periodically.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getTimer">
+    <h3>getTimer(String name) : timer</h3>
+    <section>
+        <p>
+            Returns the timer for the object with the given name.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="clearTimer">
+    <h3>clearTimer(String name) : bool</h3>
+    <section>
+        <p>
+            Clears the timer with the given name.  Returns true if the timer was successfully cleared.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getEventDelegator">
+    <h3>getEventDelegator() : MenuNode</h3>
+    <section>
+        <p>
+            Returns the MenuNode that is responsible for delegating events.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getTargetNode">
+    <h3>getTargetNode(HTMLElement target) : MenuNode</h3>
+    <section>
+        <p>
+            Returns the target node for the given HTMLElement.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getTargetItem">
+    <h3>getTargetItem(HTMLElement target) : MenuNode</h3>
+    <section>
+        <p>
+            Returns the target menu item for the given HTMLElement.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getTargetMenu">
+    <h3>getTargetMenu(HTMLElement target) : MenuNode</h3>
+    <section>
+        <p>
+            Returns the target menu for the given HTMLElement.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="isMenuItem">
+    <h3>isMenuItem() : boolean</h3>
+    <section>
+        <p>
+            Returns true if the object should be treated as a menu item.  Any object that wants to be treated as a menu node
+            should implement this method.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="isMenu">
+    <h3>isMenu() : boolean</h3>
+    <section>
+        <p>
+            Returns true if the object should be treated as a menu.  Any object that wants to be treated as a menu node
+            should implement this method.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="dispatchTopic">
+    <h3>dispatchTopic(String topic ...args) : MenuNode</h3>
+    <section>
+        <p>
+            Publishes the topic to itself and bubbles up the menu tree.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="parseDOM">
+    <h3>parseDOM() : void</h3>
+    <section>
+        <p>
+            Walks the dom tree and initializes any menu or menuitem elements that are found.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="invalidateTree">
+    <h3>invalidateTree() : void</h3>
+    <section>
+        <p>
+            Invalidates all parent and child references.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="id-prop">
+    <h3>id : string</h3>
+    <section>
+        <p>
+            Wrapper around this.element.id
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="classList-prop">
+    <h3>classList : ClassList</h3>
+    <section>
+        <p>
+            Wrapper around this.element.classList
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="dataset-prop">
+    <h3>dataset : DataSet</h3>
+    <section>
+        <p>
+            Wrapper around this.element.dataset
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="style-prop">
+    <h3>style : Object</h3>
+    <section>
+        <p>
+            Wrapper around this.element.style
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="addClass">
+    <h3>addClass(String classes) : void</h3>
+    <section>
+        <p>
+            Takes a string of space separated class names and adds them to the root nodes classList.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="removeClass">
+    <h3>removeClass(String classes) : void</h3>
+    <section>
+        <p>
+            Takes a string of space separated class names and removes them to the root nodes classList.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="getInstance">
+    <h3>@static getInstance(HTMLElement element) : MenuNode</h3>
+    <section>
+        <p>
+            Returns the bound menu controller for the provided node.
+        </p>
+    </section>
+</article>
+
+
+<article class="method-info" id="FromHTML">
+    <h3>@static FromHTML(HTMLElement element) : MenuNode</h3>
+    <section>
+        <p>
+            Constructs a menu node element for an HTMLElement.
+        </p>
+    </section>
+</article>

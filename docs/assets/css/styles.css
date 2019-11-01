@@ -260,8 +260,8 @@ p { line-height: 1.5; }
 
 .method-info .parameters { margin-bottom: 1rem; }
 
-.method-info .parameters table { border: 1px solid #ccc; box-shadow: 0 0 8px #ccc; font-size: 1rem; }
+.method-info .parameters table { border: 1px solid #ccc; box-shadow: 0 0 8px #ccc; font-size: 1rem; width: 100%; border-collapse: collapse; }
 
-.method-info .parameters td { padding: 0.25rem; }
+.method-info .parameters td { padding: 0.5rem; border-bottom: 1px solid #9aa; }
 
 /*# sourceMappingURL=styles.css.map */

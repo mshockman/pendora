@@ -125,6 +125,12 @@ export default class Menu extends MenuNode {
         }
     }
 
+    /**
+     * Renders the domElement of the widget.
+     *
+     * @param arrow
+     * @returns {HTMLDivElement}
+     */
     render({arrow=false}={}) {
         let element = document.createElement('div'),
             body = document.createElement('div');
