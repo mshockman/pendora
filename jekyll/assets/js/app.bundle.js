@@ -2513,6 +2513,9 @@ var MENU_PARAMETERS = {
   toggle: stringAttribute,
   visible: boolAttribute
 };
+/**
+ * A component for rendering nestable list of selectable items.
+ */
 
 var Menu = _decorate(null, function (_initialize, _MenuNode) {
   var Menu =
@@ -2565,7 +2568,7 @@ var Menu = _decorate(null, function (_initialize, _MenuNode) {
           _ref$deactivateOnItem = _ref.deactivateOnItemHover,
           deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem,
           _ref$delay = _ref.delay,
-          delay = _ref$delay === void 0 ? false : _ref$delay,
+          delay = _ref$delay === void 0 ? 0 : _ref$delay,
           _ref$id = _ref.id,
           id = _ref$id === void 0 ? null : _ref$id,
           _ref$classes = _ref.classes,
@@ -2905,7 +2908,8 @@ var Menu = _decorate(null, function (_initialize, _MenuNode) {
     }, {
       kind: "method",
       key: "addItem",
-      value: function addItem(text, action) {
+      value: function addItem(text) {
+        var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
         var item = new this.MenuItemClass({
           text: text,
           action: action

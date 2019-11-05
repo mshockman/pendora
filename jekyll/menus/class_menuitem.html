@@ -43,22 +43,22 @@ layout: default
     <table>
         <tr><td><a href="#method-constructor">constructor</a></td><td></td></tr>
         <tr><td><a href="#method-render">render</a></td><td>Renders the domElement of the widget.</td></tr>
-        <tr><td><a href="#">activate</a></td><td>Activates the item.</td></tr>
-        <tr><td><a href="#">deactivate</a></td><td>Deactivates the item.</td></tr>
-        <tr><td><a href="#">select</a></td><td>Triggers a select item event.</td></tr>
-        <tr><td><a href="#">isMenuItem</a></td><td>Returns true if the menu node is a menu item.</td></tr>
-        <tr><td><a href="#">addAction</a></td><td>Adds an action that will be called when the user selects the item.</td></tr>
-        <tr><td><a href="#">removeAction</a></td><td>Removes an action.</td></tr>
-        <tr><td><a href="#">hasAction</a></td><td>Tests to see if the item has an action.</td></tr>
-        <tr><td><a href="#">clearActions</a></td><td>Removes all actions from the item.</td></tr>
-        <tr><td><a href="#">attachSubMenu</a></td><td>Attaches a submenu to the menuitem.</td></tr>
-        <tr><td><a href="#">detachSubMenu</a></td><td>Detaches the submenu from the item.</td></tr>
-        <tr><td><a href="#">hasSubMenu</a></td><td>Returns true if the menu item has a submenu.</td></tr>
-        <tr><td><a href="#">isSubMenuVisible</a></td><td>Returns true if the item has a submenu and that submenu is visible.</td></tr>
-        <tr><td><a href="#">onSelect</a></td><td>Handles select events.</td></tr>
-        <tr><td><a href="#">onClick</a></td><td>Handles click events.</td></tr>
-        <tr><td><a href="#">onMouseOver</a></td><td>Handles on mouse over events.</td></tr>
-        <tr><td><a href="#">onMouseOut</a></td><td>Handles on mouse out events.</td></tr>
+        <tr><td><a href="#method-activate">activate</a></td><td>Activates the item.</td></tr>
+        <tr><td><a href="#method-deactivate">deactivate</a></td><td>Deactivates the item.</td></tr>
+        <tr><td><a href="#method-select">select</a></td><td>Triggers a select item event.</td></tr>
+        <tr><td><a href="#method-isMenuItem">isMenuItem</a></td><td>Returns true if the menu node is a menu item.</td></tr>
+        <tr><td><a href="#method-addAction">addAction</a></td><td>Adds an action that will be called when the user selects the item.</td></tr>
+        <tr><td><a href="#method-removeAction">removeAction</a></td><td>Removes an action.</td></tr>
+        <tr><td><a href="#method-hasAction">hasAction</a></td><td>Tests to see if the item has an action.</td></tr>
+        <tr><td><a href="#method-clearActions">clearActions</a></td><td>Removes all actions from the item.</td></tr>
+        <tr><td><a href="#method-attachSubMenu">attachSubMenu</a></td><td>Attaches a submenu to the menuitem.</td></tr>
+        <tr><td><a href="#method-detachSubMenu">detachSubMenu</a></td><td>Detaches the submenu from the item.</td></tr>
+        <tr><td><a href="#method-hasSubMenu">hasSubMenu</a></td><td>Returns true if the menu item has a submenu.</td></tr>
+        <tr><td><a href="#method-isSubMenuVisible">isSubMenuVisible</a></td><td>Returns true if the item has a submenu and that submenu is visible.</td></tr>
+        <tr><td><a href="#method-onSelect">onSelect</a></td><td>Handles select events.</td></tr>
+        <tr><td><a href="#method-onClick">onClick</a></td><td>Handles click events.</td></tr>
+        <tr><td><a href="#method-onMouseOver">onMouseOver</a></td><td>Handles on mouse over events.</td></tr>
+        <tr><td><a href="#method-onMouseOut">onMouseOut</a></td><td>Handles on mouse out events.</td></tr>
     </table>
 </article>
 
@@ -293,4 +293,285 @@ menuitem.activate(1000);
 {% highlight javascript linenos %}
 menuitem.deactivate();
 {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-select">select()</a></h3>
+    <section class="description">
+        <p>Selects the menu-item, calling any registered actions and triggering a "menuitem.selected" event and topic.</p>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    menuitem.select();
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-isMenuItem">isMenuItem()</a></h3>
+    <section class="description">
+        <p>A method that returns true if the menu node is a menu item.  This method is inherited from the MenuNode class.</p>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    if(node.isMenuItem()) {
+        // do something.
+    }
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-addAction">addAction(Function|String action)</a></h3>
+    <section class="description">
+        <p>Adds an action function that will be called when the menu-item is selected.</p>
+    </section>
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            <tr>
+                <td>action : <strong>{Function|String}</strong></td>
+                <td>
+                    <p>An action to call when the menu-item is selected.  If a string is passed then it will be wrapped in a function that changes the window location and returned.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td>action : <strong>{Function}</strong></td>
+                <td>
+                    <p>The function that was registered.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    menuitem.addAction(() => {
+        // do something
+    });
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-removeAction">removeAction(Function action)</a></h3>
+    <section class="description">
+        <p>Removes an action from the menuitem.</p>
+    </section>
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            <tr>
+                <td>action : <strong>{Function}</strong></td>
+                <td>
+                    <p>The action that should be removed.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    // Add the action
+    let action = () => alert("Hello World!");
+    menuitem.addAction(action);
+    // The action has been added and will trigger when the item is selected.
+
+    // Sometime later...
+
+    menuitem.removeAction(action);
+    // The action has been removed and will no longer trigger.
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-hasAction">hasAction(Function action)</a></h3>
+    <section class="description">
+        <p>Tests to see if the menuitem has the action.</p>
+    </section>
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            <tr>
+                <td>action : <strong>{Function}</strong></td>
+                <td>
+                    <p>The action that should be removed.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>boolean</strong></td>
+                <td>
+                    <p>Returns true if the menuitem has the action, false otherwise.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    // Add the action
+    let action = () => alert("Hello World!");
+
+    // The action has not been registered, logs false.
+    console.log(menuitem.hasAction(action));
+
+    menuitem.addAction(action);
+
+    // Action has been registered, hasAction now returns true.
+    console.log(menuitem.hasAction(action));
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-clearActions">clearActions()</a></h3>
+    <section class="description">
+        <p>Removes all actions from the menu-item.</p>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    menuitem.clearActions();
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-attachSubMenu">attachSubMenu(Menu submenu)</a></h3>
+    <section class="description">
+        <p>Attaches a submenu to the menuitem, setting the parent and child references between them.</p>
+        <p>A menu-item can only have one submenu.  An error will be thrown if a second submenu is attached.</p>
+        <p>The submenu will only be appended to the menuitem if is detached from the dom.  If it already in the dom it will be left as is and only the parent and child reference will be set so messages can be passed.  In rare cases this can be the correct behavior, for example in ribbon menus.</p>
+    </section>
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            <tr>
+                <td>submenu : <strong>{Menu}</strong></td>
+                <td>
+                    <p>The submenu that should be appended.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    let submenu = new Menu();
+    // Create sub items...
+
+    menuitem.attachSubMenu(submenu);
+    {% endhighlight %}
+</article>
+
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-detachSubMenu">detachSubMenu(bool remove=true)</a></h3>
+    <section class="description">
+        <p>Detaches the submenu, removing it from the DOM if remove is true.</p>
+    </section>
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            <tr>
+                <td>remove : <strong>{bool}</strong></td>
+                <td>
+                    <p>If true the submenu wil also be removed from the dom.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>Menu</strong></td>
+                <td>
+                    <p>The submenu that was removed or null if no submenu was removed.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <h3>Usage:</h3>
+    {% highlight javascript linenos %}
+    let submenu = menuitem.detachSubMenu(true);
+    {% endhighlight %}
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-hasSubMenu">hasSubMenu()</a></h3>
+    <section class="description">
+        <p>Returns true if the menu-item has a submenu.</p>
+    </section>
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>bool</strong></td>
+                <td>
+                    <p>Returns true if the menu-item has a submenu.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-isSubMenuVisible">isSubMenuVisible()</a></h3>
+    <section class="description">
+        <p>Returns true if the item both as a submenu and that submenu is visible.</p>
+    </section>
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>bool</strong></td>
+                <td>
+                    <p>Returns true if the item both as a submenu and that submenu is visible.</p>
+                </td>
+            </tr>
+        </table>
+    </section>
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-onSelect">onSelect()</a></h3>
+    <section class="description">
+        <p>Handler for select events that are encountered.</p>
+    </section>
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-onClick">onClick(MouseEvent event)</a></h3>
+    <section class="description">
+        <p>Handler for click events that are encountered.</p>
+    </section>
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-onMouseOver">onMouseOver(MouseEvent event)</a></h3>
+    <section class="description">
+        <p>Handler for mouse-over events that are encountered.</p>
+    </section>
+</article>
+
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-onMouseOut">onMouseOut(MouseEvent event)</a></h3>
+    <section class="description">
+        <p>Handler for mouse-out events that are encountered.</p>
+    </section>
 </article>

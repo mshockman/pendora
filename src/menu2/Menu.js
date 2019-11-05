@@ -29,6 +29,9 @@ export const MENU_PARAMETERS = {
 };
 
 
+/**
+ * A component for rendering nestable list of selectable items.
+ */
 export default class Menu extends MenuNode {
     @inherit position;
     @inherit multiple;
@@ -57,7 +60,7 @@ export default class Menu extends MenuNode {
      * @param context
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
-                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=false, id=null, classes=null,
+                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=0, id=null, classes=null,
                     children=null, visible=false, position="inherit", ...context}={}) {
         super();
         this.menuNodeType = "menu";
@@ -270,7 +273,7 @@ export default class Menu extends MenuNode {
         }
     }
 
-    addItem(text, action) {
+    addItem(text, action=null) {
         let item = new this.MenuItemClass({text, action});
         this.append(item);
         return this;

@@ -1,0 +1,257 @@
+name: Menu
+description: A component for rendering nestable list of selectable items.
+extends: MenuNode
+methods:
+  - name: constructor
+    parameters:
+      - name: options
+        type: Object
+        description: Configuration object for Menu
+        defaultValue: {}
+        required: false
+        options:
+          target:
+            description: The target element to use as the widgets dom element.
+            type: DOMElement
+            required: false
+            defaultValue: null
+          closeOnBlur:
+            description: If true the menu will close when the user clicks outside of it.
+            type: Boolean
+            required: false
+            defaultValue: false
+          timeout:
+            description: >
+              Controls the amount of time after the user leaves the menu that it will deactivate.
+
+              The value can be either be false for never timeout or a number.  If a number the menu will timeout after that amount of time in milliseconds has passed.
+            type: Boolean|Number
+            required: false
+            default: false
+          autoActivate:
+            description: >
+              Controls how child item behave when the mouse hover over them when the menu's state is unactive.
+
+              If the menu is active this behavior is controlled by openOnHover instead.
+
+              Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.
+            type: Boolean|Number
+            required: false
+            defaultValue: true
+          multiple:
+            description: If true multiple child items are allowed to be activated simutaniously.
+            type: boolean
+            required: false
+            defaultValue: false
+          openOnHover:
+            description: >
+              Controls how child item behave when the mouse hover over them when the menu's state is active.  When unactive this behavior is controlled by autoActivate.
+
+              Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.
+            type: Boolean|Number
+            required: false
+            defaultValue: true
+          toggle:
+            type: on|off|none|both
+            required: false
+            defaultValue: on
+            description: >
+              Controls how child item behave when clicked.  Can either be on, off, none or both.  If on item will only toggle on;  If off items will only toggle off when clicked;  If none items will never toggle on or off; and if both items will toggle both on and off.
+          closeOnSelect:
+            type: Boolean
+            required: false
+            defaultValue: true
+            description: If true the menu will deactivate when a select event is encountered.
+          delay:
+            type: Number
+            required: false
+            defaultValue: 0
+            description: Adds a delay between the activation of menuitems and the displaying of thieir submenus.
+          id:
+            type: String
+            required: false
+            defaultValue: null
+            description: Sets the id of the menu.
+          classes:
+            type: String
+            required: false
+            defaultValue: null
+            description: A list of space seperated classes that will be added to the menus classList.
+          children:
+            type: Object[]
+            required: false
+            defaultValue: null
+            description: An array of child item configuration objects that will be used to construct the menu's children.
+          visible:
+            type: boolean
+            required: false
+            defaultValue: false
+            description: If true the menu will start off as visible.
+          position:
+            type: Function|inherit
+            required: false
+            defaultValue: null
+            description: A optional function that will be called when the menu is displayed.  Used to position the menu.
+          context:
+            type: Object
+            required: false
+            defaultValue: {}
+            description: Any addtional keyword arguments are captured by the context argument and passed to the render function.
+  - name: render
+    description: Render the dom element of the widget.
+    returnType: HTMLElement
+    parameters:
+      - name: context
+        required: false
+        type: Object
+        defaultValue: {}
+        description: Keyword arguments that are used to render the widgets template.
+        options:
+          arrow:
+            type: Boolean
+            required: false
+            defaultValue: false
+            description: If true a an arrow element will be rendered.
+  - name: activate
+    description: Activates the menu.
+  - name: deactivate
+    description: Deactivates the menu.
+  - name: show
+    description: Displays the menu.
+  - name: hide
+    description: Hides the menu.
+  - name: createItems
+    description: Create a new child item and appends it to the end of the menu.
+    parameters:
+      - name: data
+        description: An array of configuration objects that are used to construct the child items and thier optional submenus.  See documentation for MenuItem for more details.
+        type: Object[]
+        required: true
+  - name: addItem
+    description: Creates a new MenuItem with the provided label and action.
+    parameters:
+      - name: text
+        type: String
+        required: true
+        description: The label for the new item.
+      - name: action
+        type: Function|String
+        required: false
+        defaultValue: null
+        description: The action to be taken when the item is selected.
+  - name: removeItem
+    description: Removes the item from the menu.
+    parameters:
+      - name: item
+        type: MenuItem
+        required: true
+        description: The item to remove from the menu.
+  - name: hasItem
+    description: Returns true if the provided item belongs to the menu.
+    returnType: boolean
+    returnDescription: True if item is a child of the current menu.
+    parameters:
+      - name: item
+        type: MenuItem
+        required: true
+        description: The item to test.
+  - name: append
+    description: Appends the item to the end of the menu.
+    parameters:
+      - name: item
+        type: MenuItem
+        required: true
+        description: The item to append.
+  - name: clearItems
+    description: Deactivates all active child items.
+  - name: getMenuBody
+    description: Returns the domElement that child items should be appended to.
+    returnType: HTMLElement
+  - name: onMouseOver
+    description: Handles on mouse over events
+  - name: onMouseOut
+    description: Handles on mouse out events.
+  - name: onClick
+    description: Handles click events.
+  - name: onSelect
+    description: Handles select events.
+properties:
+  - name: toggleOn
+    readonly: true
+    description: True if menu items should toggle on.
+    type: boolean
+  - name: toggleOff
+    readonly: true
+    description: True if menu items should toggle off.
+    type: boolean
+  - name: activeItems
+    readonly: true
+    type: MenuItem[]
+    description: A list of all active menu items.
+  - name: menuNodeType
+    type: String
+    readonly: true
+    description: Set to menu for Menu nodes and it's subclasses.
+  - name: MenuItemClass
+    type: MenuItem
+    description: The class that is used to construct new menu items.
+    defaultValue: MenuItem
+  - name: MenuClass
+    type: Menu
+    description: The class that is used to construct to sub menus.
+    defaultValue: Menu
+  - name: closeOnBlur
+    type: Boolean
+    description: If true the menu will close when the user clicks outside of it.
+    defaultValue: false
+  - name: timeout
+    type: Boolean|Number
+    description: >
+      Controls how long after the user leaves the menu that is timeouts.
+
+      Values greater then or equal to 0 will cause the menu to timeout after that amount of time has elapsed in milliseconds.  Negative values or false will cause the menu to never timeout.
+    defaultValue: false
+  - name: autoActivate
+    type: Boolean|Number
+    description: >
+      Controls if child items will activate when the user hovers over them.  Can be true, false or a number greater then or equal to 0.  Numbers specify that amount of time the user must remain over the item before it activates.
+
+      This property isn't used if the menu is active.  See openOnHover to configure how items behave when the menu is active.
+    defaultValue: true
+  - name: openOnHover
+    type: Boolean|Number
+    description: >
+      Controls if child items will activate when the user hovers over them when the menus state is active.
+      Value can be either true, false or a number.  Numbers less than 0 are equivalent to false.
+      If true items will activate immediately.  If false items will never activate.
+      If a number greater then or equal to 0 the item will activate after that amount of time in milliseconds passes.
+    defaultValue: true
+  - name: toggle
+    type: String
+    description: >
+      Controls if items will activate or deactivate when clicked.  The value can be either on, off, both or none.
+
+      If on child item will activate when clicked, but will not deactivate when clicked.  Off is the opposite and item will not activate when clicked but will toggle off when clicked.
+      Both will cause items to toggle on and off.  Finally, none will prevent the items from toggling on or off when clicked.
+    defaultValue: on
+  - name: closeOnSelect
+    type: boolean
+    description: If true the menu will deactivate when a select event is encountered.
+    defaultValue: true
+  - name: delay
+    type: Number
+    description: Adds a delay between item activation and submenu display.
+    defaultValue: 0
+  - name: position
+    type: Function
+    description: A function to call when displaying submenus.  Controls how that submenu should be positioned.
+    defaultValue: null
+  - name: isVisible
+    type: boolean
+    description: True if the menu is visible.  False otherwise.
+    defaultVaule: false
+  - name: multiple
+    type: boolean
+    description: If true mutliple child items will be allowed to be activate at the same time.
+    defaultValue: false
+
