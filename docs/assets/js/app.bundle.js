@@ -483,7 +483,8 @@ function () {
       try {
         for (var _iterator = widgets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var element = _step.value;
-          var components = element.dataset.init.split(/\s+/);
+          var components = element.dataset.init.split(/\s+/),
+              windowBind = element.dataset.windowBind;
           var _iteratorNormalCompletion2 = true;
           var _didIteratorError2 = false;
           var _iteratorError2 = undefined;
@@ -506,6 +507,10 @@ function () {
 
                 if (!initialized[key]) {
                   initialized[key] = cls(element);
+
+                  if (windowBind) {
+                    window[windowBind] = initialized[key];
+                  }
                 } // else component is already loaded do nothing.  Could be encountered if load is called multiple times.
 
               } else {
@@ -2310,14 +2315,22 @@ function getPropertyByPath(obj, path) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DropDown; });
-/* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu2/MenuNode.js");
+/* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
+/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
+/* harmony import */ var _MenuBar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MenuBar */ "./src/menu2/MenuBar.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -2331,92 +2344,38 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+
+
 var DropDown =
 /*#__PURE__*/
-function (_MenuNode) {
-  _inherits(DropDown, _MenuNode);
+function (_MenuItem) {
+  _inherits(DropDown, _MenuItem);
 
   function DropDown(_ref) {
     var _this;
 
-    var target = _ref.target,
-        text = _ref.text,
-        _ref$closeOnBlur = _ref.closeOnBlur,
-        closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
-        _ref$timeout = _ref.timeout,
-        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
-        _ref$autoActivate = _ref.autoActivate,
-        autoActivate = _ref$autoActivate === void 0 ? false : _ref$autoActivate,
-        _ref$toggle = _ref.toggle,
+    var _ref$toggle = _ref.toggle,
         toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
-        _ref$closeOnSelect = _ref.closeOnSelect,
-        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect;
+        options = _objectWithoutProperties(_ref, ["toggle"]);
 
     _classCallCheck(this, DropDown);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(DropDown).call(this));
-    _this.menuNodeType = "dropdown";
-    _this.closeOnBlur = closeOnBlur;
-    _this.timeout = timeout;
-    _this.autoActivate = autoActivate;
-    _this.toggle = toggle;
-    _this.closeOnSelect = closeOnSelect;
-
-    if (target) {
-      _this.element = target;
-    } else {
-      _this.element = _this.render(text);
-    }
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(DropDown).call(this, _objectSpread({
+      toggle: toggle
+    }, options)));
 
     _this.init();
 
     return _this;
   }
 
-  _createClass(DropDown, [{
-    key: "render",
-    value: function render(text) {
-      var element = document.createElement('div'),
-          button = document.createElement('button');
-      button.type = "button";
-      button.innerHTML = text;
-      element.appendChild(button);
-      return element;
-    }
-  }, {
-    key: "activate",
-    value: function activate() {
-      if (this.isActive) return; // Already active
-
-      this.isActive = true;
-      this.clearTimer('autoActivate');
-
-      if (this.parent) {
-        if (!this.parent.isActive) {
-          this.parent.activate();
-        }
-
-        this.parent.setActiveItem(this, true);
-      }
-    }
-  }, {
-    key: "deactivate",
-    value: function deactivate() {}
-  }, {
-    key: "onMouseOver",
-    value: function onMouseOver(event) {}
-  }, {
-    key: "onMouseOut",
-    value: function onMouseOut(event) {}
-  }, {
-    key: "onClick",
-    value: function onClick(event) {}
-  }]);
-
   return DropDown;
-}(_MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
 
+autoloader__WEBPACK_IMPORTED_MODULE_1__["default"].register('dropdown', function (element) {
+  return DropDown.FromHTML(element);
+});
 
 /***/ }),
 

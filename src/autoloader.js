@@ -26,7 +26,8 @@ export default class AutoLoader {
         let widgets = context.querySelectorAll('[data-init]');
 
         for(let element of widgets) {
-            let components = element.dataset.init.split(/\s+/);
+            let components = element.dataset.init.split(/\s+/),
+                windowBind = element.dataset.windowBind;
 
             for(let c of components) {
                 let parts = c.split(':'),
@@ -44,6 +45,10 @@ export default class AutoLoader {
 
                     if(!initialized[key]) {
                         initialized[key] = cls(element);
+
+                        if(windowBind) {
+                            window[windowBind] = initialized[key];
+                        }
                     } // else component is already loaded do nothing.  Could be encountered if load is called multiple times.
                 } else {
                     throw new Error(`No component registered called ${key}`);
