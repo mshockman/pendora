@@ -1,0 +1,8 @@
+<h4>{{ source.title }}</h4>
+{% if source.type == 'javascript' %}
+{% highlight javascript linenos %}{{ source.code }}{% endhighlight %}
+{% elsif source.type == 'html' %}
+{% highlight html linenos %}{{ source.code }}{% endhighlight %}
+{% elsif source.type == 'raw-html' %}
+<div class="example">{{ source.code }}</div>
+{% endif %}

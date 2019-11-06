@@ -176,6 +176,21 @@ p {
     margin: 0;
   }
 
+  .topbar {
+    display: flex;
+    flex-direction: row;
+    background-color: #1F2833;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.5rem;
+
+    h4 {
+      margin-right: auto;
+      padding: 0;
+    }
+  }
+
   h4 {
     display: block;
     background-color: #1F2833;
@@ -216,9 +231,13 @@ p {
     border-collapse: collapse;
     width: 100%;
 
+    td.name {
+      width: 15rem;
+    }
+
     td {
       border: 1px solid #ccc;
-      padding: 0.25rem;
+      padding: 0.25rem 1rem 0.25rem 0.25rem;
     }
   }
 }
@@ -240,9 +259,49 @@ p {
       border-collapse: collapse;
     }
 
+    td.name {
+      width: 15rem;
+    }
+
     td {
       padding: 0.5rem;
       border-bottom: 1px solid #9aa;
+    }
+  }
+}
+
+
+.tags {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+
+  .tag {
+    font-weight: bold;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    color: #427642;
+    padding: 0.2rem;
+    border-radius: 0.25rem;
+  }
+}
+
+
+.tags.tag.readonly {
+
+}
+
+
+.breadcrumbs {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  margin: 0 0 1rem 0;
+  list-style: none;
+
+  li:not(:last-child) {
+    &::after {
+      content: "/";
+      margin: 0 0.5rem 0 0.5rem;
     }
   }
 }

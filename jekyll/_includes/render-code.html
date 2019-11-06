@@ -1,0 +1,6 @@
+<section class="example">
+    <h3>{{ code.title }}</h3>
+    {% for source in code.parts %}
+    {% include render-source.html %}
+    {% endfor %}
+</section>

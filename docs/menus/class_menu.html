@@ -31,83 +31,327 @@
     </article>
     <main id="main">
         <article id="content">
-            <article>
-    <h1>Menus</h1>
+            <ul class="breadcrumbs">
+    <li><a href="/">Home</a></li>
+    <li><a href="/menus/">Menus</a></li>
+    <li>Menu</li>
+</ul>
 
-    <p>A component that represents a nestable list of selectable menu items.  Menus can be positioned relative to their
-    parent dropdown or menuitem.</p>
-</article>
+
+<h1>Menu</h1>
+<p>A component for rendering nestable list of selectable items.</p>
+
 
 
 <article class="info-table methods">
     <h4>Properties</h4>
     <table>
-        <tr><td>closeOnBlur</td><td>If true the menu will close when the user clicks outside of it.</td></tr>
-        <tr><td>timeout</td><td>Controls the amount of time after the user leaves the menu that it will deactivate.</td></tr>
-        <tr><td>autoActivate</td><td>Controls if menu items will activate when the user mouses hover them before the menu has been activate.  After activation this is controlled by the openOnHover property.</td></tr>
-        <tr><td>multiple</td><td>Controls if multiple menu items are allowed to be active at the same time.</td></tr>
-        <tr><td>openOnHover</td><td>Controls is menuitems will activate on hover after the menu is active.  Before activation this is controlled by autoActivate.</td></tr>
-        <tr><td>toggle</td><td>Controls how menu items behave when clicked.  Allows them to toggle on, off, both or neither.</td></tr>
-        <tr><td>closeOnSelect</td><td>If true the menu will deactivate if it encounters a menuitem.selected event.</td></tr>
-        <tr><td>deactivateOnItemHover</td><td></td></tr>
-        <tr><td>delay</td><td>Adds a delay to menu items with dropdown menus between when they activate and when show their submenus.</td></tr>
-        <tr><td>position</td><td>A function that is used to position the menu.</td></tr>
-        <tr><td>activeItems</td><td>A readonly property that contains list of all active child items.</td></tr>
-        <tr><td>toggleOn</td><td>A readonly property that is true if menu items should toggle on.</td></tr>
-        <tr><td>toggleOff</td><td>A readonly property that is true if menu items should toggle off.</td></tr>
+        
+        <tr>
+            <td class="name"><strong>boolean </strong>toggleOn</td>
+            <td class="desc">
+                True if menu items should toggle on.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>boolean </strong>toggleOff</td>
+            <td class="desc">
+                True if menu items should toggle off.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuItem[] </strong>activeItems</td>
+            <td class="desc">
+                A list of all active menu items.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>String </strong>menuNodeType</td>
+            <td class="desc">
+                Set to menu for Menu nodes and it's subclasses.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuItem </strong>MenuItemClass</td>
+            <td class="desc">
+                The class that is used to construct new menu items.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Menu </strong>MenuClass</td>
+            <td class="desc">
+                The class that is used to construct to sub menus.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>closeOnBlur</td>
+            <td class="desc">
+                If true the menu will close when the user clicks outside of it.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean|Number </strong>timeout</td>
+            <td class="desc">
+                <p>Controls how long after the user leaves the menu that is timeouts.</p>
+<p>Values greater then or equal to 0 will cause the menu to timeout after that amount of time has elapsed in milliseconds.  Negative values or false will cause the menu to never timeout.</p>
+
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean|Number </strong>autoActivate</td>
+            <td class="desc">
+                <p>Controls if child items will activate when the user hovers over them.  Can be true, false or a number greater then or equal to 0.  Numbers specify that amount of time the user must remain over the item before it activates.</p>
+<p>This property isn't used if the menu is active.  See openOnHover to configure how items behave when the menu is active.</p>
+
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean|Number </strong>openOnHover</td>
+            <td class="desc">
+                <p>Controls if child items will activate when the user hovers over them when the menus state is active.<br> Value can be either true, false or a number.  Numbers less than 0 are equivalent to false.<br> If true items will activate immediately.  If false items will never activate.<br> If a number greater then or equal to 0 the item will activate after that amount of time in milliseconds passes.</p>
+
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>String </strong>toggle</td>
+            <td class="desc">
+                <p>Controls if items will activate or deactivate when clicked.  The value can be either on, off, both or none.</p>
+<p>If on child item will activate when clicked, but will not deactivate when clicked.  Off is the opposite and item will not activate when clicked but will toggle off when clicked. Both will cause items to toggle on and off.  Finally, none will prevent the items from toggling on or off when clicked.</p>
+
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>boolean </strong>closeOnSelect</td>
+            <td class="desc">
+                If true the menu will deactivate when a select event is encountered.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Number </strong>delay</td>
+            <td class="desc">
+                Adds a delay between item activation and submenu display.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Function </strong>position</td>
+            <td class="desc">
+                A function to call when displaying submenus.  Controls how that submenu should be positioned.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>boolean </strong>isVisible</td>
+            <td class="desc">
+                True if the menu is visible.  False otherwise.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>boolean </strong>multiple</td>
+            <td class="desc">
+                If true mutliple child items will be allowed to be activate at the same time.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
     </table>
 </article>
+
 
 
 <article class="info-table methods">
     <h4>Methods</h4>
     <table>
-        <tr><td><a href="#method-constructor">constructor</a></td><td></td></tr>
-        <tr><td><a href="#method-render">render</a></td><td>Renders the components ui elements.</td></tr>
-        <tr><td><a href="#method-activate">activate</a></td><td>Sets the menu's state to active.</td></tr>
-        <tr><td><a href="#method-deactivate">deactivate</a></td><td>Sets the menu's state to unactive.</td></tr>
-        <tr><td><a href="#method-show">show</a></td><td>Shows the menu.</td></tr>
-        <tr><td><a href="#method-hide">hide</a></td><td>Hides the menu.</td></tr>
-        <tr><td><a href="#method-createItems">createItems</a></td><td>Creates menu items from a json object.</td></tr>
-        <tr><td><a href="#method-addItem">addItem</a></td><td>Creates a new menu item.</td></tr>
-        <tr><td><a href="#method-removeItem">removeItem</a></td><td>Removes a menuitem.</td></tr>
-        <tr><td><a href="#method-hasItem">hasItem</a></td><td>Tests if the menu has a menu item.</td></tr>
-        <tr><td><a href="#method-append">append</a></td><td>Appends a menu item to HTMLElement to the menu.</td></tr>
-        <tr><td><a href="#method-clearItems">clearItems</a></td><td>Deactivate all active items.</td></tr>
-        <tr><td><a href="#method-getMenuBody">getMenuBody</a></td><td>Returns the body of the menu.</td></tr>
-        <tr><td><a href="#method-onMouseOver">onMouseOver</a></td><td>Handles mouse over events.</td></tr>
-        <tr><td><a href="#method-onMouseOut">onMouseOut</a></td><td>Handles mouse out events.</td></tr>
-        <tr><td><a href="#method-onClick">onClick</a></td><td>Handles click events.</td></tr>
-        <tr><td><a href="#method-onSelect">onSelect</a></td><td>Handles select events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-constructor">constructor</a></td><td class="desc"></td></tr>
+        
+        <tr><td class="name"><a href="#method-render">render</a></td><td class="desc">Render the dom element of the widget.</td></tr>
+        
+        <tr><td class="name"><a href="#method-activate">activate</a></td><td class="desc">Activates the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-deactivate">deactivate</a></td><td class="desc">Deactivates the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-show">show</a></td><td class="desc">Displays the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-hide">hide</a></td><td class="desc">Hides the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-createItems">createItems</a></td><td class="desc">Create a new child item and appends it to the end of the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-addItem">addItem</a></td><td class="desc">Creates a new MenuItem with the provided label and action.</td></tr>
+        
+        <tr><td class="name"><a href="#method-removeItem">removeItem</a></td><td class="desc">Removes the item from the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-hasItem">hasItem</a></td><td class="desc">Returns true if the provided item belongs to the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-append">append</a></td><td class="desc">Appends the item to the end of the menu.</td></tr>
+        
+        <tr><td class="name"><a href="#method-clearItems">clearItems</a></td><td class="desc">Deactivates all active child items.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getMenuBody">getMenuBody</a></td><td class="desc">Returns the domElement that child items should be appended to.</td></tr>
+        
+        <tr><td class="name"><a href="#method-onMouseOver">onMouseOver</a></td><td class="desc">Handles on mouse over events</td></tr>
+        
+        <tr><td class="name"><a href="#method-onMouseOut">onMouseOut</a></td><td class="desc">Handles on mouse out events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-onClick">onClick</a></td><td class="desc">Handles click events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-onSelect">onSelect</a></td><td class="desc">Handles select events.</td></tr>
+        
     </table>
 </article>
 
 
-<article class="method-info" id="init">
-<h3><a href="#method-constructor" id="method-constructor">constructor(Object config);</a></h3>
-<section class="parameters">
-    <h4>Config Parameters</h4>
-    <table>
-        <tr><td class="name">target</td><td class="type">String|HTMLElement</td><td class="desc">The element to use as the menu.</td></tr>
-        <tr><td class="name">closeOnBlur</td><td class="type">Boolean|Number</td><td class="desc">Controls how the menu responds to the user clicking outside it.</td></tr>
-        <tr><td class="name">timeout</td><td class="type">Boolean|Number</td><td class="desc">Controls the amount of time after the user leaves the menu that it deactivates.</td></tr>
-        <tr><td class="name">autoActivate</td><td class="type">Boolean|Number</td><td class="desc">Controls how child menu items respond to on mouse over events when the menu is unactive.</td></tr>
-        <tr><td class="name">multiple</td><td class="type">Boolean|String</td><td class="desc">If true multiple children are allowed to be active simultaneously.</td></tr>
-        <tr><td class="name">openOnHover</td><td class="type">Boolean|Number</td><td class="desc">Controls how children behave on mouse over when the menu is active.</td></tr>
-        <tr><td class="name">toggle</td><td class="type">String</td><td class="desc">Controls how children behave when clicked.</td></tr>
-        <tr><td class="name">closeOnSelect</td><td class="type">Boolean</td><td class="desc">If true the menu will deactivate when it received a select event from a descendant.</td></tr>
-        <tr><td class="name">deactivateOnItemHover</td><td class="type">Boolean</td><td class="desc"></td></tr>
-        <tr><td class="name">delay</td><td class="type">Boolean|Number</td><td class="desc">Adds a delay between child item activation and the displaying of sub menus.</td></tr>
-        <tr><td class="name">id</td><td class="type">String</td><td class="desc">Ads an id to the menu.</td></tr>
-        <tr><td class="name">classes</td><td class="type">String</td><td class="desc">Space separated classes to be added to the menu.</td></tr>
-        <tr><td class="name">children</td><td class="type">Array</td><td class="desc">An array of menu item configuration objects to be added to the menu.</td></tr>
-        <tr><td class="name">visible</td><td class="type">Boolean</td><td class="desc">Controls if the menu starts off as visible.</td></tr>
-        <tr><td class="name">position</td><td class="type">Function(menu)</td><td class="desc">A function that will be called to dynamically position the menu.</td></tr>
-        <tr><td class="name">...context</td><td class="type"></td><td class="desc">Any unknown arguments are gathered in a object and passed to render.</td></tr>
-    </table>
-</section>
-<section class="example">
-    <h4>Example</h4>
+
+<article class="method-info">
+    <h3><a href="#method-constructor" id="method-constructor">constructor(
+        
+        Object 
+        options
+         = {}
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p></p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Object</strong> options</td>
+                <td class="desc">Configuration object for Menu</td>
+            </tr>
+
+            
+            
+            <tr>
+                <td class="name"><strong>DOMElement</strong> options.target</td>
+                <td class="desc">The target element to use as the widgets dom element.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Boolean</strong> options.closeOnBlur</td>
+                <td class="desc">If true the menu will close when the user clicks outside of it.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Boolean|Number</strong> options.timeout</td>
+                <td class="desc"><p>Controls the amount of time after the user leaves the menu that it will deactivate.</p>
+<p>The value can be either be false for never timeout or a number.  If a number the menu will timeout after that amount of time in milliseconds has passed.</p>
+</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Boolean|Number</strong> options.autoActivate</td>
+                <td class="desc"><p>Controls how child item behave when the mouse hover over them when the menu's state is unactive.</p>
+<p>If the menu is active this behavior is controlled by openOnHover instead.</p>
+<p>Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.</p>
+</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>boolean</strong> options.multiple</td>
+                <td class="desc">If true multiple child items are allowed to be activated simutaniously.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Boolean|Number</strong> options.openOnHover</td>
+                <td class="desc"><p>Controls how child item behave when the mouse hover over them when the menu's state is active.  When unactive this behavior is controlled by autoActivate.</p>
+Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.
+</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>on|off|none|both</strong> options.toggle</td>
+                <td class="desc">Controls how child item behave when clicked.  Can either be on, off, none or both.  If on item will only toggle on;  If off items will only toggle off when clicked;  If none items will never toggle on or off; and if both items will toggle both on and off.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Boolean</strong> options.closeOnSelect</td>
+                <td class="desc">If true the menu will deactivate when a select event is encountered.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Number</strong> options.delay</td>
+                <td class="desc">Adds a delay between the activation of menuitems and the displaying of thieir submenus.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>String</strong> options.id</td>
+                <td class="desc">Sets the id of the menu.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>String</strong> options.classes</td>
+                <td class="desc">A list of space seperated classes that will be added to the menus classList.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Object[]</strong> options.children</td>
+                <td class="desc">An array of child item configuration objects that will be used to construct the menu's children.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>boolean</strong> options.visible</td>
+                <td class="desc">If true the menu will start off as visible.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Function|inherit</strong> options.position</td>
+                <td class="desc">A optional function that will be called when the menu is displayed.  Used to position the menu.</td>
+            </tr>
+            
+            <tr>
+                <td class="name"><strong>Object</strong> options.context</td>
+                <td class="desc">Any addtional keyword arguments are captured by the context argument and passed to the render function.</td>
+            </tr>
+            
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+    
+
+    <section class="example">
+    <h3>Example Usage</h3>
+    
+    <h4>Javascript</h4>
+
 <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
 2
 3
@@ -119,58 +363,446 @@
 9
 10
 11
-</pre></td><td class="code"><pre><span class="kd">let</span> <span class="nx">menu</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Menu</span><span class="p">({</span>
+12
+13
+14
+15
+16
+</pre></td><td class="code"><pre><span class="kd">let</span> <span class="nx">menu</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Menu</span><span class="p">(</span>
+  <span class="p">{</span>
     <span class="na">target</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
     <span class="na">closeOnBlur</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
     <span class="na">timeout</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-    <span class="na">autoActivate</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="na">autoActivate</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
     <span class="na">multiple</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-    <span class="na">openOnHover</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="na">toggle</span><span class="p">:</span> <span class="dl">'</span><span class="s1">on</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">openOnHover</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">toggle</span><span class="p">:</span> <span class="nx">both</span><span class="p">,</span>
     <span class="na">closeOnSelect</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="na">delay</span><span class="p">:</span> <span class="mi">0</span>
-<span class="p">});</span>
+    <span class="na">delay</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="na">visible</span><span class="p">:</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">);</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">appendTo</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">);</span>
 </pre></td></tr></tbody></table></code></pre></figure>
+
+
+    
 </section>
+
+
+    
+    
+
 </article>
 
-
 <article class="method-info">
-    <h3><a href="#method-constructor" id="method-constructor">method(parameters...);</a></h3>
+    <h3><a href="#method-render" id="method-render">HTMLElement render(
+        
+        Object 
+        context
+         = {}
+        
+        
+        );</a></h3>
     <section class="description">
-        <p>Description</p>
+        <p>Render the dom element of the widget.</p>
     </section>
+    
     <section class="parameters">
         <h4>Parameters</h4>
         <table>
+            
+
             <tr>
-                <td class="name">show : <strong>{Boolean|Number}</strong></td>
-                <td class="desc">
-                    <p></p>
-                </td>
+                <td class="name"><strong>Object</strong> context</td>
+                <td class="desc">Keyword arguments that are used to render the widgets template.</td>
             </tr>
+
+            
+            
+            <tr>
+                <td class="name"><strong>Boolean</strong> context.arrow</td>
+                <td class="desc">If true a an arrow element will be rendered.</td>
+            </tr>
+            
+            
+
+            
         </table>
     </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-activate" id="method-activate">activate(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Activates the menu.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-deactivate" id="method-deactivate">deactivate(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Deactivates the menu.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-show" id="method-show">show(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Displays the menu.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-hide" id="method-hide">hide(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Hides the menu.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-createItems" id="method-createItems">createItems(
+        
+        Object[] 
+        data
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Create a new child item and appends it to the end of the menu.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Object[]</strong> data</td>
+                <td class="desc">An array of configuration objects that are used to construct the child items and thier optional submenus.  See documentation for MenuItem for more details.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-addItem" id="method-addItem">addItem(
+        
+        String 
+        text
+        
+        , 
+        
+        Function|String 
+        action
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Creates a new MenuItem with the provided label and action.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> text</td>
+                <td class="desc">The label for the new item.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>Function|String</strong> action</td>
+                <td class="desc">The action to be taken when the item is selected.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+    
+
+    <section class="example">
+    <h3>Example Usage</h3>
+    
+    <h4>Javascript</h4>
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="code"><pre><span class="kd">let</span> <span class="nx">menuitem</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MenuItem</span><span class="p">();</span>
+<span class="kd">let</span> <span class="nx">menu</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Menu</span><span class="p">();</span>
+
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">Home</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">home.html</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">About</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">about.html</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">Categories</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">categories.html</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">Splash</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">splash.html</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">Terms</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">terms.html</span><span class="dl">"</span><span class="p">);</span>
+<span class="nx">menu</span><span class="p">.</span><span class="nx">addItem</span><span class="p">(</span><span class="dl">"</span><span class="s2">Alert Hello World!</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">"</span><span class="s2">Hello World!</span><span class="dl">"</span><span class="p">));</span>
+
+<span class="nx">menuitem</span><span class="p">.</span><span class="nx">attachSubMenu</span><span class="p">(</span><span class="nx">menu</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+
+    
+</section>
+
+
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-removeItem" id="method-removeItem">removeItem(
+        
+        MenuItem 
+        item
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Removes the item from the menu.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>MenuItem</strong> item</td>
+                <td class="desc">The item to remove from the menu.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-hasItem" id="method-hasItem">boolean hasItem(
+        
+        MenuItem 
+        item
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns true if the provided item belongs to the menu.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>MenuItem</strong> item</td>
+                <td class="desc">The item to test.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
     <section class="function-return">
         <h4>Returns</h4>
         <table>
             <tr>
-                <td><strong>bool</strong></td>
+                <td><strong>boolean</strong></td>
                 <td>
-                    <p>Returns true if the menu-item has a submenu.</p>
+                    True if item is a child of the current menu.
                 </td>
             </tr>
         </table>
     </section>
-    <section class="example">
-        <h4>Example</h4>
-        <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-</pre></td><td class="code"><pre>        <span class="c1">// js-code</span>
-        
-</pre></td></tr></tbody></table></code></pre></figure>
-    </section>
+    
+    
+
 </article>
+
+<article class="method-info">
+    <h3><a href="#method-append" id="method-append">append(
+        
+        MenuItem 
+        item
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Appends the item to the end of the menu.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>MenuItem</strong> item</td>
+                <td class="desc">The item to append.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-clearItems" id="method-clearItems">clearItems(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Deactivates all active child items.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getMenuBody" id="method-getMenuBody">HTMLElement getMenuBody(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns the domElement that child items should be appended to.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-onMouseOver" id="method-onMouseOver">onMouseOver(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles on mouse over events</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-onMouseOut" id="method-onMouseOut">onMouseOut(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles on mouse out events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-onClick" id="method-onClick">onClick(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles click events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-onSelect" id="method-onSelect">onSelect(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles select events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+
+
 
         </article>
     </main>

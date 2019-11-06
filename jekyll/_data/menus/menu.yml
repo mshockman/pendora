@@ -10,93 +10,114 @@ methods:
         defaultValue: {}
         required: false
         options:
-          target:
+          - name: target
             description: The target element to use as the widgets dom element.
             type: DOMElement
             required: false
             defaultValue: null
-          closeOnBlur:
+          - name: closeOnBlur
             description: If true the menu will close when the user clicks outside of it.
             type: Boolean
             required: false
             defaultValue: false
-          timeout:
+          - name: timeout
             description: >
-              Controls the amount of time after the user leaves the menu that it will deactivate.
+              <p>Controls the amount of time after the user leaves the menu that it will deactivate.</p>
 
-              The value can be either be false for never timeout or a number.  If a number the menu will timeout after that amount of time in milliseconds has passed.
+              <p>The value can be either be false for never timeout or a number.  If a number the menu will timeout after that amount of time in milliseconds has passed.</p>
             type: Boolean|Number
             required: false
             default: false
-          autoActivate:
+          - name: autoActivate
             description: >
-              Controls how child item behave when the mouse hover over them when the menu's state is unactive.
+              <p>Controls how child item behave when the mouse hover over them when the menu's state is unactive.</p>
 
-              If the menu is active this behavior is controlled by openOnHover instead.
+              <p>If the menu is active this behavior is controlled by openOnHover instead.</p>
 
-              Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.
+              <p>Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.</p>
             type: Boolean|Number
             required: false
             defaultValue: true
-          multiple:
+          - name: multiple
             description: If true multiple child items are allowed to be activated simutaniously.
             type: boolean
             required: false
             defaultValue: false
-          openOnHover:
+          - name: openOnHover
             description: >
-              Controls how child item behave when the mouse hover over them when the menu's state is active.  When unactive this behavior is controlled by autoActivate.
+              <p>Controls how child item behave when the mouse hover over them when the menu's state is active.  When unactive this behavior is controlled by autoActivate.</p>
 
               Value can be either a boolean or a number greater then or equal to 0.  If a number the menu-item will activate after the given amount of time in milliseconds has passed, if true the item will activate immediately and if false the item will never activate on mouse over.
             type: Boolean|Number
             required: false
             defaultValue: true
-          toggle:
+          - name: toggle
             type: on|off|none|both
             required: false
             defaultValue: on
-            description: >
-              Controls how child item behave when clicked.  Can either be on, off, none or both.  If on item will only toggle on;  If off items will only toggle off when clicked;  If none items will never toggle on or off; and if both items will toggle both on and off.
-          closeOnSelect:
+            description: Controls how child item behave when clicked.  Can either be on, off, none or both.  If on item will only toggle on;  If off items will only toggle off when clicked;  If none items will never toggle on or off; and if both items will toggle both on and off.
+          - name: closeOnSelect
             type: Boolean
             required: false
             defaultValue: true
             description: If true the menu will deactivate when a select event is encountered.
-          delay:
+          - name: delay
             type: Number
             required: false
             defaultValue: 0
             description: Adds a delay between the activation of menuitems and the displaying of thieir submenus.
-          id:
+          - name: id
             type: String
             required: false
             defaultValue: null
             description: Sets the id of the menu.
-          classes:
+          - name: classes
             type: String
             required: false
             defaultValue: null
             description: A list of space seperated classes that will be added to the menus classList.
-          children:
+          - name: children
             type: Object[]
             required: false
             defaultValue: null
             description: An array of child item configuration objects that will be used to construct the menu's children.
-          visible:
+          - name: visible
             type: boolean
             required: false
             defaultValue: false
             description: If true the menu will start off as visible.
-          position:
+          - name: position
             type: Function|inherit
             required: false
             defaultValue: null
             description: A optional function that will be called when the menu is displayed.  Used to position the menu.
-          context:
+          - name: context
             type: Object
             required: false
             defaultValue: {}
             description: Any addtional keyword arguments are captured by the context argument and passed to the render function.
+    examples:
+      - parts:
+          - title: Javascript
+            type: javascript
+            code: |+
+              let menu = new Menu(
+                {
+                  target: null,
+                  closeOnBlur: true,
+                  timeout: false,
+                  autoActivate: true,
+                  multiple: false,
+                  openOnHover: true,
+                  toggle: both,
+                  closeOnSelect: true,
+                  delay: 0,
+                  visible: true
+                }
+              );
+
+              menu.appendTo(document.body);
+        title: Example Usage
   - name: render
     description: Render the dom element of the widget.
     returnType: HTMLElement
@@ -107,7 +128,7 @@ methods:
         defaultValue: {}
         description: Keyword arguments that are used to render the widgets template.
         options:
-          arrow:
+          - name: arrow
             type: Boolean
             required: false
             defaultValue: false
@@ -139,6 +160,23 @@ methods:
         required: false
         defaultValue: null
         description: The action to be taken when the item is selected.
+    examples:
+      - title: Example Usage
+        parts:
+          - title: Javascript
+            type: javascript
+            code: |+
+              let menuitem = new MenuItem();
+              let menu = new Menu();
+
+              menu.addItem("Home", "home.html");
+              menu.addItem("About", "about.html");
+              menu.addItem("Categories", "categories.html");
+              menu.addItem("Splash", "splash.html");
+              menu.addItem("Terms", "terms.html");
+              menu.addItem("Alert Hello World!", () => alert("Hello World!"));
+
+              menuitem.attachSubMenu(menu);
   - name: removeItem
     description: Removes the item from the menu.
     parameters:
@@ -207,32 +245,32 @@ properties:
   - name: timeout
     type: Boolean|Number
     description: >
-      Controls how long after the user leaves the menu that is timeouts.
+      <p>Controls how long after the user leaves the menu that is timeouts.</p>
 
-      Values greater then or equal to 0 will cause the menu to timeout after that amount of time has elapsed in milliseconds.  Negative values or false will cause the menu to never timeout.
+      <p>Values greater then or equal to 0 will cause the menu to timeout after that amount of time has elapsed in milliseconds.  Negative values or false will cause the menu to never timeout.</p>
     defaultValue: false
   - name: autoActivate
     type: Boolean|Number
     description: >
-      Controls if child items will activate when the user hovers over them.  Can be true, false or a number greater then or equal to 0.  Numbers specify that amount of time the user must remain over the item before it activates.
+      <p>Controls if child items will activate when the user hovers over them.  Can be true, false or a number greater then or equal to 0.  Numbers specify that amount of time the user must remain over the item before it activates.</p>
 
-      This property isn't used if the menu is active.  See openOnHover to configure how items behave when the menu is active.
+      <p>This property isn't used if the menu is active.  See openOnHover to configure how items behave when the menu is active.</p>
     defaultValue: true
   - name: openOnHover
     type: Boolean|Number
     description: >
-      Controls if child items will activate when the user hovers over them when the menus state is active.
-      Value can be either true, false or a number.  Numbers less than 0 are equivalent to false.
-      If true items will activate immediately.  If false items will never activate.
-      If a number greater then or equal to 0 the item will activate after that amount of time in milliseconds passes.
+      <p>Controls if child items will activate when the user hovers over them when the menus state is active.<br>
+      Value can be either true, false or a number.  Numbers less than 0 are equivalent to false.<br>
+      If true items will activate immediately.  If false items will never activate.<br>
+      If a number greater then or equal to 0 the item will activate after that amount of time in milliseconds passes.</p>
     defaultValue: true
   - name: toggle
     type: String
     description: >
-      Controls if items will activate or deactivate when clicked.  The value can be either on, off, both or none.
+      <p>Controls if items will activate or deactivate when clicked.  The value can be either on, off, both or none.</p>
 
-      If on child item will activate when clicked, but will not deactivate when clicked.  Off is the opposite and item will not activate when clicked but will toggle off when clicked.
-      Both will cause items to toggle on and off.  Finally, none will prevent the items from toggling on or off when clicked.
+      <p>If on child item will activate when clicked, but will not deactivate when clicked.  Off is the opposite and item will not activate when clicked but will toggle off when clicked.
+      Both will cause items to toggle on and off.  Finally, none will prevent the items from toggling on or off when clicked.</p>
     defaultValue: on
   - name: closeOnSelect
     type: boolean

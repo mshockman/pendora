@@ -7,7 +7,13 @@
     <h4>Properties</h4>
     <table>
         {% for property in doc.properties %}
-        <tr><td>{{property.name}}</td><td>{{property.description}}</td></tr>
+        <tr>
+            <td class="name"><strong>{{ property.type }} </strong>{{property.name}}</td>
+            <td class="desc">
+                {{ property.description }}
+                <div class="tags">{% if property.readonly == true %}<span class="readonly tag">@readonly</span>{% endif %}</div>
+            </td>
+        </tr>
         {% endfor %}
     </table>
 </article>
@@ -18,14 +24,14 @@
     <h4>Methods</h4>
     <table>
         {% for method in doc.methods %}
-        <tr><td><a href="#method-{{method.name}}">{{method.name}}</a></td><td>{{method.description}}</td></tr>
+        <tr><td class="name"><a href="#method-{{method.name}}">{{method.name}}</a></td><td class="desc">{{method.description}}</td></tr>
         {% endfor %}
     </table>
 </article>
 {% endif %}
 
 {% for method in doc.methods %}
-<article class="method-{{ method.name }}">
+<article class="method-info">
     <h3><a href="#method-{{ method.name }}" id="method-{{ method.name }}">{% if method.returnType %}{{ method.returnType }} {% endif %}{{ method.name }}(
         {% for parameter in method.parameters %}
         {% if parameter.type %}{{ parameter.type }} {% endif %}
@@ -41,31 +47,46 @@
     <section class="parameters">
         <h4>Parameters</h4>
         <table>
+            {% for parameter in method.parameters %}
+
             <tr>
-                <td class="name">show : <strong>{Boolean|Number}</strong></td>
-                <td class="desc">
-                    <p></p>
+                <td class="name"><strong>{{ parameter.type }}</strong> {{ parameter.name }}</td>
+                <td class="desc">{{ parameter.description }}</td>
+            </tr>
+
+            {% if parameter.options %}
+            {% for option in parameter.options %}
+            <tr>
+                <td class="name"><strong>{{ option.type }}</strong> {{ parameter.name }}.{{ option.name }}</td>
+                <td class="desc">{{ option.description }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+            {% endfor %}
+        </table>
+    </section>
+    {% endif %}
+    {% if method.returnDescription %}
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>{{ method.returnType}}</strong></td>
+                <td>
+                    {{ method.returnDescription }}
                 </td>
             </tr>
         </table>
     </section>
     {% endif %}
-    <section class="function-return">
-        <h4>Returns</h4>
-        <table>
-            <tr>
-                <td><strong>bool</strong></td>
-                <td>
-                    <p>Returns true if the menu-item has a submenu.</p>
-                </td>
-            </tr>
-        </table>
-    </section>
-    <section class="example">
-        <h4>Example</h4>
-        {% highlight javascript linenos %}
-        // js-code
-        {% endhighlight %}
-    </section>
+    {% if method.examples %}
+    {% for code in method.examples %}
+
+    {% include render-code.html %}
+
+    {% endfor %}
+    {% endif %}
+
 </article>
 {% endfor %}
