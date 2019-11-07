@@ -70,6 +70,10 @@ export default class Overlay {
         this._currentIndex = 0;
     }
 
+    /**
+     * The placement configuration and refreshes the overlays position.
+     * @param placements
+     */
     setPlacements(placements) {
         if(!Array.isArray(placements)) {
             placements = [placements];
@@ -79,10 +83,18 @@ export default class Overlay {
         this.refresh();
     }
 
+    /**
+     * Gets the overlays dom element's bounding client rect as a Vec4 object.
+     * @returns {Vec4}
+     */
     getBoundingClientRect() {
         return Vec4.getBoundingClientRect(this.element);
     }
 
+    /**
+     * Gets the reference target's bounding client rect as a Vec4 object.
+     * @returns {null|Vec4}
+     */
     getReferenceRect() {
         if(this.referenceObject) {
             return Vec4.fromRect(this.referenceObject.getBoundingClientRect());
@@ -91,6 +103,11 @@ export default class Overlay {
         }
     }
 
+    /**
+     * Sets the reference target.
+     *
+     * @param target
+     */
     setReferenceTarget(target) {
         if(typeof target === 'string') {
             this.referenceObject = document.querySelector(target);
@@ -99,8 +116,11 @@ export default class Overlay {
         }
     }
 
+    /**
+     * Refreshes the overlay position.
+     */
     refresh() {
-        let rect = this.getReferenceRect(),
+        let rect = this.getReferenceRect(), // The reference objects rect.
             elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB),
             arrowElement = this.element.querySelector('.arrow-element');
@@ -108,6 +128,8 @@ export default class Overlay {
         let flag = false,
             closestPosition = null;
 
+        // Start with the last valid placement the loop though entire list if sticky is true.
+        // Otherwise start at the begging and find the first valid placement.
         if(!this.sticky) {
             this._currentIndex = 0;
         }
@@ -116,16 +138,18 @@ export default class Overlay {
             let index = (this._currentIndex + i) % this.placements.length;
             let position = this.placements[index];
 
+            // If position is a string retrieve it's options from the PLACEMENTS dictionary.
             if(typeof position === 'string') {
                 position = PLACEMENTS[position];
             }
 
             // This forces a reflow.
+            // Needed to determine any custom css that might be effecting the element.
             this.element.dataset.placement = position.placement;
 
             let overlay = Vec4.getBoundingClientRect(this.element),
                 arrowBB = arrowElement ? Vec4.getBoundingClientRect(arrowElement) : null,
-                anchorPoint = getSubBoundingBox(overlay, position.my).subtract(overlay).toPoint(),
+                anchorPoint = getSubBoundingBox(overlay, position.my).subtract(overlay).toPoint(), // The anchor point on the target element relative to the top-left corner of the element.
                 space = getSubBoundingBox(rect, position.of),
                 unBoundedSubspace = this._getAllowedSubspace(position, space, rect, arrowElement, overlay, anchorPoint, arrowBB),
                 subspace = unBoundedSubspace;
@@ -184,6 +208,7 @@ export default class Overlay {
             }
         }
 
+        // Apply the closest valid position.
         if(!flag && closestPosition) {
             // This forces a reflow.
             this.element.dataset.placement = closestPosition.position.placement;
@@ -236,6 +261,10 @@ export default class Overlay {
         return false;
     }
 
+    /**
+     * Shows the overlay, triggering animation and then call the callback after the animation finishes.
+     * @param callback
+     */
     show(callback) {
         if(!this.isVisible) {
             this.clearTimeout();
@@ -307,6 +336,10 @@ export default class Overlay {
         }
     }
 
+    /**
+     * Hides the overlay, triggering animation and then calls the callback after the animation finishes.
+     * @param callback
+     */
     hide(callback) {
         if(this.isVisible) {
             this.isVisible = false;
@@ -365,6 +398,9 @@ export default class Overlay {
         }
     }
 
+    /**
+     * Clears the timeout timer.
+     */
     clearTimeout() {
         if(this._timeoutTimer) {
             clearTimeout(this._timeoutTimer);
@@ -372,6 +408,10 @@ export default class Overlay {
         }
     }
 
+    /**
+     * Toggles the overlay visible or hidden.  Will trigger animations!  Callback is called after the animation has finished.
+     * @param callback
+     */
     toggle(callback) {
         if(this.isVisible) {
             if(callback) {
@@ -419,9 +459,21 @@ export default class Overlay {
         return container;
     }
 
+    /**
+     * Applies the position to the overlay and arrow dom elements.
+     *
+     * @param position - The position configuration object.
+     * @param overlay - The final position for the overlay to be applied.
+     * @param arrowElement - The arrow dom element.
+     * @param arrowBB - The arrows current rect.
+     * @param reference - The reference targets rect.
+     * @private
+     */
     _applyPosition(position, overlay, arrowElement, arrowBB, reference) {
-        setElementClientPosition(this.element, overlay, position.position);
+        // Set the dom element to the overlay position from the position point.
+        setElementClientPosition(this.element, overlay, position.position); // position.position will be the method to position the element, aka top-left.
 
+        // Set the arrow elements position if needed.
         if(arrowElement && arrowBB) {
             let arrowPos = new Vec2(arrowBB.left, arrowBB.top),
                 arrowSide = getArrowSide(position.arrow),
@@ -447,7 +499,7 @@ export default class Overlay {
 
             arrowPos = arrowPos.clamp(reference.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
             arrowPos = arrowPos.clamp(overlay.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
-            arrowPos = arrowPos.subtract(overlay);
+            arrowPos = arrowPos.subtract(overlay); // Convert to overlay space as it should be the offset parent.
 
             if (arrowSide === 'top' || arrowSide === 'bottom') {
                 arrowElement.style.left = arrowPos.left + 'px';
@@ -466,6 +518,19 @@ export default class Overlay {
         return new Vec4(pos.left, pos.top, pos.left, pos.top);
     }
 
+    /**
+     * Subtracts the space needed for the anchor offset and arrow element from the allowed space.
+     *
+     * @param position - Position configuration object.
+     * @param space - The currently allowed space.
+     * @param referenceBB - Reference element rectangle.
+     * @param arrowElement - The arrow dom element.
+     * @param overlay - The overlay elements bounding box.
+     * @param anchorPoint - The offset point of the overlay we are positioning from .
+     * @param arrowBB - The arrow dom elements bounding box.
+     * @returns {*}
+     * @private
+     */
     _getAllowedSubspace(position, space, referenceBB, arrowElement, overlay, anchorPoint, arrowBB) {
         let arrowSpacePadding = this._getArrowSpacePadding(position, arrowBB),
             anchorSpacePadding = this._getAnchorSpacePadding(position, overlay, anchorPoint);
@@ -473,6 +538,15 @@ export default class Overlay {
         return space.add(arrowSpacePadding).add(anchorSpacePadding);
     }
 
+    /**
+     * Determine the padding that needs to be removed because of the anchor point of the element we are positioning.
+     *
+     * @param position
+     * @param overlay
+     * @param anchorPoint
+     * @returns {Vec4}
+     * @private
+     */
     _getAnchorSpacePadding(position, overlay, anchorPoint) {
         let anchorSpacePadding = new Vec4(0, 0, 0, 0);
 
@@ -496,6 +570,14 @@ export default class Overlay {
         return anchorSpacePadding;
     }
 
+    /**
+     * Returns the padding that is needed to account for the arrow.
+     *
+     * @param position
+     * @param arrowBB
+     * @returns {Vec4}
+     * @private
+     */
     _getArrowSpacePadding(position, arrowBB) {
         let arrowSpacePadding = new Vec4(0, 0, 0, 0);
 
