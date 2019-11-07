@@ -13,7 +13,7 @@ import {
 import MenuItem from "./MenuItem";
 import AutoLoader from 'autoloader';
 import {SelectMenu} from "./Selectable";
-import {Attribute} from "core/attributes";
+import Attribute from "core/attributes";
 
 
 export default class DropDown extends MenuNode {

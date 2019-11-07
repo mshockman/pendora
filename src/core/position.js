@@ -1,4 +1,4 @@
-import {Vec2, Vec3, Vec4} from "./vectors";
+import {Vec2, Vec3, Rect} from "./vectors";
 import {clamp} from "./utility";
 
 
@@ -35,7 +35,7 @@ export function getBoundingOffsetRect(element, offsetParent=null) {
     let offsetRect = offsetParent.getBoundingClientRect(),
         rect = element.getBoundingClientRect();
 
-    return new Vec4(
+    return new Rect(
         rect.left - offsetRect.left,
         rect.top - offsetRect.top,
         rect.right - offsetRect.right,
@@ -52,7 +52,7 @@ export function getBoundingOffsetRect(element, offsetParent=null) {
 export function getBoundingDocumentRect(element) {
     let rect = element.getBoundingClientRect();
 
-    return new Vec4(
+    return new Rect(
         rect.left + window.scrollX,
         rect.top + window.scrollY,
         rect.right + window.scrollX,
@@ -182,7 +182,7 @@ export function setElementClientPosition(element, position, method='top-left') {
             top = parseInt(style.top, 10),
             right = parseInt(style.right, 10),
             bottom = parseInt(style.bottom, 10),
-            box = Vec4.getBoundingClientRect(element),
+            box = Rect.getBoundingClientRect(element),
             deltaX = position.left - box.left,
             deltaY = position.top - box.top;
 
@@ -208,7 +208,7 @@ export function setElementClientPosition(element, position, method='top-left') {
             element.style.top = '';
         }
     } else if(method === 'translate') {
-        let box = Vec4.getBoundingClientRect(element),
+        let box = Rect.getBoundingClientRect(element),
             deltaX = position.left - box.left,
             deltaY = position.top - box.top,
             cssPosition = getTranslation(element);
@@ -218,7 +218,7 @@ export function setElementClientPosition(element, position, method='top-left') {
             y: cssPosition.y + deltaY
         });
     } else if(method === 'translate3d') {
-        let box = Vec4.getBoundingClientRect(element),
+        let box = Rect.getBoundingClientRect(element),
             deltaX = position.left - box.left,
             deltaY = position.top - box.top,
             cssPosition = getTranslation(element);
@@ -237,7 +237,7 @@ export function setElementClientPosition(element, position, method='top-left') {
  * @param rect
  */
 export function clientRectToDocumentSpace(rect) {
-    let r = Vec4.fromRect(rect);
+    let r = Rect.fromRect(rect);
 
     r.left += window.scrollX;
     r.right += window.scrollX;
@@ -253,7 +253,7 @@ export function clientRectToDocumentSpace(rect) {
  * @param rect
  */
 export function documentRectToClientSpace(rect) {
-    let r = Vec4.fromRect(rect);
+    let r = Rect.fromRect(rect);
 
     r.left -= window.scrollX;
     r.right -= window.scrollX;
@@ -281,14 +281,14 @@ export function snapToGrid(value, gridSize, roundingFunction=Math.round) {
 
 
 /**
- * Deprecated in favor of calling Vec4.fromRect() class method.
+ * Deprecated in favor of calling Rect.fromRect() class method.
  *
  * @deprecated
  * @param domRect
- * @returns {Vec4}
+ * @returns {Rect}
  */
 export function convertDomRectToObject(domRect) {
-    return Vec4.fromRect(domRect);
+    return Rect.fromRect(domRect);
 }
 
 
@@ -314,7 +314,7 @@ export function getPointOnElement(referenceElement, point, offset=null, constrai
         }
 
         if (constrain.getBoundingClientRect) {
-            constrain = Vec4.fromRect(constrain.getBoundingClientRect());
+            constrain = Rect.fromRect(constrain.getBoundingClientRect());
         }
     }
 
@@ -404,7 +404,7 @@ export function getPointOnElement(referenceElement, point, offset=null, constrai
  *
  * @param element {{getBoundingClientRect}|Element|String|{left, top, right, bottom}}
  * @param position {{left, top, bottom, right}}
- * @return {Vec4}
+ * @return {Rect}
  */
 export function getSubBoundingBox(element, position) {
     let rect;
@@ -422,7 +422,7 @@ export function getSubBoundingBox(element, position) {
     let width = rect.right - rect.left,
         height = rect.bottom - rect.top;
 
-    // The user can pass a vec4 with left, top, right and bottom properties.  The value can either be the desired
+    // The user can pass a rect with left, top, right and bottom properties.  The value can either be the desired
     // coordinates relative to the top-left corner of the reference element or a percentage.  Another possibility
     // is that the user passes one of the keyword properties that coorispond to a specific section of the element.
     // Map those keywords to their rectangle.
@@ -480,7 +480,7 @@ export function getSubBoundingBox(element, position) {
     }
 
     // Convert to client space.
-    return new Vec4(
+    return new Rect(
         rect.left + position.left,
         rect.top + position.top,
         rect.left + position.right,
@@ -490,7 +490,7 @@ export function getSubBoundingBox(element, position) {
 
 
 /**
- * Returns the distance in between the provided Vec4 objects.  If the objects are touching or overlapping 0
+ * Returns the distance in between the provided Rect objects.  If the objects are touching or overlapping 0
  * will be returned.
  *
  * @param rect1 {{left, top, right, bottom}}
@@ -498,8 +498,8 @@ export function getSubBoundingBox(element, position) {
  * @returns {Number}
  */
 export function getDistanceBetweenRects(rect1, rect2) {
-    let vec1 = Vec4.fromRect(rect1),
-        vec2 = Vec4.fromRect(rect2);
+    let vec1 = Rect.fromRect(rect1),
+        vec2 = Rect.fromRect(rect2);
 
     let isXOverlapping = vec1.isXOverlapping(vec2),
         isYOverlapping = vec1.isYOverlapping(vec2);

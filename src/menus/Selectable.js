@@ -1,6 +1,6 @@
 import AutoLoader from 'autoloader';
 import Menu from './Menu';
-import {Attribute} from 'core/attributes';
+import Attribute from 'core/attributes';
 import {parseBoolean} from 'core/utility';
 import Observable from 'core/interface/Observable';
 

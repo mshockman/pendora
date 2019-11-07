@@ -1,5 +1,5 @@
 import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
-import {Vec4, Vec2} from "core/vectors";
+import {Rect, Vec2} from "core/vectors";
 import Animation from "core/Animation";
 import {privateCache} from "core/data";
 import {addClasses, assignAttributes} from "core/utility";
@@ -15,7 +15,6 @@ const PLACEMENTS = {
     bottom: {my: 'top', at: 'bottom', of: 'border-bottom', arrow: 'top', placement: 'bottom', position: 'top-left'},
     left: {my: 'right', at: 'left', of: 'border-left', arrow: 'right', placement: 'left', position: 'top-right'}
 };
-
 
 
 function getArrowSide(align) {
@@ -84,20 +83,20 @@ export default class Overlay {
     }
 
     /**
-     * Gets the overlays dom element's bounding client rect as a Vec4 object.
-     * @returns {Vec4}
+     * Gets the overlays dom element's bounding client rect as a Rect object.
+     * @returns {Rect}
      */
     getBoundingClientRect() {
-        return Vec4.getBoundingClientRect(this.element);
+        return Rect.getBoundingClientRect(this.element);
     }
 
     /**
-     * Gets the reference target's bounding client rect as a Vec4 object.
-     * @returns {null|Vec4}
+     * Gets the reference target's bounding client rect as a Rect object.
+     * @returns {null|Rect}
      */
     getReferenceRect() {
         if(this.referenceObject) {
-            return Vec4.fromRect(this.referenceObject.getBoundingClientRect());
+            return Rect.fromRect(this.referenceObject.getBoundingClientRect());
         } else {
             return null;
         }
@@ -121,7 +120,7 @@ export default class Overlay {
      */
     refresh() {
         let rect = this.getReferenceRect(), // The reference objects rect.
-            elementBB = Vec4.fromRect(this.element.getBoundingClientRect()),
+            elementBB = Rect.fromRect(this.element.getBoundingClientRect()),
             container = this._getContainer(elementBB),
             arrowElement = this.element.querySelector('.arrow-element');
 
@@ -147,8 +146,8 @@ export default class Overlay {
             // Needed to determine any custom css that might be effecting the element.
             this.element.dataset.placement = position.placement;
 
-            let overlay = Vec4.getBoundingClientRect(this.element),
-                arrowBB = arrowElement ? Vec4.getBoundingClientRect(arrowElement) : null,
+            let overlay = Rect.getBoundingClientRect(this.element),
+                arrowBB = arrowElement ? Rect.getBoundingClientRect(arrowElement) : null,
                 anchorPoint = getSubBoundingBox(overlay, position.my).subtract(overlay).toPoint(), // The anchor point on the target element relative to the top-left corner of the element.
                 space = getSubBoundingBox(rect, position.of),
                 unBoundedSubspace = this._getAllowedSubspace(position, space, rect, arrowElement, overlay, anchorPoint, arrowBB),
@@ -156,7 +155,7 @@ export default class Overlay {
 
             if(container) {
                 // Pad container to account for anchor point offset.
-                let paddedContainer = container.add(new Vec4(
+                let paddedContainer = container.add(new Rect(
                     anchorPoint.x,
                     anchorPoint.y,
                     -(overlay.width) + anchorPoint.x,
@@ -185,7 +184,7 @@ export default class Overlay {
 
                 let paddedSpace = unBoundedSubspace.subtract(anchorSpacePadding);
 
-                if(this.magnetic instanceof Vec4) {
+                if(this.magnetic instanceof Rect) {
                     paddedSpace = paddedSpace.addMargins(this.magnetic);
                 }
 
@@ -222,7 +221,7 @@ export default class Overlay {
                 overlay = closestPosition.overlay.moveTo(pos);
 
                 overlay = overlay.clamp(container);
-            } else if(this.magnetic instanceof Vec4) {
+            } else if(this.magnetic instanceof Rect) {
                 let pos = this._getDefaultPosition(closestPosition.position, closestPosition.rect);
 
                 let paddedContainer = container.addMargins(this.magnetic);
@@ -436,7 +435,7 @@ export default class Overlay {
      * Returns the bounding client rect that defines the container space.
      * Returns null if unbounded.
      * @param elementBB
-     * @returns {null|{Vec4}}
+     * @returns {null|{Rect}}
      * @private
      */
     _getContainer(elementBB) {
@@ -453,7 +452,7 @@ export default class Overlay {
                 container = this.container;
             }
 
-            container = Vec4.fromRect(container);
+            container = Rect.fromRect(container);
         }
 
         return container;
@@ -497,8 +496,8 @@ export default class Overlay {
                 }
             }
 
-            arrowPos = arrowPos.clamp(reference.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
-            arrowPos = arrowPos.clamp(overlay.subtract(new Vec4(0, 0, arrowBB.width, arrowBB.height)));
+            arrowPos = arrowPos.clamp(reference.subtract(new Rect(0, 0, arrowBB.width, arrowBB.height)));
+            arrowPos = arrowPos.clamp(overlay.subtract(new Rect(0, 0, arrowBB.width, arrowBB.height)));
             arrowPos = arrowPos.subtract(overlay); // Convert to overlay space as it should be the offset parent.
 
             if (arrowSide === 'top' || arrowSide === 'bottom') {
@@ -515,7 +514,7 @@ export default class Overlay {
         let reference = getSubBoundingBox(referenceElementRect, position.of),
             pos = getSubBoundingBox(reference, position.at);
 
-        return new Vec4(pos.left, pos.top, pos.left, pos.top);
+        return new Rect(pos.left, pos.top, pos.left, pos.top);
     }
 
     /**
@@ -544,22 +543,22 @@ export default class Overlay {
      * @param position
      * @param overlay
      * @param anchorPoint
-     * @returns {Vec4}
+     * @returns {Rect}
      * @private
      */
     _getAnchorSpacePadding(position, overlay, anchorPoint) {
-        let anchorSpacePadding = new Vec4(0, 0, 0, 0);
+        let anchorSpacePadding = new Rect(0, 0, 0, 0);
 
         // Calculate container padding because of arrows and the offset of the overlays anchor point.
         if(position.of === 'border-top' || position.of === 'border-bottom') {
-            anchorSpacePadding = new Vec4(
+            anchorSpacePadding = new Rect(
                 -(overlay.width) + anchorPoint.x,
                 0,
                 anchorPoint.x,
                 0
             );
         } else if(position.of === 'border-left' || position.of === 'border-right') {
-            anchorSpacePadding = new Vec4(
+            anchorSpacePadding = new Rect(
                 0,
                 -(overlay.height) + anchorPoint.y,
                 0,
@@ -575,18 +574,18 @@ export default class Overlay {
      *
      * @param position
      * @param arrowBB
-     * @returns {Vec4}
+     * @returns {Rect}
      * @private
      */
     _getArrowSpacePadding(position, arrowBB) {
-        let arrowSpacePadding = new Vec4(0, 0, 0, 0);
+        let arrowSpacePadding = new Rect(0, 0, 0, 0);
 
         if(arrowBB) {
             // Calculate container padding because of arrows and the offset of the overlays anchor point.
             if (position.of === 'border-top' || position.of === 'border-bottom') {
-                arrowSpacePadding = new Vec4(arrowBB.width, 0, -arrowBB.width, 0);
+                arrowSpacePadding = new Rect(arrowBB.width, 0, -arrowBB.width, 0);
             } else if (position.of === 'border-left' || position.of === 'border-right') {
-                arrowSpacePadding = new Vec4(0, arrowBB.height, 0, -arrowBB.height);
+                arrowSpacePadding = new Rect(0, arrowBB.height, 0, -arrowBB.height);
             }
         }
 
@@ -717,7 +716,7 @@ const slideInTooltipFX = new Animation({
             element.style.maxWidth = '';
             element.style.maxHeight = '';
 
-            let box = Vec4.getBoundingClientRect(element);
+            let box = Rect.getBoundingClientRect(element);
             cache.fxMaxHeight = box.bottom - box.top;
             cache.fxMaxWidth = box.right - box.left;
 
@@ -795,7 +794,7 @@ const slideOutTooltipFX = new Animation({
             element.style.maxWidth = '';
             element.style.maxHeight = '';
 
-            let box = Vec4.getBoundingClientRect(element);
+            let box = Rect.getBoundingClientRect(element);
             cache.fxMaxHeight = box.bottom - box.top;
             cache.fxMaxWidth = box.right - box.left;
 
@@ -847,7 +846,7 @@ export const slideDownFX = new Animation({
             element.style.maxHeight = '';
             element.style.maxWidth = '';
 
-            let box = Vec4.getBoundingClientRect(element);
+            let box = Rect.getBoundingClientRect(element);
 
             cache.fxCache.maxWidth = box.width+'px';
             cache.fxCache.maxHeight = box.height+'px';
@@ -865,7 +864,7 @@ export const slideUpFX = new Animation({
      * @param element {HTMLElement}
      */
     frames: (element) => {
-        let box = Vec4.getBoundingClientRect(element);
+        let box = Rect.getBoundingClientRect(element);
 
         return {
             '0%': {

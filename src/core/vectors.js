@@ -1,6 +1,9 @@
 import {clamp} from './utility';
 
 
+const regPercentage = /^(\d+\.?\d*)%$/;
+
+
 /**
  * Stores a 2 value Vector.
  */
@@ -373,36 +376,348 @@ export class Vec4 {
         this[3] = bottom;
     }
 
-    get width() {
-        return this.right - this.left;
+    get r() {
+        return this[0];
     }
 
-    get height() {
-        return this.bottom - this.top;
+    set r(value) {
+        this[0] = value;
     }
 
-    set width(value) {
-        this.right = this.left + value;
+    get g() {
+        return this[1];
     }
 
-    set height(value) {
-        this.bottom = this.top + value;
+    set g(value) {
+        this[1] = value;
     }
 
-    get x() {
-        return this.left;
+    get b() {
+        return this[2];
     }
 
-    get y() {
-        return this.top;
+    set b(value) {
+        this[2] = value;
     }
 
-    set x(value) {
-        this.left = value;
+    get a() {
+        return this[3];
     }
 
-    set y(value) {
-        this.top = value;
+    set a(value) {
+        this[3] = value;
+    }
+
+    set(valueOrVec4) {
+        if(typeof valueOrVec4 !== 'object') {
+            this[0] = valueOrVec4;
+            this[1] = valueOrVec4;
+            this[2] = valueOrVec4;
+            this[3] = valueOrVec4;
+        } else {
+            this[0] = valueOrVec4[0];
+            this[1] = valueOrVec4[1];
+            this[2] = valueOrVec4[2];
+            this[3] = valueOrVec4[3];
+        }
+    }
+
+    add(valueOrVec4) {
+        if(typeof valueOrVec4 === 'number') {
+            return new this.constructor(
+                this[0] + valueOrVec4,
+                this[1] + valueOrVec4,
+                this[2] + valueOrVec4,
+                this[3] + valueOrVec4
+            );
+        } else {
+            return new this.constructor(
+                this[0] + valueOrVec4[0],
+                this[1] + valueOrVec4[1],
+                this[2] + valueOrVec4[2],
+                this[3] + valueOrVec4[3]
+            );
+        }
+    }
+
+    subtract(valueOrVec4) {
+        if(typeof valueOrVec4 === 'number') {
+            return new this.constructor(
+                this[0] - valueOrVec4,
+                this[1] - valueOrVec4,
+                this[2] - valueOrVec4,
+                this[3] - valueOrVec4
+            );
+        } else {
+            return new this.constructor(
+                this[0] - valueOrVec4[0],
+                this[1] - valueOrVec4[1],
+                this[2] - valueOrVec4[2],
+                this[3] - valueOrVec4[3]
+            );
+        }
+    }
+
+    scalar(value) {
+        return new this.constructor(
+            this[0] * value,
+            this[1] * value,
+            this[2] * value,
+            this[3] * value
+        );
+    }
+
+    equals(vec4) {
+        return vec4 === this || (vec4[0] === this[0] && vec4[1] === this[1] && vec4[2] === this[2] && vec4[3] === this[3]);
+    }
+
+    mod(valueOrVec4) {
+        if(typeof valueOrVec4 === 'number') {
+            return new this.constructor(
+                this[0] % valueOrVec4,
+                this[1] % valueOrVec4,
+                this[2] % valueOrVec4,
+                this[3] % valueOrVec4,
+            );
+        } else {
+            return new this.constructor(
+                this[0] % valueOrVec4[0],
+                this[1] % valueOrVec4[1],
+                this[2] % valueOrVec4[2],
+                this[3] % valueOrVec4[3]
+            );
+        }
+    }
+
+    toRGBA() {
+        return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
+    }
+
+    clone() {
+        return new this.constructor(this[0], this[1], this[2], this[3]);
+    }
+
+    static fromRGBAObject({r, g, b, a}) {
+        return new Vec4(r, g, b, a);
+    }
+
+    static fromRGBA(value) {
+        let m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
+
+        if(!m) {
+            throw new Error(`Could not parse rgba value ${value}`);
+        }
+
+        return new Vec4(
+            parseInt(m[1], 10),
+            parseInt(m[2], 10),
+            parseInt(m[3], 10),
+            parseFloat(m[4]),
+        );
+    }
+}
+
+
+export class Rect extends Vec4 {
+    constructor(left, top, right, bottom) {
+        if(typeof left === 'object' && left.getBoundingClientRect) {
+            let bb = left.getBoundingClientRect();
+            left = bb.left;
+            top = bb.top;
+            right = bb.right;
+            bottom = bb.bottom;
+        }
+
+        super(left, top, right, bottom);
+    }
+
+    toPoint() {
+        return new Vec2(this[0], this[1]);
+    }
+
+    getArea() {
+        return this.width * this.height;
+    }
+
+    translate(x, y) {
+        if(typeof x === 'object') {
+            y = x.y;
+            x = x.x;
+        }
+
+        return new this.constructor(
+            this[0] + x,
+            this[1] + y,
+            this[2] + x,
+            this[3] + y
+        );
+    }
+
+    addMargins({left, top, right, bottom}) {
+        return new this.constructor(
+            this.left - left,
+            this.top - top,
+            this.right + right,
+            this.bottom + bottom
+        );
+    }
+
+    addPaddings({left, top, right, bottom}) {
+        return new this.constructor(
+            this.left + left,
+            this.top + top,
+            this.right - right,
+            this.bottom - bottom
+        );
+    }
+
+    moveTo({left, top}) {
+        let deltaX = left - this.left,
+            deltaY = top - this.top;
+
+        return new this.constructor(
+            this.left + deltaX,
+            this.top + deltaY,
+            this.right + deltaX,
+            this.bottom + deltaY
+        );
+    }
+
+    intersection({left, top, right, bottom}) {
+        left = Math.max(this.left, left);
+        right = Math.min(this.right, right);
+        bottom = Math.min(this.bottom, bottom);
+        top = Math.max(this.top, top);
+
+        if(left > right || top > bottom) {
+            return null;
+        }
+
+        return new this.constructor(left, top, right, bottom);
+    }
+
+    contains(rect) {
+        return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+
+    containsX(rect) {
+        return this.left <= rect.left && this.right >= rect.right;
+    }
+
+    containsY(rect) {
+        return this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+
+    isXOverlapping(rect) {
+        return (rect.left <= this.right && rect.right >= this.left);
+    }
+
+    isYOverlapping(rect) {
+        return (rect.top <= this.bottom && rect.bottom >= this.top);
+    }
+
+    clampXY(rect) {
+        let width = this.right - this.left,
+            height = this.bottom - this.top,
+            left = clamp(this.left, rect.left, rect.right),
+            top = clamp(this.top, rect.top, rect.bottom);
+
+        return new this.constructor(left, top, left + width, top + height);
+    }
+
+    clamp(rect) {
+        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+        let width = this.width,
+            height = this.height,
+            left = clamp(this.left, rect.left, rect.right),
+            top = clamp(this.top, rect.top, rect.bottom);
+
+        return new this.constructor(
+            left,
+            top,
+            left + width,
+            top + height
+        );
+    }
+
+    clampX(rect) {
+        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+        let width = this.width,
+            left = clamp(this.left, rect.left, rect.right);
+
+        return new this.constructor(
+            left,
+            this.top,
+            left + width,
+            this.bottom
+        );
+    }
+
+    clampY(rect) {
+        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+        let height = this.height,
+            top = clamp(this.top, rect.top, rect.bottom);
+
+        return new Rect(
+            this.left,
+            top,
+            this.right,
+            top + height
+        );
+    }
+
+    getDistanceBetween(rect) {
+        rect = Rect.fromRect(rect);
+
+        let isXOverlapping = this.isXOverlapping(rect),
+            isYOverlapping = this.isYOverlapping(rect);
+
+        if(isXOverlapping && isYOverlapping) {
+            // Items are overlapping
+            return 0;
+        } else if(isXOverlapping) {
+            return Math.min(
+                Math.abs(this.bottom - rect.top),
+                Math.abs(this.top - rect.bottom)
+            );
+        } else if(isYOverlapping) {
+            return Math.min(
+                Math.abs(this.right - rect.left),
+                Math.abs(this.left - rect.right)
+            );
+        } else {
+            let x1, y1, x2, y2;
+
+            if(this.right <= rect.left) {
+                x1 = this.right;
+                x2 = rect.left;
+            } else {
+                x1 = this.left;
+                x2 = rect.right;
+            }
+
+            if(this.bottom <= rect.top) {
+                y1 = this.bottom;
+                y2 = rect.top;
+            } else {
+                y1 = this.top;
+                y2 = rect.bottom;
+            }
+
+            // Use distance formula to calculate distance.
+            return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+        }
+    }
+
+    static fromRect({left, top, right, bottom}) {
+        return new Rect(left, top, right, bottom);
+    }
+
+    static getBoundingClientRect(element) {
+        return Rect.fromRect(element.getBoundingClientRect());
     }
 
     get left() {
@@ -437,332 +752,131 @@ export class Vec4 {
         this[3] = value;
     }
 
-    get r() {
-        return this[0];
+    get width() {
+        return this.right - this.left;
     }
 
-    set r(value) {
-        this[0] = value;
+    get height() {
+        return this.bottom - this.top;
     }
 
-    get g() {
-        return this[1];
+    set width(value) {
+        this.right = this.left + value;
     }
 
-    set g(value) {
-        this[1] = value;
+    set height(value) {
+        this.bottom = this.top + value;
     }
 
-    get b() {
-        return this[2];
+    get x() {
+        return this.left;
     }
 
-    set b(value) {
-        this[2] = value;
+    get y() {
+        return this.top;
     }
 
-    get a() {
-        return this[3];
+    set x(value) {
+        this.left = value;
     }
 
-    set a(value) {
-        this[3] = value;
+    set y(value) {
+        this.top = value;
     }
+}
 
-    set(value) {
-        if(typeof value !== 'object') {
-            this[0] = value;
-            this[1] = value;
-            this[2] = value;
-            this[3] = value;
+
+export class RGBA extends Vec4 {
+    constructor(r, g, b, a) {
+        if(typeof r === 'object') {
+            super(r);
         } else {
-            this[0] = value[0];
-            this[1] = value[1];
-            this[2] = value[2];
-            this[3] = value[3];
+            super(r, g, b, a);
         }
     }
 
-    add(rect) {
-        if(typeof rect === 'number') {
-            return new Vec4(
-                this[0] + rect,
-                this[1] + rect,
-                this[2] + rect,
-                this[3] + rect
-            );
-        } else {
-            return new Vec4(
-                this[0] + rect[0],
-                this[1] + rect[1],
-                this[2] + rect[2],
-                this[3] + rect[3]
-            );
-        }
+    toString() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
     }
 
-    subtract(rect) {
-        if(typeof rect === 'number') {
-            return new Vec4(
-                this[0] - rect,
-                this[1] - rect,
-                this[2] - rect,
-                this[3] - rect
-            );
-        } else {
-            return new Vec4(
-                this[0] - rect[0],
-                this[1] - rect[1],
-                this[2] - rect[2],
-                this[3] - rect[3]
-            );
-        }
-    }
+    static parseRGBAColorStringArgs(value) {
+        value = value.trim().split(/\s+/);
 
-    scalar(value) {
-        return new Vec4(
-            this[0] * value,
-            this[1] * value,
-            this[2] * value,
-            this[3] * value
-        );
-    }
+        let r = value[0],
+            g = value[1],
+            b = value[2],
+            a = value[3];
 
-    equals(rect) {
-        return rect === this || (rect[0] === this[0] && rect[1] === this[1] && rect[2] === this[2] && rect[3] === this[3]);
-    }
-
-    mod(rect) {
-        if(typeof rect === 'number') {
-            return new Vec4(
-                this[0] % rect,
-                this[1] % rect,
-                this[2] % rect,
-                this[3] % rect,
-            );
-        } else {
-            return new Vec4(
-                this[0] % rect[0],
-                this[1] % rect[1],
-                this[2] % rect[2],
-                this[3] % rect[3]
-            );
-        }
-    }
-
-    translate(x, y) {
-        if(typeof x === 'object') {
-            y = x.y;
-            x = x.x;
-        }
-
-        return new Vec4(
-            this[0] + x,
-            this[1] + y,
-            this[2] + x,
-            this[3] + y
-        );
-    }
-
-    addMargins(vec4) {
-        return new Vec4(
-            this.left - vec4.left,
-            this.top - vec4.top,
-            this.right + vec4.right,
-            this.bottom + vec4.bottom
-        );
-    }
-
-    addPaddings(vec4) {
-        return new Vec4(
-            this.left + vec4.left,
-            this.top + vec4.top,
-            this.right - vec4.right,
-            this.bottom - vec4.bottom
-        );
-    }
-
-    moveTo(vec2) {
-        let deltaX = vec2.left - this.left,
-            deltaY = vec2.top - this.top;
-
-        return new Vec4(
-            this.left + deltaX,
-            this.top + deltaY,
-            this.right + deltaX,
-            this.bottom + deltaY
-        );
-    }
-
-    intersection(rect) {
-        let left = Math.max(this.left, rect.left),
-            right = Math.min(this.right, rect.right),
-            bottom = Math.min(this.bottom, rect.bottom),
-            top = Math.max(this.top, rect.top);
-
-        if(left > right || top > bottom) {
-            return null;
-        }
-
-        return new Vec4(left, top, right, bottom);
-    }
-
-    toRGBA() {
-        return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
-    }
-
-    clone() {
-        return new Vec4(this[0], this[1], this[2], this[3]);
-    }
-
-    contains(rect) {
-        return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
-    }
-
-    containsX(rect) {
-        return this.left <= rect.left && this.right >= rect.right;
-    }
-
-    containsY(rect) {
-        return this.top <= rect.top && this.bottom >= rect.bottom;
-    }
-
-    toPoint() {
-        return new Vec2(this[0], this[1]);
-    }
-
-    getArea() {
-        return this.width * this.height;
-    }
-
-    isXOverlapping(vec4) {
-        return (vec4.left <= this.right && vec4.right >= this.left);
-    }
-
-    isYOverlapping(vec4) {
-        return (vec4.top <= this.bottom && vec4.bottom >= this.top);
-    }
-
-    clampXY(vec4) {
-        let width = this.right - this.left,
-            height = this.bottom - this.top,
-            left = clamp(this.left, vec4.left, vec4.right),
-            top = clamp(this.top, vec4.top, vec4.bottom);
-
-        return new Vec4(left, top, left + width, top + height);
-    }
-
-    clamp(vec4) {
-        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
-
-        let width = this.width,
-            height = this.height,
-            left = clamp(this.left, vec4.left, vec4.right),
-            top = clamp(this.top, vec4.top, vec4.bottom);
-
-        return new Vec4(
-            left,
-            top,
-            left + width,
-            top + height
-        );
-    }
-
-    clampX(vec4) {
-        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
-
-        let width = this.width,
-            left = clamp(this.left, vec4.left, vec4.right);
-
-        return new Vec4(
-            left,
-            this.top,
-            left + width,
-            this.bottom
-        );
-    }
-
-    clampY(vec4) {
-        vec4 = vec4.subtract(new Vec4(0, 0, this.width, this.height));
-
-        let height = this.height,
-            top = clamp(this.top, vec4.top, vec4.bottom);
-
-        return new Vec4(
-            this.left,
-            top,
-            this.right,
-            top + height
-        );
-    }
-
-    getDistanceBetween(vec4) {
-        vec4 = Vec4.fromRect(vec4);
-
-        let isXOverlapping = this.isXOverlapping(vec4),
-            isYOverlapping = this.isYOverlapping(vec4);
-
-        if(isXOverlapping && isYOverlapping) {
-            // Items are overlapping
-            return 0;
-        } else if(isXOverlapping) {
-            return Math.min(
-                Math.abs(this.bottom - vec4.top),
-                Math.abs(this.top - vec4.bottom)
-            );
-        } else if(isYOverlapping) {
-            return Math.min(
-                Math.abs(this.right - vec4.left),
-                Math.abs(this.left - vec4.right)
-            );
-        } else {
-            let x1, y1, x2, y2;
-
-            if(this.right <= vec4.left) {
-                x1 = this.right;
-                x2 = vec4.left;
+        if(r) {
+            if(regPercentage.test(r)) {
+                r = (parseFloat(r) / 100) * 255;
             } else {
-                x1 = this.left;
-                x2 = vec4.right;
+                r = parseInt(r, 10);
             }
+        }
 
-            if(this.bottom <= vec4.top) {
-                y1 = this.bottom;
-                y2 = vec4.top;
+        if(g) {
+            if(regPercentage.test(g)) {
+                g = (parseFloat(g) / 100) * 255;
             } else {
-                y1 = this.top;
-                y2 = vec4.bottom;
+                g = parseInt(g, 10);
             }
-
-            // Use distance formula to calculate distance.
-            return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
-        }
-    }
-
-    static fromRect({left, top, right, bottom}) {
-        return new Vec4(left, top, right, bottom);
-    }
-
-    static getBoundingClientRect(element) {
-        return Vec4.fromRect(element.getBoundingClientRect());
-    }
-
-    static fromRGBAObject({r, g, b, a}) {
-        return new Vec4(r, g, b, a);
-    }
-
-    static fromRGBA(value) {
-        let m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
-
-        if(!m) {
-            throw new Error(`Could not parse rgba value ${value}`);
         }
 
-        return new Vec4(
-            parseInt(m[1], 10),
-            parseInt(m[2], 10),
-            parseInt(m[3], 10),
-            parseFloat(m[4]),
-        );
+        if(b) {
+            if(regPercentage.test(b)) {
+                b = (parseFloat(b) / 100) * 255;
+            } else {
+                b = parseInt(b, 10);
+            }
+        }
+
+        if(a) {
+            if(regPercentage.test(a)) {
+                a = (parseFloat(a) / 100);
+            } else {
+                a = parseFloat(a);
+            }
+        }
+
+        a = a || 1.0;
+
+        return new RGBA(r, g, b, a);
+    }
+
+    static parseHexColorStringArg(value) {
+        value = value.trim().substring(1);
+
+        let r, g, b, a = 1.0;
+
+        if(value.length === 3) {
+            r = value[0];
+            g = value[1];
+            b = value[2];
+
+            r = parseInt(r+r, 16);
+            g = parseInt(g+g, 16);
+            b = parseInt(b+b, 16);
+        } else if(value.length === 6) {
+            r = value.substr(0, 2);
+            g = value.substr(2, 2);
+            b = value.substr(4, 2);
+
+            r = parseInt(r, 16);
+            g = parseInt(g, 16);
+            b = parseInt(b, 16);
+        } else if(value.length === 8) {
+            r = value.substr(0, 2);
+            g = value.substr(2, 2);
+            b = value.substr(4, 2);
+            a = value.substr(6, 2);
+
+            r = parseInt(r, 16);
+            g = parseInt(g, 16);
+            b = parseInt(b, 16);
+            a = parseInt(a, 16) / 255;
+        }
+
+        return new RGBA(r, g, b, a);
     }
 }

@@ -1,7 +1,7 @@
 import Overlay, {Tooltip, Notification} from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
 import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
-import {Vec2, Vec4} from "core/vectors";
+import {Vec2} from "core/vectors";
 
 
 // noinspection JSUnusedGlobalSymbols

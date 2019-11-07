@@ -1,104 +1,15 @@
-import {Vec4} from "./vectors";
+import {RGBA} from "./vectors";
 
 
 const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
     regColor = /^(?:#([a-f0-9]{3})|#([a-f0-9]{6})|#([a-f0-9]{8}))$/i,
-    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i,
-    regPercentage = /^(\d+\.?\d*)%$/;
-
-
-export class Color extends Vec4 {
-    toString() {
-        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
-    }
-
-    static parseRGBAColorStringArgs(value) {
-        value = value.trim().split(/\s+/);
-
-        let r = value[0],
-            g = value[1],
-            b = value[2],
-            a = value[3];
-
-        if(r) {
-            if(regPercentage.test(r)) {
-                r = (parseFloat(r) / 100) * 255;
-            } else {
-                r = parseInt(r, 10);
-            }
-        }
-
-        if(g) {
-            if(regPercentage.test(g)) {
-                g = (parseFloat(g) / 100) * 255;
-            } else {
-                g = parseInt(g, 10);
-            }
-        }
-
-        if(b) {
-            if(regPercentage.test(b)) {
-                b = (parseFloat(b) / 100) * 255;
-            } else {
-                b = parseInt(b, 10);
-            }
-        }
-
-        if(a) {
-            if(regPercentage.test(a)) {
-                a = (parseFloat(a) / 100);
-            } else {
-                a = parseFloat(a);
-            }
-        }
-
-        a = a || 1.0;
-
-        return new Color(r, g, b, a);
-    }
-
-    static parseHexColorStringArg(value) {
-        value = value.trim().substring(1);
-
-        let r, g, b, a = 1.0;
-
-        if(value.length === 3) {
-            r = value[0];
-            g = value[1];
-            b = value[2];
-
-            r = parseInt(r+r, 16);
-            g = parseInt(g+g, 16);
-            b = parseInt(b+b, 16);
-        } else if(value.length === 6) {
-            r = value.substr(0, 2);
-            g = value.substr(2, 2);
-            b = value.substr(4, 2);
-
-            r = parseInt(r, 16);
-            g = parseInt(g, 16);
-            b = parseInt(b, 16);
-        } else if(value.length === 8) {
-            r = value.substr(0, 2);
-            g = value.substr(2, 2);
-            b = value.substr(4, 2);
-            a = value.substr(6, 2);
-
-            r = parseInt(r, 16);
-            g = parseInt(g, 16);
-            b = parseInt(b, 16);
-            a = parseInt(a, 16) / 255;
-        }
-
-        return new Color(r, g, b, a);
-    }
-}
+    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i;
 
 
 const TYPE_FUNCTIONS = {
-    hex: Color.parseHexColorStringArg,
-    rgb: Color.parseRGBAColorStringArgs,
-    rgba: Color.parseRGBAColorStringArgs
+    hex: RGBA.parseHexColorStringArg,
+    rgb: RGBA.parseRGBAColorStringArgs,
+    rgba: RGBA.parseRGBAColorStringArgs
 };
 
 
