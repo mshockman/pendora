@@ -17,7 +17,8 @@ let app = new Application({
     'test_overlay': () => import("test_overlay.js"),
     'test_modals': () => import("test_modals.js"),
     'test_tabs': () => import("test_tabs.js"),
-    'test_animation': () => import("test_animation.js")
+    'test_animation': () => import("test_animation.js"),
+    'test_positioner': () => import("test_positioner.js")
 });
 
 

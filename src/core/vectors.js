@@ -1,7 +1,24 @@
 import {clamp} from './utility';
+import {ExtendableError, ValueError} from "./errors";
 
 
-const regPercentage = /^(\d+\.?\d*)%$/;
+const regPercentage = /^(\d+\.?\d*)%$/,
+    regWhitespace = /\s+/,
+    regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/, // Parses string like "left+10px" into ["left", "+10px"]
+    regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/; // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
+
+
+export class UnitError extends ExtendableError {
+
+}
+
+
+const positionShortHandValues = {
+    top: 'center top',
+    right: 'right middle',
+    bottom: 'center bottom',
+    left: 'left middle'
+};
 
 
 /**
@@ -424,14 +441,14 @@ export class Vec4 {
 
     add(valueOrVec4) {
         if(typeof valueOrVec4 === 'number') {
-            return new this.constructor(
+            return this._new(
                 this[0] + valueOrVec4,
                 this[1] + valueOrVec4,
                 this[2] + valueOrVec4,
                 this[3] + valueOrVec4
             );
         } else {
-            return new this.constructor(
+            return this._new(
                 this[0] + valueOrVec4[0],
                 this[1] + valueOrVec4[1],
                 this[2] + valueOrVec4[2],
@@ -442,14 +459,14 @@ export class Vec4 {
 
     subtract(valueOrVec4) {
         if(typeof valueOrVec4 === 'number') {
-            return new this.constructor(
+            return this._new(
                 this[0] - valueOrVec4,
                 this[1] - valueOrVec4,
                 this[2] - valueOrVec4,
                 this[3] - valueOrVec4
             );
         } else {
-            return new this.constructor(
+            return this._new(
                 this[0] - valueOrVec4[0],
                 this[1] - valueOrVec4[1],
                 this[2] - valueOrVec4[2],
@@ -459,7 +476,7 @@ export class Vec4 {
     }
 
     scalar(value) {
-        return new this.constructor(
+        return this._new(
             this[0] * value,
             this[1] * value,
             this[2] * value,
@@ -473,14 +490,14 @@ export class Vec4 {
 
     mod(valueOrVec4) {
         if(typeof valueOrVec4 === 'number') {
-            return new this.constructor(
+            return this._new(
                 this[0] % valueOrVec4,
                 this[1] % valueOrVec4,
                 this[2] % valueOrVec4,
                 this[3] % valueOrVec4,
             );
         } else {
-            return new this.constructor(
+            return this._new(
                 this[0] % valueOrVec4[0],
                 this[1] % valueOrVec4[1],
                 this[2] % valueOrVec4[2],
@@ -495,6 +512,10 @@ export class Vec4 {
 
     clone() {
         return new this.constructor(this[0], this[1], this[2], this[3]);
+    }
+
+    _new(left, top, right, bottom) {
+        return new this.constructor(left, top, right, bottom);
     }
 
     static fromRGBAObject({r, g, b, a}) {
@@ -519,16 +540,33 @@ export class Vec4 {
 
 
 export class Rect extends Vec4 {
-    constructor(left, top, right, bottom) {
+    constructor(left, top, right, bottom, domElement=null) {
         if(typeof left === 'object' && left.getBoundingClientRect) {
-            let bb = left.getBoundingClientRect();
-            left = bb.left;
-            top = bb.top;
-            right = bb.right;
-            bottom = bb.bottom;
+            if(left.getBoundingClientRect) {
+                domElement = left;
+                let bb = domElement.getBoundingClientRect();
+                left = bb.left;
+                top = bb.top;
+                right = bb.right;
+                bottom = bb.bottom;
+            } else {
+                top = left.top;
+                right = left.right;
+                bottom = left.bottom;
+                left = left.left;
+            }
         }
 
         super(left, top, right, bottom);
+        this.domElement = domElement;
+    }
+
+    bind(element) {
+        return this._new(this.left, this.top, this.right, this.bottom, element);
+    }
+
+    _new(left, top, right, bottom, domElement=undefined) {
+        return new this.constructor(left, top, right, bottom, domElement === undefined ? this.domElement : domElement);
     }
 
     toPoint() {
@@ -545,7 +583,7 @@ export class Rect extends Vec4 {
             x = x.x;
         }
 
-        return new this.constructor(
+        return this._new(
             this[0] + x,
             this[1] + y,
             this[2] + x,
@@ -554,7 +592,7 @@ export class Rect extends Vec4 {
     }
 
     addMargins({left, top, right, bottom}) {
-        return new this.constructor(
+        return this._new(
             this.left - left,
             this.top - top,
             this.right + right,
@@ -563,7 +601,7 @@ export class Rect extends Vec4 {
     }
 
     addPaddings({left, top, right, bottom}) {
-        return new this.constructor(
+        return this._new(
             this.left + left,
             this.top + top,
             this.right - right,
@@ -575,7 +613,7 @@ export class Rect extends Vec4 {
         let deltaX = left - this.left,
             deltaY = top - this.top;
 
-        return new this.constructor(
+        return this._new(
             this.left + deltaX,
             this.top + deltaY,
             this.right + deltaX,
@@ -593,7 +631,7 @@ export class Rect extends Vec4 {
             return null;
         }
 
-        return new this.constructor(left, top, right, bottom);
+        return this._new(left, top, right, bottom);
     }
 
     contains(rect) {
@@ -622,7 +660,7 @@ export class Rect extends Vec4 {
             left = clamp(this.left, rect.left, rect.right),
             top = clamp(this.top, rect.top, rect.bottom);
 
-        return new this.constructor(left, top, left + width, top + height);
+        return this._new(left, top, left + width, top + height);
     }
 
     clamp(rect) {
@@ -633,7 +671,7 @@ export class Rect extends Vec4 {
             left = clamp(this.left, rect.left, rect.right),
             top = clamp(this.top, rect.top, rect.bottom);
 
-        return new this.constructor(
+        return this._new(
             left,
             top,
             left + width,
@@ -647,7 +685,7 @@ export class Rect extends Vec4 {
         let width = this.width,
             left = clamp(this.left, rect.left, rect.right);
 
-        return new this.constructor(
+        return this._new(
             left,
             this.top,
             left + width,
@@ -661,7 +699,7 @@ export class Rect extends Vec4 {
         let height = this.height,
             top = clamp(this.top, rect.top, rect.bottom);
 
-        return new Rect(
+        return this._new(
             this.left,
             top,
             this.right,
@@ -712,12 +750,171 @@ export class Rect extends Vec4 {
         }
     }
 
+    position({my, at, of, inside=null, collision=null}) {
+        if(of.getBoundingClientRect) {
+            of = new Rect(of);
+        }
+
+        if(inside && inside.getBoundingClientRect) {
+            inside = new Rect(inside);
+        }
+
+        // collision can be string with a space separating the x and y values.
+        // for example "fit flipfit"
+        // normalize it to an {x, y} object.
+        if(collision && typeof collision === 'string') {
+            let parts = collision.trim().split(regWhitespace);
+            collision = {
+                x: parts[0],
+                y: parts[1]
+            };
+        }
+
+        let anchor = this.evaluatePositionString(my),
+            reference = of.evaluatePositionString(at),
+            deltaX = reference.x - anchor.x,
+            deltaY = reference.y - anchor.y;
+
+        let rect = this.translate(deltaX, deltaY);
+
+        if(!collision || !inside || inside.contains(rect)) {
+            return rect;
+        }
+
+        let flip = false;
+
+        if(!inside.containsX(rect)) {
+            if(collision.x === 'flip' || collision.x === 'flipfit') {
+                let center = this.left + (this.width / 2);
+                anchor.x = ((anchor.x - center) * -1) + center;
+
+                center = of.left + (of.width / 2);
+                reference.x = ((reference.x - center)*-1) + center;
+                flip = true;
+            }
+        }
+
+        if(!inside.containsY(rect)) {
+            if(collision.y === 'flip' || collision.y === 'flipfit') {
+                let middle = this.top + (this.height / 2);
+                anchor.y = ((anchor.y - middle)*-1) + middle;
+
+                middle = of.top + (of.height / 2);
+                reference.y = ((reference.y - middle)*-1) + middle;
+                flip = true;
+            }
+        }
+
+        if(flip) {
+            deltaX = reference.x - anchor.x;
+            deltaY = reference.y - anchor.y;
+            rect = this.translate(deltaX, deltaY);
+
+            if(inside.contains(rect)) {
+                return rect;
+            }
+        }
+
+        if(collision.x === 'fit' || collision.x === 'flipfit') {
+            rect = rect.clampX(inside);
+        }
+
+        if(collision.y === 'fit' || collision.y === 'flipfit') {
+            rect = rect.clampY(inside);
+        }
+
+        return rect;
+    }
+
+    evaluatePositionString(string) {
+        if(positionShortHandValues[string]) {
+            string = positionShortHandValues[string];
+        }
+
+        let pos = string.trim().split(regWhitespace),
+            x = pos[0],
+            y = pos[1],
+            rx = null,
+            ry = null;
+
+        if(x) {
+            rx = this._evaluatePositionStringComponent(x, 'x');
+        }
+
+        if(y) {
+            ry = this._evaluatePositionStringComponent(y, 'y');
+        }
+
+        return new Vec2(rx, ry);
+    }
+
+    /**
+     * Evaluates a position string value such as "left+10px" into it final position on the rect.
+     * @param value - The value to evaluate.
+     * @param direction - The direction type.  Should be either "x" or "y".
+     * @returns {number}
+     * @private
+     */
+    _evaluatePositionStringComponent(value, direction) {
+        let parts = regPositionPart.exec(value),
+            r = 0;
+
+        if(parts[1]) {
+            let p = parts[1];
+
+            if(direction === 'x') {
+                if(p === 'left') {
+                    r = this.left;
+                } else if(p === 'center' || p === 'middle') {
+                    r = this.left + (this.width / 2);
+                } else if(p === 'right') {
+                    r = this.left + this.width;
+                } else {
+                    throw new ValueError(`Invalid Option: ${p}`);
+                }
+            } else {
+                if(p === 'top') {
+                    r = this.top;
+                } else if(p === 'middle' || p === 'center') {
+                    r = this.top + (this.height / 2);
+                } else if(p === 'bottom') {
+                    r = this.top + this.height;
+                } else {
+                    throw new ValueError(`Invalid Option: ${p}`);
+                }
+            }
+        } else if(direction === 'x') {
+            r = this.left;
+        } else {
+            r = this.top;
+        }
+
+        if(parts[2]) {
+            let value = parseFloat(parts[2]),
+                type = parts[3] || 'px';
+
+            if(type === 'px') {
+                r += value;
+            } else if(type === '%') {
+                if(direction === 'x') {
+                    r += (value / 100) * this.width;
+                } else {
+                    r += (value / 100) * this.height;
+                }
+            } else {
+                throw new UnitError("Invalid unit: Must be either % or px.");
+            }
+        }
+
+        return r;
+    }
+
     static fromRect({left, top, right, bottom}) {
         return new Rect(left, top, right, bottom);
     }
 
     static getBoundingClientRect(element) {
-        return Rect.fromRect(element.getBoundingClientRect());
+        return new Rect(element);
     }
 
     get left() {

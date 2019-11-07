@@ -1,13 +1,14 @@
 import Overlay, {Tooltip, Notification} from 'ui/Overlay';
 import Draggable, {CONTAINERS} from 'ui/Draggable';
 import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
-import {Vec2} from "core/vectors";
+import {Vec2, Rect} from "core/vectors";
 
 
 // noinspection JSUnusedGlobalSymbols
 window.getPointOnElement = getPointOnElement;
 window.getSubBoundingBox = getSubBoundingBox;
 window.Vec2 = Vec2;
+window.Rect = Rect;
 
 
 export default class OverlayTestPage {
