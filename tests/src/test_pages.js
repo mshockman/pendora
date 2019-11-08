@@ -18,7 +18,8 @@ let app = new Application({
     'test_modals': () => import("test_modals.js"),
     'test_tabs': () => import("test_tabs.js"),
     'test_animation': () => import("test_animation.js"),
-    'test_positioner': () => import("test_positioner.js")
+    'test_positioner': () => import("test_positioner.js"),
+    'test_colorpicker': () => import("test_colorpicker.js")
 });
 
 

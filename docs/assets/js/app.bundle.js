@@ -1580,7 +1580,7 @@ function chain() {
 /*!*****************************!*\
   !*** ./src/core/utility.js ***!
   \*****************************/
-/*! exports provided: clamp, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
+/*! exports provided: clamp, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath, hslToRGB, hsvToRGB */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1617,6 +1617,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filterChildren", function() { return filterChildren; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOwnProperty", function() { return getOwnProperty; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return getPropertyByPath; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hslToRGB", function() { return hslToRGB; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hsvToRGB", function() { return hsvToRGB; });
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -2301,6 +2303,109 @@ function getPropertyByPath(obj, path) {
   }
 
   return r;
+}
+/**
+ * Converts hsl values to rgb values.
+ *
+ * @param h
+ * @param s
+ * @param l
+ * @returns {{r: *, b: *, g: *}}
+ */
+
+function hslToRGB(h, s, l) {
+  // Must be fractions of 1
+  s /= 100;
+  l /= 100;
+  var c = (1 - Math.abs(2 * l - 1)) * s,
+      x = c * (1 - Math.abs(h / 60 % 2 - 1)),
+      m = l - c / 2,
+      r = 0,
+      g = 0,
+      b = 0;
+
+  if (0 <= h && h < 60) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if (60 <= h && h < 120) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if (120 <= h && h < 180) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if (180 <= h && h < 240) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if (240 <= h && h < 300) {
+    r = x;
+    g = 0;
+    b = c;
+  } else if (300 <= h && h < 360) {
+    r = c;
+    g = 0;
+    b = x;
+  }
+
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+  return {
+    r: r,
+    g: g,
+    b: b
+  };
+}
+function hsvToRGB(h, s, v) {
+  // h ∈ [0°, 360°]
+  // s ∈ [0, 1]
+  // v ∈ [0, 1]
+  var c = v * s,
+      hp = h / 60,
+      x = c * (1 - Math.abs(hp % 2 - 1)),
+      r = 0,
+      g = 0,
+      b = 0,
+      m = v - c;
+
+  if (0 <= hp && hp <= 1) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if (1 < hp && hp <= 2) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if (2 < hp && hp <= 3) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if (3 < hp && hp <= 4) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if (4 < hp && hp <= 5) {
+    r = x;
+    g = 0;
+    b = c;
+  } else if (5 < hp && hp <= 6) {
+    r = c;
+    g = 0;
+    b = x;
+  } else {
+    r = 255;
+    g = 0;
+    b = 0;
+  }
+
+  return {
+    r: (r + m) * 255,
+    g: (g + m) * 255,
+    b: (b + m) * 255
+  };
 }
 
 /***/ }),
