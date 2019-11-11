@@ -781,7 +781,9 @@ export class Rect extends Vec4 {
             return rect;
         }
 
-        let flip = false;
+        let flip = false,
+            collisionX = 'none',
+            collisionY = 'none';
 
         if(!inside.containsX(rect)) {
             if(collision.x === 'flip' || collision.x === 'flipfit') {
@@ -791,6 +793,7 @@ export class Rect extends Vec4 {
                 center = of.left + (of.width / 2);
                 reference.x = ((reference.x - center)*-1) + center;
                 flip = true;
+                collisionX = 'flip';
             }
         }
 
@@ -802,6 +805,7 @@ export class Rect extends Vec4 {
                 middle = of.top + (of.height / 2);
                 reference.y = ((reference.y - middle)*-1) + middle;
                 flip = true;
+                collisionY = 'flip';
             }
         }
 
@@ -811,18 +815,24 @@ export class Rect extends Vec4 {
             rect = this.translate(deltaX, deltaY);
 
             if(inside.contains(rect)) {
+                rect.collsionX = collisionX;
+                rect.collsionY = collisionY;
                 return rect;
             }
         }
 
         if(collision.x === 'fit' || collision.x === 'flipfit') {
             rect = rect.clampX(inside);
+            collisionX = collisionX === 'flip' ? 'flipfit': 'fit';
         }
 
         if(collision.y === 'fit' || collision.y === 'flipfit') {
             rect = rect.clampY(inside);
+            collisionY = collisionY === 'flip' ? 'flipfit': 'fit';
         }
 
+        rect.collsionX = collisionX;
+        rect.collsionY = collisionY;
         return rect;
     }
 

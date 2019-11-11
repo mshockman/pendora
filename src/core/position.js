@@ -23,6 +23,21 @@ export function getOffsetElement(element) {
 
 
 /**
+ * Returns the rectangle of the client area.
+ *
+ * @returns {Rect}
+ */
+export function getClientRect() {
+    return new Rect(
+        0,
+        0,
+        window.innerWidth,
+        window.innerHeight
+    );
+}
+
+
+/**
  * Returns a bounding rect who's positions are relative to the provided offsetParent.
  * If offsetParent is null then the targets natural offsetParent is used as returned by the getOffsetElement function.
  * @param element

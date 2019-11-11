@@ -22,6 +22,7 @@ export default class MenuNode extends Publisher {
          * @private
          */
         this._element = undefined;
+        this.menuNodeType = "node";
 
         this._isActive = false;
         this._isVisible = true;
@@ -129,7 +130,8 @@ export default class MenuNode extends Publisher {
      */
     get parentMenu() {
         let parent = this.parent;
-        return parent.closest(node => node.nodeType === 'menu');
+        // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+        return parent.closest(node => node.isMenu());
     }
 
     /**
@@ -139,7 +141,8 @@ export default class MenuNode extends Publisher {
      */
     get parentItem() {
         let parent = this.parent;
-        return parent.closest(node => node.nodeType === 'menuitem' || node.nodeType === 'dropdown');
+        // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+        return parent.closest(node => node.isMenuItem());
     }
 
     /**
@@ -223,6 +226,10 @@ export default class MenuNode extends Publisher {
                 this.element.classList.remove('disabled');
             }
         }
+    }
+
+    get isRoot() {
+        return this.root === this;
     }
 
     /**

@@ -3,19 +3,10 @@
   cursor: default;
 }
 
-.menu .menu {
-  left: 100%;
-  top: 0;
-}
-
 .menuitem {
   cursor: pointer;
   position: relative;
   white-space: nowrap;
-  padding: 0.5rem;
-}
-.menuitem > a {
-  text-decoration: none;
 }
 
 .menuitem.active {
@@ -39,11 +30,48 @@
   position: absolute;
   border: 1px solid #ccc;
   background-color: #ffffff;
-  top: 100%;
-  left: 0;
   list-style: none;
   padding: 0;
   min-width: 15rem;
+  z-index: 2;
+  margin: 0;
+}
+.menu .menuitem > a {
+  display: block;
+  padding: 0.5rem;
+  text-decoration: none;
+}
+.menu[data-position="bottom left"] {
+  top: 100%;
+  left: 0;
+}
+.menu[data-position="bottom right"] {
+  top: 100%;
+  right: 0;
+}
+.menu[data-position="right top"] {
+  top: 0;
+  left: 100%;
+}
+.menu[data-position="right bottom"] {
+  bottom: 0;
+  left: 100%;
+}
+.menu[data-position="left top"] {
+  top: 0;
+  right: 100%;
+}
+.menu[data-position="left bottom"] {
+  bottom: 0;
+  right: 100%;
+}
+.menu[data-position="top left"] {
+  bottom: 100%;
+  left: 0;
+}
+.menu[data-position="top right"] {
+  bottom: 100%;
+  right: 0;
 }
 
 .menu.hidden {
@@ -57,9 +85,9 @@
   width: 10rem;
   border: 1px solid #ccc;
 }
-.vertical-menu .menu {
-  left: 100%;
-  top: 0;
+
+.dropdown {
+  position: relative;
 }
 
 /*# sourceMappingURL=menus.css.map */

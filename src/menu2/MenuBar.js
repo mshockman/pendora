@@ -1,5 +1,6 @@
 import Menu from "./Menu";
 import AutoLoader from "autoloader";
+import * as positioners from "./positioners";
 
 
 export default class MenuBar extends Menu {
@@ -9,6 +10,8 @@ export default class MenuBar extends Menu {
             target, closeOnBlur, timeout, autoActivate, multiple, openOnHover,
             toggle, closeOnSelect, deactivateOnItemHover, delay: false, ...context
         });
+
+        this.position = positioners.dropdown();
 
         this.SubMenuClass = class SubMenu extends Menu {
             constructor(args={}) {

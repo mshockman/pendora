@@ -1576,6 +1576,629 @@ function chain() {
 
 /***/ }),
 
+/***/ "./src/core/position.js":
+/*!******************************!*\
+  !*** ./src/core/position.js ***!
+  \******************************/
+/*! exports provided: getOffsetElement, getClientRect, getBoundingOffsetRect, getBoundingDocumentRect, getTranslation, setTranslation, getCssPosition, setCssPosition, setElementClientPosition, clientRectToDocumentSpace, documentRectToClientSpace, snapToGrid, convertDomRectToObject, getPointOnElement, getSubBoundingBox, getDistanceBetweenRects */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOffsetElement", function() { return getOffsetElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClientRect", function() { return getClientRect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBoundingOffsetRect", function() { return getBoundingOffsetRect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBoundingDocumentRect", function() { return getBoundingDocumentRect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getTranslation", function() { return getTranslation; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setTranslation", function() { return setTranslation; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCssPosition", function() { return getCssPosition; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setCssPosition", function() { return setCssPosition; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setElementClientPosition", function() { return setElementClientPosition; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clientRectToDocumentSpace", function() { return clientRectToDocumentSpace; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "documentRectToClientSpace", function() { return documentRectToClientSpace; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "snapToGrid", function() { return snapToGrid; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "convertDomRectToObject", function() { return convertDomRectToObject; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPointOnElement", function() { return getPointOnElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSubBoundingBox", function() { return getSubBoundingBox; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDistanceBetweenRects", function() { return getDistanceBetweenRects; });
+/* harmony import */ var _vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vectors */ "./src/core/vectors.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
+
+
+var regMatrix = /matrix(3d)?\(([^)]+)\)/;
+/**
+ * Returns the elements offset parent.
+ *
+ * @param element
+ * @returns {HTMLElement}
+ */
+
+function getOffsetElement(element) {
+  var o = element.parentElement;
+
+  while (o) {
+    var position = getComputedStyle(o).position;
+    if (position !== 'static') return o;
+    o = o.parentElement;
+  }
+}
+/**
+ * Returns the rectangle of the client area.
+ *
+ * @returns {Rect}
+ */
+
+function getClientRect() {
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](0, 0, window.innerWidth, window.innerHeight);
+}
+/**
+ * Returns a bounding rect who's positions are relative to the provided offsetParent.
+ * If offsetParent is null then the targets natural offsetParent is used as returned by the getOffsetElement function.
+ * @param element
+ * @param offsetParent
+ * @returns {{top: number, left: number, bottom: number, width: number, right: number, height: number}}
+ */
+
+function getBoundingOffsetRect(element) {
+  var offsetParent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  if (!offsetParent) offsetParent = getOffsetElement(element);
+  var offsetRect = offsetParent.getBoundingClientRect(),
+      rect = element.getBoundingClientRect();
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](rect.left - offsetRect.left, rect.top - offsetRect.top, rect.right - offsetRect.right, rect.bottom - offsetRect.bottom);
+}
+/**
+ * Returns a bounding rect who's positions are relative to the document.
+ * @param element
+ * @returns {{top: number, left: number, bottom: number, width: number, x: number, y: number, right: number, height: number}}
+ */
+
+function getBoundingDocumentRect(element) {
+  var rect = element.getBoundingClientRect();
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](rect.left + window.scrollX, rect.top + window.scrollY, rect.right + window.scrollX, rect.bottom + window.scrollY);
+}
+/**
+ * Returns the css translation from the transformation matrix applied to the element.
+ *
+ * @param element
+ * @returns {Vec3}
+ */
+
+function getTranslation(element) {
+  var transform = getComputedStyle(element).transform,
+      m = regMatrix.exec(transform);
+
+  if (!m) {
+    return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec3"](0, 0, 0);
+  }
+
+  var data = m[2].split(/\s*,\s*/);
+
+  if (m[1]) {
+    return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec3"](parseFloat(data[12]), parseFloat(data[13]), parseFloat(data[14]));
+  } else {
+    return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec3"](parseFloat(data[4]), parseFloat(data[5]), 0);
+  }
+}
+/**
+ * Sets the element's transformation matrix to 2d translate with the specified left and top properties.
+ *
+ * @param element
+ * @param x
+ * @param y
+ * @param z
+ */
+
+function setTranslation(element, _ref) {
+  var x = _ref.x,
+      y = _ref.y,
+      _ref$z = _ref.z,
+      z = _ref$z === void 0 ? null : _ref$z;
+
+  if (z !== null) {
+    element.style.transform = "translate3d(".concat(x, "px, ").concat(y, "px, ").concat(z, "px)");
+  } else {
+    element.style.transform = "translate(".concat(x, "px, ").concat(y, "px)");
+  }
+}
+/**
+ * Gets the elements left and top style properties as numbers.
+ *
+ * @param element
+ * @returns {Vec2}
+ */
+
+function getCssPosition(element) {
+  var style = getComputedStyle(element);
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"](parseInt(style.left, 10), parseInt(style.top, 10));
+}
+/**
+ * Sets the left and top style properties of an element.  If the element is positioned statically it will be changed to
+ * relative.
+ *
+ * @param element
+ * @param left
+ * @param top
+ */
+
+function setCssPosition(element, _ref2) {
+  var _ref2$left = _ref2.left,
+      left = _ref2$left === void 0 ? null : _ref2$left,
+      _ref2$top = _ref2.top,
+      top = _ref2$top === void 0 ? null : _ref2$top;
+  var style = getComputedStyle(element);
+
+  if (style.position === 'static') {
+    style.position = 'relative';
+  }
+
+  if (left !== null && left !== undefined) {
+    element.style.left = "".concat(left, "px");
+  }
+
+  if (top !== null && top !== undefined) {
+    element.style.top = "".concat(top, "px");
+  }
+}
+/**
+ * Sets the elements position relative to the client window.  The `method` parameter controls how the elements position
+ * is modified.  The options are 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'translate', and 'translate3d'.
+ *
+ * top-left, top-right, bottom-left and bottom-right set the css left, top, right, and bottom properties of the element.
+ * translate and translate3d position the element by setting the transform property.
+ *
+ * @param element {HTMLElement}
+ * @param position {{x, y}|{left, top}|Array|Vec2}
+ * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'}
+ */
+
+function setElementClientPosition(element, position) {
+  var method = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top-left';
+  position = _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"].fromVertex(position);
+
+  if (method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
+    var style = getComputedStyle(element); // position can't be static for this operation.  Switch to relative.
+
+    if (style.position === 'static') {
+      element.style.position = 'relative';
+      style = getComputedStyle(element);
+    }
+
+    var left = parseInt(style.left, 10),
+        top = parseInt(style.top, 10),
+        right = parseInt(style.right, 10),
+        bottom = parseInt(style.bottom, 10),
+        box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element),
+        deltaX = position.left - box.left,
+        deltaY = position.top - box.top;
+
+    if (method === 'top-left') {
+      element.style.left = left + deltaX + 'px';
+      element.style.top = top + deltaY + 'px';
+      element.style.right = '';
+      element.style.bottom = '';
+    } else if (method === 'top-right') {
+      element.style.right = right - deltaX + 'px';
+      element.style.top = top + deltaY + 'px';
+      element.style.left = '';
+      element.style.bottom = '';
+    } else if (method === 'bottom-left') {
+      element.style.left = left + deltaX + 'px';
+      element.style.bottom = bottom - deltaY + 'px';
+      element.style.right = '';
+      element.style.top = '';
+    } else {
+      // bottom-right
+      element.style.right = right - deltaX + 'px';
+      element.style.bottom = bottom - deltaY + 'px';
+      element.style.left = '';
+      element.style.top = '';
+    }
+  } else if (method === 'translate') {
+    var _box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element),
+        _deltaX = position.left - _box.left,
+        _deltaY = position.top - _box.top,
+        cssPosition = getTranslation(element);
+
+    setTranslation(element, {
+      x: cssPosition.x + _deltaX,
+      y: cssPosition.y + _deltaY
+    });
+  } else if (method === 'translate3d') {
+    var _box2 = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element),
+        _deltaX2 = position.left - _box2.left,
+        _deltaY2 = position.top - _box2.top,
+        _cssPosition = getTranslation(element);
+
+    setTranslation(element, {
+      x: _cssPosition.x + _deltaX2,
+      y: _cssPosition.y + _deltaY2,
+      z: _cssPosition.z
+    });
+  }
+}
+/**
+ * Transforms the coordinates of a BoundingClientRect like object from client space to document space.
+ * @param rect
+ */
+
+function clientRectToDocumentSpace(rect) {
+  var r = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(rect);
+  r.left += window.scrollX;
+  r.right += window.scrollX;
+  if (typeof r.top === 'number') r.top += window.scrollY;
+  if (typeof r.bottom === 'number') r.bottom += window.scrollY;
+  return r;
+}
+/**
+ * Transforms the coordinates of a BoundingClientRect like object from document space to client space.
+ * @param rect
+ */
+
+function documentRectToClientSpace(rect) {
+  var r = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(rect);
+  r.left -= window.scrollX;
+  r.right -= window.scrollX;
+  if (typeof r.top === 'number') r.top -= window.scrollY;
+  if (typeof r.bottom === 'number') r.bottom -= window.scrollY;
+  return r;
+}
+/**
+ * Snaps the value to the specified grid using the provided rounding function.
+ * @param value
+ * @param gridSize
+ * @param roundingFunction
+ * @returns {number|*}
+ */
+
+function snapToGrid(value, gridSize) {
+  var roundingFunction = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : Math.round;
+
+  if (gridSize !== null && gridSize !== undefined && !Number.isNaN(gridSize)) {
+    return roundingFunction(value / gridSize) * gridSize;
+  }
+
+  return value;
+}
+/**
+ * Deprecated in favor of calling Rect.fromRect() class method.
+ *
+ * @deprecated
+ * @param domRect
+ * @returns {Rect}
+ */
+
+function convertDomRectToObject(domRect) {
+  return _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(domRect);
+}
+/**
+ * Returns the {x, y} point calculated relative to the reference element.
+ *
+ * @param referenceElement
+ * @param point
+ * @param offset
+ * @param constrain
+ * @returns {Vec2}
+ */
+
+function getPointOnElement(referenceElement, point) {
+  var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var constrain = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var rect = referenceElement;
+
+  if (rect.getBoundingClientRect) {
+    rect = rect.getBoundingClientRect();
+  }
+
+  if (constrain) {
+    if (typeof constrain === 'string') {
+      constrain = document.querySelector(constrain);
+    }
+
+    if (constrain.getBoundingClientRect) {
+      constrain = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(constrain.getBoundingClientRect());
+    }
+  } // Convert array to {x, y} object.
+
+
+  if (Array.isArray(point)) {
+    point = {
+      x: point[0],
+      y: point[1]
+    };
+  } else if (typeof point === 'string') {
+    if (point === 'top-left') {
+      point = {
+        x: 0,
+        y: 0
+      };
+    } else if (point === 'top') {
+      point = {
+        x: '50%',
+        y: 0
+      };
+    } else if (point === 'top-right') {
+      point = {
+        x: '100%',
+        y: 0
+      };
+    } else if (point === 'right') {
+      point = {
+        x: '100%',
+        y: '50%'
+      };
+    } else if (point === 'bottom-right') {
+      point = {
+        x: '100%',
+        y: '100%'
+      };
+    } else if (point === 'bottom') {
+      point = {
+        x: '50%',
+        y: '100%'
+      };
+    } else if (point === 'bottom-left') {
+      point = {
+        x: 0,
+        y: '100%'
+      };
+    } else if (point === 'left') {
+      point = {
+        x: 0,
+        y: '50%'
+      };
+    } else if (point === 'middle') {
+      point = {
+        x: '50%',
+        y: '50%'
+      };
+    } else {
+      throw new Error("Unknown point option ".concat(point));
+    }
+  }
+
+  if (typeof point.x === 'string') {
+    point.x = (rect.right - rect.left) * (parseFloat(point.x) / 100);
+  }
+
+  if (typeof point.y === 'string') {
+    point.y = (rect.bottom - rect.top) * (parseFloat(point.y) / 100);
+  }
+
+  if (constrain) {
+    if (typeof constrain.left === 'string') {
+      constrain.left = (rect.right - rect.left) * (parseFloat(constrain.left) / 100);
+    }
+
+    if (typeof constrain.right === 'string') {
+      constrain.right = (rect.right - rect.left) * (parseFloat(constrain.right) / 100);
+    }
+
+    if (typeof constrain.top === 'string') {
+      constrain.top = (rect.bottom - rect.top) * (parseFloat(constrain.top) / 100);
+    }
+
+    if (typeof constrain.bottom === 'string') {
+      constrain.bottom = (rect.bottom - rect.top) * (parseFloat(constrain.bottom) / 100);
+    }
+
+    point.x = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(point.x, constrain.left, constrain.right);
+    point.y = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(point.y, constrain.top, constrain.bottom);
+  }
+
+  if (offset) {
+    if (Array.isArray(offset)) {
+      offset = {
+        x: offset[0],
+        y: offset[1]
+      };
+    }
+
+    if (offset.x !== null) {
+      point.x += offset.x;
+    }
+
+    if (offset.y !== null) {
+      point.y += offset.y;
+    }
+  }
+
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"](rect.left + point.x, rect.top + point.y);
+}
+/**
+ * Gets the bounding client rect for a rectangle defined by the position rectangle with left, top, right and bottom
+ * properties relative to the element's position.
+ *
+ * @param element {{getBoundingClientRect}|Element|String|{left, top, right, bottom}}
+ * @param position {{left, top, bottom, right}}
+ * @return {Rect}
+ */
+
+function getSubBoundingBox(element, position) {
+  var rect; // Get the bounding client rect of the element.   The user should have passed either a css selector, an object with a
+  // getBoundingClientRect interface.  Or a bounding client rect directly.
+
+  if (element.getBoundingClientRect) {
+    rect = element.getBoundingClientRect();
+  } else if (typeof element === 'string') {
+    rect = document.querySelector(element).getBoundingClientRect();
+  } else {
+    rect = element;
+  }
+
+  var width = rect.right - rect.left,
+      height = rect.bottom - rect.top; // The user can pass a rect with left, top, right and bottom properties.  The value can either be the desired
+  // coordinates relative to the top-left corner of the reference element or a percentage.  Another possibility
+  // is that the user passes one of the keyword properties that coorispond to a specific section of the element.
+  // Map those keywords to their rectangle.
+
+  if (typeof position === 'string') {
+    if (position === 'border-top') {
+      position = {
+        left: 0,
+        right: '100%',
+        top: 0,
+        bottom: 0
+      };
+    } else if (position === 'border-right') {
+      position = {
+        left: '100%',
+        right: '100%',
+        top: 0,
+        bottom: '100%'
+      };
+    } else if (position === 'border-bottom') {
+      position = {
+        left: 0,
+        right: '100%',
+        top: '100%',
+        bottom: '100%'
+      };
+    } else if (position === 'border-left') {
+      position = {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: '100%'
+      };
+    } else if (position === 'top-left') {
+      position = {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0
+      };
+    } else if (position === 'top') {
+      position = {
+        top: 0,
+        left: '50%',
+        right: '50%',
+        bottom: 0
+      };
+    } else if (position === 'top-right') {
+      position = {
+        top: 0,
+        left: '100%',
+        right: '100%',
+        bottom: 0
+      };
+    } else if (position === 'left') {
+      position = {
+        left: 0,
+        top: '50%',
+        bottom: '50%',
+        right: 0
+      };
+    } else if (position === 'origin') {
+      position = {
+        left: '50%',
+        right: '50%',
+        top: '50%',
+        bottom: '50%'
+      };
+    } else if (position === 'bottom-left') {
+      position = {
+        left: 0,
+        right: 0,
+        top: '100%',
+        bottom: '100%'
+      };
+    } else if (position === 'bottom') {
+      position = {
+        left: '50%',
+        right: '50%',
+        top: '100%',
+        bottom: '100%'
+      };
+    } else if (position === 'bottom-right') {
+      position = {
+        left: '100%',
+        right: '100%',
+        top: '100%',
+        bottom: '100%'
+      };
+    } else if (position === 'right') {
+      position = {
+        left: '100%',
+        right: '100%',
+        top: '50%',
+        bottom: '50%'
+      };
+    }
+  }
+
+  position.left = position.left || 0;
+  position.right = position.right || 0;
+  position.top = position.top || 0;
+  position.bottom = position.bottom || 0; // left and right percentages are a percentage of the elements width.
+  // top and bottom percentages are a percentage of the elements height.
+
+  if (typeof position.left === 'string') {
+    position.left = parseFloat(position.left) / 100 * width;
+  }
+
+  if (typeof position.right === 'string') {
+    position.right = parseFloat(position.right) / 100 * width;
+  }
+
+  if (typeof position.bottom === 'string') {
+    position.bottom = parseFloat(position.bottom) / 100 * height;
+  }
+
+  if (typeof position.top === 'string') {
+    position.top = parseFloat(position.top) / 100 * height;
+  } // Convert to client space.
+
+
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](rect.left + position.left, rect.top + position.top, rect.left + position.right, rect.top + position.bottom);
+}
+/**
+ * Returns the distance in between the provided Rect objects.  If the objects are touching or overlapping 0
+ * will be returned.
+ *
+ * @param rect1 {{left, top, right, bottom}}
+ * @param rect2 {{left, top, right, bottom}}
+ * @returns {Number}
+ */
+
+function getDistanceBetweenRects(rect1, rect2) {
+  var vec1 = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(rect1),
+      vec2 = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].fromRect(rect2);
+  var isXOverlapping = vec1.isXOverlapping(vec2),
+      isYOverlapping = vec1.isYOverlapping(vec2);
+
+  if (isXOverlapping && isYOverlapping) {
+    // Items are overlapping
+    return 0;
+  } else if (isXOverlapping) {
+    return Math.min(Math.abs(vec1.bottom - vec2.top), Math.abs(vec1.top - vec2.bottom));
+  } else if (isYOverlapping) {
+    return Math.min(Math.abs(vec1.right - vec2.left), Math.abs(vec1.left - vec2.right));
+  } else {
+    var x1, y1, x2, y2;
+
+    if (vec1.right <= vec2.left) {
+      x1 = vec1.right;
+      x2 = vec2.left;
+    } else {
+      x1 = vec1.left;
+      x2 = vec2.right;
+    }
+
+    if (vec1.bottom <= vec2.top) {
+      y1 = vec1.bottom;
+      y2 = vec2.top;
+    } else {
+      y1 = vec1.top;
+      y2 = vec2.bottom;
+    } // Use distance formula to calculate distance.
+
+
+    return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+  }
+}
+
+/***/ }),
+
 /***/ "./src/core/utility.js":
 /*!*****************************!*\
   !*** ./src/core/utility.js ***!
@@ -2305,6 +2928,1138 @@ function getPropertyByPath(obj, path) {
 
 /***/ }),
 
+/***/ "./src/core/vectors.js":
+/*!*****************************!*\
+  !*** ./src/core/vectors.js ***!
+  \*****************************/
+/*! exports provided: UnitError, Vec2, Vec3, Vec4, Rect, RGBA */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnitError", function() { return UnitError; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec2", function() { return Vec2; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec3", function() { return Vec3; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec4", function() { return Vec4; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Rect", function() { return Rect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RGBA", function() { return RGBA; });
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+var regPercentage = /^(\d+\.?\d*)%$/,
+    regWhitespace = /\s+/,
+    regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/,
+    // Parses string like "left+10px" into ["left", "+10px"]
+regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/; // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
+
+var UnitError =
+/*#__PURE__*/
+function (_ExtendableError) {
+  _inherits(UnitError, _ExtendableError);
+
+  function UnitError() {
+    _classCallCheck(this, UnitError);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(UnitError).apply(this, arguments));
+  }
+
+  return UnitError;
+}(_errors__WEBPACK_IMPORTED_MODULE_1__["ExtendableError"]);
+var positionShortHandValues = {
+  top: 'center top',
+  right: 'right middle',
+  bottom: 'center bottom',
+  left: 'left middle'
+};
+/**
+ * Stores a 2 value Vector.
+ */
+
+var Vec2 =
+/*#__PURE__*/
+function () {
+  function Vec2() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+    _classCallCheck(this, Vec2);
+
+    this[0] = x;
+    this[1] = y;
+  }
+
+  _createClass(Vec2, [{
+    key: "add",
+    value: function add(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] + vec2, this[1] + vec2);
+      } else {
+        return new Vec2(this[0] + vec2[0], this[1] + vec2[1]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] - vec2, this[1] - vec2);
+      } else {
+        return new Vec2(this[0] - vec2[0], this[1] - vec2[1]);
+      }
+    }
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return new Vec2(this[0] * value, this[1] * value);
+    }
+  }, {
+    key: "mod",
+    value: function mod(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] % vec2, this[1] % vec2);
+      } else {
+        return new Vec2(this[0] % vec2[0], this[1] % vec2[1]);
+      }
+    }
+  }, {
+    key: "equals",
+    value: function equals(vec2) {
+      return this === vec2 || this[0] === vec2[0] && this[1] === vec2[1];
+    }
+  }, {
+    key: "set",
+    value: function set(value) {
+      if (_typeof(value) !== 'object') {
+        this[0] = value;
+        this[1] = value;
+      } else {
+        this[0] = value[0];
+        this[1] = value[1];
+      }
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return Vec2(this[0], this[1]);
+    }
+  }, {
+    key: "toTranslate",
+    value: function toTranslate() {
+      return "translate(".concat(this.x, "px, ").concat(this.y, "px)");
+    }
+  }, {
+    key: "toTranslate3d",
+    value: function toTranslate3d() {
+      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, 0)");
+    }
+  }, {
+    key: "clamp",
+    value: function clamp(vec4) {
+      return new Vec2(Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, vec4.left, vec4.right), Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, vec4.top, vec4.bottom));
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }], [{
+    key: "fromVertex",
+    value: function fromVertex(vertex) {
+      if (Array.isArray(vertex)) {
+        return new Vec2(vertex[0], vertex[1]);
+      } else if (vertex.hasOwnProperty('left')) {
+        return new Vec2(vertex.left, vertex.top);
+      } else {
+        return new Vec2(vertex.x, vertex.y);
+      }
+    }
+  }]);
+
+  return Vec2;
+}();
+/**
+ * Stores a 3 value vector.
+ */
+
+var Vec3 =
+/*#__PURE__*/
+function () {
+  function Vec3() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Vec3);
+
+    this[0] = x;
+    this[1] = y;
+    this[2] = z;
+  }
+
+  _createClass(Vec3, [{
+    key: "set",
+    value: function set(value) {
+      if (_typeof(value) !== 'object') {
+        this[0] = value;
+        this[1] = value;
+        this[2] = value;
+      } else {
+        this[0] = value[0];
+        this[1] = value[1];
+        this[2] = value[2];
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] + vec3, this[1] + vec3, this[2] + vec3);
+      } else {
+        return new Vec3(this[0] + vec3[0], this[1] + vec3[1], this[2] + vec3[2]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] - vec3, this[1] - vec3, this[2] - vec3);
+      } else {
+        return new Vec3(this[0] - vec3[0], this[1] - vec3[1], this[2] - vec3[2]);
+      }
+    }
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return new Vec3(this[0] * value, this[1] * value, this[2] * value);
+    }
+  }, {
+    key: "equals",
+    value: function equals(vec3) {
+      return vec3 === this || vec3[0] === this[0] && vec3[1] === this[1] && vec3[2] === this[2];
+    }
+  }, {
+    key: "mod",
+    value: function mod(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] % vec3, this[1] % vec3, this[2] % vec3);
+      } else {
+        return new Vec3(this[0] % vec3[0], this[1] % vec3[1], this[2] % vec3[2]);
+      }
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Vec3(this[0], this[1], this[2]);
+    }
+  }, {
+    key: "toHex",
+    value: function toHex() {
+      var r = Math.round(this.r).toString(16),
+          g = Math.round(this.g).toString(16),
+          b = Math.round(this.b).toString(16);
+
+      if (r.length === 1) {
+        r = '0' + r;
+      }
+
+      if (g.length === 1) {
+        g = '0' + g;
+      }
+
+      if (b.length === 1) {
+        b = '0' + b;
+      }
+
+      return "#".concat(r).concat(g).concat(b);
+    }
+  }, {
+    key: "toRGB",
+    value: function toRGB() {
+      return "rgb(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ")");
+    }
+  }, {
+    key: "toTranslate3d",
+    value: function toTranslate3d() {
+      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, ").concat(this.z, "px)");
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "z",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "r",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "g",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "b",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }], [{
+    key: "fromHex",
+    value: function fromHex(hex) {
+      var m = /^#?([0-9a-f]{3})$/i.exec(hex);
+
+      if (m) {
+        hex = m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2];
+      } else {
+        m = /^#?([0-9a-f]{6})$/i.exec(hex);
+
+        if (m) {
+          hex = m[1];
+        } else {
+          throw new Error("Could not parse value ".concat(hex));
+        }
+      }
+
+      hex = parseInt(hex, 16); // r, g, b
+
+      return new Vec3(hex & 0xff0000 >> 16, hex & 0x00ff00 >> 8, hex & 0x0000ff);
+    }
+  }, {
+    key: "fromRGB",
+    value: function fromRGB(value) {
+      var m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(value);
+
+      if (!m) {
+        throw new Error("Could not parse rgb value ".concat(value));
+      }
+
+      return new Vec3(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
+    }
+  }]);
+
+  return Vec3;
+}();
+/**
+ * Class to store a 4 value vector.
+ * Provides DOMRect interface.
+ */
+
+var Vec4 =
+/*#__PURE__*/
+function () {
+  /**
+   * r, g, b, a
+   * left, top, right, bottom
+   *
+   * @param left
+   * @param top
+   * @param right
+   * @param bottom
+   */
+  function Vec4(left, top, right, bottom) {
+    _classCallCheck(this, Vec4);
+
+    this[0] = left;
+    this[1] = top;
+    this[2] = right;
+    this[3] = bottom;
+  }
+
+  _createClass(Vec4, [{
+    key: "set",
+    value: function set(valueOrVec4) {
+      if (_typeof(valueOrVec4) !== 'object') {
+        this[0] = valueOrVec4;
+        this[1] = valueOrVec4;
+        this[2] = valueOrVec4;
+        this[3] = valueOrVec4;
+      } else {
+        this[0] = valueOrVec4[0];
+        this[1] = valueOrVec4[1];
+        this[2] = valueOrVec4[2];
+        this[3] = valueOrVec4[3];
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] + valueOrVec4, this[1] + valueOrVec4, this[2] + valueOrVec4, this[3] + valueOrVec4);
+      } else {
+        return this._new(this[0] + valueOrVec4[0], this[1] + valueOrVec4[1], this[2] + valueOrVec4[2], this[3] + valueOrVec4[3]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] - valueOrVec4, this[1] - valueOrVec4, this[2] - valueOrVec4, this[3] - valueOrVec4);
+      } else {
+        return this._new(this[0] - valueOrVec4[0], this[1] - valueOrVec4[1], this[2] - valueOrVec4[2], this[3] - valueOrVec4[3]);
+      }
+    }
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return this._new(this[0] * value, this[1] * value, this[2] * value, this[3] * value);
+    }
+  }, {
+    key: "equals",
+    value: function equals(vec4) {
+      return vec4 === this || vec4[0] === this[0] && vec4[1] === this[1] && vec4[2] === this[2] && vec4[3] === this[3];
+    }
+  }, {
+    key: "mod",
+    value: function mod(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] % valueOrVec4, this[1] % valueOrVec4, this[2] % valueOrVec4, this[3] % valueOrVec4);
+      } else {
+        return this._new(this[0] % valueOrVec4[0], this[1] % valueOrVec4[1], this[2] % valueOrVec4[2], this[3] % valueOrVec4[3]);
+      }
+    }
+  }, {
+    key: "toRGBA",
+    value: function toRGBA() {
+      return "rgba(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ", ").concat(this.a, ")");
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new this.constructor(this[0], this[1], this[2], this[3]);
+    }
+  }, {
+    key: "_new",
+    value: function _new(left, top, right, bottom) {
+      return new this.constructor(left, top, right, bottom);
+    }
+  }, {
+    key: "r",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "g",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "b",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "a",
+    get: function get() {
+      return this[3];
+    },
+    set: function set(value) {
+      this[3] = value;
+    }
+  }], [{
+    key: "fromRGBAObject",
+    value: function fromRGBAObject(_ref) {
+      var r = _ref.r,
+          g = _ref.g,
+          b = _ref.b,
+          a = _ref.a;
+      return new Vec4(r, g, b, a);
+    }
+  }, {
+    key: "fromRGBA",
+    value: function fromRGBA(value) {
+      var m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
+
+      if (!m) {
+        throw new Error("Could not parse rgba value ".concat(value));
+      }
+
+      return new Vec4(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10), parseFloat(m[4]));
+    }
+  }]);
+
+  return Vec4;
+}();
+var Rect =
+/*#__PURE__*/
+function (_Vec) {
+  _inherits(Rect, _Vec);
+
+  function Rect(left, top, right, bottom) {
+    var _this;
+
+    var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+
+    _classCallCheck(this, Rect);
+
+    if (_typeof(left) === 'object' && left.getBoundingClientRect) {
+      if (left.getBoundingClientRect) {
+        domElement = left;
+        var bb = domElement.getBoundingClientRect();
+        left = bb.left;
+        top = bb.top;
+        right = bb.right;
+        bottom = bb.bottom;
+      } else {
+        top = left.top;
+        right = left.right;
+        bottom = left.bottom;
+        left = left.left;
+      }
+    }
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, left, top, right, bottom));
+    _this.domElement = domElement;
+    return _this;
+  }
+
+  _createClass(Rect, [{
+    key: "bind",
+    value: function bind(element) {
+      return this._new(this.left, this.top, this.right, this.bottom, element);
+    }
+  }, {
+    key: "_new",
+    value: function _new(left, top, right, bottom) {
+      var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
+      return new this.constructor(left, top, right, bottom, domElement === undefined ? this.domElement : domElement);
+    }
+  }, {
+    key: "toPoint",
+    value: function toPoint() {
+      return new Vec2(this[0], this[1]);
+    }
+  }, {
+    key: "getArea",
+    value: function getArea() {
+      return this.width * this.height;
+    }
+  }, {
+    key: "translate",
+    value: function translate(x, y) {
+      if (_typeof(x) === 'object') {
+        y = x.y;
+        x = x.x;
+      }
+
+      return this._new(this[0] + x, this[1] + y, this[2] + x, this[3] + y);
+    }
+  }, {
+    key: "addMargins",
+    value: function addMargins(_ref2) {
+      var left = _ref2.left,
+          top = _ref2.top,
+          right = _ref2.right,
+          bottom = _ref2.bottom;
+      return this._new(this.left - left, this.top - top, this.right + right, this.bottom + bottom);
+    }
+  }, {
+    key: "addPaddings",
+    value: function addPaddings(_ref3) {
+      var left = _ref3.left,
+          top = _ref3.top,
+          right = _ref3.right,
+          bottom = _ref3.bottom;
+      return this._new(this.left + left, this.top + top, this.right - right, this.bottom - bottom);
+    }
+  }, {
+    key: "moveTo",
+    value: function moveTo(_ref4) {
+      var left = _ref4.left,
+          top = _ref4.top;
+      var deltaX = left - this.left,
+          deltaY = top - this.top;
+      return this._new(this.left + deltaX, this.top + deltaY, this.right + deltaX, this.bottom + deltaY);
+    }
+  }, {
+    key: "intersection",
+    value: function intersection(_ref5) {
+      var left = _ref5.left,
+          top = _ref5.top,
+          right = _ref5.right,
+          bottom = _ref5.bottom;
+      left = Math.max(this.left, left);
+      right = Math.min(this.right, right);
+      bottom = Math.min(this.bottom, bottom);
+      top = Math.max(this.top, top);
+
+      if (left > right || top > bottom) {
+        return null;
+      }
+
+      return this._new(left, top, right, bottom);
+    }
+  }, {
+    key: "contains",
+    value: function contains(rect) {
+      return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+  }, {
+    key: "containsX",
+    value: function containsX(rect) {
+      return this.left <= rect.left && this.right >= rect.right;
+    }
+  }, {
+    key: "containsY",
+    value: function containsY(rect) {
+      return this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+  }, {
+    key: "isXOverlapping",
+    value: function isXOverlapping(rect) {
+      return rect.left <= this.right && rect.right >= this.left;
+    }
+  }, {
+    key: "isYOverlapping",
+    value: function isYOverlapping(rect) {
+      return rect.top <= this.bottom && rect.bottom >= this.top;
+    }
+  }, {
+    key: "clampXY",
+    value: function clampXY(rect) {
+      var width = this.right - this.left,
+          height = this.bottom - this.top,
+          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right),
+          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
+
+      return this._new(left, top, left + width, top + height);
+    }
+  }, {
+    key: "clamp",
+    value: function clamp(rect) {
+      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+      var width = this.width,
+          height = this.height,
+          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right),
+          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
+
+      return this._new(left, top, left + width, top + height);
+    }
+  }, {
+    key: "clampX",
+    value: function clampX(rect) {
+      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+      var width = this.width,
+          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right);
+
+      return this._new(left, this.top, left + width, this.bottom);
+    }
+  }, {
+    key: "clampY",
+    value: function clampY(rect) {
+      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+      var height = this.height,
+          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
+
+      return this._new(this.left, top, this.right, top + height);
+    }
+  }, {
+    key: "getDistanceBetween",
+    value: function getDistanceBetween(rect) {
+      rect = Rect.fromRect(rect);
+      var isXOverlapping = this.isXOverlapping(rect),
+          isYOverlapping = this.isYOverlapping(rect);
+
+      if (isXOverlapping && isYOverlapping) {
+        // Items are overlapping
+        return 0;
+      } else if (isXOverlapping) {
+        return Math.min(Math.abs(this.bottom - rect.top), Math.abs(this.top - rect.bottom));
+      } else if (isYOverlapping) {
+        return Math.min(Math.abs(this.right - rect.left), Math.abs(this.left - rect.right));
+      } else {
+        var x1, y1, x2, y2;
+
+        if (this.right <= rect.left) {
+          x1 = this.right;
+          x2 = rect.left;
+        } else {
+          x1 = this.left;
+          x2 = rect.right;
+        }
+
+        if (this.bottom <= rect.top) {
+          y1 = this.bottom;
+          y2 = rect.top;
+        } else {
+          y1 = this.top;
+          y2 = rect.bottom;
+        } // Use distance formula to calculate distance.
+
+
+        return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+      }
+    }
+  }, {
+    key: "position",
+    value: function position(_ref6) {
+      var my = _ref6.my,
+          at = _ref6.at,
+          of = _ref6.of,
+          _ref6$inside = _ref6.inside,
+          inside = _ref6$inside === void 0 ? null : _ref6$inside,
+          _ref6$collision = _ref6.collision,
+          collision = _ref6$collision === void 0 ? null : _ref6$collision;
+
+      if (of.getBoundingClientRect) {
+        of = new Rect(of);
+      }
+
+      if (inside && inside.getBoundingClientRect) {
+        inside = new Rect(inside);
+      } // collision can be string with a space separating the x and y values.
+      // for example "fit flipfit"
+      // normalize it to an {x, y} object.
+
+
+      if (collision && typeof collision === 'string') {
+        var parts = collision.trim().split(regWhitespace);
+        collision = {
+          x: parts[0],
+          y: parts[1]
+        };
+      }
+
+      var anchor = this.evaluatePositionString(my),
+          reference = of.evaluatePositionString(at),
+          deltaX = reference.x - anchor.x,
+          deltaY = reference.y - anchor.y;
+      var rect = this.translate(deltaX, deltaY);
+
+      if (!collision || !inside || inside.contains(rect)) {
+        return rect;
+      }
+
+      var flip = false,
+          collisionX = 'none',
+          collisionY = 'none';
+
+      if (!inside.containsX(rect)) {
+        if (collision.x === 'flip' || collision.x === 'flipfit') {
+          var center = this.left + this.width / 2;
+          anchor.x = (anchor.x - center) * -1 + center;
+          center = of.left + of.width / 2;
+          reference.x = (reference.x - center) * -1 + center;
+          flip = true;
+          collisionX = 'flip';
+        }
+      }
+
+      if (!inside.containsY(rect)) {
+        if (collision.y === 'flip' || collision.y === 'flipfit') {
+          var middle = this.top + this.height / 2;
+          anchor.y = (anchor.y - middle) * -1 + middle;
+          middle = of.top + of.height / 2;
+          reference.y = (reference.y - middle) * -1 + middle;
+          flip = true;
+          collisionY = 'flip';
+        }
+      }
+
+      if (flip) {
+        deltaX = reference.x - anchor.x;
+        deltaY = reference.y - anchor.y;
+        rect = this.translate(deltaX, deltaY);
+
+        if (inside.contains(rect)) {
+          rect.collsionX = collisionX;
+          rect.collsionY = collisionY;
+          return rect;
+        }
+      }
+
+      if (collision.x === 'fit' || collision.x === 'flipfit') {
+        rect = rect.clampX(inside);
+        collisionX = collisionX === 'flip' ? 'flipfit' : 'fit';
+      }
+
+      if (collision.y === 'fit' || collision.y === 'flipfit') {
+        rect = rect.clampY(inside);
+        collisionY = collisionY === 'flip' ? 'flipfit' : 'fit';
+      }
+
+      rect.collsionX = collisionX;
+      rect.collsionY = collisionY;
+      return rect;
+    }
+  }, {
+    key: "evaluatePositionString",
+    value: function evaluatePositionString(string) {
+      if (positionShortHandValues[string]) {
+        string = positionShortHandValues[string];
+      }
+
+      var pos = string.trim().split(regWhitespace),
+          x = pos[0],
+          y = pos[1],
+          rx = null,
+          ry = null;
+
+      if (x) {
+        rx = this._evaluatePositionStringComponent(x, 'x');
+      }
+
+      if (y) {
+        ry = this._evaluatePositionStringComponent(y, 'y');
+      }
+
+      return new Vec2(rx, ry);
+    }
+    /**
+     * Evaluates a position string value such as "left+10px" into it final position on the rect.
+     * @param value - The value to evaluate.
+     * @param direction - The direction type.  Should be either "x" or "y".
+     * @returns {number}
+     * @private
+     */
+
+  }, {
+    key: "_evaluatePositionStringComponent",
+    value: function _evaluatePositionStringComponent(value, direction) {
+      var parts = regPositionPart.exec(value),
+          r = 0;
+
+      if (parts[1]) {
+        var p = parts[1];
+
+        if (direction === 'x') {
+          if (p === 'left') {
+            r = this.left;
+          } else if (p === 'center' || p === 'middle') {
+            r = this.left + this.width / 2;
+          } else if (p === 'right') {
+            r = this.left + this.width;
+          } else {
+            throw new _errors__WEBPACK_IMPORTED_MODULE_1__["ValueError"]("Invalid Option: ".concat(p));
+          }
+        } else {
+          if (p === 'top') {
+            r = this.top;
+          } else if (p === 'middle' || p === 'center') {
+            r = this.top + this.height / 2;
+          } else if (p === 'bottom') {
+            r = this.top + this.height;
+          } else {
+            throw new _errors__WEBPACK_IMPORTED_MODULE_1__["ValueError"]("Invalid Option: ".concat(p));
+          }
+        }
+      } else if (direction === 'x') {
+        r = this.left;
+      } else {
+        r = this.top;
+      }
+
+      if (parts[2]) {
+        var _value = parseFloat(parts[2]),
+            type = parts[3] || 'px';
+
+        if (type === 'px') {
+          r += _value;
+        } else if (type === '%') {
+          if (direction === 'x') {
+            r += _value / 100 * this.width;
+          } else {
+            r += _value / 100 * this.height;
+          }
+        } else {
+          throw new UnitError("Invalid unit: Must be either % or px.");
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this[3];
+    },
+    set: function set(value) {
+      this[3] = value;
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this.right - this.left;
+    },
+    set: function set(value) {
+      this.right = this.left + value;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this.bottom - this.top;
+    },
+    set: function set(value) {
+      this.bottom = this.top + value;
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this.left;
+    },
+    set: function set(value) {
+      this.left = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this.top;
+    },
+    set: function set(value) {
+      this.top = value;
+    }
+  }], [{
+    key: "fromRect",
+    value: function fromRect(_ref7) {
+      var left = _ref7.left,
+          top = _ref7.top,
+          right = _ref7.right,
+          bottom = _ref7.bottom;
+      return new Rect(left, top, right, bottom);
+    }
+  }, {
+    key: "getBoundingClientRect",
+    value: function getBoundingClientRect(element) {
+      return new Rect(element);
+    }
+  }]);
+
+  return Rect;
+}(Vec4);
+var RGBA =
+/*#__PURE__*/
+function (_Vec2) {
+  _inherits(RGBA, _Vec2);
+
+  function RGBA(r, g, b, a) {
+    var _this2;
+
+    _classCallCheck(this, RGBA);
+
+    if (_typeof(r) === 'object') {
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r));
+    } else {
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r, g, b, a));
+    }
+
+    return _possibleConstructorReturn(_this2);
+  }
+
+  _createClass(RGBA, [{
+    key: "toString",
+    value: function toString() {
+      return "rgba(".concat(this.r, ", ").concat(this.g, ", ").concat(this.b, ", ").concat(this.a, ")");
+    }
+  }], [{
+    key: "parseRGBAColorStringArgs",
+    value: function parseRGBAColorStringArgs(value) {
+      value = value.trim().split(/\s+/);
+      var r = value[0],
+          g = value[1],
+          b = value[2],
+          a = value[3];
+
+      if (r) {
+        if (regPercentage.test(r)) {
+          r = parseFloat(r) / 100 * 255;
+        } else {
+          r = parseInt(r, 10);
+        }
+      }
+
+      if (g) {
+        if (regPercentage.test(g)) {
+          g = parseFloat(g) / 100 * 255;
+        } else {
+          g = parseInt(g, 10);
+        }
+      }
+
+      if (b) {
+        if (regPercentage.test(b)) {
+          b = parseFloat(b) / 100 * 255;
+        } else {
+          b = parseInt(b, 10);
+        }
+      }
+
+      if (a) {
+        if (regPercentage.test(a)) {
+          a = parseFloat(a) / 100;
+        } else {
+          a = parseFloat(a);
+        }
+      }
+
+      a = a || 1.0;
+      return new RGBA(r, g, b, a);
+    }
+  }, {
+    key: "parseHexColorStringArg",
+    value: function parseHexColorStringArg(value) {
+      value = value.trim().substring(1);
+      var r,
+          g,
+          b,
+          a = 1.0;
+
+      if (value.length === 3) {
+        r = value[0];
+        g = value[1];
+        b = value[2];
+        r = parseInt(r + r, 16);
+        g = parseInt(g + g, 16);
+        b = parseInt(b + b, 16);
+      } else if (value.length === 6) {
+        r = value.substr(0, 2);
+        g = value.substr(2, 2);
+        b = value.substr(4, 2);
+        r = parseInt(r, 16);
+        g = parseInt(g, 16);
+        b = parseInt(b, 16);
+      } else if (value.length === 8) {
+        r = value.substr(0, 2);
+        g = value.substr(2, 2);
+        b = value.substr(4, 2);
+        a = value.substr(6, 2);
+        r = parseInt(r, 16);
+        g = parseInt(g, 16);
+        b = parseInt(b, 16);
+        a = parseInt(a, 16) / 255;
+      }
+
+      return new RGBA(r, g, b, a);
+    }
+  }]);
+
+  return RGBA;
+}(Vec4);
+
+/***/ }),
+
 /***/ "./src/menu2/DropDown.js":
 /*!*******************************!*\
   !*** ./src/menu2/DropDown.js ***!
@@ -2317,7 +4072,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DropDown; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _MenuBar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MenuBar */ "./src/menu2/MenuBar.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu2/positioners.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -2356,13 +4111,20 @@ function (_MenuItem) {
 
     var _ref$toggle = _ref.toggle,
         toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
-        options = _objectWithoutProperties(_ref, ["toggle"]);
+        _ref$closeOnSelect = _ref.closeOnSelect,
+        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
+        _ref$closeOnBlur = _ref.closeOnBlur,
+        closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
+        options = _objectWithoutProperties(_ref, ["toggle", "closeOnSelect", "closeOnBlur"]);
 
     _classCallCheck(this, DropDown);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(DropDown).call(this, _objectSpread({
-      toggle: toggle
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      closeOnBlur: closeOnBlur
     }, options)));
+    _this.position = _positioners__WEBPACK_IMPORTED_MODULE_2__["dropdown"]();
 
     _this.init();
 
@@ -2996,6 +4758,12 @@ var Menu = _decorate(null, function (_initialize, _MenuNode) {
       key: "getMenuBody",
       value: function getMenuBody() {
         return this.element.querySelectorAll(':scope > .menu__body');
+      }
+    }, {
+      kind: "method",
+      key: "isMenu",
+      value: function isMenu() {
+        return true;
       } //------------------------------------------------------------------------------------------------------------------
       // Event Handlers
 
@@ -3086,6 +4854,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBar; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu2/Menu.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu2/positioners.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -3113,6 +4882,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -3162,6 +4932,7 @@ function (_Menu) {
       deactivateOnItemHover: deactivateOnItemHover,
       delay: false
     }, context)));
+    _this.position = _positioners__WEBPACK_IMPORTED_MODULE_2__["dropdown"]();
 
     _this.SubMenuClass =
     /*#__PURE__*/
@@ -3948,6 +5719,7 @@ function (_Publisher) {
      */
 
     _this._element = undefined;
+    _this.menuNodeType = "node";
     _this._isActive = false;
     _this._isVisible = true;
     _this.nodeType = null;
@@ -4739,9 +6511,10 @@ function (_Publisher) {
   }, {
     key: "parentMenu",
     get: function get() {
-      var parent = this.parent;
+      var parent = this.parent; // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+
       return parent.closest(function (node) {
-        return node.nodeType === 'menu';
+        return node.isMenu();
       });
     }
     /**
@@ -4753,9 +6526,10 @@ function (_Publisher) {
   }, {
     key: "parentItem",
     get: function get() {
-      var parent = this.parent;
+      var parent = this.parent; // noinspection JSUnresolvedVariable,JSUnresolvedFunction
+
       return parent.closest(function (node) {
-        return node.nodeType === 'menuitem' || node.nodeType === 'dropdown';
+        return node.isMenuItem();
       });
     }
     /**
@@ -4850,6 +6624,11 @@ function (_Publisher) {
           this.element.classList.remove('disabled');
         }
       }
+    }
+  }, {
+    key: "isRoot",
+    get: function get() {
+      return this.root === this;
     }
   }, {
     key: "isVisible",
@@ -5108,6 +6887,114 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+/***/ }),
+
+/***/ "./src/menu2/positioners.js":
+/*!**********************************!*\
+  !*** ./src/menu2/positioners.js ***!
+  \**********************************/
+/*! exports provided: dropdown */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dropdown", function() { return dropdown; });
+/* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors.js");
+/* harmony import */ var core_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/position */ "./src/core/position.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+
+var opposites = {
+  left: 'right',
+  top: 'bottom',
+  right: 'left',
+  bottom: 'top',
+  center: 'center',
+  middle: 'middle'
+};
+
+function getInheritedPosition(menu) {
+  if (menu.parent && menu.parent.parent && !menu.parent.parent.isRoot) {
+    return menu.element.dataset.position;
+  }
+}
+
+function flipPositionIfOutOfBounds(target, container, flip) {
+  var targetRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target),
+      containerRect = typeof container === 'function' ? container() : core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(container),
+      _target$dataset$posit = target.dataset.position.split(' '),
+      _target$dataset$posit2 = _slicedToArray(_target$dataset$posit, 2),
+      posX = _target$dataset$posit2[0],
+      posY = _target$dataset$posit2[1],
+      boundX = containerRect.containsX.bind(containerRect),
+      boundY = containerRect.containsY.bind(containerRect);
+
+  var fnMap = {
+    left: boundX,
+    right: boundX,
+    top: boundY,
+    bottom: boundY
+  };
+
+  if (posX && fnMap[posX] && !fnMap[posX](targetRect)) {
+    posX = opposites[posX];
+  }
+
+  if (posY && fnMap[posY] && !fnMap[posY](targetRect)) {
+    posY = opposites[posY];
+  }
+
+  target.dataset.position = "".concat(posX, " ").concat(posY);
+}
+/**
+ * Positions first level of menus statically
+ * Then position second level of menus at the bottom left of the first level.
+ * Finally positions every other level to the top right of the previous level.
+ * Menu's can flip if they fall out of bounds of the container.
+ * By default the container is the client area.
+ *
+ * @param container
+ * @returns {Function}
+ */
+
+
+function dropdown() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+  if (!container) {
+    container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
+  } else if (typeof container === 'string') {
+    var target = document.querySelector(container);
+
+    container = function container() {
+      return core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target);
+    };
+  } else {
+    var _target = container;
+
+    container = function container() {
+      return core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(_target);
+    };
+  }
+
+  return function (menu) {
+    if (menu.parent && menu.parent.isRoot) {
+      menu.element.dataset.position = 'bottom left';
+      flipPositionIfOutOfBounds(menu.element, container, 'xy');
+    } else if (menu.parentMenu) {
+      menu.element.dataset.position = getInheritedPosition(menu) || 'right top';
+      flipPositionIfOutOfBounds(menu.element, container, 'xy');
+    }
+  };
+}
 
 /***/ }),
 

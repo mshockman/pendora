@@ -3,22 +3,10 @@
   cursor: default;
 }
 
-
-.menu .menu {
-  left: 100%;
-  top: 0;
-}
-
-
 .menuitem {
   cursor: pointer;
   position: relative;
   white-space: nowrap;
-  padding: 0.5rem;
-
-  & > a {
-    text-decoration: none;
-  }
 }
 
 
@@ -46,11 +34,59 @@
   position: absolute;
   border: 1px solid #ccc;
   background-color: #ffffff;
-  top: 100%;
-  left: 0;
   list-style: none;
   padding: 0;
   min-width: 15rem;
+  z-index: 2;
+  margin: 0;
+
+  .menuitem {
+    & > a {
+      display: block;
+      padding: 0.5rem;
+      text-decoration: none;
+    }
+  }
+
+  &[data-position="bottom left"] {
+    top: 100%;
+    left: 0;
+  }
+
+  &[data-position="bottom right"] {
+    top: 100%;
+    right: 0;
+  }
+
+  &[data-position="right top"] {
+    top: 0;
+    left: 100%;
+  }
+
+  &[data-position="right bottom"] {
+    bottom: 0;
+    left: 100%;
+  }
+
+  &[data-position="left top"] {
+    top: 0;
+    right: 100%;
+  }
+
+  &[data-position="left bottom"] {
+    bottom: 0;
+    right: 100%;
+  }
+
+  &[data-position="top left"] {
+    bottom: 100%;
+    left: 0;
+  }
+
+  &[data-position="top right"] {
+    bottom: 100%;
+    right: 0;
+  }
 }
 
 
@@ -65,9 +101,9 @@
   padding: 0;
   width: 10rem;
   border: 1px solid #ccc;
+}
 
-  .menu {
-    left: 100%;
-    top: 0;
-  }
+
+.dropdown {
+  position: relative;
 }

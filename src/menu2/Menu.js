@@ -345,6 +345,10 @@ export default class Menu extends MenuNode {
         return this.element.querySelectorAll(':scope > .menu__body');
     }
 
+    isMenu() {
+        return true;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Event Handlers
 
