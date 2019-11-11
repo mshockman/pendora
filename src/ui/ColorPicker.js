@@ -84,11 +84,15 @@ export class ColorPickerWheel {
                 distance = this._getStrengthDistance(x, y);
 
             if(distance <= 1) {
-                this.x = x;
-                this.y = y;
-                this.render();
+                this.chooseColorAt(x, y);
             }
         });
+    }
+
+    chooseColorAt(x, y) {
+        this.x = x;
+        this.y = y;
+        this.render();
     }
 
     getColorAt(x, y) {
@@ -160,6 +164,56 @@ export class ColorPickerWheel {
             y = (event.clientY - bb.top);
 
         return {x, y};
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+}
+
+
+export class ColorPickerWheelSlider {
+    constructor(wheel, width, height) {
+        this.element = document.createElement('canvas');
+        this.context = this.element.getContext('2d');
+        this.element.width = width;
+        this.element.height = height;
+        this.element.style.border = "1px solid #000";
+
+        this.image = null;
+        this.wheel = wheel;
+    }
+
+    refreshImage() {
+        this.image = this.context.createImageData(this.element.width, this.element.height);
+
+        for(let x = 0, width = this.element.width; x < width; x++) {
+            for(let y = 0, height = this.element.height; y < height; y++) {
+                let index = 4*(x+(y*width));
+
+                let m = 1 - (x / width),
+                    rgb = hsvToRGB(this.wheel.hue, this.wheel.saturation, m);
+
+                this.image.data[index] = rgb.r;
+                this.image.data[index+1] = rgb.g;
+                this.image.data[index+2] = rgb.b;
+                this.image.data[index+3] = 255;
+            }
+        }
+    }
+
+    render() {
+        if(!this.image) {
+            this.refreshImage();
+        }
+
+        this.context.putImageData(this.image, 0, 0);
     }
 
     appendTo(selector) {
