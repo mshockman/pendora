@@ -692,17 +692,22 @@ window.addEventListener('load', function () {
 /*!*******************************!*\
   !*** ./src/core/Publisher.js ***!
   \*******************************/
-/*! exports provided: default */
+/*! exports provided: STOP, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "STOP", function() { return STOP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Publisher; });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function STOP() {
+  throw STOP;
+}
 
 var Publisher =
 /*#__PURE__*/
@@ -812,7 +817,16 @@ function () {
         try {
           for (var _iterator = callbacks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var cb = _step.value;
-            cb.apply(this, args);
+
+            try {
+              cb.apply(this, args);
+            } catch (e) {
+              if (e === STOP) {
+                return e;
+              } else {
+                throw e;
+              }
+            }
           }
         } catch (err) {
           _didIteratorError = true;
@@ -830,7 +844,7 @@ function () {
         }
       }
 
-      return this;
+      return true;
     }
   }]);
 
@@ -5171,7 +5185,7 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
     /**
      * Renders the domElement.
      *
-     * @param text
+     * @param text {String}
      * @param nodeName
      * @param href
      * @returns {HTMLDivElement}
@@ -5601,6 +5615,30 @@ var MenuItem = _decorate(null, function (_initialize, _MenuNode) {
       } //------------------------------------------------------------------------------------------------------------------
       // Getters and Setters
 
+    }, {
+      kind: "get",
+      key: "button",
+      value: function button() {
+        if (!this._button) {
+          this._button = Array.prototype.slice.call(this.element.children).find(function (node) {
+            return node.matches("button, a, .btn, [data-role='button']");
+          });
+        }
+
+        return this._button;
+      }
+    }, {
+      kind: "get",
+      key: "value",
+      value: function value() {
+        return this.element.dataset.value;
+      }
+    }, {
+      kind: "set",
+      key: "value",
+      value: function value(_value) {
+        this.element.dataset.value = _value;
+      }
       /**
        * Will return true if menu items should toggle on.
        *
@@ -6310,7 +6348,6 @@ function (_Publisher) {
      *
      * @param topic
      * @param args
-     * @returns {MenuNode}
      */
 
   }, {
@@ -6325,12 +6362,12 @@ function (_Publisher) {
       while (o) {
         var _o;
 
-        (_o = o).publish.apply(_o, [topic].concat(args));
+        if ((_o = o).publish.apply(_o, [topic].concat(args)) === core_Publisher__WEBPACK_IMPORTED_MODULE_0__["STOP"]) {
+          return core_Publisher__WEBPACK_IMPORTED_MODULE_0__["STOP"];
+        }
 
         o = o.parent;
       }
-
-      return this;
     } //------------------------------------------------------------------------------------------------------------------
     // Tree functions
 
@@ -6750,6 +6787,283 @@ function (_Publisher) {
 
 /***/ }),
 
+/***/ "./src/menu2/SelectDropDown.js":
+/*!*************************************!*\
+  !*** ./src/menu2/SelectDropDown.js ***!
+  \*************************************/
+/*! exports provided: SelectMenu, SelectDropDown */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectDropDown", function() { return SelectDropDown; });
+/* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
+/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu2/Menu.js");
+/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./positioners */ "./src/menu2/positioners.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utility */ "./src/menu2/utility.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+var SelectMenu =
+/*#__PURE__*/
+function (_Menu) {
+  _inherits(SelectMenu, _Menu);
+
+  function SelectMenu(options) {
+    var _this;
+
+    _classCallCheck(this, SelectMenu);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, options));
+    _this.isSelectMenu = true;
+
+    _this.on('menuitem.selected', function (topic) {
+      var item = topic.target;
+
+      if (item.element.classList.contains('selected')) {// item.element.classList.remove('selected');
+      } else {
+        if (!_this.multiple) {
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+          var _iteratorError = undefined;
+
+          try {
+            for (var _iterator = _this.element.querySelectorAll('.selected')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+              var node = _step.value;
+              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getMenuInstance"])(node);
+
+              if (instance && instance !== item) {
+                instance.element.classList.remove('selected');
+
+                _this.dispatchTopic('option.deselected', {
+                  target: instance,
+                  menu: _assertThisInitialized(_this)
+                });
+              }
+            }
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                _iterator["return"]();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
+            }
+          }
+        }
+
+        item.element.classList.add('selected');
+
+        if (!item.isActive) {
+          item.activate();
+        }
+
+        _this.dispatchTopic('option.selected', {
+          target: item,
+          menu: _assertThisInitialized(_this)
+        });
+      }
+    });
+
+    _this.on('menu.show', function (menu) {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = menu.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var child = _step2.value;
+
+          if (child.element.classList.contains('selected') && !child.isActive) {
+            child.activate();
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    });
+
+    return _this;
+  }
+
+  return SelectMenu;
+}(_Menu__WEBPACK_IMPORTED_MODULE_1__["default"]);
+var SelectDropDown =
+/*#__PURE__*/
+function (_MenuItem) {
+  _inherits(SelectDropDown, _MenuItem);
+
+  function SelectDropDown(_ref) {
+    var _this2;
+
+    var _ref$toggle = _ref.toggle,
+        toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
+        _ref$widget = _ref.widget,
+        widget = _ref$widget === void 0 ? null : _ref$widget,
+        _ref$closeOnSelect = _ref.closeOnSelect,
+        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
+        _ref$closeOnBlur = _ref.closeOnBlur,
+        closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
+        options = _objectWithoutProperties(_ref, ["toggle", "widget", "closeOnSelect", "closeOnBlur"]);
+
+    _classCallCheck(this, SelectDropDown);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SelectDropDown).call(this, _objectSpread({
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      closeOnBlur: closeOnBlur
+    }, options)));
+    _this2.position = _positioners__WEBPACK_IMPORTED_MODULE_3__["dropdown"]();
+    _this2.isSelectItem = true;
+    _this2.widget = widget;
+    _this2.SubMenuClass = SelectMenu;
+
+    _this2.init();
+
+    _this2.on('option.selected', function (topic) {
+      _this2.button.innerHTML = topic.target.button.innerHTML;
+
+      if (_this2.widget) {
+        _this2.widget.setValue(_this2.getValue());
+      }
+    });
+
+    return _this2;
+  }
+
+  _createClass(SelectDropDown, [{
+    key: "getValue",
+    value: function getValue() {
+      var r = [];
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = this.selection[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var item = _step3.value;
+          r.push(item.value);
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      if (this.multiple) {
+        return r;
+      } else {
+        return r[0];
+      }
+    }
+  }, {
+    key: "render",
+    value: function render(context) {}
+  }, {
+    key: "button",
+    get: function get() {
+      return Array.prototype.find.call(this.element.children, function (node) {
+        return node.matches('.selection');
+      });
+    }
+  }, {
+    key: "selection",
+    get: function get() {
+      var r = [];
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = this.element.querySelectorAll('.selected')[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var node = _step4.value;
+          var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getMenuInstance"])(node);
+          if (instance) r.push(instance);
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+            _iterator4["return"]();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+
+      return r;
+    }
+  }]);
+
+  return SelectDropDown;
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"]);
+autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
+  return SelectDropDown.FromHTML(element);
+});
+
+/***/ }),
+
 /***/ "./src/menu2/decorators.js":
 /*!*********************************!*\
   !*** ./src/menu2/decorators.js ***!
@@ -6857,7 +7171,7 @@ function publishTargetEvent(topic) {
 /*!****************************!*\
   !*** ./src/menu2/index.js ***!
   \****************************/
-/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode */
+/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectDropDown, SelectMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6876,6 +7190,12 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MenuNode */ "./src/menu2/MenuNode.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MenuNode", function() { return _MenuNode__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+
+/* harmony import */ var _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./SelectDropDown */ "./src/menu2/SelectDropDown.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectDropDown", function() { return _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__["SelectDropDown"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
+
 
 
 

@@ -73,7 +73,7 @@ export default class MenuItem extends MenuNode {
     /**
      * Renders the domElement.
      *
-     * @param text
+     * @param text {String}
      * @param nodeName
      * @param href
      * @returns {HTMLDivElement}
@@ -404,6 +404,22 @@ export default class MenuItem extends MenuNode {
 
     //------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
+
+    get button() {
+        if(!this._button) {
+            this._button = Array.prototype.slice.call(this.element.children).find(node => node.matches("button, a, .btn, [data-role='button']"));
+        }
+
+        return this._button;
+    }
+
+    get value() {
+        return this.element.dataset.value;
+    }
+
+    set value(value) {
+        this.element.dataset.value = value;
+    }
 
     /**
      * Will return true if menu items should toggle on.

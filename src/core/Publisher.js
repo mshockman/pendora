@@ -1,5 +1,10 @@
 
 
+export function STOP() {
+    throw STOP;
+}
+
+
 export default class Publisher {
     constructor() {
         this._topics = {};
@@ -77,10 +82,18 @@ export default class Publisher {
             let callbacks = this._topics[topic].slice(0);
 
             for(let cb of callbacks) {
-                cb.apply(this, args);
+                try {
+                    cb.apply(this, args);
+                } catch (e) {
+                    if(e === STOP) {
+                        return e;
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
 
-        return this;
+        return true;
     }
 }

@@ -1,4 +1,4 @@
-import Publisher from "core/Publisher";
+import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
 import {addClasses, removeClasses} from "core/utility";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance} from "./utility";
@@ -642,17 +642,17 @@ export default class MenuNode extends Publisher {
      *
      * @param topic
      * @param args
-     * @returns {MenuNode}
      */
     dispatchTopic(topic, ...args) {
         let o = this;
 
         while(o) {
-            o.publish(topic, ...args);
+            if(o.publish(topic, ...args) === STOP) {
+                return STOP;
+            }
+
             o = o.parent;
         }
-
-        return this;
     }
 
     //------------------------------------------------------------------------------------------------------------------
