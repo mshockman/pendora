@@ -11,7 +11,7 @@ export default class MenuBar extends Menu {
             toggle, closeOnSelect, deactivateOnItemHover, delay: false, ...context
         });
 
-        this.position = positioners.dropdown();
+        this.position = positioners.DROPDOWN;
 
         this.SubMenuClass = class SubMenu extends Menu {
             constructor(args={}) {

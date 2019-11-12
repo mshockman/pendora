@@ -1,7 +1,7 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 import {addClasses} from "core/utility";
-import {parseBoolean, parseIntValue, parseAny} from "core/utility";
+import {parseBoolean, parseIntValue, parseAny, parseHTML} from "core/utility";
 import * as iter from "core/iter";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
@@ -30,65 +30,33 @@ export const MENU_PARAMETERS = {
 
 
 /**
- * A component for rendering nestable list of selectable items.
+ * @abstract
  */
-export default class Menu extends MenuNode {
+export class AbstractMenu extends MenuNode {
     @inherit position;
     @inherit multiple;
+
+    constructor() {
+        super();
+        this.menuNodeType = "menu";
+
+        this.closeOnBlur = false;
+        this.timeout = false;
+        this.autoActivate = false;
+        this.multiple = false;
+        this.openOnHover = false;
+        this.toggle = "none";
+        this.closeOnSelect = true;
+        this.deactivateOnItemHover = false;
+        this.delay = false;
+        this.position = null;
+    }
 
     // Used to parse attributes on elements to their correct type during initializing by
     // parsing the DOM tree.
     static __attributes__ = MENU_PARAMETERS;
 
-    /**
-     *
-     * @param target {String|HTMLElement}
-     * @param closeOnBlur {Boolean|Number}
-     * @param timeout {Boolean|Number}
-     * @param autoActivate {Boolean|Number}
-     * @param multiple {Boolean|"inherit"|"root"}
-     * @param openOnHover {Boolean|Number}
-     * @param toggle {"on"|"off"|"both"|"none"}
-     * @param closeOnSelect {Boolean}
-     * @param deactivateOnItemHover {Boolean}
-     * @param delay {Boolean|Number}
-     * @param id {String}
-     * @param classes {String}
-     * @param children {Array}
-     * @param visible
-     * @param position {function|"inherit"|"root"|null|undefined}
-     * @param context
-     */
-    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
-                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=0, id=null, classes=null,
-                    children=null, visible=false, position="inherit", ...context}={}) {
-        super();
-        this.menuNodeType = "menu";
-        this.events = null;
-        this.MenuItemClass = MenuItem;
-        this.SubMenuClass = Menu;
-
-        this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
-        this.autoActivate = autoActivate;
-        this.multiple = multiple;
-        this.openOnHover = openOnHover;
-        this.toggle = toggle;
-        this.closeOnSelect = closeOnSelect;
-        this.deactivateOnItemHover = deactivateOnItemHover;
-        this.delay = delay;
-        this.position = position;
-
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = this.render(context);
-        }
-
-        this.isVisible = visible;
-
-        this.init();
-
+    registerTopics() {
         // On child is activate
         // deactivate siblings if multiple is false.
         this.on('activate', (target) => {
@@ -119,36 +87,6 @@ export default class Menu extends MenuNode {
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
-
-        if(classes) addClasses(this.element, classes);
-        if(id) this.element.id = id;
-
-        if(children) {
-            this.createItems(children);
-        }
-    }
-
-    /**
-     * Renders the domElement of the widget.
-     *
-     * @param arrow
-     * @returns {HTMLDivElement}
-     */
-    render({arrow=false}={}) {
-        let element = document.createElement('div'),
-            body = document.createElement('div');
-
-        element.className = "menu";
-        body.className = "menu__body";
-
-        if(arrow) {
-            let arrow = document.createElement('div');
-            arrow.className = "menu__arrow";
-            element.appendChild(arrow);
-        }
-
-        element.appendChild(body);
-        return element;
     }
 
     activate() {
@@ -349,6 +287,10 @@ export default class Menu extends MenuNode {
         return true;
     }
 
+    setParent(parent) {
+        parent.attachSubMenu(this);
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Event Handlers
 
@@ -398,6 +340,88 @@ export default class Menu extends MenuNode {
      */
     get toggleOff() {
         return this.toggle === 'off' || this.toggle === 'both';
+    }
+}
+
+
+/**
+ * A component for rendering nestable list of selectable items.
+ */
+export default class Menu extends AbstractMenu {
+    /**
+     *
+     * @param target {String|HTMLElement}
+     * @param closeOnBlur {Boolean|Number}
+     * @param timeout {Boolean|Number}
+     * @param autoActivate {Boolean|Number}
+     * @param multiple {Boolean|"inherit"|"root"}
+     * @param openOnHover {Boolean|Number}
+     * @param toggle {"on"|"off"|"both"|"none"}
+     * @param closeOnSelect {Boolean}
+     * @param deactivateOnItemHover {Boolean}
+     * @param delay {Boolean|Number}
+     * @param id {String}
+     * @param classes {String}
+     * @param children {Array}
+     * @param visible
+     * @param position {function|"inherit"|"root"|null|undefined}
+     * @param context
+     */
+    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
+                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=0, id=null, classes=null,
+                    children=null, visible=false, position="inherit", ...context}={}) {
+        super();
+        this.events = null;
+        this.MenuItemClass = MenuItem;
+        this.SubMenuClass = Menu;
+
+        this.closeOnBlur = closeOnBlur;
+        this.timeout = timeout;
+        this.autoActivate = autoActivate;
+        this.multiple = multiple;
+        this.openOnHover = openOnHover;
+        this.toggle = toggle;
+        this.closeOnSelect = closeOnSelect;
+        this.deactivateOnItemHover = deactivateOnItemHover;
+        this.delay = delay;
+        this.position = position;
+
+        if(target) {
+            this.element = target;
+        } else {
+            this.element = this.render(context);
+        }
+
+        this.isVisible = visible;
+
+        if(classes) addClasses(this.element, classes);
+        if(id) this.element.id = id;
+
+        this.registerTopics();
+        this.parseDOM();
+        this.init();
+
+        if(children) {
+            this.createItems(children);
+        }
+    }
+
+    /**
+     * Renders the domElement of the widget.
+     *
+     * @param arrow
+     * @returns {HTMLElement|Element}
+     */
+    render({arrow=false}={}) {
+        let html = `
+            <div class="menu">
+                ${arrow ? `<div class="menu__arrow"></div>` : ""}
+                <div class="menu__body"></div>
+            </div>
+        `;
+
+        let fragment = parseHTML(html);
+        return fragment.children[0];
     }
 }
 

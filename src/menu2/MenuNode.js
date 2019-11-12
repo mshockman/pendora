@@ -24,9 +24,6 @@ export default class MenuNode extends Publisher {
         this._element = undefined;
         this.menuNodeType = "node";
 
-        this._isActive = false;
-        this._isVisible = true;
-
         this.nodeType = null;
         this.isController = false;
 
@@ -178,7 +175,7 @@ export default class MenuNode extends Publisher {
      * @returns {boolean}
      */
     get isActive() {
-        return this._isActive;
+        return this.element.classList.contains('active');
     }
 
     /**
@@ -191,14 +188,12 @@ export default class MenuNode extends Publisher {
     set isActive(value) {
         value = !!value;
 
-        if(value !== this._isActive) {
+        if(value !== this.isActive) {
             if(value) {
                 this.element.classList.add('active');
             } else {
                 this.element.classList.remove('active');
             }
-
-            this._isActive = value;
         }
     }
 
@@ -257,7 +252,7 @@ export default class MenuNode extends Publisher {
      * @returns {boolean}
      */
     get isVisible() {
-        return this._isVisible;
+        return !this.element.classList.contains('hidden');
     }
 
     /**
@@ -268,14 +263,12 @@ export default class MenuNode extends Publisher {
     set isVisible(value) {
         value = !!value;
 
-        if(value !== this._isVisible) {
+        if(value !== this.isVisible) {
             if(value) {
                 this.element.classList.remove('hidden');
             } else {
                 this.element.classList.add('hidden');
             }
-
-            this._isVisible = value;
         }
     }
 
@@ -674,19 +667,13 @@ export default class MenuNode extends Publisher {
 
                 if(hasMenuInstance(child)) {
                     let instance = getMenuInstance(child);
-                    instance._parent = this;
-                    this._children.push(instance);
-                    instance.parseDOM();
+                    instance.setParent(this);
                 } else if(role === 'menu') {
                     let menu = this.SubMenuClass.FromHTML(child);
-                    this._children.push(menu);
-                    menu._parent = this;
-                    menu.parseDOM();
+                    menu.setParent(this);
                 } else if(role === 'menuitem') {
                     let item = this.MenuItemClass.FromHTML(child);
-                    this._children.push(item);
-                    item._parent = this;
-                    item.parseDOM();
+                    item.setParent(this);
                 } else {
                     walk(child);
                 }
@@ -769,10 +756,6 @@ export default class MenuNode extends Publisher {
 
         parameters.target = element;
 
-        let instance = new this(parameters);
-
-        instance.parseDOM();
-
-        return instance;
+        return new this(parameters);
     }
 }

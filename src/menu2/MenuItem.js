@@ -1,7 +1,7 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
 import Menu from './Menu';
-import {parseAny, parseBoolean, parseIntValue} from "../core/utility";
+import {parseAny, parseBoolean, parseIntValue, parseHTML} from "../core/utility";
 import Attribute, {DROP, TRUE} from "core/attributes";
 
 
@@ -25,7 +25,10 @@ export const ITEM_ATTRIBUTES = {
 };
 
 
-export default class MenuItem extends MenuNode {
+/**
+ * @abstract
+ */
+export class AbstractMenuItem extends MenuNode {
     @inherit toggle;
     @inherit autoActivate;
     @inherit openOnHover;
@@ -35,64 +38,28 @@ export default class MenuItem extends MenuNode {
 
     static __attributes__ = ITEM_ATTRIBUTES;
 
-    constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
-                    delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
-                    nodeName="div", position="inherit", multiple=false, ...context}={}) {
+    constructor() {
         super();
+        this.menuNodeType = "menuitem";
 
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = this.render({text, nodeName, href, ...context});
-        }
+        this.toggle = "both";
+        this.autoActivate = false;
+        this.openOnHover = false;
+        this.delay = false;
+        this.closeOnSelect = false;
+        this.closeOnBlur = false;
+        this.timeout = false;
+        this.position = null;
+        this.multiple = false;
+        this.clearSubItemsOnHover = true;
+        this.autoDeactivateItems = true;
+    }
 
-        if(classes) {
-            this.addClass(classes);
-        }
-
-        if(action) this.addAction(action);
-
-        this.toggle = toggle;
-        this.autoActivate = autoActivate;
-        this.openOnHover = openOnHover;
-        this.delay = delay;
-        this.closeOnSelect = closeOnSelect;
-        this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
-        this.position = position;
-        this.multiple = multiple;
-        this.MenuItemClass = MenuItem;
-        this.SubMenuClass = Menu;
-
+    registerTopics() {
         this.on('event.click', (event) => this.onClick(event));
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
-    }
-
-    /**
-     * Renders the domElement.
-     *
-     * @param text {String}
-     * @param nodeName
-     * @param href
-     * @returns {HTMLDivElement}
-     */
-    render({text, nodeName="div", href=null}={}) {
-        let element = document.createElement(nodeName),
-            button = document.createElement('a');
-
-        element.className = "menuitem";
-        button.type = "button";
-        button.innerHTML = text;
-        button.className = "menuitem__button";
-
-        if(href) {
-            button.href = href;
-        }
-
-        element.appendChild(button);
-        return element;
     }
 
     /**
@@ -250,6 +217,7 @@ export default class MenuItem extends MenuNode {
      */
     attachSubMenu(submenu) {
         if(this.submenu) {
+            if(this.submenu === submenu) return;
             throw new Error("MenuItem can only have one submenu.");
         }
 
@@ -296,6 +264,11 @@ export default class MenuItem extends MenuNode {
      */
     isSubMenuVisible() {
         return this.hasSubMenu() ? this.submenu.isVisible : false;
+    }
+
+    setParent(parent) {
+        this._parent = parent;
+        parent._children.push(this);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -351,7 +324,7 @@ export default class MenuItem extends MenuNode {
 
         if(event.target === this) {
             // When the mouse moves on an item clear any active items in it's submenu.
-            if (this.submenu) {
+            if (this.submenu && this.clearSubItemsOnHover) {
                 this.submenu.clearItems();
             }
 
@@ -391,7 +364,7 @@ export default class MenuItem extends MenuNode {
             this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if(event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
+        if(this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
             this.deactivate();
         }
 
@@ -411,14 +384,6 @@ export default class MenuItem extends MenuNode {
         }
 
         return this._button;
-    }
-
-    get value() {
-        return this.element.dataset.value;
-    }
-
-    set value(value) {
-        this.element.dataset.value = value;
     }
 
     /**
@@ -453,5 +418,62 @@ export default class MenuItem extends MenuNode {
         } else {
             this.attachSubMenu(value);
         }
+    }
+}
+
+
+export default class MenuItem extends AbstractMenuItem {
+    constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
+                    delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
+                    nodeName="div", position="inherit", multiple=false, ...context}={}) {
+        super();
+
+        if(target) {
+            this.element = target;
+        } else {
+            this.element = this.render({text, nodeName, href, ...context});
+        }
+
+        if(classes) {
+            this.addClass(classes);
+        }
+
+        if(action) this.addAction(action);
+
+        this.toggle = toggle;
+        this.autoActivate = autoActivate;
+        this.openOnHover = openOnHover;
+        this.delay = delay;
+        this.closeOnSelect = closeOnSelect;
+        this.closeOnBlur = closeOnBlur;
+        this.timeout = timeout;
+        this.position = position;
+        this.multiple = multiple;
+        this.clearSubItemsOnHover = true;
+        this.autoDeactivateItems = true;
+        this.MenuItemClass = MenuItem;
+        this.SubMenuClass = Menu;
+
+        this.registerTopics();
+        this.parseDOM();
+    }
+
+    /**
+     * Renders the domElement.
+     *
+     * @param text {String}
+     * @param nodeName
+     * @param href
+     * @returns {HTMLElement|Element}
+     */
+    render({text, nodeName="div", href=null}={}) {
+        let html = `
+            <${nodeName} class="menuitem">
+                <a class="menuitem__button" ${href ? `href="${href}"` : ""}>${text}</a>
+            </${nodeName}>
+        `;
+
+        let fragment = parseHTML(html);
+        return fragment.children[0];
     }
 }
