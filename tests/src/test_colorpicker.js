@@ -1,17 +1,16 @@
-import {ColorPickerWheel, ColorPickerWheelSlider} from "../../src/ui/ColorPicker";
+import {ColorPickerWheel} from "../../src/ui/ColorPicker";
 import {hslToRGB, hsvToRGB} from "../../src/core/utility";
+import {HSV} from "../../src/core/vectors";
+
+
+window.HSV = HSV;
 
 
 export default class TestColorPickerPage {
     load() {
-        window.wheel = this.wheel = new ColorPickerWheel(600);
-        window.slider = this.slider = new ColorPickerWheelSlider(this.wheel, 300, 100);
-        window.hslToRGB = hslToRGB;
-        window.hsvToRGB = hsvToRGB;
+        let colorPicker = new ColorPickerWheel(300, 500);
 
-        this.wheel.appendTo(document.body);
-        this.slider.appendTo(document.body);
-        this.wheel.render();
-        this.slider.render();
+        colorPicker.appendTo(document.body);
+        colorPicker.render();
     }
 }

@@ -681,3 +681,35 @@ export function hsvToRGB(h, s, v) {
         b: (b + m)*255
     };
 }
+
+
+export function rgbToHsv(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    let cMax = Math.max(r, g, b),
+        cMin = Math.min(r, g, b),
+        delta = cMax - cMin,
+        h, s, v;
+
+    if(delta === 0) {
+        h = 0;
+    } else if(cMax === r) {
+        h = 60 * (((g - b) / delta) % 6);
+    } else if(cMax === g) {
+        h = 60 * (((b - r) / delta) + 2);
+    } else {
+        h = 60 * (((r - g) / delta) + 4);
+    }
+
+    if(cMax === 0) {
+        s = 0;
+    } else {
+        s = delta / cMax;
+    }
+
+    v = cMax;
+
+    return {h, s, v};
+}

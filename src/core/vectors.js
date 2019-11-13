@@ -1,4 +1,4 @@
-import {clamp} from './utility';
+import {clamp, hsvToRGB} from './utility';
 import {ExtendableError, ValueError} from "./errors";
 
 
@@ -19,6 +19,150 @@ const positionShortHandValues = {
     bottom: 'center bottom',
     left: 'left middle'
 };
+
+
+/**
+ * @abstract
+ */
+export class AbstractVector {
+    constructor(size) {
+        this.size = size;
+
+        for(let i = 0; i < size; i++) {
+            this[i] = 0;
+        }
+    }
+
+    _new(...args) {
+        return new this.constructor(...args);
+    }
+
+    clone() {
+        let r = this._new();
+
+        for(let i = 0; i < this.size; i++) {
+            r[i] = this[i];
+        }
+
+        return r;
+    }
+
+    add(vectorOrNumber) {
+        let r = this._new();
+
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                r[i] = this[i] + vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                r[i] += this[i] + vectorOrNumber[i];
+            }
+        }
+
+        return r;
+    }
+
+    subtract(vectorOrNumber) {
+        let r = this._new();
+
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                r[i] = this[i] - vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                r[i] += this[i] - vectorOrNumber[i];
+            }
+        }
+
+        return r;
+    }
+
+    scalar(number) {
+        let r = this._new();
+
+        for(let i = 0; i < this.size; i++) {
+            r[i] = this[i] * number;
+        }
+
+        return r;
+    }
+
+    multiply(vectorOrNumber) {
+        let r = this._new();
+
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                r[i] = this[i] * vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                r[i] += this[i] * vectorOrNumber[i];
+            }
+        }
+
+        return r;
+    }
+
+    mod(vectorOrNumber) {
+        let r = this._new();
+
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                r[i] = this[i] % vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                r[i] += this[i] % vectorOrNumber[i];
+            }
+        }
+
+        return r;
+    }
+
+    divide(vectorOrNumber) {
+        let r = this._new();
+
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                r[i] = this[i] / vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                r[i] += this[i] / vectorOrNumber[i];
+            }
+        }
+
+        return r;
+    }
+
+    set(vectorOrNumber) {
+        if(typeof vectorOrNumber === 'number') {
+            for(let i = 0; i < this.size; i++) {
+                this[i] = vectorOrNumber;
+            }
+        } else {
+            for(let i = 0; i < this.size; i++) {
+                this[i] = vectorOrNumber[i];
+            }
+        }
+
+        return this;
+    }
+
+    equals(vector) {
+        if(this.size !== vector.size) return false;
+
+        for(let i = 0; i < this.size; i++) {
+            if(this[i] !== vector[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
 
 
 /**
@@ -393,38 +537,6 @@ export class Vec4 {
         this[3] = bottom;
     }
 
-    get r() {
-        return this[0];
-    }
-
-    set r(value) {
-        this[0] = value;
-    }
-
-    get g() {
-        return this[1];
-    }
-
-    set g(value) {
-        this[1] = value;
-    }
-
-    get b() {
-        return this[2];
-    }
-
-    set b(value) {
-        this[2] = value;
-    }
-
-    get a() {
-        return this[3];
-    }
-
-    set a(value) {
-        this[3] = value;
-    }
-
     set(valueOrVec4) {
         if(typeof valueOrVec4 !== 'object') {
             this[0] = valueOrVec4;
@@ -506,35 +618,12 @@ export class Vec4 {
         }
     }
 
-    toRGBA() {
-        return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
-    }
-
     clone() {
         return new this.constructor(this[0], this[1], this[2], this[3]);
     }
 
     _new(left, top, right, bottom) {
         return new this.constructor(left, top, right, bottom);
-    }
-
-    static fromRGBAObject({r, g, b, a}) {
-        return new Vec4(r, g, b, a);
-    }
-
-    static fromRGBA(value) {
-        let m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
-
-        if(!m) {
-            throw new Error(`Could not parse rgba value ${value}`);
-        }
-
-        return new Vec4(
-            parseInt(m[1], 10),
-            parseInt(m[2], 10),
-            parseInt(m[3], 10),
-            parseFloat(m[4]),
-        );
     }
 }
 
@@ -983,12 +1072,17 @@ export class Rect extends Vec4 {
 }
 
 
-export class RGBA extends Vec4 {
-    constructor(r, g, b, a) {
+export class RGBA extends AbstractVector {
+    constructor(r=0, g=0, b=0, a=1) {
+        super(4);
+
         if(typeof r === 'object') {
-            super(r);
+            this.set(r);
         } else {
-            super(r, g, b, a);
+            this[0] = r;
+            this[1] = g;
+            this[2] = b;
+            this[3] = a;
         }
     }
 
@@ -1075,5 +1169,91 @@ export class RGBA extends Vec4 {
         }
 
         return new RGBA(r, g, b, a);
+    }
+
+    get r() {
+        return this[0];
+    }
+
+    set r(value) {
+        this[0] = value;
+    }
+
+    get g() {
+        return this[1];
+    }
+
+    set g(value) {
+        this[1] = value;
+    }
+
+    get b() {
+        return this[2];
+    }
+
+    set b(value) {
+        this[2] = value;
+    }
+
+    get a() {
+        return this[3];
+    }
+
+    set a(value) {
+        this[3] = value;
+    }
+
+    toRGBAString() {
+        return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
+    }
+}
+
+
+export class HSV extends AbstractVector {
+    constructor(h=0, s=0, v=0) {
+        super(3);
+
+        if(typeof h === 'object') {
+            this.set(h);
+        } else {
+            this[0] = h;
+            this[1] = s;
+            this[2] = v;
+        }
+    }
+
+    get h() {
+        return this[0]
+    }
+
+    get s() {
+        return this[1]
+    }
+
+    get v() {
+        return this[2]
+    }
+
+    set h(value) {
+        this[0] = value;
+    }
+
+    set s(value) {
+        this[1] = value;
+    }
+
+    set v(value) {
+        this[2] = value;
+    }
+
+    toRGB() {
+        let r = new RGBA(0.0, 0.0, 0.0, 1.0);
+
+        let rgb = hsvToRGB(this.h, this.s, this.v);
+        r.r = rgb.r;
+        r.g = rgb.g;
+        r.b = rgb.b;
+
+        return r;
     }
 }
