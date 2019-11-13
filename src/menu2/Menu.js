@@ -18,7 +18,7 @@ export const MENU_PARAMETERS = {
     closeOnBlur: timeAttribute,
     timeout: timeAttribute,
     autoActivate: timeAttribute,
-    multiple: boolAttribute,
+    multiActive: boolAttribute,
     openOnHover: timeAttribute,
     closeOnSelect: boolAttribute,
     deactivateOnItemHover: boolAttribute,
@@ -34,7 +34,6 @@ export const MENU_PARAMETERS = {
  */
 export class AbstractMenu extends MenuNode {
     @inherit position;
-    @inherit multiple;
 
     constructor() {
         super();
@@ -43,10 +42,10 @@ export class AbstractMenu extends MenuNode {
         this.closeOnBlur = false;
         this.timeout = false;
         this.autoActivate = false;
-        this.multiple = false;
         this.openOnHover = false;
         this.toggle = "none";
         this.closeOnSelect = true;
+        this.multiActive = false;
         this.deactivateOnItemHover = false;
         this.delay = false;
         this.position = null;
@@ -65,7 +64,7 @@ export class AbstractMenu extends MenuNode {
                     this.activate();
                 }
 
-                if (!this.multiple) {
+                if(!this.multiActive) {
                     for (let activeItem of this.activeItems) {
                         if (activeItem !== target) {
                             activeItem.deactivate();
@@ -354,7 +353,7 @@ export default class Menu extends AbstractMenu {
      * @param closeOnBlur {Boolean|Number}
      * @param timeout {Boolean|Number}
      * @param autoActivate {Boolean|Number}
-     * @param multiple {Boolean|"inherit"|"root"}
+     * @param multiActive {Boolean|"inherit"|"root"}
      * @param openOnHover {Boolean|Number}
      * @param toggle {"on"|"off"|"both"|"none"}
      * @param closeOnSelect {Boolean}
@@ -367,7 +366,7 @@ export default class Menu extends AbstractMenu {
      * @param position {function|"inherit"|"root"|null|undefined}
      * @param context
      */
-    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
+    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiActive=false, openOnHover=true,
                     toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=0, id=null, classes=null,
                     children=null, visible=false, position="inherit", ...context}={}) {
         super();
@@ -378,7 +377,7 @@ export default class Menu extends AbstractMenu {
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
         this.autoActivate = autoActivate;
-        this.multiple = multiple;
+        this.multiActive = multiActive;
         this.openOnHover = openOnHover;
         this.toggle = toggle;
         this.closeOnSelect = closeOnSelect;

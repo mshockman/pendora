@@ -3,7 +3,9 @@ import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {getMenuInstance} from "./utility";
-import {parseHTML, emptyElement} from "core/utility";
+import {parseHTML, emptyElement, parseBoolean} from "core/utility";
+import {inherit} from "./decorators";
+import Attribute, {DROP, TRUE} from "core/attributes";
 
 
 export class SelectOption extends AbstractMenuItem {
@@ -38,7 +40,9 @@ export class SelectOption extends AbstractMenuItem {
         this.MenuItemClass = SelectOption;
         this.SubMenuClass = Menu;
 
-        this.autoDeactivateItems = false;
+        this.autoDeactivateItems = "auto";
+
+        this.element.classList.add("option");
 
         this.registerTopics();
         this.parseDOM();
@@ -49,6 +53,53 @@ export class SelectOption extends AbstractMenuItem {
             fragment = parseHTML(html);
 
         return fragment.children[0];
+    }
+
+    onClick(event) {
+        let isDisabled = this.getDisabled();
+
+        if(isDisabled) {
+            event.preventDefault();
+            return;
+        }
+
+        if(event.target !== this) return;
+        let parent = this.parent;
+
+        if(!this.isSelected) {
+            this.select();
+        } else if(this.isSelected && parent.multiSelect) {
+            this.deselect();
+        }
+    }
+
+    select() {
+        if(this.isSelected) return;
+
+        if(!this.multiSelect) {
+            for (let node of this.element.querySelectorAll('.selected')) {
+                let instance = getMenuInstance(node);
+
+                if (instance && instance !== this) {
+                    instance.deselect();
+                }
+            }
+        }
+
+        this.isSelected = true;
+
+        if(!this.isActive) {
+            this.activate();
+        }
+
+        this.dispatchTopic('option.select', {target: this, menu: this});
+    }
+
+    deselect() {
+        if(!this.isSelected) return;
+        this.isSelected = false;
+        if(this.isActive) this.deactivate();
+        this.dispatchTopic('option.deselect', {target: this, menu: this});
     }
 
     get isSelected() {
@@ -82,10 +133,39 @@ export class SelectOption extends AbstractMenuItem {
     set text(value) {
         this.button.innerText = (value+"").trim();
     }
+
+    get parentSelect() {
+        let o = this.parent;
+
+        while(o) {
+            if(o.isSelect && o.isSelect()) {
+                return o;
+            }
+
+            o = o.parent;
+        }
+
+        return null;
+    }
+
+    get autoDeactivateItems() {
+        if(this._props.autoDeactivateItems === 'auto') {
+            let parent = this.parentSelect;
+            return !!(parent && parent.multiSelect);
+        } else {
+            return this._props.autoDeactivateItems;
+        }
+    }
+
+    set autoDeactivateItems(value) {
+        this._props.autoDeactivateItems = value;
+    }
 }
 
 
 export class SelectMenu extends AbstractMenu {
+    @inherit multiSelect;
+
     constructor({target, id=null, classes=null, ...context}={}) {
         super();
         this.isSelectMenu = true;
@@ -100,10 +180,10 @@ export class SelectMenu extends AbstractMenu {
         this.closeOnBlur = false;
         this.timeout = false;
         this.autoActivate = true;
+        this.multiActive = false;
         this.openOnHover = false;
-        this.multiple = false;
-        this.toggle = "on";
-        this.closeOnSelect = true;
+        this.multiSelect = "inherit";
+        this.closeOnSelect = false;
         this.delay = 0;
         this.position = "inherit";
 
@@ -127,46 +207,48 @@ export class SelectMenu extends AbstractMenu {
     registerTopics() {
         super.registerTopics();
 
-        this.on('menuitem.selected', topic => {
-            let item = topic.target;
-
-            if(item.element.classList.contains('selected')) {
-                // item.element.classList.remove('selected');
-            } else {
-                if(!this.multiple) {
-                    for (let node of this.element.querySelectorAll('.selected')) {
-                        let instance = getMenuInstance(node);
-
-                        if (instance && instance !== item) {
-                            instance.element.classList.remove('selected');
-                            this.dispatchTopic('option.deselected', {target: instance, menu: this});
-                        }
+        this.on('menu.show', menu => {
+            if(!this.multiSelect) {
+                for (let child of menu.children) {
+                    if (child.element.classList.contains('selected') && !child.isActive) {
+                        child.activate();
                     }
                 }
-
-                item.element.classList.add('selected');
-
-                if(!item.isActive) {
-                    item.activate();
-                }
-
-                this.dispatchTopic('option.selected', {target: item, menu: this});
             }
         });
 
-        this.on('menu.show', menu => {
-            for(let child of menu.children) {
-                if(child.element.classList.contains('selected') && !child.isActive) {
-                    child.activate();
+        this.on('option.select', topic => {
+            if(!this.multiSelect) {
+                for(let item of this.selection) {
+                    if(item !== topic.target) {
+                        item.deselect();
+                    }
                 }
             }
         });
+    }
+
+    get selection() {
+        let r = [];
+
+        for(let item of this.children) {
+            if(item.isSelected) {
+                r.push(item);
+            }
+        }
+
+        return r;
     }
 }
 
 
 export class SelectDropDown extends AbstractMenuItem {
-    constructor({target, options=null, multiple=false, timeout=false, id=null, classes=null}={}) {
+    static __attributes__ = {
+        multiSelect: new Attribute(parseBoolean, DROP, TRUE),
+        ...AbstractMenuItem.__attributes__
+    };
+
+    constructor({target, options=null, multiSelect=false, timeout=false, id=null, classes=null, widget=null}={}) {
         super();
 
         if(target) {
@@ -187,49 +269,65 @@ export class SelectDropDown extends AbstractMenuItem {
         this.autoActivate = false;
         this.openOnHover = false;
         this.delay = false;
-        this.closeOnSelect = true;
+        this.closeOnSelect = "auto";
         this.closeOnBlur = true;
         this.timeout = timeout;
-        this.multiple = multiple;
+        this.multiSelect = multiSelect;
         this.MenuItemClass = SelectOption;
         this.SubMenuClass = SelectMenu;
         this.position = positioners.DROPDOWN;
         this.clearSubItemsOnHover = false;
+        this.widget = widget;
+
+        this.element.classList.add('select');
+        this.element.tabIndex = 0;
 
         this.registerTopics();
         this.parseDOM();
         this.init();
     }
 
+    isSelect() {
+        return true;
+    }
+
     registerTopics() {
         super.registerTopics();
 
-        this.on('option.selected', (topic) => {
-            topic.target.isSelected = true;
-
-            let output = this.button,
-                selection = this.selection,
-                fragment = document.createDocumentFragment();
-
-            emptyElement(output);
-
-            for(let item of selection) {
-                let li = document.createElement('li'),
-                    exitButton = document.createElement('div'),
-                    span = document.createElement('span');
-
-                li.className = "choice";
-                exitButton.className = "exit-button";
-                span.innerText = item.text;
-
-                li.appendChild(exitButton);
-                li.appendChild(span);
-
-                fragment.appendChild(li);
-            }
-
-            output.appendChild(fragment);
+        this.on('option.select', () => {
+            this.renderLabels();
         });
+
+        this.on('option.deselect', () => {
+            this.renderLabels();
+        });
+    }
+
+    renderLabels() {
+        let output = this.button,
+            selection = this.selection,
+            fragment = document.createDocumentFragment();
+
+        emptyElement(output);
+
+        for(let item of selection) {
+            let li = document.createElement('li'),
+                exitButton = document.createElement('div'),
+                span = document.createElement('span');
+
+            li.className = "choice";
+            exitButton.className = "exit-button";
+            span.innerText = item.text;
+
+            li.appendChild(exitButton);
+            li.appendChild(span);
+
+            fragment.appendChild(li);
+        }
+
+        output.appendChild(fragment);
+
+        if(this.widget) this.widget.setValue(this.getValue());
     }
 
     get button() {
@@ -251,19 +349,12 @@ export class SelectDropDown extends AbstractMenuItem {
     }
 
     get selection() {
-        let r = [];
-
-        for(let node of this.element.querySelectorAll('.selected')) {
-            let instance = getMenuInstance(node);
-            if(instance) r.push(instance);
-        }
-
-        return r;
+        return this.submenu.selection;
     }
 
     render(context) {
         let html = `
-        <article class="dropdown">
+        <article class="dropdown select">
             <ul class="selection"></ul>
             <ul class="menu hidden" data-role="menu">
                 <li data-role="menuitem" class="menuitem" data-value="1"><a href="#">Item #1</a></li>
@@ -279,15 +370,15 @@ export class SelectDropDown extends AbstractMenuItem {
         return fragment.children[0];
     }
 
-    get multiple() {
-        return this._props.multiple;
+    get multiSelect() {
+        return this._props.multiSelect;
     }
 
-    set multiple(value) {
+    set multiSelect(value) {
         value = !!value;
 
-        if(value !== this.multiple) {
-            this._props.multiple = value;
+        if(value !== this.multiSelect) {
+            this._props.multiSelect = value;
 
             if(value) {
                 this.element.classList.add('multiple');
@@ -295,6 +386,18 @@ export class SelectDropDown extends AbstractMenuItem {
                 this.element.classList.remove('multiple');
             }
         }
+    }
+
+    get closeOnSelect() {
+        if(this._props.closeOnSelect === "auto") {
+            return !this.multiSelect;
+        } else {
+            return this._props.closeOnSelect;
+        }
+    }
+
+    set closeOnSelect(value) {
+        this._props.closeOnSelect = value;
     }
 
     static FromHTML(element) {

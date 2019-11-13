@@ -76,6 +76,7 @@
 
 .menu.hidden {
   visibility: hidden;
+  display: none;
 }
 
 .vertical-menu {
@@ -98,9 +99,24 @@
   list-style: none;
   min-height: 2rem;
   min-width: 10rem;
-  overflow-y: scroll;
   border: 1px solid #cccccc;
   background-color: #ffffff;
+}
+.dropdown.select:not(.multiple) .selection .choice {
+  padding: 0.5rem;
+}
+.dropdown.select.multiple .option.selected {
+  background-color: #ccc;
+}
+.dropdown.select.multiple .selection {
+  padding: 0.5rem 0 0 0.5rem;
+  overflow-y: scroll;
+}
+.dropdown.select.multiple .selection .choice {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 0.25rem;
+  margin: 0 0.5rem 0.5rem 0;
 }
 
 /*# sourceMappingURL=pendora.css.map */
