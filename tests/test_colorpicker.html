@@ -18,16 +18,58 @@
             background-color: #333;
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        .color-picker {
+            display: flex;
+            flex-direction: row;
+            color: #ffffff;
+        }
+
+        .color-picker input {
+            background-color: #222;
+            color: #ffffff;
+            border: 1px solid #444;
+        }
+
         .color-picker-wheel {
-            border: 2px solid #000;
-            padding: 1rem;
-            position: absolute;
-            left: 200px;
-            top: 200px;
+
+        }
+
+        .color-picker__col2 {
+            padding: 0.5rem;
+        }
+
+        .color-picker__col1 {
+            padding: 0.5rem;
         }
 
         .cpw__wheel-container {
             margin-bottom: 0.6rem;
+        }
+
+        .rgb-slider {
+            margin-bottom: 0.5rem;
+        }
+
+        .rgb-slider__label {
+            display: flex;
+        }
+
+        .rgb-slider__text {
+            display: inline-block;
+            height: 24px;
+            line-height: 24px;
+        }
+
+        .rgb-slider__slider {
+            height: 24px;
+        }
+
+        .rgb-slider__input {
+            height: 24px;
         }
     </style>
 </head>

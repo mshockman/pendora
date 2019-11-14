@@ -1580,7 +1580,7 @@ function chain() {
 /*!*****************************!*\
   !*** ./src/core/utility.js ***!
   \*****************************/
-/*! exports provided: clamp, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath, hslToRGB, hsvToRGB */
+/*! exports provided: clamp, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath, hslToRGB, hsvToRGB, rgbToHsv */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1619,6 +1619,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return getPropertyByPath; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hslToRGB", function() { return hslToRGB; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hsvToRGB", function() { return hsvToRGB; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rgbToHsv", function() { return rgbToHsv; });
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -2405,6 +2406,48 @@ function hsvToRGB(h, s, v) {
     r: (r + m) * 255,
     g: (g + m) * 255,
     b: (b + m) * 255
+  };
+}
+function rgbToHsv(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  var cMax = Math.max(r, g, b),
+      cMin = Math.min(r, g, b),
+      delta = cMax - cMin,
+      h,
+      s,
+      v;
+
+  if (delta === 0) {
+    h = 0;
+  } else if (cMax === r) {
+    h = 60 * ((g - b) / delta % 6);
+  } else if (cMax === g) {
+    h = 60 * ((b - r) / delta + 2);
+  } else {
+    h = 60 * ((r - g) / delta + 4);
+  }
+
+  if (cMax === 0) {
+    s = 0;
+  } else {
+    s = delta / cMax;
+  }
+
+  v = cMax;
+  h %= 360;
+
+  if (h < 0) {
+    h += 360;
+  }
+
+  s = clamp(s, 0, 1);
+  v = clamp(v, 0, 1);
+  return {
+    h: h,
+    s: s,
+    v: v
   };
 }
 

@@ -1,6 +1,6 @@
 import {hsvToRGB, rgbToHsv, clamp} from "core/utility";
 import Publisher from "core/Publisher";
-import {HSV} from "core/vectors";
+import {HSV, RGBA} from "core/vectors";
 
 
 export class SquareColorPickerCursor {
@@ -89,11 +89,11 @@ export class ColorWheel extends Publisher {
         this.radius = size / 2;
         this.x = this.radius;
         this.y = this.radius;
+        this.v = 1.0;
         this.isMouseDown = false;
         this.image = null;
-        this.hue = hue;
-        this.saturation = saturation;
-        this.value = value;
+
+        this.value = new HSV(0.0, 0.0, 1.0);
 
         this.cursor = new SquareColorPickerCursor(20, 2);
 
@@ -143,17 +143,15 @@ export class ColorWheel extends Publisher {
     }
 
     chooseColorAt(x, y) {
-        this.x = x;
-        this.y = y;
-        this.render();
-        let hsv = this.getHSV();
-        this.hue = hsv.h;
-        this.saturation = hsv.s;
-        this.value = hsv.v;
+        this.value = this._getHsvAt(x, y);
 
         this.publish('color-change', {
             wheel: this
         });
+    }
+
+    getHSV() {
+        return this.value;
     }
 
     getColorAt(x, y) {
@@ -167,19 +165,15 @@ export class ColorWheel extends Publisher {
     _getHsvAt(x, y) {
         let distance = this._getStrengthDistance(x, y);
 
-        if(distance > 1) {
-            return;
-        }
-
         let x2 = x,
             y2 = y,
             theta = this._getThetaPercentage(x2, y2);
 
-        return {
-            h: theta * 360,
-            s: distance,
-            v: this.value
-        };
+        return new HSV(
+            clamp(theta * 360, 0, 360),
+            clamp(distance, 0, 1),
+            clamp(this.v, 0, 1)
+        );
     }
 
     refreshImage() {
@@ -191,9 +185,10 @@ export class ColorWheel extends Publisher {
         for(let x = 0; x < width; x++) {
             for(let y = 0; y < height; y++) {
                 let rgb = this.getColorAt(x, y),
-                    index = 4*(x+(y*width));
+                    index = 4*(x+(y*width)),
+                    distance = this._getStrengthDistance(x, y);
 
-                if(!rgb) {
+                if(distance > 1) {
                     continue;
                 }
 
@@ -206,13 +201,19 @@ export class ColorWheel extends Publisher {
     }
 
     render() {
-        if(!this.image) {
-            this.refreshImage();
+        if(!this._renderID) {
+            this._renderID = window.requestAnimationFrame(() => {
+                this._renderID = null;
+
+                if(!this.image) {
+                    this.refreshImage();
+                }
+
+                this.context.putImageData(this.image, 0, 0);
+
+                this.cursor.draw(this.context, this.x, this.y);
+            });
         }
-
-        this.context.putImageData(this.image, 0, 0);
-
-        this.cursor.draw(this.context, this.x, this.y);
     }
 
     _getStrengthDistance(x, y) {
@@ -244,19 +245,8 @@ export class ColorWheel extends Publisher {
         };
     }
 
-    setRGB(r, g, b) {
-        let hsv = rgbToHsv(r, g, b),
-            {x, y} = this._getXY(hsv.h, hsv.s);
-
-        this.chooseColorAt(x, y);
-    }
-
-    getHSV() {
-        return this._getHsvAt(this.x, this.y);
-    }
-
     getRGB() {
-        return this.getColorAt(this.x, this.y);
+        return this.value.toRGB();
     }
 
     _getXYPositionFromEvent(event) {
@@ -276,6 +266,28 @@ export class ColorWheel extends Publisher {
             selector.append(this.element);
         }
     }
+
+    get value() {
+        return this._getHsvAt(this.x, this.y);
+    }
+
+    set value(value) {
+        value = value.toHSV();
+        let currentValue = this.value;
+
+        if(!currentValue.equals(value)) {
+            if(currentValue.v !== value.v) {
+                this.image = null;
+            }
+
+            let {x, y} = this._getXY(value.hue, value.saturation);
+            this.x = x;
+            this.y = y;
+            this.v = value.value;
+
+            this.render();
+        }
+    }
 }
 
 
@@ -286,15 +298,16 @@ export class ColorRangeSlider extends Publisher {
         this.context = this.element.getContext('2d');
         this.element.width = width;
         this.element.height = height;
-        this.element.style.border = "1px solid #000";  // todo remove debug only
-        this.value = 1;
+        this.value = 0;
+        this.imagePaddingX = 6;
+        this.imagePaddingY = 3;
         this.isMouseDown = false;
-        this.from = new HSV(0, 0, 1.0);
-        this.to = new HSV(0, 0, 0.0);
+        this.start = new HSV(0, 0, 0.0);
+        this.end = new HSV(0, 0, 1.0);
 
         this.image = null;
 
-        this.cursor = new TrianglesCursorX(this.element.height / 2, this.element.height, "#000000", "#ffffff", 10);
+        this.cursor = new TrianglesCursorX(this.element.height / 2, this.element.height, "#000000", "#ffffff", 6);
 
         let onMouseMove = (event) => {
             if(this.isMouseDown) {
@@ -304,7 +317,7 @@ export class ColorRangeSlider extends Publisher {
 
                 let v = clamp(x / (this.element.width), 0, 1);
 
-                this.setValue(v);
+                this.chooseColorAt(v);
             }
         };
 
@@ -328,8 +341,8 @@ export class ColorRangeSlider extends Publisher {
     }
 
     refreshImage() {
-        let width = this.element.width,
-            height = this.element.height;
+        let width = this.element.width-(this.imagePaddingX*2),
+            height = this.element.height-(this.imagePaddingY*2);
 
         this.image = this.context.createImageData(width, height);
 
@@ -349,31 +362,75 @@ export class ColorRangeSlider extends Publisher {
     }
 
     getColorAt(pos) {
-        let delta = this.to.subtract(this.from),
-            color = this.from.add(delta.scalar(pos));
+        let delta = this.end.subtract(this.start),
+            color = this.start.add(delta.scalar(pos));
 
         return color.toRGB();
     }
 
     render() {
-        if(!this.image) {
-            this.refreshImage();
+        if(!this._renderID) {
+            this._renderID = window.requestAnimationFrame(() => {
+                this._renderID = null;
+
+                if(!this.image) {
+                    this.refreshImage();
+                }
+
+                this.context.clearRect(0, 0, this.element.width, this.element.height);
+                this.context.putImageData(this.image, this.imagePaddingX, this.imagePaddingY);
+
+                let v = this.value;
+
+                let imageWidth = (this.element.width - (this.imagePaddingX*2)),
+                    pos = clamp(v * imageWidth, 0, imageWidth);
+
+                this.cursor.draw(this.context, this.imagePaddingX + pos, 0);
+            });
         }
-
-        this.context.putImageData(this.image, 0, 0);
-
-        let v = 1 - this.value;
-
-        let x = v * (this.element.width);
-
-        this.cursor.draw(this.context, x, 0);
     }
 
-    setValue(value) {
+    chooseColorAt(value) {
         if(value !== this.value) {
             this.value = value;
             this.render();
+            this.publish('color-change', {target: this, value});
         }
+    }
+
+    set value(value) {
+        if(value !== this._value) {
+            this._value = value;
+            this.render();
+        }
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set end(value) {
+        this._end = value;
+        this.image = null;
+        this.render();
+    }
+
+    get end() {
+        return this._end;
+    }
+
+    set start(value) {
+        this._start = value;
+        this.image = null;
+        this.render();
+    }
+
+    get start() {
+        return this._start;
+    }
+
+    getColorValue() {
+        return this.getColorAt(this.value);
     }
 
     appendTo(selector) {
@@ -388,12 +445,14 @@ export class ColorRangeSlider extends Publisher {
 }
 
 
-export class ColorPickerWheel {
+export class ColorPickerWheel extends Publisher {
     constructor(width, height) {
+        super();
         this.width = width;
         this.height = height;
 
         this.element = document.createElement('article');
+
         let wheelContainer = document.createElement('div'),
             sliderContainer = document.createElement('div');
 
@@ -406,10 +465,27 @@ export class ColorPickerWheel {
         this.element.appendChild(sliderContainer);
 
         this.wheel = new ColorWheel(this.width, 0, 0, 1);
-        this.slider = new ColorRangeSlider(this.wheel, this.width, 25, 20);
+        this.sliderValue = new ColorRangeSlider(this.width, 25, 20);
+
+        this.wheel.on('color-change', topic => {
+            let color = this.wheel.getHSV();
+
+            this.sliderValue.start = new HSV(color.h, color.s, 0.0);
+            this.sliderValue.end = new HSV(color.h, color.s, 1.0);
+
+            this.publish('color-change', {target: this});
+        });
+
+        this.sliderValue.on('color-change', topic => {
+            let hsv = this.wheel.value;
+            this.wheel.value = new HSV(hsv.hue, hsv.saturation, topic.value);
+            this.publish('color-change', {target: this});
+        });
 
         this.wheel.appendTo(wheelContainer);
-        this.slider.appendTo(sliderContainer);
+        this.sliderValue.appendTo(sliderContainer);
+
+        this.value = new HSV(0, 0, 1.0);
     }
 
     appendTo(selector) {
@@ -424,6 +500,211 @@ export class ColorPickerWheel {
 
     render() {
         this.wheel.render();
+        this.sliderValue.render();
+    }
+
+    get value() {
+        return this.wheel.value;
+    }
+
+    set value(value) {
+        value = value.toHSV();
+        this.wheel.value = value;
+
+        console.log(value);
+        this.sliderValue.start = new HSV(value.hue, value.saturation, 0.0);
+        this.sliderValue.end = new HSV(value.hue, value.saturation, 1.0);
+        this.sliderValue.value = value.value;
+    }
+}
+
+
+export class ColorComponentSlider extends Publisher {
+    constructor(width, height, label, start, end, value=0, name="", max=255, step=1, round=false) {
+        super();
+        this.slider = new ColorRangeSlider(width, height);
+        this.element = document.createElement('div');
+        this.label = document.createElement('label');
+        this.input = document.createElement('input');
+        this.textBox = document.createElement('span');
+
+        this.element.className = "rgb-slider";
+        this.label.className = "rgb-slider__label";
+        this.input.className = "rgb-slider__input";
+        this.textBox.className = "rgb-slider__text";
+        this.slider.element.classList.add('rgb-slider__slider');
+
+        this.max = max;
+        this.round = round;
+        this.input.name = name;
+        this.input.type = "number";
+        this.input.max = max+"";
+        this.input.min = "0";
+        this.input.step = step+"";
+        this.textBox.innerText = label;
+
+        this.element.appendChild(this.label);
+        this.label.appendChild(this.textBox);
+        this.slider.appendTo(this.label);
+        this.label.appendChild(this.input);
+
+        this.slider.start = start;
+        this.slider.end = end;
+
+        this.slider.on('color-change', topic => {
+            let value = topic.value * max;
+
+            if(round) {
+                value = Math.round(value);
+            }
+
+            this.value = value;
+            this.publish('color-change', {target: this});
+        });
+
+        this.input.addEventListener('change', (event) => {
+            this.value = parseInt(this.input.value, 10);
+            this.publish('color-change', {target: this});
+        });
+
+        this.value = value;
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+
+    render() {
         this.slider.render();
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        if(this.round) {
+            value = Math.round(value);
+        }
+
+        value = clamp(value, 0, this.max);
+
+        this._value = value;
+        this.input.value = value + "";
+        this.slider.value = value / this.max;
+    }
+}
+
+
+export class ColorPanel extends Publisher {
+    constructor() {
+        super();
+        this.element = document.createElement("div");
+        this.element.className = "color-panel";
+
+        this.redSlider = new ColorComponentSlider(100, 20, "R", new RGBA(0, 0, 0, 1), new RGBA(255, 0, 0, 1), 0, "", 255, 1, true);
+        this.greenSlider = new ColorComponentSlider(100, 20, "G", new RGBA(0, 0, 0, 1), new RGBA(0, 255, 0, 1), 0, "", 255, 1, true);
+        this.blueSlider = new ColorComponentSlider(100, 20, "B", new RGBA(0, 0, 0, 1), new RGBA(0, 0, 255, 1), 0, "", 255, 1, true);
+
+        this.redSlider.appendTo(this.element);
+        this.greenSlider.appendTo(this.element);
+        this.blueSlider.appendTo(this.element);
+
+        this.redSlider.on('color-change', () => {
+            this.value = new RGBA(this.redSlider.value, this.value.g, this.value.b);
+            this.publish('color-change', {target: this});
+        });
+
+        this.greenSlider.on('color-change', () => {
+            this.value = new RGBA(this.value.r, this.greenSlider.value, this.value.b);
+            this.publish('color-change', {target: this});
+        });
+
+        this.blueSlider.on('color-change', () => {
+            this.value = new RGBA(this.value.r, this.value.g, this.blueSlider.value);
+            this.publish('color-change', {target: this});
+        });
+
+        this.value = new RGBA(255, 255, 255, 1);
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+
+    render() {
+        this.redSlider.render();
+        this.greenSlider.render();
+        this.blueSlider.render();
+    }
+
+    set value(value) {
+        this._value = value;
+        let rgb = this._value.toRGB();
+        this.redSlider.value = rgb.r;
+        this.greenSlider.value = rgb.g;
+        this.blueSlider.value = rgb.b;
+    }
+
+    get value() {
+        return this._value;
+    }
+}
+
+
+export class ColorPicker {
+    constructor() {
+        this.element = document.createElement('article');
+
+        let col1 = document.createElement('div'),
+            col2 = document.createElement('div');
+
+        this.colorPicker = new ColorPickerWheel(300, 500);
+        this.panel = new ColorPanel();
+
+        this.element.appendChild(col1);
+        this.element.appendChild(col2);
+
+        this.colorPicker.appendTo(col1);
+        this.panel.appendTo(col2);
+
+        this.element.className = "color-picker";
+        col1.className = "color-picker__col1";
+        col2.className = "color-picker__col2";
+
+        this.colorPicker.on('color-change', () => {
+            this.panel.value = this.colorPicker.value;
+        });
+
+        this.panel.on('color-change', () => {
+            this.colorPicker.value = this.panel.value;
+        });
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+
+    render() {
+        this.colorPicker.render();
+        this.panel.render();
     }
 }

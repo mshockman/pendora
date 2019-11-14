@@ -711,5 +711,14 @@ export function rgbToHsv(r, g, b) {
 
     v = cMax;
 
+    h %= 360;
+
+    if(h < 0) {
+        h += 360;
+    }
+
+    s = clamp(s, 0, 1);
+    v = clamp(v, 0, 1);
+
     return {h, s, v};
 }

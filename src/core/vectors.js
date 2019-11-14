@@ -1,4 +1,4 @@
-import {clamp, hsvToRGB} from './utility';
+import {clamp, hsvToRGB, rgbToHsv} from './utility';
 import {ExtendableError, ValueError} from "./errors";
 
 
@@ -1206,6 +1206,15 @@ export class RGBA extends AbstractVector {
     toRGBAString() {
         return `rgba(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(this.b)}, ${this.a})`;
     }
+
+    toRGB() {
+        return this.clone();
+    }
+
+    toHSV() {
+        let hsv = rgbToHsv(this.r, this.g, this.b);
+        return new HSV(hsv.h, hsv.s, hsv.v);
+    }
 }
 
 
@@ -1246,14 +1255,36 @@ export class HSV extends AbstractVector {
         this[2] = value;
     }
 
+    get hue() {
+        return this[0];
+    }
+
+    set hue(value) {
+        this[0] = value;
+    }
+
+    get saturation() {
+        return this[1];
+    }
+
+    set saturation(value) {
+        this[1] = value;
+    }
+
+    get value() {
+        return this[2];
+    }
+
+    set value(value) {
+        this[2] = value;
+    }
+
     toRGB() {
-        let r = new RGBA(0.0, 0.0, 0.0, 1.0);
-
         let rgb = hsvToRGB(this.h, this.s, this.v);
-        r.r = rgb.r;
-        r.g = rgb.g;
-        r.b = rgb.b;
+        return new RGBA(rgb.r, rgb.g, rgb.b, 1.0);
+    }
 
-        return r;
+    toHSV() {
+        return this.clone();
     }
 }
