@@ -5,7 +5,8 @@ import {ExtendableError, ValueError} from "./errors";
 const regPercentage = /^(\d+\.?\d*)%$/,
     regWhitespace = /\s+/,
     regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/, // Parses string like "left+10px" into ["left", "+10px"]
-    regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/; // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
+    regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/, // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
+    hexString = /^#?([a-f0-9]{3})$|^#?([a-f0-9]{6})$|^#?([a-f0-9]{8})$/i;
 
 
 export class UnitError extends ExtendableError {
@@ -473,45 +474,6 @@ export class Vec3 {
 
     toTranslate3d() {
         return `translate3d(${this.x}px, ${this.y}px, ${this.z}px)`;
-    }
-
-    static fromHex(hex) {
-        let m = /^#?([0-9a-f]{3})$/i.exec(hex);
-
-        if(m) {
-            hex = m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2];
-        } else {
-            m = /^#?([0-9a-f]{6})$/i.exec(hex);
-
-            if(m) {
-                hex = m[1];
-            } else {
-                throw new Error(`Could not parse value ${hex}`);
-            }
-        }
-
-        hex = parseInt(hex, 16);
-
-        // r, g, b
-        return new Vec3(
-            hex & 0xff0000 >> 16,
-            hex & 0x00ff00 >> 8,
-            hex & 0x0000ff
-        );
-    }
-
-    static fromRGB(value) {
-        let m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(value);
-
-        if(!m) {
-            throw new Error(`Could not parse rgb value ${value}`);
-        }
-
-        return new Vec3(
-            parseInt(m[1], 10),
-            parseInt(m[2], 10),
-            parseInt(m[3], 10),
-        );
     }
 }
 
@@ -1090,7 +1052,33 @@ export class RGBA extends AbstractVector {
         return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
     }
 
-    static parseRGBAColorStringArgs(value) {
+    toHex() {
+        let r = Math.round(this.r).toString(16),
+            g = Math.round(this.g).toString(16),
+            b = Math.round(this.b).toString(16);
+
+        if(r.length === 1) r = "0" + r;
+        if(g.length === 1) g = "0" + g;
+        if(b.length === 1) b = "0" + b;
+
+        return `#${r}${g}${b}`;
+    }
+
+    toHexA() {
+        let r = Math.round(this.r).toString(16),
+            g = Math.round(this.g).toString(16),
+            b = Math.round(this.b).toString(16),
+            a = Math.round(this.a*255).toString(16);
+
+        if(r.length === 1) r = "0" + r;
+        if(g.length === 1) g = "0" + g;
+        if(b.length === 1) b = "0" + b;
+        if(a.length === 1) a = "0" + a;
+
+        return `#${r}${g}${b}${a}`;
+    }
+
+    static fromRBGA(value) {
         value = value.trim().split(/\s+/);
 
         let r = value[0],
@@ -1135,38 +1123,32 @@ export class RGBA extends AbstractVector {
         return new RGBA(r, g, b, a);
     }
 
-    static parseHexColorStringArg(value) {
-        value = value.trim().substring(1);
+    static fromHex(value) {
+        let m = hexString.exec(value),
+            r, g, b, a = 1.0;
 
-        let r, g, b, a = 1.0;
-
-        if(value.length === 3) {
-            r = value[0];
-            g = value[1];
-            b = value[2];
-
-            r = parseInt(r+r, 16);
-            g = parseInt(g+g, 16);
-            b = parseInt(b+b, 16);
-        } else if(value.length === 6) {
-            r = value.substr(0, 2);
-            g = value.substr(2, 2);
-            b = value.substr(4, 2);
-
-            r = parseInt(r, 16);
-            g = parseInt(g, 16);
-            b = parseInt(b, 16);
-        } else if(value.length === 8) {
-            r = value.substr(0, 2);
-            g = value.substr(2, 2);
-            b = value.substr(4, 2);
-            a = value.substr(6, 2);
-
-            r = parseInt(r, 16);
-            g = parseInt(g, 16);
-            b = parseInt(b, 16);
-            a = parseInt(a, 16) / 255;
+        if(!m) {
+            throw new Error("Invalid hex color value.  Must be a valid css hex color");
         }
+
+        if(m[1]) {
+            r = m[1][0] + m[1][0];
+            g = m[1][1] + m[1][1];
+            b = m[1][2] + m[1][2];
+        } else if(m[2]) {
+            r = m[2].substr(0, 2);
+            g = m[2].substr(2, 2);
+            b = m[2].substr(4, 2);
+        } else {
+            r = m[3].substr(0, 2);
+            g = m[3].substr(2, 2);
+            b = m[3].substr(4, 2);
+            a = parseInt(m[3].substr(6, 2), 16) / 255;
+        }
+
+        r = parseInt(r, 16);
+        g = parseInt(g, 16);
+        b = parseInt(b, 16);
 
         return new RGBA(r, g, b, a);
     }

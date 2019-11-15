@@ -7,9 +7,9 @@ const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
 
 
 const TYPE_FUNCTIONS = {
-    hex: RGBA.parseHexColorStringArg,
-    rgb: RGBA.parseRGBAColorStringArgs,
-    rgba: RGBA.parseRGBAColorStringArgs
+    hex: RGBA.fromHex,
+    rgb: RGBA.fromRBGA,
+    rgba: RGBA.fromRBGA
 };
 
 
