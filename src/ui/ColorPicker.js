@@ -511,7 +511,6 @@ export class ColorPickerWheel extends Publisher {
         value = value.toHSV();
         this.wheel.value = value;
 
-        console.log(value);
         this.sliderValue.start = new HSV(value.hue, value.saturation, 0.0);
         this.sliderValue.end = new HSV(value.hue, value.saturation, 1.0);
         this.sliderValue.value = value.value;
@@ -563,8 +562,14 @@ export class ColorComponentSlider extends Publisher {
         });
 
         this.input.addEventListener('change', (event) => {
-            this.value = parseInt(this.input.value, 10);
-            this.publish('color-change', {target: this});
+            let value = parseInt(this.input.value, 10);
+
+            if(!Number.isNaN(value)) {
+                this.value = value;
+                this.publish('color-change', {target: this});
+            } else {
+                this.input.value = this.value;
+            }
         });
 
         this.value = value;
@@ -585,7 +590,13 @@ export class ColorComponentSlider extends Publisher {
     }
 
     get value() {
-        return this._value;
+        let value = this._value * this.max;
+
+        if(this.round) {
+            value = Math.round(value);
+        }
+
+        return clamp(value, 0, this.max);
     }
 
     set value(value) {
@@ -595,9 +606,9 @@ export class ColorComponentSlider extends Publisher {
 
         value = clamp(value, 0, this.max);
 
-        this._value = value;
+        this._value = value / this.max;
         this.input.value = value + "";
-        this.slider.value = value / this.max;
+        this.slider.value = this._value;
     }
 }
 
@@ -612,23 +623,70 @@ export class ColorPanel extends Publisher {
         this.greenSlider = new ColorComponentSlider(100, 20, "G", new RGBA(0, 0, 0, 1), new RGBA(0, 255, 0, 1), 0, "", 255, 1, true);
         this.blueSlider = new ColorComponentSlider(100, 20, "B", new RGBA(0, 0, 0, 1), new RGBA(0, 0, 255, 1), 0, "", 255, 1, true);
 
+        this.hueSlider = new ColorComponentSlider(100, 20, "H", new HSV(0, 0, 0), new HSV(0, 0, 1), 0, "", 360, 0.1, false);
+        this.satSlider = new ColorComponentSlider(100, 20, "S", new HSV(0, 0, 0), new HSV(0, 0, 1), 0, "", 1, 0.1, false);
+        this.valueSlider = new ColorComponentSlider(100, 20, "V", new HSV(0, 0, 0), new HSV(0, 0, 1), 0, "", 1, 0.1, false);
+
         this.redSlider.appendTo(this.element);
         this.greenSlider.appendTo(this.element);
         this.blueSlider.appendTo(this.element);
 
+        this.hueSlider.appendTo(this.element);
+        this.satSlider.appendTo(this.element);
+        this.valueSlider.appendTo(this.element);
+
+        this.hexInput = document.createElement('input');
+        this.hexInput.type = "text";
+        this.hexInput.className = "color-panel__hex";
+        this.element.appendChild(this.hexInput);
+
+        this.swatch = document.createElement('div');
+        this.swatch.className = 'color-panel__swatch';
+        this.element.appendChild(this.swatch);
+
         this.redSlider.on('color-change', () => {
-            this.value = new RGBA(this.redSlider.value, this.value.g, this.value.b);
+            let rgb = this.rgb;
+            this.value = new RGBA(this.redSlider.value, rgb.g, rgb.b);
             this.publish('color-change', {target: this});
         });
 
         this.greenSlider.on('color-change', () => {
-            this.value = new RGBA(this.value.r, this.greenSlider.value, this.value.b);
+            let rgb = this.rgb;
+            this.value = new RGBA(rgb.r, this.greenSlider.value, rgb.b);
             this.publish('color-change', {target: this});
         });
 
         this.blueSlider.on('color-change', () => {
-            this.value = new RGBA(this.value.r, this.value.g, this.blueSlider.value);
+            let rgb = this.rgb;
+            this.value = new RGBA(rgb.r, rgb.g, this.blueSlider.value);
             this.publish('color-change', {target: this});
+        });
+
+        this.hueSlider.on('color-change', () => {
+            let hsv = this.hsv;
+            this.value = new HSV(this.hueSlider.value, hsv.s, hsv.v);
+            this.publish('color-change', {target: this});
+        });
+
+        this.satSlider.on('color-change', () => {
+            let hsv = this.hsv;
+            this.value = new HSV(hsv.h, this.satSlider.value, hsv.v);
+            this.publish('color-change', {target: this});
+        });
+
+        this.valueSlider.on('color-change', () => {
+            let hsv = this.hsv;
+            this.value = new HSV(hsv.h, hsv.s, this.valueSlider.value);
+            this.publish('color-change', {target: this});
+        });
+
+        this.hexInput.addEventListener('change', (event) => {
+            try {
+                this.value = RGBA.fromHex(this.hexInput.value);
+                this.publish('color-change', {target: this});
+            } catch(e) {
+                this.hexInput.value = this.rgb.toHex();
+            }
         });
 
         this.value = new RGBA(255, 255, 255, 1);
@@ -652,14 +710,57 @@ export class ColorPanel extends Publisher {
 
     set value(value) {
         this._value = value;
+        this._hsv = value.toHSV();
         let rgb = this._value.toRGB();
+        this._rgb = rgb;
+
         this.redSlider.value = rgb.r;
+        this.redSlider.slider.start = new RGBA(0, rgb.g, rgb.b, 1);
+        this.redSlider.slider.end = new RGBA(255, rgb.g, rgb.b, 1);
+
         this.greenSlider.value = rgb.g;
+        this.greenSlider.slider.start = new RGBA(rgb.r, 0, rgb.b, 1);
+        this.greenSlider.slider.end = new RGBA(rgb.r, 255, rgb.b, 1);
+
         this.blueSlider.value = rgb.b;
+        this.blueSlider.slider.start = new RGBA(rgb.r, rgb.g, 0, 1);
+        this.blueSlider.slider.end = new RGBA(rgb.r, rgb.g, 255, 1);
+
+        this.hueSlider.value = this._hsv.h;
+        this.hueSlider.slider.start = new HSV(0, this._hsv.s, this._hsv.v);
+        this.hueSlider.slider.end = new HSV(360, this._hsv.s, this._hsv.v);
+
+        this.satSlider.value = this._hsv.s;
+        this.satSlider.slider.start = new HSV(this._hsv.h, 0, this._hsv.v);
+        this.satSlider.slider.end = new HSV(this._hsv.h, 1, this._hsv.v);
+
+        this.valueSlider.value = this._hsv.v;
+        this.valueSlider.slider.start = new HSV(this._hsv.h, this._hsv.s, 0);
+        this.valueSlider.slider.end = new HSV(this._hsv.h, this._hsv.s, 1);
+
+        let hex = rgb.toHex();
+        this.hexInput.value = hex;
+        this.swatch.style.backgroundColor = hex;
     }
 
     get value() {
         return this._value;
+    }
+
+    get rgb() {
+        return this._rgb;
+    }
+
+    set rgb(value) {
+        this.value = value;
+    }
+
+    get hsv() {
+        return this._hsv;
+    }
+
+    set hsv(value) {
+        this.value = value;
     }
 }
 
