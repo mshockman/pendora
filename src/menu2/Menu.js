@@ -2,7 +2,6 @@ import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 import {addClasses} from "core/utility";
 import {parseBoolean, parseIntValue, parseAny, parseHTML} from "core/utility";
-import * as iter from "core/iter";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
 import Attribute, {DROP, TRUE} from "core/attributes";
@@ -276,10 +275,17 @@ export class AbstractMenu extends MenuNode {
      * Menu bodies are where item are appended when using function like addItem or append.  They will be added to the
      * last menu body in the menu.
      *
-     * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]>}
+     * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]> | HTMLElement[]}
      */
     getMenuBody() {
-        return this.element.querySelectorAll(':scope > .menu__body');
+        let bodies = Array.prototype.slice.call(this.element.querySelectorAll(':scope > .menu__body'));
+
+        if(!bodies.length) {
+            return [this.element];
+        } else {
+            // noinspection JSValidateTypes
+            return bodies;
+        }
     }
 
     isMenu() {

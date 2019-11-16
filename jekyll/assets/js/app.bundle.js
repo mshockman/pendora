@@ -1283,313 +1283,6 @@ function (_ExtendableError6) {
 
 /***/ }),
 
-/***/ "./src/core/iter.js":
-/*!**************************!*\
-  !*** ./src/core/iter.js ***!
-  \**************************/
-/*! exports provided: items, keys, values, enumerate, chain */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "items", function() { return items; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keys", function() { return keys; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "values", function() { return values; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "enumerate", function() { return enumerate; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chain", function() { return chain; });
-var _marked =
-/*#__PURE__*/
-regeneratorRuntime.mark(items),
-    _marked2 =
-/*#__PURE__*/
-regeneratorRuntime.mark(keys),
-    _marked3 =
-/*#__PURE__*/
-regeneratorRuntime.mark(values),
-    _marked4 =
-/*#__PURE__*/
-regeneratorRuntime.mark(enumerate),
-    _marked5 =
-/*#__PURE__*/
-regeneratorRuntime.mark(chain);
-
-function items(object) {
-  var key;
-  return regeneratorRuntime.wrap(function items$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          _context.t0 = regeneratorRuntime.keys(object);
-
-        case 1:
-          if ((_context.t1 = _context.t0()).done) {
-            _context.next = 8;
-            break;
-          }
-
-          key = _context.t1.value;
-
-          if (!object.hasOwnProperty(key)) {
-            _context.next = 6;
-            break;
-          }
-
-          _context.next = 6;
-          return [key, object[key]];
-
-        case 6:
-          _context.next = 1;
-          break;
-
-        case 8:
-        case "end":
-          return _context.stop();
-      }
-    }
-  }, _marked);
-}
-function keys(object) {
-  var key;
-  return regeneratorRuntime.wrap(function keys$(_context2) {
-    while (1) {
-      switch (_context2.prev = _context2.next) {
-        case 0:
-          _context2.t0 = regeneratorRuntime.keys(object);
-
-        case 1:
-          if ((_context2.t1 = _context2.t0()).done) {
-            _context2.next = 8;
-            break;
-          }
-
-          key = _context2.t1.value;
-
-          if (!object.hasOwnProperty(key)) {
-            _context2.next = 6;
-            break;
-          }
-
-          _context2.next = 6;
-          return key;
-
-        case 6:
-          _context2.next = 1;
-          break;
-
-        case 8:
-        case "end":
-          return _context2.stop();
-      }
-    }
-  }, _marked2);
-}
-function values(object) {
-  var key;
-  return regeneratorRuntime.wrap(function values$(_context3) {
-    while (1) {
-      switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.t0 = regeneratorRuntime.keys(object);
-
-        case 1:
-          if ((_context3.t1 = _context3.t0()).done) {
-            _context3.next = 8;
-            break;
-          }
-
-          key = _context3.t1.value;
-
-          if (!object.hasOwnProperty(key)) {
-            _context3.next = 6;
-            break;
-          }
-
-          _context3.next = 6;
-          return object[key];
-
-        case 6:
-          _context3.next = 1;
-          break;
-
-        case 8:
-        case "end":
-          return _context3.stop();
-      }
-    }
-  }, _marked3);
-}
-function enumerate(iterable) {
-  var i, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, value;
-
-  return regeneratorRuntime.wrap(function enumerate$(_context4) {
-    while (1) {
-      switch (_context4.prev = _context4.next) {
-        case 0:
-          i = 0;
-          _iteratorNormalCompletion = true;
-          _didIteratorError = false;
-          _iteratorError = undefined;
-          _context4.prev = 4;
-          _iterator = iterable[Symbol.iterator]();
-
-        case 6:
-          if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-            _context4.next = 13;
-            break;
-          }
-
-          value = _step.value;
-          _context4.next = 10;
-          return [i, value];
-
-        case 10:
-          _iteratorNormalCompletion = true;
-          _context4.next = 6;
-          break;
-
-        case 13:
-          _context4.next = 19;
-          break;
-
-        case 15:
-          _context4.prev = 15;
-          _context4.t0 = _context4["catch"](4);
-          _didIteratorError = true;
-          _iteratorError = _context4.t0;
-
-        case 19:
-          _context4.prev = 19;
-          _context4.prev = 20;
-
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-
-        case 22:
-          _context4.prev = 22;
-
-          if (!_didIteratorError) {
-            _context4.next = 25;
-            break;
-          }
-
-          throw _iteratorError;
-
-        case 25:
-          return _context4.finish(22);
-
-        case 26:
-          return _context4.finish(19);
-
-        case 27:
-        case "end":
-          return _context4.stop();
-      }
-    }
-  }, _marked4, null, [[4, 15, 19, 27], [20,, 22, 26]]);
-}
-function chain() {
-  var _len,
-      iterables,
-      _key,
-      _i,
-      _iterables,
-      iter,
-      _iteratorNormalCompletion2,
-      _didIteratorError2,
-      _iteratorError2,
-      _iterator2,
-      _step2,
-      value,
-      _args5 = arguments;
-
-  return regeneratorRuntime.wrap(function chain$(_context5) {
-    while (1) {
-      switch (_context5.prev = _context5.next) {
-        case 0:
-          for (_len = _args5.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
-            iterables[_key] = _args5[_key];
-          }
-
-          _i = 0, _iterables = iterables;
-
-        case 2:
-          if (!(_i < _iterables.length)) {
-            _context5.next = 33;
-            break;
-          }
-
-          iter = _iterables[_i];
-          _iteratorNormalCompletion2 = true;
-          _didIteratorError2 = false;
-          _iteratorError2 = undefined;
-          _context5.prev = 7;
-          _iterator2 = iter[Symbol.iterator]();
-
-        case 9:
-          if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-            _context5.next = 16;
-            break;
-          }
-
-          value = _step2.value;
-          _context5.next = 13;
-          return value;
-
-        case 13:
-          _iteratorNormalCompletion2 = true;
-          _context5.next = 9;
-          break;
-
-        case 16:
-          _context5.next = 22;
-          break;
-
-        case 18:
-          _context5.prev = 18;
-          _context5.t0 = _context5["catch"](7);
-          _didIteratorError2 = true;
-          _iteratorError2 = _context5.t0;
-
-        case 22:
-          _context5.prev = 22;
-          _context5.prev = 23;
-
-          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-            _iterator2["return"]();
-          }
-
-        case 25:
-          _context5.prev = 25;
-
-          if (!_didIteratorError2) {
-            _context5.next = 28;
-            break;
-          }
-
-          throw _iteratorError2;
-
-        case 28:
-          return _context5.finish(25);
-
-        case 29:
-          return _context5.finish(22);
-
-        case 30:
-          _i++;
-          _context5.next = 2;
-          break;
-
-        case 33:
-        case "end":
-          return _context5.stop();
-      }
-    }
-  }, _marked5, null, [[7, 18, 22, 30], [23,, 25, 29]]);
-}
-
-/***/ }),
-
 /***/ "./src/core/position.js":
 /*!******************************!*\
   !*** ./src/core/position.js ***!
@@ -4170,10 +3863,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu2/MenuNode.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
 /* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
-/* harmony import */ var core_iter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core/iter */ "./src/core/iter.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./decorators */ "./src/menu2/decorators.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./decorators */ "./src/menu2/decorators.js");
+/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
+/* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -4232,13 +3924,12 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
-
 var parseBooleanOrInt = function parseBooleanOrInt(value) {
   return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["parseAny"])(value, core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_utility__WEBPACK_IMPORTED_MODULE_2__["parseIntValue"]);
 },
-    timeAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_6__["default"](parseBooleanOrInt, core_attributes__WEBPACK_IMPORTED_MODULE_6__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_6__["TRUE"]),
-    boolAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_6__["default"](core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_6__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_6__["TRUE"]),
-    stringAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_6__["default"](null, core_attributes__WEBPACK_IMPORTED_MODULE_6__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_6__["TRUE"]);
+    timeAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](parseBooleanOrInt, core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]),
+    boolAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]),
+    stringAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](null, core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]);
 
 var MENU_PARAMETERS = {
   closeOnBlur: timeAttribute,
@@ -4295,7 +3986,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
     F: AbstractMenu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_4__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
       key: "position",
       value: void 0
     }, {
@@ -4661,14 +4352,21 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
        * Menu bodies are where item are appended when using function like addItem or append.  They will be added to the
        * last menu body in the menu.
        *
-       * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]>}
+       * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]> | HTMLElement[]}
        */
 
     }, {
       kind: "method",
       key: "getMenuBody",
       value: function getMenuBody() {
-        return this.element.querySelectorAll(':scope > .menu__body');
+        var bodies = Array.prototype.slice.call(this.element.querySelectorAll(':scope > .menu__body'));
+
+        if (!bodies.length) {
+          return [this.element];
+        } else {
+          // noinspection JSValidateTypes
+          return bodies;
+        }
       }
     }, {
       kind: "method",
@@ -4879,7 +4577,7 @@ function (_AbstractMenu) {
 }(AbstractMenu);
 
 
-autoloader__WEBPACK_IMPORTED_MODULE_5__["default"].register('menu', function (element) {
+autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (element) {
   return Menu.FromHTML(element);
 });
 
@@ -5205,18 +4903,21 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       value: function registerTopics() {
         var _this2 = this;
 
-        this.on('event.click', function (event) {
-          return _this2.onClick(event);
-        });
-        this.on('event.mouseover', function (event) {
-          return _this2.onMouseOver(event);
-        });
-        this.on('event.mouseout', function (event) {
-          return _this2.onMouseOut(event);
-        });
-        this.on('menuitem.selected', function (event) {
-          return _this2.onSelect(event);
-        });
+        if (!this._isTopicInit) {
+          this._isTopicInit = true;
+          this.on('event.click', function (event) {
+            return _this2.onClick(event);
+          });
+          this.on('event.mouseover', function (event) {
+            return _this2.onMouseOver(event);
+          });
+          this.on('event.mouseout', function (event) {
+            return _this2.onMouseOut(event);
+          });
+          this.on('menuitem.selected', function (event) {
+            return _this2.onSelect(event);
+          });
+        }
       }
       /**
        * Activates the item.
@@ -5477,6 +5178,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "onSelect",
       value: function onSelect() {
+        console.log(this.closeOnSelect);
+
         if (this.closeOnSelect && this.isActive) {
           this.deactivate();
         }
@@ -7271,6 +6974,10 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
               }
             }
           }
+
+          if (_this3.closeOnSelect && _this3.isActive) {
+            _this3.deactivate();
+          }
         });
       }
     }, {
@@ -7373,6 +7080,13 @@ function (_AbstractMenuItem2) {
 
     _this4.parseDOM();
 
+    if (!_this4.submenu) {
+      var submenu = new SelectMenu();
+      submenu.isVisible = false;
+
+      _this4.attachSubMenu(submenu);
+    }
+
     _this4.init();
 
     return _this4;
@@ -7392,6 +7106,10 @@ function (_AbstractMenuItem2) {
 
       this.on('option.select', function () {
         _this5.renderLabels();
+
+        if (_this5.closeOnSelect === true && _this5.isActive) {
+          _this5.deactivate();
+        }
       });
       this.on('option.deselect', function () {
         _this5.renderLabels();
@@ -7440,6 +7158,11 @@ function (_AbstractMenuItem2) {
       if (this.widget) this.widget.setValue(this.getValue());
     }
   }, {
+    key: "append",
+    value: function append(option) {
+      this.submenu.append(option);
+    }
+  }, {
     key: "getValue",
     value: function getValue() {
       var r = [];
@@ -7476,7 +7199,7 @@ function (_AbstractMenuItem2) {
   }, {
     key: "render",
     value: function render(context) {
-      var html = "\n        <article class=\"dropdown select\">\n            <ul class=\"selection\"></ul>\n            <ul class=\"menu hidden\" data-role=\"menu\">\n                <li data-role=\"menuitem\" class=\"menuitem\" data-value=\"1\"><a href=\"#\">Item #1</a></li>\n                <li data-role=\"menuitem\" class=\"menuitem\" data-value=\"2\"><a href=\"#\">Item #2</a></li>\n                <li data-role=\"menuitem\" class=\"menuitem\" data-value=\"3\"><a href=\"#\">Item #3</a></li>\n                <li data-role=\"menuitem\" class=\"menuitem\" data-value=\"4\"><a href=\"#\">Item #4</a></li>\n                <li data-role=\"menuitem\" class=\"menuitem\" data-value=\"5\"><a href=\"#\">Item #5</a></li>\n            </ul>\n        </article>\n        ";
+      var html = "\n        <article class=\"dropdown select\">\n            <ul class=\"selection\"></ul>\n        </article>\n        ";
       var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
     }
@@ -7529,7 +7252,41 @@ function (_AbstractMenuItem2) {
         element = document.querySelector(element);
       }
 
-      if (element.nodeName === "SELECT") {// todo create new select instance from select html element.
+      if (element.nodeName === "SELECT") {
+        // todo create new select instance from select html element.
+        var select = new SelectDropDown({
+          multiSelect: element.multiple
+        });
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
+
+        try {
+          for (var _iterator7 = element.querySelectorAll('option')[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var option = _step7.value;
+            var item = new SelectOption({
+              text: option.innerText.trim(),
+              value: option.value
+            });
+            select.append(item);
+          }
+        } catch (err) {
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+              _iterator7["return"]();
+            }
+          } finally {
+            if (_didIteratorError7) {
+              throw _iteratorError7;
+            }
+          }
+        }
+
+        element.replaceWith(select.element);
+        return select;
       } else {
         return _get(_getPrototypeOf(SelectDropDown), "FromHTML", this).call(this, element);
       }

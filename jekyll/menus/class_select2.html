@@ -1,0 +1,43 @@
+---
+title: Menu Class
+description: A component for managing a nestable list of items that map user event's to actions.
+layout: default
+---
+
+<header class="mod-header">
+    <h1>Select</h1>
+    <p class="subtitle">A replacement for the default select menu.</p>
+</header>
+
+<article>
+    <h2>Overview</h2>
+    <p>
+        Their are many cases where the default behavior of the &lt;select&gt; element just isn't enough.  For example,
+        if you want to perform advanced styling on the menu or if it's behavior when multiple is set to true isn't to your liking.
+        The Select2 widget is a replacement for the default &lt;select&gt; element that fixes some of this issues.
+    </p>
+
+    <select aria-label="Original">
+        <option value="1">Item #1</option>
+        <option value="1">Item #2</option>
+        <option value="1">Item #3</option>
+        <option value="1">Item #4</option>
+        <option value="1">Item #5</option>
+    </select>
+
+    <select data-init="select" aria-label="Custom" data-window-bind="testDD1">
+        <option value="1">Item #1</option>
+        <option value="1">Item #2</option>
+        <option value="1">Item #3</option>
+        <option value="1">Item #4</option>
+        <option value="1">Item #5</option>
+    </select>
+
+    <select data-init="select" aria-label="Custom" multiple>
+        <option value="1">Item #1</option>
+        <option value="1">Item #2</option>
+        <option value="1">Item #3</option>
+        <option value="1">Item #4</option>
+        <option value="1">Item #5</option>
+    </select>
+</article>

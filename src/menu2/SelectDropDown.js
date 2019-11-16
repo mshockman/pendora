@@ -225,6 +225,10 @@ export class SelectMenu extends AbstractMenu {
                     }
                 }
             }
+
+            if(this.closeOnSelect && this.isActive) {
+                this.deactivate();
+            }
         });
     }
 
@@ -284,6 +288,13 @@ export class SelectDropDown extends AbstractMenuItem {
 
         this.registerTopics();
         this.parseDOM();
+
+        if(!this.submenu) {
+            let submenu = new SelectMenu();
+            submenu.isVisible = false;
+            this.attachSubMenu(submenu);
+        }
+
         this.init();
     }
 
@@ -296,6 +307,10 @@ export class SelectDropDown extends AbstractMenuItem {
 
         this.on('option.select', () => {
             this.renderLabels();
+
+            if(this.closeOnSelect === true && this.isActive) {
+                this.deactivate();
+            }
         });
 
         this.on('option.deselect', () => {
@@ -330,6 +345,10 @@ export class SelectDropDown extends AbstractMenuItem {
         if(this.widget) this.widget.setValue(this.getValue());
     }
 
+    append(option) {
+        this.submenu.append(option);
+    }
+
     get button() {
         return Array.prototype.find.call(this.element.children, node => node.matches('.selection'));
     }
@@ -356,13 +375,6 @@ export class SelectDropDown extends AbstractMenuItem {
         let html = `
         <article class="dropdown select">
             <ul class="selection"></ul>
-            <ul class="menu hidden" data-role="menu">
-                <li data-role="menuitem" class="menuitem" data-value="1"><a href="#">Item #1</a></li>
-                <li data-role="menuitem" class="menuitem" data-value="2"><a href="#">Item #2</a></li>
-                <li data-role="menuitem" class="menuitem" data-value="3"><a href="#">Item #3</a></li>
-                <li data-role="menuitem" class="menuitem" data-value="4"><a href="#">Item #4</a></li>
-                <li data-role="menuitem" class="menuitem" data-value="5"><a href="#">Item #5</a></li>
-            </ul>
         </article>
         `;
 
@@ -407,6 +419,21 @@ export class SelectDropDown extends AbstractMenuItem {
 
         if(element.nodeName === "SELECT") {
             // todo create new select instance from select html element.
+            let select = new SelectDropDown({
+                multiSelect: element.multiple
+            });
+
+            for(let option of element.querySelectorAll('option')) {
+                let item = new SelectOption({
+                    text: option.innerText.trim(),
+                    value: option.value
+                });
+
+                select.append(item);
+            }
+
+            element.replaceWith(select.element);
+            return select;
         } else {
             return super.FromHTML(element);
         }

@@ -56,10 +56,13 @@ export class AbstractMenuItem extends MenuNode {
     }
 
     registerTopics() {
-        this.on('event.click', (event) => this.onClick(event));
-        this.on('event.mouseover', (event) => this.onMouseOver(event));
-        this.on('event.mouseout', (event) => this.onMouseOut(event));
-        this.on('menuitem.selected', (event) => this.onSelect(event));
+        if(!this._isTopicInit) {
+            this._isTopicInit = true;
+            this.on('event.click', (event) => this.onClick(event));
+            this.on('event.mouseover', (event) => this.onMouseOver(event));
+            this.on('event.mouseout', (event) => this.onMouseOut(event));
+            this.on('menuitem.selected', (event) => this.onSelect(event));
+        }
     }
 
     /**
@@ -278,6 +281,7 @@ export class AbstractMenuItem extends MenuNode {
      * Handles select events.
      */
     onSelect() {
+        console.log(this.closeOnSelect);
         if(this.closeOnSelect && this.isActive) {
             this.deactivate();
         }
