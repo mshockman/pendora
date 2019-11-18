@@ -2,11 +2,11 @@ import {clamp, hsvToRGB, rgbToHsv} from './utility';
 import {ExtendableError, ValueError} from "./errors";
 
 
-const regPercentage = /^(\d+\.?\d*)%$/,
-    regWhitespace = /\s+/,
+const regWhitespace = /\s+/,
     regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/, // Parses string like "left+10px" into ["left", "+10px"]
     regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/, // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
-    hexString = /^#?([a-f0-9]{3})$|^#?([a-f0-9]{6})$|^#?([a-f0-9]{8})$/i;
+    hexString = /^#?([a-f0-9]{3})$|^#?([a-f0-9]{6})$|^#?([a-f0-9]{8})$/i,
+    regRGBA = /^rgba\((.+?)\)$/;
 
 
 export class UnitError extends ExtendableError {
@@ -1078,49 +1078,27 @@ export class RGBA extends AbstractVector {
         return `#${r}${g}${b}${a}`;
     }
 
-    static fromRBGA(value) {
-        value = value.trim().split(/\s+/);
+    static fromRBGAString(value) {
+        let regResults = regRGBA.exec(value.trim());
 
-        let r = value[0],
-            g = value[1],
-            b = value[2],
-            a = value[3];
+        if(regResults) {
+            let [r, g, b, a] = regResults[1].split(/\s*,\s*/);
 
-        if(r) {
-            if(regPercentage.test(r)) {
-                r = (parseFloat(r) / 100) * 255;
-            } else {
-                r = parseInt(r, 10);
-            }
+            r = parseInt(r, 10);
+            g = parseInt(g, 10);
+            b = parseInt(b, 10);
+            a = a ? parseFloat(a) : 1;
+
+            return new RGBA(r, g, b, a);
         }
+    }
 
-        if(g) {
-            if(regPercentage.test(g)) {
-                g = (parseFloat(g) / 100) * 255;
-            } else {
-                g = parseInt(g, 10);
-            }
+    static fromColorString(value) {
+        if(regRGBA.test(value)) {
+            return this.fromRBGAString(value);
+        } else {
+            return this.fromHex(value);
         }
-
-        if(b) {
-            if(regPercentage.test(b)) {
-                b = (parseFloat(b) / 100) * 255;
-            } else {
-                b = parseInt(b, 10);
-            }
-        }
-
-        if(a) {
-            if(regPercentage.test(a)) {
-                a = (parseFloat(a) / 100);
-            } else {
-                a = parseFloat(a);
-            }
-        }
-
-        a = a || 1.0;
-
-        return new RGBA(r, g, b, a);
     }
 
     static fromHex(value) {

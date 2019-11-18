@@ -1,4 +1,4 @@
-import {hsvToRGB, rgbToHsv, clamp} from "core/utility";
+import {hsvToRGB, clamp} from "core/utility";
 import Publisher from "core/Publisher";
 import {HSV, RGBA} from "core/vectors";
 
@@ -79,7 +79,7 @@ export class TrianglesCursorX {
 
 
 export class ColorWheel extends Publisher {
-    constructor(size, hue=0, saturation=0, value=1) {
+    constructor(size, value=new HSV(0.0, 0.0, 1.0), allowImageRefresh=false) {
         super();
 
         this.element = document.createElement('canvas');
@@ -91,9 +91,10 @@ export class ColorWheel extends Publisher {
         this.y = this.radius;
         this.v = 1.0;
         this.isMouseDown = false;
+        this.allowImageRefresh = allowImageRefresh;
         this.image = null;
 
-        this.value = new HSV(0.0, 0.0, 1.0);
+        this.value = value;
 
         this.cursor = new SquareColorPickerCursor(20, 2);
 
@@ -146,7 +147,8 @@ export class ColorWheel extends Publisher {
         this.value = this._getHsvAt(x, y);
 
         this.publish('color-change', {
-            wheel: this
+            target: this,
+            value: this.value
         });
     }
 
@@ -172,7 +174,7 @@ export class ColorWheel extends Publisher {
         return new HSV(
             clamp(theta * 360, 0, 360),
             clamp(distance, 0, 1),
-            clamp(this.v, 0, 1)
+            clamp(this.allowImageRefresh ? this.v : 1, 0, 1)
         );
     }
 
@@ -276,14 +278,14 @@ export class ColorWheel extends Publisher {
         let currentValue = this.value;
 
         if(!currentValue.equals(value)) {
-            if(currentValue.v !== value.v) {
+            if(currentValue.v !== value.v && this.allowImageRefresh) {
                 this.image = null;
             }
 
             let {x, y} = this._getXY(value.hue, value.saturation);
             this.x = x;
             this.y = y;
-            this.v = value.value;
+            this.v = this.allowImageRefresh ? value.value : 1.0;
 
             this.render();
         }
@@ -321,14 +323,14 @@ export class ColorRangeSlider extends Publisher {
             }
         };
 
-        let onMouseUp = (event) => {
+        let onMouseUp = () => {
             this.isMouseDown = false;
             document.removeEventListener('mouseup', onMouseUp);
             document.removeEventListener('mousemove', onMouseMove);
             this.element.style.cursor = "";
         };
 
-        let onMouseDown = event => {
+        let onMouseDown = () => {
             if(!this.isMouseDown) {
                 this.isMouseDown = true;
                 this.element.style.cursor = "none";
@@ -394,7 +396,7 @@ export class ColorRangeSlider extends Publisher {
         if(value !== this.value) {
             this.value = value;
             this.render();
-            this.publish('color-change', {target: this, value});
+            this.publish('color-change', {target: this, value: this.value});
         }
     }
 
@@ -446,7 +448,7 @@ export class ColorRangeSlider extends Publisher {
 
 
 export class ColorPickerWheel extends Publisher {
-    constructor(width, height) {
+    constructor(width, height, refreshWheel=false) {
         super();
         this.width = width;
         this.height = height;
@@ -464,22 +466,22 @@ export class ColorPickerWheel extends Publisher {
         this.element.appendChild(sliderContainer);
         this.element.appendChild(sliderContainer);
 
-        this.wheel = new ColorWheel(this.width, 0, 0, 1);
+        this.wheel = new ColorWheel(this.width, new HSV(0, 0, 1.0), refreshWheel);
         this.sliderValue = new ColorRangeSlider(this.width, 25, 20);
 
-        this.wheel.on('color-change', topic => {
+        this.wheel.on('color-change', () => {
             let color = this.wheel.getHSV();
 
             this.sliderValue.start = new HSV(color.h, color.s, 0.0);
             this.sliderValue.end = new HSV(color.h, color.s, 1.0);
 
-            this.publish('color-change', {target: this});
+            this.publish('color-change', {target: this, value: this.value});
         });
 
         this.sliderValue.on('color-change', topic => {
             let hsv = this.wheel.value;
             this.wheel.value = new HSV(hsv.hue, hsv.saturation, topic.value);
-            this.publish('color-change', {target: this});
+            this.publish('color-change', {target: this, value: this.value});
         });
 
         this.wheel.appendTo(wheelContainer);
@@ -504,7 +506,7 @@ export class ColorPickerWheel extends Publisher {
     }
 
     get value() {
-        return this.wheel.value;
+        return new HSV(this.wheel.value.hue, this.wheel.value.saturation, this.sliderValue.value);
     }
 
     set value(value) {
@@ -561,7 +563,7 @@ export class ColorComponentSlider extends Publisher {
             this.publish('color-change', {target: this});
         });
 
-        this.input.addEventListener('change', (event) => {
+        this.input.addEventListener('change', () => {
             let value = parseInt(this.input.value, 10);
 
             if(!Number.isNaN(value)) {
@@ -680,7 +682,7 @@ export class ColorPanel extends Publisher {
             this.publish('color-change', {target: this});
         });
 
-        this.hexInput.addEventListener('change', (event) => {
+        this.hexInput.addEventListener('change', () => {
             try {
                 this.value = RGBA.fromHex(this.hexInput.value);
                 this.publish('color-change', {target: this});
@@ -766,13 +768,13 @@ export class ColorPanel extends Publisher {
 
 
 export class ColorPicker {
-    constructor() {
+    constructor(refreshWheel=false) {
         this.element = document.createElement('article');
 
         let col1 = document.createElement('div'),
             col2 = document.createElement('div');
 
-        this.colorPicker = new ColorPickerWheel(300, 500);
+        this.colorPicker = new ColorPickerWheel(300, 500, refreshWheel);
         this.panel = new ColorPanel();
 
         this.element.appendChild(col1);
@@ -787,11 +789,15 @@ export class ColorPicker {
 
         this.colorPicker.on('color-change', () => {
             this.panel.value = this.colorPicker.value;
+            this._value = this.colorPicker.value.toRGB();
         });
 
         this.panel.on('color-change', () => {
             this.colorPicker.value = this.panel.value;
+            this._value = this.panel.value.toRGB();
         });
+
+        this.value = new RGBA(255, 255, 255, 1.0);
     }
 
     appendTo(selector) {
@@ -807,5 +813,154 @@ export class ColorPicker {
     render() {
         this.colorPicker.render();
         this.panel.render();
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(value) {
+        value = value.toRGB();
+        if(!this.colorPicker.value.equals(value)) this.colorPicker.value = value;
+        if(!this.panel.value.equals(value)) this.panel.value = value;
+        this._value = value;
+    }
+}
+
+
+export class ColorPallet extends Publisher {
+    constructor(selectable=false) {
+        super();
+        this.element = document.createElement('ul');
+        this.element.className = "color-pallet";
+        this.colorMap = new WeakMap();
+        this.selectable = selectable;
+
+        this.element.addEventListener('click', (event) => {
+            // noinspection JSUnresolvedFunction
+            let item = event.target.closest('.color-pallet__item');
+
+            if(item) {
+                let color = this.colorMap.get(item);
+                this.publish('color-click', {target: this, color, item});
+
+                if(this.getSelection() !== item) {
+                    this.selectItem(item);
+                    this.publish('color-selected', {target: this, color, item});
+                }
+            }
+        });
+    }
+
+    selectItem(item) {
+        for(let selectedItem of this.element.querySelectorAll('.selected')) {
+            if(selectedItem !== item) {
+                selectedItem.classList.remove('selected');
+            }
+        }
+
+        item.classList.add('selected');
+    }
+
+    selectColor(color) {
+        let item = this.getElementByColor(color);
+
+        if(item) {
+            this.selectItem(item);
+        }
+    }
+
+    clearSelection() {
+        for(let selectedItem of this.element.querySelectorAll('.selected')) {
+            selectedItem.classList.remove('selected');
+        }
+    }
+
+    getSelection() {
+        return this.element.querySelector('.selected');
+    }
+
+    addColor(color) {
+        color = this._color(color);
+
+        if(!this.contains(color)) {
+            let item = document.createElement('li');
+            item.className = 'color-pallet__item';
+            item.style.backgroundColor = color.toString();
+            this.colorMap.set(item, color);
+            this.element.appendChild(item);
+            return item;
+        }
+
+        return null;
+    }
+
+    removeColor(color) {
+        color = this._color(color);
+        let item = this.getElementByColor(color);
+
+        if(item) {
+            this.element.removeChild(item);
+            this.colorMap.delete(item);
+            return color;
+        }
+
+        return null;
+    }
+
+    getElementByColor(color) {
+        color = this._color(color);
+
+        for(let child of this.element.children) {
+            let childColor = this.colorMap.get(child);
+
+            if(childColor && childColor.equals(color)) {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    contains(color) {
+        let colors = this.getColors();
+        color = this._color(color);
+
+        for(let option of colors) {
+            if(option.equals(color)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    getColors() {
+        let r = [];
+
+        for(let child of this.element.children) {
+            let color = this.colorMap.get(child);
+            if(color) r.push(color);
+        }
+
+        return r;
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+
+    _color(color) {
+        if(typeof color === 'string') {
+            return RGBA.fromColorString(color);
+        } else {
+            return color.toRGB();
+        }
     }
 }

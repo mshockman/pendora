@@ -3,13 +3,60 @@ import {RGBA} from "./vectors";
 
 const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
     regColor = /^(?:#([a-f0-9]{3})|#([a-f0-9]{6})|#([a-f0-9]{8}))$/i,
-    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i;
+    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i,
+    regPercentage = /^(\d+\.?\d*)%$/;
+
+
+function fromRBGA(value) {
+    value = value.trim().split(/\s+/);
+
+    let r = value[0],
+        g = value[1],
+        b = value[2],
+        a = value[3];
+
+    if(r) {
+        if(regPercentage.test(r)) {
+            r = (parseFloat(r) / 100) * 255;
+        } else {
+            r = parseInt(r, 10);
+        }
+    }
+
+    if(g) {
+        if(regPercentage.test(g)) {
+            g = (parseFloat(g) / 100) * 255;
+        } else {
+            g = parseInt(g, 10);
+        }
+    }
+
+    if(b) {
+        if(regPercentage.test(b)) {
+            b = (parseFloat(b) / 100) * 255;
+        } else {
+            b = parseInt(b, 10);
+        }
+    }
+
+    if(a) {
+        if(regPercentage.test(a)) {
+            a = (parseFloat(a) / 100);
+        } else {
+            a = parseFloat(a);
+        }
+    }
+
+    a = a || 1.0;
+
+    return new RGBA(r, g, b, a);
+}
 
 
 const TYPE_FUNCTIONS = {
     hex: RGBA.fromHex,
-    rgb: RGBA.fromRBGA,
-    rgba: RGBA.fromRBGA
+    rgb: fromRBGA,
+    rgba: fromRBGA
 };
 
 
