@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .menubar, .menu {
   user-select: none;
   cursor: default;
@@ -111,6 +112,20 @@
 .dropdown.select.multiple .selection {
   padding: 0.5rem 0 0 0.5rem;
   overflow-y: scroll;
+}
+.dropdown.select.multiple .selection .exit-button {
+  font-family: "Font Awesome 5 Pro", serif;
+  font-weight: 900;
+  width: 1rem;
+  height: 1rem;
+  display: inline-block;
+  cursor: pointer;
+}
+.dropdown.select.multiple .selection .exit-button:hover {
+  color: #770000;
+}
+.dropdown.select.multiple .selection .exit-button:before {
+  content: "";
 }
 .dropdown.select.multiple .selection .choice {
   border: 1px solid #ccc;

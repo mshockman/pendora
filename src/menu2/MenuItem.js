@@ -15,12 +15,10 @@ export const ITEM_ATTRIBUTES = {
     closeOnBlur: timeAttribute,
     timeout: timeAttribute,
     autoActivate: timeAttribute,
-    multiple: boolAttribute,
     openOnHover: timeAttribute,
     closeOnSelect: boolAttribute,
-    deactivateOnItemHover: boolAttribute,
     delay: timeAttribute,
-    position: stringAttribute,
+    positioner: stringAttribute,
     toggle: stringAttribute
 };
 
@@ -32,9 +30,8 @@ export class AbstractMenuItem extends MenuNode {
     @inherit toggle;
     @inherit autoActivate;
     @inherit openOnHover;
-    /**@type{boolean|Number|"inherit"|"root"}*/
     @inherit delay = false;
-    @inherit position;
+    @inherit positioner;
 
     static __attributes__ = ITEM_ATTRIBUTES;
 
@@ -42,16 +39,68 @@ export class AbstractMenuItem extends MenuNode {
         super();
         this.menuNodeType = "menuitem";
 
+        /**
+         * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
+         * will toggle both on and off and none will cause the item to not be toggleable.
+         * @type {string}
+         */
         this.toggle = "both";
+
+        /**
+         * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
+         * When the parent is active, openOnHover is used instead.
+         * @type {string|Number|Boolean}
+         */
         this.autoActivate = false;
+
+        /**
+         * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
+         * See autoActivate for more details.
+         * @type {string}
+         */
         this.openOnHover = false;
+
+        /**
+         * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
+         * @type {string|Number|Boolean}
+         */
         this.delay = false;
+
+        /**
+         * If true the item will close when a descendent menuitem is selected.
+         * @type {boolean}
+         */
         this.closeOnSelect = false;
+
+        /**
+         * If true the menuitem will close when the user clicks the page outside of the item.
+         * @type {boolean}
+         */
         this.closeOnBlur = false;
+
+        /**
+         * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
+         * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
+         * @type {boolean|Number}
+         */
         this.timeout = false;
-        this.position = null;
-        this.multiple = false;
+
+        /**
+         * A function that is used to position the menuitem's submenu.
+         * @type {null|Function}
+         */
+        this.positioner = "inherit";
+
+        /**
+         * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
+         * @type {boolean}
+         */
         this.clearSubItemsOnHover = true;
+
+        /**
+         * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
+         * @type {boolean}
+         */
         this.autoDeactivateItems = true;
     }
 
@@ -78,10 +127,10 @@ export class AbstractMenuItem extends MenuNode {
 
         if(this.submenu) {
             if(show === true) {
-                this.submenu.show();
+                this.showSubMenu();
             } else if(typeof show === 'number' && show >= 0) {
                 this.startTimer('showTimer', () => {
-                    this.submenu.show();
+                    this.showSubMenu();
                 }, show);
             }
         }
@@ -121,10 +170,7 @@ export class AbstractMenuItem extends MenuNode {
         this.isActive = false;
         this.clearTimer('showTimer');
 
-        if(this.submenu) {
-            this.submenu.deactivate();
-            this.submenu.hide();
-        }
+        this.hideSubMenu();
 
         // Remove document click handler that tracks user clicks outside of menu tree.
         if(this._captureDocumentClick) {
@@ -212,6 +258,26 @@ export class AbstractMenuItem extends MenuNode {
 
     //------------------------------------------------------------------------------------------------------------------
     // Manage submenu
+
+    showSubMenu() {
+        let submenu = this.submenu;
+
+        if(submenu) {
+            submenu.show();
+            let positioner = this.positioner;
+
+            if(positioner) {
+                positioner.call(submenu, submenu);
+            }
+        }
+    }
+
+    hideSubMenu() {
+        if(this.submenu) {
+            this.submenu.deactivate();
+            this.submenu.hide();
+        }
+    }
 
     /**
      * Attaches a submenu to the menuitem.
@@ -306,7 +372,7 @@ export class AbstractMenuItem extends MenuNode {
 
         if(!isDisabled) {
             if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
-                this.submenu.show();
+                this.showSubMenu();
             } else if (!this.isActive && this.toggleOn) {
                 this.activate();
             } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
@@ -328,13 +394,13 @@ export class AbstractMenuItem extends MenuNode {
 
         if(event.target === this) {
             // When the mouse moves on an item clear any active items in it's submenu.
-            if (this.submenu && this.clearSubItemsOnHover) {
+            if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearItems) {
                 this.submenu.clearItems();
             }
 
             if(this.element.contains(event.originalEvent.relatedTarget)) return;
 
-            let activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
+            let activate = this.parent && this.parent.isActive && this.openOnHover !== null ? this.openOnHover : this.autoActivate;
 
             if (this.parent) {
                 this.parent.publish('mouse-enter-item', this, event);
@@ -429,7 +495,7 @@ export class AbstractMenuItem extends MenuNode {
 export default class MenuItem extends AbstractMenuItem {
     constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
                     delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
-                    nodeName="div", position="inherit", multiple=false, ...context}={}) {
+                    nodeName="div", positioner="inherit", ...context}={}) {
         super();
 
         if(target) {
@@ -448,13 +514,16 @@ export default class MenuItem extends AbstractMenuItem {
         this.autoActivate = autoActivate;
         this.openOnHover = openOnHover;
         this.delay = delay;
+
         this.closeOnSelect = closeOnSelect;
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
-        this.position = position;
-        this.multiple = multiple;
+
+        this.positioner = positioner;
+
         this.clearSubItemsOnHover = true;
         this.autoDeactivateItems = true;
+
         this.MenuItemClass = MenuItem;
         this.SubMenuClass = Menu;
 

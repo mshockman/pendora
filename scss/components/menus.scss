@@ -137,6 +137,23 @@
       padding: 0.5rem 0 0 0.5rem;
       overflow-y: scroll;
 
+      .exit-button {
+        font-family: "Font Awesome 5 Pro", serif;
+        font-weight: 900;
+        width: 1rem;
+        height: 1rem;
+        display: inline-block;
+        cursor: pointer;
+
+        &:hover {
+          color: #770000;
+        }
+
+        &:before {
+          content: "\f00d";
+        }
+      }
+
       .choice {
         border: 1px solid #ccc;
         display: inline-block;

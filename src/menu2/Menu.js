@@ -20,9 +20,7 @@ export const MENU_PARAMETERS = {
     multiActive: boolAttribute,
     openOnHover: timeAttribute,
     closeOnSelect: boolAttribute,
-    deactivateOnItemHover: boolAttribute,
     delay: timeAttribute,
-    position: stringAttribute,
     toggle: stringAttribute,
     visible: boolAttribute
 };
@@ -32,22 +30,21 @@ export const MENU_PARAMETERS = {
  * @abstract
  */
 export class AbstractMenu extends MenuNode {
-    @inherit position;
+    @inherit positioner;
 
     constructor() {
         super();
         this.menuNodeType = "menu";
 
-        this.closeOnBlur = false;
-        this.timeout = false;
-        this.autoActivate = false;
-        this.openOnHover = false;
+        this.closeOnBlur = false; // both sub-item and menu
+        this.timeout = false; // both sub-item and menu
+        this.autoActivate = false; // sub-item property
+        this.openOnHover = false; // sub-item property
         this.toggle = "none";
-        this.closeOnSelect = true;
-        this.multiActive = false;
-        this.deactivateOnItemHover = false;
-        this.delay = false;
-        this.position = null;
+        this.closeOnSelect = true; // both sub-item and menu.
+        this.multiActive = false; // menu only
+        this.delay = false; // sub-item property
+        this.positioner = "inherit";
     }
 
     // Used to parse attributes on elements to their correct type during initializing by
@@ -164,10 +161,6 @@ export class AbstractMenu extends MenuNode {
     show() {
         if(!this.isVisible) {
             this.isVisible = true;
-
-            if(this.position) {
-                this.position.call(this, this);
-            }
 
             if(this.parent) this.parent.publish('submenu.show', this);
             this.publish('menu.show', this);
@@ -363,18 +356,16 @@ export default class Menu extends AbstractMenu {
      * @param openOnHover {Boolean|Number}
      * @param toggle {"on"|"off"|"both"|"none"}
      * @param closeOnSelect {Boolean}
-     * @param deactivateOnItemHover {Boolean}
      * @param delay {Boolean|Number}
      * @param id {String}
      * @param classes {String}
      * @param children {Array}
      * @param visible
-     * @param position {function|"inherit"|"root"|null|undefined}
      * @param context
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiActive=false, openOnHover=true,
-                    toggle="on", closeOnSelect=true, deactivateOnItemHover=true, delay=0, id=null, classes=null,
-                    children=null, visible=false, position="inherit", ...context}={}) {
+                    toggle="on", closeOnSelect=true, delay=0, id=null, classes=null,
+                    children=null, visible=false, ...context}={}) {
         super();
         this.events = null;
         this.MenuItemClass = MenuItem;
@@ -387,9 +378,7 @@ export default class Menu extends AbstractMenu {
         this.openOnHover = openOnHover;
         this.toggle = toggle;
         this.closeOnSelect = closeOnSelect;
-        this.deactivateOnItemHover = deactivateOnItemHover;
         this.delay = delay;
-        this.position = position;
 
         if(target) {
             this.element = target;

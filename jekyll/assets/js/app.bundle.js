@@ -3767,6 +3767,526 @@ function (_Vec2) {
 
 /***/ }),
 
+/***/ "./src/forms/FormWidgetBase.js":
+/*!*************************************!*\
+  !*** ./src/forms/FormWidgetBase.js ***!
+  \*************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FormWidgetBase; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * @interface
+ */
+var FormWidgetBase =
+/*#__PURE__*/
+function () {
+  function FormWidgetBase(element) {
+    _classCallCheck(this, FormWidgetBase);
+
+    this.element = null;
+
+    if (typeof element === 'string') {
+      this.element = document.querySelector(element);
+    } else if (element) {
+      this.element = element;
+    }
+  }
+
+  _createClass(FormWidgetBase, [{
+    key: "appendTo",
+    value: function appendTo(selector) {
+      if (typeof selector === 'string') {
+        document.querySelector(selector).appendChild(this.element);
+      } else if (selector.appendChild) {
+        selector.appendChild(this.element);
+      } else if (selector.append) {
+        selector.append(this.element);
+      }
+    }
+    /**
+     * Returns the current raw value without any cleaning, typecasting, or validation.
+     * @abstract
+     */
+
+  }, {
+    key: "getValue",
+    value: function getValue() {}
+    /**
+     * Sets the widgets raw value.
+     *
+     * @abstract
+     * @param value {*}
+     */
+
+  }, {
+    key: "setValue",
+    value: function setValue(value) {}
+    /**
+     * Sets the name of the widget.
+     *
+     * @abstract
+     * @param name {String}
+     */
+
+  }, {
+    key: "setName",
+    value: function setName(name) {}
+    /**
+     * Returns the name of the widget.
+     * @abstract
+     * @returns {String}
+     */
+
+  }, {
+    key: "getName",
+    value: function getName() {}
+  }]);
+
+  return FormWidgetBase;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/forms/HiddenInputWidget.js":
+/*!****************************************!*\
+  !*** ./src/forms/HiddenInputWidget.js ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HiddenInputWidget; });
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+var HiddenInputWidget =
+/*#__PURE__*/
+function (_FormWidgetBase) {
+  _inherits(HiddenInputWidget, _FormWidgetBase);
+
+  function HiddenInputWidget(name) {
+    var _this;
+
+    _classCallCheck(this, HiddenInputWidget);
+
+    var element = document.createElement('span');
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(HiddenInputWidget).call(this, element));
+    _this.element.style.display = "none";
+    _this.name = name;
+    return _this;
+  }
+
+  _createClass(HiddenInputWidget, [{
+    key: "getValue",
+    value: function getValue() {
+      var r = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.element.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var input = _step.value;
+          r.push(input.value);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      if (r.length === 1) {
+        return r[0];
+      } else if (r.length > 1) {
+        return r;
+      }
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(value) {
+      var fragment = document.createDocumentFragment();
+
+      if (!Array.isArray(value)) {
+        value = [value];
+      }
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var v = _step2.value;
+          var input = document.createElement('input');
+          input.type = "hidden";
+          input.value = v + "";
+          if (this.name) input.name = this.name;
+          fragment.appendChild(input);
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      Object(_core_utility__WEBPACK_IMPORTED_MODULE_0__["emptyElement"])(this.element);
+      this.element.appendChild(fragment);
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.name;
+    }
+  }, {
+    key: "setName",
+    value: function setName(name) {
+      this.name = name;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = this.element.querySelectorAll('input')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var input = _step3.value;
+          input.name = name;
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+    }
+  }]);
+
+  return HiddenInputWidget;
+}(_FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/forms/SelectInputWidget.js":
+/*!****************************************!*\
+  !*** ./src/forms/SelectInputWidget.js ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SelectInputWidget; });
+/* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+var SelectInputWidget =
+/*#__PURE__*/
+function (_FormWidgetBase) {
+  _inherits(SelectInputWidget, _FormWidgetBase);
+
+  function SelectInputWidget(select) {
+    var _this;
+
+    var multiple = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var hidden = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+    _classCallCheck(this, SelectInputWidget);
+
+    if (typeof select === 'string') {
+      select = document.querySelector(select);
+    }
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectInputWidget).call(this, select));
+
+    if (name !== null) {
+      _this.element.name = name;
+    }
+
+    if (multiple !== null) {
+      _this.element.multiple = multiple;
+    }
+
+    if (hidden !== null) {
+      _this.isHidden = hidden;
+    }
+
+    return _this;
+  }
+
+  _createClass(SelectInputWidget, [{
+    key: "appendTo",
+    value: function appendTo(selector) {
+      if (typeof selector === 'string') {
+        document.querySelector(selector).appendChild(this.element);
+      } else if (selector.appendChild) {
+        selector.appendChild(this.element);
+      } else if (selector.append) {
+        selector.append(this.element);
+      }
+    }
+  }, {
+    key: "getValue",
+    value: function getValue() {
+      var r = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.element.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var option = _step.value;
+
+          if (option.selected) {
+            r.push(option.value);
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(values) {
+      this.clearSelected();
+
+      if (!Array.isArray(values)) {
+        values = [values];
+      }
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = values[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var value = _step2.value;
+          value += "";
+          var found = false;
+          var _iteratorNormalCompletion3 = true;
+          var _didIteratorError3 = false;
+          var _iteratorError3 = undefined;
+
+          try {
+            for (var _iterator3 = this.element.options[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              var option = _step3.value;
+
+              if (option.value === value && !option.selected) {
+                option.selected = true;
+                found = true;
+                break;
+              }
+            }
+          } catch (err) {
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+                _iterator3["return"]();
+              }
+            } finally {
+              if (_didIteratorError3) {
+                throw _iteratorError3;
+              }
+            }
+          }
+
+          if (!found) {
+            throw new Error("Unknown value: ".concat(value));
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  }, {
+    key: "clearSelected",
+    value: function clearSelected() {
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = this.element.options[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var option = _step4.value;
+          option.selected = false;
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+            _iterator4["return"]();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.element.name;
+    }
+  }, {
+    key: "setName",
+    value: function setName(name) {
+      this.element.name = name;
+    }
+  }, {
+    key: "isHidden",
+    get: function get() {
+      return this.element.style.display === 'none';
+    },
+    set: function set(value) {
+      if (this.isHidden !== value) {
+        if (value) {
+          this.element.style.display = "none";
+        } else {
+          this.element.style.display = "";
+        }
+      }
+    }
+  }]);
+
+  return SelectInputWidget;
+}(_FormWidgetBase__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/forms/index.js":
+/*!****************************!*\
+  !*** ./src/forms/index.js ***!
+  \****************************/
+/*! exports provided: SelectInputWidget, HiddenInputWidget, FormWidgetBase */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SelectInputWidget__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SelectInputWidget */ "./src/forms/SelectInputWidget.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectInputWidget", function() { return _SelectInputWidget__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _HiddenInputWidget__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./HiddenInputWidget */ "./src/forms/HiddenInputWidget.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "HiddenInputWidget", function() { return _HiddenInputWidget__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+/* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FormWidgetBase", function() { return _FormWidgetBase__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+
+
+
+
+
+
+
+/***/ }),
+
 /***/ "./src/menu2/DropDown.js":
 /*!*******************************!*\
   !*** ./src/menu2/DropDown.js ***!
@@ -3938,9 +4458,7 @@ var MENU_PARAMETERS = {
   multiActive: boolAttribute,
   openOnHover: timeAttribute,
   closeOnSelect: boolAttribute,
-  deactivateOnItemHover: boolAttribute,
   delay: timeAttribute,
-  position: stringAttribute,
   toggle: stringAttribute,
   visible: boolAttribute
 };
@@ -3964,16 +4482,22 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       _initialize(_assertThisInitialized(_this));
 
       _this.menuNodeType = "menu";
-      _this.closeOnBlur = false;
-      _this.timeout = false;
-      _this.autoActivate = false;
-      _this.openOnHover = false;
+      _this.closeOnBlur = false; // both sub-item and menu
+
+      _this.timeout = false; // both sub-item and menu
+
+      _this.autoActivate = false; // sub-item property
+
+      _this.openOnHover = false; // sub-item property
+
       _this.toggle = "none";
-      _this.closeOnSelect = true;
-      _this.multiActive = false;
-      _this.deactivateOnItemHover = false;
-      _this.delay = false;
-      _this.position = null;
+      _this.closeOnSelect = true; // both sub-item and menu.
+
+      _this.multiActive = false; // menu only
+
+      _this.delay = false; // sub-item property
+
+      _this.positioner = "inherit";
       return _this;
     } // Used to parse attributes on elements to their correct type during initializing by
     // parsing the DOM tree.
@@ -3987,7 +4511,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
     d: [{
       kind: "field",
       decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
-      key: "position",
+      key: "positioner",
       value: void 0
     }, {
       kind: "field",
@@ -4160,11 +4684,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       value: function show() {
         if (!this.isVisible) {
           this.isVisible = true;
-
-          if (this.position) {
-            this.position.call(this, this);
-          }
-
           if (this.parent) this.parent.publish('submenu.show', this);
           this.publish('menu.show', this);
           this.element.dispatchEvent(new CustomEvent('menu.show', {
@@ -4468,13 +4987,11 @@ function (_AbstractMenu) {
    * @param openOnHover {Boolean|Number}
    * @param toggle {"on"|"off"|"both"|"none"}
    * @param closeOnSelect {Boolean}
-   * @param deactivateOnItemHover {Boolean}
    * @param delay {Boolean|Number}
    * @param id {String}
    * @param classes {String}
    * @param children {Array}
    * @param visible
-   * @param position {function|"inherit"|"root"|null|undefined}
    * @param context
    */
   function Menu() {
@@ -4497,8 +5014,6 @@ function (_AbstractMenu) {
         toggle = _ref$toggle === void 0 ? "on" : _ref$toggle,
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
-        _ref$deactivateOnItem = _ref.deactivateOnItemHover,
-        deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem,
         _ref$delay = _ref.delay,
         delay = _ref$delay === void 0 ? 0 : _ref$delay,
         _ref$id = _ref.id,
@@ -4509,9 +5024,7 @@ function (_AbstractMenu) {
         children = _ref$children === void 0 ? null : _ref$children,
         _ref$visible = _ref.visible,
         visible = _ref$visible === void 0 ? false : _ref$visible,
-        _ref$position = _ref.position,
-        position = _ref$position === void 0 ? "inherit" : _ref$position,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiActive", "openOnHover", "toggle", "closeOnSelect", "deactivateOnItemHover", "delay", "id", "classes", "children", "visible", "position"]);
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiActive", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible"]);
 
     _classCallCheck(this, Menu);
 
@@ -4526,9 +5039,7 @@ function (_AbstractMenu) {
     _this5.openOnHover = openOnHover;
     _this5.toggle = toggle;
     _this5.closeOnSelect = closeOnSelect;
-    _this5.deactivateOnItemHover = deactivateOnItemHover;
     _this5.delay = delay;
-    _this5.position = position;
 
     if (target) {
       _this5.element = target;
@@ -4815,12 +5326,10 @@ var ITEM_ATTRIBUTES = {
   closeOnBlur: timeAttribute,
   timeout: timeAttribute,
   autoActivate: timeAttribute,
-  multiple: boolAttribute,
   openOnHover: timeAttribute,
   closeOnSelect: boolAttribute,
-  deactivateOnItemHover: boolAttribute,
   delay: timeAttribute,
-  position: stringAttribute,
+  positioner: stringAttribute,
   toggle: stringAttribute
 };
 /**
@@ -4833,7 +5342,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
   function (_MenuNode2) {
     _inherits(AbstractMenuItem, _MenuNode2);
 
-    /**@type{boolean|Number|"inherit"|"root"}*/
     function AbstractMenuItem() {
       var _this;
 
@@ -4844,16 +5352,69 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       _initialize(_assertThisInitialized(_this));
 
       _this.menuNodeType = "menuitem";
+      /**
+       * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
+       * will toggle both on and off and none will cause the item to not be toggleable.
+       * @type {string}
+       */
+
       _this.toggle = "both";
+      /**
+       * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
+       * When the parent is active, openOnHover is used instead.
+       * @type {string|Number|Boolean}
+       */
+
       _this.autoActivate = false;
+      /**
+       * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
+       * See autoActivate for more details.
+       * @type {string}
+       */
+
       _this.openOnHover = false;
+      /**
+       * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
+       * @type {string|Number|Boolean}
+       */
+
       _this.delay = false;
+      /**
+       * If true the item will close when a descendent menuitem is selected.
+       * @type {boolean}
+       */
+
       _this.closeOnSelect = false;
+      /**
+       * If true the menuitem will close when the user clicks the page outside of the item.
+       * @type {boolean}
+       */
+
       _this.closeOnBlur = false;
+      /**
+       * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
+       * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
+       * @type {boolean|Number}
+       */
+
       _this.timeout = false;
-      _this.position = null;
-      _this.multiple = false;
+      /**
+       * A function that is used to position the menuitem's submenu.
+       * @type {null|Function}
+       */
+
+      _this.positioner = "inherit";
+      /**
+       * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
+       * @type {boolean}
+       */
+
       _this.clearSubItemsOnHover = true;
+      /**
+       * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
+       * @type {boolean}
+       */
+
       _this.autoDeactivateItems = true;
       return _this;
     }
@@ -4888,7 +5449,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
     }, {
       kind: "field",
       decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "position",
+      key: "positioner",
       value: void 0
     }, {
       kind: "field",
@@ -4938,10 +5499,10 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (this.submenu) {
           if (show === true) {
-            this.submenu.show();
+            this.showSubMenu();
           } else if (typeof show === 'number' && show >= 0) {
             this.startTimer('showTimer', function () {
-              _this3.submenu.show();
+              _this3.showSubMenu();
             }, show);
           }
         } // Register document click handler
@@ -4982,12 +5543,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         if (!this.isActive) return;
         this.isActive = false;
         this.clearTimer('showTimer');
-
-        if (this.submenu) {
-          this.submenu.deactivate();
-          this.submenu.hide();
-        } // Remove document click handler that tracks user clicks outside of menu tree.
-
+        this.hideSubMenu(); // Remove document click handler that tracks user clicks outside of menu tree.
 
         if (this._captureDocumentClick) {
           this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
@@ -5091,6 +5647,30 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       } //------------------------------------------------------------------------------------------------------------------
       // Manage submenu
 
+    }, {
+      kind: "method",
+      key: "showSubMenu",
+      value: function showSubMenu() {
+        var submenu = this.submenu;
+
+        if (submenu) {
+          submenu.show();
+          var positioner = this.positioner;
+
+          if (positioner) {
+            positioner.call(submenu, submenu);
+          }
+        }
+      }
+    }, {
+      kind: "method",
+      key: "hideSubMenu",
+      value: function hideSubMenu() {
+        if (this.submenu) {
+          this.submenu.deactivate();
+          this.submenu.hide();
+        }
+      }
       /**
        * Attaches a submenu to the menuitem.
        *
@@ -5207,7 +5787,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (!isDisabled) {
           if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
-            this.submenu.show();
+            this.showSubMenu();
           } else if (!this.isActive && this.toggleOn) {
             this.activate();
           } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
@@ -5234,12 +5814,12 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (event.target === this) {
           // When the mouse moves on an item clear any active items in it's submenu.
-          if (this.submenu && this.clearSubItemsOnHover) {
+          if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearItems) {
             this.submenu.clearItems();
           }
 
           if (this.element.contains(event.originalEvent.relatedTarget)) return;
-          var activate = this.parent && this.parent.isActive ? this.openOnHover : this.autoActivate;
+          var activate = this.parent && this.parent.isActive && this.openOnHover !== null ? this.openOnHover : this.autoActivate;
 
           if (this.parent) {
             this.parent.publish('mouse-enter-item', this, event);
@@ -5381,11 +5961,9 @@ function (_AbstractMenuItem) {
         timeout = _ref$timeout === void 0 ? false : _ref$timeout,
         _ref$nodeName = _ref.nodeName,
         nodeName = _ref$nodeName === void 0 ? "div" : _ref$nodeName,
-        _ref$position = _ref.position,
-        position = _ref$position === void 0 ? "inherit" : _ref$position,
-        _ref$multiple = _ref.multiple,
-        multiple = _ref$multiple === void 0 ? false : _ref$multiple,
-        context = _objectWithoutProperties(_ref, ["target", "text", "action", "href", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "classes", "timeout", "nodeName", "position", "multiple"]);
+        _ref$positioner = _ref.positioner,
+        positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
+        context = _objectWithoutProperties(_ref, ["target", "text", "action", "href", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "classes", "timeout", "nodeName", "positioner"]);
 
     _classCallCheck(this, MenuItem);
 
@@ -5413,8 +5991,7 @@ function (_AbstractMenuItem) {
     _this6.closeOnSelect = closeOnSelect;
     _this6.closeOnBlur = closeOnBlur;
     _this6.timeout = timeout;
-    _this6.position = position;
-    _this6.multiple = multiple;
+    _this6.positioner = positioner;
     _this6.clearSubItemsOnHover = true;
     _this6.autoDeactivateItems = true;
     _this6.MenuItemClass = MenuItem;
@@ -6536,18 +7113,18 @@ function (_Publisher) {
 
 /***/ }),
 
-/***/ "./src/menu2/SelectDropDown.js":
-/*!*************************************!*\
-  !*** ./src/menu2/SelectDropDown.js ***!
-  \*************************************/
-/*! exports provided: SelectOption, SelectMenu, SelectDropDown */
+/***/ "./src/menu2/Select2.js":
+/*!******************************!*\
+  !*** ./src/menu2/Select2.js ***!
+  \******************************/
+/*! exports provided: SelectOption, SelectMenu, Select2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return SelectOption; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectDropDown", function() { return SelectDropDown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu2/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu2/Menu.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
@@ -6556,6 +7133,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
 /* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./decorators */ "./src/menu2/decorators.js");
 /* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
+/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -6615,6 +7193,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -6874,7 +7453,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this2.multiSelect = "inherit";
       _this2.closeOnSelect = false;
       _this2.delay = 0;
-      _this2.position = "inherit";
+      _this2.positioner = "inherit";
 
       _this2.registerTopics();
 
@@ -7017,12 +7596,16 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     }]
   };
 }, _Menu__WEBPACK_IMPORTED_MODULE_1__["AbstractMenu"]);
-var SelectDropDown =
+/**
+ * @implements FormWidgetBase
+ */
+
+var Select2 =
 /*#__PURE__*/
 function (_AbstractMenuItem2) {
-  _inherits(SelectDropDown, _AbstractMenuItem2);
+  _inherits(Select2, _AbstractMenuItem2);
 
-  function SelectDropDown() {
+  function Select2() {
     var _this4;
 
     var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -7040,9 +7623,9 @@ function (_AbstractMenuItem2) {
         _ref5$widget = _ref5.widget,
         widget = _ref5$widget === void 0 ? null : _ref5$widget;
 
-    _classCallCheck(this, SelectDropDown);
+    _classCallCheck(this, Select2);
 
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(SelectDropDown).call(this));
+    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Select2).call(this));
 
     if (target) {
       _this4.element = target;
@@ -7068,9 +7651,9 @@ function (_AbstractMenuItem2) {
     _this4.multiSelect = multiSelect;
     _this4.MenuItemClass = SelectOption;
     _this4.SubMenuClass = SelectMenu;
-    _this4.position = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this4.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
     _this4.clearSubItemsOnHover = false;
-    _this4.widget = widget;
+    _this4.labelMap = new WeakMap();
 
     _this4.element.classList.add('select');
 
@@ -7079,6 +7662,14 @@ function (_AbstractMenuItem2) {
     _this4.registerTopics();
 
     _this4.parseDOM();
+
+    if (widget) {
+      _this4.widget = widget;
+    } else {
+      _this4.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
+
+      _this4.widget.appendTo(_this4.element);
+    }
 
     if (!_this4.submenu) {
       var submenu = new SelectMenu();
@@ -7092,7 +7683,7 @@ function (_AbstractMenuItem2) {
     return _this4;
   }
 
-  _createClass(SelectDropDown, [{
+  _createClass(Select2, [{
     key: "isSelect",
     value: function isSelect() {
       return true;
@@ -7102,7 +7693,7 @@ function (_AbstractMenuItem2) {
     value: function registerTopics() {
       var _this5 = this;
 
-      _get(_getPrototypeOf(SelectDropDown.prototype), "registerTopics", this).call(this);
+      _get(_getPrototypeOf(Select2.prototype), "registerTopics", this).call(this);
 
       this.on('option.select', function () {
         _this5.renderLabels();
@@ -7137,6 +7728,7 @@ function (_AbstractMenuItem2) {
           span.innerText = item.text;
           li.appendChild(exitButton);
           li.appendChild(span);
+          this.labelMap.set(li, item);
           fragment.appendChild(li);
         }
       } catch (err) {
@@ -7155,7 +7747,7 @@ function (_AbstractMenuItem2) {
       }
 
       output.appendChild(fragment);
-      if (this.widget) this.widget.setValue(this.getValue());
+      if (this.widget) this.widget.setValue(this._getSelectedValues());
     }
   }, {
     key: "append",
@@ -7163,8 +7755,8 @@ function (_AbstractMenuItem2) {
       this.submenu.append(option);
     }
   }, {
-    key: "getValue",
-    value: function getValue() {
+    key: "_getSelectedValues",
+    value: function _getSelectedValues() {
       var r = [];
       var _iteratorNormalCompletion6 = true;
       var _didIteratorError6 = false;
@@ -7190,11 +7782,29 @@ function (_AbstractMenuItem2) {
         }
       }
 
-      if (this.multiple) {
+      if (this.multiSelect) {
         return r;
       } else {
         return r[0];
       }
+    }
+  }, {
+    key: "getValue",
+    value: function getValue() {
+      return this.widget.getValue();
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(value) {}
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.widget.getName();
+    }
+  }, {
+    key: "setName",
+    value: function setName(name) {
+      this.widget.setName(name);
     }
   }, {
     key: "render",
@@ -7202,6 +7812,19 @@ function (_AbstractMenuItem2) {
       var html = "\n        <article class=\"dropdown select\">\n            <ul class=\"selection\"></ul>\n        </article>\n        ";
       var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
+    }
+  }, {
+    key: "onClick",
+    value: function onClick(topic) {
+      var event = topic.originalEvent;
+
+      if (topic.target === this && event.target.closest('.exit-button')) {
+        var li = event.target.closest('li'),
+            item = this.labelMap.get(li);
+        item.deselect();
+      } else {
+        return _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
+      }
     }
   }, {
     key: "button",
@@ -7253,9 +7876,10 @@ function (_AbstractMenuItem2) {
       }
 
       if (element.nodeName === "SELECT") {
-        // todo create new select instance from select html element.
-        var select = new SelectDropDown({
-          multiSelect: element.multiple
+        // noinspection JSUnresolvedVariable
+        var select = new Select2({
+          multiSelect: element.multiple,
+          widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true)
         });
         var _iteratorNormalCompletion7 = true;
         var _didIteratorError7 = false;
@@ -7286,22 +7910,23 @@ function (_AbstractMenuItem2) {
         }
 
         element.replaceWith(select.element);
+        select.element.appendChild(select.widget.element);
         return select;
       } else {
-        return _get(_getPrototypeOf(SelectDropDown), "FromHTML", this).call(this, element);
+        return _get(_getPrototypeOf(Select2), "FromHTML", this).call(this, element);
       }
     }
   }]);
 
-  return SelectDropDown;
+  return Select2;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
 
-_defineProperty(SelectDropDown, "__attributes__", _objectSpread({
+_defineProperty(Select2, "__attributes__", _objectSpread({
   multiSelect: new core_attributes__WEBPACK_IMPORTED_MODULE_7__["default"](core_utility__WEBPACK_IMPORTED_MODULE_5__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["TRUE"])
 }, _MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"].__attributes__));
 
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
-  return SelectDropDown.FromHTML(element);
+  return Select2.FromHTML(element);
 });
 
 /***/ }),
@@ -7413,7 +8038,7 @@ function publishTargetEvent(topic) {
 /*!****************************!*\
   !*** ./src/menu2/index.js ***!
   \****************************/
-/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectDropDown, SelectMenu */
+/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, Select2, SelectMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7433,10 +8058,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MenuNode */ "./src/menu2/MenuNode.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MenuNode", function() { return _MenuNode__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
-/* harmony import */ var _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./SelectDropDown */ "./src/menu2/SelectDropDown.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectDropDown", function() { return _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__["SelectDropDown"]; });
+/* harmony import */ var _Select2__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Select2 */ "./src/menu2/Select2.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["Select2"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _SelectDropDown__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
 
 
 

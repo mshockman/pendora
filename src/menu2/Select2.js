@@ -1,4 +1,4 @@
-import MenuItem, {AbstractMenuItem} from "./MenuItem";
+import {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
@@ -6,6 +6,7 @@ import {getMenuInstance} from "./utility";
 import {parseHTML, emptyElement, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
+import {SelectInputWidget, HiddenInputWidget} from "../forms/";
 
 
 export class SelectOption extends AbstractMenuItem {
@@ -185,7 +186,7 @@ export class SelectMenu extends AbstractMenu {
         this.multiSelect = "inherit";
         this.closeOnSelect = false;
         this.delay = 0;
-        this.position = "inherit";
+        this.positioner = "inherit";
 
         this.registerTopics();
         this.parseDOM();
@@ -246,7 +247,10 @@ export class SelectMenu extends AbstractMenu {
 }
 
 
-export class SelectDropDown extends AbstractMenuItem {
+/**
+ * @implements FormWidgetBase
+ */
+export class Select2 extends AbstractMenuItem {
     static __attributes__ = {
         multiSelect: new Attribute(parseBoolean, DROP, TRUE),
         ...AbstractMenuItem.__attributes__
@@ -279,15 +283,22 @@ export class SelectDropDown extends AbstractMenuItem {
         this.multiSelect = multiSelect;
         this.MenuItemClass = SelectOption;
         this.SubMenuClass = SelectMenu;
-        this.position = positioners.DROPDOWN;
+        this.positioner = positioners.DROPDOWN;
         this.clearSubItemsOnHover = false;
-        this.widget = widget;
+        this.labelMap = new WeakMap();
 
         this.element.classList.add('select');
         this.element.tabIndex = 0;
 
         this.registerTopics();
         this.parseDOM();
+
+        if(widget) {
+            this.widget = widget;
+        } else {
+            this.widget = new HiddenInputWidget();
+            this.widget.appendTo(this.element);
+        }
 
         if(!this.submenu) {
             let submenu = new SelectMenu();
@@ -336,13 +347,14 @@ export class SelectDropDown extends AbstractMenuItem {
 
             li.appendChild(exitButton);
             li.appendChild(span);
+            this.labelMap.set(li, item);
 
             fragment.appendChild(li);
         }
 
         output.appendChild(fragment);
 
-        if(this.widget) this.widget.setValue(this.getValue());
+        if(this.widget) this.widget.setValue(this._getSelectedValues());
     }
 
     append(option) {
@@ -353,18 +365,34 @@ export class SelectDropDown extends AbstractMenuItem {
         return Array.prototype.find.call(this.element.children, node => node.matches('.selection'));
     }
 
-    getValue() {
+    _getSelectedValues() {
         let r = [];
 
         for(let item of this.selection) {
             r.push(item.value);
         }
 
-        if(this.multiple) {
+        if(this.multiSelect) {
             return r;
         } else {
             return r[0];
         }
+    }
+
+    getValue() {
+        return this.widget.getValue();
+    }
+
+    setValue(value) {
+
+    }
+
+    getName() {
+        return this.widget.getName();
+    }
+
+    setName(name) {
+        this.widget.setName(name);
     }
 
     get selection() {
@@ -380,6 +408,19 @@ export class SelectDropDown extends AbstractMenuItem {
 
         let fragment = parseHTML(html);
         return fragment.children[0];
+    }
+
+    onClick(topic) {
+        let event = topic.originalEvent;
+
+        if(topic.target === this && event.target.closest('.exit-button')) {
+            let li = event.target.closest('li'),
+                item = this.labelMap.get(li);
+
+            item.deselect();
+        } else {
+            return super.onClick(topic);
+        }
     }
 
     get multiSelect() {
@@ -418,9 +459,10 @@ export class SelectDropDown extends AbstractMenuItem {
         }
 
         if(element.nodeName === "SELECT") {
-            // todo create new select instance from select html element.
-            let select = new SelectDropDown({
-                multiSelect: element.multiple
+            // noinspection JSUnresolvedVariable
+            let select = new Select2({
+                multiSelect: element.multiple,
+                widget: new SelectInputWidget(element, null, null, true)
             });
 
             for(let option of element.querySelectorAll('option')) {
@@ -433,6 +475,7 @@ export class SelectDropDown extends AbstractMenuItem {
             }
 
             element.replaceWith(select.element);
+            select.element.appendChild(select.widget.element);
             return select;
         } else {
             return super.FromHTML(element);
@@ -441,4 +484,4 @@ export class SelectDropDown extends AbstractMenuItem {
 }
 
 
-AutoLoader.register('select', (element) => SelectDropDown.FromHTML(element));
+AutoLoader.register('select', (element) => Select2.FromHTML(element));
