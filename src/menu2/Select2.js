@@ -68,13 +68,13 @@ export class SelectOption extends AbstractMenuItem {
         let parent = this.parent;
 
         if(!this.isSelected) {
-            this.select();
+            this.select({event});
         } else if(this.isSelected && parent.multiSelect) {
-            this.deselect();
+            this.deselect({event});
         }
     }
 
-    select() {
+    select(topicData={}) {
         if(this.isSelected) return;
 
         if(!this.multiSelect) {
@@ -93,14 +93,14 @@ export class SelectOption extends AbstractMenuItem {
             this.activate();
         }
 
-        this.dispatchTopic('option.select', {target: this, menu: this});
+        this.dispatchTopic('option.select', {target: this, menu: this, ...topicData});
     }
 
-    deselect() {
+    deselect(topicData={}) {
         if(!this.isSelected) return;
         this.isSelected = false;
         if(this.isActive) this.deactivate();
-        this.dispatchTopic('option.deselect', {target: this, menu: this});
+        this.dispatchTopic('option.deselect', {target: this, menu: this, ...topicData});
     }
 
     get isSelected() {
@@ -167,7 +167,7 @@ export class SelectOption extends AbstractMenuItem {
 export class SelectMenu extends AbstractMenu {
     @inherit multiSelect;
 
-    constructor({target, id=null, classes=null, ...context}={}) {
+    constructor({target, id=null, classes=null, shiftSelect=true, ...context}={}) {
         super();
         this.isSelectMenu = true;
         this.MenuItemClass = SelectOption;
@@ -187,6 +187,7 @@ export class SelectMenu extends AbstractMenu {
         this.closeOnSelect = false;
         this.delay = 0;
         this.positioner = "inherit";
+        this.shiftSelect = shiftSelect;
 
         this.registerTopics();
         this.parseDOM();
@@ -226,10 +227,9 @@ export class SelectMenu extends AbstractMenu {
                     }
                 }
             }
-
-            if(this.closeOnSelect && this.isActive) {
-                this.deactivate();
-            }
+            // if(this.closeOnSelect && this.isActive) {
+            //     this.deactivate();
+            // }
         });
     }
 
@@ -243,6 +243,39 @@ export class SelectMenu extends AbstractMenu {
         }
 
         return r;
+    }
+
+    onClick(topic) {
+        let event = topic.originalEvent,
+            target = topic.target,
+            isDisabled = target.getDisabled();
+
+        super.onClick(topic);
+
+        if(!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
+            if(event.shiftKey) {
+                let lastTarget = this.lastTarget || target,
+                    children = this.children,
+                    lastIndex = children.indexOf(lastTarget),
+                    targetIndex = children.indexOf(target),
+                    start = Math.min(lastIndex, targetIndex),
+                    end = Math.max(lastIndex, targetIndex);
+
+                for(let i = 0; i < children.length; i++) {
+                    let item = children[i];
+
+                    if(i >= start && i <= end) {
+                        if(!item.isSelected) {
+                            item.select();
+                        }
+                    } else if(item.isSelected) {
+                        item.deselect();
+                    }
+                }
+            } else {
+                this.lastTarget = target;
+            }
+        }
     }
 }
 

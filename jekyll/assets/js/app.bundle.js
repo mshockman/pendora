@@ -7134,13 +7134,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./decorators */ "./src/menu2/decorators.js");
 /* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
 /* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
@@ -7177,6 +7171,12 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
 function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7287,14 +7287,19 @@ function (_AbstractMenuItem) {
       var parent = this.parent;
 
       if (!this.isSelected) {
-        this.select();
+        this.select({
+          event: event
+        });
       } else if (this.isSelected && parent.multiSelect) {
-        this.deselect();
+        this.deselect({
+          event: event
+        });
       }
     }
   }, {
     key: "select",
     value: function select() {
+      var topicData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       if (this.isSelected) return;
 
       if (!this.multiSelect) {
@@ -7333,21 +7338,22 @@ function (_AbstractMenuItem) {
         this.activate();
       }
 
-      this.dispatchTopic('option.select', {
+      this.dispatchTopic('option.select', _objectSpread({
         target: this,
         menu: this
-      });
+      }, topicData));
     }
   }, {
     key: "deselect",
     value: function deselect() {
+      var topicData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       if (!this.isSelected) return;
       this.isSelected = false;
       if (this.isActive) this.deactivate();
-      this.dispatchTopic('option.deselect', {
+      this.dispatchTopic('option.deselect', _objectSpread({
         target: this,
         menu: this
-      });
+      }, topicData));
     }
   }, {
     key: "isSelected",
@@ -7428,7 +7434,9 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           id = _ref3$id === void 0 ? null : _ref3$id,
           _ref3$classes = _ref3.classes,
           classes = _ref3$classes === void 0 ? null : _ref3$classes,
-          context = _objectWithoutProperties(_ref3, ["target", "id", "classes"]);
+          _ref3$shiftSelect = _ref3.shiftSelect,
+          shiftSelect = _ref3$shiftSelect === void 0 ? true : _ref3$shiftSelect,
+          context = _objectWithoutProperties(_ref3, ["target", "id", "classes", "shiftSelect"]);
 
       _classCallCheck(this, SelectMenu);
 
@@ -7454,6 +7462,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this2.closeOnSelect = false;
       _this2.delay = 0;
       _this2.positioner = "inherit";
+      _this2.shiftSelect = shiftSelect;
 
       _this2.registerTopics();
 
@@ -7552,11 +7561,10 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
                 }
               }
             }
-          }
+          } // if(this.closeOnSelect && this.isActive) {
+          //     this.deactivate();
+          // }
 
-          if (_this3.closeOnSelect && _this3.isActive) {
-            _this3.deactivate();
-          }
         });
       }
     }, {
@@ -7592,6 +7600,41 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         }
 
         return r;
+      }
+    }, {
+      kind: "method",
+      key: "onClick",
+      value: function onClick(topic) {
+        var event = topic.originalEvent,
+            target = topic.target,
+            isDisabled = target.getDisabled();
+
+        _get(_getPrototypeOf(SelectMenu.prototype), "onClick", this).call(this, topic);
+
+        if (!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
+          if (event.shiftKey) {
+            var lastTarget = this.lastTarget || target,
+                children = this.children,
+                lastIndex = children.indexOf(lastTarget),
+                targetIndex = children.indexOf(target),
+                start = Math.min(lastIndex, targetIndex),
+                end = Math.max(lastIndex, targetIndex);
+
+            for (var i = 0; i < children.length; i++) {
+              var item = children[i];
+
+              if (i >= start && i <= end) {
+                if (!item.isSelected) {
+                  item.select();
+                }
+              } else if (item.isSelected) {
+                item.deselect();
+              }
+            }
+          } else {
+            this.lastTarget = target;
+          }
+        }
       }
     }]
   };
