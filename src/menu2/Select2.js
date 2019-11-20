@@ -198,7 +198,9 @@ export class SelectMenu extends AbstractMenu {
         let html = `
             <div class="menu">
                 ${arrow ? `<div class="menu__arrow"></div>` : ""}
-                <div class="menu__body"></div>
+                <div class="menu__header">
+                <section class="menu__body"></section>
+                <div class="menu__footer"></div>
             </div>
         `;
 
@@ -289,7 +291,7 @@ export class Select2 extends AbstractMenuItem {
         ...AbstractMenuItem.__attributes__
     };
 
-    constructor({target, options=null, multiSelect=false, timeout=false, id=null, classes=null, widget=null}={}) {
+    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null}={}) {
         super();
 
         if(target) {

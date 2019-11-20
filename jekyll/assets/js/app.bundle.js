@@ -4518,6 +4518,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
   function (_MenuNode2) {
     _inherits(AbstractMenu, _MenuNode2);
 
+    // Used to parse attributes on elements to their correct type during initializing by
+    // parsing the DOM tree.
     function AbstractMenu() {
       var _this;
 
@@ -4545,9 +4547,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.positioner = "inherit";
       return _this;
-    } // Used to parse attributes on elements to their correct type during initializing by
-    // parsing the DOM tree.
-
+    }
 
     return AbstractMenu;
   }(_MenuNode);
@@ -4556,16 +4556,16 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
     F: AbstractMenu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
-      key: "positioner",
-      value: void 0
-    }, {
-      kind: "field",
       "static": true,
       key: "__attributes__",
       value: function value() {
         return MENU_PARAMETERS;
       }
+    }, {
+      kind: "field",
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      key: "positioner",
+      value: void 0
     }, {
       kind: "method",
       key: "registerTopics",
@@ -4911,6 +4911,66 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
       }
+    }, {
+      kind: "method",
+      key: "filter",
+      value: function filter(testFunction) {
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
+
+        try {
+          for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var child = _step6.value;
+            child.isVisible = !!testFunction.call(this, child);
+          }
+        } catch (err) {
+          _didIteratorError6 = true;
+          _iteratorError6 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+              _iterator6["return"]();
+            }
+          } finally {
+            if (_didIteratorError6) {
+              throw _iteratorError6;
+            }
+          }
+        }
+
+        this.publish('filter-change', this);
+      }
+    }, {
+      kind: "method",
+      key: "clearFilter",
+      value: function clearFilter() {
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
+
+        try {
+          for (var _iterator7 = this.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var child = _step7.value;
+            child.isVisible = true;
+          }
+        } catch (err) {
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+              _iterator7["return"]();
+            }
+          } finally {
+            if (_didIteratorError7) {
+              throw _iteratorError7;
+            }
+          }
+        }
+
+        this.publish('filter-change', this);
+      }
       /**
        * Returns list of all menu bodies for the menu.
        *
@@ -5038,6 +5098,7 @@ function (_AbstractMenu) {
    * @param classes {String}
    * @param children {Array}
    * @param visible
+   * @param filter
    * @param context
    */
   function Menu() {
@@ -5070,7 +5131,9 @@ function (_AbstractMenu) {
         children = _ref$children === void 0 ? null : _ref$children,
         _ref$visible = _ref.visible,
         visible = _ref$visible === void 0 ? false : _ref$visible,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiActive", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible"]);
+        _ref$filter = _ref.filter,
+        filter = _ref$filter === void 0 ? false : _ref$filter,
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiActive", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible", "filter"]);
 
     _classCallCheck(this, Menu);
 
@@ -5972,6 +6035,18 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.attachSubMenu(value);
         }
       }
+    }, {
+      kind: "get",
+      key: "text",
+      value: function text() {
+        return this.button.innerText;
+      }
+    }, {
+      kind: "set",
+      key: "text",
+      value: function text(value) {
+        this.button.innerText = value;
+      }
     }]
   };
 }, _MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
@@ -6140,6 +6215,7 @@ function (_Publisher) {
     _this._parent = null;
     _this._children = [];
     _this._props = {};
+    _this._eventListeners = {};
     _this._timers = {};
     /**
      * @type {undefined|null|HTMLElement}
@@ -6166,8 +6242,7 @@ function (_Publisher) {
     value: function init() {
       var _this2 = this;
 
-      if (this.boundEvents) return;
-      this.boundEvents = {};
+      if (this.boundEvents) return; // this.boundEvents = {};
 
       var handleEvent = function handleEvent(event) {
         var target = _this2.getTargetNode(event.target),
@@ -6181,13 +6256,18 @@ function (_Publisher) {
         }
       };
 
-      this.boundEvents.onMouseOver = handleEvent;
-      this.boundEvents.onMouseOut = handleEvent;
-      this.boundEvents.onClick = handleEvent;
-      this.element.addEventListener('click', this.boundEvents.onClick);
-      this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
-      this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
+      this.addEventListener('click', handleEvent);
+      this.addEventListener('mouseover', handleEvent);
+      this.addEventListener('mouseout', handleEvent); // this.boundEvents.onMouseOver = handleEvent;
+      // this.boundEvents.onMouseOut = handleEvent;
+      // this.boundEvents.onClick = handleEvent;
+      //
+      // this.element.addEventListener('click', this.boundEvents.onClick);
+      // this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
+      // this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
+
       this.isController = true;
+      this.publish('init', this);
     }
     /**
      * Unbinds all event listeners.
@@ -6196,15 +6276,16 @@ function (_Publisher) {
   }, {
     key: "destroy",
     value: function destroy() {
-      if (this.events && this.hasElement()) {
-        this.element.removeEventListener('click', this.boundEvents.onClick);
-        this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
-        this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
-      }
+      // if(this.events && this.hasElement()) {
+      //     this.element.removeEventListener('click', this.boundEvents.onClick);
+      //     this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
+      //     this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
+      // }
+      this.clearAllRegisteredEvents();
+      this.isController = false; // this.boundEvents = null;
 
-      this.isController = false;
-      this.boundEvents = null;
       this.element = null;
+      this.publish('destroy', this);
     }
     /**
      * Renders the component.
@@ -6216,56 +6297,12 @@ function (_Publisher) {
   }, {
     key: "render",
     value: function render(context) {} //------------------------------------------------------------------------------------------------------------------
-    // Actions
+    // Tree transversal and manipulation functions.
 
     /**
      * Reference to the nodes parent or null if it is the root node of the tree.
      *
      * @returns {null|MenuNode}
-     */
-
-  }, {
-    key: "getDisabled",
-
-    /**
-     * Returns true if the current node is disabled or if any ancestor node is disabled.
-     *
-     * @returns {boolean}
-     */
-    value: function getDisabled() {
-      var o = this;
-
-      while (o) {
-        if (o.isDisabled) {
-          return true;
-        }
-
-        o = o.parent;
-      }
-
-      return false;
-    }
-    /**
-     * Returns true if the current node is visible.
-     *
-     * @returns {boolean}
-     */
-
-  }, {
-    key: "hasElement",
-
-    /**
-     * Returns true if the nodes element is defined.
-     *
-     * @returns {boolean}
-     */
-    value: function hasElement() {
-      return !!this._element;
-    }
-    /**
-     * Gets the root HTMLElement of the node.
-     *
-     * @returns {HTMLElement}
      */
 
   }, {
@@ -6295,38 +6332,6 @@ function (_Publisher) {
       }
 
       return null;
-    }
-    /**
-     * Appends the component to the target selector.
-     *
-     * @param selector {string|HTMLElement|{append}}
-     */
-
-  }, {
-    key: "appendTo",
-    value: function appendTo(selector) {
-      if (typeof selector === 'string') {
-        document.querySelector(selector).appendChild(this.element);
-      } else if (selector.appendChild) {
-        selector.appendChild(this.element);
-      } else if (selector.append) {
-        selector.append(this.element);
-      }
-    }
-    /**
-     * Removes the component from the dom.
-     *
-     * @returns {MenuNode}
-     */
-
-  }, {
-    key: "remove",
-    value: function remove() {
-      if (this.element.parentElement) {
-        this.element.parentElement.removeChild(this.element);
-      }
-
-      return this;
     }
     /**
      * Returns the closest MenuNode up the tree that matches the provided test function.
@@ -6503,6 +6508,210 @@ function (_Publisher) {
       }, getDescendants, this, [[3, 40, 44, 52], [12, 23, 27, 35], [28,, 30, 34], [45,, 47, 51]]);
     })
     /**
+     * Returns the closest menu node instance bound to an element for the target HTMLElement in the current menu tree.
+     *
+     * @param target {HTMLElement}
+     * @returns {null|MenuNode}
+     */
+
+  }, {
+    key: "getTargetNode",
+    value: function getTargetNode(target) {
+      var o = target;
+
+      while (o) {
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+
+        if (instance) {
+          return instance;
+        }
+
+        if (o === this.element) {
+          break;
+        }
+
+        o = o.parentElement;
+      }
+
+      return null;
+    }
+    /**
+     * Returns the target item for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+
+  }, {
+    key: "getTargetItem",
+    value: function getTargetItem(target) {
+      var o = target;
+
+      while (o) {
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+
+        if (instance && instance.isMenuItem()) {
+          return instance;
+        }
+
+        if (o === this.element) {
+          break;
+        }
+
+        o = o.parentElement;
+      }
+
+      return null;
+    }
+    /**
+     * Returns the target menu for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+
+  }, {
+    key: "getTargetMenu",
+    value: function getTargetMenu(target) {
+      var o = target;
+
+      while (o) {
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+
+        if (instance && instance.isMenu()) {
+          return instance;
+        }
+
+        if (o === this.element) {
+          break;
+        }
+
+        o = o.parentElement;
+      }
+
+      return null;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Widget functions
+
+    /**
+     * Returns true if the current node is visible.
+     *
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "hasElement",
+
+    /**
+     * Returns true if the nodes element is defined.
+     *
+     * @returns {boolean}
+     */
+    value: function hasElement() {
+      return !!this._element;
+    }
+    /**
+     * Gets the root HTMLElement of the node.
+     *
+     * @returns {HTMLElement}
+     */
+
+  }, {
+    key: "appendTo",
+
+    /**
+     * Appends the component to the target selector.
+     *
+     * @param selector {string|HTMLElement|{append}}
+     */
+    value: function appendTo(selector) {
+      if (typeof selector === 'string') {
+        document.querySelector(selector).appendChild(this.element);
+      } else if (selector.appendChild) {
+        selector.appendChild(this.element);
+      } else if (selector.append) {
+        selector.append(this.element);
+      }
+    }
+    /**
+     * Removes the component from the dom.
+     *
+     * @returns {MenuNode}
+     */
+
+  }, {
+    key: "remove",
+    value: function remove() {
+      if (this.element.parentElement) {
+        this.element.parentElement.removeChild(this.element);
+      }
+
+      return this;
+    }
+  }, {
+    key: "addClass",
+    value: function addClass(classes) {
+      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(this.element, classes);
+    }
+  }, {
+    key: "removeClass",
+    value: function removeClass(classes) {
+      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["removeClasses"])(this.element, classes);
+    } //------------------------------------------------------------------------------------------------------------------
+    // Menu state functions
+
+    /**
+     * True if the node is active.
+     *
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "getDisabled",
+
+    /**
+     * Returns true if the current node is disabled or if any ancestor node is disabled.
+     *
+     * @returns {boolean}
+     */
+    value: function getDisabled() {
+      var o = this;
+
+      while (o) {
+        if (o.isDisabled) {
+          return true;
+        }
+
+        o = o.parent;
+      }
+
+      return false;
+    }
+    /**
+     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
+     *
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "isMenuItem",
+    value: function isMenuItem() {
+      return false;
+    }
+    /**
+     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
+     *
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "isMenu",
+    value: function isMenu() {
+      return false;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Timer, topic and event functions
+
+    /**
      * Creates a timer with the given name.  Only one timer with that name can be active per object.
      * If another timer with the same name is created the previous one will be cleared if `clear` is true.
      * Otherwise if `clear` is false a KeyError with be thrown.  The callback function for the timer is called
@@ -6626,112 +6835,6 @@ function (_Publisher) {
       return null;
     }
     /**
-     * Returns the target node for the given HTMLElement in the current menu tree.
-     *
-     * @param target {HTMLElement}
-     * @returns {null|MenuNode}
-     */
-
-  }, {
-    key: "getTargetNode",
-    value: function getTargetNode(target) {
-      var o = target;
-
-      while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
-
-        if (instance) {
-          return instance;
-        }
-
-        if (o === this.element) {
-          break;
-        }
-
-        o = o.parentElement;
-      }
-
-      return null;
-    }
-    /**
-     * Returns the target item for the given HTMLElement in the current menu tree.
-     *
-     * @param target
-     * @returns {null}
-     */
-
-  }, {
-    key: "getTargetItem",
-    value: function getTargetItem(target) {
-      var o = target;
-
-      while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
-
-        if (instance && instance.isMenuItem()) {
-          return instance;
-        }
-
-        if (o === this.element) {
-          break;
-        }
-
-        o = o.parentElement;
-      }
-
-      return null;
-    }
-    /**
-     * Returns the target menu for the given HTMLElement in the current menu tree.
-     *
-     * @param target
-     * @returns {null}
-     */
-
-  }, {
-    key: "getTargetMenu",
-    value: function getTargetMenu(target) {
-      var o = target;
-
-      while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
-
-        if (instance && instance.isMenu()) {
-          return instance;
-        }
-
-        if (o === this.element) {
-          break;
-        }
-
-        o = o.parentElement;
-      }
-
-      return null;
-    }
-    /**
-     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
-     *
-     * @returns {boolean}
-     */
-
-  }, {
-    key: "isMenuItem",
-    value: function isMenuItem() {
-      return false;
-    }
-    /**
-     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
-     *
-     * @returns {boolean}
-     */
-
-  }, {
-    key: "isMenu",
-    value: function isMenu() {
-      return false;
-    }
-    /**
      * Publishes the topic to itself and bubbles up the menu tree.
      *
      * @param topic
@@ -6756,8 +6859,161 @@ function (_Publisher) {
 
         o = o.parent;
       }
+    }
+  }, {
+    key: "clearAllRegisteredEvents",
+    value: function clearAllRegisteredEvents() {
+      if (this.element) {
+        for (var _i = 0, _Object$keys = Object.keys(this._eventListeners); _i < _Object$keys.length; _i++) {
+          var key = _Object$keys[_i];
+          var _iteratorNormalCompletion3 = true;
+          var _didIteratorError3 = false;
+          var _iteratorError3 = undefined;
+
+          try {
+            for (var _iterator3 = this._eventListeners[key][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              var listener = _step3.value;
+              this.element.removeEventListener(key, listener.callback, listener.bubble);
+            }
+          } catch (err) {
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+                _iterator3["return"]();
+              }
+            } finally {
+              if (_didIteratorError3) {
+                throw _iteratorError3;
+              }
+            }
+          }
+        }
+      }
+
+      this._events = {};
+    }
+  }, {
+    key: "_registerAllEvents",
+    value: function _registerAllEvents() {
+      for (var _i2 = 0, _Object$keys2 = Object.keys(this._eventListeners); _i2 < _Object$keys2.length; _i2++) {
+        var key = _Object$keys2[_i2];
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
+
+        try {
+          for (var _iterator4 = this._eventListeners[key][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            var listener = _step4.value;
+            this.element.addEventListener(key, listener.callback, listener.bubble);
+          }
+        } catch (err) {
+          _didIteratorError4 = true;
+          _iteratorError4 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+              _iterator4["return"]();
+            }
+          } finally {
+            if (_didIteratorError4) {
+              throw _iteratorError4;
+            }
+          }
+        }
+      }
+    }
+    /**
+     * A wrapper function around calling this.element.addEventListener.  Will register a listener on the element.
+     * This function keeps a record of the event listeners that are attached to the element.  If the element
+     * hasn't been rendered yet and this function is called attaching the element will be delayed until element is set.
+     *
+     * @param name
+     * @param callback
+     * @param bubble
+     */
+
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(name, callback) {
+      var bubble = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (!this._eventListeners[name]) {
+        this._eventListeners[name] = [];
+      }
+
+      var listener = {
+        callback: callback,
+        bubble: bubble
+      };
+
+      this._eventListeners[name].push(listener);
+
+      if (this.element) {
+        this.element.addEventListener(name, callback, bubble);
+      }
+    }
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(name, callback) {
+      var bubble = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (this._eventListeners[name]) {
+        for (var i = 0, l = this._eventListeners[name].length; i < l; i++) {
+          var listener = this._eventListeners[name][i];
+
+          if (listener.callback === callback && listener.bubble === bubble) {
+            this._eventListeners.splice(i, 1);
+
+            if (!this._eventListeners[name].length) {
+              delete this._eventListeners[name];
+            }
+
+            return listener;
+          }
+        }
+      }
+
+      return null;
+    }
+  }, {
+    key: "hasEventListener",
+    value: function hasEventListener(name, callback) {
+      var bubble = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (this._eventListeners[name]) {
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
+
+        try {
+          for (var _iterator5 = this._eventListeners[name][Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var listener = _step5.value;
+
+            if (listener.callback === callback && listener.bubble === bubble) {
+              return true;
+            }
+          }
+        } catch (err) {
+          _didIteratorError5 = true;
+          _iteratorError5 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+              _iterator5["return"]();
+            }
+          } finally {
+            if (_didIteratorError5) {
+              throw _iteratorError5;
+            }
+          }
+        }
+      }
+
+      return false;
     } //------------------------------------------------------------------------------------------------------------------
-    // Tree functions
+    // Tree parsing functions.
 
     /**
      * Parses the dom and initializes any menu or menuitem elements that are found.
@@ -6769,39 +7025,39 @@ function (_Publisher) {
       var _this4 = this;
 
       if (this._children.length) {
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
 
         try {
-          for (var _iterator3 = this._children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var child = _step3.value;
+          for (var _iterator6 = this._children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var child = _step6.value;
             child.invalidateTree();
           }
         } catch (err) {
-          _didIteratorError3 = true;
-          _iteratorError3 = err;
+          _didIteratorError6 = true;
+          _iteratorError6 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-              _iterator3["return"]();
+            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+              _iterator6["return"]();
             }
           } finally {
-            if (_didIteratorError3) {
-              throw _iteratorError3;
+            if (_didIteratorError6) {
+              throw _iteratorError6;
             }
           }
         }
       }
 
       var walk = function walk(node) {
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
 
         try {
-          for (var _iterator4 = node.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var _child = _step4.value;
+          for (var _iterator7 = node.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var _child = _step7.value;
             var role = _child.dataset.role;
 
             if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
@@ -6820,16 +7076,16 @@ function (_Publisher) {
             }
           }
         } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-              _iterator4["return"]();
+            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+              _iterator7["return"]();
             }
           } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
+            if (_didIteratorError7) {
+              throw _iteratorError7;
             }
           }
         }
@@ -6845,44 +7101,34 @@ function (_Publisher) {
     key: "invalidateTree",
     value: function invalidateTree() {
       this._parent = null;
-      var _iteratorNormalCompletion5 = true;
-      var _didIteratorError5 = false;
-      var _iteratorError5 = undefined;
+      var _iteratorNormalCompletion8 = true;
+      var _didIteratorError8 = false;
+      var _iteratorError8 = undefined;
 
       try {
-        for (var _iterator5 = this.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-          var child = _step5.value;
+        for (var _iterator8 = this.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+          var child = _step8.value;
           child.invalidateTree();
         }
       } catch (err) {
-        _didIteratorError5 = true;
-        _iteratorError5 = err;
+        _didIteratorError8 = true;
+        _iteratorError8 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-            _iterator5["return"]();
+          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+            _iterator8["return"]();
           }
         } finally {
-          if (_didIteratorError5) {
-            throw _iteratorError5;
+          if (_didIteratorError8) {
+            throw _iteratorError8;
           }
         }
       }
 
       this._children = [];
     } //------------------------------------------------------------------------------------------------------------------
-    // Getters and Setters
+    // Static functions
 
-  }, {
-    key: "addClass",
-    value: function addClass(classes) {
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(this.element, classes);
-    }
-  }, {
-    key: "removeClass",
-    value: function removeClass(classes) {
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["removeClasses"])(this.element, classes);
-    }
     /**
      * Returns the bound menu controller for the provided node.
      *
@@ -6980,21 +7226,18 @@ function (_Publisher) {
     get: function get() {
       return this._children.slice(0);
     }
-    /**
-     * True if the node is active.
-     *
-     * @returns {boolean}
-     */
-
   }, {
-    key: "isActive",
+    key: "isRoot",
     get: function get() {
-      return this.element.classList.contains('active');
+      return this.root === this;
+    }
+  }, {
+    key: "isVisible",
+    get: function get() {
+      return !this.element.classList.contains('hidden');
     }
     /**
-     * Sets the isActive state for the node.
-     *
-     * Will toggle the active class on the root element as needed.
+     * Sets the visible state of the node.
      *
      * @param value
      */
@@ -7002,11 +7245,11 @@ function (_Publisher) {
     set: function set(value) {
       value = !!value;
 
-      if (value !== this.isActive) {
+      if (value !== this.isVisible) {
         if (value) {
-          this.element.classList.add('active');
+          this.element.classList.remove('hidden');
         } else {
-          this.element.classList.remove('active');
+          this.element.classList.add('hidden');
         }
       }
     }
@@ -7039,33 +7282,6 @@ function (_Publisher) {
       }
     }
   }, {
-    key: "isRoot",
-    get: function get() {
-      return this.root === this;
-    }
-  }, {
-    key: "isVisible",
-    get: function get() {
-      return !this.element.classList.contains('hidden');
-    }
-    /**
-     * Sets the visible state of the node.
-     *
-     * @param value
-     */
-    ,
-    set: function set(value) {
-      value = !!value;
-
-      if (value !== this.isVisible) {
-        if (value) {
-          this.element.classList.remove('hidden');
-        } else {
-          this.element.classList.add('hidden');
-        }
-      }
-    }
-  }, {
     key: "element",
     get: function get() {
       if (this._element === undefined) {
@@ -7094,12 +7310,15 @@ function (_Publisher) {
       }
 
       if (this._element) {
+        this.clearAllRegisteredEvents();
         Object(_utility__WEBPACK_IMPORTED_MODULE_3__["detachMenuInstance"])(this._element);
         this._element = undefined;
       }
 
       Object(_utility__WEBPACK_IMPORTED_MODULE_3__["attachMenuInstance"])(element, this);
       this._element = element;
+
+      this._registerAllEvents();
     }
   }, {
     key: "id",
@@ -7126,6 +7345,30 @@ function (_Publisher) {
     },
     set: function set(style) {
       this.element.style = style;
+    }
+  }, {
+    key: "isActive",
+    get: function get() {
+      return this.element.classList.contains('active');
+    }
+    /**
+     * Sets the isActive state for the node.
+     *
+     * Will toggle the active class on the root element as needed.
+     *
+     * @param value
+     */
+    ,
+    set: function set(value) {
+      value = !!value;
+
+      if (value !== this.isActive) {
+        if (value) {
+          this.element.classList.add('active');
+        } else {
+          this.element.classList.remove('active');
+        }
+      }
     }
   }], [{
     key: "getInstance",
@@ -7537,7 +7780,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\"></div>\n            </div>\n        ");
+        var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__header\">\n                <section class=\"menu__body\"></section>\n                <div class=\"menu__footer\"></div>\n            </div>\n        ");
         var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
         return fragment.children[0];
       }
@@ -7699,8 +7942,6 @@ function (_AbstractMenuItem2) {
 
     var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         target = _ref5.target,
-        _ref5$options = _ref5.options,
-        options = _ref5$options === void 0 ? null : _ref5$options,
         _ref5$multiSelect = _ref5.multiSelect,
         multiSelect = _ref5$multiSelect === void 0 ? false : _ref5$multiSelect,
         _ref5$timeout = _ref5.timeout,
@@ -8284,7 +8525,7 @@ var DROPDOWN = dropdown();
 /*!******************************!*\
   !*** ./src/menu2/utility.js ***!
   \******************************/
-/*! exports provided: MENU_MAP, attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance */
+/*! exports provided: MENU_MAP, attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement, getClosestMenuItemByElement, getClosestMenuByElement */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8294,6 +8535,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "detachMenuInstance", function() { return detachMenuInstance; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hasMenuInstance", function() { return hasMenuInstance; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMenuInstance", function() { return getMenuInstance; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClosestMenuNodeByElement", function() { return getClosestMenuNodeByElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClosestMenuItemByElement", function() { return getClosestMenuItemByElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClosestMenuByElement", function() { return getClosestMenuByElement; });
 var MENU_MAP = new WeakMap();
 function attachMenuInstance(element, instance) {
   if (instance === null) {
@@ -8314,6 +8558,45 @@ function hasMenuInstance(element) {
 }
 function getMenuInstance(element) {
   return MENU_MAP.get(element);
+}
+function getClosestMenuNodeByElement(element) {
+  while (element) {
+    var instance = getMenuInstance(element);
+
+    if (instance) {
+      return instance;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
+}
+function getClosestMenuItemByElement(element) {
+  while (element) {
+    var instance = getMenuInstance(element);
+
+    if (instance && instance.isMenuItem()) {
+      return instance;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
+}
+function getClosestMenuByElement(element) {
+  while (element) {
+    var instance = getMenuInstance(element);
+
+    if (instance && instance.isMenu()) {
+      return instance;
+    }
+
+    element = element.parentElement;
+  }
+
+  return null;
 }
 
 /***/ }),

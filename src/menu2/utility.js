@@ -27,3 +27,48 @@ export function hasMenuInstance(element) {
 export function getMenuInstance(element) {
     return MENU_MAP.get(element);
 }
+
+
+export function getClosestMenuNodeByElement(element) {
+    while(element) {
+        let instance = getMenuInstance(element);
+
+        if(instance) {
+            return instance;
+        }
+
+        element = element.parentElement;
+    }
+
+    return null;
+}
+
+
+export function getClosestMenuItemByElement(element) {
+    while(element) {
+        let instance = getMenuInstance(element);
+
+        if(instance && instance.isMenuItem()) {
+            return instance;
+        }
+
+        element = element.parentElement;
+    }
+
+    return null;
+}
+
+
+export function getClosestMenuByElement(element) {
+    while(element) {
+        let instance = getMenuInstance(element);
+
+        if(instance && instance.isMenu()) {
+            return instance;
+        }
+
+        element = element.parentElement;
+    }
+
+    return null;
+}

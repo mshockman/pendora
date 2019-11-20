@@ -489,6 +489,14 @@ export class AbstractMenuItem extends MenuNode {
             this.attachSubMenu(value);
         }
     }
+
+    get text() {
+        return this.button.innerText;
+    }
+
+    set text(value) {
+        this.button.innerText = value;
+    }
 }
 
 

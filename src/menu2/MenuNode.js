@@ -16,6 +16,7 @@ export default class MenuNode extends Publisher {
         this._parent = null;
         this._children = [];
         this._props = {};
+        this._eventListeners = {};
         this._timers = {};
         /**
          * @type {undefined|null|HTMLElement}
@@ -39,7 +40,7 @@ export default class MenuNode extends Publisher {
     init() {
         if(this.boundEvents) return;
 
-        this.boundEvents = {};
+        // this.boundEvents = {};
 
         let handleEvent = (event) => {
             let target = this.getTargetNode(event.target),
@@ -53,29 +54,39 @@ export default class MenuNode extends Publisher {
             }
         };
 
-        this.boundEvents.onMouseOver = handleEvent;
-        this.boundEvents.onMouseOut = handleEvent;
-        this.boundEvents.onClick = handleEvent;
+        this.addEventListener('click', handleEvent);
+        this.addEventListener('mouseover', handleEvent);
+        this.addEventListener('mouseout', handleEvent);
 
-        this.element.addEventListener('click', this.boundEvents.onClick);
-        this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
-        this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
+        // this.boundEvents.onMouseOver = handleEvent;
+        // this.boundEvents.onMouseOut = handleEvent;
+        // this.boundEvents.onClick = handleEvent;
+        //
+        // this.element.addEventListener('click', this.boundEvents.onClick);
+        // this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
+        // this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
         this.isController = true;
+
+        this.publish('init', this);
     }
 
     /**
      * Unbinds all event listeners.
      */
     destroy() {
-        if(this.events && this.hasElement()) {
-            this.element.removeEventListener('click', this.boundEvents.onClick);
-            this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
-            this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
-        }
+        // if(this.events && this.hasElement()) {
+        //     this.element.removeEventListener('click', this.boundEvents.onClick);
+        //     this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
+        //     this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
+        // }
+        this.clearAllRegisteredEvents();
 
         this.isController = false;
-        this.boundEvents = null;
+        // this.boundEvents = null;
         this.element = null;
+
+        this.publish('destroy', this);
+
     }
 
     /**
@@ -89,7 +100,7 @@ export default class MenuNode extends Publisher {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    // Actions
+    // Tree transversal and manipulation functions.
 
     /**
      * Reference to the nodes parent or null if it is the root node of the tree.
@@ -169,156 +180,8 @@ export default class MenuNode extends Publisher {
         return this._children.slice(0);
     }
 
-    /**
-     * True if the node is active.
-     *
-     * @returns {boolean}
-     */
-    get isActive() {
-        return this.element.classList.contains('active');
-    }
-
-    /**
-     * Sets the isActive state for the node.
-     *
-     * Will toggle the active class on the root element as needed.
-     *
-     * @param value
-     */
-    set isActive(value) {
-        value = !!value;
-
-        if(value !== this.isActive) {
-            if(value) {
-                this.element.classList.add('active');
-            } else {
-                this.element.classList.remove('active');
-            }
-        }
-    }
-
-    /**
-     * Returns true if the current node is disabled.
-     *
-     * @returns {boolean}
-     */
-    get isDisabled() {
-        return this.element.classList.contains('disabled');
-    }
-
-    /**
-     * Sets the disabled state for the current node.
-     *
-     * @param value
-     */
-    set isDisabled(value) {
-        value = !!value;
-
-        if(value !== this.isDisabled) {
-            if(value) {
-                this.element.classList.add('disabled');
-            } else {
-                this.element.classList.remove('disabled');
-            }
-        }
-    }
-
     get isRoot() {
         return this.root === this;
-    }
-
-    /**
-     * Returns true if the current node is disabled or if any ancestor node is disabled.
-     *
-     * @returns {boolean}
-     */
-    getDisabled() {
-        let o = this;
-
-        while(o) {
-            if(o.isDisabled) {
-                return true;
-            }
-
-            o = o.parent;
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns true if the current node is visible.
-     *
-     * @returns {boolean}
-     */
-    get isVisible() {
-        return !this.element.classList.contains('hidden');
-    }
-
-    /**
-     * Sets the visible state of the node.
-     *
-     * @param value
-     */
-    set isVisible(value) {
-        value = !!value;
-
-        if(value !== this.isVisible) {
-            if(value) {
-                this.element.classList.remove('hidden');
-            } else {
-                this.element.classList.add('hidden');
-            }
-        }
-    }
-
-    /**
-     * Returns true if the nodes element is defined.
-     *
-     * @returns {boolean}
-     */
-    hasElement() {
-        return !!this._element;
-    }
-
-    /**
-     * Gets the root HTMLElement of the node.
-     *
-     * @returns {HTMLElement}
-     */
-    get element() {
-        if(this._element === undefined) {
-            this.element = this.render({});
-        }
-
-        return this._element;
-    }
-
-    /**
-     * Sets the root HTMLElement of the node.
-     *
-     * @param element
-     */
-    set element(element) {
-        if(typeof element === 'string') {
-            element = document.querySelector(element);
-        } else if(typeof element === 'function') {
-            element = element.call(this);
-        }
-
-        if(this._element === element) return;
-
-        if(hasMenuInstance(element)) {
-            throw new Error("Element is already bound to menu controller");
-        }
-
-        if(this._element) {
-            detachMenuInstance(this._element);
-            this._element = undefined;
-        }
-
-        attachMenuInstance(element, this);
-        this._element = element;
     }
 
     /**
@@ -344,34 +207,6 @@ export default class MenuNode extends Publisher {
         }
 
         return null;
-    }
-
-    /**
-     * Appends the component to the target selector.
-     *
-     * @param selector {string|HTMLElement|{append}}
-     */
-    appendTo(selector) {
-        if(typeof selector === 'string') {
-            document.querySelector(selector).appendChild(this.element);
-        } else if(selector.appendChild) {
-            selector.appendChild(this.element);
-        } else if(selector.append) {
-            selector.append(this.element);
-        }
-    }
-
-    /**
-     * Removes the component from the dom.
-     *
-     * @returns {MenuNode}
-     */
-    remove() {
-        if(this.element.parentElement) {
-            this.element.parentElement.removeChild(this.element);
-        }
-
-        return this;
     }
 
     /**
@@ -423,6 +258,320 @@ export default class MenuNode extends Publisher {
             }
         }
     }
+
+    /**
+     * Returns the closest menu node instance bound to an element for the target HTMLElement in the current menu tree.
+     *
+     * @param target {HTMLElement}
+     * @returns {null|MenuNode}
+     */
+    getTargetNode(target) {
+        let o = target;
+
+        while(o) {
+            let instance = getMenuInstance(o);
+
+            if(instance) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the target item for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+    getTargetItem(target) {
+        let o = target;
+
+        while(o) {
+            let instance = getMenuInstance(o);
+
+            if(instance && instance.isMenuItem()) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the target menu for the given HTMLElement in the current menu tree.
+     *
+     * @param target
+     * @returns {null}
+     */
+    getTargetMenu(target) {
+        let o = target;
+
+        while(o) {
+            let instance = getMenuInstance(o);
+
+            if(instance && instance.isMenu()) {
+                return instance;
+            }
+
+            if(o === this.element) {
+                break;
+            }
+
+            o = o.parentElement;
+        }
+
+        return null;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Widget functions
+    /**
+     * Returns true if the current node is visible.
+     *
+     * @returns {boolean}
+     */
+    get isVisible() {
+        return !this.element.classList.contains('hidden');
+    }
+
+    /**
+     * Sets the visible state of the node.
+     *
+     * @param value
+     */
+    set isVisible(value) {
+        value = !!value;
+
+        if(value !== this.isVisible) {
+            if(value) {
+                this.element.classList.remove('hidden');
+            } else {
+                this.element.classList.add('hidden');
+            }
+        }
+    }
+
+    /**
+     * Returns true if the current node is disabled.
+     *
+     * @returns {boolean}
+     */
+    get isDisabled() {
+        return this.element.classList.contains('disabled');
+    }
+
+    /**
+     * Sets the disabled state for the current node.
+     *
+     * @param value
+     */
+    set isDisabled(value) {
+        value = !!value;
+
+        if(value !== this.isDisabled) {
+            if(value) {
+                this.element.classList.add('disabled');
+            } else {
+                this.element.classList.remove('disabled');
+            }
+        }
+    }
+
+    /**
+     * Returns true if the nodes element is defined.
+     *
+     * @returns {boolean}
+     */
+    hasElement() {
+        return !!this._element;
+    }
+
+    /**
+     * Gets the root HTMLElement of the node.
+     *
+     * @returns {HTMLElement}
+     */
+    get element() {
+        if(this._element === undefined) {
+            this.element = this.render({});
+        }
+
+        return this._element;
+    }
+
+    /**
+     * Sets the root HTMLElement of the node.
+     *
+     * @param element
+     */
+    set element(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        } else if(typeof element === 'function') {
+            element = element.call(this);
+        }
+
+        if(this._element === element) return;
+
+        if(hasMenuInstance(element)) {
+            throw new Error("Element is already bound to menu controller");
+        }
+
+        if(this._element) {
+            this.clearAllRegisteredEvents();
+            detachMenuInstance(this._element);
+            this._element = undefined;
+        }
+
+        attachMenuInstance(element, this);
+        this._element = element;
+        this._registerAllEvents();
+    }
+
+    /**
+     * Appends the component to the target selector.
+     *
+     * @param selector {string|HTMLElement|{append}}
+     */
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else if(selector.append) {
+            selector.append(this.element);
+        }
+    }
+
+    /**
+     * Removes the component from the dom.
+     *
+     * @returns {MenuNode}
+     */
+    remove() {
+        if(this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
+        }
+
+        return this;
+    }
+
+    get id() {
+        return this.element.id;
+    }
+
+    set id(id) {
+        if(this.element) this.element.id = id;
+    }
+
+    get classList() {
+        return this.element.classList;
+    }
+
+    get dataset() {
+        return this.element.dataset;
+    }
+
+    get style() {
+        return this.element.style;
+    }
+
+    set style(style) {
+        this.element.style = style;
+    }
+
+    addClass(classes) {
+        return addClasses(this.element, classes);
+    }
+
+    removeClass(classes) {
+        return removeClasses(this.element, classes);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Menu state functions
+
+    /**
+     * True if the node is active.
+     *
+     * @returns {boolean}
+     */
+    get isActive() {
+        return this.element.classList.contains('active');
+    }
+
+    /**
+     * Sets the isActive state for the node.
+     *
+     * Will toggle the active class on the root element as needed.
+     *
+     * @param value
+     */
+    set isActive(value) {
+        value = !!value;
+
+        if(value !== this.isActive) {
+            if(value) {
+                this.element.classList.add('active');
+            } else {
+                this.element.classList.remove('active');
+            }
+        }
+    }
+
+    /**
+     * Returns true if the current node is disabled or if any ancestor node is disabled.
+     *
+     * @returns {boolean}
+     */
+    getDisabled() {
+        let o = this;
+
+        while(o) {
+            if(o.isDisabled) {
+                return true;
+            }
+
+            o = o.parent;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
+     *
+     * @returns {boolean}
+     */
+    isMenuItem() {
+        return false;
+    }
+
+    /**
+     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
+     *
+     * @returns {boolean}
+     */
+    isMenu() {
+        return false;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Timer, topic and event functions
 
     /**
      * Creates a timer with the given name.  Only one timer with that name can be active per object.
@@ -535,102 +684,6 @@ export default class MenuNode extends Publisher {
     }
 
     /**
-     * Returns the target node for the given HTMLElement in the current menu tree.
-     *
-     * @param target {HTMLElement}
-     * @returns {null|MenuNode}
-     */
-    getTargetNode(target) {
-        let o = target;
-
-        while(o) {
-            let instance = getMenuInstance(o);
-
-            if(instance) {
-                return instance;
-            }
-
-            if(o === this.element) {
-                break;
-            }
-
-            o = o.parentElement;
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the target item for the given HTMLElement in the current menu tree.
-     *
-     * @param target
-     * @returns {null}
-     */
-    getTargetItem(target) {
-        let o = target;
-
-        while(o) {
-            let instance = getMenuInstance(o);
-
-            if(instance && instance.isMenuItem()) {
-                return instance;
-            }
-
-            if(o === this.element) {
-                break;
-            }
-
-            o = o.parentElement;
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the target menu for the given HTMLElement in the current menu tree.
-     *
-     * @param target
-     * @returns {null}
-     */
-    getTargetMenu(target) {
-        let o = target;
-
-        while(o) {
-            let instance = getMenuInstance(o);
-
-            if(instance && instance.isMenu()) {
-                return instance;
-            }
-
-            if(o === this.element) {
-                break;
-            }
-
-            o = o.parentElement;
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns true if the node is a menu item.  Should be overridden by subclasses that are menu item like.
-     *
-     * @returns {boolean}
-     */
-    isMenuItem() {
-        return false;
-    }
-
-    /**
-     * Returns true if the node is a menu.  Method should be defined by any object that should be treated like a menu.
-     *
-     * @returns {boolean}
-     */
-    isMenu() {
-        return false;
-    }
-
-    /**
      * Publishes the topic to itself and bubbles up the menu tree.
      *
      * @param topic
@@ -648,8 +701,82 @@ export default class MenuNode extends Publisher {
         }
     }
 
+    clearAllRegisteredEvents() {
+        if(this.element) {
+            for(let key of Object.keys(this._eventListeners)) {
+                for(let listener of this._eventListeners[key]) {
+                    this.element.removeEventListener(key, listener.callback, listener.bubble);
+                }
+            }
+        }
+
+        this._events = {};
+    }
+
+    _registerAllEvents() {
+        for(let key of Object.keys(this._eventListeners)) {
+            for(let listener of this._eventListeners[key]) {
+                this.element.addEventListener(key, listener.callback, listener.bubble);
+            }
+        }
+    }
+
+    /**
+     * A wrapper function around calling this.element.addEventListener.  Will register a listener on the element.
+     * This function keeps a record of the event listeners that are attached to the element.  If the element
+     * hasn't been rendered yet and this function is called attaching the element will be delayed until element is set.
+     *
+     * @param name
+     * @param callback
+     * @param bubble
+     */
+    addEventListener(name, callback, bubble=false) {
+        if(!this._eventListeners[name]) {
+            this._eventListeners[name] = [];
+        }
+
+        let listener = {callback, bubble};
+        this._eventListeners[name].push(listener);
+
+        if(this.element) {
+            this.element.addEventListener(name, callback, bubble);
+        }
+    }
+
+    removeEventListener(name, callback, bubble=false) {
+        if(this._eventListeners[name]) {
+            for(let i = 0, l = this._eventListeners[name].length; i < l; i++) {
+                let listener = this._eventListeners[name][i];
+
+                if(listener.callback === callback && listener.bubble === bubble) {
+                    this._eventListeners.splice(i, 1);
+
+                    if(!this._eventListeners[name].length) {
+                        delete this._eventListeners[name];
+                    }
+
+                    return listener;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    hasEventListener(name, callback, bubble=false) {
+        if(this._eventListeners[name]) {
+            for(let listener of this._eventListeners[name]) {
+                if(listener.callback === callback && listener.bubble === bubble) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     //------------------------------------------------------------------------------------------------------------------
-    // Tree functions
+    // Tree parsing functions.
 
     /**
      * Parses the dom and initializes any menu or menuitem elements that are found.
@@ -697,39 +824,7 @@ export default class MenuNode extends Publisher {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    // Getters and Setters
-
-    get id() {
-        return this.element.id;
-    }
-
-    set id(id) {
-        if(this.element) this.element.id = id;
-    }
-
-    get classList() {
-        return this.element.classList;
-    }
-
-    get dataset() {
-        return this.element.dataset;
-    }
-
-    get style() {
-        return this.element.style;
-    }
-
-    set style(style) {
-        this.element.style = style;
-    }
-
-    addClass(classes) {
-        return addClasses(this.element, classes);
-    }
-
-    removeClass(classes) {
-        return removeClasses(this.element, classes);
-    }
+    // Static functions
 
     /**
      * Returns the bound menu controller for the provided node.

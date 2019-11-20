@@ -30,6 +30,10 @@ export const MENU_PARAMETERS = {
  * @abstract
  */
 export class AbstractMenu extends MenuNode {
+    // Used to parse attributes on elements to their correct type during initializing by
+    // parsing the DOM tree.
+    static __attributes__ = MENU_PARAMETERS;
+
     @inherit positioner;
 
     constructor() {
@@ -46,10 +50,6 @@ export class AbstractMenu extends MenuNode {
         this.delay = false; // sub-item property
         this.positioner = "inherit";
     }
-
-    // Used to parse attributes on elements to their correct type during initializing by
-    // parsing the DOM tree.
-    static __attributes__ = MENU_PARAMETERS;
 
     registerTopics() {
         // On child is activate
@@ -262,6 +262,22 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
+    filter(testFunction) {
+        for(let child of this.children) {
+            child.isVisible = !!testFunction.call(this, child);
+        }
+
+        this.publish('filter-change', this);
+    }
+
+    clearFilter() {
+        for(let child of this.children) {
+            child.isVisible = true;
+        }
+
+        this.publish('filter-change', this);
+    }
+
     /**
      * Returns list of all menu bodies for the menu.
      *
@@ -361,11 +377,12 @@ export default class Menu extends AbstractMenu {
      * @param classes {String}
      * @param children {Array}
      * @param visible
+     * @param filter
      * @param context
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiActive=false, openOnHover=true,
                     toggle="on", closeOnSelect=true, delay=0, id=null, classes=null,
-                    children=null, visible=false, ...context}={}) {
+                    children=null, visible=false, filter=false, ...context}={}) {
         super();
         this.events = null;
         this.MenuItemClass = MenuItem;
