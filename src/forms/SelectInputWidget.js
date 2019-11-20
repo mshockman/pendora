@@ -49,7 +49,7 @@ export default class SelectInputWidget extends FormWidgetBase {
     getValue() {
         let r = [];
 
-        for(let option of this.element.options) {
+        for(let option of this.element.querySelectorAll("option")) {
             if(option.selected) {
                 r.push(option.value);
             }
@@ -59,17 +59,25 @@ export default class SelectInputWidget extends FormWidgetBase {
     }
 
     setValue(values) {
-        this.clearSelected();
-
         if(!Array.isArray(values)) {
             values = [values];
+        }
+
+        let options = [];
+
+        for(let option of this.element.querySelectorAll("option")) {
+            options.push({
+                element: option,
+                value: option.value,
+                selected: false
+            });
         }
 
         for(let value of values) {
             value += "";
             let found = false;
 
-            for(let option of this.element.options) {
+            for(let option of options) {
                 if(option.value === value && !option.selected) {
                     option.selected = true;
                     found = true;
@@ -81,10 +89,26 @@ export default class SelectInputWidget extends FormWidgetBase {
                 throw new Error(`Unknown value: ${value}`);
             }
         }
+
+        // Select will set its value back to selected if there is no currently selected elements.
+        // To fix this select the elements first, then deselect.
+        for(let option of options) {
+            if(option.selected) {
+                option.element.selected = true;
+            }
+        }
+
+        for(let option of options) {
+            if(!option.selected) {
+                option.element.selected = false;
+            }
+        }
     }
 
     clearSelected() {
-        for(let option of this.element.options) {
+        let options = this.element.querySelectorAll("option");
+
+        for(let option of options) {
             option.selected = false;
         }
     }

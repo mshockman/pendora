@@ -4110,7 +4110,7 @@ function (_FormWidgetBase) {
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = this.element.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = this.element.querySelectorAll("option")[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var option = _step.value;
 
           if (option.selected) {
@@ -4137,53 +4137,23 @@ function (_FormWidgetBase) {
   }, {
     key: "setValue",
     value: function setValue(values) {
-      this.clearSelected();
-
       if (!Array.isArray(values)) {
         values = [values];
       }
 
+      var options = [];
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator2 = values[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var value = _step2.value;
-          value += "";
-          var found = false;
-          var _iteratorNormalCompletion3 = true;
-          var _didIteratorError3 = false;
-          var _iteratorError3 = undefined;
-
-          try {
-            for (var _iterator3 = this.element.options[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-              var option = _step3.value;
-
-              if (option.value === value && !option.selected) {
-                option.selected = true;
-                found = true;
-                break;
-              }
-            }
-          } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-                _iterator3["return"]();
-              }
-            } finally {
-              if (_didIteratorError3) {
-                throw _iteratorError3;
-              }
-            }
-          }
-
-          if (!found) {
-            throw new Error("Unknown value: ".concat(value));
-          }
+        for (var _iterator2 = this.element.querySelectorAll("option")[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var option = _step2.value;
+          options.push({
+            element: option,
+            value: option.value,
+            selected: false
+          });
         }
       } catch (err) {
         _didIteratorError2 = true;
@@ -4199,30 +4169,106 @@ function (_FormWidgetBase) {
           }
         }
       }
+
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = values[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var value = _step3.value;
+          value += "";
+          var found = false;
+          var _iteratorNormalCompletion4 = true;
+          var _didIteratorError4 = false;
+          var _iteratorError4 = undefined;
+
+          try {
+            for (var _iterator4 = options[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+              var _option = _step4.value;
+
+              if (_option.value === value && !_option.selected) {
+                _option.selected = true;
+                found = true;
+                break;
+              }
+            }
+          } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+                _iterator4["return"]();
+              }
+            } finally {
+              if (_didIteratorError4) {
+                throw _iteratorError4;
+              }
+            }
+          }
+
+          if (!found) {
+            throw new Error("Unknown value: ".concat(value));
+          }
+        } // Select will set its value back to selected if there is no currently selected elements.
+        // To fix this select the elements first, then deselect.
+
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      for (var _i = 0, _options = options; _i < _options.length; _i++) {
+        var _option2 = _options[_i];
+
+        if (_option2.selected) {
+          _option2.element.selected = true;
+        }
+      }
+
+      for (var _i2 = 0, _options2 = options; _i2 < _options2.length; _i2++) {
+        var _option3 = _options2[_i2];
+
+        if (!_option3.selected) {
+          _option3.element.selected = false;
+        }
+      }
     }
   }, {
     key: "clearSelected",
     value: function clearSelected() {
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
+      var options = this.element.querySelectorAll("option");
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
 
       try {
-        for (var _iterator4 = this.element.options[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var option = _step4.value;
+        for (var _iterator5 = options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var option = _step5.value;
           option.selected = false;
         }
       } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-            _iterator4["return"]();
+          if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+            _iterator5["return"]();
           }
         } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
+          if (_didIteratorError5) {
+            throw _iteratorError5;
           }
         }
       }
