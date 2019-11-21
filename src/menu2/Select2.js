@@ -7,6 +7,7 @@ import {parseHTML, emptyElement, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
 import {SelectInputWidget, HiddenInputWidget} from "../forms/";
+import ItemFilter from "../ui/ItemFilter";
 
 
 export class SelectOption extends AbstractMenuItem {
@@ -189,6 +190,8 @@ export class SelectMenu extends AbstractMenu {
         this.positioner = "inherit";
         this.shiftSelect = shiftSelect;
 
+        this.element.classList.add('select-menu');
+
         this.registerTopics();
         this.parseDOM();
         this.init();
@@ -198,7 +201,7 @@ export class SelectMenu extends AbstractMenu {
         let html = `
             <div class="menu">
                 ${arrow ? `<div class="menu__arrow"></div>` : ""}
-                <div class="menu__header">
+                <div class="menu__header"></div>
                 <section class="menu__body"></section>
                 <div class="menu__footer"></div>
             </div>
@@ -291,7 +294,7 @@ export class Select2 extends AbstractMenuItem {
         ...AbstractMenuItem.__attributes__
     };
 
-    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null}={}) {
+    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null, filter=true, placeholder="No Items Found"}={}) {
         super();
 
         if(target) {
@@ -320,7 +323,8 @@ export class Select2 extends AbstractMenuItem {
         this.SubMenuClass = SelectMenu;
         this.positioner = positioners.DROPDOWN;
         this.clearSubItemsOnHover = false;
-        this.labelMap = new WeakMap();
+        this.labelToItemMap = new WeakMap();
+        this.itemToLabelMap = new WeakMap();
 
         this.element.classList.add('select');
         this.element.tabIndex = 0;
@@ -342,6 +346,88 @@ export class Select2 extends AbstractMenuItem {
         }
 
         this.init();
+
+        if(filter) {
+            if(this.multiSelect) {
+                this.filter = new ItemFilter({
+                    items: () => {
+                        let r = [];
+
+                        for(let child of this.submenu.children) {
+                            r.push(child.element);
+                        }
+
+                        return r;
+                    }
+                });
+
+                let li = document.createElement('li');
+                li.className = "select-filter-container";
+                this.filter.appendTo(li);
+                this.filter.wrapper = li;
+                this.button.appendChild(li);
+            } else {
+                this.filter = new ItemFilter({
+                    items: () => {
+                        let r = [];
+
+                        for(let child of this.submenu.children) {
+                            r.push(child.element);
+                        }
+
+                        return r;
+                    },
+
+                    placeholder: "Filter"
+                });
+
+                this.filter.appendTo(this.submenu.element.querySelector('.menu__header'));
+                this.submenu.element.classList.add('has-filter');
+            }
+
+            this.filter.on('filter-change', (topic) => {
+                if(topic.allItemsFiltered) {
+                    this.submenu.element.classList.add('all-items-filtered');
+                } else {
+                    this.submenu.element.classList.remove('all-items-filtered');
+                }
+            });
+
+            if(placeholder) {
+                let placeholderNode = document.createElement('li');
+                placeholderNode.className = "placeholder";
+                placeholderNode.innerHTML = placeholder;
+                let body = this.submenu.getMenuBody();
+                body = body[body.length-1];
+                body.appendChild(placeholderNode);
+            }
+        }
+    }
+
+    activate(show=true) {
+        if(!this.isActive) {
+            let r = super.activate();
+
+            if(this.filter) {
+                this.filter.clear();
+                this.filter.focus();
+            }
+
+            return r;
+        }
+    }
+
+    deactivate() {
+        if(this.isActive) {
+            let r = super.deactivate();
+
+            if(this.filter) {
+                this.filter.clear();
+                this.filter.blur();
+            }
+
+            return r;
+        }
     }
 
     isSelect() {
@@ -366,28 +452,45 @@ export class Select2 extends AbstractMenuItem {
 
     renderLabels() {
         let output = this.button,
-            selection = this.selection,
             fragment = document.createDocumentFragment();
 
-        emptyElement(output);
+        for(let item of this.options) {
+            if(item.isSelected) {
+                let pill = this.itemToLabelMap.get(item);
 
-        for(let item of selection) {
-            let li = document.createElement('li'),
-                exitButton = document.createElement('div'),
-                span = document.createElement('span');
+                if (!pill) {
+                    pill = document.createElement('li');
 
-            li.className = "choice";
-            exitButton.className = "exit-button";
-            span.innerText = item.text;
+                    let exitButton = document.createElement('div'),
+                        span = document.createElement('span');
 
-            li.appendChild(exitButton);
-            li.appendChild(span);
-            this.labelMap.set(li, item);
+                    pill.className = "choice";
+                    exitButton.className = "exit-button";
+                    span.innerText = item.text;
 
-            fragment.appendChild(li);
+                    pill.appendChild(exitButton);
+                    pill.appendChild(span);
+                    this.itemToLabelMap.set(item, pill);
+                    this.labelToItemMap.set(pill, item);
+
+                    fragment.appendChild(pill);
+                }
+            } else {
+                let pill = this.itemToLabelMap.get(item);
+
+                if(pill) {
+                    pill.parentElement.removeChild(pill);
+                    this.itemToLabelMap.delete(item);
+                    this.labelToItemMap.delete(pill);
+                }
+            }
         }
 
-        output.appendChild(fragment);
+        if(this.filter && this.filter.wrapper && this.filter.wrapper.parentElement === output) {
+            output.insertBefore(fragment, this.filter.wrapper);
+        } else {
+            output.appendChild(fragment);
+        }
 
         if(this.widget) this.widget.setValue(this._getSelectedValues());
     }
@@ -434,6 +537,10 @@ export class Select2 extends AbstractMenuItem {
         return this.submenu.selection;
     }
 
+    get options() {
+        return this.submenu.children;
+    }
+
     render(context) {
         let html = `
         <article class="dropdown select">
@@ -450,11 +557,21 @@ export class Select2 extends AbstractMenuItem {
 
         if(topic.target === this && event.target.closest('.exit-button')) {
             let li = event.target.closest('li'),
-                item = this.labelMap.get(li);
+                item = this.labelToItemMap.get(li);
 
             item.deselect();
         } else {
-            return super.onClick(topic);
+            if(this.filter) {
+                if(!this.isActive) {
+                    this.activate();
+                } else if(this.submenu.element.contains(event.target)) {
+                    this.filter.focus();
+                } else {
+                    super.onClick(topic);
+                }
+            } else {
+                super.onClick(topic);
+            }
         }
     }
 
@@ -507,6 +624,10 @@ export class Select2 extends AbstractMenuItem {
                 });
 
                 select.append(item);
+
+                if(option.selected) {
+                    item.select();
+                }
             }
 
             element.replaceWith(select.element);

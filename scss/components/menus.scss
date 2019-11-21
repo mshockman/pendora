@@ -161,6 +161,49 @@
         margin: 0 0.5rem 0.5rem 0;
       }
     }
+
+    .placeholder {
+      display: none;
+    }
+
+    .all-items-filtered .placeholder {
+      display: block;
+    }
+
+    &.multiple {
+      .select-filter-container {
+        width: 2rem;
+        display: inline-block;
+
+        .item-filter {
+          width: 100%;
+        }
+
+        .item-filter__input {
+          width: 100%;
+          border: 0;
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+.select-menu {
+  &.has-filter {
+    .menu__header {
+      background-color: #eaeaea;
+      padding: 0.5rem;
+      border-bottom: 1px solid #333;
+    }
+  }
+
+  .item-filter__input {
+    width: 100%;
   }
 }
 
