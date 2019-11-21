@@ -294,7 +294,7 @@ export class Select2 extends AbstractMenuItem {
         ...AbstractMenuItem.__attributes__
     };
 
-    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null, filter=true, placeholder="No Items Found"}={}) {
+    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null, filter=false, placeholder="No Items Found"}={}) {
         super();
 
         if(target) {
@@ -614,7 +614,8 @@ export class Select2 extends AbstractMenuItem {
             // noinspection JSUnresolvedVariable
             let select = new Select2({
                 multiSelect: element.multiple,
-                widget: new SelectInputWidget(element, null, null, true)
+                widget: new SelectInputWidget(element, null, null, true),
+                filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
             });
 
             for(let option of element.querySelectorAll('option')) {

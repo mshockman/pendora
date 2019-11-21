@@ -108,6 +108,7 @@
 .dropdown {
   position: relative;
   display: inline-block;
+  vertical-align: top;
 
   .selection {
     user-select: none;
@@ -162,14 +163,6 @@
       }
     }
 
-    .placeholder {
-      display: none;
-    }
-
-    .all-items-filtered .placeholder {
-      display: block;
-    }
-
     &.multiple {
       .select-filter-container {
         width: 2rem;
@@ -204,6 +197,15 @@
 
   .item-filter__input {
     width: 100%;
+  }
+
+  .placeholder {
+    display: none;
+    padding: 0.5rem;
+  }
+
+  &.all-items-filtered .placeholder {
+    display: block;
   }
 }
 

@@ -7957,7 +7957,7 @@ function (_AbstractMenuItem2) {
         _ref5$widget = _ref5.widget,
         widget = _ref5$widget === void 0 ? null : _ref5$widget,
         _ref5$filter = _ref5.filter,
-        filter = _ref5$filter === void 0 ? true : _ref5$filter,
+        filter = _ref5$filter === void 0 ? false : _ref5$filter,
         _ref5$placeholder = _ref5.placeholder,
         placeholder = _ref5$placeholder === void 0 ? "No Items Found" : _ref5$placeholder;
 
@@ -8381,7 +8381,8 @@ function (_AbstractMenuItem2) {
         // noinspection JSUnresolvedVariable
         var select = new Select2({
           multiSelect: element.multiple,
-          widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true)
+          widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true),
+          filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
         });
         var _iteratorNormalCompletion9 = true;
         var _didIteratorError9 = false;

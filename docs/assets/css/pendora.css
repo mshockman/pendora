@@ -91,6 +91,7 @@
 .dropdown {
   position: relative;
   display: inline-block;
+  vertical-align: top;
 }
 .dropdown .selection {
   user-select: none;
@@ -133,12 +134,6 @@
   padding: 0.25rem;
   margin: 0 0.5rem 0.5rem 0;
 }
-.dropdown.select .placeholder {
-  display: none;
-}
-.dropdown.select .all-items-filtered .placeholder {
-  display: block;
-}
 .dropdown.select.multiple .select-filter-container {
   width: 2rem;
   display: inline-block;
@@ -161,6 +156,13 @@
 }
 .select-menu .item-filter__input {
   width: 100%;
+}
+.select-menu .placeholder {
+  display: none;
+  padding: 0.5rem;
+}
+.select-menu.all-items-filtered .placeholder {
+  display: block;
 }
 
 .menuitem.hidden {
