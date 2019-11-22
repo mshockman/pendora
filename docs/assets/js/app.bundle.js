@@ -4617,8 +4617,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         });
-        this.on('event.click', function (event) {
-          return _this2.onClick(event);
+        this.on('event.mousedown', function (event) {
+          return _this2.onMouseDown(event);
         });
         this.on('event.mouseover', function (event) {
           return _this2.onMouseOver(event);
@@ -5029,8 +5029,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       }
     }, {
       kind: "method",
-      key: "onClick",
-      value: function onClick(event) {
+      key: "onMouseDown",
+      value: function onMouseDown(event) {
         if (event.target === this) {
           if (this.isActive && this.toggleOff) {
             this.deactivate();
@@ -5575,8 +5575,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (!this._isTopicInit) {
           this._isTopicInit = true;
-          this.on('event.click', function (event) {
-            return _this2.onClick(event);
+          this.on('event.mousedown', function (event) {
+            return _this2.onMouseDown(event);
           });
           this.on('event.mouseover', function (event) {
             return _this2.onMouseOver(event);
@@ -5867,8 +5867,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "onSelect",
       value: function onSelect() {
-        console.log(this.closeOnSelect);
-
         if (this.closeOnSelect && this.isActive) {
           this.deactivate();
         }
@@ -5880,8 +5878,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
     }, {
       kind: "method",
-      key: "onClick",
-      value: function onClick(event) {
+      key: "onMouseDown",
+      value: function onMouseDown(event) {
         var isDisabled = this.getDisabled();
 
         if (isDisabled) {
@@ -6256,7 +6254,7 @@ function (_Publisher) {
         }
       };
 
-      this.addEventListener('click', handleEvent);
+      this.addEventListener('mousedown', handleEvent);
       this.addEventListener('mouseover', handleEvent);
       this.addEventListener('mouseout', handleEvent); // this.boundEvents.onMouseOver = handleEvent;
       // this.boundEvents.onMouseOut = handleEvent;
@@ -7565,8 +7563,8 @@ function (_AbstractMenuItem) {
       return fragment.children[0];
     }
   }, {
-    key: "onClick",
-    value: function onClick(event) {
+    key: "onMouseDown",
+    value: function onMouseDown(event) {
       var isDisabled = this.getDisabled();
 
       if (isDisabled) {
@@ -7896,13 +7894,13 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       }
     }, {
       kind: "method",
-      key: "onClick",
-      value: function onClick(topic) {
+      key: "onMouseDown",
+      value: function onMouseDown(topic) {
         var event = topic.originalEvent,
             target = topic.target,
             isDisabled = target.getDisabled();
 
-        _get(_getPrototypeOf(SelectMenu.prototype), "onClick", this).call(this, topic);
+        _get(_getPrototypeOf(SelectMenu.prototype), "onMouseDown", this).call(this, topic);
 
         if (!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
           if (event.shiftKey) {
@@ -8049,7 +8047,8 @@ function (_AbstractMenuItem2) {
             }
 
             return r;
-          }
+          },
+          tabindex: -1
         });
         var li = document.createElement('li');
         li.className = "select-filter-container";
@@ -8115,7 +8114,55 @@ function (_AbstractMenuItem2) {
         body = body[body.length - 1];
         body.appendChild(placeholderNode);
       }
+
+      _this4.addEventListener('keydown', function (event) {
+        if (_this4.filter && event.key === 'Backspace') {
+          if (_this4.filter.isFocused() && _this4.filter.input.value !== "") {
+            return;
+          }
+
+          if (!_this4._isChoiceElement(document.activeElement)) {
+            var choices = _this4.getLabels();
+
+            if (choices.length) {
+              choices[choices.length - 1].focus();
+            }
+          } else {
+            _this4.labelToItemMap.get(document.activeElement).deselect();
+
+            _this4.filter.focus();
+          }
+        }
+      });
+
+      _this4.filter.input.addEventListener('focus', function (event) {
+        _this4.element.classList.add('select-highlight');
+      });
+
+      _this4.filter.input.addEventListener('blur', function (event) {
+        if (!_this4.element.contains(event.relatedTarget)) {
+          _this4.element.classList.remove('select-highlight');
+
+          if (_this4.isActive) _this4.deactivate();
+        }
+      });
     }
+
+    _this4.addEventListener('focus', function (event) {
+      if (_this4.filter) {
+        _this4.filter.focus();
+      }
+
+      _this4.element.classList.add('select-highlight');
+    });
+
+    _this4.addEventListener('blur', function (event) {
+      if (!_this4.element.contains(event.relatedTarget)) {
+        if (_this4.isActive) _this4.deactivate();
+
+        _this4.element.classList.remove('select-highlight');
+      }
+    });
 
     return _this4;
   }
@@ -8130,7 +8177,10 @@ function (_AbstractMenuItem2) {
 
         if (this.filter) {
           this.filter.clear();
-          this.filter.focus();
+
+          if (!this.multiSelect || !this.element.contains(document.activeElement) || !document.activeElement.classList.contains('choice')) {
+            this.filter.focus();
+          }
         }
 
         return r;
@@ -8196,6 +8246,7 @@ function (_AbstractMenuItem2) {
               pill.className = "choice";
               exitButton.className = "exit-button";
               span.innerText = item.text;
+              if (this.multiSelect) pill.tabIndex = -1;
               pill.appendChild(exitButton);
               pill.appendChild(span);
               this.itemToLabelMap.set(item, pill);
@@ -8276,6 +8327,43 @@ function (_AbstractMenuItem2) {
       }
     }
   }, {
+    key: "_isChoiceElement",
+    value: function _isChoiceElement(element) {
+      var _iteratorNormalCompletion9 = true;
+      var _didIteratorError9 = false;
+      var _iteratorError9 = undefined;
+
+      try {
+        for (var _iterator9 = this.options[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+          var option = _step9.value;
+
+          if (this.itemToLabelMap.get(option) === element) {
+            return true;
+          }
+        }
+      } catch (err) {
+        _didIteratorError9 = true;
+        _iteratorError9 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+            _iterator9["return"]();
+          }
+        } finally {
+          if (_didIteratorError9) {
+            throw _iteratorError9;
+          }
+        }
+      }
+
+      return false;
+    }
+  }, {
+    key: "getLabels",
+    value: function getLabels() {
+      return this.button.querySelectorAll('.choice');
+    }
+  }, {
     key: "getValue",
     value: function getValue() {
       return this.widget.getValue();
@@ -8301,8 +8389,8 @@ function (_AbstractMenuItem2) {
       return fragment.children[0];
     }
   }, {
-    key: "onClick",
-    value: function onClick(topic) {
+    key: "onMouseDown",
+    value: function onMouseDown(topic) {
       var event = topic.originalEvent;
 
       if (topic.target === this && event.target.closest('.exit-button')) {
@@ -8318,10 +8406,10 @@ function (_AbstractMenuItem2) {
           } else if (this.submenu.element.contains(event.target)) {
             this.filter.focus();
           } else if (!inFilter) {
-            _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
+            _get(_getPrototypeOf(Select2.prototype), "onMouseDown", this).call(this, topic);
           }
         } else {
-          _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
+          _get(_getPrototypeOf(Select2.prototype), "onMouseDown", this).call(this, topic);
         }
       }
     }
@@ -8386,13 +8474,13 @@ function (_AbstractMenuItem2) {
           widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true),
           filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
         });
-        var _iteratorNormalCompletion9 = true;
-        var _didIteratorError9 = false;
-        var _iteratorError9 = undefined;
+        var _iteratorNormalCompletion10 = true;
+        var _didIteratorError10 = false;
+        var _iteratorError10 = undefined;
 
         try {
-          for (var _iterator9 = element.querySelectorAll('option')[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-            var option = _step9.value;
+          for (var _iterator10 = element.querySelectorAll('option')[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+            var option = _step10.value;
             var item = new SelectOption({
               text: option.innerText.trim(),
               value: option.value
@@ -8404,16 +8492,16 @@ function (_AbstractMenuItem2) {
             }
           }
         } catch (err) {
-          _didIteratorError9 = true;
-          _iteratorError9 = err;
+          _didIteratorError10 = true;
+          _iteratorError10 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
-              _iterator9["return"]();
+            if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
+              _iterator10["return"]();
             }
           } finally {
-            if (_didIteratorError9) {
-              throw _iteratorError9;
+            if (_didIteratorError10) {
+              throw _iteratorError10;
             }
           }
         }
@@ -8855,7 +8943,9 @@ function (_Publisher) {
         _ref$delay = _ref.delay,
         delay = _ref$delay === void 0 ? 500 : _ref$delay,
         _ref$placeholder = _ref.placeholder,
-        placeholder = _ref$placeholder === void 0 ? "" : _ref$placeholder;
+        placeholder = _ref$placeholder === void 0 ? "" : _ref$placeholder,
+        _ref$tabindex = _ref.tabindex,
+        tabindex = _ref$tabindex === void 0 ? 0 : _ref$tabindex;
 
     _classCallCheck(this, ItemFilter);
 
@@ -8872,6 +8962,8 @@ function (_Publisher) {
       _this.element.appendChild(_this.input);
 
       _this.input.classList.add("item-filter__input");
+
+      _this.input.tabIndex = tabindex;
     }
 
     _this.target = target;

@@ -54,7 +54,7 @@ export default class MenuNode extends Publisher {
             }
         };
 
-        this.addEventListener('click', handleEvent);
+        this.addEventListener('mousedown', handleEvent);
         this.addEventListener('mouseover', handleEvent);
         this.addEventListener('mouseout', handleEvent);
 

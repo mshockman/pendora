@@ -169,4 +169,8 @@
   display: none;
 }
 
+.select-highlight {
+  outline: 2px solid Highlight;
+}
+
 /*# sourceMappingURL=menus.css.map */

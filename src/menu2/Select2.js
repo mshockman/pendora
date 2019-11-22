@@ -57,7 +57,7 @@ export class SelectOption extends AbstractMenuItem {
         return fragment.children[0];
     }
 
-    onClick(event) {
+    onMouseDown(event) {
         let isDisabled = this.getDisabled();
 
         if(isDisabled) {
@@ -250,12 +250,12 @@ export class SelectMenu extends AbstractMenu {
         return r;
     }
 
-    onClick(topic) {
+    onMouseDown(topic) {
         let event = topic.originalEvent,
             target = topic.target,
             isDisabled = target.getDisabled();
 
-        super.onClick(topic);
+        super.onMouseDown(topic);
 
         if(!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
             if(event.shiftKey) {
@@ -358,7 +358,8 @@ export class Select2 extends AbstractMenuItem {
                         }
 
                         return r;
-                    }
+                    },
+                    tabindex: -1
                 });
 
                 let li = document.createElement('li');
@@ -401,7 +402,52 @@ export class Select2 extends AbstractMenuItem {
                 body = body[body.length-1];
                 body.appendChild(placeholderNode);
             }
+
+            this.addEventListener('keydown', event => {
+                if(this.filter && event.key === 'Backspace') {
+                    if(this.filter.isFocused() && this.filter.input.value !== "") {
+                        return;
+                    }
+
+                    if(!this._isChoiceElement(document.activeElement)) {
+                        let choices = this.getLabels();
+
+                        if(choices.length) {
+                            choices[choices.length-1].focus();
+                        }
+                    } else {
+                        this.labelToItemMap.get(document.activeElement).deselect();
+                        this.filter.focus();
+                    }
+                }
+            });
+
+            this.filter.input.addEventListener('focus', event => {
+                this.element.classList.add('select-highlight');
+            });
+
+            this.filter.input.addEventListener('blur', event => {
+                if(!this.element.contains(event.relatedTarget)) {
+                    this.element.classList.remove('select-highlight');
+                    if(this.isActive) this.deactivate();
+                }
+            });
         }
+
+        this.addEventListener('focus', event => {
+            if(this.filter) {
+                this.filter.focus();
+            }
+
+            this.element.classList.add('select-highlight');
+        });
+
+        this.addEventListener('blur', event => {
+            if(!this.element.contains(event.relatedTarget)) {
+                if(this.isActive) this.deactivate();
+                this.element.classList.remove('select-highlight');
+            }
+        });
     }
 
     activate(show=true) {
@@ -410,7 +456,10 @@ export class Select2 extends AbstractMenuItem {
 
             if(this.filter) {
                 this.filter.clear();
-                this.filter.focus();
+
+                if(!this.multiSelect || !this.element.contains(document.activeElement) || !document.activeElement.classList.contains('choice')) {
+                    this.filter.focus();
+                }
             }
 
             return r;
@@ -467,6 +516,7 @@ export class Select2 extends AbstractMenuItem {
                     pill.className = "choice";
                     exitButton.className = "exit-button";
                     span.innerText = item.text;
+                    if(this.multiSelect) pill.tabIndex = -1;
 
                     pill.appendChild(exitButton);
                     pill.appendChild(span);
@@ -517,6 +567,20 @@ export class Select2 extends AbstractMenuItem {
         }
     }
 
+    _isChoiceElement(element) {
+        for(let option of this.options) {
+            if(this.itemToLabelMap.get(option) === element) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    getLabels() {
+        return this.button.querySelectorAll('.choice');
+    }
+
     getValue() {
         return this.widget.getValue();
     }
@@ -552,7 +616,7 @@ export class Select2 extends AbstractMenuItem {
         return fragment.children[0];
     }
 
-    onClick(topic) {
+    onMouseDown(topic) {
         let event = topic.originalEvent;
 
         if(topic.target === this && event.target.closest('.exit-button')) {
@@ -569,10 +633,10 @@ export class Select2 extends AbstractMenuItem {
                 } else if(this.submenu.element.contains(event.target)) {
                     this.filter.focus();
                 } else if(!inFilter) {
-                    super.onClick(topic);
+                    super.onMouseDown(topic);
                 }
             } else {
-                super.onClick(topic);
+                super.onMouseDown(topic);
             }
         }
     }

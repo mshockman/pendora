@@ -22,7 +22,7 @@ export function innerTextCompare(item, value) {
  * A component that filters items in a container by an the input value of the text field.
  */
 export default class ItemFilter extends Publisher {
-    constructor({element, target, items=".filter-item", compareFunction=innerTextCompare, onHide="hidden", onShow=null, delay=500, placeholder=""}={}) {
+    constructor({element, target, items=".filter-item", compareFunction=innerTextCompare, onHide="hidden", onShow=null, delay=500, placeholder="", tabindex=0}={}) {
         super();
 
         if(element) {
@@ -34,6 +34,7 @@ export default class ItemFilter extends Publisher {
             this.input.placeholder = placeholder;
             this.element.appendChild(this.input);
             this.input.classList.add("item-filter__input");
+            this.input.tabIndex = tabindex;
         }
 
         this.target = target;
