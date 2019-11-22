@@ -8311,11 +8311,13 @@ function (_AbstractMenuItem2) {
         item.deselect();
       } else {
         if (this.filter) {
-          if (!this.isActive) {
+          var inFilter = this.filter.element.contains(event.target);
+
+          if (!this.isActive && inFilter) {
             this.activate();
           } else if (this.submenu.element.contains(event.target)) {
             this.filter.focus();
-          } else {
+          } else if (!inFilter) {
             _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
           }
         } else {

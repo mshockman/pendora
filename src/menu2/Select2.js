@@ -3,7 +3,7 @@ import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {getMenuInstance} from "./utility";
-import {parseHTML, emptyElement, parseBoolean} from "core/utility";
+import {parseHTML, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
 import {SelectInputWidget, HiddenInputWidget} from "../forms/";
@@ -562,11 +562,13 @@ export class Select2 extends AbstractMenuItem {
             item.deselect();
         } else {
             if(this.filter) {
-                if(!this.isActive) {
+                let inFilter = this.filter.element.contains(event.target);
+
+                if(!this.isActive && inFilter) {
                     this.activate();
                 } else if(this.submenu.element.contains(event.target)) {
                     this.filter.focus();
-                } else {
+                } else if(!inFilter) {
                     super.onClick(topic);
                 }
             } else {
