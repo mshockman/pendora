@@ -1,7 +1,7 @@
 import "@babel/polyfill";
 import Application from "app";
 import "autoloader";
-import "menu2";
+import "menu";
 
 
 __webpack_public_path__ = "/assets/js/";

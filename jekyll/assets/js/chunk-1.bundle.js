@@ -10,7 +10,7 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBarExamplePage; });
-/* harmony import */ var menu2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! menu2 */ "./src/menu2/index.js");
+/* harmony import */ var menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! menu */ "./src/menu/index.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -70,7 +70,7 @@ function () {
     key: "load",
     value: function load() {
       var main = document.getElementById('content');
-      var menu = new menu2__WEBPACK_IMPORTED_MODULE_0__["MenuBar"]({
+      var menu = new menu__WEBPACK_IMPORTED_MODULE_0__["MenuBar"]({
         timeout: 2000,
         delay: 1000,
         autoActivate: false,

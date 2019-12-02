@@ -1,4 +1,4 @@
-import {MenuBar, Menu, MenuItem} from "menu2";
+import {MenuBar, Menu, MenuItem} from "menu";
 
 
 export default class MenuBarExamplePage {
