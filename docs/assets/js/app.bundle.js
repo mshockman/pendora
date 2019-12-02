@@ -5293,7 +5293,7 @@ function (_Menu) {
       deactivateOnItemHover: deactivateOnItemHover,
       delay: false
     }, context)));
-    _this.position = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
+    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
 
     _this.SubMenuClass =
     /*#__PURE__*/
@@ -8775,10 +8775,12 @@ function dropdown() {
   }
 
   return function (menu) {
-    if (menu.parent && menu.parent.isRoot) {
+    var parentMenu = menu.parentMenu;
+
+    if (!parentMenu || parentMenu.isRoot) {
       menu.element.dataset.position = topLevelPosition;
       flipPositionIfOutOfBounds(menu.element, container, 'xy');
-    } else if (menu.parentMenu) {
+    } else {
       menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
       flipPositionIfOutOfBounds(menu.element, container, 'xy');
     }

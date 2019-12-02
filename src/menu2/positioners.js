@@ -68,10 +68,12 @@ export function dropdown(container=null, topLevelPosition="bottom left", default
     }
 
     return function(menu) {
-        if (menu.parent && menu.parent.isRoot) {
+        let parentMenu = menu.parentMenu;
+
+        if (!parentMenu || parentMenu.isRoot) {
             menu.element.dataset.position = topLevelPosition;
             flipPositionIfOutOfBounds(menu.element, container, 'xy');
-        } else if (menu.parentMenu) {
+        } else {
             menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
             flipPositionIfOutOfBounds(menu.element, container, 'xy');
         }
