@@ -4397,7 +4397,7 @@ function (_MenuItem) {
       closeOnSelect: closeOnSelect,
       closeOnBlur: closeOnBlur
     }, options)));
-    _this.position = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
+    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
 
     _this.init();
 
@@ -4617,8 +4617,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         });
-        this.on('event.mousedown', function (event) {
-          return _this2.onMouseDown(event);
+        this.on('event.click', function (event) {
+          return _this2.onClick(event);
         });
         this.on('event.mouseover', function (event) {
           return _this2.onMouseOver(event);
@@ -5029,8 +5029,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       }
     }, {
       kind: "method",
-      key: "onMouseDown",
-      value: function onMouseDown(event) {
+      key: "onClick",
+      value: function onClick(event) {
         if (event.target === this) {
           if (this.isActive && this.toggleOff) {
             this.deactivate();
@@ -5575,8 +5575,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (!this._isTopicInit) {
           this._isTopicInit = true;
-          this.on('event.mousedown', function (event) {
-            return _this2.onMouseDown(event);
+          this.on('event.click', function (event) {
+            return _this2.onClick(event);
           });
           this.on('event.mouseover', function (event) {
             return _this2.onMouseOver(event);
@@ -5878,8 +5878,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
     }, {
       kind: "method",
-      key: "onMouseDown",
-      value: function onMouseDown(event) {
+      key: "onClick",
+      value: function onClick(event) {
         var isDisabled = this.getDisabled();
 
         if (isDisabled) {
@@ -5889,7 +5889,10 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         if (event.target !== this) return;
 
         if (this.parent) {
-          this.parent.publish('click-item', this, event);
+          this.parent.publish('click-item', {
+            sender: this,
+            event: event
+          });
         }
 
         if (!isDisabled) {
@@ -6256,14 +6259,8 @@ function (_Publisher) {
 
       this.addEventListener('mousedown', handleEvent);
       this.addEventListener('mouseover', handleEvent);
-      this.addEventListener('mouseout', handleEvent); // this.boundEvents.onMouseOver = handleEvent;
-      // this.boundEvents.onMouseOut = handleEvent;
-      // this.boundEvents.onClick = handleEvent;
-      //
-      // this.element.addEventListener('click', this.boundEvents.onClick);
-      // this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
-      // this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
-
+      this.addEventListener('mouseout', handleEvent);
+      this.addEventListener('click', handleEvent);
       this.isController = true;
       this.publish('init', this);
     }
@@ -7404,7 +7401,7 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, SelectMenu, Select2 */
+/*! exports provided: SelectOption, SelectMenu, Select2, AdvancedSelect, MultiSelect, ComboSelect, MultiCombo */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7412,6 +7409,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return SelectOption; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AdvancedSelect", function() { return AdvancedSelect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiSelect", function() { return MultiSelect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboSelect", function() { return ComboSelect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiCombo", function() { return MultiCombo; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
@@ -7492,6 +7493,10 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+/**
+ * The class SelectOption is used to construct an item contained in SelectMenu object.
+ */
+
 var SelectOption =
 /*#__PURE__*/
 function (_AbstractMenuItem) {
@@ -7552,6 +7557,13 @@ function (_AbstractMenuItem) {
 
     return _this;
   }
+  /**
+   * Creates the dom elements for the SelectOption.
+   * @param text
+   * @param value
+   * @returns {Element}
+   */
+
 
   _createClass(SelectOption, [{
     key: "render",
@@ -7562,6 +7574,12 @@ function (_AbstractMenuItem) {
           fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
     }
+    /**
+     * Handles mousedown events.
+     *
+     * @param event
+     */
+
   }, {
     key: "onMouseDown",
     value: function onMouseDown(event) {
@@ -7585,6 +7603,12 @@ function (_AbstractMenuItem) {
         });
       }
     }
+    /**
+     * Selects the options and publishes a [option.select] topic.
+     *
+     * @param topicData
+     */
+
   }, {
     key: "select",
     value: function select() {
@@ -7632,6 +7656,11 @@ function (_AbstractMenuItem) {
         menu: this
       }, topicData));
     }
+    /**
+     * Deselect the SelectOption if it is selected and publishes an [option.deselect] topic.
+     * @param topicData
+     */
+
   }, {
     key: "deselect",
     value: function deselect() {
@@ -7644,11 +7673,21 @@ function (_AbstractMenuItem) {
         menu: this
       }, topicData));
     }
+    /**
+     * Returns true if the option is selected.
+     * @returns {boolean}
+     */
+
   }, {
     key: "isSelected",
     get: function get() {
       return this.element.classList.contains('selected');
-    },
+    }
+    /**
+     * Sets the options selected state to true or false.
+     * @param value
+     */
+    ,
     set: function set(value) {
       value = !!value;
 
@@ -7660,22 +7699,47 @@ function (_AbstractMenuItem) {
         }
       }
     }
+    /**
+     * Returns the options value.
+     * @returns {string}
+     */
+
   }, {
     key: "value",
     get: function get() {
       return this.element.dataset.value;
-    },
+    }
+    /**
+     * Sets the options value.
+     * @param value
+     */
+    ,
     set: function set(value) {
       this.element.dataset.value = value;
     }
+    /**
+     * Return the options inner html.
+     * @returns {*}
+     */
+
   }, {
     key: "text",
     get: function get() {
       return this.button.innerText.trim();
-    },
+    }
+    /**
+     * Sets the options inner html.
+     * @param value
+     */
+    ,
     set: function set(value) {
       this.button.innerText = (value + "").trim();
     }
+    /**
+     * Returns the options parent select menu or null.
+     * @returns {null|{isSelect}|MenuNode}
+     */
+
   }, {
     key: "parentSelect",
     get: function get() {
@@ -7708,6 +7772,10 @@ function (_AbstractMenuItem) {
 
   return SelectOption;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+/**
+ * Creates a menu that contains SelectOptions.
+ */
+
 var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
   var SelectMenu =
   /*#__PURE__*/
@@ -7931,6 +7999,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
   };
 }, _Menu__WEBPACK_IMPORTED_MODULE_1__["AbstractMenu"]);
 /**
+ * A component that can be used as an alternative to the built in <select> element.
  * @implements FormWidgetBase
  */
 
@@ -8389,8 +8458,8 @@ function (_AbstractMenuItem2) {
       return fragment.children[0];
     }
   }, {
-    key: "onMouseDown",
-    value: function onMouseDown(topic) {
+    key: "onClick",
+    value: function onClick(topic) {
       var event = topic.originalEvent;
 
       if (topic.target === this && event.target.closest('.exit-button')) {
@@ -8406,10 +8475,10 @@ function (_AbstractMenuItem2) {
           } else if (this.submenu.element.contains(event.target)) {
             this.filter.focus();
           } else if (!inFilter) {
-            _get(_getPrototypeOf(Select2.prototype), "onMouseDown", this).call(this, topic);
+            _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
           }
         } else {
-          _get(_getPrototypeOf(Select2.prototype), "onMouseDown", this).call(this, topic);
+          _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
         }
       }
     }
@@ -8522,6 +8591,28 @@ _defineProperty(Select2, "__attributes__", _objectSpread({
   multiSelect: new core_attributes__WEBPACK_IMPORTED_MODULE_7__["default"](core_utility__WEBPACK_IMPORTED_MODULE_5__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["TRUE"])
 }, _MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"].__attributes__));
 
+var AdvancedSelect =
+/*#__PURE__*/
+function (_AbstractMenuItem3) {
+  _inherits(AdvancedSelect, _AbstractMenuItem3);
+
+  function AdvancedSelect() {
+    _classCallCheck(this, AdvancedSelect);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(AdvancedSelect).apply(this, arguments));
+  }
+
+  return AdvancedSelect;
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+var MultiSelect = function MultiSelect() {
+  _classCallCheck(this, MultiSelect);
+};
+var ComboSelect = function ComboSelect() {
+  _classCallCheck(this, ComboSelect);
+};
+var MultiCombo = function MultiCombo() {
+  _classCallCheck(this, MultiCombo);
+};
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return Select2.FromHTML(element);
 });
@@ -8808,6 +8899,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClosestMenuItemByElement", function() { return getClosestMenuItemByElement; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getClosestMenuByElement", function() { return getClosestMenuByElement; });
 var MENU_MAP = new WeakMap();
+/**
+ * Maps elements to menu node controller instances.
+ * @param element
+ * @param instance
+ */
+
 function attachMenuInstance(element, instance) {
   if (instance === null) {
     return detachMenuInstance(element);
@@ -8819,15 +8916,38 @@ function attachMenuInstance(element, instance) {
 
   MENU_MAP.set(element, instance);
 }
+/**
+ * Unmaps menu node controller instance from an element.
+ * @param element
+ */
+
 function detachMenuInstance(element) {
   MENU_MAP["delete"](element);
 }
+/**
+ * Returns true if the element has a menu controller instance mapped.
+ * @param element
+ * @returns {boolean}
+ */
+
 function hasMenuInstance(element) {
   return MENU_MAP.has(element);
 }
+/**
+ * Retrieves the mapped menu node controller instance for the element.
+ * @param element
+ * @returns {any}
+ */
+
 function getMenuInstance(element) {
   return MENU_MAP.get(element);
 }
+/**
+ * Finds the closest menu node controller for the element in the DOM tree.
+ * @param element
+ * @returns {null|any}
+ */
+
 function getClosestMenuNodeByElement(element) {
   while (element) {
     var instance = getMenuInstance(element);
@@ -8841,6 +8961,12 @@ function getClosestMenuNodeByElement(element) {
 
   return null;
 }
+/**
+ * Finds the closest menuitem controller for the element in the DOM tree.
+ * @param element
+ * @returns {null|any}
+ */
+
 function getClosestMenuItemByElement(element) {
   while (element) {
     var instance = getMenuInstance(element);
@@ -8854,6 +8980,12 @@ function getClosestMenuItemByElement(element) {
 
   return null;
 }
+/**
+ * Finds the closest menu node controller for the element in the DOM tree
+ * @param element
+ * @returns {null|any}
+ */
+
 function getClosestMenuByElement(element) {
   while (element) {
     var instance = getMenuInstance(element);

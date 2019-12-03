@@ -1,6 +1,11 @@
 export const MENU_MAP = new WeakMap();
 
 
+/**
+ * Maps elements to menu node controller instances.
+ * @param element
+ * @param instance
+ */
 export function attachMenuInstance(element, instance) {
     if(instance === null) {
         return detachMenuInstance(element);
@@ -14,21 +19,40 @@ export function attachMenuInstance(element, instance) {
 }
 
 
+/**
+ * Unmaps menu node controller instance from an element.
+ * @param element
+ */
 export function detachMenuInstance(element) {
     MENU_MAP.delete(element);
 }
 
 
+/**
+ * Returns true if the element has a menu controller instance mapped.
+ * @param element
+ * @returns {boolean}
+ */
 export function hasMenuInstance(element) {
     return MENU_MAP.has(element);
 }
 
 
+/**
+ * Retrieves the mapped menu node controller instance for the element.
+ * @param element
+ * @returns {any}
+ */
 export function getMenuInstance(element) {
     return MENU_MAP.get(element);
 }
 
 
+/**
+ * Finds the closest menu node controller for the element in the DOM tree.
+ * @param element
+ * @returns {null|any}
+ */
 export function getClosestMenuNodeByElement(element) {
     while(element) {
         let instance = getMenuInstance(element);
@@ -44,6 +68,11 @@ export function getClosestMenuNodeByElement(element) {
 }
 
 
+/**
+ * Finds the closest menuitem controller for the element in the DOM tree.
+ * @param element
+ * @returns {null|any}
+ */
 export function getClosestMenuItemByElement(element) {
     while(element) {
         let instance = getMenuInstance(element);
@@ -59,6 +88,11 @@ export function getClosestMenuItemByElement(element) {
 }
 
 
+/**
+ * Finds the closest menu node controller for the element in the DOM tree
+ * @param element
+ * @returns {null|any}
+ */
 export function getClosestMenuByElement(element) {
     while(element) {
         let instance = getMenuInstance(element);

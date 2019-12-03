@@ -57,14 +57,8 @@ export default class MenuNode extends Publisher {
         this.addEventListener('mousedown', handleEvent);
         this.addEventListener('mouseover', handleEvent);
         this.addEventListener('mouseout', handleEvent);
+        this.addEventListener('click', handleEvent);
 
-        // this.boundEvents.onMouseOver = handleEvent;
-        // this.boundEvents.onMouseOut = handleEvent;
-        // this.boundEvents.onClick = handleEvent;
-        //
-        // this.element.addEventListener('click', this.boundEvents.onClick);
-        // this.element.addEventListener('mouseover', this.boundEvents.onMouseOver);
-        // this.element.addEventListener('mouseout', this.boundEvents.onMouseOut);
         this.isController = true;
 
         this.publish('init', this);

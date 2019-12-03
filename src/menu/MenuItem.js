@@ -107,7 +107,7 @@ export class AbstractMenuItem extends MenuNode {
     registerTopics() {
         if(!this._isTopicInit) {
             this._isTopicInit = true;
-            this.on('event.mousedown', (event) => this.onMouseDown(event));
+            this.on('event.click', (event) => this.onClick(event));
             this.on('event.mouseover', (event) => this.onMouseOver(event));
             this.on('event.mouseout', (event) => this.onMouseOut(event));
             this.on('menuitem.selected', (event) => this.onSelect(event));
@@ -356,7 +356,7 @@ export class AbstractMenuItem extends MenuNode {
      * Handles click events.
      * @param event
      */
-    onMouseDown(event) {
+    onClick(event) {
         let isDisabled = this.getDisabled();
 
         if(isDisabled) {
@@ -366,7 +366,7 @@ export class AbstractMenuItem extends MenuNode {
         if(event.target !== this) return;
 
         if(this.parent) {
-            this.parent.publish('click-item', this, event);
+            this.parent.publish('click-item', {sender: this, event});
         }
 
         if(!isDisabled) {

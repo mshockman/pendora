@@ -10,6 +10,9 @@ import {SelectInputWidget, HiddenInputWidget} from "../forms/";
 import ItemFilter from "../ui/ItemFilter";
 
 
+/**
+ * The class SelectOption is used to construct an item contained in SelectMenu object.
+ */
 export class SelectOption extends AbstractMenuItem {
     constructor({target, text, value, id=null, classes=null}={}) {
         super();
@@ -50,6 +53,12 @@ export class SelectOption extends AbstractMenuItem {
         this.parseDOM();
     }
 
+    /**
+     * Creates the dom elements for the SelectOption.
+     * @param text
+     * @param value
+     * @returns {Element}
+     */
     render({text, value}) {
         let html = `<li data-role="menuitem" class="menuitem" data-value="${value}"><a>${text}</a></li>`,
             fragment = parseHTML(html);
@@ -57,6 +66,11 @@ export class SelectOption extends AbstractMenuItem {
         return fragment.children[0];
     }
 
+    /**
+     * Handles mousedown events.
+     *
+     * @param event
+     */
     onMouseDown(event) {
         let isDisabled = this.getDisabled();
 
@@ -75,6 +89,11 @@ export class SelectOption extends AbstractMenuItem {
         }
     }
 
+    /**
+     * Selects the options and publishes a [option.select] topic.
+     *
+     * @param topicData
+     */
     select(topicData={}) {
         if(this.isSelected) return;
 
@@ -97,6 +116,10 @@ export class SelectOption extends AbstractMenuItem {
         this.dispatchTopic('option.select', {target: this, menu: this, ...topicData});
     }
 
+    /**
+     * Deselect the SelectOption if it is selected and publishes an [option.deselect] topic.
+     * @param topicData
+     */
     deselect(topicData={}) {
         if(!this.isSelected) return;
         this.isSelected = false;
@@ -104,10 +127,18 @@ export class SelectOption extends AbstractMenuItem {
         this.dispatchTopic('option.deselect', {target: this, menu: this, ...topicData});
     }
 
+    /**
+     * Returns true if the option is selected.
+     * @returns {boolean}
+     */
     get isSelected() {
         return this.element.classList.contains('selected');
     }
 
+    /**
+     * Sets the options selected state to true or false.
+     * @param value
+     */
     set isSelected(value) {
         value = !!value;
 
@@ -120,22 +151,42 @@ export class SelectOption extends AbstractMenuItem {
         }
     }
 
+    /**
+     * Returns the options value.
+     * @returns {string}
+     */
     get value() {
         return this.element.dataset.value;
     }
 
+    /**
+     * Sets the options value.
+     * @param value
+     */
     set value(value) {
         this.element.dataset.value = value;
     }
 
+    /**
+     * Return the options inner html.
+     * @returns {*}
+     */
     get text() {
         return this.button.innerText.trim();
     }
 
+    /**
+     * Sets the options inner html.
+     * @param value
+     */
     set text(value) {
         this.button.innerText = (value+"").trim();
     }
 
+    /**
+     * Returns the options parent select menu or null.
+     * @returns {null|{isSelect}|MenuNode}
+     */
     get parentSelect() {
         let o = this.parent;
 
@@ -165,6 +216,9 @@ export class SelectOption extends AbstractMenuItem {
 }
 
 
+/**
+ * Creates a menu that contains SelectOptions.
+ */
 export class SelectMenu extends AbstractMenu {
     @inherit multiSelect;
 
@@ -286,6 +340,7 @@ export class SelectMenu extends AbstractMenu {
 
 
 /**
+ * A component that can be used as an alternative to the built in <select> element.
  * @implements FormWidgetBase
  */
 export class Select2 extends AbstractMenuItem {
@@ -616,7 +671,7 @@ export class Select2 extends AbstractMenuItem {
         return fragment.children[0];
     }
 
-    onMouseDown(topic) {
+    onClick(topic) {
         let event = topic.originalEvent;
 
         if(topic.target === this && event.target.closest('.exit-button')) {
@@ -633,10 +688,10 @@ export class Select2 extends AbstractMenuItem {
                 } else if(this.submenu.element.contains(event.target)) {
                     this.filter.focus();
                 } else if(!inFilter) {
-                    super.onMouseDown(topic);
+                    super.onClick(topic);
                 }
             } else {
-                super.onMouseDown(topic);
+                super.onClick(topic);
             }
         }
     }
@@ -704,6 +759,26 @@ export class Select2 extends AbstractMenuItem {
             return super.FromHTML(element);
         }
     }
+}
+
+
+export class AdvancedSelect extends AbstractMenuItem {
+
+}
+
+
+export class MultiSelect {
+
+}
+
+
+export class ComboSelect {
+
+}
+
+
+export class MultiCombo {
+
 }
 
 

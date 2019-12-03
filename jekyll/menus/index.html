@@ -1,6 +1,6 @@
 ---
 title: Menu Overview
-description: A library for creating nested menus & ribbons.
+description: A library for creating nested menus.
 layout: default
 pageClass: menu_examples
 ---
@@ -8,255 +8,358 @@ pageClass: menu_examples
 <h1>Menus</h1>
 
 <p>
-    A flexible menu component that can be used to create common navigation and control patterns.
+    Components for creating nestable overlay menus for common navigation patterns.
 </p>
 
-<p>
-    Menu and it's subclasses can be initialized in one of three different ways.  Imperatively using code; from JSON object;
-    or parsed from the DOM.  Building your menu imperatively will provide you with the most amount of control.
-    The menu module comes with several intelligent sub classes which construct the most common uses cases. See the
-    table below.
-</p>
+<ul>
+    <li>Styling Menus</li>
+    <li>Menu States</li>
+    <li>Event Handling</li>
+    <li>Custom Menus</li>
+    <li><a href="functions.html">Menu Functions</a></li>
+    <li><a href="#">Positioners</a></li>
+</ul>
 
 <article class="info-table">
-    <h4>Classes</h4>
+    <h4>Components</h4>
     <table>
-        <tr><td><a href="class_menunode.html">MenuNode</a></td><td>The base class for both Menu and MenuItem.  Provides the utilities needed to handle events and manage the menu tree of nodes.</td></tr>
-        <tr><td><a href="class_menuitem.html">MenuItem</a></td><td>A configurable button that displays a menu overlay when active.  Represents the menu items in all menu classes.</td></tr>
-        <tr><td><a href="class_menu.html">Menu</a></td><td>The Menu class displays an overlay of a list of menu items that the user can select.  Used as a submenu for MenuBar, VerticalMenu and DropDown menu classes and is also inherited by all other types of menus.</td></tr>
-        <tr><td><a href="class_menubar.html">MenuBar</a></td><td>Subclass of Menu.  Creates a windows like horizontal menubar for using at the top and bottom of views.</td></tr>
-        <tr><td><a href="class_dropdown.html">DropDown</a></td><td>A subclass of MenuItem that can act as the root node of a menu tree.</td></tr>
-        <tr><td><a href="class_select2.html">Select2</a></td><td>A replacement for the default select widget.</td></tr>
+        <tr><td><a href="menubar.html">MenuBar</a></td><td>A component that creates a horizontal navigation menu filled with nestable pull down items.</td></tr>
+        <tr><td><a href="">SideMenu</a></td><td>Description</td></tr>
+        <tr><td><a href="">DropDown</a></td><td>Description</td></tr>
+        <tr><td><a href="">ContextMenu</a></td><td>Description</td></tr>
+        <tr><td><a href="">Select2</a></td><td>Description</td></tr>
     </table>
 </article>
 
-<h2>Example</h2>
-<div id="menubar_1" class="example-container"></div>
-<br>
+<h2>MenuBar</h2>
+<p>
+    MenuBar is a horizontal list of dropdown menus that can contain navigation links and more.  By default, the MenuBar
+    is activated when the user clicks on a root level menu-item.  After the MenuBar is activated child items can then
+    be activated on hover.  This is designed to simulate the normal behavior of MenuBars found in Window's and Mac applications.
+</p>
 
-<h2>Initializing from JSON</h2>
-
-<article class="example">
-    <h4>JSON</h4>
-{% highlight javascript linenos %}
-let menu = new Menu({
-    closeOnBlur: true,
-    closeOnSelect: true
-});
-
-menu.isVisible = true;
-
-menu.createItems([
-    {
-        text: "Item #1",
-        submenu: {
-            children: [
-                {text: "SubItem #1", href: "#"},
-                {text: "SubItem #2", href: "#"},
-                {text: "SubItem #3", href: "#"},
-                {text: "SubItem #4", href: "#"},
-                {text: "SubItem #5", href: "#"}
-            ]
-        }
-    },
-    {
-        text: "Item #2",
-        submenu: {
-            children: [
-                {text: "SubItem #1", href: "#"},
-                {text: "SubItem #2", href: "#"},
-                {text: "SubItem #3", href: "#"},
-                {text: "SubItem #4", href: "#"},
-                {text: "SubItem #5", href: "#"}
-            ]
-        }
-    },
-    {
-        text: "Item #3",
-        submenu: {
-            children: [
-                {text: "SubItem #1", href: "#"},
-                {text: "SubItem #2", href: "#"},
-                {text: "SubItem #3", href: "#"},
-                {text: "SubItem #4", href: "#"},
-                {text: "SubItem #5", href: "#"}
-            ]
-        }
-    },
-    {
-        text: "Item #4",
-        submenu: {
-            children: [
-                {text: "SubItem #1", href: "#"},
-                {text: "SubItem #2", href: "#"},
-                {text: "SubItem #3", href: "#"},
-                {text: "SubItem #4", href: "#"},
-                {text: "SubItem #5", href: "#"}
-            ]
-        }
-    },
-    {
-        text: "Item #5",
-        submenu: {
-            children: [
-                {text: "SubItem #1", href: "#"},
-                {text: "SubItem #2", href: "#"},
-                {text: "SubItem #3", href: "#"},
-                {text: "SubItem #4", href: "#"},
-                {text: "SubItem #5", href: "#"}
-            ]
-        }
-    }
-]);
-
-menu.style.position = 'static';
-menu.style.width = '16rem';
-
-menu.appendTo("#init-menu-from-json");
-
-{% endhighlight %}
-    <h4>Result</h4>
-    <div class="result" id="init-menu-from-json"></div>
-</article>
-
-<h2>Initializing from DOM</h2>
-
-<article class="example">
-    <h4>HTML</h4>
-{% highlight html linenos %}
-<ul class="vertical-menu" data-init="menu">
-    <li data-role="menuitem" class="menuitem">
-        <button type="button">Item #1</button>
-        <ul data-role="menu" class="menu hidden">
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+<ul class="menubar" data-init="menubar">
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #1</a>
+        <ul class="menu hidden" data-role="menu">
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #1</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="http://google.com">Google</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #2</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #3</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #4</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #5</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
         </ul>
     </li>
-    <li data-role="menuitem" class="menuitem">
-        <button type="button">Item #2</button>
-        <ul data-role="menu" class="menu hidden">
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #2</a>
+        <ul class="menu hidden" data-role="menu">
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #1</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #2</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #3</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #4</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #5</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
         </ul>
     </li>
-    <li data-role="menuitem" class="menuitem">
-        <button type="button">Item #3</button>
-        <ul data-role="menu" class="menu hidden">
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #3</a>
+        <ul class="menu hidden" data-role="menu">
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #1</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #2</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #3</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #4</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #5</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
         </ul>
     </li>
-    <li data-role="menuitem" class="menuitem">
-        <button type="button">Item #4</button>
-        <ul data-role="menu" class="menu hidden">
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #4</a>
+        <ul class="menu hidden" data-role="menu">
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #1</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #2</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #3</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #4</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #5</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
         </ul>
     </li>
-    <li data-role="menuitem" class="menuitem">
-        <button type="button">Item #5</button>
-        <ul data-role="menu" class="menu hidden">
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-            <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
+    <li class="menuitem" data-role="menuitem">
+        <a>Root Item #5</a>
+        <ul class="menu hidden" data-role="menu">
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #1</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #2</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #3</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #4</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
+            <li class="menuitem" data-role="menuitem">
+                <a>Item #5</a>
+                <ul class="menu hidden" data-role="menu">
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+                    <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+                </ul>
+            </li>
         </ul>
     </li>
 </ul>
-{% endhighlight %}
-    <h4>Result</h4>
-    <div class="result">
-        <ul id="test-init-from-dom" class="vertical-menu" data-init="menu" data-timeout="1000" data-close-on-blur="true" data-auto-activate="false">
-            <li data-role="menuitem" class="menuitem">
-                <a type="button">Item #1</a>
-                <ul data-role="menu" class="menu hidden">
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
-                </ul>
-            </li>
-            <li data-role="menuitem" class="menuitem">
-                <a type="button">Item #2</a>
-                <ul data-role="menu" class="menu hidden">
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
-                </ul>
-            </li>
-            <li data-role="menuitem" class="menuitem">
-                <a type="button">Item #3</a>
-                <ul data-role="menu" class="menu hidden">
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
-                </ul>
-            </li>
-            <li data-role="menuitem" class="menuitem">
-                <a type="button">Item #4</a>
-                <ul data-role="menu" class="menu hidden">
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
-                </ul>
-            </li>
-            <li data-role="menuitem" class="menuitem">
-                <a type="button">Item #5</a>
-                <ul data-role="menu" class="menu hidden">
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #1</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #2</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #3</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #4</a></li>
-                    <li data-role="menuitem" class="menuitem"><a href="#">Item #5</a></li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-</article>
 
-<h2>Initializing Imperatively</h2>
+<br>
+<h2>DropDown</h2>
+<p>
+    A button that displays a contextual overlay of navigation items and more.  By default, the dropdown activates when
+    the user clicks on the button but it can be configured to display on hover.
+</p>
 
-<article class="example">
-    <h4>Javascript</h4>
-{% highlight javascript linenos %}
-let container = document.getElementById('init-menu-imperatively');
+<div data-init="dropdown" class="dropdown">
+    <button type="button">DropDown</button>
+    <ul class="menu hidden" data-role="menu">
+        <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
+        <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
+        <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
+        <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
+        <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
+    </ul>
+</div>
 
-let menu = new Menu();
+<br>
+<br>
+<h2>Select</h2>
+<p>
+    A replacement for the built in &lt;select&gt; element.
+</p>
 
-menu.append(new MenuItem({text: "Item #1", action: () => alert("Item #1 Clicked")}));
-menu.append(new MenuItem({text: "Item #2", action: () => alert("Item #2 Clicked")}));
-menu.append(new MenuItem({text: "Item #3", action: () => alert("Item #3 Clicked")}));
-menu.append(new MenuItem({text: "Item #4", action: () => alert("Item #4 Clicked")}));
-menu.append(new MenuItem({text: "Item #5", action: () => alert("Item #5 Clicked")}));
 
-menu.isVisible = true;
-menu.addClass('vertical-menu');
-menu.removeClass('menu');
+<select data-init="select" data-filter="true">
+    <option value="1">Item #1</option>
+    <option value="2">Item #2</option>
+    <option value="3">Item #3</option>
+    <option value="4">Item #4</option>
+    <option value="5">Item #5</option>
+</select>
 
-menu.appendTo(container);
+<br><br>
+<h2>MultiSelect</h2>
+<p>
+    A replacement for the built in &lt;select&gt; element.
+</p>
 
-{% endhighlight %}
-    <h4>Result</h4>
-    <div class="result" id="init-menu-imperatively"></div>
-</article>
-
+<select data-init="select" data-filter="true" multiple>
+    <option value="1">Item #1</option>
+    <option value="2">Item #2</option>
+    <option value="3">Item #3</option>
+    <option value="4">Item #4</option>
+    <option value="5">Item #5</option>
+</select>

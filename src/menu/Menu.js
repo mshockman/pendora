@@ -78,7 +78,7 @@ export class AbstractMenu extends MenuNode {
             }
         });
 
-        this.on('event.mousedown', (event) => this.onMouseDown(event));
+        this.on('event.click', (event) => this.onClick(event));
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
@@ -322,7 +322,7 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
-    onMouseDown(event) {
+    onClick(event) {
         if(event.target === this) {
             if(this.isActive && this.toggleOff) {
                 this.deactivate();

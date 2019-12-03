@@ -1,65 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Menu Overview</title>
+---
+title: MenuBar
+description:
+layout: default
+---
 
-    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
-    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
-</head>
-<body data-page="menu_examples">
-    <header id="header">
-        <nav>
-            <ul>
-                <li>Pendora</li>
-                <li>Examples</li>
-                <li>Download</li>
-                <li>Documentation</li>
-                <li class="mr-auto">Changelog</li>
-                <li><i class="fab fa-github"></i> Github</li>
-            </ul>
-        </nav>
-    </header>
-    <article id="splash">
-        <header>
-            <h2>Menu Overview</h2>
-            <p>A library for creating nested menus.</p>
-        </header>
-    </article>
-    <main id="main">
-        <article id="content">
-            <h1>Menus</h1>
-
-<p>
-    Components for creating nestable overlay menus for common navigation patterns.
-</p>
-
-<ul>
-    <li>Styling Menus</li>
-    <li>Menu States</li>
-    <li>Event Handling</li>
-    <li>Custom Menus</li>
-    <li><a href="functions.html">Menu Functions</a></li>
-    <li><a href="#">Positioners</a></li>
-</ul>
-
-<article class="info-table">
-    <h4>Components</h4>
-    <table>
-        <tr><td><a href="menubar.html">MenuBar</a></td><td>A component that creates a horizontal navigation menu filled with nestable pull down items.</td></tr>
-        <tr><td><a href="">SideMenu</a></td><td>Description</td></tr>
-        <tr><td><a href="">DropDown</a></td><td>Description</td></tr>
-        <tr><td><a href="">ContextMenu</a></td><td>Description</td></tr>
-        <tr><td><a href="">Select2</a></td><td>Description</td></tr>
-    </table>
-</article>
-
-<h2>MenuBar</h2>
 <p>
     MenuBar is a horizontal list of dropdown menus that can contain navigation links and more.  By default, the MenuBar
     is activated when the user clicks on a root level menu-item.  After the MenuBar is activated child items can then
     be activated on hover.  This is designed to simulate the normal behavior of MenuBars found in Window's and Mac applications.
 </p>
+
+
+<h2>Example</h2>
 
 <ul class="menubar" data-init="menubar">
     <li class="menuitem" data-role="menuitem">
@@ -338,63 +290,3 @@
         </ul>
     </li>
 </ul>
-
-<br>
-<h2>DropDown</h2>
-<p>
-    A button that displays a contextual overlay of navigation items and more.  By default, the dropdown activates when
-    the user clicks on the button but it can be configured to display on hover.
-</p>
-
-<div data-init="dropdown" class="dropdown">
-    <button type="button">DropDown</button>
-    <ul class="menu hidden" data-role="menu">
-        <li class="menuitem" data-role="menuitem"><a href="#">Link #1</a></li>
-        <li class="menuitem" data-role="menuitem"><a href="#">Link #2</a></li>
-        <li class="menuitem" data-role="menuitem"><a href="#">Link #3</a></li>
-        <li class="menuitem" data-role="menuitem"><a href="#">Link #4</a></li>
-        <li class="menuitem" data-role="menuitem"><a href="#">Link #5</a></li>
-    </ul>
-</div>
-
-<br>
-<br>
-<h2>Select</h2>
-<p>
-    A replacement for the built in &lt;select&gt; element.
-</p>
-
-
-<select data-init="select" data-filter="true">
-    <option value="1">Item #1</option>
-    <option value="2">Item #2</option>
-    <option value="3">Item #3</option>
-    <option value="4">Item #4</option>
-    <option value="5">Item #5</option>
-</select>
-
-<br><br>
-<h2>MultiSelect</h2>
-<p>
-    A replacement for the built in &lt;select&gt; element.
-</p>
-
-<select data-init="select" data-filter="true" multiple>
-    <option value="1">Item #1</option>
-    <option value="2">Item #2</option>
-    <option value="3">Item #3</option>
-    <option value="4">Item #4</option>
-    <option value="5">Item #5</option>
-</select>
-
-        </article>
-    </main>
-    <footer id="footer">
-
-    </footer>
-
-<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
-<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
-</body>
-</html>
