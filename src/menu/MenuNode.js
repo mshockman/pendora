@@ -1,7 +1,7 @@
 import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
 import {addClasses, removeClasses} from "core/utility";
-import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance} from "./utility";
+import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
 import Attribute from "../core/attributes";
 
 
@@ -227,8 +227,13 @@ export default class MenuNode extends Publisher {
      * @returns {boolean}
      */
     contains(node) {
+        if(node.nodeType) {
+            node = getClosestMenuNodeByElement(node);
+            return node ? this.closest(node) : false;
+        }
+
         while(node) {
-            if(node.parent === this) {
+            if(node === this) {
                 return true;
             }
 
@@ -383,6 +388,22 @@ export default class MenuNode extends Publisher {
                 this.element.classList.remove('disabled');
             }
         }
+    }
+
+    /**
+     * Alias for isDisabled getter.
+     * @returns {boolean}
+     */
+    get disabled() {
+        return this.isDisabled;
+    }
+
+    /**
+     * Alias for isDisabled setter.
+     * @param value
+     */
+    set disabled(value) {
+        this.isDisabled = value;
     }
 
     /**
@@ -789,14 +810,21 @@ export default class MenuNode extends Publisher {
                 if(hasMenuInstance(child)) {
                     let instance = getMenuInstance(child);
                     instance.setParent(this);
-                } else if(role === 'menu') {
-                    let menu = this.SubMenuClass.FromHTML(child);
-                    menu.setParent(this);
-                } else if(role === 'menuitem') {
-                    let item = this.MenuItemClass.FromHTML(child);
-                    item.setParent(this);
                 } else {
-                    walk(child);
+                    let hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
+                        hasMenuAttribute = child.hasAttribute('data-menu');
+
+                    if(hasMenuAttribute && hasMenuItemAttribute) {
+                        throw new Error("Element cannot be both a menuitem and a menu.");
+                    } else if(hasMenuAttribute) {
+                        let menu = this.SubMenuClass.FromHTML(child);
+                        menu.setParent(this);
+                    } else if(hasMenuItemAttribute) {
+                        let item = this.MenuItemClass.FromHTML(child);
+                        item.setParent(this);
+                    } else {
+                        walk(child);
+                    }
                 }
             }
         };

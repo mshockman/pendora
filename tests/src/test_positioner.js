@@ -23,18 +23,37 @@ export default class TestPositionerPage {
         });
 
         this.reposition = () => {
+            let _p = (offsetName) => {
+                let value = this.getSelectValue(`${offsetName}-offset`),
+                    unit = this.getSelectValue(`${offsetName}-offset-unit`);
+
+                value = parseFloat(value);
+
+                if(value < 0) {
+                    return `${value}${unit}`;
+                } else if(value > 0) {
+                    return `+${value}${unit}`;
+                } else {
+                    return '';
+                }
+            };
+
             let myX = this.getSelectValue('my-x'),
                 myY = this.getSelectValue('my-y'),
                 atX = this.getSelectValue('at-x'),
                 atY = this.getSelectValue('at-y'),
                 flipX = this.getSelectValue('flip-x'),
-                flipY = this.getSelectValue('flip-y');
+                flipY = this.getSelectValue('flip-y'),
+                myOffsetX = _p('my-x'),
+                myOffsetY = _p('my-y'),
+                atOffsetX = _p('at-x'),
+                atOffsetY = _p('at-y');
 
             let rect = new Rect(this.overlay);
 
             rect = rect.position({
-                my: `${myX} ${myY}`,
-                at: `${atX} ${atY}`,
+                my: `${myX}${myOffsetX} ${myY}${myOffsetY}`,
+                at: `${atX}${atOffsetX} ${atY}${atOffsetY}`,
                 of: this.referenceElement,
                 inside: this.container,
                 collision: `${flipX} ${flipY}`

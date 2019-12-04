@@ -141,7 +141,7 @@ export class AbstractMenuItem extends MenuNode {
                 target: document,
 
                 onDocumentClick: (event) => {
-                    if(!this.element.contains(event.target)) {
+                    if(!this.contains(event.target)) {
                         this.deactivate();
                     }
                 }
@@ -267,7 +267,7 @@ export class AbstractMenuItem extends MenuNode {
             let positioner = this.positioner;
 
             if(positioner) {
-                positioner.call(submenu, submenu);
+                positioner.call(submenu, this, submenu);
             }
         }
     }

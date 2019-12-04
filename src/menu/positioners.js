@@ -1,5 +1,5 @@
 import {Rect} from "core/vectors";
-import {getClientRect} from "core/position";
+import {getClientRect, setElementClientPosition} from "core/position";
 
 const opposites = {
     left: 'right',
@@ -18,29 +18,40 @@ function getInheritedPosition(menu) {
 }
 
 
-function flipPositionIfOutOfBounds(target, container, flip) {
-    let targetRect = Rect.getBoundingClientRect(target),
-        containerRect = typeof container === 'function' ? container() : Rect.getBoundingClientRect(container),
-        [posX, posY] = target.dataset.position.split(' '),
-        boundX = containerRect.containsX.bind(containerRect),
-        boundY = containerRect.containsY.bind(containerRect);
+function _applyPosition(target, overlay, container, flip) {
+    let position = overlay.dataset.position,
+        [my, at] = position.split(/\s*;\s*/),
+        overlayRect = Rect.getBoundingClientRect(overlay),
+        targetRect = Rect.getBoundingClientRect(target),
+        containerRect = container.nodeType ? Rect.getBoundingClientRect(container) : container;
 
-    const fnMap = {
-        left: boundX,
-        right: boundX,
-        top: boundY,
-        bottom: boundY
-    };
+    my = my.trim();
+    at = at.trim();
 
-    if(posX && fnMap[posX] && !fnMap[posX](targetRect)) {
-        posX = opposites[posX];
+    let [myX, myY] = my.split(/\s+/),
+        [atX, atY] = at.split(/\s+/);
+
+    let pos = overlayRect.position({my: `${myX} ${myY}`, at: `${atX} ${atY}`, of: targetRect, inside: containerRect, collision: null}),
+        refresh = false; // flag that determines is position will be refreshed.
+
+    if(!containerRect.containsX(pos)) {
+        myX = opposites[myX];
+        atX = opposites[atX];
+        refresh = true;
     }
 
-    if(posY && fnMap[posY] && !fnMap[posY](targetRect)) {
-        posY = opposites[posY];
+    if(!containerRect.containsY(pos)) {
+        myY = opposites[myY];
+        atY = opposites[atY];
+        refresh = true;
     }
 
-    target.dataset.position = `${posX} ${posY}`;
+    if(refresh) {
+        pos = overlayRect.position({my: `${myX} ${myY}`, at: `${atX} ${atY}`, of: targetRect, inside: containerRect, collision: null});
+        overlay.dataset.position = `${myX} ${myY}; ${atX} ${atY}`;
+    }
+
+    setElementClientPosition(overlay, pos, "top-left");
 }
 
 
@@ -56,7 +67,7 @@ function flipPositionIfOutOfBounds(target, container, flip) {
  * @param defaultPosition
  * @returns {Function}
  */
-export function dropdown(container=null, topLevelPosition="bottom left", defaultPosition="right top") {
+export function dropdown(container=null, topLevelPosition="left top; left bottom;", defaultPosition="left top; right top;") {
     if(!container) {
         container = getClientRect;
     } else if(typeof container === 'string') {
@@ -67,18 +78,26 @@ export function dropdown(container=null, topLevelPosition="bottom left", default
         container = () => Rect.getBoundingClientRect(target);
     }
 
-    return function(menu) {
-        let parentMenu = menu.parentMenu;
+    return function(target, menu) {
+        let parentMenu = menu.parentMenu,
+            containerElement = container;
+
+        if(typeof containerElement === 'function') {
+            containerElement = containerElement(target, menu);
+        }
 
         if (!parentMenu || parentMenu.isRoot) {
             menu.element.dataset.position = topLevelPosition;
-            flipPositionIfOutOfBounds(menu.element, container, 'xy');
+            // flipPositionIfOutOfBounds(menu.element, container, 'xy');
+            _applyPosition(target.element, menu.element, containerElement, 'xy');
         } else {
             menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
-            flipPositionIfOutOfBounds(menu.element, container, 'xy');
+            // flipPositionIfOutOfBounds(menu.element, container, 'xy');
+            _applyPosition(target.element, menu.element, containerElement, 'xy');
         }
     }
 }
 
 
 export const DROPDOWN = dropdown();
+export const SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");

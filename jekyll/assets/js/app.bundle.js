@@ -72,11 +72,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var deferredModules = [];
 /******/
-/******/ 	// script path function
-/******/ 	function jsonpScriptSrc(chunkId) {
-/******/ 		return __webpack_require__.p + "chunk-" + ({}[chunkId]||chunkId) + ".bundle.js"
-/******/ 	}
-/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/
@@ -101,67 +96,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 		return module.exports;
 /******/ 	}
 /******/
-/******/ 	// This file contains only the entry chunk.
-/******/ 	// The chunk loading function for additional chunks
-/******/ 	__webpack_require__.e = function requireEnsure(chunkId) {
-/******/ 		var promises = [];
-/******/
-/******/
-/******/ 		// JSONP chunk loading for javascript
-/******/
-/******/ 		var installedChunkData = installedChunks[chunkId];
-/******/ 		if(installedChunkData !== 0) { // 0 means "already installed".
-/******/
-/******/ 			// a Promise means "currently loading".
-/******/ 			if(installedChunkData) {
-/******/ 				promises.push(installedChunkData[2]);
-/******/ 			} else {
-/******/ 				// setup Promise in chunk cache
-/******/ 				var promise = new Promise(function(resolve, reject) {
-/******/ 					installedChunkData = installedChunks[chunkId] = [resolve, reject];
-/******/ 				});
-/******/ 				promises.push(installedChunkData[2] = promise);
-/******/
-/******/ 				// start chunk loading
-/******/ 				var script = document.createElement('script');
-/******/ 				var onScriptComplete;
-/******/
-/******/ 				script.charset = 'utf-8';
-/******/ 				script.timeout = 120;
-/******/ 				if (__webpack_require__.nc) {
-/******/ 					script.setAttribute("nonce", __webpack_require__.nc);
-/******/ 				}
-/******/ 				script.src = jsonpScriptSrc(chunkId);
-/******/
-/******/ 				// create error before stack unwound to get useful stacktrace later
-/******/ 				var error = new Error();
-/******/ 				onScriptComplete = function (event) {
-/******/ 					// avoid mem leaks in IE.
-/******/ 					script.onerror = script.onload = null;
-/******/ 					clearTimeout(timeout);
-/******/ 					var chunk = installedChunks[chunkId];
-/******/ 					if(chunk !== 0) {
-/******/ 						if(chunk) {
-/******/ 							var errorType = event && (event.type === 'load' ? 'missing' : event.type);
-/******/ 							var realSrc = event && event.target && event.target.src;
-/******/ 							error.message = 'Loading chunk ' + chunkId + ' failed.\n(' + errorType + ': ' + realSrc + ')';
-/******/ 							error.name = 'ChunkLoadError';
-/******/ 							error.type = errorType;
-/******/ 							error.request = realSrc;
-/******/ 							chunk[1](error);
-/******/ 						}
-/******/ 						installedChunks[chunkId] = undefined;
-/******/ 					}
-/******/ 				};
-/******/ 				var timeout = setTimeout(function(){
-/******/ 					onScriptComplete({ type: 'timeout', target: script });
-/******/ 				}, 120000);
-/******/ 				script.onerror = script.onload = onScriptComplete;
-/******/ 				document.head.appendChild(script);
-/******/ 			}
-/******/ 		}
-/******/ 		return Promise.all(promises);
-/******/ 	};
 /******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
@@ -215,9 +149,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "/tests/dist/";
 /******/
-/******/ 	// on error function for async loading
-/******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
-/******/
 /******/ 	var jsonpArray = window["webpackJsonppendora"] = window["webpackJsonppendora"] || [];
 /******/ 	var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
 /******/ 	jsonpArray.push = webpackJsonpCallback;
@@ -257,13 +188,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 __webpack_require__.p = "/assets/js/";
-var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
-  'menubar': function menubar() {
-    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./pages/menubar_example.js */ "./jekyll/js/pages/menubar_example.js"));
-  },
-  'menu_examples': function menu_examples() {
-    return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./pages/menu_examples.js */ "./jekyll/js/pages/menu_examples.js"));
-  }
+var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({// 'menubar': () =>  import("./pages/menubar_example.js"),
+  // 'menu_examples': () =>  import("./pages/menu_examples.js"),
 });
 window.addEventListener('load',
 /*#__PURE__*/
@@ -5621,7 +5547,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this._captureDocumentClick = {
             target: document,
             onDocumentClick: function onDocumentClick(event) {
-              if (!_this3.element.contains(event.target)) {
+              if (!_this3.contains(event.target)) {
                 _this3.deactivate();
               }
             }
@@ -5767,7 +5693,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           var positioner = this.positioner;
 
           if (positioner) {
-            positioner.call(submenu, submenu);
+            positioner.call(submenu, this, submenu);
           }
         }
       }
@@ -6357,8 +6283,13 @@ function (_Publisher) {
   }, {
     key: "contains",
     value: function contains(node) {
+      if (node.nodeType) {
+        node = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuNodeByElement"])(node);
+        return node ? this.closest(node) : false;
+      }
+
       while (node) {
-        if (node.parent === this) {
+        if (node === this) {
           return true;
         }
 
@@ -7058,16 +6989,23 @@ function (_Publisher) {
             if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
               var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(_child);
               instance.setParent(_this4);
-            } else if (role === 'menu') {
-              var menu = _this4.SubMenuClass.FromHTML(_child);
-
-              menu.setParent(_this4);
-            } else if (role === 'menuitem') {
-              var item = _this4.MenuItemClass.FromHTML(_child);
-
-              item.setParent(_this4);
             } else {
-              walk(_child);
+              var hasMenuItemAttribute = _child.hasAttribute('data-menuitem'),
+                  hasMenuAttribute = _child.hasAttribute('data-menu');
+
+              if (hasMenuAttribute && hasMenuItemAttribute) {
+                throw new Error("Element cannot be both a menuitem and a menu.");
+              } else if (hasMenuAttribute) {
+                var menu = _this4.SubMenuClass.FromHTML(_child);
+
+                menu.setParent(_this4);
+              } else if (hasMenuItemAttribute) {
+                var item = _this4.MenuItemClass.FromHTML(_child);
+
+                item.setParent(_this4);
+              } else {
+                walk(_child);
+              }
             }
           }
         } catch (err) {
@@ -7276,6 +7214,24 @@ function (_Publisher) {
         }
       }
     }
+    /**
+     * Alias for isDisabled getter.
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "disabled",
+    get: function get() {
+      return this.isDisabled;
+    }
+    /**
+     * Alias for isDisabled setter.
+     * @param value
+     */
+    ,
+    set: function set(value) {
+      this.isDisabled = value;
+    }
   }, {
     key: "element",
     get: function get() {
@@ -7401,7 +7357,7 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, SelectMenu, Select2, AdvancedSelect, MultiSelect, ComboSelect, MultiCombo */
+/*! exports provided: SelectOption, SelectMenu, Select2, ComboBox, MultiSelect, MultiCombo */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7409,9 +7365,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return SelectOption; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AdvancedSelect", function() { return AdvancedSelect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiSelect", function() { return MultiSelect; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboSelect", function() { return ComboSelect; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiCombo", function() { return MultiCombo; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
@@ -7457,10 +7412,6 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -7476,6 +7427,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
@@ -7526,6 +7481,9 @@ function (_AbstractMenuItem) {
         value: value
       });
     }
+
+    _this.textNode = _this.element.querySelector('[data-text], button, a');
+    if (!_this.textNode) _this.textNode = _this.element;
 
     _this.element.setAttribute('aria-role', 'option');
 
@@ -7613,6 +7571,9 @@ function (_AbstractMenuItem) {
     key: "select",
     value: function select() {
       var topicData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      _get(_getPrototypeOf(SelectOption.prototype), "select", this).call(this);
+
       if (this.isSelected) return;
 
       if (!this.multiSelect) {
@@ -7725,7 +7686,7 @@ function (_AbstractMenuItem) {
   }, {
     key: "text",
     get: function get() {
-      return this.button.innerText.trim();
+      return this.textNode.innerText.trim();
     }
     /**
      * Sets the options inner html.
@@ -7733,7 +7694,7 @@ function (_AbstractMenuItem) {
      */
     ,
     set: function set(value) {
-      this.button.innerText = (value + "").trim();
+      this.textNode.innerText = (value + "").trim();
     }
     /**
      * Returns the options parent select menu or null.
@@ -7801,7 +7762,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _initialize(_assertThisInitialized(_this2));
 
-      _this2.isSelectMenu = true;
       _this2.MenuItemClass = SelectOption;
 
       if (target) {
@@ -7961,6 +7921,18 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         return r;
       }
     }, {
+      kind: "get",
+      key: "selectedOptions",
+      value: function selectedOptions() {
+        return this.selection;
+      }
+    }, {
+      kind: "get",
+      key: "options",
+      value: function options() {
+        return this.children;
+      }
+    }, {
       kind: "method",
       key: "onMouseDown",
       value: function onMouseDown(topic) {
@@ -7994,6 +7966,12 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             this.lastTarget = target;
           }
         }
+      }
+    }, {
+      kind: "method",
+      key: "isSelectMenu",
+      value: function isSelectMenu() {
+        return true;
       }
     }]
   };
@@ -8591,30 +8569,193 @@ _defineProperty(Select2, "__attributes__", _objectSpread({
   multiSelect: new core_attributes__WEBPACK_IMPORTED_MODULE_7__["default"](core_utility__WEBPACK_IMPORTED_MODULE_5__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["TRUE"])
 }, _MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"].__attributes__));
 
-var AdvancedSelect =
+var ComboBox =
 /*#__PURE__*/
 function (_AbstractMenuItem3) {
-  _inherits(AdvancedSelect, _AbstractMenuItem3);
+  _inherits(ComboBox, _AbstractMenuItem3);
 
-  function AdvancedSelect() {
-    _classCallCheck(this, AdvancedSelect);
+  function ComboBox(_ref6) {
+    var _this6;
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(AdvancedSelect).apply(this, arguments));
+    var _ref6$target = _ref6.target,
+        target = _ref6$target === void 0 ? null : _ref6$target,
+        _ref6$timeout = _ref6.timeout,
+        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
+        _ref6$submenu = _ref6.submenu,
+        submenu = _ref6$submenu === void 0 ? null : _ref6$submenu;
+
+    _classCallCheck(this, ComboBox);
+
+    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
+
+    if (target) {
+      _this6.element = target;
+
+      if (_this6.element.nodeName === 'INPUT') {
+        _this6.input = _this6.element;
+      } else {
+        _this6.input = _this6.element.querySelector('input');
+      }
+    } else {
+      var _this6$render = _this6.render(),
+          element = _this6$render.element,
+          input = _this6$render.input;
+
+      _this6.element = element;
+      _this6.input = input;
+    }
+
+    _this6.toggle = "both";
+    _this6.autoActivate = false;
+    _this6.openOnHover = false;
+    _this6.delay = false;
+    _this6.timeout = timeout;
+    _this6.closeOnBlur = true;
+    _this6.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this6.closeOnSelect = true;
+    _this6.SubMenuClass = SelectMenu;
+    _this6.element.tabIndex = 0;
+
+    _this6.element.classList.add('advanced-select');
+
+    _this6.registerTopics();
+
+    _this6.parseDOM();
+
+    if (submenu) {
+      if (typeof submenu === 'string') {
+        submenu = document.querySelector(submenu);
+      }
+
+      if (!submenu.isSelectMenu || !submenu.isSelectMenu()) {
+        submenu = new _this6.SubMenuClass({
+          target: submenu
+        });
+
+        _this6.attachSubMenu(submenu);
+      }
+    }
+
+    _this6.init();
+
+    return _this6;
   }
 
-  return AdvancedSelect;
+  _createClass(ComboBox, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this7 = this;
+
+      _get(_getPrototypeOf(ComboBox.prototype), "registerTopics", this).call(this);
+
+      this.on('option.select', function () {
+        _this7._renderLabel();
+      });
+      this.on('option.deselect', function () {
+        _this7._renderLabel();
+      });
+    }
+  }, {
+    key: "render",
+    value: function render(context) {
+      var element = "\n        <div class=\"advanced-select\">\n            <input type=\"text\" readonly=\"readonly\" />\n        </div>\n        ";
+      element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(element).children[0];
+      return {
+        element: element,
+        input: element.querySelector('input')
+      };
+    } //------------------------------------------------------------------------------------------------------------------
+    // Event & topic handling methods
+    //------------------------------------------------------------------------------------------------------------------
+    // Private methods
+
+  }, {
+    key: "_renderLabel",
+    value: function _renderLabel() {
+      var labels = this.selectedOptions.map(function (item) {
+        return item.text;
+      });
+      this.value = labels.join(", ");
+    } //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+  }, {
+    key: "isSelect",
+    //------------------------------------------------------------------------------------------------------------------
+    // Interface methods
+    value: function isSelect() {
+      return true;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Static methods
+
+  }, {
+    key: "options",
+    get: function get() {
+      return this.submenu.options;
+    }
+  }, {
+    key: "selectedOptions",
+    get: function get() {
+      return this.submenu.selectedOptions;
+    }
+  }, {
+    key: "selectedIndex",
+    get: function get() {},
+    set: function set(index) {}
+  }, {
+    key: "name",
+    get: function get() {
+      return this.input.name;
+    },
+    set: function set(value) {
+      this.input.name = value;
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this.input.value;
+    },
+    set: function set(value) {
+      this.input.value = value;
+    }
+  }, {
+    key: "placeholder",
+    get: function get() {
+      return this.input.placeholder;
+    },
+    set: function set(value) {
+      this.input.placeholder = value;
+    }
+  }], [{
+    key: "FromHTML",
+    value: function FromHTML(element) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      }
+
+      if (element.nodeName === 'SELECT') {} else {
+        var menu = element.dataset.menu;
+        return new ComboBox({
+          target: element,
+          submenu: menu
+        });
+      }
+    }
+  }]);
+
+  return ComboBox;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
 var MultiSelect = function MultiSelect() {
   _classCallCheck(this, MultiSelect);
-};
-var ComboSelect = function ComboSelect() {
-  _classCallCheck(this, ComboSelect);
 };
 var MultiCombo = function MultiCombo() {
   _classCallCheck(this, MultiCombo);
 };
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return Select2.FromHTML(element);
+});
+autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('combo-box', function (element) {
+  return ComboBox.FromHTML(element);
 });
 
 /***/ }),
@@ -8769,13 +8910,14 @@ __webpack_require__.r(__webpack_exports__);
 /*!*********************************!*\
   !*** ./src/menu/positioners.js ***!
   \*********************************/
-/*! exports provided: dropdown, DROPDOWN */
+/*! exports provided: dropdown, DROPDOWN, SIDE_MENU */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dropdown", function() { return dropdown; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROPDOWN", function() { return DROPDOWN; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SIDE_MENU", function() { return SIDE_MENU; });
 /* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors.js");
 /* harmony import */ var core_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/position */ "./src/core/position.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -8803,32 +8945,61 @@ function getInheritedPosition(menu) {
   }
 }
 
-function flipPositionIfOutOfBounds(target, container, flip) {
-  var targetRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target),
-      containerRect = typeof container === 'function' ? container() : core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(container),
-      _target$dataset$posit = target.dataset.position.split(' '),
-      _target$dataset$posit2 = _slicedToArray(_target$dataset$posit, 2),
-      posX = _target$dataset$posit2[0],
-      posY = _target$dataset$posit2[1],
-      boundX = containerRect.containsX.bind(containerRect),
-      boundY = containerRect.containsY.bind(containerRect);
+function _applyPosition(target, overlay, container, flip) {
+  var position = overlay.dataset.position,
+      _position$split = position.split(/\s*;\s*/),
+      _position$split2 = _slicedToArray(_position$split, 2),
+      my = _position$split2[0],
+      at = _position$split2[1],
+      overlayRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(overlay),
+      targetRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target),
+      containerRect = container.nodeType ? core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(container) : container;
 
-  var fnMap = {
-    left: boundX,
-    right: boundX,
-    top: boundY,
-    bottom: boundY
-  };
+  my = my.trim();
+  at = at.trim();
 
-  if (posX && fnMap[posX] && !fnMap[posX](targetRect)) {
-    posX = opposites[posX];
+  var _my$split = my.split(/\s+/),
+      _my$split2 = _slicedToArray(_my$split, 2),
+      myX = _my$split2[0],
+      myY = _my$split2[1],
+      _at$split = at.split(/\s+/),
+      _at$split2 = _slicedToArray(_at$split, 2),
+      atX = _at$split2[0],
+      atY = _at$split2[1];
+
+  var pos = overlayRect.position({
+    my: "".concat(myX, " ").concat(myY),
+    at: "".concat(atX, " ").concat(atY),
+    of: targetRect,
+    inside: containerRect,
+    collision: null
+  }),
+      refresh = false; // flag that determines is position will be refreshed.
+
+  if (!containerRect.containsX(pos)) {
+    myX = opposites[myX];
+    atX = opposites[atX];
+    refresh = true;
   }
 
-  if (posY && fnMap[posY] && !fnMap[posY](targetRect)) {
-    posY = opposites[posY];
+  if (!containerRect.containsY(pos)) {
+    myY = opposites[myY];
+    atY = opposites[atY];
+    refresh = true;
   }
 
-  target.dataset.position = "".concat(posX, " ").concat(posY);
+  if (refresh) {
+    pos = overlayRect.position({
+      my: "".concat(myX, " ").concat(myY),
+      at: "".concat(atX, " ").concat(atY),
+      of: targetRect,
+      inside: containerRect,
+      collision: null
+    });
+    overlay.dataset.position = "".concat(myX, " ").concat(myY, "; ").concat(atX, " ").concat(atY);
+  }
+
+  Object(core_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(overlay, pos, "top-left");
 }
 /**
  * Positions first level of menus statically
@@ -8846,8 +9017,8 @@ function flipPositionIfOutOfBounds(target, container, flip) {
 
 function dropdown() {
   var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var topLevelPosition = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "bottom left";
-  var defaultPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "right top";
+  var topLevelPosition = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "left top; left bottom;";
+  var defaultPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "left top; right top;";
 
   if (!container) {
     container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
@@ -8865,19 +9036,27 @@ function dropdown() {
     };
   }
 
-  return function (menu) {
-    var parentMenu = menu.parentMenu;
+  return function (target, menu) {
+    var parentMenu = menu.parentMenu,
+        containerElement = container;
+
+    if (typeof containerElement === 'function') {
+      containerElement = containerElement(target, menu);
+    }
 
     if (!parentMenu || parentMenu.isRoot) {
-      menu.element.dataset.position = topLevelPosition;
-      flipPositionIfOutOfBounds(menu.element, container, 'xy');
+      menu.element.dataset.position = topLevelPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
+
+      _applyPosition(target.element, menu.element, containerElement, 'xy');
     } else {
-      menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
-      flipPositionIfOutOfBounds(menu.element, container, 'xy');
+      menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
+
+      _applyPosition(target.element, menu.element, containerElement, 'xy');
     }
   };
 }
 var DROPDOWN = dropdown();
+var SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");
 
 /***/ }),
 

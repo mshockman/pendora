@@ -57,6 +57,19 @@
             display: inline-flex;
             flex-direction: row;
         }
+
+        .offset-row {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .offset-row input {
+            width: 100%;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
     </style>
 </head>
 <body>
@@ -86,6 +99,26 @@
     </div>
 
     <div>
+        <h3>My Offset:</h3>
+        <label class="offset-row">
+            <span>X: </span>
+            <input type="number" value="0" name="my-x-offset" />
+            <select name="my-x-offset-unit">
+                <option value="px" selected>px</option>
+                <option value="%">%</option>
+            </select>
+        </label>
+        <label class="offset-row">
+            <span>Y: </span>
+            <input type="number" value="0" name="my-y-offset" />
+            <select name="my-y-offset-unit">
+                <option value="px" selected>px</option>
+                <option value="%">%</option>
+            </select>
+        </label>
+    </div>
+
+    <div>
         <h3>At:</h3>
         <label>
             <span>X: </span>
@@ -101,6 +134,26 @@
                 <option value="top">top</option>
                 <option value="middle">middle</option>
                 <option value="bottom">bottom</option>
+            </select>
+        </label>
+    </div>
+
+    <div>
+        <h3>At Offset:</h3>
+        <label class="offset-row">
+            <span>X: </span>
+            <input type="number" value="0" name="at-x-offset" />
+            <select name="at-x-offset-unit">
+                <option value="px" selected>px</option>
+                <option value="%">%</option>
+            </select>
+        </label>
+        <label class="offset-row">
+            <span>Y: </span>
+            <input type="number" value="0" name="at-y-offset" />
+            <select name="at-y-offset-unit">
+                <option value="px" selected>px</option>
+                <option value="%">%</option>
             </select>
         </label>
     </div>

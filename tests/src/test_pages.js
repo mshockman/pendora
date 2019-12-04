@@ -1,7 +1,7 @@
 
 import Application from 'app';
 import AutoLoader from 'autoloader';
-import "menus";
+
 import "filters";
 import {privateCache} from "core/data";
 import Modal from 'ui/modal';

@@ -1,4 +1,4 @@
-import {AbstractMenuItem} from "./MenuItem";
+import MenuItem, {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
@@ -22,6 +22,9 @@ export class SelectOption extends AbstractMenuItem {
         } else {
             this.element = this.render({text, value});
         }
+
+        this.textNode = this.element.querySelector('[data-text], button, a');
+        if(!this.textNode) this.textNode = this.element;
 
         this.element.setAttribute('aria-role', 'option');
 
@@ -95,6 +98,8 @@ export class SelectOption extends AbstractMenuItem {
      * @param topicData
      */
     select(topicData={}) {
+        super.select();
+
         if(this.isSelected) return;
 
         if(!this.multiSelect) {
@@ -172,7 +177,7 @@ export class SelectOption extends AbstractMenuItem {
      * @returns {*}
      */
     get text() {
-        return this.button.innerText.trim();
+        return this.textNode.innerText.trim();
     }
 
     /**
@@ -180,7 +185,7 @@ export class SelectOption extends AbstractMenuItem {
      * @param value
      */
     set text(value) {
-        this.button.innerText = (value+"").trim();
+        this.textNode.innerText = (value+"").trim();
     }
 
     /**
@@ -224,7 +229,6 @@ export class SelectMenu extends AbstractMenu {
 
     constructor({target, id=null, classes=null, shiftSelect=true, ...context}={}) {
         super();
-        this.isSelectMenu = true;
         this.MenuItemClass = SelectOption;
 
         if(target) {
@@ -304,6 +308,14 @@ export class SelectMenu extends AbstractMenu {
         return r;
     }
 
+    get selectedOptions() {
+        return this.selection;
+    }
+
+    get options() {
+        return this.children;
+    }
+
     onMouseDown(topic) {
         let event = topic.originalEvent,
             target = topic.target,
@@ -335,6 +347,10 @@ export class SelectMenu extends AbstractMenu {
                 this.lastTarget = target;
             }
         }
+    }
+
+    isSelectMenu() {
+        return true;
     }
 }
 
@@ -762,8 +778,158 @@ export class Select2 extends AbstractMenuItem {
 }
 
 
-export class AdvancedSelect extends AbstractMenuItem {
+export class ComboBox extends AbstractMenuItem {
+    constructor({target=null, timeout=false, submenu=null}) {
+        super();
 
+        if(target) {
+            this.element = target;
+
+            if(this.element.nodeName === 'INPUT') {
+                this.input = this.element;
+            } else {
+                this.input = this.element.querySelector('input');
+            }
+        } else {
+            let {element, input} = this.render();
+            this.element = element;
+            this.input = input;
+        }
+
+        this.toggle = "both";
+        this.autoActivate = false;
+        this.openOnHover = false;
+        this.delay = false;
+        this.timeout = timeout;
+        this.closeOnBlur = true;
+        this.positioner = positioners.DROPDOWN;
+        this.closeOnSelect = true;
+
+        this.SubMenuClass = SelectMenu;
+
+        this.element.tabIndex = 0;
+        this.element.classList.add('advanced-select');
+
+        this.registerTopics();
+        this.parseDOM();
+
+        if(submenu) {
+            if(typeof submenu === 'string') {
+                submenu = document.querySelector(submenu);
+            }
+
+            if(!submenu.isSelectMenu || !submenu.isSelectMenu()) {
+                submenu = new this.SubMenuClass({target: submenu});
+                this.attachSubMenu(submenu);
+            }
+        }
+
+        this.init();
+    }
+
+    registerTopics() {
+        super.registerTopics();
+
+        this.on('option.select', () => {
+            this._renderLabel();
+        });
+
+        this.on('option.deselect', () => {
+            this._renderLabel();
+        });
+    }
+
+    render(context) {
+        let element = `
+        <div class="advanced-select">
+            <input type="text" readonly="readonly" />
+        </div>
+        `;
+
+        element = parseHTML(element).children[0];
+        return {
+            element: element,
+            input: element.querySelector('input')
+        };
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Event & topic handling methods
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Private methods
+
+    _renderLabel() {
+        let labels = this.selectedOptions.map(item => item.text);
+        this.value = labels.join(", ");
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+    get options() {
+        return this.submenu.options;
+    }
+
+    get selectedOptions() {
+        return this.submenu.selectedOptions;
+    }
+
+    get selectedIndex() {
+
+    }
+
+    set selectedIndex(index) {
+
+    }
+
+    get name() {
+        return this.input.name;
+    }
+
+    set name(value) {
+        this.input.name = value;
+    }
+
+    get value() {
+        return this.input.value;
+    }
+
+    set value(value) {
+        this.input.value = value;
+    }
+
+    get placeholder() {
+        return this.input.placeholder;
+    }
+
+    set placeholder(value) {
+        this.input.placeholder = value;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Interface methods
+
+    isSelect() {
+        return true;
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Static methods
+
+    static FromHTML(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        if(element.nodeName === 'SELECT') {
+
+        } else {
+            let {menu} = element.dataset;
+
+            return new ComboBox({target: element, submenu: menu});
+        }
+    }
 }
 
 
@@ -771,15 +937,10 @@ export class MultiSelect {
 
 }
 
-
-export class ComboSelect {
-
-}
-
-
 export class MultiCombo {
 
 }
 
 
 AutoLoader.register('select', (element) => Select2.FromHTML(element));
+AutoLoader.register('combo-box', (element) => ComboBox.FromHTML(element));

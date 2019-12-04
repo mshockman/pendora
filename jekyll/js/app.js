@@ -3,13 +3,12 @@ import Application from "app";
 import "autoloader";
 import "menu";
 
-
 __webpack_public_path__ = "/assets/js/";
 
 
 let app = new Application({
-    'menubar': () =>  import("./pages/menubar_example.js"),
-    'menu_examples': () =>  import("./pages/menu_examples.js"),
+    // 'menubar': () =>  import("./pages/menubar_example.js"),
+    // 'menu_examples': () =>  import("./pages/menu_examples.js"),
 });
 
 
