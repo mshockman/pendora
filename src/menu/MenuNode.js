@@ -1,6 +1,6 @@
 import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
-import {addClasses, removeClasses} from "core/utility";
+import {addClasses, removeClasses, modulo} from "core/utility";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
 import Attribute from "../core/attributes";
 
@@ -30,6 +30,8 @@ export default class MenuNode extends Publisher {
 
         this.SubMenuClass = null;
         this.MenuItemClass = null;
+
+        this.enableKeyboardNavigation = false;
     }
 
     /**
@@ -38,10 +40,6 @@ export default class MenuNode extends Publisher {
      * the event will be ignored.
      */
     init() {
-        if(this.boundEvents) return;
-
-        // this.boundEvents = {};
-
         let handleEvent = (event) => {
             let target = this.getTargetNode(event.target),
                 wrappedEvent = {
@@ -58,10 +56,18 @@ export default class MenuNode extends Publisher {
         this.addEventListener('mouseover', handleEvent);
         this.addEventListener('mouseout', handleEvent);
         this.addEventListener('click', handleEvent);
+        this.addEventListener('keydown', handleEvent);
 
         this.isController = true;
 
         this.publish('init', this);
+    }
+
+    registerTopics() {
+        if (this._isTopicInit) return;
+        this._isTopicInit = true;
+
+        this.on('event.keydown', (topic) => this._rootKeyDown(topic));
     }
 
     /**
@@ -179,6 +185,30 @@ export default class MenuNode extends Publisher {
     }
 
     /**
+     * Returns the target active item in the tree.
+     * @abstract
+     * @returns {*|{isActive}|null}
+     */
+    get activeItem() {
+        let activeItem = null;
+
+        if(this.isActive) {
+            for(let child of this.children) {
+                if(child.isActive) {
+                    if(child.isMenuItem && child.isMenuItem()) {
+                        activeItem = child.activeItem || child;
+                    } else {
+                        activeItem = child.activeItem || activeItem;
+                    }
+                    break;
+                }
+            }
+        }
+
+        return activeItem;
+    }
+
+    /**
      * Return the sibling offset from the current node.
      *
      * @param offset
@@ -238,6 +268,28 @@ export default class MenuNode extends Publisher {
             }
 
             node = node.parent;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks to see if the element is contained within the menu node.  Has to check every child manually since
+     * it's not guaranteed that children are descendants of their parent menu nodes.  Probably a very costly method
+     * should be overused.
+     *
+     * @param element
+     * @returns {boolean}
+     */
+    containsElement(element) {
+        if(this.element.contains(element)) {
+            return true;
+        }
+
+        for(let child of this.children) {
+            if(child.containsElement(element)) {
+                return true;
+            }
         }
 
         return false;
@@ -788,6 +840,27 @@ export default class MenuNode extends Publisher {
         }
 
         return false;
+    }
+
+    _rootKeyDown(topic) {
+        if(this.enableKeyboardNavigation && this.isRoot) {
+            let event = topic.originalEvent;
+
+            if(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) {
+                return;
+            }
+
+            event.preventDefault();
+            let activeItem = this.activeItem,
+                /**
+                 * @type AbstractMenu
+                 */
+                targetMenu = activeItem ? activeItem.parentMenu : activeItem.submenu,
+                key = event.key;
+
+            // todo finish
+
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------

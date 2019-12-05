@@ -71,7 +71,7 @@ export function getClosestMenuNodeByElement(element) {
 /**
  * Finds the closest menuitem controller for the element in the DOM tree.
  * @param element
- * @returns {null|any}
+ * @returns {null|*}
  */
 export function getClosestMenuItemByElement(element) {
     while(element) {
@@ -91,7 +91,7 @@ export function getClosestMenuItemByElement(element) {
 /**
  * Finds the closest menu node controller for the element in the DOM tree
  * @param element
- * @returns {null|any}
+ * @returns {null|*}
  */
 export function getClosestMenuByElement(element) {
     while(element) {

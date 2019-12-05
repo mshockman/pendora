@@ -20,7 +20,7 @@ function getInheritedPosition(menu) {
 
 function _applyPosition(target, overlay, container, flip) {
     let position = overlay.dataset.position,
-        [my, at] = position.split(/\s*;\s*/),
+        [my, at, method] = position.split(/\s*;\s*/),
         overlayRect = Rect.getBoundingClientRect(overlay),
         targetRect = Rect.getBoundingClientRect(target),
         containerRect = container.nodeType ? Rect.getBoundingClientRect(container) : container;
@@ -29,7 +29,13 @@ function _applyPosition(target, overlay, container, flip) {
     at = at.trim();
 
     let [myX, myY] = my.split(/\s+/),
-        [atX, atY] = at.split(/\s+/);
+        [atX, atY] = at.split(/\s+/),
+        methodX, methodY;
+
+    if(method) {
+        method = method.trim();
+        [methodX, methodY] = method.split(/\s+/);
+    }
 
     let pos = overlayRect.position({my: `${myX} ${myY}`, at: `${atX} ${atY}`, of: targetRect, inside: containerRect, collision: null}),
         refresh = false; // flag that determines is position will be refreshed.
@@ -37,21 +43,31 @@ function _applyPosition(target, overlay, container, flip) {
     if(!containerRect.containsX(pos)) {
         myX = opposites[myX];
         atX = opposites[atX];
+        if(methodX) methodX = opposites[methodX];
         refresh = true;
     }
 
     if(!containerRect.containsY(pos)) {
         myY = opposites[myY];
         atY = opposites[atY];
+        if(methodY) methodY = opposites[methodY];
         refresh = true;
     }
 
     if(refresh) {
         pos = overlayRect.position({my: `${myX} ${myY}`, at: `${atX} ${atY}`, of: targetRect, inside: containerRect, collision: null});
-        overlay.dataset.position = `${myX} ${myY}; ${atX} ${atY}`;
+
+        if(methodX && methodY) {
+            overlay.dataset.position = `${myX} ${myY}; ${atX} ${atY}; ${methodX} ${methodY};`;
+        } else {
+            overlay.dataset.position = `${myX} ${myY}; ${atX} ${atY};`;
+        }
     }
 
-    setElementClientPosition(overlay, pos, "top-left");
+    methodX = methodX || 'left';
+    methodY = methodY || 'top';
+
+    setElementClientPosition(overlay, pos, `${methodY}-${methodX}`);
 }
 
 
@@ -67,7 +83,7 @@ function _applyPosition(target, overlay, container, flip) {
  * @param defaultPosition
  * @returns {Function}
  */
-export function dropdown(container=null, topLevelPosition="left top; left bottom;", defaultPosition="left top; right top;") {
+export function dropdown(container=null, topLevelPosition="left top; left bottom; left top;", defaultPosition="left top; right top; left top;") {
     if(!container) {
         container = getClientRect;
     } else if(typeof container === 'string') {

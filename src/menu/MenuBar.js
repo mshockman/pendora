@@ -12,6 +12,8 @@ export default class MenuBar extends Menu {
         });
 
         this.positioner = positioners.DROPDOWN;
+        this.direction = 'horizontal';
+        this.enableKeyboardNavigation = true;
 
         this.SubMenuClass = class SubMenu extends Menu {
             constructor(args={}) {

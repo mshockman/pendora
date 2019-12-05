@@ -151,6 +151,11 @@
   margin: 0;
   list-style: none;
 }
+.select-menu .select-menu__header {
+  background-color: #eaeaea;
+  padding: 0.5rem;
+  border-bottom: 1px solid #333;
+}
 .select-menu h3 {
   margin: 0;
   padding: 0.25rem;

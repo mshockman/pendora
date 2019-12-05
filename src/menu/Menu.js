@@ -17,7 +17,6 @@ export const MENU_PARAMETERS = {
     closeOnBlur: timeAttribute,
     timeout: timeAttribute,
     autoActivate: timeAttribute,
-    multiActive: boolAttribute,
     openOnHover: timeAttribute,
     closeOnSelect: boolAttribute,
     delay: timeAttribute,
@@ -46,33 +45,34 @@ export class AbstractMenu extends MenuNode {
         this.openOnHover = false; // sub-item property
         this.toggle = "none";
         this.closeOnSelect = true; // both sub-item and menu.
-        this.multiActive = false; // menu only
         this.delay = false; // sub-item property
         this.positioner = "inherit";
+        this.direction = "vertical";
     }
 
     registerTopics() {
+        if(this._isTopicInit) return;
+        super.registerTopics();
+
         // On child is activate
         // deactivate siblings if multiple is false.
-        this.on('activate', (target) => {
+        this.on('menuitem.activate', (target) => {
             if(target.parent === this) {
                 if (!this.isActive) {
                     this.activate();
                 }
 
-                if(!this.multiActive) {
-                    for (let activeItem of this.activeItems) {
-                        if (activeItem !== target) {
-                            activeItem.deactivate();
-                        }
+                for(let child of this.children) {
+                    if(child !== target && child.isActive) {
+                        child.deactivate();
                     }
                 }
             }
         });
 
-        this.on('deactivate', (target) => {
+        this.on('menuitem.deactivate', (target) => {
             if(target.parent === this) {
-                if (this.isActive && this.activeItems.length === 0) {
+                if (this.isActive && !this.activeChild) {
                     this.deactivate();
                 }
             }
@@ -127,7 +127,7 @@ export class AbstractMenu extends MenuNode {
             this.isActive = false;
 
             // Clear any active child items.
-            this.clearItems();
+            this.clearActiveChild();
 
             // Remove document click handler that tracks user clicks outside of menu tree.
             if(this._captureDocumentClick) {
@@ -244,21 +244,33 @@ export class AbstractMenu extends MenuNode {
         return this;
     }
 
-    get activeItems() {
-        let r = [];
-
+    get activeChild() {
         for(let item of this.children) {
             if(item.isActive) {
-                r.push(item);
+                return item;
             }
         }
 
-        return r;
+        return null;
     }
 
-    clearItems() {
-        for(let child of this.activeItems) {
-            child.deactivate();
+    get activeIndex() {
+        let children = this.children;
+
+        for(let i = 0, l = children.length; i < l; i++) {
+            if(children[i].isActive) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    clearActiveChild() {
+        for(let child of this.children) {
+            if(child.isActive) {
+                child.deactivate();
+            }
         }
     }
 
@@ -352,7 +364,6 @@ export default class Menu extends AbstractMenu {
      * @param closeOnBlur {Boolean|Number}
      * @param timeout {Boolean|Number}
      * @param autoActivate {Boolean|Number}
-     * @param multiActive {Boolean|"inherit"|"root"}
      * @param openOnHover {Boolean|Number}
      * @param toggle {"on"|"off"|"both"|"none"}
      * @param closeOnSelect {Boolean}
@@ -364,7 +375,7 @@ export default class Menu extends AbstractMenu {
      * @param filter
      * @param context
      */
-    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, multiActive=false, openOnHover=true,
+    constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
                     toggle="on", closeOnSelect=true, delay=0, id=null, classes=null,
                     children=null, visible=false, filter=false, ...context}={}) {
         super();
@@ -375,11 +386,11 @@ export default class Menu extends AbstractMenu {
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
         this.autoActivate = autoActivate;
-        this.multiActive = multiActive;
         this.openOnHover = openOnHover;
         this.toggle = toggle;
         this.closeOnSelect = closeOnSelect;
         this.delay = delay;
+        this.direction = 'vertical';
 
         if(target) {
             this.element = target;
@@ -395,6 +406,8 @@ export default class Menu extends AbstractMenu {
         this.registerTopics();
         this.parseDOM();
         this.init();
+
+        // this.element.tabIndex = -1;
 
         if(children) {
             this.createItems(children);

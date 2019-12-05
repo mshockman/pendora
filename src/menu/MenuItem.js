@@ -106,7 +106,7 @@ export class AbstractMenuItem extends MenuNode {
 
     registerTopics() {
         if(!this._isTopicInit) {
-            this._isTopicInit = true;
+            super.registerTopics();
             this.on('event.click', (event) => this.onClick(event));
             this.on('event.mouseover', (event) => this.onMouseOver(event));
             this.on('event.mouseout', (event) => this.onMouseOut(event));
@@ -150,16 +150,7 @@ export class AbstractMenuItem extends MenuNode {
             this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
         }
 
-        this.publish('activate', this);
-
-        if(this.parent) {
-            this.parent.publish('activate', this);
-        }
-
-        this.element.dispatchEvent(new CustomEvent('menuitem.activate', {
-            detail: this,
-            bubbles: true
-        }));
+        this.dispatchTopic('menuitem.activate', this);
     }
 
     /**
@@ -178,13 +169,7 @@ export class AbstractMenuItem extends MenuNode {
             this._captureDocumentClick = null;
         }
 
-        this.publish('deactivate', this);
-        if(this.parent) this.parent.publish('deactivate', this);
-
-        this.element.dispatchEvent(new CustomEvent('menuitem.deactivate', {
-            detail: this,
-            bubbles: true
-        }));
+        this.dispatchTopic('menuitem.deactivate', this);
     }
 
     /**
@@ -393,8 +378,8 @@ export class AbstractMenuItem extends MenuNode {
 
         if(event.target === this) {
             // When the mouse moves on an item clear any active items in it's submenu.
-            if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearItems) {
-                this.submenu.clearItems();
+            if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearActiveChild) {
+                this.submenu.clearActiveChild();
             }
 
             if(this.element.contains(event.originalEvent.relatedTarget)) return;
@@ -533,6 +518,8 @@ export default class MenuItem extends AbstractMenuItem {
 
         this.MenuItemClass = MenuItem;
         this.SubMenuClass = Menu;
+
+        this.element.tabIndex = -1;
 
         this.registerTopics();
         this.parseDOM();

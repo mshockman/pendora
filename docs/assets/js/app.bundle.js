@@ -1836,12 +1836,13 @@ function getDistanceBetweenRects(rect1, rect2) {
 /*!*****************************!*\
   !*** ./src/core/utility.js ***!
   \*****************************/
-/*! exports provided: clamp, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
+/*! exports provided: clamp, modulo, firstValue, all, any, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clamp", function() { return clamp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "modulo", function() { return modulo; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "firstValue", function() { return firstValue; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "all", function() { return all; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "any", function() { return any; });
@@ -1907,6 +1908,9 @@ function clamp(value) {
   }
 
   return value;
+}
+function modulo(value, mod) {
+  return (value % mod + mod) % mod;
 }
 /**
  * Takes an iterable and returns the first none null or undefined value.
@@ -4372,8 +4376,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
@@ -4408,6 +4410,12 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
 
 
 
@@ -4427,7 +4435,6 @@ var MENU_PARAMETERS = {
   closeOnBlur: timeAttribute,
   timeout: timeAttribute,
   autoActivate: timeAttribute,
-  multiActive: boolAttribute,
   openOnHover: timeAttribute,
   closeOnSelect: boolAttribute,
   delay: timeAttribute,
@@ -4467,11 +4474,10 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       _this.toggle = "none";
       _this.closeOnSelect = true; // both sub-item and menu.
 
-      _this.multiActive = false; // menu only
-
       _this.delay = false; // sub-item property
 
       _this.positioner = "inherit";
+      _this.direction = "vertical";
       return _this;
     }
 
@@ -4498,47 +4504,49 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       value: function registerTopics() {
         var _this2 = this;
 
-        // On child is activate
+        if (this._isTopicInit) return;
+
+        _get(_getPrototypeOf(AbstractMenu.prototype), "registerTopics", this).call(this); // On child is activate
         // deactivate siblings if multiple is false.
-        this.on('activate', function (target) {
+
+
+        this.on('menuitem.activate', function (target) {
           if (target.parent === _this2) {
             if (!_this2.isActive) {
               _this2.activate();
             }
 
-            if (!_this2.multiActive) {
-              var _iteratorNormalCompletion = true;
-              var _didIteratorError = false;
-              var _iteratorError = undefined;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
-              try {
-                for (var _iterator = _this2.activeItems[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                  var activeItem = _step.value;
+            try {
+              for (var _iterator = _this2.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var child = _step.value;
 
-                  if (activeItem !== target) {
-                    activeItem.deactivate();
-                  }
+                if (child !== target && child.isActive) {
+                  child.deactivate();
                 }
-              } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
+              }
+            } catch (err) {
+              _didIteratorError = true;
+              _iteratorError = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                  _iterator["return"]();
+                }
               } finally {
-                try {
-                  if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                    _iterator["return"]();
-                  }
-                } finally {
-                  if (_didIteratorError) {
-                    throw _iteratorError;
-                  }
+                if (_didIteratorError) {
+                  throw _iteratorError;
                 }
               }
             }
           }
         });
-        this.on('deactivate', function (target) {
+        this.on('menuitem.deactivate', function (target) {
           if (target.parent === _this2) {
-            if (_this2.isActive && _this2.activeItems.length === 0) {
+            if (_this2.isActive && !_this2.activeChild) {
               _this2.deactivate();
             }
           }
@@ -4601,7 +4609,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           // Set flag and remove active classes.
           this.isActive = false; // Clear any active child items.
 
-          this.clearItems(); // Remove document click handler that tracks user clicks outside of menu tree.
+          this.clearActiveChild(); // Remove document click handler that tracks user clicks outside of menu tree.
 
           if (this._captureDocumentClick) {
             this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
@@ -4777,9 +4785,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       }
     }, {
       kind: "get",
-      key: "activeItems",
-      value: function activeItems() {
-        var r = [];
+      key: "activeChild",
+      value: function activeChild() {
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
@@ -4789,7 +4796,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             var item = _step4.value;
 
             if (item.isActive) {
-              r.push(item);
+              return item;
             }
           }
         } catch (err) {
@@ -4807,20 +4814,37 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
 
-        return r;
+        return null;
+      }
+    }, {
+      kind: "get",
+      key: "activeIndex",
+      value: function activeIndex() {
+        var children = this.children;
+
+        for (var i = 0, l = children.length; i < l; i++) {
+          if (children[i].isActive) {
+            return i;
+          }
+        }
+
+        return -1;
       }
     }, {
       kind: "method",
-      key: "clearItems",
-      value: function clearItems() {
+      key: "clearActiveChild",
+      value: function clearActiveChild() {
         var _iteratorNormalCompletion5 = true;
         var _didIteratorError5 = false;
         var _iteratorError5 = undefined;
 
         try {
-          for (var _iterator5 = this.activeItems[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          for (var _iterator5 = this.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
             var child = _step5.value;
-            child.deactivate();
+
+            if (child.isActive) {
+              child.deactivate();
+            }
           }
         } catch (err) {
           _didIteratorError5 = true;
@@ -4955,7 +4979,6 @@ function (_AbstractMenu) {
    * @param closeOnBlur {Boolean|Number}
    * @param timeout {Boolean|Number}
    * @param autoActivate {Boolean|Number}
-   * @param multiActive {Boolean|"inherit"|"root"}
    * @param openOnHover {Boolean|Number}
    * @param toggle {"on"|"off"|"both"|"none"}
    * @param closeOnSelect {Boolean}
@@ -4979,8 +5002,6 @@ function (_AbstractMenu) {
         timeout = _ref$timeout === void 0 ? false : _ref$timeout,
         _ref$autoActivate = _ref.autoActivate,
         autoActivate = _ref$autoActivate === void 0 ? true : _ref$autoActivate,
-        _ref$multiActive = _ref.multiActive,
-        multiActive = _ref$multiActive === void 0 ? false : _ref$multiActive,
         _ref$openOnHover = _ref.openOnHover,
         openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
         _ref$toggle = _ref.toggle,
@@ -4999,7 +5020,7 @@ function (_AbstractMenu) {
         visible = _ref$visible === void 0 ? false : _ref$visible,
         _ref$filter = _ref.filter,
         filter = _ref$filter === void 0 ? false : _ref$filter,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiActive", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible", "filter"]);
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible", "filter"]);
 
     _classCallCheck(this, Menu);
 
@@ -5010,11 +5031,11 @@ function (_AbstractMenu) {
     _this5.closeOnBlur = closeOnBlur;
     _this5.timeout = timeout;
     _this5.autoActivate = autoActivate;
-    _this5.multiActive = multiActive;
     _this5.openOnHover = openOnHover;
     _this5.toggle = toggle;
     _this5.closeOnSelect = closeOnSelect;
     _this5.delay = delay;
+    _this5.direction = 'vertical';
 
     if (target) {
       _this5.element = target;
@@ -5030,7 +5051,8 @@ function (_AbstractMenu) {
 
     _this5.parseDOM();
 
-    _this5.init();
+    _this5.init(); // this.element.tabIndex = -1;
+
 
     if (children) {
       _this5.createItems(children);
@@ -5160,6 +5182,8 @@ function (_Menu) {
       delay: false
     }, context)));
     _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
+    _this.direction = 'horizontal';
+    _this.enableKeyboardNavigation = true;
 
     _this.SubMenuClass =
     /*#__PURE__*/
@@ -5248,8 +5272,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
@@ -5283,6 +5305,12 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 
 
@@ -5440,7 +5468,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         var _this2 = this;
 
         if (!this._isTopicInit) {
-          this._isTopicInit = true;
+          _get(_getPrototypeOf(AbstractMenuItem.prototype), "registerTopics", this).call(this);
+
           this.on('event.click', function (event) {
             return _this2.onClick(event);
           });
@@ -5496,16 +5525,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
         }
 
-        this.publish('activate', this);
-
-        if (this.parent) {
-          this.parent.publish('activate', this);
-        }
-
-        this.element.dispatchEvent(new CustomEvent('menuitem.activate', {
-          detail: this,
-          bubbles: true
-        }));
+        this.dispatchTopic('menuitem.activate', this);
       }
       /**
        * Deactivates the item.
@@ -5526,12 +5546,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this._captureDocumentClick = null;
         }
 
-        this.publish('deactivate', this);
-        if (this.parent) this.parent.publish('deactivate', this);
-        this.element.dispatchEvent(new CustomEvent('menuitem.deactivate', {
-          detail: this,
-          bubbles: true
-        }));
+        this.dispatchTopic('menuitem.deactivate', this);
       }
       /**
        * Triggers a select item event.
@@ -5790,8 +5805,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (event.target === this) {
           // When the mouse moves on an item clear any active items in it's submenu.
-          if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearItems) {
-            this.submenu.clearItems();
+          if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearActiveChild) {
+            this.submenu.clearActiveChild();
           }
 
           if (this.element.contains(event.originalEvent.relatedTarget)) return;
@@ -5984,6 +5999,7 @@ function (_AbstractMenuItem) {
     _this6.autoDeactivateItems = true;
     _this6.MenuItemClass = MenuItem;
     _this6.SubMenuClass = _Menu__WEBPACK_IMPORTED_MODULE_2__["default"];
+    _this6.element.tabIndex = -1;
 
     _this6.registerTopics();
 
@@ -6095,6 +6111,7 @@ function (_Publisher) {
     _this.isController = false;
     _this.SubMenuClass = null;
     _this.MenuItemClass = null;
+    _this.enableKeyboardNavigation = false;
     return _this;
   }
   /**
@@ -6108,8 +6125,6 @@ function (_Publisher) {
     key: "init",
     value: function init() {
       var _this2 = this;
-
-      if (this.boundEvents) return; // this.boundEvents = {};
 
       var handleEvent = function handleEvent(event) {
         var target = _this2.getTargetNode(event.target),
@@ -6127,8 +6142,20 @@ function (_Publisher) {
       this.addEventListener('mouseover', handleEvent);
       this.addEventListener('mouseout', handleEvent);
       this.addEventListener('click', handleEvent);
+      this.addEventListener('keydown', handleEvent);
       this.isController = true;
       this.publish('init', this);
+    }
+  }, {
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this3 = this;
+
+      if (this._isTopicInit) return;
+      this._isTopicInit = true;
+      this.on('event.keydown', function (topic) {
+        return _this3._rootKeyDown(topic);
+      });
     }
     /**
      * Unbinds all event listeners.
@@ -6239,6 +6266,51 @@ function (_Publisher) {
       return false;
     }
     /**
+     * Checks to see if the element is contained within the menu node.  Has to check every child manually since
+     * it's not guaranteed that children are descendants of their parent menu nodes.  Probably a very costly method
+     * should be overused.
+     *
+     * @param element
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "containsElement",
+    value: function containsElement(element) {
+      if (this.element.contains(element)) {
+        return true;
+      }
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var child = _step.value;
+
+          if (child.containsElement(element)) {
+            return true;
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return false;
+    }
+    /**
      * Yields all descendants.
      *
      * @returns {IterableIterator<MenuNode>}
@@ -6249,47 +6321,47 @@ function (_Publisher) {
     value:
     /*#__PURE__*/
     regeneratorRuntime.mark(function getDescendants() {
-      var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, child, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, grandchild;
+      var _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, child, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, grandchild;
 
       return regeneratorRuntime.wrap(function getDescendants$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _iteratorNormalCompletion = true;
-              _didIteratorError = false;
-              _iteratorError = undefined;
+              _iteratorNormalCompletion2 = true;
+              _didIteratorError2 = false;
+              _iteratorError2 = undefined;
               _context.prev = 3;
-              _iterator = this.children[Symbol.iterator]();
+              _iterator2 = this.children[Symbol.iterator]();
 
             case 5:
-              if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+              if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
                 _context.next = 38;
                 break;
               }
 
-              child = _step.value;
+              child = _step2.value;
               _context.next = 9;
               return child;
 
             case 9:
-              _iteratorNormalCompletion2 = true;
-              _didIteratorError2 = false;
-              _iteratorError2 = undefined;
+              _iteratorNormalCompletion3 = true;
+              _didIteratorError3 = false;
+              _iteratorError3 = undefined;
               _context.prev = 12;
-              _iterator2 = child.getDescendants()[Symbol.iterator]();
+              _iterator3 = child.getDescendants()[Symbol.iterator]();
 
             case 14:
-              if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+              if (_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done) {
                 _context.next = 21;
                 break;
               }
 
-              grandchild = _step2.value;
+              grandchild = _step3.value;
               _context.next = 18;
               return grandchild;
 
             case 18:
-              _iteratorNormalCompletion2 = true;
+              _iteratorNormalCompletion3 = true;
               _context.next = 14;
               break;
 
@@ -6300,26 +6372,26 @@ function (_Publisher) {
             case 23:
               _context.prev = 23;
               _context.t0 = _context["catch"](12);
-              _didIteratorError2 = true;
-              _iteratorError2 = _context.t0;
+              _didIteratorError3 = true;
+              _iteratorError3 = _context.t0;
 
             case 27:
               _context.prev = 27;
               _context.prev = 28;
 
-              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                _iterator2["return"]();
+              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+                _iterator3["return"]();
               }
 
             case 30:
               _context.prev = 30;
 
-              if (!_didIteratorError2) {
+              if (!_didIteratorError3) {
                 _context.next = 33;
                 break;
               }
 
-              throw _iteratorError2;
+              throw _iteratorError3;
 
             case 33:
               return _context.finish(30);
@@ -6328,7 +6400,7 @@ function (_Publisher) {
               return _context.finish(27);
 
             case 35:
-              _iteratorNormalCompletion = true;
+              _iteratorNormalCompletion2 = true;
               _context.next = 5;
               break;
 
@@ -6339,26 +6411,26 @@ function (_Publisher) {
             case 40:
               _context.prev = 40;
               _context.t1 = _context["catch"](3);
-              _didIteratorError = true;
-              _iteratorError = _context.t1;
+              _didIteratorError2 = true;
+              _iteratorError2 = _context.t1;
 
             case 44:
               _context.prev = 44;
               _context.prev = 45;
 
-              if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                _iterator["return"]();
+              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                _iterator2["return"]();
               }
 
             case 47:
               _context.prev = 47;
 
-              if (!_didIteratorError) {
+              if (!_didIteratorError2) {
                 _context.next = 50;
                 break;
               }
 
-              throw _iteratorError;
+              throw _iteratorError2;
 
             case 50:
               return _context.finish(47);
@@ -6596,7 +6668,7 @@ function (_Publisher) {
   }, {
     key: "startTimer",
     value: function startTimer(name, fn, time) {
-      var _this3 = this;
+      var _this4 = this;
 
       var interval = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       var clear = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
@@ -6616,30 +6688,30 @@ function (_Publisher) {
 
       if (interval) {
         var id = timer.id = setInterval(function (timer) {
-          fn.call(_this3, timer);
+          fn.call(_this4, timer);
         }, time, timer);
         timer.type = 'interval';
 
         timer.cancel = function () {
-          if (_this3._timers[name] === timer) {
+          if (_this4._timers[name] === timer) {
             clearInterval(id);
-            delete _this3._timers[name];
+            delete _this4._timers[name];
             timer.status = 'canceled';
           }
         };
       } else {
         var _id = timer.id = setTimeout(function (timer) {
-          delete _this3._timers[name];
+          delete _this4._timers[name];
           timer.status = 'complete';
-          fn.call(_this3, timer);
+          fn.call(_this4, timer);
         }, time, timer);
 
         timer.type = 'timeout';
 
         timer.cancel = function () {
-          if (_this3._timers[name] === timer) {
+          if (_this4._timers[name] === timer) {
             clearTimeout(_id);
-            delete _this3._timers[name];
+            delete _this4._timers[name];
             timer.status = 'canceled';
           }
         };
@@ -6732,26 +6804,26 @@ function (_Publisher) {
       if (this.element) {
         for (var _i = 0, _Object$keys = Object.keys(this._eventListeners); _i < _Object$keys.length; _i++) {
           var key = _Object$keys[_i];
-          var _iteratorNormalCompletion3 = true;
-          var _didIteratorError3 = false;
-          var _iteratorError3 = undefined;
+          var _iteratorNormalCompletion4 = true;
+          var _didIteratorError4 = false;
+          var _iteratorError4 = undefined;
 
           try {
-            for (var _iterator3 = this._eventListeners[key][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-              var listener = _step3.value;
+            for (var _iterator4 = this._eventListeners[key][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+              var listener = _step4.value;
               this.element.removeEventListener(key, listener.callback, listener.bubble);
             }
           } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-                _iterator3["return"]();
+              if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+                _iterator4["return"]();
               }
             } finally {
-              if (_didIteratorError3) {
-                throw _iteratorError3;
+              if (_didIteratorError4) {
+                throw _iteratorError4;
               }
             }
           }
@@ -6765,26 +6837,26 @@ function (_Publisher) {
     value: function _registerAllEvents() {
       for (var _i2 = 0, _Object$keys2 = Object.keys(this._eventListeners); _i2 < _Object$keys2.length; _i2++) {
         var key = _Object$keys2[_i2];
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
 
         try {
-          for (var _iterator4 = this._eventListeners[key][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var listener = _step4.value;
+          for (var _iterator5 = this._eventListeners[key][Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var listener = _step5.value;
             this.element.addEventListener(key, listener.callback, listener.bubble);
           }
         } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
+          _didIteratorError5 = true;
+          _iteratorError5 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-              _iterator4["return"]();
+            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+              _iterator5["return"]();
             }
           } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
+            if (_didIteratorError5) {
+              throw _iteratorError5;
             }
           }
         }
@@ -6849,56 +6921,17 @@ function (_Publisher) {
       var bubble = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
       if (this._eventListeners[name]) {
-        var _iteratorNormalCompletion5 = true;
-        var _didIteratorError5 = false;
-        var _iteratorError5 = undefined;
-
-        try {
-          for (var _iterator5 = this._eventListeners[name][Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var listener = _step5.value;
-
-            if (listener.callback === callback && listener.bubble === bubble) {
-              return true;
-            }
-          }
-        } catch (err) {
-          _didIteratorError5 = true;
-          _iteratorError5 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-              _iterator5["return"]();
-            }
-          } finally {
-            if (_didIteratorError5) {
-              throw _iteratorError5;
-            }
-          }
-        }
-      }
-
-      return false;
-    } //------------------------------------------------------------------------------------------------------------------
-    // Tree parsing functions.
-
-    /**
-     * Parses the dom and initializes any menu or menuitem elements that are found.
-     */
-
-  }, {
-    key: "parseDOM",
-    value: function parseDOM() {
-      var _this4 = this;
-
-      if (this._children.length) {
         var _iteratorNormalCompletion6 = true;
         var _didIteratorError6 = false;
         var _iteratorError6 = undefined;
 
         try {
-          for (var _iterator6 = this._children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var child = _step6.value;
-            child.invalidateTree();
+          for (var _iterator6 = this._eventListeners[name][Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var listener = _step6.value;
+
+            if (listener.callback === callback && listener.bubble === bubble) {
+              return true;
+            }
           }
         } catch (err) {
           _didIteratorError6 = true;
@@ -6916,37 +6949,48 @@ function (_Publisher) {
         }
       }
 
-      var walk = function walk(node) {
+      return false;
+    }
+  }, {
+    key: "_rootKeyDown",
+    value: function _rootKeyDown(topic) {
+      if (this.enableKeyboardNavigation && this.isRoot) {
+        var event = topic.originalEvent;
+
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) {
+          return;
+        }
+
+        event.preventDefault();
+        var activeItem = this.activeItem,
+
+        /**
+         * @type AbstractMenu
+         */
+        targetMenu = activeItem ? activeItem.parentMenu : activeItem.submenu,
+            key = event.key; // todo finish
+      }
+    } //------------------------------------------------------------------------------------------------------------------
+    // Tree parsing functions.
+
+    /**
+     * Parses the dom and initializes any menu or menuitem elements that are found.
+     */
+
+  }, {
+    key: "parseDOM",
+    value: function parseDOM() {
+      var _this5 = this;
+
+      if (this._children.length) {
         var _iteratorNormalCompletion7 = true;
         var _didIteratorError7 = false;
         var _iteratorError7 = undefined;
 
         try {
-          for (var _iterator7 = node.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var _child = _step7.value;
-            var role = _child.dataset.role;
-
-            if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
-              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(_child);
-              instance.setParent(_this4);
-            } else {
-              var hasMenuItemAttribute = _child.hasAttribute('data-menuitem'),
-                  hasMenuAttribute = _child.hasAttribute('data-menu');
-
-              if (hasMenuAttribute && hasMenuItemAttribute) {
-                throw new Error("Element cannot be both a menuitem and a menu.");
-              } else if (hasMenuAttribute) {
-                var menu = _this4.SubMenuClass.FromHTML(_child);
-
-                menu.setParent(_this4);
-              } else if (hasMenuItemAttribute) {
-                var item = _this4.MenuItemClass.FromHTML(_child);
-
-                item.setParent(_this4);
-              } else {
-                walk(_child);
-              }
-            }
+          for (var _iterator7 = this._children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var child = _step7.value;
+            child.invalidateTree();
           }
         } catch (err) {
           _didIteratorError7 = true;
@@ -6962,6 +7006,54 @@ function (_Publisher) {
             }
           }
         }
+      }
+
+      var walk = function walk(node) {
+        var _iteratorNormalCompletion8 = true;
+        var _didIteratorError8 = false;
+        var _iteratorError8 = undefined;
+
+        try {
+          for (var _iterator8 = node.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+            var _child = _step8.value;
+            var role = _child.dataset.role;
+
+            if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
+              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(_child);
+              instance.setParent(_this5);
+            } else {
+              var hasMenuItemAttribute = _child.hasAttribute('data-menuitem'),
+                  hasMenuAttribute = _child.hasAttribute('data-menu');
+
+              if (hasMenuAttribute && hasMenuItemAttribute) {
+                throw new Error("Element cannot be both a menuitem and a menu.");
+              } else if (hasMenuAttribute) {
+                var menu = _this5.SubMenuClass.FromHTML(_child);
+
+                menu.setParent(_this5);
+              } else if (hasMenuItemAttribute) {
+                var item = _this5.MenuItemClass.FromHTML(_child);
+
+                item.setParent(_this5);
+              } else {
+                walk(_child);
+              }
+            }
+          }
+        } catch (err) {
+          _didIteratorError8 = true;
+          _iteratorError8 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+              _iterator8["return"]();
+            }
+          } finally {
+            if (_didIteratorError8) {
+              throw _iteratorError8;
+            }
+          }
+        }
       };
 
       walk(this.element);
@@ -6974,26 +7066,26 @@ function (_Publisher) {
     key: "invalidateTree",
     value: function invalidateTree() {
       this._parent = null;
-      var _iteratorNormalCompletion8 = true;
-      var _didIteratorError8 = false;
-      var _iteratorError8 = undefined;
+      var _iteratorNormalCompletion9 = true;
+      var _didIteratorError9 = false;
+      var _iteratorError9 = undefined;
 
       try {
-        for (var _iterator8 = this.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-          var child = _step8.value;
+        for (var _iterator9 = this.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+          var child = _step9.value;
           child.invalidateTree();
         }
       } catch (err) {
-        _didIteratorError8 = true;
-        _iteratorError8 = err;
+        _didIteratorError9 = true;
+        _iteratorError9 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-            _iterator8["return"]();
+          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+            _iterator9["return"]();
           }
         } finally {
-          if (_didIteratorError8) {
-            throw _iteratorError8;
+          if (_didIteratorError9) {
+            throw _iteratorError9;
           }
         }
       }
@@ -7103,6 +7195,54 @@ function (_Publisher) {
     key: "isRoot",
     get: function get() {
       return this.root === this;
+    }
+    /**
+     * Returns the target active item in the tree.
+     * @abstract
+     * @returns {*|{isActive}|null}
+     */
+
+  }, {
+    key: "activeItem",
+    get: function get() {
+      var activeItem = null;
+
+      if (this.isActive) {
+        var _iteratorNormalCompletion10 = true;
+        var _didIteratorError10 = false;
+        var _iteratorError10 = undefined;
+
+        try {
+          for (var _iterator10 = this.children[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+            var child = _step10.value;
+
+            if (child.isActive) {
+              if (child.isMenuItem && child.isMenuItem()) {
+                activeItem = child.activeItem || child;
+              } else {
+                activeItem = child.activeItem || activeItem;
+              }
+
+              break;
+            }
+          }
+        } catch (err) {
+          _didIteratorError10 = true;
+          _iteratorError10 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
+              _iterator10["return"]();
+            }
+          } finally {
+            if (_didIteratorError10) {
+              throw _iteratorError10;
+            }
+          }
+        }
+      }
+
+      return activeItem;
     }
   }, {
     key: "isVisible",
@@ -7714,12 +7854,14 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           _ref3$shiftSelect = _ref3.shiftSelect,
           shiftSelect = _ref3$shiftSelect === void 0 ? true : _ref3$shiftSelect,
           _ref3$filter = _ref3.filter,
-          filter = _ref3$filter === void 0 ? FILTERS.icontains : _ref3$filter,
+          filter = _ref3$filter === void 0 ? null : _ref3$filter,
           _ref3$placeholder = _ref3.placeholder,
           placeholder = _ref3$placeholder === void 0 ? "No Items Found" : _ref3$placeholder,
           _ref3$filterDelay = _ref3.filterDelay,
           filterDelay = _ref3$filterDelay === void 0 ? 500 : _ref3$filterDelay,
-          context = _objectWithoutProperties(_ref3, ["target", "shiftSelect", "filter", "placeholder", "filterDelay"]);
+          _ref3$filterPlacehold = _ref3.filterPlaceholderText,
+          filterPlaceholderText = _ref3$filterPlacehold === void 0 ? "Search" : _ref3$filterPlacehold,
+          context = _objectWithoutProperties(_ref3, ["target", "shiftSelect", "filter", "placeholder", "filterDelay", "filterPlaceholderText"]);
 
       _classCallCheck(this, SelectMenu);
 
@@ -7738,7 +7880,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this2.closeOnBlur = false;
       _this2.timeout = false;
       _this2.autoActivate = true;
-      _this2.multiActive = false;
       _this2.openOnHover = false;
       _this2.multiSelect = "inherit";
       _this2.closeOnSelect = false;
@@ -7758,7 +7899,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         _this2.filterDelay = filterDelay;
         _this2.placeholder = placeholder;
 
-        _this2._initFilter(filter);
+        _this2._initFilter(filter, filterPlaceholderText);
       }
 
       return _this2;
@@ -7774,6 +7915,16 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       decorators: [_decorators__WEBPACK_IMPORTED_MODULE_6__["inherit"]],
       key: "multiSelect",
       value: void 0
+    }, {
+      kind: "method",
+      key: "show",
+      value: function show() {
+        if (!this.isVisible) {
+          this.clearFilter();
+
+          _get(_getPrototypeOf(SelectMenu.prototype), "show", this).call(this);
+        }
+      }
     }, {
       kind: "method",
       key: "render",
@@ -8029,6 +8180,10 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
           this._placeholder = null;
         }
+
+        if (this.filterInput) {
+          this.filterInput.value = "";
+        }
       }
     }, {
       kind: "method",
@@ -8067,14 +8222,27 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     }, {
       kind: "method",
       key: "_initFilter",
-      value: function _initFilter(fn) {
+      value: function _initFilter(fn, filterPlaceholderText) {
         var _this4 = this;
 
-        this.filterInput = document.createElement('input');
-        this.filterInput.type = 'text';
-        var filterContainer = document.createElement('div');
-        filterContainer.className = "select-menu__filter";
-        filterContainer.appendChild(this.filterInput);
+        // let filterInput = this.element.querySelectorAll('[data-filter]');
+        var filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(function (node) {
+          return Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(node) === _this4;
+        });
+
+        if (!filterInput) {
+          this.filterInput = document.createElement('input');
+          this.filterInput.type = 'text';
+          this.filterInput.placeholder = filterPlaceholderText || "";
+          var filterContainer = document.createElement('div');
+          filterContainer.className = "select-menu__filter";
+          filterContainer.appendChild(this.filterInput);
+          var container = this.element.querySelector(".select-menu__header") || this.element;
+          container.insertBefore(filterContainer, container.firstChild);
+        } else {
+          this.filterInput = filterInput;
+        }
+
         var _timer = null;
         this.filterInput.addEventListener('keydown', function (event) {
           if (_timer) {
@@ -8088,8 +8256,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _this4.filter(fn(_this4.filterInput.value));
           }, _this4.filterDelay);
         });
-        var container = this.element.querySelector(".select-menu__header") || this.element;
-        container.insertBefore(filterContainer, container.firstChild);
       }
     }]
   };
@@ -9066,9 +9232,10 @@ function getInheritedPosition(menu) {
 function _applyPosition(target, overlay, container, flip) {
   var position = overlay.dataset.position,
       _position$split = position.split(/\s*;\s*/),
-      _position$split2 = _slicedToArray(_position$split, 2),
+      _position$split2 = _slicedToArray(_position$split, 3),
       my = _position$split2[0],
       at = _position$split2[1],
+      method = _position$split2[2],
       overlayRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(overlay),
       targetRect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target),
       containerRect = container.nodeType ? core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(container) : container;
@@ -9083,7 +9250,20 @@ function _applyPosition(target, overlay, container, flip) {
       _at$split = at.split(/\s+/),
       _at$split2 = _slicedToArray(_at$split, 2),
       atX = _at$split2[0],
-      atY = _at$split2[1];
+      atY = _at$split2[1],
+      methodX,
+      methodY;
+
+  if (method) {
+    method = method.trim();
+
+    var _method$split = method.split(/\s+/);
+
+    var _method$split2 = _slicedToArray(_method$split, 2);
+
+    methodX = _method$split2[0];
+    methodY = _method$split2[1];
+  }
 
   var pos = overlayRect.position({
     my: "".concat(myX, " ").concat(myY),
@@ -9097,12 +9277,14 @@ function _applyPosition(target, overlay, container, flip) {
   if (!containerRect.containsX(pos)) {
     myX = opposites[myX];
     atX = opposites[atX];
+    if (methodX) methodX = opposites[methodX];
     refresh = true;
   }
 
   if (!containerRect.containsY(pos)) {
     myY = opposites[myY];
     atY = opposites[atY];
+    if (methodY) methodY = opposites[methodY];
     refresh = true;
   }
 
@@ -9114,10 +9296,17 @@ function _applyPosition(target, overlay, container, flip) {
       inside: containerRect,
       collision: null
     });
-    overlay.dataset.position = "".concat(myX, " ").concat(myY, "; ").concat(atX, " ").concat(atY);
+
+    if (methodX && methodY) {
+      overlay.dataset.position = "".concat(myX, " ").concat(myY, "; ").concat(atX, " ").concat(atY, "; ").concat(methodX, " ").concat(methodY, ";");
+    } else {
+      overlay.dataset.position = "".concat(myX, " ").concat(myY, "; ").concat(atX, " ").concat(atY, ";");
+    }
   }
 
-  Object(core_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(overlay, pos, "top-left");
+  methodX = methodX || 'left';
+  methodY = methodY || 'top';
+  Object(core_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(overlay, pos, "".concat(methodY, "-").concat(methodX));
 }
 /**
  * Positions first level of menus statically
@@ -9135,8 +9324,8 @@ function _applyPosition(target, overlay, container, flip) {
 
 function dropdown() {
   var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var topLevelPosition = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "left top; left bottom;";
-  var defaultPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "left top; right top;";
+  var topLevelPosition = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "left top; left bottom; left top;";
+  var defaultPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "left top; right top; left top;";
 
   if (!container) {
     container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
@@ -9261,7 +9450,7 @@ function getClosestMenuNodeByElement(element) {
 /**
  * Finds the closest menuitem controller for the element in the DOM tree.
  * @param element
- * @returns {null|any}
+ * @returns {null|*}
  */
 
 function getClosestMenuItemByElement(element) {
@@ -9280,7 +9469,7 @@ function getClosestMenuItemByElement(element) {
 /**
  * Finds the closest menu node controller for the element in the DOM tree
  * @param element
- * @returns {null|any}
+ * @returns {null|*}
  */
 
 function getClosestMenuByElement(element) {

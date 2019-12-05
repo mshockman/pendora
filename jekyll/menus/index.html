@@ -38,7 +38,7 @@ layout: default
     be activated on hover.  This is designed to simulate the normal behavior of MenuBars found in Window's and Mac applications.
 </p>
 
-<ul class="menubar" data-init="menubar">
+<ul class="menubar" data-init="menubar" data-window-bind="testMenuBar">
     <li class="menuitem" data-menuitem>
         <a>Root Item #1</a>
         <ul class="menu hidden" data-menu>
@@ -373,22 +373,29 @@ layout: default
 
 <input type="text" aria-label="combobox" data-init="combo-box" data-menu="#combo-box-menu-1" data-window-bind="testComboBox" />
 <div class="select-menu hidden" id="combo-box-menu-1">
+    <div class="select-menu__header">
+        <input type="text" data-filter placeholder="Filter Items" aria-label="Search" />
+    </div>
     <div class="select-menu__body">
-        <a data-menuitem data-text data-value="1">1</a>
-        <a data-menuitem data-text data-value="2">2</a>
-        <a data-menuitem data-text data-value="3">3</a>
-        <a data-menuitem data-text data-value="4">4</a>
-        <a data-menuitem data-text data-value="5">5</a>
-        <hr>
-        <a data-menuitem data-text data-value="6">6</a>
-        <a data-menuitem data-text data-value="7">7</a>
-        <a data-menuitem data-text data-value="8">8</a>
-        <a data-menuitem data-text data-value="9">9</a>
-        <a data-menuitem data-text data-value="10">10</a>
+        <a data-menuitem data-text>1</a>
+        <a data-menuitem data-text>2</a>
+        <a data-menuitem data-text>3</a>
+        <a data-menuitem data-text>4</a>
+        <a data-menuitem data-text>5</a>
+        <a data-menuitem data-text>6</a>
+        <a data-menuitem data-text>7</a>
+        <a data-menuitem data-text>8</a>
+        <a data-menuitem data-text>9</a>
+        <a data-menuitem data-text>10</a>
     </div>
 </div>
 
 
+<br><br><br>
+<br><br><br>
+<br><br><br>
+<br><br><br>
+<br><br><br>
 <br><br><br>
 <br><br><br>
 <br><br><br>

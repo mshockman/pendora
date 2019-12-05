@@ -2,7 +2,7 @@ import MenuItem, {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
-import {getMenuInstance} from "./utility";
+import {getMenuInstance, getClosestMenuByElement} from "./utility";
 import {parseHTML, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
@@ -254,7 +254,7 @@ export const FILTERS = {
 export class SelectMenu extends AbstractMenu {
     @inherit multiSelect;
 
-    constructor({target, shiftSelect=true, filter=FILTERS.icontains, placeholder="No Items Found", filterDelay=500, ...context}={}) {
+    constructor({target, shiftSelect=true, filter=null, placeholder="No Items Found", filterDelay=500, filterPlaceholderText="Search", ...context}={}) {
         super();
         this.MenuItemClass = SelectOption;
 
@@ -267,7 +267,6 @@ export class SelectMenu extends AbstractMenu {
         this.closeOnBlur = false;
         this.timeout = false;
         this.autoActivate = true;
-        this.multiActive = false;
         this.openOnHover = false;
         this.multiSelect = "inherit";
         this.closeOnSelect = false;
@@ -284,7 +283,14 @@ export class SelectMenu extends AbstractMenu {
         if(filter) {
             this.filterDelay = filterDelay;
             this.placeholder = placeholder;
-            this._initFilter(filter);
+            this._initFilter(filter, filterPlaceholderText);
+        }
+    }
+
+    show() {
+        if(!this.isVisible) {
+            this.clearFilter();
+            super.show();
         }
     }
 
@@ -421,6 +427,10 @@ export class SelectMenu extends AbstractMenu {
             this._placeholder.parentElement.removeChild(this._placeholder);
             this._placeholder = null;
         }
+
+        if(this.filterInput) {
+            this.filterInput.value = "";
+        }
     }
 
     getFilteredItems() {
@@ -435,13 +445,24 @@ export class SelectMenu extends AbstractMenu {
         return r;
     }
 
-    _initFilter(fn) {
-        this.filterInput = document.createElement('input');
-        this.filterInput.type = 'text';
+    _initFilter(fn, filterPlaceholderText) {
+        // let filterInput = this.element.querySelectorAll('[data-filter]');
+        let filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(node => getClosestMenuByElement(node) === this);
 
-        let filterContainer = document.createElement('div');
-        filterContainer.className = "select-menu__filter";
-        filterContainer.appendChild(this.filterInput);
+        if(!filterInput) {
+            this.filterInput = document.createElement('input');
+            this.filterInput.type = 'text';
+            this.filterInput.placeholder = filterPlaceholderText || "";
+
+            let filterContainer = document.createElement('div');
+            filterContainer.className = "select-menu__filter";
+            filterContainer.appendChild(this.filterInput);
+
+            let container = this.element.querySelector(".select-menu__header") || this.element;
+            container.insertBefore(filterContainer, container.firstChild);
+        } else {
+            this.filterInput = filterInput;
+        }
 
         let _timer = null;
 
@@ -456,10 +477,6 @@ export class SelectMenu extends AbstractMenu {
                 this.filter(fn(this.filterInput.value));
             }, this.filterDelay);
         });
-
-        let container = this.element.querySelector(".select-menu__header") || this.element;
-
-        container.insertBefore(filterContainer, container.firstChild);
     }
 }
 

@@ -22,6 +22,11 @@ export function clamp(value, minValue=null, maxValue=null) {
 }
 
 
+export function modulo(value, mod) {
+    return ((value % mod) + mod) % mod;
+}
+
+
 /**
  * Takes an iterable and returns the first none null or undefined value.
  * @param args
