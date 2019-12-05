@@ -262,22 +262,6 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
-    filter(testFunction) {
-        for(let child of this.children) {
-            child.isVisible = !!testFunction.call(this, child);
-        }
-
-        this.publish('filter-change', this);
-    }
-
-    clearFilter() {
-        for(let child of this.children) {
-            child.isVisible = true;
-        }
-
-        this.publish('filter-change', this);
-    }
-
     /**
      * Returns list of all menu bodies for the menu.
      *

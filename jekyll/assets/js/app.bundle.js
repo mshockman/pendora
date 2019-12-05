@@ -4837,66 +4837,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
       }
-    }, {
-      kind: "method",
-      key: "filter",
-      value: function filter(testFunction) {
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
-
-        try {
-          for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var child = _step6.value;
-            child.isVisible = !!testFunction.call(this, child);
-          }
-        } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-              _iterator6["return"]();
-            }
-          } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
-            }
-          }
-        }
-
-        this.publish('filter-change', this);
-      }
-    }, {
-      kind: "method",
-      key: "clearFilter",
-      value: function clearFilter() {
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
-
-        try {
-          for (var _iterator7 = this.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var child = _step7.value;
-            child.isVisible = true;
-          }
-        } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
-              _iterator7["return"]();
-            }
-          } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
-            }
-          }
-        }
-
-        this.publish('filter-change', this);
-      }
       /**
        * Returns list of all menu bodies for the menu.
        *
@@ -6285,7 +6225,7 @@ function (_Publisher) {
     value: function contains(node) {
       if (node.nodeType) {
         node = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuNodeByElement"])(node);
-        return node ? this.closest(node) : false;
+        return node ? this.contains(node) : false;
       }
 
       while (node) {
@@ -7357,12 +7297,13 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, SelectMenu, Select2, ComboBox, MultiSelect, MultiCombo */
+/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, ComboBox, MultiSelect, MultiCombo */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return SelectOption; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FILTERS", function() { return FILTERS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
@@ -7733,6 +7674,28 @@ function (_AbstractMenuItem) {
 
   return SelectOption;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+var FILTERS = {
+  startsWith: function startsWith(value) {
+    return function (item) {
+      return item.text.indexOf(value) !== 0;
+    };
+  },
+  istartsWith: function istartsWith(value) {
+    return function (item) {
+      return item.text.toLowerCase().indexOf(value.toLowerCase()) !== 0;
+    };
+  },
+  contains: function contains(value) {
+    return function (item) {
+      return item.text.indexOf(value) !== -1;
+    };
+  },
+  icontains: function icontains(value) {
+    return function (item) {
+      return item.text.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+    };
+  }
+};
 /**
  * Creates a menu that contains SelectOptions.
  */
@@ -7748,13 +7711,15 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           target = _ref3.target,
-          _ref3$id = _ref3.id,
-          id = _ref3$id === void 0 ? null : _ref3$id,
-          _ref3$classes = _ref3.classes,
-          classes = _ref3$classes === void 0 ? null : _ref3$classes,
           _ref3$shiftSelect = _ref3.shiftSelect,
           shiftSelect = _ref3$shiftSelect === void 0 ? true : _ref3$shiftSelect,
-          context = _objectWithoutProperties(_ref3, ["target", "id", "classes", "shiftSelect"]);
+          _ref3$filter = _ref3.filter,
+          filter = _ref3$filter === void 0 ? FILTERS.icontains : _ref3$filter,
+          _ref3$placeholder = _ref3.placeholder,
+          placeholder = _ref3$placeholder === void 0 ? "No Items Found" : _ref3$placeholder,
+          _ref3$filterDelay = _ref3.filterDelay,
+          filterDelay = _ref3$filterDelay === void 0 ? 500 : _ref3$filterDelay,
+          context = _objectWithoutProperties(_ref3, ["target", "shiftSelect", "filter", "placeholder", "filterDelay"]);
 
       _classCallCheck(this, SelectMenu);
 
@@ -7789,6 +7754,13 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _this2.init();
 
+      if (filter) {
+        _this2.filterDelay = filterDelay;
+        _this2.placeholder = placeholder;
+
+        _this2._initFilter(filter);
+      }
+
       return _this2;
     }
 
@@ -7810,7 +7782,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__header\"></div>\n                <section class=\"menu__body\"></section>\n                <div class=\"menu__footer\"></div>\n            </div>\n        ");
+        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <section class=\"select-menu__body\"></section>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
         var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
         return fragment.children[0];
       }
@@ -7887,6 +7859,12 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         });
       }
     }, {
+      kind: "method",
+      key: "isSelectMenu",
+      value: function isSelectMenu() {
+        return true;
+      }
+    }, {
       kind: "get",
       key: "selection",
       value: function selection() {
@@ -7934,13 +7912,13 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       }
     }, {
       kind: "method",
-      key: "onMouseDown",
-      value: function onMouseDown(topic) {
+      key: "onClick",
+      value: function onClick(topic) {
         var event = topic.originalEvent,
             target = topic.target,
             isDisabled = target.getDisabled();
 
-        _get(_getPrototypeOf(SelectMenu.prototype), "onMouseDown", this).call(this, topic);
+        _get(_getPrototypeOf(SelectMenu.prototype), "onClick", this).call(this, topic);
 
         if (!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
           if (event.shiftKey) {
@@ -7969,9 +7947,149 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       }
     }, {
       kind: "method",
-      key: "isSelectMenu",
-      value: function isSelectMenu() {
-        return true;
+      key: "filter",
+      value: function filter(fn) {
+        if (fn === null) {
+          return this.clearFilter();
+        }
+
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
+
+        try {
+          for (var _iterator5 = this.options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var option = _step5.value;
+
+            if (fn(option)) {
+              option.classList.remove('filtered');
+            } else {
+              option.classList.add('filtered');
+            }
+          }
+        } catch (err) {
+          _didIteratorError5 = true;
+          _iteratorError5 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+              _iterator5["return"]();
+            }
+          } finally {
+            if (_didIteratorError5) {
+              throw _iteratorError5;
+            }
+          }
+        }
+
+        if (this.getFilteredItems().length < this.options.length) {
+          if (this._placeholder) {
+            this._placeholder.parentElement.removeChild(this._placeholder);
+
+            this._placeholder = null;
+          }
+        } else if (this.placeholder) {
+          var placeholder = document.createElement('div');
+          placeholder.innerHTML = this.placeholder;
+          var container = this.element.querySelector('.select-menu__body') || this.element;
+          container.appendChild(placeholder);
+          this._placeholder = placeholder;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "clearFilter",
+      value: function clearFilter() {
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
+
+        try {
+          for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var option = _step6.value;
+            option.classList.remove('filtered');
+          }
+        } catch (err) {
+          _didIteratorError6 = true;
+          _iteratorError6 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+              _iterator6["return"]();
+            }
+          } finally {
+            if (_didIteratorError6) {
+              throw _iteratorError6;
+            }
+          }
+        }
+
+        if (this._placeholder && this.getFilteredItems().length < this.options.length) {
+          this._placeholder.parentElement.removeChild(this._placeholder);
+
+          this._placeholder = null;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getFilteredItems",
+      value: function getFilteredItems() {
+        var r = [];
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
+
+        try {
+          for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var option = _step7.value;
+
+            if (option.classList.contains('filtered')) {
+              r.push(option);
+            }
+          }
+        } catch (err) {
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+              _iterator7["return"]();
+            }
+          } finally {
+            if (_didIteratorError7) {
+              throw _iteratorError7;
+            }
+          }
+        }
+
+        return r;
+      }
+    }, {
+      kind: "method",
+      key: "_initFilter",
+      value: function _initFilter(fn) {
+        var _this4 = this;
+
+        this.filterInput = document.createElement('input');
+        this.filterInput.type = 'text';
+        var filterContainer = document.createElement('div');
+        filterContainer.className = "select-menu__filter";
+        filterContainer.appendChild(this.filterInput);
+        var _timer = null;
+        this.filterInput.addEventListener('keydown', function (event) {
+          if (_timer) {
+            clearTimeout(_timer);
+            _timer = null;
+          }
+
+          _timer = setTimeout(function () {
+            _timer = null;
+
+            _this4.filter(fn(_this4.filterInput.value));
+          }, _this4.filterDelay);
+        });
+        var container = this.element.querySelector(".select-menu__header") || this.element;
+        container.insertBefore(filterContainer, container.firstChild);
       }
     }]
   };
@@ -7987,7 +8105,7 @@ function (_AbstractMenuItem2) {
   _inherits(Select2, _AbstractMenuItem2);
 
   function Select2() {
-    var _this4;
+    var _this5;
 
     var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         target = _ref5.target,
@@ -8008,87 +8126,87 @@ function (_AbstractMenuItem2) {
 
     _classCallCheck(this, Select2);
 
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(Select2).call(this));
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Select2).call(this));
 
     if (target) {
-      _this4.element = target;
+      _this5.element = target;
     } else {
-      _this4.element = _this4.render();
+      _this5.element = _this5.render();
     }
 
     if (classes) {
-      _this4.addClass(classes);
+      _this5.addClass(classes);
     }
 
     if (id) {
-      _this4.element.id = id;
+      _this5.element.id = id;
     }
 
-    _this4.toggle = "both";
-    _this4.autoActivate = false;
-    _this4.openOnHover = false;
-    _this4.delay = false;
-    _this4.closeOnSelect = "auto";
-    _this4.closeOnBlur = true;
-    _this4.timeout = timeout;
-    _this4.multiSelect = multiSelect;
-    _this4.MenuItemClass = SelectOption;
-    _this4.SubMenuClass = SelectMenu;
-    _this4.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this4.clearSubItemsOnHover = false;
-    _this4.labelToItemMap = new WeakMap();
-    _this4.itemToLabelMap = new WeakMap();
+    _this5.toggle = "both";
+    _this5.autoActivate = false;
+    _this5.openOnHover = false;
+    _this5.delay = false;
+    _this5.closeOnSelect = "auto";
+    _this5.closeOnBlur = true;
+    _this5.timeout = timeout;
+    _this5.multiSelect = multiSelect;
+    _this5.MenuItemClass = SelectOption;
+    _this5.SubMenuClass = SelectMenu;
+    _this5.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this5.clearSubItemsOnHover = false;
+    _this5.labelToItemMap = new WeakMap();
+    _this5.itemToLabelMap = new WeakMap();
 
-    _this4.element.classList.add('select');
+    _this5.element.classList.add('select');
 
-    _this4.element.tabIndex = 0;
+    _this5.element.tabIndex = 0;
 
-    _this4.registerTopics();
+    _this5.registerTopics();
 
-    _this4.parseDOM();
+    _this5.parseDOM();
 
     if (widget) {
-      _this4.widget = widget;
+      _this5.widget = widget;
     } else {
-      _this4.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
+      _this5.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
 
-      _this4.widget.appendTo(_this4.element);
+      _this5.widget.appendTo(_this5.element);
     }
 
-    if (!_this4.submenu) {
+    if (!_this5.submenu) {
       var submenu = new SelectMenu();
       submenu.isVisible = false;
 
-      _this4.attachSubMenu(submenu);
+      _this5.attachSubMenu(submenu);
     }
 
-    _this4.init();
+    _this5.init();
 
     if (filter) {
-      if (_this4.multiSelect) {
-        _this4.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
+      if (_this5.multiSelect) {
+        _this5.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
           items: function items() {
             var r = [];
-            var _iteratorNormalCompletion5 = true;
-            var _didIteratorError5 = false;
-            var _iteratorError5 = undefined;
+            var _iteratorNormalCompletion8 = true;
+            var _didIteratorError8 = false;
+            var _iteratorError8 = undefined;
 
             try {
-              for (var _iterator5 = _this4.submenu.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                var child = _step5.value;
+              for (var _iterator8 = _this5.submenu.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                var child = _step8.value;
                 r.push(child.element);
               }
             } catch (err) {
-              _didIteratorError5 = true;
-              _iteratorError5 = err;
+              _didIteratorError8 = true;
+              _iteratorError8 = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-                  _iterator5["return"]();
+                if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+                  _iterator8["return"]();
                 }
               } finally {
-                if (_didIteratorError5) {
-                  throw _iteratorError5;
+                if (_didIteratorError8) {
+                  throw _iteratorError8;
                 }
               }
             }
@@ -8100,35 +8218,35 @@ function (_AbstractMenuItem2) {
         var li = document.createElement('li');
         li.className = "select-filter-container";
 
-        _this4.filter.appendTo(li);
+        _this5.filter.appendTo(li);
 
-        _this4.filter.wrapper = li;
+        _this5.filter.wrapper = li;
 
-        _this4.button.appendChild(li);
+        _this5.button.appendChild(li);
       } else {
-        _this4.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
+        _this5.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
           items: function items() {
             var r = [];
-            var _iteratorNormalCompletion6 = true;
-            var _didIteratorError6 = false;
-            var _iteratorError6 = undefined;
+            var _iteratorNormalCompletion9 = true;
+            var _didIteratorError9 = false;
+            var _iteratorError9 = undefined;
 
             try {
-              for (var _iterator6 = _this4.submenu.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                var child = _step6.value;
+              for (var _iterator9 = _this5.submenu.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                var child = _step9.value;
                 r.push(child.element);
               }
             } catch (err) {
-              _didIteratorError6 = true;
-              _iteratorError6 = err;
+              _didIteratorError9 = true;
+              _iteratorError9 = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-                  _iterator6["return"]();
+                if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+                  _iterator9["return"]();
                 }
               } finally {
-                if (_didIteratorError6) {
-                  throw _iteratorError6;
+                if (_didIteratorError9) {
+                  throw _iteratorError9;
                 }
               }
             }
@@ -8138,16 +8256,16 @@ function (_AbstractMenuItem2) {
           placeholder: "Filter"
         });
 
-        _this4.filter.appendTo(_this4.submenu.element.querySelector('.menu__header'));
+        _this5.filter.appendTo(_this5.submenu.element.querySelector('.select-menu__header'));
 
-        _this4.submenu.element.classList.add('has-filter');
+        _this5.submenu.element.classList.add('has-filter');
       }
 
-      _this4.filter.on('filter-change', function (topic) {
+      _this5.filter.on('filter-change', function (topic) {
         if (topic.allItemsFiltered) {
-          _this4.submenu.element.classList.add('all-items-filtered');
+          _this5.submenu.element.classList.add('all-items-filtered');
         } else {
-          _this4.submenu.element.classList.remove('all-items-filtered');
+          _this5.submenu.element.classList.remove('all-items-filtered');
         }
       });
 
@@ -8156,62 +8274,62 @@ function (_AbstractMenuItem2) {
         placeholderNode.className = "placeholder";
         placeholderNode.innerHTML = placeholder;
 
-        var body = _this4.submenu.getMenuBody();
+        var body = _this5.submenu.getMenuBody();
 
         body = body[body.length - 1];
         body.appendChild(placeholderNode);
       }
 
-      _this4.addEventListener('keydown', function (event) {
-        if (_this4.filter && event.key === 'Backspace') {
-          if (_this4.filter.isFocused() && _this4.filter.input.value !== "") {
+      _this5.addEventListener('keydown', function (event) {
+        if (_this5.filter && event.key === 'Backspace') {
+          if (_this5.filter.isFocused() && _this5.filter.input.value !== "") {
             return;
           }
 
-          if (!_this4._isChoiceElement(document.activeElement)) {
-            var choices = _this4.getLabels();
+          if (!_this5._isChoiceElement(document.activeElement)) {
+            var choices = _this5.getLabels();
 
             if (choices.length) {
               choices[choices.length - 1].focus();
             }
           } else {
-            _this4.labelToItemMap.get(document.activeElement).deselect();
+            _this5.labelToItemMap.get(document.activeElement).deselect();
 
-            _this4.filter.focus();
+            _this5.filter.focus();
           }
         }
       });
 
-      _this4.filter.input.addEventListener('focus', function (event) {
-        _this4.element.classList.add('select-highlight');
+      _this5.filter.input.addEventListener('focus', function (event) {
+        _this5.element.classList.add('select-highlight');
       });
 
-      _this4.filter.input.addEventListener('blur', function (event) {
-        if (!_this4.element.contains(event.relatedTarget)) {
-          _this4.element.classList.remove('select-highlight');
+      _this5.filter.input.addEventListener('blur', function (event) {
+        if (!_this5.element.contains(event.relatedTarget)) {
+          _this5.element.classList.remove('select-highlight');
 
-          if (_this4.isActive) _this4.deactivate();
+          if (_this5.isActive) _this5.deactivate();
         }
       });
     }
 
-    _this4.addEventListener('focus', function (event) {
-      if (_this4.filter) {
-        _this4.filter.focus();
+    _this5.addEventListener('focus', function (event) {
+      if (_this5.filter) {
+        _this5.filter.focus();
       }
 
-      _this4.element.classList.add('select-highlight');
+      _this5.element.classList.add('select-highlight');
     });
 
-    _this4.addEventListener('blur', function (event) {
-      if (!_this4.element.contains(event.relatedTarget)) {
-        if (_this4.isActive) _this4.deactivate();
+    _this5.addEventListener('blur', function (event) {
+      if (!_this5.element.contains(event.relatedTarget)) {
+        if (_this5.isActive) _this5.deactivate();
 
-        _this4.element.classList.remove('select-highlight');
+        _this5.element.classList.remove('select-highlight');
       }
     });
 
-    return _this4;
+    return _this5;
   }
 
   _createClass(Select2, [{
@@ -8255,19 +8373,19 @@ function (_AbstractMenuItem2) {
   }, {
     key: "registerTopics",
     value: function registerTopics() {
-      var _this5 = this;
+      var _this6 = this;
 
       _get(_getPrototypeOf(Select2.prototype), "registerTopics", this).call(this);
 
       this.on('option.select', function () {
-        _this5.renderLabels();
+        _this6.renderLabels();
 
-        if (_this5.closeOnSelect === true && _this5.isActive) {
-          _this5.deactivate();
+        if (_this6.closeOnSelect === true && _this6.isActive) {
+          _this6.deactivate();
         }
       });
       this.on('option.deselect', function () {
-        _this5.renderLabels();
+        _this6.renderLabels();
       });
     }
   }, {
@@ -8275,13 +8393,13 @@ function (_AbstractMenuItem2) {
     value: function renderLabels() {
       var output = this.button,
           fragment = document.createDocumentFragment();
-      var _iteratorNormalCompletion7 = true;
-      var _didIteratorError7 = false;
-      var _iteratorError7 = undefined;
+      var _iteratorNormalCompletion10 = true;
+      var _didIteratorError10 = false;
+      var _iteratorError10 = undefined;
 
       try {
-        for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-          var item = _step7.value;
+        for (var _iterator10 = this.options[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+          var item = _step10.value;
 
           if (item.isSelected) {
             var pill = this.itemToLabelMap.get(item);
@@ -8312,16 +8430,16 @@ function (_AbstractMenuItem2) {
           }
         }
       } catch (err) {
-        _didIteratorError7 = true;
-        _iteratorError7 = err;
+        _didIteratorError10 = true;
+        _iteratorError10 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
-            _iterator7["return"]();
+          if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
+            _iterator10["return"]();
           }
         } finally {
-          if (_didIteratorError7) {
-            throw _iteratorError7;
+          if (_didIteratorError10) {
+            throw _iteratorError10;
           }
         }
       }
@@ -8343,26 +8461,26 @@ function (_AbstractMenuItem2) {
     key: "_getSelectedValues",
     value: function _getSelectedValues() {
       var r = [];
-      var _iteratorNormalCompletion8 = true;
-      var _didIteratorError8 = false;
-      var _iteratorError8 = undefined;
+      var _iteratorNormalCompletion11 = true;
+      var _didIteratorError11 = false;
+      var _iteratorError11 = undefined;
 
       try {
-        for (var _iterator8 = this.selection[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-          var item = _step8.value;
+        for (var _iterator11 = this.selection[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+          var item = _step11.value;
           r.push(item.value);
         }
       } catch (err) {
-        _didIteratorError8 = true;
-        _iteratorError8 = err;
+        _didIteratorError11 = true;
+        _iteratorError11 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-            _iterator8["return"]();
+          if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
+            _iterator11["return"]();
           }
         } finally {
-          if (_didIteratorError8) {
-            throw _iteratorError8;
+          if (_didIteratorError11) {
+            throw _iteratorError11;
           }
         }
       }
@@ -8376,29 +8494,29 @@ function (_AbstractMenuItem2) {
   }, {
     key: "_isChoiceElement",
     value: function _isChoiceElement(element) {
-      var _iteratorNormalCompletion9 = true;
-      var _didIteratorError9 = false;
-      var _iteratorError9 = undefined;
+      var _iteratorNormalCompletion12 = true;
+      var _didIteratorError12 = false;
+      var _iteratorError12 = undefined;
 
       try {
-        for (var _iterator9 = this.options[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-          var option = _step9.value;
+        for (var _iterator12 = this.options[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+          var option = _step12.value;
 
           if (this.itemToLabelMap.get(option) === element) {
             return true;
           }
         }
       } catch (err) {
-        _didIteratorError9 = true;
-        _iteratorError9 = err;
+        _didIteratorError12 = true;
+        _iteratorError12 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
-            _iterator9["return"]();
+          if (!_iteratorNormalCompletion12 && _iterator12["return"] != null) {
+            _iterator12["return"]();
           }
         } finally {
-          if (_didIteratorError9) {
-            throw _iteratorError9;
+          if (_didIteratorError12) {
+            throw _iteratorError12;
           }
         }
       }
@@ -8521,13 +8639,13 @@ function (_AbstractMenuItem2) {
           widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true),
           filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
         });
-        var _iteratorNormalCompletion10 = true;
-        var _didIteratorError10 = false;
-        var _iteratorError10 = undefined;
+        var _iteratorNormalCompletion13 = true;
+        var _didIteratorError13 = false;
+        var _iteratorError13 = undefined;
 
         try {
-          for (var _iterator10 = element.querySelectorAll('option')[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-            var option = _step10.value;
+          for (var _iterator13 = element.querySelectorAll('option')[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+            var option = _step13.value;
             var item = new SelectOption({
               text: option.innerText.trim(),
               value: option.value
@@ -8539,16 +8657,16 @@ function (_AbstractMenuItem2) {
             }
           }
         } catch (err) {
-          _didIteratorError10 = true;
-          _iteratorError10 = err;
+          _didIteratorError13 = true;
+          _iteratorError13 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
-              _iterator10["return"]();
+            if (!_iteratorNormalCompletion13 && _iterator13["return"] != null) {
+              _iterator13["return"]();
             }
           } finally {
-            if (_didIteratorError10) {
-              throw _iteratorError10;
+            if (_didIteratorError13) {
+              throw _iteratorError13;
             }
           }
         }
@@ -8575,7 +8693,7 @@ function (_AbstractMenuItem3) {
   _inherits(ComboBox, _AbstractMenuItem3);
 
   function ComboBox(_ref6) {
-    var _this6;
+    var _this7;
 
     var _ref6$target = _ref6.target,
         target = _ref6$target === void 0 ? null : _ref6$target,
@@ -8586,41 +8704,41 @@ function (_AbstractMenuItem3) {
 
     _classCallCheck(this, ComboBox);
 
-    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
 
     if (target) {
-      _this6.element = target;
+      _this7.element = target;
 
-      if (_this6.element.nodeName === 'INPUT') {
-        _this6.input = _this6.element;
+      if (_this7.element.nodeName === 'INPUT') {
+        _this7.input = _this7.element;
       } else {
-        _this6.input = _this6.element.querySelector('input');
+        _this7.input = _this7.element.querySelector('input');
       }
     } else {
-      var _this6$render = _this6.render(),
-          element = _this6$render.element,
-          input = _this6$render.input;
+      var _this7$render = _this7.render(),
+          element = _this7$render.element,
+          input = _this7$render.input;
 
-      _this6.element = element;
-      _this6.input = input;
+      _this7.element = element;
+      _this7.input = input;
     }
 
-    _this6.toggle = "both";
-    _this6.autoActivate = false;
-    _this6.openOnHover = false;
-    _this6.delay = false;
-    _this6.timeout = timeout;
-    _this6.closeOnBlur = true;
-    _this6.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this6.closeOnSelect = true;
-    _this6.SubMenuClass = SelectMenu;
-    _this6.element.tabIndex = 0;
+    _this7.toggle = "both";
+    _this7.autoActivate = false;
+    _this7.openOnHover = false;
+    _this7.delay = false;
+    _this7.timeout = timeout;
+    _this7.closeOnBlur = true;
+    _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this7.closeOnSelect = true;
+    _this7.SubMenuClass = SelectMenu;
+    _this7.element.tabIndex = 0;
 
-    _this6.element.classList.add('advanced-select');
+    _this7.element.classList.add('advanced-select');
 
-    _this6.registerTopics();
+    _this7.registerTopics();
 
-    _this6.parseDOM();
+    _this7.parseDOM();
 
     if (submenu) {
       if (typeof submenu === 'string') {
@@ -8628,31 +8746,31 @@ function (_AbstractMenuItem3) {
       }
 
       if (!submenu.isSelectMenu || !submenu.isSelectMenu()) {
-        submenu = new _this6.SubMenuClass({
+        submenu = new _this7.SubMenuClass({
           target: submenu
         });
 
-        _this6.attachSubMenu(submenu);
+        _this7.attachSubMenu(submenu);
       }
     }
 
-    _this6.init();
+    _this7.init();
 
-    return _this6;
+    return _this7;
   }
 
   _createClass(ComboBox, [{
     key: "registerTopics",
     value: function registerTopics() {
-      var _this7 = this;
+      var _this8 = this;
 
       _get(_getPrototypeOf(ComboBox.prototype), "registerTopics", this).call(this);
 
       this.on('option.select', function () {
-        _this7._renderLabel();
+        _this8._renderLabel();
       });
       this.on('option.deselect', function () {
-        _this7._renderLabel();
+        _this8._renderLabel();
       });
     }
   }, {

@@ -229,7 +229,7 @@ export default class MenuNode extends Publisher {
     contains(node) {
         if(node.nodeType) {
             node = getClosestMenuNodeByElement(node);
-            return node ? this.closest(node) : false;
+            return node ? this.contains(node) : false;
         }
 
         while(node) {

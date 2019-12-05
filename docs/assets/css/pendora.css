@@ -4,13 +4,13 @@
   cursor: default;
 }
 
-.menuitem {
+.menuitem, .select-menu .option {
   cursor: pointer;
   position: relative;
   white-space: nowrap;
 }
 
-.menuitem.active {
+.menuitem.active, .select-menu .active.option {
   background-color: #ccc;
 }
 
@@ -23,7 +23,7 @@
   padding: 0;
   margin: 0;
 }
-.menubar .menuitem {
+.menubar .menuitem, .menubar .select-menu .option, .select-menu .menubar .option {
   padding: 0.5rem;
 }
 
@@ -37,47 +37,13 @@
   z-index: 2;
   margin: 0;
 }
-.menu .menuitem > a {
+.menu.hidden {
+  display: none;
+}
+.menu .menuitem > a, .menu .select-menu .option > a, .select-menu .menu .option > a {
   display: block;
   padding: 0.5rem;
   text-decoration: none;
-}
-.menu[data-position="bottom left"] {
-  top: 100%;
-  left: 0;
-}
-.menu[data-position="bottom right"] {
-  top: 100%;
-  right: 0;
-}
-.menu[data-position="right top"] {
-  top: 0;
-  left: 100%;
-}
-.menu[data-position="right bottom"] {
-  bottom: 0;
-  left: 100%;
-}
-.menu[data-position="left top"] {
-  top: 0;
-  right: 100%;
-}
-.menu[data-position="left bottom"] {
-  bottom: 0;
-  right: 100%;
-}
-.menu[data-position="top left"] {
-  bottom: 100%;
-  left: 0;
-}
-.menu[data-position="top right"] {
-  bottom: 100%;
-  right: 0;
-}
-
-.menu.hidden {
-  visibility: hidden;
-  display: none;
 }
 
 .vertical-menu {
@@ -165,12 +131,46 @@
   display: block;
 }
 
-.menuitem.hidden {
+.menuitem.hidden, .select-menu .hidden.option {
   display: none;
 }
 
 .select-highlight {
   outline: 2px solid Highlight;
+}
+
+.select-menu {
+  position: absolute;
+  z-index: 2;
+}
+.select-menu .select-menu__body {
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  padding: 0;
+  min-width: 15rem;
+  margin: 0;
+  list-style: none;
+}
+.select-menu h3 {
+  margin: 0;
+  padding: 0.25rem;
+}
+.select-menu hr {
+  border-top: 1px solid #ccc;
+  margin: 0.25rem 0 0.25rem 0;
+}
+.select-menu a:hover {
+  text-decoration: none;
+}
+.select-menu .option {
+  display: block;
+  padding: 0.25rem;
+}
+.select-menu .option.filtered {
+  display: none;
+}
+.select-menu.hidden {
+  display: none;
 }
 
 /*# sourceMappingURL=pendora.css.map */

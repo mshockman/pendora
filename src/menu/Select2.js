@@ -221,13 +221,40 @@ export class SelectOption extends AbstractMenuItem {
 }
 
 
+export const FILTERS = {
+    startsWith(value) {
+        return function(item) {
+            return item.text.indexOf(value) !== 0;
+        }
+    },
+
+    istartsWith(value) {
+        return function(item) {
+            return item.text.toLowerCase().indexOf(value.toLowerCase()) !== 0;
+        }
+    },
+
+    contains(value) {
+        return function(item) {
+            return item.text.indexOf(value) !== -1;
+        }
+    },
+
+    icontains(value) {
+        return function(item) {
+            return item.text.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+        }
+    }
+};
+
+
 /**
  * Creates a menu that contains SelectOptions.
  */
 export class SelectMenu extends AbstractMenu {
     @inherit multiSelect;
 
-    constructor({target, id=null, classes=null, shiftSelect=true, ...context}={}) {
+    constructor({target, shiftSelect=true, filter=FILTERS.icontains, placeholder="No Items Found", filterDelay=500, ...context}={}) {
         super();
         this.MenuItemClass = SelectOption;
 
@@ -253,15 +280,20 @@ export class SelectMenu extends AbstractMenu {
         this.registerTopics();
         this.parseDOM();
         this.init();
+
+        if(filter) {
+            this.filterDelay = filterDelay;
+            this.placeholder = placeholder;
+            this._initFilter(filter);
+        }
     }
 
     render({arrow=false}={}) {
         let html = `
-            <div class="menu">
-                ${arrow ? `<div class="menu__arrow"></div>` : ""}
-                <div class="menu__header"></div>
-                <section class="menu__body"></section>
-                <div class="menu__footer"></div>
+            <div class="select-menu">
+                <div class="select-menu__header"></div>
+                <section class="select-menu__body"></section>
+                <div class="select-menu__footer"></div>
             </div>
         `;
 
@@ -296,6 +328,10 @@ export class SelectMenu extends AbstractMenu {
         });
     }
 
+    isSelectMenu() {
+        return true;
+    }
+
     get selection() {
         let r = [];
 
@@ -316,12 +352,12 @@ export class SelectMenu extends AbstractMenu {
         return this.children;
     }
 
-    onMouseDown(topic) {
+    onClick(topic) {
         let event = topic.originalEvent,
             target = topic.target,
             isDisabled = target.getDisabled();
 
-        super.onMouseDown(topic);
+        super.onClick(topic);
 
         if(!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
             if(event.shiftKey) {
@@ -349,8 +385,81 @@ export class SelectMenu extends AbstractMenu {
         }
     }
 
-    isSelectMenu() {
-        return true;
+    filter(fn) {
+        if(fn === null) {
+            return this.clearFilter();
+        }
+
+        for(let option of this.options) {
+            if(fn(option)) {
+                option.classList.remove('filtered');
+            } else {
+                option.classList.add('filtered');
+            }
+        }
+
+        if(this.getFilteredItems().length < this.options.length) {
+            if(this._placeholder) {
+                this._placeholder.parentElement.removeChild(this._placeholder);
+                this._placeholder = null;
+            }
+        } else if(this.placeholder) {
+            let placeholder = document.createElement('div');
+            placeholder.innerHTML = this.placeholder;
+            let container = this.element.querySelector('.select-menu__body') || this.element;
+            container.appendChild(placeholder);
+            this._placeholder = placeholder;
+        }
+    }
+
+    clearFilter() {
+        for(let option of this.options) {
+            option.classList.remove('filtered');
+        }
+
+        if(this._placeholder && this.getFilteredItems().length < this.options.length) {
+            this._placeholder.parentElement.removeChild(this._placeholder);
+            this._placeholder = null;
+        }
+    }
+
+    getFilteredItems() {
+        let r = [];
+
+        for(let option of this.options) {
+            if(option.classList.contains('filtered')) {
+                r.push(option);
+            }
+        }
+
+        return r;
+    }
+
+    _initFilter(fn) {
+        this.filterInput = document.createElement('input');
+        this.filterInput.type = 'text';
+
+        let filterContainer = document.createElement('div');
+        filterContainer.className = "select-menu__filter";
+        filterContainer.appendChild(this.filterInput);
+
+        let _timer = null;
+
+        this.filterInput.addEventListener('keydown', event => {
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
+            }
+
+            _timer = setTimeout(() => {
+                _timer = null;
+                this.filter(fn(this.filterInput.value));
+            }, this.filterDelay);
+        });
+
+        let container = this.element.querySelector(".select-menu__header") || this.element;
+
+        container.insertBefore(filterContainer, container.firstChild);
     }
 }
 
@@ -453,7 +562,7 @@ export class Select2 extends AbstractMenuItem {
                     placeholder: "Filter"
                 });
 
-                this.filter.appendTo(this.submenu.element.querySelector('.menu__header'));
+                this.filter.appendTo(this.submenu.element.querySelector('.select-menu__header'));
                 this.submenu.element.classList.add('has-filter');
             }
 
