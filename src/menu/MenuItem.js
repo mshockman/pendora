@@ -255,11 +255,7 @@ export class AbstractMenuItem extends MenuNode {
 
         if(submenu) {
             submenu.show();
-            let positioner = this.positioner;
-
-            if(positioner) {
-                positioner.call(submenu, this, submenu);
-            }
+            submenu.position();
         }
     }
 

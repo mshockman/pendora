@@ -298,7 +298,7 @@ export class SelectMenu extends AbstractMenu {
         let html = `
             <div class="select-menu">
                 <div class="select-menu__header"></div>
-                <section class="select-menu__body"></section>
+                <section class="select-menu__body menu__body"></section>
                 <div class="select-menu__footer"></div>
             </div>
         `;

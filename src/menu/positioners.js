@@ -94,9 +94,10 @@ export function dropdown(container=null, topLevelPosition="left top; left bottom
         container = () => Rect.getBoundingClientRect(target);
     }
 
-    return function(target, menu) {
+    return function(menu) {
         let parentMenu = menu.parentMenu,
-            containerElement = container;
+            containerElement = container,
+            target = menu.parent;
 
         if(typeof containerElement === 'function') {
             containerElement = containerElement(target, menu);

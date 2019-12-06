@@ -187,6 +187,14 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
+    position() {
+        let positioner = this.positioner;
+
+        if(positioner) {
+            positioner.call(this, this);
+        }
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Tree methods.
 

@@ -4688,6 +4688,16 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             bubbles: true
           }));
         }
+      }
+    }, {
+      kind: "method",
+      key: "position",
+      value: function position() {
+        var positioner = this.positioner;
+
+        if (positioner) {
+          positioner.call(this, this);
+        }
       } //------------------------------------------------------------------------------------------------------------------
       // Tree methods.
 
@@ -5877,11 +5887,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (submenu) {
           submenu.show();
-          var positioner = this.positioner;
-
-          if (positioner) {
-            positioner.call(submenu, this, submenu);
-          }
+          submenu.position();
         }
       }
     }, {
@@ -8181,7 +8187,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <section class=\"select-menu__body\"></section>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
+        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <section class=\"select-menu__body menu__body\"></section>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
         var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
         return fragment.children[0];
       }
@@ -9591,9 +9597,10 @@ function dropdown() {
     };
   }
 
-  return function (target, menu) {
+  return function (menu) {
     var parentMenu = menu.parentMenu,
-        containerElement = container;
+        containerElement = container,
+        target = menu.parent;
 
     if (typeof containerElement === 'function') {
       containerElement = containerElement(target, menu);
