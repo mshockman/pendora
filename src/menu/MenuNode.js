@@ -139,7 +139,7 @@ export default class MenuNode extends Publisher {
     get parentMenu() {
         let parent = this.parent;
         // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-        return parent.closest(node => node.isMenu());
+        return parent ? parent.closest(node => node.isMenu()) : null;
     }
 
     /**
@@ -150,7 +150,7 @@ export default class MenuNode extends Publisher {
     get parentItem() {
         let parent = this.parent;
         // noinspection JSUnresolvedVariable,JSUnresolvedFunction
-        return parent.closest(node => node.isMenuItem());
+        return parent ? parent.closest(node => node.isMenuItem()) : null;
     }
 
     /**
@@ -184,9 +184,12 @@ export default class MenuNode extends Publisher {
         return this.root === this;
     }
 
+    get enabledChildren() {
+        return this.children.filter(item => !item.isDisabled);
+    }
+
     /**
      * Returns the target active item in the tree.
-     * @abstract
      * @returns {*|{isActive}|null}
      */
     get activeItem() {

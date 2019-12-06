@@ -275,6 +275,30 @@ export class AbstractMenu extends MenuNode {
         return this.children[this.children.length-1];
     }
 
+    get firstEnabledChild() {
+        let children = this.children;
+
+        for(let i = 0, l = children.length; i < l; i++) {
+            if(!children[i].isDisabled) {
+                return children[i];
+            }
+        }
+
+        return null;
+    }
+
+    get lastEnabledChild() {
+        let children = this.children;
+
+        for(let i = children.length-1, l = 0; i >= l; i--) {
+            if(!children[i].isDisabled) {
+                return children[i];
+            }
+        }
+
+        return null;
+    }
+
     clearActiveChild() {
         for(let child of this.children) {
             if(child.isActive) {
@@ -343,132 +367,146 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
+    /**
+     * Handles navigating the selection to an item during keyboard navigation.
+     * @param item
+     * @param showSubMenu
+     * @private
+     */
+    _navigateToItem(item, showSubMenu=false) {
+        if(!item) return;
+
+        let parent = item.parent;
+
+        if(!parent.isVisible) parent.show();
+        if(!parent.isActive) parent.activate();
+        if(!item.isActive) item.activate(false);
+        if(showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
+    }
+
     onMenuKeyPress(topic) {
         let event = topic.originalEvent,
             key = event.key,
             arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
-            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1,
+            ARROW_BACK = 'ArrowUp',
+            ARROW_FORWARD = 'ArrowDown',
+            ARROW_NEXT = 'ArrowRight',
+            ARROW_PREVIOUS = 'ArrowLeft';
 
-        if(arrowKeyPressed && this.direction === 'horizontal') {
-            let index = this.activeIndex,
-                children = this.children;
+        if(this.direction === 'vertical') {
+            ARROW_BACK = 'ArrowLeft';
+            ARROW_FORWARD = 'ArrowRight';
+            ARROW_NEXT = 'ArrowDown';
+            ARROW_PREVIOUS = 'ArrowUp';
+        }
 
-            if(key === 'ArrowLeft') {
+        if(arrowKeyPressed) {
+            let children = this.enabledChildren,
+                index = children.indexOf(this.activeChild),
+                child = children[index];
+
+            if(key === ARROW_PREVIOUS) {
                 if(index === -1) {
-                    if(children[children.length-1]) children[children.length-1].activate(this.isRoot);
+                    // When their is no active item, activate the last item.
+                    this._navigateToItem(children[children.length-1], this.isRoot);
                 } else {
-                    children[modulo(index-1, children.length)].activate(this.isRoot);
+                    this._navigateToItem(children[modulo(index-1, children.length)], this.isRoot);
+                }
+
+                return;
+            } else if(key === ARROW_NEXT) {
+                if(index === -1) {
+                    this._navigateToItem(children[0], this.isRoot);
+                } else {
+                    this._navigateToItem(children[modulo(index+1, children.length)], this.isRoot);
                 }
                 return;
-            } else if(key === 'ArrowRight') {
-                if(index === -1) {
-                    if(children[0]) children[0].activate(this.isRoot);
-                } else {
-                    children[modulo(index+1, children.length)].activate(this.isRoot);
-                }
-                return;
-            } else if(key === 'ArrowDown') {
-                let child = children[index];
+            } else if(key === ARROW_FORWARD) {
+                if(child && child.hasSubMenu()) {
+                    let ret = false;
+                    if(!child.submenu.isVisible) {
+                        ret = true;
+                        child.showSubMenu();
+                    }
 
-                if(child && child.submenu && !child.submenu.isVisible) {
-                    child.showSubMenu();
-                    if(child.submenu.firstChild) child.submenu.firstChild.activate(false);
-                    return;
-                } else if(child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
-                    child.submenu.firstChild.activate(false);
-                    return;
-                } else if(!child && this.firstChild) {
-                    this.firstChild.activate(this.isRoot);
-                    return;
+                    if(!child.submenu.activeChild) {
+                        let firstChild = child.submenu.firstEnabledChild;
+                        if(firstChild) {
+                            ret = true;
+                            this._navigateToItem(firstChild, false);
+                        }
+                    }
+
+                    if(ret) return;
+                } else if(!child) {
+                    let firstChild = this.firstEnabledChild;
+                    if(firstChild) {
+                        this._navigateToItem(firstChild, this.isRoot);
+
+                        if(firstChild.hasSubMenu() && firstChild.submenu.isVisible) {
+                            let firstSubMenuChild = firstChild.submenu.firstEnabledChild;
+                            if(firstSubMenuChild) this._navigateToItem(firstSubMenuChild, false);
+                        }
+                        return;
+                    }
                 }
-            } else if(key === 'ArrowUp') {
+            } else if(key === ARROW_BACK) {
                 if(!this.isRoot) {
                     this.deactivate();
                 } else {
-                    let child = children[index];
-
-                    if(child && child.submenu && child.submenu.lastChild) {
+                    if(child && child.submenu) {
                         if(!child.submenu.isVisible) child.showSubMenu();
-                        child.submenu.lastChild.activate(false);
-                    }
+                        let lastChild = child.submenu.lastEnabledChild;
+                        if(lastChild) this._navigateToItem(lastChild, false);
+                    } else if(!child) {
+                        let firstChild = this.firstEnabledChild;
+                        if(firstChild) {
+                            this._navigateToItem(firstChild, this.isRoot);
 
-                    return;
-                }
-            }
-        } else if(arrowKeyPressed && this.direction === 'vertical') {
-            let index = this.activeIndex,
-                children = this.children;
-
-            if(key === 'ArrowUp') {
-                if(index === -1) {
-                    if(children[children.length-1]) children[children.length-1].activate(this.isRoot);
-                } else {
-                    children[modulo(index-1, children.length)].activate(this.isRoot);
-                }
-                return;
-            } else if(key === 'ArrowDown') {
-                if(index === -1) {
-                    if(children[0]) children[0].activate(this.isRoot);
-                } else {
-                    children[modulo(index+1, children.length)].activate(this.isRoot);
-                }
-                return;
-            } else if(key === 'ArrowRight') {
-                let child = children[index];
-
-                if(child && child.submenu && !child.submenu.isVisible) {
-                    child.showSubMenu();
-                    if(child.submenu.firstChild) child.submenu.firstChild.activate(false);
-                    return;
-                } else if(child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
-                    child.submenu.firstChild.activate(false);
-                    return;
-                } else if(!child && this.firstChild) {
-                    this.firstChild.activate(this.isRoot);
-                    return;
-                }
-            } else if(key === 'ArrowLeft') {
-                let child = children[index];
-
-                if(child && child.submenu && child.submenu.isVisible) {
-                    child.hideSubMenu();
-                    child.submenu.deactivate();
-                    return;
-                }
-            }
-        } else if(!arrowKeyPressed) {
-            if(key === 'Enter') {
-                if(this.activeChild) {
-                    if(this.activeChild.hasSubMenu()) {
-                        if(!this.activeChild.submenu.isVisible) {
-                            this.activeChild.showSubMenu();
-                            if(this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+                            if(firstChild.hasSubMenu() && firstChild.submenu.isVisible) {
+                                let lastSubMenuChild = firstChild.submenu.lastEnabledChild;
+                                if(lastSubMenuChild) this._navigateToItem(lastSubMenuChild, false);
+                            }
                         }
-                    } else {
-                        this.activeChild.select();
+                    }
+
+                    return;
+                }
+            }
+        } else if(key === 'Enter') {
+            if(this.activeChild) {
+                if(this.activeChild.hasSubMenu()) {
+                    if(!this.activeChild.submenu.isVisible) {
+                        this.activeChild.showSubMenu();
+                        if(this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
                     }
                 } else {
-                    this.firstChild.activate();
-
-                    if(this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
-                        this.firstChild.submenu.firstChild.activate(false);
-                    }
+                    this.activeChild.select();
                 }
             } else {
-                for(let child of this.children) {
-                    if(child.targetKey === key) {
-                        if(child.hasSubMenu()) {
-                            if(!child.isActive) {
-                                child.activate();
-                            } else if(!child.submenu.isVisible) {
-                                child.showSubMenu();
-                            }
-                        } else {
-                            child.select();
-                        }
+                this.firstChild.activate();
 
-                        break;
+                if(this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
+                    this.firstChild.submenu.firstChild.activate(false);
+                }
+            }
+
+            return;
+        } else if(!arrowKeyPressed) {
+            for(let child of this.children) {
+                if(child.targetKey === key) {
+                    if(child.hasSubMenu()) {
+                        if(!child.isActive) {
+                            child.activate();
+                        } else if(!child.submenu.isVisible) {
+                            child.showSubMenu();
+                        }
+                    } else {
+                        child.select();
                     }
+
+                    break;
                 }
             }
 

@@ -4846,6 +4846,34 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         return this.children[this.children.length - 1];
       }
     }, {
+      kind: "get",
+      key: "firstEnabledChild",
+      value: function firstEnabledChild() {
+        var children = this.children;
+
+        for (var i = 0, l = children.length; i < l; i++) {
+          if (!children[i].isDisabled) {
+            return children[i];
+          }
+        }
+
+        return null;
+      }
+    }, {
+      kind: "get",
+      key: "lastEnabledChild",
+      value: function lastEnabledChild() {
+        var children = this.children;
+
+        for (var i = children.length - 1, l = 0; i >= l; i--) {
+          if (!children[i].isDisabled) {
+            return children[i];
+          }
+        }
+
+        return null;
+      }
+    }, {
       kind: "method",
       key: "clearActiveChild",
       value: function clearActiveChild() {
@@ -4952,6 +4980,25 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           this.deactivate();
         }
       }
+      /**
+       * Handles navigating the selection to an item during keyboard navigation.
+       * @param item
+       * @param showSubMenu
+       * @private
+       */
+
+    }, {
+      kind: "method",
+      key: "_navigateToItem",
+      value: function _navigateToItem(item) {
+        var showSubMenu = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+        if (!item) return;
+        var parent = item.parent;
+        if (!parent.isVisible) parent.show();
+        if (!parent.isActive) parent.activate();
+        if (!item.isActive) item.activate(false);
+        if (showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
+      }
     }, {
       kind: "method",
       key: "onMenuKeyPress",
@@ -4959,157 +5006,152 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         var event = topic.originalEvent,
             key = event.key,
             arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
-            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1,
+            ARROW_BACK = 'ArrowUp',
+            ARROW_FORWARD = 'ArrowDown',
+            ARROW_NEXT = 'ArrowRight',
+            ARROW_PREVIOUS = 'ArrowLeft';
 
-        if (arrowKeyPressed && this.direction === 'horizontal') {
-          var index = this.activeIndex,
-              children = this.children;
+        if (this.direction === 'vertical') {
+          ARROW_BACK = 'ArrowLeft';
+          ARROW_FORWARD = 'ArrowRight';
+          ARROW_NEXT = 'ArrowDown';
+          ARROW_PREVIOUS = 'ArrowUp';
+        }
 
-          if (key === 'ArrowLeft') {
+        if (arrowKeyPressed) {
+          var children = this.enabledChildren,
+              index = children.indexOf(this.activeChild),
+              child = children[index];
+
+          if (key === ARROW_PREVIOUS) {
             if (index === -1) {
-              if (children[children.length - 1]) children[children.length - 1].activate(this.isRoot);
+              // When their is no active item, activate the last item.
+              this._navigateToItem(children[children.length - 1], this.isRoot);
             } else {
-              children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index - 1, children.length)].activate(this.isRoot);
+              this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index - 1, children.length)], this.isRoot);
             }
 
             return;
-          } else if (key === 'ArrowRight') {
+          } else if (key === ARROW_NEXT) {
             if (index === -1) {
-              if (children[0]) children[0].activate(this.isRoot);
+              this._navigateToItem(children[0], this.isRoot);
             } else {
-              children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index + 1, children.length)].activate(this.isRoot);
+              this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index + 1, children.length)], this.isRoot);
             }
 
             return;
-          } else if (key === 'ArrowDown') {
-            var child = children[index];
+          } else if (key === ARROW_FORWARD) {
+            if (child && child.hasSubMenu()) {
+              var ret = false;
 
-            if (child && child.submenu && !child.submenu.isVisible) {
-              child.showSubMenu();
-              if (child.submenu.firstChild) child.submenu.firstChild.activate(false);
-              return;
-            } else if (child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
-              child.submenu.firstChild.activate(false);
-              return;
-            } else if (!child && this.firstChild) {
-              this.firstChild.activate(this.isRoot);
-              return;
+              if (!child.submenu.isVisible) {
+                ret = true;
+                child.showSubMenu();
+              }
+
+              if (!child.submenu.activeChild) {
+                var firstChild = child.submenu.firstEnabledChild;
+
+                if (firstChild) {
+                  ret = true;
+
+                  this._navigateToItem(firstChild, false);
+                }
+              }
+
+              if (ret) return;
+            } else if (!child) {
+              var _firstChild = this.firstEnabledChild;
+
+              if (_firstChild) {
+                this._navigateToItem(_firstChild, this.isRoot);
+
+                if (_firstChild.hasSubMenu() && _firstChild.submenu.isVisible) {
+                  var firstSubMenuChild = _firstChild.submenu.firstEnabledChild;
+                  if (firstSubMenuChild) this._navigateToItem(firstSubMenuChild, false);
+                }
+
+                return;
+              }
             }
-          } else if (key === 'ArrowUp') {
+          } else if (key === ARROW_BACK) {
             if (!this.isRoot) {
               this.deactivate();
             } else {
-              var _child = children[index];
+              if (child && child.submenu) {
+                if (!child.submenu.isVisible) child.showSubMenu();
+                var lastChild = child.submenu.lastEnabledChild;
+                if (lastChild) this._navigateToItem(lastChild, false);
+              } else if (!child) {
+                var _firstChild2 = this.firstEnabledChild;
 
-              if (_child && _child.submenu && _child.submenu.lastChild) {
-                if (!_child.submenu.isVisible) _child.showSubMenu();
+                if (_firstChild2) {
+                  this._navigateToItem(_firstChild2, this.isRoot);
 
-                _child.submenu.lastChild.activate(false);
-              }
-
-              return;
-            }
-          }
-        } else if (arrowKeyPressed && this.direction === 'vertical') {
-          var _index = this.activeIndex,
-              _children = this.children;
-
-          if (key === 'ArrowUp') {
-            if (_index === -1) {
-              if (_children[_children.length - 1]) _children[_children.length - 1].activate(this.isRoot);
-            } else {
-              _children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(_index - 1, _children.length)].activate(this.isRoot);
-            }
-
-            return;
-          } else if (key === 'ArrowDown') {
-            if (_index === -1) {
-              if (_children[0]) _children[0].activate(this.isRoot);
-            } else {
-              _children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(_index + 1, _children.length)].activate(this.isRoot);
-            }
-
-            return;
-          } else if (key === 'ArrowRight') {
-            var _child2 = _children[_index];
-
-            if (_child2 && _child2.submenu && !_child2.submenu.isVisible) {
-              _child2.showSubMenu();
-
-              if (_child2.submenu.firstChild) _child2.submenu.firstChild.activate(false);
-              return;
-            } else if (_child2 && _child2.submenu && !_child2.submenu.activeChild && _child2.submenu.firstChild) {
-              _child2.submenu.firstChild.activate(false);
-
-              return;
-            } else if (!_child2 && this.firstChild) {
-              this.firstChild.activate(this.isRoot);
-              return;
-            }
-          } else if (key === 'ArrowLeft') {
-            var _child3 = _children[_index];
-
-            if (_child3 && _child3.submenu && _child3.submenu.isVisible) {
-              _child3.hideSubMenu();
-
-              _child3.submenu.deactivate();
-
-              return;
-            }
-          }
-        } else if (!arrowKeyPressed) {
-          if (key === 'Enter') {
-            if (this.activeChild) {
-              if (this.activeChild.hasSubMenu()) {
-                if (!this.activeChild.submenu.isVisible) {
-                  this.activeChild.showSubMenu();
-                  if (this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+                  if (_firstChild2.hasSubMenu() && _firstChild2.submenu.isVisible) {
+                    var lastSubMenuChild = _firstChild2.submenu.lastEnabledChild;
+                    if (lastSubMenuChild) this._navigateToItem(lastSubMenuChild, false);
+                  }
                 }
-              } else {
-                this.activeChild.select();
+              }
+
+              return;
+            }
+          }
+        } else if (key === 'Enter') {
+          if (this.activeChild) {
+            if (this.activeChild.hasSubMenu()) {
+              if (!this.activeChild.submenu.isVisible) {
+                this.activeChild.showSubMenu();
+                if (this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
               }
             } else {
-              this.firstChild.activate();
-
-              if (this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
-                this.firstChild.submenu.firstChild.activate(false);
-              }
+              this.activeChild.select();
             }
           } else {
-            var _iteratorNormalCompletion6 = true;
-            var _didIteratorError6 = false;
-            var _iteratorError6 = undefined;
+            this.firstChild.activate();
 
-            try {
-              for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                var _child4 = _step6.value;
+            if (this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
+              this.firstChild.submenu.firstChild.activate(false);
+            }
+          }
 
-                if (_child4.targetKey === key) {
-                  if (_child4.hasSubMenu()) {
-                    if (!_child4.isActive) {
-                      _child4.activate();
-                    } else if (!_child4.submenu.isVisible) {
-                      _child4.showSubMenu();
-                    }
-                  } else {
-                    _child4.select();
+          return;
+        } else if (!arrowKeyPressed) {
+          var _iteratorNormalCompletion6 = true;
+          var _didIteratorError6 = false;
+          var _iteratorError6 = undefined;
+
+          try {
+            for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+              var _child = _step6.value;
+
+              if (_child.targetKey === key) {
+                if (_child.hasSubMenu()) {
+                  if (!_child.isActive) {
+                    _child.activate();
+                  } else if (!_child.submenu.isVisible) {
+                    _child.showSubMenu();
                   }
+                } else {
+                  _child.select();
+                }
 
-                  break;
-                }
+                break;
               }
-            } catch (err) {
-              _didIteratorError6 = true;
-              _iteratorError6 = err;
+            }
+          } catch (err) {
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+                _iterator6["return"]();
+              }
             } finally {
-              try {
-                if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-                  _iterator6["return"]();
-                }
-              } finally {
-                if (_didIteratorError6) {
-                  throw _iteratorError6;
-                }
+              if (_didIteratorError6) {
+                throw _iteratorError6;
               }
             }
           }
@@ -7339,9 +7381,9 @@ function (_Publisher) {
     get: function get() {
       var parent = this.parent; // noinspection JSUnresolvedVariable,JSUnresolvedFunction
 
-      return parent.closest(function (node) {
+      return parent ? parent.closest(function (node) {
         return node.isMenu();
-      });
+      }) : null;
     }
     /**
      * Reference to the first ancestor node in the menu tree who is an item. Returns null if it does not exist.
@@ -7354,9 +7396,9 @@ function (_Publisher) {
     get: function get() {
       var parent = this.parent; // noinspection JSUnresolvedVariable,JSUnresolvedFunction
 
-      return parent.closest(function (node) {
+      return parent ? parent.closest(function (node) {
         return node.isMenuItem();
-      });
+      }) : null;
     }
     /**
      * Reference to the next sibling node in the menu tree.
@@ -7396,9 +7438,15 @@ function (_Publisher) {
     get: function get() {
       return this.root === this;
     }
+  }, {
+    key: "enabledChildren",
+    get: function get() {
+      return this.children.filter(function (item) {
+        return !item.isDisabled;
+      });
+    }
     /**
      * Returns the target active item in the tree.
-     * @abstract
      * @returns {*|{isActive}|null}
      */
 
