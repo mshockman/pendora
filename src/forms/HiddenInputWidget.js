@@ -1,13 +1,13 @@
 import {emptyElement} from "../core/utility";
 import FormWidgetBase from "./FormWidgetBase";
+import InputWidget from "./InputWidget";
 
 
-export default class HiddenInputWidget extends FormWidgetBase {
-    constructor(name) {
-        let element = document.createElement('span');
+export class MultiHiddenInputWidget extends FormWidgetBase {
+    constructor(container=null) {
+        let element = container || document.createElement('span');
         super(element);
         this.element.style.display = "none";
-        this.name = name;
     }
 
     getValue() {
@@ -53,5 +53,13 @@ export default class HiddenInputWidget extends FormWidgetBase {
         for(let input of this.element.querySelectorAll('input')) {
             input.name = name;
         }
+    }
+}
+
+
+export default class HiddenInputWidget extends InputWidget {
+    constructor(input=null) {
+        super(input);
+        this.type = 'hidden';
     }
 }

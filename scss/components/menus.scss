@@ -225,3 +225,32 @@
     display: none;
   }
 }
+
+
+.combobox {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: inline-block;
+  padding: 0 0.5rem;
+
+  &:focus-within {
+    border: 1px solid #2a7ae2;
+  }
+
+  .combobox__input {
+    border: 0;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+
+    &:focus {
+      outline: 0;
+    }
+  }
+}
+
+
+.combobox__menu {
+  .select-menu__header, .select-menu__footer {
+    display: none;
+  }
+}

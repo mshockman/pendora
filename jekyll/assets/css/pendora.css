@@ -178,4 +178,26 @@
   display: none;
 }
 
+.combobox {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  display: inline-block;
+  padding: 0 0.5rem;
+}
+.combobox:focus-within {
+  border: 1px solid #2a7ae2;
+}
+.combobox .combobox__input {
+  border: 0;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+}
+.combobox .combobox__input:focus {
+  outline: 0;
+}
+
+.combobox__menu .select-menu__header, .combobox__menu .select-menu__footer {
+  display: none;
+}
+
 /*# sourceMappingURL=pendora.css.map */

@@ -276,6 +276,8 @@ export class SelectMenu extends AbstractMenu {
 
         this.element.classList.add('select-menu');
 
+        this.isVisible = false;
+
         this.registerTopics();
         this.parseDOM();
         this.init();
@@ -905,21 +907,21 @@ export class Select2 extends AbstractMenuItem {
 
 
 export class ComboBox extends AbstractMenuItem {
-    constructor({target=null, timeout=false, submenu=null}) {
+    constructor({target=null, timeout=false, submenu=null, widget=null}={}) {
         super();
 
         if(target) {
             this.element = target;
 
             if(this.element.nodeName === 'INPUT') {
-                this.input = this.element;
+                this.textbox = this.element;
             } else {
-                this.input = this.element.querySelector('input');
+                this.textbox = this.element.querySelector('[data-text]');
             }
         } else {
-            let {element, input} = this.render();
+            let {element, textbox} = this.render();
             this.element = element;
-            this.input = input;
+            this.textbox = textbox;
         }
 
         this.toggle = "both";
@@ -934,7 +936,6 @@ export class ComboBox extends AbstractMenuItem {
         this.SubMenuClass = SelectMenu;
 
         this.element.tabIndex = 0;
-        this.element.classList.add('advanced-select');
 
         this.registerTopics();
         this.parseDOM();
@@ -948,6 +949,18 @@ export class ComboBox extends AbstractMenuItem {
                 submenu = new this.SubMenuClass({target: submenu});
                 this.attachSubMenu(submenu);
             }
+        } else {
+            let submenu = new this.SubMenuClass();
+            this.attachSubMenu(submenu);
+        }
+
+        this.submenu.classList.add('combobox__menu');
+
+        if(!widget) {
+            this.widget = new HiddenInputWidget();
+            this.widget.appendTo(this.element);
+        } else {
+            this.widget = widget;
         }
 
         this.init();
@@ -963,20 +976,32 @@ export class ComboBox extends AbstractMenuItem {
         this.on('option.deselect', () => {
             this._renderLabel();
         });
+
+        this.on('event.click', () => {
+            this.input.focus();
+        });
     }
 
     render(context) {
         let element = `
-        <div class="advanced-select">
-            <input type="text" readonly="readonly" />
+        <div class="combobox">
+            <input type="text" class="combobox__input" data-text />
+            <span class="combobox__caret"><i class="fas fa-caret-down"></i></span>
         </div>
         `;
 
         element = parseHTML(element).children[0];
         return {
             element: element,
-            input: element.querySelector('input')
+            textbox: element.querySelector('[data-text]')
         };
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Tree methods
+
+    append(option) {
+        return this.submenu.append(option);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -1010,27 +1035,27 @@ export class ComboBox extends AbstractMenuItem {
     }
 
     get name() {
-        return this.input.name;
+        return this.widget.name;
     }
 
     set name(value) {
-        this.input.name = value;
+        this.widget.name = value;
     }
 
     get value() {
-        return this.input.value;
+        return this.widget.value;
     }
 
     set value(value) {
-        this.input.value = value;
+        this.widget.value = value;
     }
 
     get placeholder() {
-        return this.input.placeholder;
+        return this.textbox.placeholder;
     }
 
     set placeholder(value) {
-        this.input.placeholder = value;
+        this.textbox.placeholder = value;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -1048,25 +1073,24 @@ export class ComboBox extends AbstractMenuItem {
             element = document.querySelector(element);
         }
 
-        if(element.nodeName === 'SELECT') {
+        let instance = new ComboBox();
 
-        } else {
-            let {menu} = element.dataset;
-
-            return new ComboBox({target: element, submenu: menu});
+        for(let child of element.querySelectorAll('li')) {
+            let option = new SelectOption({text: child.innerHTML.trim()});
+            instance.append(option);
         }
+
+        element.parentElement.replaceChild(instance.element, element);
+
+        return instance;
     }
 }
 
 
-export class MultiSelect {
-
-}
-
-export class MultiCombo {
+export class MultiComboBox {
 
 }
 
 
 AutoLoader.register('select', (element) => Select2.FromHTML(element));
-AutoLoader.register('combo-box', (element) => ComboBox.FromHTML(element));
+AutoLoader.register('combobox', (element) => ComboBox.FromHTML(element));

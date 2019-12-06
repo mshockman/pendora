@@ -1,5 +1,6 @@
 /**
  * @interface
+ * @abstract
  */
 export default class FormWidgetBase {
     constructor(element) {
@@ -20,6 +21,10 @@ export default class FormWidgetBase {
         } else if(selector.append) {
             selector.append(this.element);
         }
+    }
+
+    remove() {
+        this.element.parentElement.removeChild(this.element);
     }
 
     /**
@@ -57,5 +62,45 @@ export default class FormWidgetBase {
      */
     getName() {
 
+    }
+
+    get id() {
+        return this.element.id;
+    }
+
+    set id(id) {
+        this.element.id = id;
+    }
+
+    get classList() {
+        return this.element.classList;
+    }
+
+    set classList(value) {
+        this.element.classList = value;
+    }
+
+    get dataset() {
+        return this.element.dataset;
+    }
+
+    set dataset(dataset) {
+        this.element.dataset = dataset;
+    }
+
+    get name() {
+        return this.getName();
+    }
+
+    set name(value) {
+        this.setName(value);
+    }
+
+    get value() {
+        return this.getValue();
+    }
+
+    set value(value) {
+        this.setValue(value);
     }
 }

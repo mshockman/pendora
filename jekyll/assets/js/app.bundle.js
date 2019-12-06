@@ -3715,6 +3715,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 /**
  * @interface
+ * @abstract
  */
 var FormWidgetBase =
 /*#__PURE__*/
@@ -3741,6 +3742,11 @@ function () {
       } else if (selector.append) {
         selector.append(this.element);
       }
+    }
+  }, {
+    key: "remove",
+    value: function remove() {
+      this.element.parentElement.removeChild(this.element);
     }
     /**
      * Returns the current raw value without any cleaning, typecasting, or validation.
@@ -3779,6 +3785,46 @@ function () {
   }, {
     key: "getName",
     value: function getName() {}
+  }, {
+    key: "id",
+    get: function get() {
+      return this.element.id;
+    },
+    set: function set(id) {
+      this.element.id = id;
+    }
+  }, {
+    key: "classList",
+    get: function get() {
+      return this.element.classList;
+    },
+    set: function set(value) {
+      this.element.classList = value;
+    }
+  }, {
+    key: "dataset",
+    get: function get() {
+      return this.element.dataset;
+    },
+    set: function set(dataset) {
+      this.element.dataset = dataset;
+    }
+  }, {
+    key: "name",
+    get: function get() {
+      return this.getName();
+    },
+    set: function set(value) {
+      this.setName(value);
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this.getValue();
+    },
+    set: function set(value) {
+      this.setValue(value);
+    }
   }]);
 
   return FormWidgetBase;
@@ -3792,14 +3838,16 @@ function () {
 /*!****************************************!*\
   !*** ./src/forms/HiddenInputWidget.js ***!
   \****************************************/
-/*! exports provided: default */
+/*! exports provided: MultiHiddenInputWidget, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiHiddenInputWidget", function() { return MultiHiddenInputWidget; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HiddenInputWidget; });
 /* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
 /* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
+/* harmony import */ var _InputWidget__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./InputWidget */ "./src/forms/InputWidget.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3821,24 +3869,25 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-var HiddenInputWidget =
+var MultiHiddenInputWidget =
 /*#__PURE__*/
 function (_FormWidgetBase) {
-  _inherits(HiddenInputWidget, _FormWidgetBase);
+  _inherits(MultiHiddenInputWidget, _FormWidgetBase);
 
-  function HiddenInputWidget(name) {
+  function MultiHiddenInputWidget() {
     var _this;
 
-    _classCallCheck(this, HiddenInputWidget);
+    var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
-    var element = document.createElement('span');
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(HiddenInputWidget).call(this, element));
+    _classCallCheck(this, MultiHiddenInputWidget);
+
+    var element = container || document.createElement('span');
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MultiHiddenInputWidget).call(this, element));
     _this.element.style.display = "none";
-    _this.name = name;
     return _this;
   }
 
-  _createClass(HiddenInputWidget, [{
+  _createClass(MultiHiddenInputWidget, [{
     key: "getValue",
     value: function getValue() {
       var r = [];
@@ -3947,7 +3996,126 @@ function (_FormWidgetBase) {
     }
   }]);
 
+  return MultiHiddenInputWidget;
+}(_FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+var HiddenInputWidget =
+/*#__PURE__*/
+function (_InputWidget) {
+  _inherits(HiddenInputWidget, _InputWidget);
+
+  function HiddenInputWidget() {
+    var _this2;
+
+    var input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+    _classCallCheck(this, HiddenInputWidget);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(HiddenInputWidget).call(this, input));
+    _this2.type = 'hidden';
+    return _this2;
+  }
+
   return HiddenInputWidget;
+}(_InputWidget__WEBPACK_IMPORTED_MODULE_2__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/forms/InputWidget.js":
+/*!**********************************!*\
+  !*** ./src/forms/InputWidget.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return InputWidget; });
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+var InputWidget =
+/*#__PURE__*/
+function (_FormWidgetBase) {
+  _inherits(InputWidget, _FormWidgetBase);
+
+  function InputWidget() {
+    var _this;
+
+    var input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+    _classCallCheck(this, InputWidget);
+
+    if (!input) {
+      input = document.createElement('input');
+    }
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(InputWidget).call(this, input));
+    _this.input = input;
+    return _this;
+  }
+
+  _createClass(InputWidget, [{
+    key: "getValue",
+    value: function getValue() {
+      return this.input.value;
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(value) {
+      this.input.value = value;
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.input.name;
+    }
+  }, {
+    key: "setName",
+    value: function setName(name) {
+      this.input.name = name;
+    }
+  }, {
+    key: "type",
+    get: function get() {
+      return this.input.type;
+    },
+    set: function set(type) {
+      this.input.type = type;
+    }
+  }, {
+    key: "placeholder",
+    get: function get() {
+      return this.input.placeholder;
+    },
+    set: function set(value) {
+      this.input.placeholder = value;
+    }
+  }]);
+
+  return InputWidget;
 }(_FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 
@@ -4240,7 +4408,7 @@ function (_FormWidgetBase) {
 /*!****************************!*\
   !*** ./src/forms/index.js ***!
   \****************************/
-/*! exports provided: SelectInputWidget, HiddenInputWidget, FormWidgetBase */
+/*! exports provided: SelectInputWidget, HiddenInputWidget, MultiHiddenInputWidget, FormWidgetBase, InputWidget */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4251,8 +4419,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _HiddenInputWidget__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./HiddenInputWidget */ "./src/forms/HiddenInputWidget.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "HiddenInputWidget", function() { return _HiddenInputWidget__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MultiHiddenInputWidget", function() { return _HiddenInputWidget__WEBPACK_IMPORTED_MODULE_1__["MultiHiddenInputWidget"]; });
+
 /* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FormWidgetBase", function() { return _FormWidgetBase__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+/* harmony import */ var _InputWidget__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./InputWidget */ "./src/forms/InputWidget.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "InputWidget", function() { return _InputWidget__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+
+
+
 
 
 
@@ -7691,7 +7867,7 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, ComboBox, MultiSelect, MultiCombo */
+/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, ComboBox, MultiComboBox */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7701,8 +7877,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiSelect", function() { return MultiSelect; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiCombo", function() { return MultiCombo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiComboBox", function() { return MultiComboBox; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
@@ -8142,6 +8317,8 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this2.shiftSelect = shiftSelect;
 
       _this2.element.classList.add('select-menu');
+
+      _this2.isVisible = false;
 
       _this2.registerTopics();
 
@@ -9112,15 +9289,18 @@ var ComboBox =
 function (_AbstractMenuItem3) {
   _inherits(ComboBox, _AbstractMenuItem3);
 
-  function ComboBox(_ref6) {
+  function ComboBox() {
     var _this7;
 
-    var _ref6$target = _ref6.target,
+    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref6$target = _ref6.target,
         target = _ref6$target === void 0 ? null : _ref6$target,
         _ref6$timeout = _ref6.timeout,
         timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
         _ref6$submenu = _ref6.submenu,
-        submenu = _ref6$submenu === void 0 ? null : _ref6$submenu;
+        submenu = _ref6$submenu === void 0 ? null : _ref6$submenu,
+        _ref6$widget = _ref6.widget,
+        widget = _ref6$widget === void 0 ? null : _ref6$widget;
 
     _classCallCheck(this, ComboBox);
 
@@ -9130,17 +9310,17 @@ function (_AbstractMenuItem3) {
       _this7.element = target;
 
       if (_this7.element.nodeName === 'INPUT') {
-        _this7.input = _this7.element;
+        _this7.textbox = _this7.element;
       } else {
-        _this7.input = _this7.element.querySelector('input');
+        _this7.textbox = _this7.element.querySelector('[data-text]');
       }
     } else {
       var _this7$render = _this7.render(),
           element = _this7$render.element,
-          input = _this7$render.input;
+          textbox = _this7$render.textbox;
 
       _this7.element = element;
-      _this7.input = input;
+      _this7.textbox = textbox;
     }
 
     _this7.toggle = "both";
@@ -9153,8 +9333,6 @@ function (_AbstractMenuItem3) {
     _this7.closeOnSelect = true;
     _this7.SubMenuClass = SelectMenu;
     _this7.element.tabIndex = 0;
-
-    _this7.element.classList.add('advanced-select');
 
     _this7.registerTopics();
 
@@ -9172,6 +9350,20 @@ function (_AbstractMenuItem3) {
 
         _this7.attachSubMenu(submenu);
       }
+    } else {
+      var _submenu = new _this7.SubMenuClass();
+
+      _this7.attachSubMenu(_submenu);
+    }
+
+    _this7.submenu.classList.add('combobox__menu');
+
+    if (!widget) {
+      _this7.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
+
+      _this7.widget.appendTo(_this7.element);
+    } else {
+      _this7.widget = widget;
     }
 
     _this7.init();
@@ -9192,16 +9384,26 @@ function (_AbstractMenuItem3) {
       this.on('option.deselect', function () {
         _this8._renderLabel();
       });
+      this.on('event.click', function () {
+        _this8.input.focus();
+      });
     }
   }, {
     key: "render",
     value: function render(context) {
-      var element = "\n        <div class=\"advanced-select\">\n            <input type=\"text\" readonly=\"readonly\" />\n        </div>\n        ";
+      var element = "\n        <div class=\"combobox\">\n            <input type=\"text\" class=\"combobox__input\" data-text />\n            <span class=\"combobox__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
       element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(element).children[0];
       return {
         element: element,
-        input: element.querySelector('input')
+        textbox: element.querySelector('[data-text]')
       };
+    } //------------------------------------------------------------------------------------------------------------------
+    // Tree methods
+
+  }, {
+    key: "append",
+    value: function append(option) {
+      return this.submenu.append(option);
     } //------------------------------------------------------------------------------------------------------------------
     // Event & topic handling methods
     //------------------------------------------------------------------------------------------------------------------
@@ -9243,26 +9445,26 @@ function (_AbstractMenuItem3) {
   }, {
     key: "name",
     get: function get() {
-      return this.input.name;
+      return this.widget.name;
     },
     set: function set(value) {
-      this.input.name = value;
+      this.widget.name = value;
     }
   }, {
     key: "value",
     get: function get() {
-      return this.input.value;
+      return this.widget.value;
     },
     set: function set(value) {
-      this.input.value = value;
+      this.widget.value = value;
     }
   }, {
     key: "placeholder",
     get: function get() {
-      return this.input.placeholder;
+      return this.textbox.placeholder;
     },
     set: function set(value) {
-      this.input.placeholder = value;
+      this.textbox.placeholder = value;
     }
   }], [{
     key: "FromHTML",
@@ -9271,28 +9473,48 @@ function (_AbstractMenuItem3) {
         element = document.querySelector(element);
       }
 
-      if (element.nodeName === 'SELECT') {} else {
-        var menu = element.dataset.menu;
-        return new ComboBox({
-          target: element,
-          submenu: menu
-        });
+      var instance = new ComboBox();
+      var _iteratorNormalCompletion14 = true;
+      var _didIteratorError14 = false;
+      var _iteratorError14 = undefined;
+
+      try {
+        for (var _iterator14 = element.querySelectorAll('li')[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+          var child = _step14.value;
+          var option = new SelectOption({
+            text: child.innerHTML.trim()
+          });
+          instance.append(option);
+        }
+      } catch (err) {
+        _didIteratorError14 = true;
+        _iteratorError14 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+            _iterator14["return"]();
+          }
+        } finally {
+          if (_didIteratorError14) {
+            throw _iteratorError14;
+          }
+        }
       }
+
+      element.parentElement.replaceChild(instance.element, element);
+      return instance;
     }
   }]);
 
   return ComboBox;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var MultiSelect = function MultiSelect() {
-  _classCallCheck(this, MultiSelect);
-};
-var MultiCombo = function MultiCombo() {
-  _classCallCheck(this, MultiCombo);
+var MultiComboBox = function MultiComboBox() {
+  _classCallCheck(this, MultiComboBox);
 };
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return Select2.FromHTML(element);
 });
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('combo-box', function (element) {
+autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('combobox', function (element) {
   return ComboBox.FromHTML(element);
 });
 
