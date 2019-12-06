@@ -4563,6 +4563,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         this.on('menuitem.selected', function (event) {
           return _this2.onSelect(event);
         });
+        this.on('menu.keypress', function (topic) {
+          return _this2.onMenuKeyPress(topic);
+        });
       }
     }, {
       kind: "method",
@@ -4831,6 +4834,18 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         return -1;
       }
     }, {
+      kind: "get",
+      key: "firstChild",
+      value: function firstChild() {
+        return this.children[0];
+      }
+    }, {
+      kind: "get",
+      key: "lastChild",
+      value: function lastChild() {
+        return this.children[this.children.length - 1];
+      }
+    }, {
       kind: "method",
       key: "clearActiveChild",
       value: function clearActiveChild() {
@@ -4935,6 +4950,175 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       value: function onSelect() {
         if (this.closeOnSelect && this.isActive) {
           this.deactivate();
+        }
+      }
+    }, {
+      kind: "method",
+      key: "onMenuKeyPress",
+      value: function onMenuKeyPress(topic) {
+        var event = topic.originalEvent,
+            key = event.key,
+            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
+
+        if (arrowKeyPressed && this.direction === 'horizontal') {
+          var index = this.activeIndex,
+              children = this.children;
+
+          if (key === 'ArrowLeft') {
+            if (index === -1) {
+              if (children[children.length - 1]) children[children.length - 1].activate(this.isRoot);
+            } else {
+              children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index - 1, children.length)].activate(this.isRoot);
+            }
+
+            return;
+          } else if (key === 'ArrowRight') {
+            if (index === -1) {
+              if (children[0]) children[0].activate(this.isRoot);
+            } else {
+              children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index + 1, children.length)].activate(this.isRoot);
+            }
+
+            return;
+          } else if (key === 'ArrowDown') {
+            var child = children[index];
+
+            if (child && child.submenu && !child.submenu.isVisible) {
+              child.showSubMenu();
+              if (child.submenu.firstChild) child.submenu.firstChild.activate(false);
+              return;
+            } else if (child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
+              child.submenu.firstChild.activate(false);
+              return;
+            } else if (!child && this.firstChild) {
+              this.firstChild.activate(this.isRoot);
+              return;
+            }
+          } else if (key === 'ArrowUp') {
+            if (!this.isRoot) {
+              this.deactivate();
+            } else {
+              var _child = children[index];
+
+              if (_child && _child.submenu && _child.submenu.lastChild) {
+                if (!_child.submenu.isVisible) _child.showSubMenu();
+
+                _child.submenu.lastChild.activate(false);
+              }
+
+              return;
+            }
+          }
+        } else if (arrowKeyPressed && this.direction === 'vertical') {
+          var _index = this.activeIndex,
+              _children = this.children;
+
+          if (key === 'ArrowUp') {
+            if (_index === -1) {
+              if (_children[_children.length - 1]) _children[_children.length - 1].activate(this.isRoot);
+            } else {
+              _children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(_index - 1, _children.length)].activate(this.isRoot);
+            }
+
+            return;
+          } else if (key === 'ArrowDown') {
+            if (_index === -1) {
+              if (_children[0]) _children[0].activate(this.isRoot);
+            } else {
+              _children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(_index + 1, _children.length)].activate(this.isRoot);
+            }
+
+            return;
+          } else if (key === 'ArrowRight') {
+            var _child2 = _children[_index];
+
+            if (_child2 && _child2.submenu && !_child2.submenu.isVisible) {
+              _child2.showSubMenu();
+
+              if (_child2.submenu.firstChild) _child2.submenu.firstChild.activate(false);
+              return;
+            } else if (_child2 && _child2.submenu && !_child2.submenu.activeChild && _child2.submenu.firstChild) {
+              _child2.submenu.firstChild.activate(false);
+
+              return;
+            } else if (!_child2 && this.firstChild) {
+              this.firstChild.activate(this.isRoot);
+              return;
+            }
+          } else if (key === 'ArrowLeft') {
+            var _child3 = _children[_index];
+
+            if (_child3 && _child3.submenu && _child3.submenu.isVisible) {
+              _child3.hideSubMenu();
+
+              _child3.submenu.deactivate();
+
+              return;
+            }
+          }
+        } else if (!arrowKeyPressed) {
+          if (key === 'Enter') {
+            if (this.activeChild) {
+              if (this.activeChild.hasSubMenu()) {
+                if (!this.activeChild.submenu.isVisible) {
+                  this.activeChild.showSubMenu();
+                  if (this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+                }
+              } else {
+                this.activeChild.select();
+              }
+            } else {
+              this.firstChild.activate();
+
+              if (this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
+                this.firstChild.submenu.firstChild.activate(false);
+              }
+            }
+          } else {
+            var _iteratorNormalCompletion6 = true;
+            var _didIteratorError6 = false;
+            var _iteratorError6 = undefined;
+
+            try {
+              for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                var _child4 = _step6.value;
+
+                if (_child4.targetKey === key) {
+                  if (_child4.hasSubMenu()) {
+                    if (!_child4.isActive) {
+                      _child4.activate();
+                    } else if (!_child4.submenu.isVisible) {
+                      _child4.showSubMenu();
+                    }
+                  } else {
+                    _child4.select();
+                  }
+
+                  break;
+                }
+              }
+            } catch (err) {
+              _didIteratorError6 = true;
+              _iteratorError6 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+                  _iterator6["return"]();
+                }
+              } finally {
+                if (_didIteratorError6) {
+                  throw _iteratorError6;
+                }
+              }
+            }
+          }
+
+          return;
+        }
+
+        if (this.parentMenu) {
+          this.parentMenu.publish('menu.keypress', topic);
         }
       }
       /**
@@ -5355,6 +5539,12 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       _initialize(_assertThisInitialized(_this));
 
       _this.menuNodeType = "menuitem";
+      /**
+       * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
+       * @type {null|String}
+       */
+
+      _this.targetKey = null;
       /**
        * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
        * will toggle both on and off and none will cause the item to not be toggleable.
@@ -6957,18 +7147,28 @@ function (_Publisher) {
       if (this.enableKeyboardNavigation && this.isRoot) {
         var event = topic.originalEvent;
 
-        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) {
+        if (event.key === "Escape") {
+          this.deactivate();
+          document.activeElement.blur();
           return;
         }
 
-        event.preventDefault();
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) !== -1) {
+          event.preventDefault();
+        }
+
         var activeItem = this.activeItem,
 
         /**
          * @type AbstractMenu
          */
-        targetMenu = activeItem ? activeItem.parentMenu : activeItem.submenu,
-            key = event.key; // todo finish
+        targetMenu = activeItem ? activeItem.parentMenu : this;
+        topic.activeItem = activeItem;
+        topic.targetMenu = targetMenu;
+
+        if (targetMenu) {
+          targetMenu.publish('menu.keypress', topic);
+        }
       }
     } //------------------------------------------------------------------------------------------------------------------
     // Tree parsing functions.

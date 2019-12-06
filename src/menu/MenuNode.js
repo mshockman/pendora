@@ -1,6 +1,6 @@
 import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
-import {addClasses, removeClasses, modulo} from "core/utility";
+import {addClasses, removeClasses} from "core/utility";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
 import Attribute from "../core/attributes";
 
@@ -846,20 +846,28 @@ export default class MenuNode extends Publisher {
         if(this.enableKeyboardNavigation && this.isRoot) {
             let event = topic.originalEvent;
 
-            if(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) === -1) {
+            if(event.key === "Escape") {
+                this.deactivate();
+                document.activeElement.blur();
                 return;
             }
 
-            event.preventDefault();
+            if(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) !== -1) {
+                event.preventDefault();
+            }
+
             let activeItem = this.activeItem,
                 /**
                  * @type AbstractMenu
                  */
-                targetMenu = activeItem ? activeItem.parentMenu : activeItem.submenu,
-                key = event.key;
+                targetMenu = activeItem ? activeItem.parentMenu : this;
 
-            // todo finish
+            topic.activeItem = activeItem;
+            topic.targetMenu = targetMenu;
 
+            if(targetMenu) {
+                targetMenu.publish('menu.keypress', topic);
+            }
         }
     }
 

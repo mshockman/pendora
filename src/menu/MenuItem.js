@@ -40,6 +40,12 @@ export class AbstractMenuItem extends MenuNode {
         this.menuNodeType = "menuitem";
 
         /**
+         * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
+         * @type {null|String}
+         */
+        this.targetKey = null;
+
+        /**
          * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
          * will toggle both on and off and none will cause the item to not be toggleable.
          * @type {string}

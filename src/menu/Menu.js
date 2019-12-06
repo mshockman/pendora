@@ -1,6 +1,6 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
-import {addClasses} from "core/utility";
+import {addClasses, modulo} from "core/utility";
 import {parseBoolean, parseIntValue, parseAny, parseHTML} from "core/utility";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
@@ -82,6 +82,7 @@ export class AbstractMenu extends MenuNode {
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
+        this.on('menu.keypress', (topic) => this.onMenuKeyPress(topic));
     }
 
     activate() {
@@ -266,6 +267,14 @@ export class AbstractMenu extends MenuNode {
         return -1;
     }
 
+    get firstChild() {
+        return this.children[0];
+    }
+
+    get lastChild() {
+        return this.children[this.children.length-1];
+    }
+
     clearActiveChild() {
         for(let child of this.children) {
             if(child.isActive) {
@@ -331,6 +340,143 @@ export class AbstractMenu extends MenuNode {
     onSelect() {
         if(this.closeOnSelect && this.isActive) {
             this.deactivate();
+        }
+    }
+
+    onMenuKeyPress(topic) {
+        let event = topic.originalEvent,
+            key = event.key,
+            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
+
+        if(arrowKeyPressed && this.direction === 'horizontal') {
+            let index = this.activeIndex,
+                children = this.children;
+
+            if(key === 'ArrowLeft') {
+                if(index === -1) {
+                    if(children[children.length-1]) children[children.length-1].activate(this.isRoot);
+                } else {
+                    children[modulo(index-1, children.length)].activate(this.isRoot);
+                }
+                return;
+            } else if(key === 'ArrowRight') {
+                if(index === -1) {
+                    if(children[0]) children[0].activate(this.isRoot);
+                } else {
+                    children[modulo(index+1, children.length)].activate(this.isRoot);
+                }
+                return;
+            } else if(key === 'ArrowDown') {
+                let child = children[index];
+
+                if(child && child.submenu && !child.submenu.isVisible) {
+                    child.showSubMenu();
+                    if(child.submenu.firstChild) child.submenu.firstChild.activate(false);
+                    return;
+                } else if(child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
+                    child.submenu.firstChild.activate(false);
+                    return;
+                } else if(!child && this.firstChild) {
+                    this.firstChild.activate(this.isRoot);
+                    return;
+                }
+            } else if(key === 'ArrowUp') {
+                if(!this.isRoot) {
+                    this.deactivate();
+                } else {
+                    let child = children[index];
+
+                    if(child && child.submenu && child.submenu.lastChild) {
+                        if(!child.submenu.isVisible) child.showSubMenu();
+                        child.submenu.lastChild.activate(false);
+                    }
+
+                    return;
+                }
+            }
+        } else if(arrowKeyPressed && this.direction === 'vertical') {
+            let index = this.activeIndex,
+                children = this.children;
+
+            if(key === 'ArrowUp') {
+                if(index === -1) {
+                    if(children[children.length-1]) children[children.length-1].activate(this.isRoot);
+                } else {
+                    children[modulo(index-1, children.length)].activate(this.isRoot);
+                }
+                return;
+            } else if(key === 'ArrowDown') {
+                if(index === -1) {
+                    if(children[0]) children[0].activate(this.isRoot);
+                } else {
+                    children[modulo(index+1, children.length)].activate(this.isRoot);
+                }
+                return;
+            } else if(key === 'ArrowRight') {
+                let child = children[index];
+
+                if(child && child.submenu && !child.submenu.isVisible) {
+                    child.showSubMenu();
+                    if(child.submenu.firstChild) child.submenu.firstChild.activate(false);
+                    return;
+                } else if(child && child.submenu && !child.submenu.activeChild && child.submenu.firstChild) {
+                    child.submenu.firstChild.activate(false);
+                    return;
+                } else if(!child && this.firstChild) {
+                    this.firstChild.activate(this.isRoot);
+                    return;
+                }
+            } else if(key === 'ArrowLeft') {
+                let child = children[index];
+
+                if(child && child.submenu && child.submenu.isVisible) {
+                    child.hideSubMenu();
+                    child.submenu.deactivate();
+                    return;
+                }
+            }
+        } else if(!arrowKeyPressed) {
+            if(key === 'Enter') {
+                if(this.activeChild) {
+                    if(this.activeChild.hasSubMenu()) {
+                        if(!this.activeChild.submenu.isVisible) {
+                            this.activeChild.showSubMenu();
+                            if(this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+                        }
+                    } else {
+                        this.activeChild.select();
+                    }
+                } else {
+                    this.firstChild.activate();
+
+                    if(this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
+                        this.firstChild.submenu.firstChild.activate(false);
+                    }
+                }
+            } else {
+                for(let child of this.children) {
+                    if(child.targetKey === key) {
+                        if(child.hasSubMenu()) {
+                            if(!child.isActive) {
+                                child.activate();
+                            } else if(!child.submenu.isVisible) {
+                                child.showSubMenu();
+                            }
+                        } else {
+                            child.select();
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return;
+        }
+
+        if(this.parentMenu) {
+            this.parentMenu.publish('menu.keypress', topic);
         }
     }
 
