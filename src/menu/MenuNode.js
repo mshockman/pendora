@@ -17,6 +17,7 @@ export default class MenuNode extends Publisher {
         this._children = [];
         this._props = {};
         this._eventListeners = {};
+        this._keyboardNavigationEnabled = false;
         this._timers = {};
         /**
          * @type {undefined|null|HTMLElement}
@@ -27,11 +28,10 @@ export default class MenuNode extends Publisher {
 
         this.nodeType = null;
         this.isController = false;
+        this.closeOnSelect = false;
 
         this.SubMenuClass = null;
         this.MenuItemClass = null;
-
-        this.enableKeyboardNavigation = false;
     }
 
     /**
@@ -63,26 +63,26 @@ export default class MenuNode extends Publisher {
         this.publish('init', this);
     }
 
+    initKeyboardNavigation() {
+        if(!this._keyboardNavigationEnabled) {
+            this._keyboardNavigationEnabled = true;
+            this.on('event.keydown', (topic) => this._rootKeyDown(topic));
+        }
+    }
+
     registerTopics() {
         if (this._isTopicInit) return;
         this._isTopicInit = true;
-
-        this.on('event.keydown', (topic) => this._rootKeyDown(topic));
     }
 
     /**
      * Unbinds all event listeners.
      */
     destroy() {
-        // if(this.events && this.hasElement()) {
-        //     this.element.removeEventListener('click', this.boundEvents.onClick);
-        //     this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
-        //     this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
-        // }
         this.clearAllRegisteredEvents();
 
         this.isController = false;
-        // this.boundEvents = null;
+        this.__keyboardNavigationEnabled = false;
         this.element = null;
 
         this.publish('destroy', this);
@@ -278,8 +278,8 @@ export default class MenuNode extends Publisher {
 
     /**
      * Checks to see if the element is contained within the menu node.  Has to check every child manually since
-     * it's not guaranteed that children are descendants of their parent menu nodes.  Probably a very costly method
-     * should be overused.
+     * it's not guaranteed that children are descendants of their parent menu nodes in the dom tree.  Probably a very
+     * costly method, shouldn't be overused.
      *
      * @param element
      * @returns {boolean}
@@ -855,22 +855,10 @@ export default class MenuNode extends Publisher {
                 return;
             }
 
-            if(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) !== -1) {
-                event.preventDefault();
-            }
-
             let activeItem = this.activeItem,
-                /**
-                 * @type AbstractMenu
-                 */
-                targetMenu = activeItem ? activeItem.parentMenu : this;
+                target = activeItem ? activeItem.parentMenu : this;
 
-            topic.activeItem = activeItem;
-            topic.targetMenu = targetMenu;
-
-            if(targetMenu) {
-                targetMenu.publish('menu.keypress', topic);
-            }
+            target._navigate(event);
         }
     }
 

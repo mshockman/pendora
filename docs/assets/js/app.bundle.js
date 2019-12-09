@@ -1059,6 +1059,45 @@ var privateCache = new Data();
 
 /***/ }),
 
+/***/ "./src/core/debounce.js":
+/*!******************************!*\
+  !*** ./src/core/debounce.js ***!
+  \******************************/
+/*! exports provided: debounce */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
+/**
+ * Throttles a function to only be executed after a given wait period.  If multiple calls to the debounced function
+ * are made within that period the waiting period is set.
+ * @param fn
+ * @param wait
+ * @returns {Function}
+ */
+function debounce(fn, wait) {
+  var timeout;
+  return function () {
+    var _this = this;
+
+    var args = arguments;
+
+    var later = function later() {
+      timeout = null;
+      fn.apply(_this, args);
+    };
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/***/ }),
+
 /***/ "./src/core/errors.js":
 /*!****************************!*\
   !*** ./src/core/errors.js ***!
@@ -4654,6 +4693,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.positioner = "inherit";
       _this.direction = "vertical";
+      _this.SubMenuClass = Menu;
+      _this.MenuItemClass = _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"];
       return _this;
     }
 
@@ -4739,9 +4780,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         this.on('menuitem.selected', function (event) {
           return _this2.onSelect(event);
         });
-        this.on('menu.keypress', function (topic) {
-          return _this2.onMenuKeyPress(topic);
-        });
       }
     }, {
       kind: "method",
@@ -4769,6 +4807,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
 
           if (parent) {
+            if (!parent.isActive) parent.activate();
             parent.publish('submenu.activate', this);
           }
 
@@ -5185,18 +5224,30 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         if (!item.isActive) item.activate(false);
         if (showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
       }
+      /**
+       * Handles keyboard navigation.
+       * @param event
+       * @param allowTargetKeys
+       * @param _depth
+       * @returns {boolean|boolean|*}
+       * @private
+       */
+
     }, {
       kind: "method",
-      key: "onMenuKeyPress",
-      value: function onMenuKeyPress(topic) {
-        var event = topic.originalEvent,
-            key = event.key,
-            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
-            arrowKeyPressed = arrowKeys.indexOf(key) !== -1,
+      key: "_navigate",
+      value: function _navigate(event) {
+        var allowTargetKeys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+        var _depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+        var key = event.key,
             ARROW_BACK = 'ArrowUp',
             ARROW_FORWARD = 'ArrowDown',
             ARROW_NEXT = 'ArrowRight',
-            ARROW_PREVIOUS = 'ArrowLeft';
+            ARROW_PREVIOUS = 'ArrowLeft',
+            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
 
         if (this.direction === 'vertical') {
           ARROW_BACK = 'ArrowLeft';
@@ -5218,7 +5269,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index - 1, children.length)], this.isRoot);
             }
 
-            return;
+            event.preventDefault();
+            return true;
           } else if (key === ARROW_NEXT) {
             if (index === -1) {
               this._navigateToItem(children[0], this.isRoot);
@@ -5226,9 +5278,10 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index + 1, children.length)], this.isRoot);
             }
 
-            return;
+            event.preventDefault();
+            return true;
           } else if (key === ARROW_FORWARD) {
-            if (child && child.hasSubMenu()) {
+            if (child && child.hasSubMenu() && (!child.submenu.isVisible || !child.submenu.activeChild)) {
               var ret = false;
 
               if (!child.submenu.isVisible) {
@@ -5236,17 +5289,18 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                 child.showSubMenu();
               }
 
-              if (!child.submenu.activeChild) {
-                var firstChild = child.submenu.firstEnabledChild;
+              var firstChild = child.submenu.firstEnabledChild;
 
-                if (firstChild) {
-                  ret = true;
+              if (firstChild) {
+                ret = true;
 
-                  this._navigateToItem(firstChild, false);
-                }
+                this._navigateToItem(firstChild, false);
               }
 
-              if (ret) return;
+              if (ret) {
+                event.preventDefault();
+                return true;
+              }
             } else if (!child) {
               var _firstChild = this.firstEnabledChild;
 
@@ -5255,68 +5309,101 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
                 if (_firstChild.hasSubMenu() && _firstChild.submenu.isVisible) {
                   var firstSubMenuChild = _firstChild.submenu.firstEnabledChild;
-                  if (firstSubMenuChild) this._navigateToItem(firstSubMenuChild, false);
+
+                  if (firstSubMenuChild) {
+                    this._navigateToItem(firstSubMenuChild, false);
+                  }
                 }
 
-                return;
+                event.preventDefault();
+                return true;
               }
+            } else if (!this.isRoot) {
+              return this.parent._navigate(event, allowTargetKeys, _depth + 1);
             }
           } else if (key === ARROW_BACK) {
             if (!this.isRoot) {
-              this.deactivate();
-            } else {
+              if (this.activeChild && this.activeChild.hasSubMenu() && this.activeChild.submenu.isVisible) {
+                this.activeChild.hideSubMenu();
+                event.preventDefault();
+                return true;
+              } else {
+                return this.parent._navigate(event, allowTargetKeys, _depth + 1);
+              }
+            } else if (_depth === 0) {
               if (child && child.submenu) {
-                if (!child.submenu.isVisible) child.showSubMenu();
-                var lastChild = child.submenu.lastEnabledChild;
-                if (lastChild) this._navigateToItem(lastChild, false);
+                return child._navigate(event, allowTargetKeys, 0);
               } else if (!child) {
                 var _firstChild2 = this.firstEnabledChild;
 
                 if (_firstChild2) {
-                  this._navigateToItem(_firstChild2, this.isRoot);
-
-                  if (_firstChild2.hasSubMenu() && _firstChild2.submenu.isVisible) {
-                    var lastSubMenuChild = _firstChild2.submenu.lastEnabledChild;
-                    if (lastSubMenuChild) this._navigateToItem(lastSubMenuChild, false);
-                  }
+                  return _firstChild2._navigate(event, allowTargetKeys, 0);
                 }
               }
-
-              return;
             }
           }
-        } else if (key === 'Enter') {
+        } else if (key === "Enter") {
           if (this.activeChild) {
             if (this.activeChild.hasSubMenu()) {
               if (!this.activeChild.submenu.isVisible) {
                 this.activeChild.showSubMenu();
-                if (this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+
+                if (this.activeChild.submenu.firstEnabledChild) {
+                  this.activeChild.submenu.firstEnabledChild.activate(false);
+                }
+
+                event.preventDefault();
+                return true;
+              } else if (!this.activeChild.submenu.activeChild) {
+                var _firstChild3 = this.activeChild.submenu.firstEnabledChild;
+
+                if (_firstChild3) {
+                  _firstChild3.activate(false);
+
+                  event.preventDefault();
+                  return true;
+                }
               }
             } else {
               this.activeChild.select();
+              event.preventDefault();
+              return true;
             }
           } else {
-            this.firstChild.activate();
+            var _firstChild4 = this.firstEnabledChild;
 
-            if (this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
-              this.firstChild.submenu.firstChild.activate(false);
+            if (_firstChild4) {
+              _firstChild4.activate();
+
+              if (_firstChild4.hasSubMenu()) {
+                _firstChild4.showSubMenu();
+
+                if (_firstChild4.submenu.firstEnabledChild) {
+                  _firstChild4.submenu.firstEnabledChild.activate(false);
+                }
+              }
+
+              event.preventDefault();
+              return true;
             }
           }
-
-          return;
-        } else if (!arrowKeyPressed) {
+        } else if (allowTargetKeys) {
           var _iteratorNormalCompletion6 = true;
           var _didIteratorError6 = false;
           var _iteratorError6 = undefined;
 
           try {
-            for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            for (var _iterator6 = this.enabledChildren[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
               var _child = _step6.value;
 
               if (_child.targetKey === key) {
+                event.preventDefault();
+
                 if (_child.hasSubMenu()) {
                   if (!_child.isActive) {
                     _child.activate();
+
+                    _child.showSubMenu();
                   } else if (!_child.submenu.isVisible) {
                     _child.showSubMenu();
                   }
@@ -5324,7 +5411,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                   _child.select();
                 }
 
-                break;
+                return true;
               }
             }
           } catch (err) {
@@ -5341,13 +5428,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               }
             }
           }
-
-          return;
         }
 
-        if (this.parentMenu) {
-          this.parentMenu.publish('menu.keypress', topic);
-        }
+        return false;
       }
       /**
        * Will return true if menu items should toggle on.
@@ -5550,8 +5633,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var MenuBar =
 /*#__PURE__*/
-function (_Menu) {
-  _inherits(MenuBar, _Menu);
+function (_AbstractMenu) {
+  _inherits(MenuBar, _AbstractMenu);
 
   function MenuBar() {
     var _this;
@@ -5573,34 +5656,36 @@ function (_Menu) {
         toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
-        _ref$deactivateOnItem = _ref.deactivateOnItemHover,
-        deactivateOnItemHover = _ref$deactivateOnItem === void 0 ? true : _ref$deactivateOnItem,
         _ref$delay = _ref.delay,
         delay = _ref$delay === void 0 ? false : _ref$delay,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "deactivateOnItemHover", "delay"]);
+        _ref$enableKeyboardNa = _ref.enableKeyboardNavigation,
+        enableKeyboardNavigation = _ref$enableKeyboardNa === void 0 ? true : _ref$enableKeyboardNa,
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
 
     _classCallCheck(this, MenuBar);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, _objectSpread({
-      target: target,
-      closeOnBlur: closeOnBlur,
-      timeout: timeout,
-      autoActivate: autoActivate,
-      multiple: multiple,
-      openOnHover: openOnHover,
-      toggle: toggle,
-      closeOnSelect: closeOnSelect,
-      deactivateOnItemHover: deactivateOnItemHover,
-      delay: false
-    }, context)));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this));
     _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
     _this.direction = 'horizontal';
     _this.enableKeyboardNavigation = true;
+    _this.closeOnBlur = closeOnBlur;
+    _this.timeout = timeout;
+    _this.autoActivate = autoActivate;
+    _this.openOnHover = openOnHover;
+    _this.toggle = toggle;
+    _this.closeOnSelect = closeOnSelect;
+    _this.delay = delay;
+
+    if (target) {
+      _this.element = target;
+    } else {
+      _this.element = _this.render(context);
+    }
 
     _this.SubMenuClass =
     /*#__PURE__*/
-    function (_Menu2) {
-      _inherits(SubMenu, _Menu2);
+    function (_Menu) {
+      _inherits(SubMenu, _Menu);
 
       function SubMenu() {
         var _this2;
@@ -5620,6 +5705,17 @@ function (_Menu) {
     }(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
     _this.isVisible = true;
+
+    _this.registerTopics();
+
+    _this.parseDOM();
+
+    _this.init();
+
+    if (enableKeyboardNavigation) {
+      _this.initKeyboardNavigation();
+    }
+
     return _this;
   }
 
@@ -5638,7 +5734,7 @@ function (_Menu) {
   }]);
 
   return MenuBar;
-}(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
+}(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
 autoloader__WEBPACK_IMPORTED_MODULE_1__["default"].register('menubar', function (element) {
@@ -5941,6 +6037,12 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           };
 
           this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
+        }
+
+        var parent = this.parent;
+
+        if (parent && !parent.isActive) {
+          parent.activate();
         }
 
         this.dispatchTopic('menuitem.activate', this);
@@ -6343,6 +6445,18 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       value: function text(value) {
         this.button.innerText = value;
       }
+    }, {
+      kind: "method",
+      key: "_navigate",
+      value: function _navigate(event) {
+        var _depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+        if (_depth === 0 && this.hasSubMenu()) {
+          return this.submenu._navigate(event, 0);
+        } else {
+          return this.parent._navigate(event, _depth);
+        }
+      }
     }]
   };
 }, _MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
@@ -6513,6 +6627,7 @@ function (_Publisher) {
     _this._children = [];
     _this._props = {};
     _this._eventListeners = {};
+    _this._keyboardNavigationEnabled = false;
     _this._timers = {};
     /**
      * @type {undefined|null|HTMLElement}
@@ -6523,9 +6638,9 @@ function (_Publisher) {
     _this.menuNodeType = "node";
     _this.nodeType = null;
     _this.isController = false;
+    _this.closeOnSelect = false;
     _this.SubMenuClass = null;
     _this.MenuItemClass = null;
-    _this.enableKeyboardNavigation = false;
     return _this;
   }
   /**
@@ -6561,15 +6676,22 @@ function (_Publisher) {
       this.publish('init', this);
     }
   }, {
-    key: "registerTopics",
-    value: function registerTopics() {
+    key: "initKeyboardNavigation",
+    value: function initKeyboardNavigation() {
       var _this3 = this;
 
+      if (!this._keyboardNavigationEnabled) {
+        this._keyboardNavigationEnabled = true;
+        this.on('event.keydown', function (topic) {
+          return _this3._rootKeyDown(topic);
+        });
+      }
+    }
+  }, {
+    key: "registerTopics",
+    value: function registerTopics() {
       if (this._isTopicInit) return;
       this._isTopicInit = true;
-      this.on('event.keydown', function (topic) {
-        return _this3._rootKeyDown(topic);
-      });
     }
     /**
      * Unbinds all event listeners.
@@ -6578,14 +6700,9 @@ function (_Publisher) {
   }, {
     key: "destroy",
     value: function destroy() {
-      // if(this.events && this.hasElement()) {
-      //     this.element.removeEventListener('click', this.boundEvents.onClick);
-      //     this.element.removeEventListener('onMouseOut', this.boundEvents.onMouseOut);
-      //     this.element.removeEventListener('onMouseOver', this.boundEvents.onMouseOver);
-      // }
       this.clearAllRegisteredEvents();
-      this.isController = false; // this.boundEvents = null;
-
+      this.isController = false;
+      this.__keyboardNavigationEnabled = false;
       this.element = null;
       this.publish('destroy', this);
     }
@@ -6681,8 +6798,8 @@ function (_Publisher) {
     }
     /**
      * Checks to see if the element is contained within the menu node.  Has to check every child manually since
-     * it's not guaranteed that children are descendants of their parent menu nodes.  Probably a very costly method
-     * should be overused.
+     * it's not guaranteed that children are descendants of their parent menu nodes in the dom tree.  Probably a very
+     * costly method, shouldn't be overused.
      *
      * @param element
      * @returns {boolean}
@@ -7377,22 +7494,10 @@ function (_Publisher) {
           return;
         }
 
-        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(event.key) !== -1) {
-          event.preventDefault();
-        }
-
         var activeItem = this.activeItem,
+            target = activeItem ? activeItem.parentMenu : this;
 
-        /**
-         * @type AbstractMenu
-         */
-        targetMenu = activeItem ? activeItem.parentMenu : this;
-        topic.activeItem = activeItem;
-        topic.targetMenu = targetMenu;
-
-        if (targetMenu) {
-          targetMenu.publish('menu.keypress', topic);
-        }
+        target._navigate(event);
       }
     } //------------------------------------------------------------------------------------------------------------------
     // Tree parsing functions.
@@ -7888,6 +7993,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
 /* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
 /* harmony import */ var _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../ui/ItemFilter */ "./src/ui/ItemFilter.js");
+/* harmony import */ var _core_debounce__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../core/debounce */ "./src/core/debounce.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
@@ -7958,6 +8064,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
@@ -7973,7 +8080,8 @@ function (_AbstractMenuItem) {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         target = _ref.target,
         text = _ref.text,
-        value = _ref.value,
+        _ref$value = _ref.value,
+        value = _ref$value === void 0 ? null : _ref$value,
         _ref$id = _ref.id,
         id = _ref$id === void 0 ? null : _ref$id,
         _ref$classes = _ref.classes,
@@ -7987,8 +8095,7 @@ function (_AbstractMenuItem) {
       _this.element = target;
     } else {
       _this.element = _this.render({
-        text: text,
-        value: value
+        text: text
       });
     }
 
@@ -8023,12 +8130,15 @@ function (_AbstractMenuItem) {
 
     _this.parseDOM();
 
+    if (value !== null && value !== undefined) {
+      _this.value = value;
+    }
+
     return _this;
   }
   /**
    * Creates the dom elements for the SelectOption.
    * @param text
-   * @param value
    * @returns {Element}
    */
 
@@ -8036,9 +8146,8 @@ function (_AbstractMenuItem) {
   _createClass(SelectOption, [{
     key: "render",
     value: function render(_ref2) {
-      var text = _ref2.text,
-          value = _ref2.value;
-      var html = "<li data-role=\"menuitem\" class=\"menuitem\" data-value=\"".concat(value, "\"><a>").concat(text, "</a></li>"),
+      var text = _ref2.text;
+      var html = "<li data-role=\"menuitem\" class=\"menuitem\"><a data-text>".concat(text, "</a></li>"),
           fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
     }
@@ -8168,6 +8277,18 @@ function (_AbstractMenuItem) {
         } else {
           this.element.classList.remove('selected');
         }
+      }
+    }
+  }, {
+    key: "isFiltered",
+    get: function get() {
+      return this.classList.contains('filtered');
+    },
+    set: function set(value) {
+      if (value) {
+        this.classList.add('filtered');
+      } else {
+        this.classList.remove('filtered');
       }
     }
     /**
@@ -8353,6 +8474,35 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         if (!this.isVisible) {
           this.clearFilter();
 
+          if (!this.multiSelect) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+              for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var child = _step2.value;
+
+                if (child.isSelected && !child.isActive) {
+                  child.activate();
+                }
+              }
+            } catch (err) {
+              _didIteratorError2 = true;
+              _iteratorError2 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                  _iterator2["return"]();
+                }
+              } finally {
+                if (_didIteratorError2) {
+                  throw _iteratorError2;
+                }
+              }
+            }
+          }
+
           _get(_getPrototypeOf(SelectMenu.prototype), "show", this).call(this);
         }
       }
@@ -8376,36 +8526,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
         _get(_getPrototypeOf(SelectMenu.prototype), "registerTopics", this).call(this);
 
-        this.on('menu.show', function (menu) {
-          if (!_this3.multiSelect) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-              for (var _iterator2 = menu.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var child = _step2.value;
-
-                if (child.element.classList.contains('selected') && !child.isActive) {
-                  child.activate();
-                }
-              }
-            } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
-                }
-              } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
-                }
-              }
-            }
-          }
-        });
         this.on('option.select', function (topic) {
           if (!_this3.multiSelect) {
             var _iteratorNormalCompletion3 = true;
@@ -8535,6 +8655,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           return this.clearFilter();
         }
 
+        this.element.classList.add('items-filtered');
         var _iteratorNormalCompletion5 = true;
         var _didIteratorError5 = false;
         var _iteratorError5 = undefined;
@@ -8543,10 +8664,10 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           for (var _iterator5 = this.options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
             var option = _step5.value;
 
-            if (fn(option)) {
-              option.classList.remove('filtered');
+            if (!fn(option)) {
+              option.isFiltered = false;
             } else {
-              option.classList.add('filtered');
+              option.isFiltered = true;
             }
           }
         } catch (err) {
@@ -8615,6 +8736,8 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         if (this.filterInput) {
           this.filterInput.value = "";
         }
+
+        this.element.classList.remove('items-filtered');
       }
     }, {
       kind: "method",
@@ -8629,7 +8752,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
             var option = _step7.value;
 
-            if (option.classList.contains('filtered')) {
+            if (option.isFiltered) {
               r.push(option);
             }
           }
@@ -9300,7 +9423,11 @@ function (_AbstractMenuItem3) {
         _ref6$submenu = _ref6.submenu,
         submenu = _ref6$submenu === void 0 ? null : _ref6$submenu,
         _ref6$widget = _ref6.widget,
-        widget = _ref6$widget === void 0 ? null : _ref6$widget;
+        widget = _ref6$widget === void 0 ? null : _ref6$widget,
+        _ref6$wait = _ref6.wait,
+        wait = _ref6$wait === void 0 ? 500 : _ref6$wait,
+        _ref6$filter = _ref6.filter,
+        filter = _ref6$filter === void 0 ? FILTERS.istartsWith : _ref6$filter;
 
     _classCallCheck(this, ComboBox);
 
@@ -9331,10 +9458,10 @@ function (_AbstractMenuItem3) {
     _this7.closeOnBlur = true;
     _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
     _this7.closeOnSelect = true;
+    _this7._label = '';
+    _this7.enableKeyboardNavigation = true;
     _this7.SubMenuClass = SelectMenu;
     _this7.element.tabIndex = 0;
-
-    _this7.registerTopics();
 
     _this7.parseDOM();
 
@@ -9366,6 +9493,48 @@ function (_AbstractMenuItem3) {
       _this7.widget = widget;
     }
 
+    _this7.textbox.addEventListener('blur', function (event) {
+      if (!_this7.containsElement(event.relatedTarget)) {
+        _this7.textbox.value = _this7._label;
+      }
+    });
+
+    _this7.textbox.addEventListener('input', function (event) {
+      _this7.submenu.filter(filter(_this7.textbox.value));
+
+      var _iteratorNormalCompletion14 = true;
+      var _didIteratorError14 = false;
+      var _iteratorError14 = undefined;
+
+      try {
+        for (var _iterator14 = _this7.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+          var option = _step14.value;
+
+          if (!option.isDisabled && !option.isFiltered) {
+            option.activate();
+            break;
+          }
+        }
+      } catch (err) {
+        _didIteratorError14 = true;
+        _iteratorError14 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+            _iterator14["return"]();
+          }
+        } finally {
+          if (_didIteratorError14) {
+            throw _iteratorError14;
+          }
+        }
+      }
+    });
+
+    _this7.initKeyboardNavigation();
+
+    _this7.registerTopics();
+
     _this7.init();
 
     return _this7;
@@ -9380,12 +9549,18 @@ function (_AbstractMenuItem3) {
 
       this.on('option.select', function () {
         _this8._renderLabel();
+
+        if (_this8.closeOnSelect) {
+          _this8.deactivate();
+        }
       });
       this.on('option.deselect', function () {
         _this8._renderLabel();
       });
-      this.on('event.click', function () {
-        _this8.input.focus();
+      this.on('event.click', function (event) {
+        event.originalEvent.preventDefault();
+
+        _this8.textbox.focus();
       });
     }
   }, {
@@ -9406,16 +9581,24 @@ function (_AbstractMenuItem3) {
       return this.submenu.append(option);
     } //------------------------------------------------------------------------------------------------------------------
     // Event & topic handling methods
-    //------------------------------------------------------------------------------------------------------------------
+
+  }, {
+    key: "onSelect",
+    value: function onSelect(topic) {
+      return _get(_getPrototypeOf(ComboBox.prototype), "onSelect", this).call(this, topic);
+    } //------------------------------------------------------------------------------------------------------------------
     // Private methods
 
   }, {
     key: "_renderLabel",
     value: function _renderLabel() {
-      var labels = this.selectedOptions.map(function (item) {
+      var options = this.selectedOptions,
+          labels = options.map(function (item) {
         return item.text;
       });
-      this.value = labels.join(", ");
+      this.value = options.length ? options[0].value || options[0].text || '' : '';
+      this._label = labels.join(", ");
+      this.textbox.value = this._label;
     } //------------------------------------------------------------------------------------------------------------------
     // Properties
 
@@ -9474,29 +9657,30 @@ function (_AbstractMenuItem3) {
       }
 
       var instance = new ComboBox();
-      var _iteratorNormalCompletion14 = true;
-      var _didIteratorError14 = false;
-      var _iteratorError14 = undefined;
+      var _iteratorNormalCompletion15 = true;
+      var _didIteratorError15 = false;
+      var _iteratorError15 = undefined;
 
       try {
-        for (var _iterator14 = element.querySelectorAll('li')[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-          var child = _step14.value;
+        for (var _iterator15 = element.querySelectorAll('li')[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+          var child = _step15.value;
           var option = new SelectOption({
-            text: child.innerHTML.trim()
+            text: child.innerHTML.trim(),
+            value: child.dataset.value || null
           });
           instance.append(option);
         }
       } catch (err) {
-        _didIteratorError14 = true;
-        _iteratorError14 = err;
+        _didIteratorError15 = true;
+        _iteratorError15 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
-            _iterator14["return"]();
+          if (!_iteratorNormalCompletion15 && _iterator15["return"] != null) {
+            _iterator15["return"]();
           }
         } finally {
-          if (_didIteratorError14) {
-            throw _iteratorError14;
+          if (_didIteratorError15) {
+            throw _iteratorError15;
           }
         }
       }

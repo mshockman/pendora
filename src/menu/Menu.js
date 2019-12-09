@@ -48,6 +48,9 @@ export class AbstractMenu extends MenuNode {
         this.delay = false; // sub-item property
         this.positioner = "inherit";
         this.direction = "vertical";
+
+        this.SubMenuClass = Menu;
+        this.MenuItemClass = MenuItem;
     }
 
     registerTopics() {
@@ -82,7 +85,6 @@ export class AbstractMenu extends MenuNode {
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
         this.on('menuitem.selected', (event) => this.onSelect(event));
-        this.on('menu.keypress', (topic) => this.onMenuKeyPress(topic));
     }
 
     activate() {
@@ -109,6 +111,7 @@ export class AbstractMenu extends MenuNode {
 
             // Notify parent that submenu activated.
             if(parent) {
+                if(!parent.isActive) parent.activate();
                 parent.publish('submenu.activate', this);
             }
 
@@ -392,15 +395,22 @@ export class AbstractMenu extends MenuNode {
         if(showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
     }
 
-    onMenuKeyPress(topic) {
-        let event = topic.originalEvent,
-            key = event.key,
-            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
-            arrowKeyPressed = arrowKeys.indexOf(key) !== -1,
+    /**
+     * Handles keyboard navigation.
+     * @param event
+     * @param allowTargetKeys
+     * @param _depth
+     * @returns {boolean|boolean|*}
+     * @private
+     */
+    _navigate(event, allowTargetKeys=true, _depth=0) {
+        let key = event.key,
             ARROW_BACK = 'ArrowUp',
             ARROW_FORWARD = 'ArrowDown',
             ARROW_NEXT = 'ArrowRight',
-            ARROW_PREVIOUS = 'ArrowLeft';
+            ARROW_PREVIOUS = 'ArrowLeft',
+            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
 
         if(this.direction === 'vertical') {
             ARROW_BACK = 'ArrowLeft';
@@ -422,91 +432,131 @@ export class AbstractMenu extends MenuNode {
                     this._navigateToItem(children[modulo(index-1, children.length)], this.isRoot);
                 }
 
-                return;
+                event.preventDefault();
+                return true;
             } else if(key === ARROW_NEXT) {
                 if(index === -1) {
                     this._navigateToItem(children[0], this.isRoot);
                 } else {
                     this._navigateToItem(children[modulo(index+1, children.length)], this.isRoot);
                 }
-                return;
+
+                event.preventDefault();
+                return true;
             } else if(key === ARROW_FORWARD) {
-                if(child && child.hasSubMenu()) {
+                if(child && child.hasSubMenu() && (!child.submenu.isVisible || !child.submenu.activeChild)) {
                     let ret = false;
+
                     if(!child.submenu.isVisible) {
                         ret = true;
                         child.showSubMenu();
                     }
 
-                    if(!child.submenu.activeChild) {
-                        let firstChild = child.submenu.firstEnabledChild;
-                        if(firstChild) {
-                            ret = true;
-                            this._navigateToItem(firstChild, false);
-                        }
+                    let firstChild = child.submenu.firstEnabledChild;
+
+                    if(firstChild) {
+                        ret = true;
+                        this._navigateToItem(firstChild, false);
                     }
 
-                    if(ret) return;
+                    if(ret) {
+                        event.preventDefault();
+                        return true;
+                    }
                 } else if(!child) {
                     let firstChild = this.firstEnabledChild;
+
                     if(firstChild) {
                         this._navigateToItem(firstChild, this.isRoot);
 
                         if(firstChild.hasSubMenu() && firstChild.submenu.isVisible) {
                             let firstSubMenuChild = firstChild.submenu.firstEnabledChild;
-                            if(firstSubMenuChild) this._navigateToItem(firstSubMenuChild, false);
+
+                            if(firstSubMenuChild) {
+                                this._navigateToItem(firstSubMenuChild, false);
+                            }
                         }
-                        return;
+
+                        event.preventDefault();
+                        return true;
                     }
+                } else if(!this.isRoot) {
+                    return this.parent._navigate(event, allowTargetKeys, _depth+1);
                 }
             } else if(key === ARROW_BACK) {
                 if(!this.isRoot) {
-                    this.deactivate();
-                } else {
+                    if (this.activeChild && this.activeChild.hasSubMenu() && this.activeChild.submenu.isVisible) {
+                        this.activeChild.hideSubMenu();
+                        event.preventDefault();
+                        return true;
+                    } else {
+                        return this.parent._navigate(event, allowTargetKeys, _depth + 1);
+                    }
+                } else if(_depth === 0) {
                     if(child && child.submenu) {
-                        if(!child.submenu.isVisible) child.showSubMenu();
-                        let lastChild = child.submenu.lastEnabledChild;
-                        if(lastChild) this._navigateToItem(lastChild, false);
+                        return child._navigate(event, allowTargetKeys, 0);
                     } else if(!child) {
                         let firstChild = this.firstEnabledChild;
-                        if(firstChild) {
-                            this._navigateToItem(firstChild, this.isRoot);
 
-                            if(firstChild.hasSubMenu() && firstChild.submenu.isVisible) {
-                                let lastSubMenuChild = firstChild.submenu.lastEnabledChild;
-                                if(lastSubMenuChild) this._navigateToItem(lastSubMenuChild, false);
-                            }
+                        if(firstChild) {
+                            return firstChild._navigate(event, allowTargetKeys, 0);
                         }
                     }
-
-                    return;
                 }
             }
-        } else if(key === 'Enter') {
+        } else if(key === "Enter") {
             if(this.activeChild) {
                 if(this.activeChild.hasSubMenu()) {
                     if(!this.activeChild.submenu.isVisible) {
                         this.activeChild.showSubMenu();
-                        if(this.activeChild.submenu.firstChild) this.activeChild.submenu.firstChild.activate();
+
+                        if(this.activeChild.submenu.firstEnabledChild) {
+                            this.activeChild.submenu.firstEnabledChild.activate(false);
+                        }
+
+                        event.preventDefault();
+                        return true;
+                    } else if(!this.activeChild.submenu.activeChild) {
+                        let firstChild = this.activeChild.submenu.firstEnabledChild;
+
+                        if(firstChild) {
+                            firstChild.activate(false);
+                            event.preventDefault();
+                            return true;
+                        }
                     }
                 } else {
                     this.activeChild.select();
+                    event.preventDefault();
+                    return true;
                 }
             } else {
-                this.firstChild.activate();
+                let firstChild = this.firstEnabledChild;
 
-                if(this.firstChild.hasSubMenu() && this.firstChild.submenu.firstChild) {
-                    this.firstChild.submenu.firstChild.activate(false);
+                if(firstChild) {
+                    firstChild.activate();
+
+                    if(firstChild.hasSubMenu()) {
+                        firstChild.showSubMenu();
+
+                        if(firstChild.submenu.firstEnabledChild) {
+                            firstChild.submenu.firstEnabledChild.activate(false);
+                        }
+                    }
+
+                    event.preventDefault();
+                    return true;
                 }
             }
-
-            return;
-        } else if(!arrowKeyPressed) {
-            for(let child of this.children) {
+        } else if(allowTargetKeys) {
+            for(let child of this.enabledChildren) {
                 if(child.targetKey === key) {
+                    event.preventDefault();
+
                     if(child.hasSubMenu()) {
                         if(!child.isActive) {
                             child.activate();
+                            child.showSubMenu();
                         } else if(!child.submenu.isVisible) {
                             child.showSubMenu();
                         }
@@ -514,16 +564,12 @@ export class AbstractMenu extends MenuNode {
                         child.select();
                     }
 
-                    break;
+                    return true;
                 }
             }
-
-            return;
         }
 
-        if(this.parentMenu) {
-            this.parentMenu.publish('menu.keypress', topic);
-        }
+        return false;
     }
 
     /**

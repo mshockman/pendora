@@ -156,6 +156,11 @@ export class AbstractMenuItem extends MenuNode {
             this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
         }
 
+        let parent = this.parent;
+        if(parent && !parent.isActive) {
+            parent.activate();
+        }
+
         this.dispatchTopic('menuitem.activate', this);
     }
 
@@ -482,6 +487,14 @@ export class AbstractMenuItem extends MenuNode {
 
     set text(value) {
         this.button.innerText = value;
+    }
+
+    _navigate(event, _depth=0) {
+        if(_depth === 0 && this.hasSubMenu()) {
+            return this.submenu._navigate(event, 0);
+        } else {
+            return this.parent._navigate(event, _depth);
+        }
     }
 }
 

@@ -8,19 +8,20 @@ import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
 import {SelectInputWidget, HiddenInputWidget} from "../forms/";
 import ItemFilter from "../ui/ItemFilter";
+import {debounce} from "../core/debounce";
 
 
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
 export class SelectOption extends AbstractMenuItem {
-    constructor({target, text, value, id=null, classes=null}={}) {
+    constructor({target, text, value=null, id=null, classes=null}={}) {
         super();
 
         if(target) {
             this.element = target;
         } else {
-            this.element = this.render({text, value});
+            this.element = this.render({text});
         }
 
         this.textNode = this.element.querySelector('[data-text], button, a');
@@ -54,16 +55,19 @@ export class SelectOption extends AbstractMenuItem {
 
         this.registerTopics();
         this.parseDOM();
+
+        if(value !== null && value !== undefined) {
+            this.value = value;
+        }
     }
 
     /**
      * Creates the dom elements for the SelectOption.
      * @param text
-     * @param value
      * @returns {Element}
      */
-    render({text, value}) {
-        let html = `<li data-role="menuitem" class="menuitem" data-value="${value}"><a>${text}</a></li>`,
+    render({text}) {
+        let html = `<li data-role="menuitem" class="menuitem"><a data-text>${text}</a></li>`,
             fragment = parseHTML(html);
 
         return fragment.children[0];
@@ -153,6 +157,18 @@ export class SelectOption extends AbstractMenuItem {
             } else {
                 this.element.classList.remove('selected');
             }
+        }
+    }
+
+    get isFiltered() {
+        return this.classList.contains('filtered');
+    }
+
+    set isFiltered(value) {
+        if(value) {
+            this.classList.add('filtered');
+        } else {
+            this.classList.remove('filtered');
         }
     }
 
@@ -292,6 +308,15 @@ export class SelectMenu extends AbstractMenu {
     show() {
         if(!this.isVisible) {
             this.clearFilter();
+
+            if(!this.multiSelect) {
+                for (let child of this.children) {
+                    if (child.isSelected && !child.isActive) {
+                        child.activate();
+                    }
+                }
+            }
+
             super.show();
         }
     }
@@ -311,16 +336,6 @@ export class SelectMenu extends AbstractMenu {
 
     registerTopics() {
         super.registerTopics();
-
-        this.on('menu.show', menu => {
-            if(!this.multiSelect) {
-                for (let child of menu.children) {
-                    if (child.element.classList.contains('selected') && !child.isActive) {
-                        child.activate();
-                    }
-                }
-            }
-        });
 
         this.on('option.select', topic => {
             if(!this.multiSelect) {
@@ -398,11 +413,13 @@ export class SelectMenu extends AbstractMenu {
             return this.clearFilter();
         }
 
+        this.element.classList.add('items-filtered');
+
         for(let option of this.options) {
-            if(fn(option)) {
-                option.classList.remove('filtered');
+            if(!fn(option)) {
+                option.isFiltered = false;
             } else {
-                option.classList.add('filtered');
+                option.isFiltered = true;
             }
         }
 
@@ -433,13 +450,15 @@ export class SelectMenu extends AbstractMenu {
         if(this.filterInput) {
             this.filterInput.value = "";
         }
+
+        this.element.classList.remove('items-filtered');
     }
 
     getFilteredItems() {
         let r = [];
 
         for(let option of this.options) {
-            if(option.classList.contains('filtered')) {
+            if(option.isFiltered) {
                 r.push(option);
             }
         }
@@ -907,7 +926,7 @@ export class Select2 extends AbstractMenuItem {
 
 
 export class ComboBox extends AbstractMenuItem {
-    constructor({target=null, timeout=false, submenu=null, widget=null}={}) {
+    constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith}={}) {
         super();
 
         if(target) {
@@ -932,12 +951,13 @@ export class ComboBox extends AbstractMenuItem {
         this.closeOnBlur = true;
         this.positioner = positioners.DROPDOWN;
         this.closeOnSelect = true;
+        this._label = '';
+        this.enableKeyboardNavigation = true;
 
         this.SubMenuClass = SelectMenu;
 
         this.element.tabIndex = 0;
 
-        this.registerTopics();
         this.parseDOM();
 
         if(submenu) {
@@ -963,6 +983,25 @@ export class ComboBox extends AbstractMenuItem {
             this.widget = widget;
         }
 
+        this.textbox.addEventListener('blur', event => {
+            if(!this.containsElement(event.relatedTarget)) {
+                this.textbox.value = this._label;
+            }
+        });
+
+        this.textbox.addEventListener('input', event => {
+            this.submenu.filter(filter(this.textbox.value));
+
+            for(let option of this.submenu.options) {
+                if(!option.isDisabled && !option.isFiltered) {
+                    option.activate();
+                    break;
+                }
+            }
+        });
+
+        this.initKeyboardNavigation();
+        this.registerTopics();
         this.init();
     }
 
@@ -971,14 +1010,19 @@ export class ComboBox extends AbstractMenuItem {
 
         this.on('option.select', () => {
             this._renderLabel();
+
+            if(this.closeOnSelect) {
+                this.deactivate();
+            }
         });
 
         this.on('option.deselect', () => {
             this._renderLabel();
         });
 
-        this.on('event.click', () => {
-            this.input.focus();
+        this.on('event.click', (event) => {
+            event.originalEvent.preventDefault();
+            this.textbox.focus();
         });
     }
 
@@ -1007,12 +1051,20 @@ export class ComboBox extends AbstractMenuItem {
     //------------------------------------------------------------------------------------------------------------------
     // Event & topic handling methods
 
+    onSelect(topic) {
+        return super.onSelect(topic);
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Private methods
 
     _renderLabel() {
-        let labels = this.selectedOptions.map(item => item.text);
-        this.value = labels.join(", ");
+        let options = this.selectedOptions,
+            labels = options.map(item => item.text);
+
+        this.value = options.length ? options[0].value || options[0].text || '' : '';
+        this._label = labels.join(", ");
+        this.textbox.value = this._label;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -1076,7 +1128,7 @@ export class ComboBox extends AbstractMenuItem {
         let instance = new ComboBox();
 
         for(let child of element.querySelectorAll('li')) {
-            let option = new SelectOption({text: child.innerHTML.trim()});
+            let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
             instance.append(option);
         }
 
