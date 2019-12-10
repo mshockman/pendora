@@ -20,7 +20,7 @@ export const MENU_PARAMETERS = {
     openOnHover: timeAttribute,
     closeOnSelect: boolAttribute,
     delay: timeAttribute,
-    toggle: stringAttribute,
+    toggle: boolAttribute,
     visible: boolAttribute
 };
 
@@ -43,7 +43,7 @@ export class AbstractMenu extends MenuNode {
         this.timeout = false; // both sub-item and menu
         this.autoActivate = false; // sub-item property
         this.openOnHover = false; // sub-item property
-        this.toggle = "none";
+        this.toggle = false;
         this.closeOnSelect = true; // both sub-item and menu.
         this.delay = false; // sub-item property
         this.positioner = "inherit";
@@ -364,9 +364,9 @@ export class AbstractMenu extends MenuNode {
 
     onClick(event) {
         if(event.target === this) {
-            if(this.isActive && this.toggleOff) {
+            if(this.isActive && this.toggle) {
                 this.deactivate();
-            } else if(!this.isActive && this.toggleOn) {
+            } else if(!this.isActive) {
                 this.activate();
             }
         }
@@ -621,7 +621,7 @@ export default class Menu extends AbstractMenu {
      * @param timeout {Boolean|Number}
      * @param autoActivate {Boolean|Number}
      * @param openOnHover {Boolean|Number}
-     * @param toggle {"on"|"off"|"both"|"none"}
+     * @param toggle {boolean}
      * @param closeOnSelect {Boolean}
      * @param delay {Boolean|Number}
      * @param id {String}
@@ -632,7 +632,7 @@ export default class Menu extends AbstractMenu {
      * @param context
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle="on", closeOnSelect=true, delay=0, id=null, classes=null,
+                    toggle=false, closeOnSelect=true, delay=0, id=null, classes=null,
                     children=null, visible=false, filter=false, ...context}={}) {
         super();
         this.events = null;

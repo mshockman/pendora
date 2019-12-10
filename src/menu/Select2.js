@@ -37,7 +37,7 @@ export class SelectOption extends AbstractMenuItem {
             this.element.id = id;
         }
 
-        this.toggle = "both";
+        this.toggle = "inherit";
         this.autoActivate = true;
         this.openOnHover = true;
         this.delay = 0;
@@ -73,28 +73,28 @@ export class SelectOption extends AbstractMenuItem {
         return fragment.children[0];
     }
 
-    /**
-     * Handles mousedown events.
-     *
-     * @param event
-     */
-    onMouseDown(event) {
-        let isDisabled = this.getDisabled();
-
-        if(isDisabled) {
-            event.preventDefault();
-            return;
-        }
-
-        if(event.target !== this) return;
-        let parent = this.parent;
-
-        if(!this.isSelected) {
-            this.select({event});
-        } else if(this.isSelected && parent.multiSelect) {
-            this.deselect({event});
-        }
-    }
+    // /**
+    //  * Handles mousedown events.
+    //  *
+    //  * @param event
+    //  */
+    // onMouseDown(event) {
+    //     let isDisabled = this.getDisabled();
+    //
+    //     if(isDisabled) {
+    //         event.preventDefault();
+    //         return;
+    //     }
+    //
+    //     if(event.target !== this) return;
+    //     let parent = this.parent;
+    //
+    //     if(!this.isSelected) {
+    //         this.select({event});
+    //     } else if(this.isSelected && parent.multiSelect) {
+    //         this.deselect({event});
+    //     }
+    // }
 
     /**
      * Selects the options and publishes a [option.select] topic.
@@ -134,6 +134,21 @@ export class SelectOption extends AbstractMenuItem {
         this.isSelected = false;
         if(this.isActive) this.deactivate();
         this.dispatchTopic('option.deselect', {target: this, menu: this, ...topicData});
+    }
+
+    onClick(event) {
+        let isDisabled = this.getDisabled();
+
+        if(isDisabled) {
+            event.originalEvent.preventDefault();
+            return;
+        }
+
+        if(this.isSelected) {
+            if(this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) this.deselect();
+        } else {
+            this.select();
+        }
     }
 
     /**
@@ -1019,23 +1034,6 @@ export class ComboBox extends AbstractMenuItem {
         this.init();
     }
 
-    _rootKeyDown(topic) {
-        if(this.enableKeyboardNavigation && this.isRoot) {
-            let event = topic.originalEvent,
-                key = event.key;
-
-            if(key === "Escape") {
-                this.deactivate();
-                document.activeElement.blur();
-            } else if(key !== 'ArrowLeft' && key !== 'ArrowRight') { // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
-                let activeItem = this.activeItem,
-                    target = activeItem ? activeItem.parentMenu : this;
-
-                target._navigate(event);
-            }
-        }
-    }
-
     registerTopics() {
         super.registerTopics();
 
@@ -1106,6 +1104,23 @@ export class ComboBox extends AbstractMenuItem {
         this.textbox.value = this._label;
     }
 
+    _rootKeyDown(topic) {
+        if(this.enableKeyboardNavigation && this.isRoot) {
+            let event = topic.originalEvent,
+                key = event.key;
+
+            if(key === "Escape") {
+                this.deactivate();
+                document.activeElement.blur();
+            } else if(key !== 'ArrowLeft' && key !== 'ArrowRight') { // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
+                let activeItem = this.activeItem,
+                    target = activeItem ? activeItem.parentMenu : this;
+
+                target._navigate(event);
+            }
+        }
+    }
+
     //------------------------------------------------------------------------------------------------------------------
     // Properties
 
@@ -1115,14 +1130,6 @@ export class ComboBox extends AbstractMenuItem {
 
     get selectedOptions() {
         return this.submenu.selectedOptions;
-    }
-
-    get selectedIndex() {
-
-    }
-
-    set selectedIndex(index) {
-
     }
 
     get name() {
@@ -1178,8 +1185,10 @@ export class ComboBox extends AbstractMenuItem {
 }
 
 
-export class MultiComboBox {
+export class MultiComboBox extends AbstractMenuItem {
 
+    render(context) {
+    }
 }
 
 

@@ -9,6 +9,7 @@ __webpack_public_path__ = "/assets/js/";
 let app = new Application({
     // 'menubar': () =>  import("./pages/menubar_example.js"),
     // 'menu_examples': () =>  import("./pages/menu_examples.js"),
+    'menu_page_index': () =>  import("./pages/menus/page_index"),
 });
 
 

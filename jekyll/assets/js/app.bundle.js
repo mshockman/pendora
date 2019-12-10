@@ -72,6 +72,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/ 	var deferredModules = [];
 /******/
+/******/ 	// script path function
+/******/ 	function jsonpScriptSrc(chunkId) {
+/******/ 		return __webpack_require__.p + "chunk-" + ({}[chunkId]||chunkId) + ".bundle.js"
+/******/ 	}
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/
@@ -96,6 +101,67 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 		return module.exports;
 /******/ 	}
 /******/
+/******/ 	// This file contains only the entry chunk.
+/******/ 	// The chunk loading function for additional chunks
+/******/ 	__webpack_require__.e = function requireEnsure(chunkId) {
+/******/ 		var promises = [];
+/******/
+/******/
+/******/ 		// JSONP chunk loading for javascript
+/******/
+/******/ 		var installedChunkData = installedChunks[chunkId];
+/******/ 		if(installedChunkData !== 0) { // 0 means "already installed".
+/******/
+/******/ 			// a Promise means "currently loading".
+/******/ 			if(installedChunkData) {
+/******/ 				promises.push(installedChunkData[2]);
+/******/ 			} else {
+/******/ 				// setup Promise in chunk cache
+/******/ 				var promise = new Promise(function(resolve, reject) {
+/******/ 					installedChunkData = installedChunks[chunkId] = [resolve, reject];
+/******/ 				});
+/******/ 				promises.push(installedChunkData[2] = promise);
+/******/
+/******/ 				// start chunk loading
+/******/ 				var script = document.createElement('script');
+/******/ 				var onScriptComplete;
+/******/
+/******/ 				script.charset = 'utf-8';
+/******/ 				script.timeout = 120;
+/******/ 				if (__webpack_require__.nc) {
+/******/ 					script.setAttribute("nonce", __webpack_require__.nc);
+/******/ 				}
+/******/ 				script.src = jsonpScriptSrc(chunkId);
+/******/
+/******/ 				// create error before stack unwound to get useful stacktrace later
+/******/ 				var error = new Error();
+/******/ 				onScriptComplete = function (event) {
+/******/ 					// avoid mem leaks in IE.
+/******/ 					script.onerror = script.onload = null;
+/******/ 					clearTimeout(timeout);
+/******/ 					var chunk = installedChunks[chunkId];
+/******/ 					if(chunk !== 0) {
+/******/ 						if(chunk) {
+/******/ 							var errorType = event && (event.type === 'load' ? 'missing' : event.type);
+/******/ 							var realSrc = event && event.target && event.target.src;
+/******/ 							error.message = 'Loading chunk ' + chunkId + ' failed.\n(' + errorType + ': ' + realSrc + ')';
+/******/ 							error.name = 'ChunkLoadError';
+/******/ 							error.type = errorType;
+/******/ 							error.request = realSrc;
+/******/ 							chunk[1](error);
+/******/ 						}
+/******/ 						installedChunks[chunkId] = undefined;
+/******/ 					}
+/******/ 				};
+/******/ 				var timeout = setTimeout(function(){
+/******/ 					onScriptComplete({ type: 'timeout', target: script });
+/******/ 				}, 120000);
+/******/ 				script.onerror = script.onload = onScriptComplete;
+/******/ 				document.head.appendChild(script);
+/******/ 			}
+/******/ 		}
+/******/ 		return Promise.all(promises);
+/******/ 	};
 /******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
@@ -149,6 +215,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "/tests/dist/";
 /******/
+/******/ 	// on error function for async loading
+/******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
+/******/
 /******/ 	var jsonpArray = window["webpackJsonppendora"] = window["webpackJsonppendora"] || [];
 /******/ 	var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
 /******/ 	jsonpArray.push = webpackJsonpCallback;
@@ -188,8 +257,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 __webpack_require__.p = "/assets/js/";
-var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({// 'menubar': () =>  import("./pages/menubar_example.js"),
+var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
+  // 'menubar': () =>  import("./pages/menubar_example.js"),
   // 'menu_examples': () =>  import("./pages/menu_examples.js"),
+  'menu_page_index': function menu_page_index() {
+    return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./pages/menus/page_index */ "./jekyll/js/pages/menus/page_index.js"));
+  }
 });
 window.addEventListener('load',
 /*#__PURE__*/
@@ -4653,7 +4726,7 @@ var MENU_PARAMETERS = {
   openOnHover: timeAttribute,
   closeOnSelect: boolAttribute,
   delay: timeAttribute,
-  toggle: stringAttribute,
+  toggle: boolAttribute,
   visible: boolAttribute
 };
 /**
@@ -4686,7 +4759,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.openOnHover = false; // sub-item property
 
-      _this.toggle = "none";
+      _this.toggle = false;
       _this.closeOnSelect = true; // both sub-item and menu.
 
       _this.delay = false; // sub-item property
@@ -5190,9 +5263,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       key: "onClick",
       value: function onClick(event) {
         if (event.target === this) {
-          if (this.isActive && this.toggleOff) {
+          if (this.isActive && this.toggle) {
             this.deactivate();
-          } else if (!this.isActive && this.toggleOn) {
+          } else if (!this.isActive) {
             this.activate();
           }
         }
@@ -5493,7 +5566,7 @@ function (_AbstractMenu) {
    * @param timeout {Boolean|Number}
    * @param autoActivate {Boolean|Number}
    * @param openOnHover {Boolean|Number}
-   * @param toggle {"on"|"off"|"both"|"none"}
+   * @param toggle {boolean}
    * @param closeOnSelect {Boolean}
    * @param delay {Boolean|Number}
    * @param id {String}
@@ -5518,7 +5591,7 @@ function (_AbstractMenu) {
         _ref$openOnHover = _ref.openOnHover,
         openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
         _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? "on" : _ref$toggle,
+        toggle = _ref$toggle === void 0 ? false : _ref$toggle,
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
         _ref$delay = _ref.delay,
@@ -5671,7 +5744,7 @@ function (_AbstractMenu) {
         _ref$openOnHover = _ref.openOnHover,
         openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
         _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? "both" : _ref$toggle,
+        toggle = _ref$toggle === void 0 ? true : _ref$toggle,
         _ref$closeOnSelect = _ref.closeOnSelect,
         closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
         _ref$delay = _ref.delay,
@@ -5859,7 +5932,7 @@ var ITEM_ATTRIBUTES = {
   closeOnSelect: boolAttribute,
   delay: timeAttribute,
   positioner: stringAttribute,
-  toggle: stringAttribute
+  toggle: boolAttribute
 };
 /**
  * @abstract
@@ -5893,7 +5966,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
        * @type {string}
        */
 
-      _this.toggle = "both";
+      _this.toggle = true;
       /**
        * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
        * When the parent is active, openOnHover is used instead.
@@ -6313,9 +6386,9 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         if (!isDisabled) {
           if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
             this.showSubMenu();
-          } else if (!this.isActive && this.toggleOn) {
+          } else if (!this.isActive) {
             this.activate();
-          } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
+          } else if (this.isActive && this.toggle && this.hasSubMenu()) {
             this.deactivate();
           }
 
@@ -6405,30 +6478,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         return this._button;
-      }
-      /**
-       * Will return true if menu items should toggle on.
-       *
-       * @returns {boolean}
-       */
-
-    }, {
-      kind: "get",
-      key: "toggleOn",
-      value: function toggleOn() {
-        return this.toggle === 'on' || this.toggle === 'both';
-      }
-      /**
-       * Will return true if menu items should toggle off.
-       *
-       * @returns {boolean}
-       */
-
-    }, {
-      kind: "get",
-      key: "toggleOff",
-      value: function toggleOff() {
-        return this.toggle === 'off' || this.toggle === 'both';
       }
     }, {
       kind: "get",
@@ -8130,7 +8179,7 @@ function (_AbstractMenuItem) {
       _this.element.id = id;
     }
 
-    _this.toggle = "both";
+    _this.toggle = "inherit";
     _this.autoActivate = true;
     _this.openOnHover = true;
     _this.delay = 0;
@@ -8168,36 +8217,29 @@ function (_AbstractMenuItem) {
       var html = "<div data-role=\"menuitem\" class=\"menuitem\"><a data-text>".concat(text, "</a></div>"),
           fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
-    }
-    /**
-     * Handles mousedown events.
-     *
-     * @param event
-     */
+    } // /**
+    //  * Handles mousedown events.
+    //  *
+    //  * @param event
+    //  */
+    // onMouseDown(event) {
+    //     let isDisabled = this.getDisabled();
+    //
+    //     if(isDisabled) {
+    //         event.preventDefault();
+    //         return;
+    //     }
+    //
+    //     if(event.target !== this) return;
+    //     let parent = this.parent;
+    //
+    //     if(!this.isSelected) {
+    //         this.select({event});
+    //     } else if(this.isSelected && parent.multiSelect) {
+    //         this.deselect({event});
+    //     }
+    // }
 
-  }, {
-    key: "onMouseDown",
-    value: function onMouseDown(event) {
-      var isDisabled = this.getDisabled();
-
-      if (isDisabled) {
-        event.preventDefault();
-        return;
-      }
-
-      if (event.target !== this) return;
-      var parent = this.parent;
-
-      if (!this.isSelected) {
-        this.select({
-          event: event
-        });
-      } else if (this.isSelected && parent.multiSelect) {
-        this.deselect({
-          event: event
-        });
-      }
-    }
     /**
      * Selects the options and publishes a [option.select] topic.
      *
@@ -8270,6 +8312,22 @@ function (_AbstractMenuItem) {
         target: this,
         menu: this
       }, topicData));
+    }
+  }, {
+    key: "onClick",
+    value: function onClick(event) {
+      var isDisabled = this.getDisabled();
+
+      if (isDisabled) {
+        event.originalEvent.preventDefault();
+        return;
+      }
+
+      if (this.isSelected) {
+        if (this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) this.deselect();
+      } else {
+        this.select();
+      }
     }
     /**
      * Returns true if the option is selected.
@@ -9592,25 +9650,6 @@ function (_AbstractMenuItem3) {
   }
 
   _createClass(ComboBox, [{
-    key: "_rootKeyDown",
-    value: function _rootKeyDown(topic) {
-      if (this.enableKeyboardNavigation && this.isRoot) {
-        var event = topic.originalEvent,
-            key = event.key;
-
-        if (key === "Escape") {
-          this.deactivate();
-          document.activeElement.blur();
-        } else if (key !== 'ArrowLeft' && key !== 'ArrowRight') {
-          // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
-          var activeItem = this.activeItem,
-              target = activeItem ? activeItem.parentMenu : this;
-
-          target._navigate(event);
-        }
-      }
-    }
-  }, {
     key: "registerTopics",
     value: function registerTopics() {
       var _this8 = this;
@@ -9676,6 +9715,25 @@ function (_AbstractMenuItem3) {
       this.value = options.length ? options[0].value || options[0].text || '' : '';
       this._label = labels.join(", ");
       this.textbox.value = this._label;
+    }
+  }, {
+    key: "_rootKeyDown",
+    value: function _rootKeyDown(topic) {
+      if (this.enableKeyboardNavigation && this.isRoot) {
+        var event = topic.originalEvent,
+            key = event.key;
+
+        if (key === "Escape") {
+          this.deactivate();
+          document.activeElement.blur();
+        } else if (key !== 'ArrowLeft' && key !== 'ArrowRight') {
+          // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
+          var activeItem = this.activeItem,
+              target = activeItem ? activeItem.parentMenu : this;
+
+          target._navigate(event);
+        }
+      }
     } //------------------------------------------------------------------------------------------------------------------
     // Properties
 
@@ -9698,10 +9756,6 @@ function (_AbstractMenuItem3) {
     get: function get() {
       return this.submenu.selectedOptions;
     }
-  }, {
-    key: "selectedIndex",
-    get: function get() {},
-    set: function set(index) {}
   }, {
     key: "name",
     get: function get() {
@@ -9769,9 +9823,24 @@ function (_AbstractMenuItem3) {
 
   return ComboBox;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var MultiComboBox = function MultiComboBox() {
-  _classCallCheck(this, MultiComboBox);
-};
+var MultiComboBox =
+/*#__PURE__*/
+function (_AbstractMenuItem4) {
+  _inherits(MultiComboBox, _AbstractMenuItem4);
+
+  function MultiComboBox() {
+    _classCallCheck(this, MultiComboBox);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).apply(this, arguments));
+  }
+
+  _createClass(MultiComboBox, [{
+    key: "render",
+    value: function render(context) {}
+  }]);
+
+  return MultiComboBox;
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return Select2.FromHTML(element);
 });

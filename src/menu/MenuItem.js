@@ -19,7 +19,7 @@ export const ITEM_ATTRIBUTES = {
     closeOnSelect: boolAttribute,
     delay: timeAttribute,
     positioner: stringAttribute,
-    toggle: stringAttribute
+    toggle: boolAttribute
 };
 
 
@@ -50,7 +50,7 @@ export class AbstractMenuItem extends MenuNode {
          * will toggle both on and off and none will cause the item to not be toggleable.
          * @type {string}
          */
-        this.toggle = "both";
+        this.toggle = true;
 
         /**
          * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
@@ -364,9 +364,9 @@ export class AbstractMenuItem extends MenuNode {
         if(!isDisabled) {
             if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
                 this.showSubMenu();
-            } else if (!this.isActive && this.toggleOn) {
+            } else if (!this.isActive) {
                 this.activate();
-            } else if (this.isActive && this.toggleOff && this.hasSubMenu()) {
+            } else if (this.isActive && this.toggle && this.hasSubMenu()) {
                 this.deactivate();
             }
 
@@ -445,24 +445,6 @@ export class AbstractMenuItem extends MenuNode {
         }
 
         return this._button;
-    }
-
-    /**
-     * Will return true if menu items should toggle on.
-     *
-     * @returns {boolean}
-     */
-    get toggleOn() {
-        return this.toggle === 'on' || this.toggle === 'both';
-    }
-
-    /**
-     * Will return true if menu items should toggle off.
-     *
-     * @returns {boolean}
-     */
-    get toggleOff() {
-        return this.toggle === 'off' || this.toggle === 'both';
     }
 
     get submenu() {

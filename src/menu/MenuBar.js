@@ -5,7 +5,7 @@ import * as positioners from "./positioners";
 
 export default class MenuBar extends AbstractMenu {
     constructor({target=null, closeOnBlur=true, timeout=false, autoActivate=false, multiple=false, openOnHover=true,
-                    toggle="both", closeOnSelect=true, delay=false, enableKeyboardNavigation=true, ...context}={}) {
+                    toggle=true, closeOnSelect=true, delay=false, enableKeyboardNavigation=true, ...context}={}) {
         super();
         this.positioner = positioners.DROPDOWN;
         this.direction = 'horizontal';

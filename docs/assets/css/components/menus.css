@@ -115,6 +115,9 @@
   outline: none;
 }
 
+.select-menu {
+  user-select: none;
+}
 .select-menu.has-filter .menu__header {
   background-color: #eaeaea;
   padding: 0.5rem;
@@ -128,6 +131,9 @@
 }
 .select-menu.all-items-filtered .placeholder {
   display: block;
+}
+.select-menu .option.selected {
+  background-color: #66FCF1;
 }
 
 .menuitem.hidden, .select-menu .hidden.option {

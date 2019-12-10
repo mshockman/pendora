@@ -145,6 +145,8 @@
 
 
 .select-menu {
+  user-select: none;
+
   &.has-filter {
     .menu__header {
       background-color: #eaeaea;
@@ -163,6 +165,10 @@
 
   &.all-items-filtered .placeholder {
     display: block;
+  }
+
+  & .option.selected {
+    background-color: #66FCF1;
   }
 }
 
