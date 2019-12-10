@@ -124,7 +124,6 @@
   width: 100%;
 }
 .select-menu .placeholder {
-  display: none;
   padding: 0.5rem;
 }
 .select-menu.all-items-filtered .placeholder {

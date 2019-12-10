@@ -67,7 +67,7 @@ export class SelectOption extends AbstractMenuItem {
      * @returns {Element}
      */
     render({text}) {
-        let html = `<li data-role="menuitem" class="menuitem"><a data-text>${text}</a></li>`,
+        let html = `<div data-role="menuitem" class="menuitem"><a data-text>${text}</a></div>`,
             fragment = parseHTML(html);
 
         return fragment.children[0];
@@ -292,6 +292,10 @@ export class SelectMenu extends AbstractMenu {
 
         this.element.classList.add('select-menu');
 
+        this.placeholder = document.createElement('div');
+        this.placeholder.classList.add('placeholder');
+        this.placeholder.innerHTML = placeholder;
+
         this.isVisible = false;
 
         this.registerTopics();
@@ -309,7 +313,7 @@ export class SelectMenu extends AbstractMenu {
         if(!this.isVisible) {
             this.clearFilter();
 
-            if(!this.multiSelect) {
+            if(!this.multiSelect && !this.activeChild) {
                 for (let child of this.children) {
                     if (child.isSelected && !child.isActive) {
                         child.activate();
@@ -325,7 +329,7 @@ export class SelectMenu extends AbstractMenu {
         let html = `
             <div class="select-menu">
                 <div class="select-menu__header"></div>
-                <section class="select-menu__body menu__body"></section>
+                <div class="select-menu__body menu__body"></div>
                 <div class="select-menu__footer"></div>
             </div>
         `;
@@ -416,24 +420,18 @@ export class SelectMenu extends AbstractMenu {
         this.element.classList.add('items-filtered');
 
         for(let option of this.options) {
-            if(!fn(option)) {
-                option.isFiltered = false;
-            } else {
-                option.isFiltered = true;
-            }
+            option.isFiltered = fn(option);
         }
 
-        if(this.getFilteredItems().length < this.options.length) {
-            if(this._placeholder) {
-                this._placeholder.parentElement.removeChild(this._placeholder);
-                this._placeholder = null;
+        if(this.placeholder) {
+            if(this.getFilteredItems().length < this.options.length) {
+                if(this.placeholder.parentElement) {
+                    this.placeholder.parentElement.removeChild(this.placeholder);
+                }
+            } else {
+                let container = this.element.querySelector('.select-menu__body') || this.element;
+                container.appendChild(this.placeholder);
             }
-        } else if(this.placeholder) {
-            let placeholder = document.createElement('div');
-            placeholder.innerHTML = this.placeholder;
-            let container = this.element.querySelector('.select-menu__body') || this.element;
-            container.appendChild(placeholder);
-            this._placeholder = placeholder;
         }
     }
 
@@ -442,9 +440,8 @@ export class SelectMenu extends AbstractMenu {
             option.classList.remove('filtered');
         }
 
-        if(this._placeholder && this.getFilteredItems().length < this.options.length) {
-            this._placeholder.parentElement.removeChild(this._placeholder);
-            this._placeholder = null;
+        if(this.placeholder && this.placeholder.parentElement && this.getFilteredItems().length < this.options.length) {
+            this.placeholder.parentElement.removeChild(this.placeholder);
         }
 
         if(this.filterInput) {
@@ -953,6 +950,7 @@ export class ComboBox extends AbstractMenuItem {
         this.closeOnSelect = true;
         this._label = '';
         this.enableKeyboardNavigation = true;
+        this.clearSubItemsOnHover = false;
 
         this.SubMenuClass = SelectMenu;
 
@@ -992,10 +990,26 @@ export class ComboBox extends AbstractMenuItem {
         this.textbox.addEventListener('input', event => {
             this.submenu.filter(filter(this.textbox.value));
 
-            for(let option of this.submenu.options) {
-                if(!option.isDisabled && !option.isFiltered) {
-                    option.activate();
-                    break;
+            // Flag if we found a select item.
+            let f = false;
+
+            // Activate the selected items.
+            if(!this.multiSelect) {
+                for(let option of this.submenu.options) {
+                    if(!option.isDisabled && !option.isFiltered && option.isSelected) {
+                        option.activate();
+                        f = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!f) {
+                for (let option of this.submenu.options) {
+                    if (!option.isDisabled && !option.isFiltered) {
+                        option.activate();
+                        break;
+                    }
                 }
             }
         });
@@ -1003,6 +1017,23 @@ export class ComboBox extends AbstractMenuItem {
         this.initKeyboardNavigation();
         this.registerTopics();
         this.init();
+    }
+
+    _rootKeyDown(topic) {
+        if(this.enableKeyboardNavigation && this.isRoot) {
+            let event = topic.originalEvent,
+                key = event.key;
+
+            if(key === "Escape") {
+                this.deactivate();
+                document.activeElement.blur();
+            } else if(key !== 'ArrowLeft' && key !== 'ArrowRight') { // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
+                let activeItem = this.activeItem,
+                    target = activeItem ? activeItem.parentMenu : this;
+
+                target._navigate(event);
+            }
+        }
     }
 
     registerTopics() {
@@ -1023,6 +1054,14 @@ export class ComboBox extends AbstractMenuItem {
         this.on('event.click', (event) => {
             event.originalEvent.preventDefault();
             this.textbox.focus();
+        });
+
+        this.on('menuitem.selected', (topic) => {
+            this._renderLabel();
+
+            if(this.isActive && this.closeOnSelect) {
+                this.deactivate();
+            }
         });
     }
 

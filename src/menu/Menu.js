@@ -420,6 +420,12 @@ export class AbstractMenu extends MenuNode {
         }
 
         if(arrowKeyPressed) {
+            if(!this.isVisible) {
+                this.show();
+                event.preventDefault();
+                return true;
+            }
+
             let children = this.enabledChildren,
                 index = children.indexOf(this.activeChild),
                 child = children[index];
@@ -505,12 +511,24 @@ export class AbstractMenu extends MenuNode {
                 }
             }
         } else if(key === "Enter") {
+            // The menu is not visible at this point make it visible and return.
+            if(!this.isVisible) {
+                this.show();
+                event.preventDefault();
+
+                if(!this.activeChild && this.firstEnabledChild) {
+                    this.firstEnabledChild.activate();
+                }
+
+                return true;
+            }
+
             if(this.activeChild) {
                 if(this.activeChild.hasSubMenu()) {
                     if(!this.activeChild.submenu.isVisible) {
                         this.activeChild.showSubMenu();
 
-                        if(this.activeChild.submenu.firstEnabledChild) {
+                        if(!this.activeChild.submenu.activeChild && this.activeChild.submenu.firstEnabledChild) {
                             this.activeChild.submenu.firstEnabledChild.activate(false);
                         }
 
@@ -539,7 +557,7 @@ export class AbstractMenu extends MenuNode {
                     if(firstChild.hasSubMenu()) {
                         firstChild.showSubMenu();
 
-                        if(firstChild.submenu.firstEnabledChild) {
+                        if(!firstChild.submenu.activeChild && firstChild.submenu.firstEnabledChild) {
                             firstChild.submenu.firstEnabledChild.activate(false);
                         }
                     }

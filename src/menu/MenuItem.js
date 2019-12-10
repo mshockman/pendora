@@ -492,7 +492,7 @@ export class AbstractMenuItem extends MenuNode {
     _navigate(event, _depth=0) {
         if(_depth === 0 && this.hasSubMenu()) {
             return this.submenu._navigate(event, 0);
-        } else {
+        } else if(this.parent) {
             return this.parent._navigate(event, _depth);
         }
     }

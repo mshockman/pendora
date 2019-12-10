@@ -5257,6 +5257,12 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         if (arrowKeyPressed) {
+          if (!this.isVisible) {
+            this.show();
+            event.preventDefault();
+            return true;
+          }
+
           var children = this.enabledChildren,
               index = children.indexOf(this.activeChild),
               child = children[index];
@@ -5343,12 +5349,24 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         } else if (key === "Enter") {
+          // The menu is not visible at this point make it visible and return.
+          if (!this.isVisible) {
+            this.show();
+            event.preventDefault();
+
+            if (!this.activeChild && this.firstEnabledChild) {
+              this.firstEnabledChild.activate();
+            }
+
+            return true;
+          }
+
           if (this.activeChild) {
             if (this.activeChild.hasSubMenu()) {
               if (!this.activeChild.submenu.isVisible) {
                 this.activeChild.showSubMenu();
 
-                if (this.activeChild.submenu.firstEnabledChild) {
+                if (!this.activeChild.submenu.activeChild && this.activeChild.submenu.firstEnabledChild) {
                   this.activeChild.submenu.firstEnabledChild.activate(false);
                 }
 
@@ -5378,7 +5396,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               if (_firstChild4.hasSubMenu()) {
                 _firstChild4.showSubMenu();
 
-                if (_firstChild4.submenu.firstEnabledChild) {
+                if (!_firstChild4.submenu.activeChild && _firstChild4.submenu.firstEnabledChild) {
                   _firstChild4.submenu.firstEnabledChild.activate(false);
                 }
               }
@@ -6453,7 +6471,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (_depth === 0 && this.hasSubMenu()) {
           return this.submenu._navigate(event, 0);
-        } else {
+        } else if (this.parent) {
           return this.parent._navigate(event, _depth);
         }
       }
@@ -8147,7 +8165,7 @@ function (_AbstractMenuItem) {
     key: "render",
     value: function render(_ref2) {
       var text = _ref2.text;
-      var html = "<li data-role=\"menuitem\" class=\"menuitem\"><a data-text>".concat(text, "</a></li>"),
+      var html = "<div data-role=\"menuitem\" class=\"menuitem\"><a data-text>".concat(text, "</a></div>"),
           fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
     }
@@ -8439,6 +8457,11 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _this2.element.classList.add('select-menu');
 
+      _this2.placeholder = document.createElement('div');
+
+      _this2.placeholder.classList.add('placeholder');
+
+      _this2.placeholder.innerHTML = placeholder;
       _this2.isVisible = false;
 
       _this2.registerTopics();
@@ -8474,7 +8497,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         if (!this.isVisible) {
           this.clearFilter();
 
-          if (!this.multiSelect) {
+          if (!this.multiSelect && !this.activeChild) {
             var _iteratorNormalCompletion2 = true;
             var _didIteratorError2 = false;
             var _iteratorError2 = undefined;
@@ -8514,7 +8537,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <section class=\"select-menu__body menu__body\"></section>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
+        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <div class=\"select-menu__body menu__body\"></div>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
         var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
         return fragment.children[0];
       }
@@ -8663,12 +8686,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         try {
           for (var _iterator5 = this.options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
             var option = _step5.value;
-
-            if (!fn(option)) {
-              option.isFiltered = false;
-            } else {
-              option.isFiltered = true;
-            }
+            option.isFiltered = fn(option);
           }
         } catch (err) {
           _didIteratorError5 = true;
@@ -8685,18 +8703,15 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           }
         }
 
-        if (this.getFilteredItems().length < this.options.length) {
-          if (this._placeholder) {
-            this._placeholder.parentElement.removeChild(this._placeholder);
-
-            this._placeholder = null;
+        if (this.placeholder) {
+          if (this.getFilteredItems().length < this.options.length) {
+            if (this.placeholder.parentElement) {
+              this.placeholder.parentElement.removeChild(this.placeholder);
+            }
+          } else {
+            var container = this.element.querySelector('.select-menu__body') || this.element;
+            container.appendChild(this.placeholder);
           }
-        } else if (this.placeholder) {
-          var placeholder = document.createElement('div');
-          placeholder.innerHTML = this.placeholder;
-          var container = this.element.querySelector('.select-menu__body') || this.element;
-          container.appendChild(placeholder);
-          this._placeholder = placeholder;
         }
       }
     }, {
@@ -8727,10 +8742,8 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           }
         }
 
-        if (this._placeholder && this.getFilteredItems().length < this.options.length) {
-          this._placeholder.parentElement.removeChild(this._placeholder);
-
-          this._placeholder = null;
+        if (this.placeholder && this.placeholder.parentElement && this.getFilteredItems().length < this.options.length) {
+          this.placeholder.parentElement.removeChild(this.placeholder);
         }
 
         if (this.filterInput) {
@@ -9460,6 +9473,7 @@ function (_AbstractMenuItem3) {
     _this7.closeOnSelect = true;
     _this7._label = '';
     _this7.enableKeyboardNavigation = true;
+    _this7.clearSubItemsOnHover = false;
     _this7.SubMenuClass = SelectMenu;
     _this7.element.tabIndex = 0;
 
@@ -9500,32 +9514,69 @@ function (_AbstractMenuItem3) {
     });
 
     _this7.textbox.addEventListener('input', function (event) {
-      _this7.submenu.filter(filter(_this7.textbox.value));
+      _this7.submenu.filter(filter(_this7.textbox.value)); // Flag if we found a select item.
 
-      var _iteratorNormalCompletion14 = true;
-      var _didIteratorError14 = false;
-      var _iteratorError14 = undefined;
 
-      try {
-        for (var _iterator14 = _this7.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-          var option = _step14.value;
+      var f = false; // Activate the selected items.
 
-          if (!option.isDisabled && !option.isFiltered) {
-            option.activate();
-            break;
+      if (!_this7.multiSelect) {
+        var _iteratorNormalCompletion14 = true;
+        var _didIteratorError14 = false;
+        var _iteratorError14 = undefined;
+
+        try {
+          for (var _iterator14 = _this7.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+            var option = _step14.value;
+
+            if (!option.isDisabled && !option.isFiltered && option.isSelected) {
+              option.activate();
+              f = true;
+              break;
+            }
+          }
+        } catch (err) {
+          _didIteratorError14 = true;
+          _iteratorError14 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+              _iterator14["return"]();
+            }
+          } finally {
+            if (_didIteratorError14) {
+              throw _iteratorError14;
+            }
           }
         }
-      } catch (err) {
-        _didIteratorError14 = true;
-        _iteratorError14 = err;
-      } finally {
+      }
+
+      if (!f) {
+        var _iteratorNormalCompletion15 = true;
+        var _didIteratorError15 = false;
+        var _iteratorError15 = undefined;
+
         try {
-          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
-            _iterator14["return"]();
+          for (var _iterator15 = _this7.submenu.options[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+            var _option = _step15.value;
+
+            if (!_option.isDisabled && !_option.isFiltered) {
+              _option.activate();
+
+              break;
+            }
           }
+        } catch (err) {
+          _didIteratorError15 = true;
+          _iteratorError15 = err;
         } finally {
-          if (_didIteratorError14) {
-            throw _iteratorError14;
+          try {
+            if (!_iteratorNormalCompletion15 && _iterator15["return"] != null) {
+              _iterator15["return"]();
+            }
+          } finally {
+            if (_didIteratorError15) {
+              throw _iteratorError15;
+            }
           }
         }
       }
@@ -9541,6 +9592,25 @@ function (_AbstractMenuItem3) {
   }
 
   _createClass(ComboBox, [{
+    key: "_rootKeyDown",
+    value: function _rootKeyDown(topic) {
+      if (this.enableKeyboardNavigation && this.isRoot) {
+        var event = topic.originalEvent,
+            key = event.key;
+
+        if (key === "Escape") {
+          this.deactivate();
+          document.activeElement.blur();
+        } else if (key !== 'ArrowLeft' && key !== 'ArrowRight') {
+          // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
+          var activeItem = this.activeItem,
+              target = activeItem ? activeItem.parentMenu : this;
+
+          target._navigate(event);
+        }
+      }
+    }
+  }, {
     key: "registerTopics",
     value: function registerTopics() {
       var _this8 = this;
@@ -9561,6 +9631,13 @@ function (_AbstractMenuItem3) {
         event.originalEvent.preventDefault();
 
         _this8.textbox.focus();
+      });
+      this.on('menuitem.selected', function (topic) {
+        _this8._renderLabel();
+
+        if (_this8.isActive && _this8.closeOnSelect) {
+          _this8.deactivate();
+        }
       });
     }
   }, {
@@ -9657,13 +9734,13 @@ function (_AbstractMenuItem3) {
       }
 
       var instance = new ComboBox();
-      var _iteratorNormalCompletion15 = true;
-      var _didIteratorError15 = false;
-      var _iteratorError15 = undefined;
+      var _iteratorNormalCompletion16 = true;
+      var _didIteratorError16 = false;
+      var _iteratorError16 = undefined;
 
       try {
-        for (var _iterator15 = element.querySelectorAll('li')[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-          var child = _step15.value;
+        for (var _iterator16 = element.querySelectorAll('li')[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+          var child = _step16.value;
           var option = new SelectOption({
             text: child.innerHTML.trim(),
             value: child.dataset.value || null
@@ -9671,16 +9748,16 @@ function (_AbstractMenuItem3) {
           instance.append(option);
         }
       } catch (err) {
-        _didIteratorError15 = true;
-        _iteratorError15 = err;
+        _didIteratorError16 = true;
+        _iteratorError16 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion15 && _iterator15["return"] != null) {
-            _iterator15["return"]();
+          if (!_iteratorNormalCompletion16 && _iterator16["return"] != null) {
+            _iterator16["return"]();
           }
         } finally {
-          if (_didIteratorError15) {
-            throw _iteratorError15;
+          if (_didIteratorError16) {
+            throw _iteratorError16;
           }
         }
       }
