@@ -1,4 +1,5 @@
 import Menu, {AbstractMenu} from "./Menu";
+import MenuItem from './MenuItem';
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 
@@ -6,17 +7,38 @@ import * as positioners from "./positioners";
 export default class MenuBar extends AbstractMenu {
     constructor({target=null, closeOnBlur=true, timeout=false, autoActivate=false, multiple=false, openOnHover=true,
                     toggle=true, closeOnSelect=true, delay=false, enableKeyboardNavigation=true, ...context}={}) {
-        super();
+
+        class SubMenuClass extends Menu {
+            constructor(args={}) {
+                super({
+                    delay,
+                    SubMenuClass: SubMenuClass,
+                    MenuItemClass: MenuItemClass,
+                    ...args
+                });
+            }
+        }
+
+        class MenuItemClass extends MenuItem {
+            constructor(args={}) {
+                super({
+                    MenuItemClass: MenuItemClass,
+                    SubMenuClass: SubMenuClass,
+                    ...args
+                })
+            }
+        }
+
+        super({
+            closeOnBlur, timeout, autoActivate, openOnHover, toggle, closeOnSelect, delay,
+            positioner: positioners.DROPDOWN,
+            direction: 'horizontal',
+            SubMenuClass: SubMenuClass,
+            MenuItemClass: MenuItemClass
+        });
+
         this.positioner = positioners.DROPDOWN;
         this.direction = 'horizontal';
-        this.enableKeyboardNavigation = true;
-        this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
-        this.autoActivate = autoActivate;
-        this.openOnHover = openOnHover;
-        this.toggle = toggle;
-        this.closeOnSelect = closeOnSelect;
-        this.delay = delay;
 
         if(target) {
             this.element = target;
@@ -24,26 +46,13 @@ export default class MenuBar extends AbstractMenu {
             this.element = this.render(context);
         }
 
-        this.SubMenuClass = class SubMenu extends Menu {
-            constructor(args={}) {
-                super({
-                    delay,
-                    ...args
-                });
-
-                this.SubMenuClass = SubMenu;
-            }
-        };
-
         this.isVisible = true;
 
         this.registerTopics();
         this.parseDOM();
         this.init();
 
-        if(enableKeyboardNavigation) {
-            this.initKeyboardNavigation();
-        }
+        this.initKeyboardNavigation();
     }
 
     render(context) {

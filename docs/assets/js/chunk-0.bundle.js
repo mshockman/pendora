@@ -33,6 +33,9 @@ function () {
       testMenu.isVisible = true;
       testMenu.multiSelect = true;
       testMenu.toggle = "ctrl";
+      testMenu.clearOldSelection = true;
+      testMenu.enableShiftSelect = true;
+      testMenu.enableCtrlToggle = true;
 
       for (var i = 0; i < 10; i++) {
         var option = new menu_Select2__WEBPACK_IMPORTED_MODULE_0__["SelectOption"]({

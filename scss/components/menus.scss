@@ -147,6 +147,14 @@
 .select-menu {
   user-select: none;
 
+  .checkmark {
+    visibility: hidden;
+  }
+
+  & .option.selected .checkmark {
+    visibility: visible;
+  }
+
   &.has-filter {
     .menu__header {
       background-color: #eaeaea;

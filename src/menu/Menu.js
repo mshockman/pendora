@@ -1,6 +1,6 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
-import {addClasses, modulo} from "core/utility";
+import {modulo} from "core/utility";
 import {parseBoolean, parseIntValue, parseAny, parseHTML} from "core/utility";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
@@ -9,8 +9,7 @@ import Attribute, {DROP, TRUE} from "core/attributes";
 
 const parseBooleanOrInt = (value) => parseAny(value, parseBoolean, parseIntValue),
     timeAttribute = new Attribute(parseBooleanOrInt, DROP, TRUE),
-    boolAttribute = new Attribute(parseBoolean, DROP, TRUE),
-    stringAttribute = new Attribute(null, DROP, TRUE);
+    boolAttribute = new Attribute(parseBoolean, DROP, TRUE);
 
 
 export const MENU_PARAMETERS = {
@@ -35,22 +34,27 @@ export class AbstractMenu extends MenuNode {
 
     @inherit positioner;
 
-    constructor() {
+    constructor({
+            closeOnBlur=false, timeout=false, autoActivate=false, openOnHover=false, toggle=false,
+            closeOnSelect=true, delay=false, positioner="inherit", direction="vertical", SubMenuClass=null,
+            MenuItemClass=null}={}) {
         super();
-        this.menuNodeType = "menu";
 
-        this.closeOnBlur = false; // both sub-item and menu
-        this.timeout = false; // both sub-item and menu
-        this.autoActivate = false; // sub-item property
-        this.openOnHover = false; // sub-item property
-        this.toggle = false;
-        this.closeOnSelect = true; // both sub-item and menu.
-        this.delay = false; // sub-item property
-        this.positioner = "inherit";
-        this.direction = "vertical";
+        this.closeOnBlur = closeOnBlur; // both sub-item and menu
+        this.timeout = timeout; // both sub-item and menu
+        // noinspection JSUnusedGlobalSymbols
+        this.autoActivate = autoActivate; // sub-item property
+        // noinspection JSUnusedGlobalSymbols
+        this.openOnHover = openOnHover; // sub-item property
+        this.toggle = toggle;
+        this.closeOnSelect = closeOnSelect; // both sub-item and menu.
+        // noinspection JSUnusedGlobalSymbols
+        this.delay = delay; // sub-item property
+        this.positioner = positioner;
+        this.direction = direction;
 
-        this.SubMenuClass = Menu;
-        this.MenuItemClass = MenuItem;
+        this.SubMenuClass = SubMenuClass;
+        this.MenuItemClass = MenuItemClass;
     }
 
     registerTopics() {
@@ -84,7 +88,7 @@ export class AbstractMenu extends MenuNode {
         this.on('event.click', (event) => this.onClick(event));
         this.on('event.mouseover', (event) => this.onMouseOver(event));
         this.on('event.mouseout', (event) => this.onMouseOut(event));
-        this.on('menuitem.selected', (event) => this.onSelect(event));
+        this.on('menuitem.select', (event) => this.onSelect(event));
     }
 
     activate() {
@@ -214,6 +218,7 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     addItem(text, action=null) {
         let item = new this.MenuItemClass({text, action});
         this.append(item);
@@ -228,6 +233,7 @@ export class AbstractMenu extends MenuNode {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     hasItem(item) {
         return this._children.indexOf(item) !== -1;
     }
@@ -266,6 +272,7 @@ export class AbstractMenu extends MenuNode {
         return null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get activeIndex() {
         let children = this.children;
 
@@ -282,6 +289,7 @@ export class AbstractMenu extends MenuNode {
         return this.children[0];
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get lastChild() {
         return this.children[this.children.length-1];
     }
@@ -298,6 +306,7 @@ export class AbstractMenu extends MenuNode {
         return null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get lastEnabledChild() {
         let children = this.children;
 
@@ -369,6 +378,8 @@ export class AbstractMenu extends MenuNode {
             } else if(!this.isActive) {
                 this.activate();
             }
+
+            this.dispatchTopic('menu.click', event);
         }
     }
 
@@ -589,24 +600,6 @@ export class AbstractMenu extends MenuNode {
 
         return false;
     }
-
-    /**
-     * Will return true if menu items should toggle on.
-     *
-     * @returns {boolean}
-     */
-    get toggleOn() {
-        return this.toggle === 'on' || this.toggle === 'both';
-    }
-
-    /**
-     * Will return true if menu items should toggle off.
-     *
-     * @returns {boolean}
-     */
-    get toggleOff() {
-        return this.toggle === 'off' || this.toggle === 'both';
-    }
 }
 
 
@@ -625,28 +618,18 @@ export default class Menu extends AbstractMenu {
      * @param closeOnSelect {Boolean}
      * @param delay {Boolean|Number}
      * @param id {String}
-     * @param classes {String}
      * @param children {Array}
-     * @param visible
-     * @param filter
      * @param context
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle=false, closeOnSelect=true, delay=0, id=null, classes=null,
-                    children=null, visible=false, filter=false, ...context}={}) {
-        super();
-        this.events = null;
-        this.MenuItemClass = MenuItem;
-        this.SubMenuClass = Menu;
+                    toggle=false, closeOnSelect=true, delay=0, children=null, MenuClass=Menu, MenuItemClass=MenuItem,
+                    ...context}={}) {
+        super({
+            closeOnBlur, timeout, autoActivate, open, toggle, closeOnSelect, delay, positioner: 'inherit',
+            direction: 'vertical', SubMenuClass: MenuClass, MenuItemClass: MenuItemClass, openOnHover
+        });
 
-        this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
-        this.autoActivate = autoActivate;
-        this.openOnHover = openOnHover;
-        this.toggle = toggle;
-        this.closeOnSelect = closeOnSelect;
-        this.delay = delay;
-        this.direction = 'vertical';
+        this.events = null;
 
         if(target) {
             this.element = target;
@@ -654,16 +637,9 @@ export default class Menu extends AbstractMenu {
             this.element = this.render(context);
         }
 
-        this.isVisible = visible;
-
-        if(classes) addClasses(this.element, classes);
-        if(id) this.element.id = id;
-
         this.registerTopics();
         this.parseDOM();
         this.init();
-
-        // this.element.tabIndex = -1;
 
         if(children) {
             this.createItems(children);

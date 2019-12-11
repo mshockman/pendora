@@ -8,14 +8,13 @@ import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
 import {SelectInputWidget, HiddenInputWidget} from "../forms/";
 import ItemFilter from "../ui/ItemFilter";
-import {debounce} from "../core/debounce";
 
 
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
 export class SelectOption extends AbstractMenuItem {
-    constructor({target, text, value=null, id=null, classes=null}={}) {
+    constructor({target, text, value=null}={}) {
         super();
 
         if(target) {
@@ -29,25 +28,21 @@ export class SelectOption extends AbstractMenuItem {
 
         this.element.setAttribute('aria-role', 'option');
 
-        if(classes) {
-            this.addClass(classes);
-        }
-
-        if(id) {
-            this.element.id = id;
-        }
-
         this.toggle = "inherit";
         this.autoActivate = true;
         this.openOnHover = true;
         this.delay = 0;
         this.closeOnSelect = false;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = false;
         this.timeout = false;
+        // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = true;
 
-        this.MenuItemClass = SelectOption;
-        this.SubMenuClass = Menu;
+        // noinspection JSUnusedGlobalSymbols
+        this.MenuItemClass = null;
+        // noinspection JSUnusedGlobalSymbols
+        this.SubMenuClass = null;
 
         this.autoDeactivateItems = "auto";
 
@@ -67,34 +62,14 @@ export class SelectOption extends AbstractMenuItem {
      * @returns {Element}
      */
     render({text}) {
-        let html = `<div data-role="menuitem" class="menuitem"><a data-text>${text}</a></div>`,
+        let html = `<div data-role="menuitem" class="menuitem">
+            <span class="checkmark"><i class="fas fa-check"></i></span>
+            <a data-text>${text}</a>
+        </div>`,
             fragment = parseHTML(html);
 
         return fragment.children[0];
     }
-
-    // /**
-    //  * Handles mousedown events.
-    //  *
-    //  * @param event
-    //  */
-    // onMouseDown(event) {
-    //     let isDisabled = this.getDisabled();
-    //
-    //     if(isDisabled) {
-    //         event.preventDefault();
-    //         return;
-    //     }
-    //
-    //     if(event.target !== this) return;
-    //     let parent = this.parent;
-    //
-    //     if(!this.isSelected) {
-    //         this.select({event});
-    //     } else if(this.isSelected && parent.multiSelect) {
-    //         this.deselect({event});
-    //     }
-    // }
 
     /**
      * Selects the options and publishes a [option.select] topic.
@@ -105,16 +80,6 @@ export class SelectOption extends AbstractMenuItem {
         super.select();
 
         if(this.isSelected) return;
-
-        if(!this.multiSelect) {
-            for (let node of this.element.querySelectorAll('.selected')) {
-                let instance = getMenuInstance(node);
-
-                if (instance && instance !== this) {
-                    instance.deselect();
-                }
-            }
-        }
 
         this.isSelected = true;
 
@@ -144,10 +109,28 @@ export class SelectOption extends AbstractMenuItem {
             return;
         }
 
+        if(event.target !== this) {
+            return;
+        }
+
+        event.willSelect = false;
+        event.willDeselect = false;
+
         if(this.isSelected) {
-            if(this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) this.deselect();
+            if(this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) {
+                event.willDeselect = true;
+            }
         } else {
+            event.willSelect = true;
+        }
+
+        // Trigger and menuitem.click event.  Behavior
+        this.dispatchTopic('menuitem.click', event);
+
+        if(event.willSelect) {
             this.select();
+        } else if(event.willDeselect) {
+            this.deselect();
         }
     }
 
@@ -175,10 +158,12 @@ export class SelectOption extends AbstractMenuItem {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get isFiltered() {
         return this.classList.contains('filtered');
     }
 
+    // noinspection JSUnusedGlobalSymbols
     set isFiltered(value) {
         if(value) {
             this.classList.add('filtered');
@@ -220,7 +205,7 @@ export class SelectOption extends AbstractMenuItem {
     }
 
     /**
-     * Returns the options parent select menu or null.
+     * Returns the options parent select-menu or null.
      * @returns {null|{isSelect}|MenuNode}
      */
     get parentSelect() {
@@ -252,6 +237,7 @@ export class SelectOption extends AbstractMenuItem {
 }
 
 
+// noinspection JSUnusedGlobalSymbols
 export const FILTERS = {
     startsWith(value) {
         return function(item) {
@@ -285,8 +271,12 @@ export const FILTERS = {
 export class SelectMenu extends AbstractMenu {
     @inherit multiSelect;
 
-    constructor({target, shiftSelect=true, filter=null, placeholder="No Items Found", filterDelay=500, filterPlaceholderText="Search", ...context}={}) {
+    constructor({
+                target, filter=null, placeholder="No Items Found", filterDelay=500,
+                filterPlaceholderText="Search", toggle=false, enableShiftSelect=true, enableCtrlToggle=true, clearOldSelection=false, ...context
+    }={}) {
         super();
+        // noinspection JSUnusedGlobalSymbols
         this.MenuItemClass = SelectOption;
 
         if(target) {
@@ -295,15 +285,22 @@ export class SelectMenu extends AbstractMenu {
             this.element = this.render(context);
         }
 
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = false;
         this.timeout = false;
+        // noinspection JSUnusedGlobalSymbols
         this.autoActivate = true;
+        // noinspection JSUnusedGlobalSymbols
         this.openOnHover = false;
         this.multiSelect = "inherit";
         this.closeOnSelect = false;
+        // noinspection JSUnusedGlobalSymbols
         this.delay = 0;
         this.positioner = "inherit";
-        this.shiftSelect = shiftSelect;
+
+        this.enableShiftSelect = enableShiftSelect;
+        this.enableCtrlToggle = enableCtrlToggle;
+        this.clearOldSelection = clearOldSelection;
 
         this.element.classList.add('select-menu');
 
@@ -364,9 +361,70 @@ export class SelectMenu extends AbstractMenu {
                     }
                 }
             }
-            // if(this.closeOnSelect && this.isActive) {
-            //     this.deactivate();
-            // }
+
+            this.dispatchTopic('selection-change', this);
+        });
+
+        this.on('menuitem.click', topic => {
+            if(topic.target.parent !== this) return;
+
+            let event = topic.originalEvent;
+
+            if(this._lastClick && event.shiftKey && this.enableShiftSelect) {
+                let children = this.children,
+                    targetIndex = children.indexOf(topic.target),
+                    lastIndex = children.indexOf(this._lastClick);
+
+                if(targetIndex !== -1 && lastIndex !== -1) {
+                    let startIndex = Math.min(targetIndex, lastIndex),
+                        endingIndex = Math.max(targetIndex, lastIndex),
+                        change = false;
+
+                    for(let i = 0, l = children.length; i < l; i++) {
+                        let child = children[i];
+
+                        if(i >= startIndex && i <= endingIndex && !child.isDisabled) {
+                            if(!child.isSelected) {
+                                child.isSelected = true;
+                                change = true;
+                            }
+                        } else if(child.isSelected) {
+                            child.isSelected = false;
+                            change = true;
+                        }
+                    }
+
+                    if(change) {
+                        this.dispatchTopic('selection-change', this);
+                    }
+                }
+            } else if(event.ctrlKey && this.enableCtrlToggle) {
+                let change = false;
+
+                if(!topic.target.isSelected && !topic.deselected) {
+                    event.target.isSelected = true;
+                    change = true
+                } else if(topic.target.isSelected && !topic.selected) {
+                    event.target.isSelected = false;
+                    change = true;
+                }
+
+                this._lastClick = topic.target;
+
+                if(change) {
+                    this.dispatchTopic('selection-change', this);
+                }
+            } else if(this.clearOldSelection) {
+                for(let child of this.children) {
+                    if(child !== topic.target && child.isSelected) {
+                        child.isSelected = false;
+                    }
+                }
+
+                this._lastClick = topic.target;
+            } else {
+                this._lastClick = topic.target;
+            }
         });
     }
 
@@ -499,7 +557,7 @@ export class SelectMenu extends AbstractMenu {
 
         let _timer = null;
 
-        this.filterInput.addEventListener('keydown', event => {
+        this.filterInput.addEventListener('keydown', () => {
             if(_timer) {
                 clearTimeout(_timer);
                 _timer = null;
@@ -546,12 +604,16 @@ export class Select2 extends AbstractMenuItem {
         this.openOnHover = false;
         this.delay = false;
         this.closeOnSelect = "auto";
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = true;
         this.timeout = timeout;
         this.multiSelect = multiSelect;
+        // noinspection JSUnusedGlobalSymbols
         this.MenuItemClass = SelectOption;
+        // noinspection JSUnusedGlobalSymbols
         this.SubMenuClass = SelectMenu;
         this.positioner = positioners.DROPDOWN;
+        // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = false;
         this.labelToItemMap = new WeakMap();
         this.itemToLabelMap = new WeakMap();
@@ -652,11 +714,12 @@ export class Select2 extends AbstractMenuItem {
                 }
             });
 
-            this.filter.input.addEventListener('focus', event => {
+            this.filter.input.addEventListener('focus', () => {
                 this.element.classList.add('select-highlight');
             });
 
             this.filter.input.addEventListener('blur', event => {
+                // noinspection JSCheckFunctionSignatures
                 if(!this.element.contains(event.relatedTarget)) {
                     this.element.classList.remove('select-highlight');
                     if(this.isActive) this.deactivate();
@@ -664,7 +727,7 @@ export class Select2 extends AbstractMenuItem {
             });
         }
 
-        this.addEventListener('focus', event => {
+        this.addEventListener('focus', () => {
             if(this.filter) {
                 this.filter.focus();
             }
@@ -811,18 +874,22 @@ export class Select2 extends AbstractMenuItem {
         return this.button.querySelectorAll('.choice');
     }
 
+    // noinspection JSUnusedGlobalSymbols
     getValue() {
         return this.widget.getValue();
     }
 
+    // noinspection JSUnusedGlobalSymbols
     setValue(value) {
-
+        this.widget.setValue(value);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     getName() {
         return this.widget.getName();
     }
 
+    // noinspection JSUnusedGlobalSymbols
     setName(name) {
         this.widget.setName(name);
     }
@@ -849,13 +916,16 @@ export class Select2 extends AbstractMenuItem {
     onClick(topic) {
         let event = topic.originalEvent;
 
+        // noinspection JSUnresolvedFunction
         if(topic.target === this && event.target.closest('.exit-button')) {
+            // noinspection JSUnresolvedFunction
             let li = event.target.closest('li'),
                 item = this.labelToItemMap.get(li);
 
             item.deselect();
         } else {
             if(this.filter) {
+                // noinspection JSCheckFunctionSignatures
                 let inFilter = this.filter.element.contains(event.target);
 
                 if(!this.isActive && inFilter) {
@@ -955,16 +1025,17 @@ export class ComboBox extends AbstractMenuItem {
             this.textbox = textbox;
         }
 
-        this.toggle = "both";
+        this.toggle = true;
         this.autoActivate = false;
         this.openOnHover = false;
         this.delay = false;
         this.timeout = timeout;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = true;
         this.positioner = positioners.DROPDOWN;
         this.closeOnSelect = true;
         this._label = '';
-        this.enableKeyboardNavigation = true;
+        // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = false;
 
         this.SubMenuClass = SelectMenu;
@@ -1002,16 +1073,19 @@ export class ComboBox extends AbstractMenuItem {
             }
         });
 
-        this.textbox.addEventListener('input', event => {
+        let _timer = null;
+
+        let applyFilter = () => {
+            _timer = null;
             this.submenu.filter(filter(this.textbox.value));
 
             // Flag if we found a select item.
             let f = false;
 
             // Activate the selected items.
-            if(!this.multiSelect) {
-                for(let option of this.submenu.options) {
-                    if(!option.isDisabled && !option.isFiltered && option.isSelected) {
+            if (!this.multiSelect) {
+                for (let option of this.submenu.options) {
+                    if (!option.isDisabled && !option.isFiltered && option.isSelected) {
                         option.activate();
                         f = true;
                         break;
@@ -1019,13 +1093,35 @@ export class ComboBox extends AbstractMenuItem {
                 }
             }
 
-            if(!f) {
+            if (!f) {
                 for (let option of this.submenu.options) {
                     if (!option.isDisabled && !option.isFiltered) {
                         option.activate();
                         break;
                     }
                 }
+            }
+        };
+
+        this.textbox.addEventListener('input', () => {
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
+            }
+
+            if(wait === false || wait < 0) {
+                applyFilter();
+            } else {
+                _timer = setTimeout(applyFilter, wait);
+            }
+        });
+
+        this.textbox.addEventListener('keydown', event => {
+            // Apply the filter immediately on enter.
+            if(event.key === "Enter" && _timer) {
+                clearTimeout(_timer);
+                _timer = null;
+                applyFilter();
             }
         });
 
@@ -1054,7 +1150,7 @@ export class ComboBox extends AbstractMenuItem {
             this.textbox.focus();
         });
 
-        this.on('menuitem.selected', (topic) => {
+        this.on('menuitem.select', () => {
             this._renderLabel();
 
             if(this.isActive && this.closeOnSelect) {
@@ -1105,12 +1201,13 @@ export class ComboBox extends AbstractMenuItem {
     }
 
     _rootKeyDown(topic) {
-        if(this.enableKeyboardNavigation && this.isRoot) {
+        if(this.isRoot) {
             let event = topic.originalEvent,
                 key = event.key;
 
             if(key === "Escape") {
                 this.deactivate();
+                // noinspection JSUnresolvedFunction
                 document.activeElement.blur();
             } else if(key !== 'ArrowLeft' && key !== 'ArrowRight') { // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
                 let activeItem = this.activeItem,

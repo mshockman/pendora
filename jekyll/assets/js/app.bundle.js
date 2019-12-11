@@ -1132,45 +1132,6 @@ var privateCache = new Data();
 
 /***/ }),
 
-/***/ "./src/core/debounce.js":
-/*!******************************!*\
-  !*** ./src/core/debounce.js ***!
-  \******************************/
-/*! exports provided: debounce */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
-/**
- * Throttles a function to only be executed after a given wait period.  If multiple calls to the debounced function
- * are made within that period the waiting period is set.
- * @param fn
- * @param wait
- * @returns {Function}
- */
-function debounce(fn, wait) {
-  var timeout;
-  return function () {
-    var _this = this;
-
-    var args = arguments;
-
-    var later = function later() {
-      timeout = null;
-      fn.apply(_this, args);
-    };
-
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-
-    timeout = setTimeout(later, wait);
-  };
-}
-
-/***/ }),
-
 /***/ "./src/core/errors.js":
 /*!****************************!*\
   !*** ./src/core/errors.js ***!
@@ -4716,8 +4677,7 @@ var parseBooleanOrInt = function parseBooleanOrInt(value) {
   return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["parseAny"])(value, core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_utility__WEBPACK_IMPORTED_MODULE_2__["parseIntValue"]);
 },
     timeAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](parseBooleanOrInt, core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]),
-    boolAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]),
-    stringAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](null, core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]);
+    boolAttribute = new core_attributes__WEBPACK_IMPORTED_MODULE_5__["default"](core_utility__WEBPACK_IMPORTED_MODULE_2__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_5__["TRUE"]);
 
 var MENU_PARAMETERS = {
   closeOnBlur: timeAttribute,
@@ -4744,30 +4704,56 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
     function AbstractMenu() {
       var _this;
 
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref$closeOnBlur = _ref.closeOnBlur,
+          closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
+          _ref$timeout = _ref.timeout,
+          timeout = _ref$timeout === void 0 ? false : _ref$timeout,
+          _ref$autoActivate = _ref.autoActivate,
+          autoActivate = _ref$autoActivate === void 0 ? false : _ref$autoActivate,
+          _ref$openOnHover = _ref.openOnHover,
+          openOnHover = _ref$openOnHover === void 0 ? false : _ref$openOnHover,
+          _ref$toggle = _ref.toggle,
+          toggle = _ref$toggle === void 0 ? false : _ref$toggle,
+          _ref$closeOnSelect = _ref.closeOnSelect,
+          closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
+          _ref$delay = _ref.delay,
+          delay = _ref$delay === void 0 ? false : _ref$delay,
+          _ref$positioner = _ref.positioner,
+          positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
+          _ref$direction = _ref.direction,
+          direction = _ref$direction === void 0 ? "vertical" : _ref$direction,
+          _ref$SubMenuClass = _ref.SubMenuClass,
+          SubMenuClass = _ref$SubMenuClass === void 0 ? null : _ref$SubMenuClass,
+          _ref$MenuItemClass = _ref.MenuItemClass,
+          MenuItemClass = _ref$MenuItemClass === void 0 ? null : _ref$MenuItemClass;
+
       _classCallCheck(this, AbstractMenu);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this));
 
       _initialize(_assertThisInitialized(_this));
 
-      _this.menuNodeType = "menu";
-      _this.closeOnBlur = false; // both sub-item and menu
+      _this.closeOnBlur = closeOnBlur; // both sub-item and menu
 
-      _this.timeout = false; // both sub-item and menu
+      _this.timeout = timeout; // both sub-item and menu
+      // noinspection JSUnusedGlobalSymbols
 
-      _this.autoActivate = false; // sub-item property
+      _this.autoActivate = autoActivate; // sub-item property
+      // noinspection JSUnusedGlobalSymbols
 
-      _this.openOnHover = false; // sub-item property
+      _this.openOnHover = openOnHover; // sub-item property
 
-      _this.toggle = false;
-      _this.closeOnSelect = true; // both sub-item and menu.
+      _this.toggle = toggle;
+      _this.closeOnSelect = closeOnSelect; // both sub-item and menu.
+      // noinspection JSUnusedGlobalSymbols
 
-      _this.delay = false; // sub-item property
+      _this.delay = delay; // sub-item property
 
-      _this.positioner = "inherit";
-      _this.direction = "vertical";
-      _this.SubMenuClass = Menu;
-      _this.MenuItemClass = _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"];
+      _this.positioner = positioner;
+      _this.direction = direction;
+      _this.SubMenuClass = SubMenuClass;
+      _this.MenuItemClass = MenuItemClass;
       return _this;
     }
 
@@ -4850,7 +4836,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         this.on('event.mouseout', function (event) {
           return _this2.onMouseOut(event);
         });
-        this.on('menuitem.selected', function (event) {
+        this.on('menuitem.select', function (event) {
           return _this2.onSelect(event);
         });
       }
@@ -5027,7 +5013,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         }
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "method",
       key: "addItem",
@@ -5051,7 +5038,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
           if (item.element.parentElement) item.element.parentElement.removeChild(item.element);
         }
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "method",
       key: "hasItem",
@@ -5116,7 +5104,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         return null;
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "get",
       key: "activeIndex",
@@ -5136,7 +5125,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       key: "firstChild",
       value: function firstChild() {
         return this.children[0];
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "get",
       key: "lastChild",
@@ -5156,7 +5146,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         return null;
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "get",
       key: "lastEnabledChild",
@@ -5268,6 +5259,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           } else if (!this.isActive) {
             this.activate();
           }
+
+          this.dispatchTopic('menu.click', event);
         }
       }
     }, {
@@ -5523,30 +5516,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
         return false;
       }
-      /**
-       * Will return true if menu items should toggle on.
-       *
-       * @returns {boolean}
-       */
-
-    }, {
-      kind: "get",
-      key: "toggleOn",
-      value: function toggleOn() {
-        return this.toggle === 'on' || this.toggle === 'both';
-      }
-      /**
-       * Will return true if menu items should toggle off.
-       *
-       * @returns {boolean}
-       */
-
-    }, {
-      kind: "get",
-      key: "toggleOff",
-      value: function toggleOff() {
-        return this.toggle === 'off' || this.toggle === 'both';
-      }
     }]
   };
 }, _MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
@@ -5570,58 +5539,54 @@ function (_AbstractMenu) {
    * @param closeOnSelect {Boolean}
    * @param delay {Boolean|Number}
    * @param id {String}
-   * @param classes {String}
    * @param children {Array}
-   * @param visible
-   * @param filter
    * @param context
    */
   function Menu() {
     var _this5;
 
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$target = _ref.target,
-        target = _ref$target === void 0 ? null : _ref$target,
-        _ref$closeOnBlur = _ref.closeOnBlur,
-        closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
-        _ref$timeout = _ref.timeout,
-        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
-        _ref$autoActivate = _ref.autoActivate,
-        autoActivate = _ref$autoActivate === void 0 ? true : _ref$autoActivate,
-        _ref$openOnHover = _ref.openOnHover,
-        openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
-        _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? false : _ref$toggle,
-        _ref$closeOnSelect = _ref.closeOnSelect,
-        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
-        _ref$delay = _ref.delay,
-        delay = _ref$delay === void 0 ? 0 : _ref$delay,
-        _ref$id = _ref.id,
-        id = _ref$id === void 0 ? null : _ref$id,
-        _ref$classes = _ref.classes,
-        classes = _ref$classes === void 0 ? null : _ref$classes,
-        _ref$children = _ref.children,
-        children = _ref$children === void 0 ? null : _ref$children,
-        _ref$visible = _ref.visible,
-        visible = _ref$visible === void 0 ? false : _ref$visible,
-        _ref$filter = _ref.filter,
-        filter = _ref$filter === void 0 ? false : _ref$filter,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "id", "classes", "children", "visible", "filter"]);
+    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref2$target = _ref2.target,
+        target = _ref2$target === void 0 ? null : _ref2$target,
+        _ref2$closeOnBlur = _ref2.closeOnBlur,
+        closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
+        _ref2$timeout = _ref2.timeout,
+        timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
+        _ref2$autoActivate = _ref2.autoActivate,
+        autoActivate = _ref2$autoActivate === void 0 ? true : _ref2$autoActivate,
+        _ref2$openOnHover = _ref2.openOnHover,
+        openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
+        _ref2$toggle = _ref2.toggle,
+        toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
+        _ref2$closeOnSelect = _ref2.closeOnSelect,
+        closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
+        _ref2$delay = _ref2.delay,
+        delay = _ref2$delay === void 0 ? 0 : _ref2$delay,
+        _ref2$children = _ref2.children,
+        children = _ref2$children === void 0 ? null : _ref2$children,
+        _ref2$MenuClass = _ref2.MenuClass,
+        MenuClass = _ref2$MenuClass === void 0 ? Menu : _ref2$MenuClass,
+        _ref2$MenuItemClass = _ref2.MenuItemClass,
+        MenuItemClass = _ref2$MenuItemClass === void 0 ? _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"] : _ref2$MenuItemClass,
+        context = _objectWithoutProperties(_ref2, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "children", "MenuClass", "MenuItemClass"]);
 
     _classCallCheck(this, Menu);
 
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this));
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
+      closeOnBlur: closeOnBlur,
+      timeout: timeout,
+      autoActivate: autoActivate,
+      open: open,
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      delay: delay,
+      positioner: 'inherit',
+      direction: 'vertical',
+      SubMenuClass: MenuClass,
+      MenuItemClass: MenuItemClass,
+      openOnHover: openOnHover
+    }));
     _this5.events = null;
-    _this5.MenuItemClass = _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"];
-    _this5.SubMenuClass = Menu;
-    _this5.closeOnBlur = closeOnBlur;
-    _this5.timeout = timeout;
-    _this5.autoActivate = autoActivate;
-    _this5.openOnHover = openOnHover;
-    _this5.toggle = toggle;
-    _this5.closeOnSelect = closeOnSelect;
-    _this5.delay = delay;
-    _this5.direction = 'vertical';
 
     if (target) {
       _this5.element = target;
@@ -5629,16 +5594,11 @@ function (_AbstractMenu) {
       _this5.element = _this5.render(context);
     }
 
-    _this5.isVisible = visible;
-    if (classes) Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(_this5.element, classes);
-    if (id) _this5.element.id = id;
-
     _this5.registerTopics();
 
     _this5.parseDOM();
 
-    _this5.init(); // this.element.tabIndex = -1;
-
+    _this5.init();
 
     if (children) {
       _this5.createItems(children);
@@ -5657,9 +5617,9 @@ function (_AbstractMenu) {
   _createClass(Menu, [{
     key: "render",
     value: function render() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          _ref2$arrow = _ref2.arrow,
-          arrow = _ref2$arrow === void 0 ? false : _ref2$arrow;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref3$arrow = _ref3.arrow,
+          arrow = _ref3$arrow === void 0 ? false : _ref3$arrow;
 
       var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\"></div>\n            </div>\n        ");
       var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(html);
@@ -5688,8 +5648,9 @@ autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (el
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBar; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
+/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -5717,6 +5678,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -5755,45 +5717,66 @@ function (_AbstractMenu) {
 
     _classCallCheck(this, MenuBar);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this));
-    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
+    var SubMenuClass =
+    /*#__PURE__*/
+    function (_Menu) {
+      _inherits(SubMenuClass, _Menu);
+
+      function SubMenuClass() {
+        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, SubMenuClass);
+
+        return _possibleConstructorReturn(this, _getPrototypeOf(SubMenuClass).call(this, _objectSpread({
+          delay: delay,
+          SubMenuClass: SubMenuClass,
+          MenuItemClass: MenuItemClass
+        }, args)));
+      }
+
+      return SubMenuClass;
+    }(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+    var MenuItemClass =
+    /*#__PURE__*/
+    function (_MenuItem) {
+      _inherits(MenuItemClass, _MenuItem);
+
+      function MenuItemClass() {
+        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _classCallCheck(this, MenuItemClass);
+
+        return _possibleConstructorReturn(this, _getPrototypeOf(MenuItemClass).call(this, _objectSpread({
+          MenuItemClass: MenuItemClass,
+          SubMenuClass: SubMenuClass
+        }, args)));
+      }
+
+      return MenuItemClass;
+    }(_MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, {
+      closeOnBlur: closeOnBlur,
+      timeout: timeout,
+      autoActivate: autoActivate,
+      openOnHover: openOnHover,
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      delay: delay,
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      direction: 'horizontal',
+      SubMenuClass: SubMenuClass,
+      MenuItemClass: MenuItemClass
+    }));
+    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
     _this.direction = 'horizontal';
-    _this.enableKeyboardNavigation = true;
-    _this.closeOnBlur = closeOnBlur;
-    _this.timeout = timeout;
-    _this.autoActivate = autoActivate;
-    _this.openOnHover = openOnHover;
-    _this.toggle = toggle;
-    _this.closeOnSelect = closeOnSelect;
-    _this.delay = delay;
 
     if (target) {
       _this.element = target;
     } else {
       _this.element = _this.render(context);
     }
-
-    _this.SubMenuClass =
-    /*#__PURE__*/
-    function (_Menu) {
-      _inherits(SubMenu, _Menu);
-
-      function SubMenu() {
-        var _this2;
-
-        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, SubMenu);
-
-        _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SubMenu).call(this, _objectSpread({
-          delay: delay
-        }, args)));
-        _this2.SubMenuClass = SubMenu;
-        return _this2;
-      }
-
-      return SubMenu;
-    }(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
     _this.isVisible = true;
 
@@ -5803,9 +5786,7 @@ function (_AbstractMenu) {
 
     _this.init();
 
-    if (enableKeyboardNavigation) {
-      _this.initKeyboardNavigation();
-    }
+    _this.initKeyboardNavigation();
 
     return _this;
   }
@@ -5828,7 +5809,7 @@ function (_AbstractMenu) {
 }(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
-autoloader__WEBPACK_IMPORTED_MODULE_1__["default"].register('menubar', function (element) {
+autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('menubar', function (element) {
   return MenuBar.FromHTML(element);
 });
 
@@ -5950,14 +5931,12 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       _classCallCheck(this, AbstractMenuItem);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this));
-
-      _initialize(_assertThisInitialized(_this));
-
-      _this.menuNodeType = "menuitem";
       /**
        * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
        * @type {null|String}
        */
+
+      _initialize(_assertThisInitialized(_this));
 
       _this.targetKey = null;
       /**
@@ -6084,7 +6063,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.on('event.mouseout', function (event) {
             return _this2.onMouseOut(event);
           });
-          this.on('menuitem.selected', function (event) {
+          this.on('menuitem.select', function (event) {
             return _this2.onSelect(event);
           });
         }
@@ -6167,11 +6146,11 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "select",
       value: function select() {
-        this.publish('selected');
-        this.dispatchTopic('menuitem.selected', {
+        this.publish('select');
+        this.dispatchTopic('menuitem.select', {
           target: this
         });
-        this.element.dispatchEvent(new CustomEvent('menuitem.selected', {
+        this.element.dispatchEvent(new CustomEvent('menuitem.select', {
           detail: this,
           bubbles: true
         }));
@@ -6206,13 +6185,14 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
             window.location = action;
           };
 
-          this.on('selected', fn);
+          this.on('select', fn);
           return fn;
         } else {
-          this.on('selected', action);
+          this.on('select', action);
           return action;
         }
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
       /**
        * Removes an action.
        * @param action
@@ -6222,8 +6202,9 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "removeAction",
       value: function removeAction(action) {
-        this.off('selected', action);
-      }
+        this.off('select', action);
+      } // noinspection JSUnusedGlobalSymbols
+
       /**
        * Tests to see if the item has an action.
        * @param action
@@ -6234,8 +6215,9 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "hasAction",
       value: function hasAction(action) {
-        return this.hasEvent('selected', action);
-      }
+        return this.hasEvent('select', action);
+      } // noinspection JSUnusedGlobalSymbols
+
       /**
        * Removes all actions from the item.
        */
@@ -6244,7 +6226,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "clearActions",
       value: function clearActions() {
-        this.off('selected');
+        this.off('select');
       } //------------------------------------------------------------------------------------------------------------------
       // Manage submenu
 
@@ -6376,13 +6358,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (event.target !== this) return;
 
-        if (this.parent) {
-          this.parent.publish('click-item', {
-            sender: this,
-            event: event
-          });
-        }
-
         if (!isDisabled) {
           if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
             this.showSubMenu();
@@ -6395,6 +6370,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           if (this.isActive && !this.hasSubMenu()) {
             this.select();
           }
+
+          this.dispatchTopic('menuitem.click', event);
         }
       }
       /**
@@ -6561,7 +6538,11 @@ function (_AbstractMenuItem) {
         nodeName = _ref$nodeName === void 0 ? "div" : _ref$nodeName,
         _ref$positioner = _ref.positioner,
         positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
-        context = _objectWithoutProperties(_ref, ["target", "text", "action", "href", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "classes", "timeout", "nodeName", "positioner"]);
+        _ref$SubMenuClass = _ref.SubMenuClass,
+        SubMenuClass = _ref$SubMenuClass === void 0 ? _Menu__WEBPACK_IMPORTED_MODULE_2__["default"] : _ref$SubMenuClass,
+        _ref$MenuItemClass = _ref.MenuItemClass,
+        MenuItemClass = _ref$MenuItemClass === void 0 ? MenuItem : _ref$MenuItemClass,
+        context = _objectWithoutProperties(_ref, ["target", "text", "action", "href", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "classes", "timeout", "nodeName", "positioner", "SubMenuClass", "MenuItemClass"]);
 
     _classCallCheck(this, MenuItem);
 
@@ -6586,14 +6567,18 @@ function (_AbstractMenuItem) {
     _this6.autoActivate = autoActivate;
     _this6.openOnHover = openOnHover;
     _this6.delay = delay;
-    _this6.closeOnSelect = closeOnSelect;
+    _this6.closeOnSelect = closeOnSelect; // noinspection JSUnusedGlobalSymbols
+
     _this6.closeOnBlur = closeOnBlur;
     _this6.timeout = timeout;
-    _this6.positioner = positioner;
+    _this6.positioner = positioner; // noinspection JSUnusedGlobalSymbols
+
     _this6.clearSubItemsOnHover = true;
-    _this6.autoDeactivateItems = true;
-    _this6.MenuItemClass = MenuItem;
-    _this6.SubMenuClass = _Menu__WEBPACK_IMPORTED_MODULE_2__["default"];
+    _this6.autoDeactivateItems = true; // noinspection JSUnusedGlobalSymbols
+
+    _this6.MenuItemClass = MenuItemClass; // noinspection JSUnusedGlobalSymbols
+
+    _this6.SubMenuClass = SubMenuClass;
     _this6.element.tabIndex = -1;
 
     _this6.registerTopics();
@@ -6702,7 +6687,6 @@ function (_Publisher) {
      */
 
     _this._element = undefined;
-    _this.menuNodeType = "node";
     _this.nodeType = null;
     _this.isController = false;
     _this.closeOnSelect = false;
@@ -6768,7 +6752,8 @@ function (_Publisher) {
     key: "destroy",
     value: function destroy() {
       this.clearAllRegisteredEvents();
-      this.isController = false;
+      this.isController = false; // noinspection JSUnusedGlobalSymbols
+
       this.__keyboardNavigationEnabled = false;
       this.element = null;
       this.publish('destroy', this);
@@ -6907,7 +6892,8 @@ function (_Publisher) {
       }
 
       return false;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Yields all descendants.
      *
@@ -7070,7 +7056,8 @@ function (_Publisher) {
       }
 
       return null;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Returns the target item for the given HTMLElement in the current menu tree.
      *
@@ -7098,7 +7085,8 @@ function (_Publisher) {
       }
 
       return null;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Returns the target menu for the given HTMLElement in the current menu tree.
      *
@@ -7137,6 +7125,7 @@ function (_Publisher) {
 
   }, {
     key: "hasElement",
+    // noinspection JSUnusedGlobalSymbols
 
     /**
      * Returns true if the nodes element is defined.
@@ -7188,7 +7177,8 @@ function (_Publisher) {
     key: "addClass",
     value: function addClass(classes) {
       return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(this.element, classes);
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "removeClass",
     value: function removeClass(classes) {
@@ -7334,7 +7324,8 @@ function (_Publisher) {
       }
 
       return false;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Returns the timer object if it exists.
      *
@@ -7428,7 +7419,7 @@ function (_Publisher) {
         }
       }
 
-      this._events = {};
+      this._eventListeners = {};
     }
   }, {
     key: "_registerAllEvents",
@@ -7512,7 +7503,8 @@ function (_Publisher) {
       }
 
       return null;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "hasEventListener",
     value: function hasEventListener(name, callback) {
@@ -7552,11 +7544,12 @@ function (_Publisher) {
   }, {
     key: "_rootKeyDown",
     value: function _rootKeyDown(topic) {
-      if (this.enableKeyboardNavigation && this.isRoot) {
+      if (this.isRoot) {
         var event = topic.originalEvent;
 
         if (event.key === "Escape") {
-          this.deactivate();
+          this.deactivate(); // noinspection JSUnresolvedFunction
+
           document.activeElement.blur();
           return;
         }
@@ -7612,7 +7605,6 @@ function (_Publisher) {
         try {
           for (var _iterator8 = node.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
             var _child = _step8.value;
-            var role = _child.dataset.role;
 
             if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
               var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(_child);
@@ -7689,6 +7681,7 @@ function (_Publisher) {
       this._children = [];
     } //------------------------------------------------------------------------------------------------------------------
     // Static functions
+    // noinspection JSUnusedGlobalSymbols
 
     /**
      * Returns the bound menu controller for the provided node.
@@ -7738,7 +7731,8 @@ function (_Publisher) {
       return parent ? parent.closest(function (node) {
         return node.isMenu();
       }) : null;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Reference to the first ancestor node in the menu tree who is an item. Returns null if it does not exist.
      *
@@ -7764,7 +7758,8 @@ function (_Publisher) {
     key: "nextSibling",
     get: function get() {
       return this.getOffsetSibling(1);
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Reference to the previous sibling node in the menu tree.
      *
@@ -8060,7 +8055,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
 /* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
 /* harmony import */ var _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../ui/ItemFilter */ "./src/ui/ItemFilter.js");
-/* harmony import */ var _core_debounce__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../core/debounce */ "./src/core/debounce.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
@@ -8131,7 +8125,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
@@ -8148,11 +8141,7 @@ function (_AbstractMenuItem) {
         target = _ref.target,
         text = _ref.text,
         _ref$value = _ref.value,
-        value = _ref$value === void 0 ? null : _ref$value,
-        _ref$id = _ref.id,
-        id = _ref$id === void 0 ? null : _ref$id,
-        _ref$classes = _ref.classes,
-        classes = _ref$classes === void 0 ? null : _ref$classes;
+        value = _ref$value === void 0 ? null : _ref$value;
 
     _classCallCheck(this, SelectOption);
 
@@ -8171,24 +8160,20 @@ function (_AbstractMenuItem) {
 
     _this.element.setAttribute('aria-role', 'option');
 
-    if (classes) {
-      _this.addClass(classes);
-    }
-
-    if (id) {
-      _this.element.id = id;
-    }
-
     _this.toggle = "inherit";
     _this.autoActivate = true;
     _this.openOnHover = true;
     _this.delay = 0;
-    _this.closeOnSelect = false;
+    _this.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
+
     _this.closeOnBlur = false;
-    _this.timeout = false;
-    _this.clearSubItemsOnHover = true;
-    _this.MenuItemClass = SelectOption;
-    _this.SubMenuClass = _Menu__WEBPACK_IMPORTED_MODULE_1__["default"];
+    _this.timeout = false; // noinspection JSUnusedGlobalSymbols
+
+    _this.clearSubItemsOnHover = true; // noinspection JSUnusedGlobalSymbols
+
+    _this.MenuItemClass = null; // noinspection JSUnusedGlobalSymbols
+
+    _this.SubMenuClass = null;
     _this.autoDeactivateItems = "auto";
 
     _this.element.classList.add("option");
@@ -8214,32 +8199,10 @@ function (_AbstractMenuItem) {
     key: "render",
     value: function render(_ref2) {
       var text = _ref2.text;
-      var html = "<div data-role=\"menuitem\" class=\"menuitem\"><a data-text>".concat(text, "</a></div>"),
+      var html = "<div data-role=\"menuitem\" class=\"menuitem\">\n            <span class=\"checkmark\"><i class=\"fas fa-check\"></i></span>\n            <a data-text>".concat(text, "</a>\n        </div>"),
           fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
-    } // /**
-    //  * Handles mousedown events.
-    //  *
-    //  * @param event
-    //  */
-    // onMouseDown(event) {
-    //     let isDisabled = this.getDisabled();
-    //
-    //     if(isDisabled) {
-    //         event.preventDefault();
-    //         return;
-    //     }
-    //
-    //     if(event.target !== this) return;
-    //     let parent = this.parent;
-    //
-    //     if(!this.isSelected) {
-    //         this.select({event});
-    //     } else if(this.isSelected && parent.multiSelect) {
-    //         this.deselect({event});
-    //     }
-    // }
-
+    }
     /**
      * Selects the options and publishes a [option.select] topic.
      *
@@ -8254,37 +8217,6 @@ function (_AbstractMenuItem) {
       _get(_getPrototypeOf(SelectOption.prototype), "select", this).call(this);
 
       if (this.isSelected) return;
-
-      if (!this.multiSelect) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = this.element.querySelectorAll('.selected')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var node = _step.value;
-            var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getMenuInstance"])(node);
-
-            if (instance && instance !== this) {
-              instance.deselect();
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-      }
-
       this.isSelected = true;
 
       if (!this.isActive) {
@@ -8323,10 +8255,28 @@ function (_AbstractMenuItem) {
         return;
       }
 
+      if (event.target !== this) {
+        return;
+      }
+
+      event.willSelect = false;
+      event.willDeselect = false;
+
       if (this.isSelected) {
-        if (this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) this.deselect();
+        if (this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) {
+          event.willDeselect = true;
+        }
       } else {
+        event.willSelect = true;
+      } // Trigger and menuitem.click event.  Behavior
+
+
+      this.dispatchTopic('menuitem.click', event);
+
+      if (event.willSelect) {
         this.select();
+      } else if (event.willDeselect) {
+        this.deselect();
       }
     }
     /**
@@ -8354,12 +8304,14 @@ function (_AbstractMenuItem) {
           this.element.classList.remove('selected');
         }
       }
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "isFiltered",
     get: function get() {
       return this.classList.contains('filtered');
-    },
+    } // noinspection JSUnusedGlobalSymbols
+    ,
     set: function set(value) {
       if (value) {
         this.classList.add('filtered');
@@ -8404,7 +8356,7 @@ function (_AbstractMenuItem) {
       this.textNode.innerText = (value + "").trim();
     }
     /**
-     * Returns the options parent select menu or null.
+     * Returns the options parent select-menu or null.
      * @returns {null|{isSelect}|MenuNode}
      */
 
@@ -8439,7 +8391,8 @@ function (_AbstractMenuItem) {
   }]);
 
   return SelectOption;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]); // noinspection JSUnusedGlobalSymbols
+
 var FILTERS = {
   startsWith: function startsWith(value) {
     return function (item) {
@@ -8477,8 +8430,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           target = _ref3.target,
-          _ref3$shiftSelect = _ref3.shiftSelect,
-          shiftSelect = _ref3$shiftSelect === void 0 ? true : _ref3$shiftSelect,
           _ref3$filter = _ref3.filter,
           filter = _ref3$filter === void 0 ? null : _ref3$filter,
           _ref3$placeholder = _ref3.placeholder,
@@ -8487,11 +8438,19 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           filterDelay = _ref3$filterDelay === void 0 ? 500 : _ref3$filterDelay,
           _ref3$filterPlacehold = _ref3.filterPlaceholderText,
           filterPlaceholderText = _ref3$filterPlacehold === void 0 ? "Search" : _ref3$filterPlacehold,
-          context = _objectWithoutProperties(_ref3, ["target", "shiftSelect", "filter", "placeholder", "filterDelay", "filterPlaceholderText"]);
+          _ref3$toggle = _ref3.toggle,
+          toggle = _ref3$toggle === void 0 ? false : _ref3$toggle,
+          _ref3$enableShiftSele = _ref3.enableShiftSelect,
+          enableShiftSelect = _ref3$enableShiftSele === void 0 ? true : _ref3$enableShiftSele,
+          _ref3$enableCtrlToggl = _ref3.enableCtrlToggle,
+          enableCtrlToggle = _ref3$enableCtrlToggl === void 0 ? true : _ref3$enableCtrlToggl,
+          _ref3$clearOldSelecti = _ref3.clearOldSelection,
+          clearOldSelection = _ref3$clearOldSelecti === void 0 ? false : _ref3$clearOldSelecti,
+          context = _objectWithoutProperties(_ref3, ["target", "filter", "placeholder", "filterDelay", "filterPlaceholderText", "toggle", "enableShiftSelect", "enableCtrlToggle", "clearOldSelection"]);
 
       _classCallCheck(this, SelectMenu);
 
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this));
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this)); // noinspection JSUnusedGlobalSymbols
 
       _initialize(_assertThisInitialized(_this2));
 
@@ -8501,17 +8460,23 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         _this2.element = target;
       } else {
         _this2.element = _this2.render(context);
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
 
       _this2.closeOnBlur = false;
-      _this2.timeout = false;
-      _this2.autoActivate = true;
+      _this2.timeout = false; // noinspection JSUnusedGlobalSymbols
+
+      _this2.autoActivate = true; // noinspection JSUnusedGlobalSymbols
+
       _this2.openOnHover = false;
       _this2.multiSelect = "inherit";
-      _this2.closeOnSelect = false;
+      _this2.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
+
       _this2.delay = 0;
       _this2.positioner = "inherit";
-      _this2.shiftSelect = shiftSelect;
+      _this2.enableShiftSelect = enableShiftSelect;
+      _this2.enableCtrlToggle = enableCtrlToggle;
+      _this2.clearOldSelection = clearOldSelection;
 
       _this2.element.classList.add('select-menu');
 
@@ -8556,29 +8521,29 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           this.clearFilter();
 
           if (!this.multiSelect && !this.activeChild) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
             try {
-              for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var child = _step2.value;
+              for (var _iterator = this.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var child = _step.value;
 
                 if (child.isSelected && !child.isActive) {
                   child.activate();
                 }
               }
             } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
+              _didIteratorError = true;
+              _iteratorError = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
+                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                  _iterator["return"]();
                 }
               } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
+                if (_didIteratorError) {
+                  throw _iteratorError;
                 }
               }
             }
@@ -8609,16 +8574,95 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
         this.on('option.select', function (topic) {
           if (!_this3.multiSelect) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+              for (var _iterator2 = _this3.selection[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var item = _step2.value;
+
+                if (item !== topic.target) {
+                  item.deselect();
+                }
+              }
+            } catch (err) {
+              _didIteratorError2 = true;
+              _iteratorError2 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                  _iterator2["return"]();
+                }
+              } finally {
+                if (_didIteratorError2) {
+                  throw _iteratorError2;
+                }
+              }
+            }
+          }
+
+          _this3.dispatchTopic('selection-change', _this3);
+        });
+        this.on('menuitem.click', function (topic) {
+          if (topic.target.parent !== _this3) return;
+          var event = topic.originalEvent;
+
+          if (_this3._lastClick && event.shiftKey && _this3.enableShiftSelect) {
+            var children = _this3.children,
+                targetIndex = children.indexOf(topic.target),
+                lastIndex = children.indexOf(_this3._lastClick);
+
+            if (targetIndex !== -1 && lastIndex !== -1) {
+              var startIndex = Math.min(targetIndex, lastIndex),
+                  endingIndex = Math.max(targetIndex, lastIndex),
+                  change = false;
+
+              for (var i = 0, l = children.length; i < l; i++) {
+                var child = children[i];
+
+                if (i >= startIndex && i <= endingIndex && !child.isDisabled) {
+                  if (!child.isSelected) {
+                    child.isSelected = true;
+                    change = true;
+                  }
+                } else if (child.isSelected) {
+                  child.isSelected = false;
+                  change = true;
+                }
+              }
+
+              if (change) {
+                _this3.dispatchTopic('selection-change', _this3);
+              }
+            }
+          } else if (event.ctrlKey && _this3.enableCtrlToggle) {
+            var _change = false;
+
+            if (!topic.target.isSelected && !topic.deselected) {
+              event.target.isSelected = true;
+              _change = true;
+            } else if (topic.target.isSelected && !topic.selected) {
+              event.target.isSelected = false;
+              _change = true;
+            }
+
+            _this3._lastClick = topic.target;
+
+            if (_change) {
+              _this3.dispatchTopic('selection-change', _this3);
+            }
+          } else if (_this3.clearOldSelection) {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
 
             try {
-              for (var _iterator3 = _this3.selection[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var item = _step3.value;
+              for (var _iterator3 = _this3.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                var _child = _step3.value;
 
-                if (item !== topic.target) {
-                  item.deselect();
+                if (_child !== topic.target && _child.isSelected) {
+                  _child.isSelected = false;
                 }
               }
             } catch (err) {
@@ -8635,10 +8679,11 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
                 }
               }
             }
-          } // if(this.closeOnSelect && this.isActive) {
-          //     this.deactivate();
-          // }
 
+            _this3._lastClick = topic.target;
+          } else {
+            _this3._lastClick = topic.target;
+          }
         });
       }
     }, {
@@ -8869,7 +8914,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         }
 
         var _timer = null;
-        this.filterInput.addEventListener('keydown', function (event) {
+        this.filterInput.addEventListener('keydown', function () {
           if (_timer) {
             clearTimeout(_timer);
             _timer = null;
@@ -8937,13 +8982,17 @@ function (_AbstractMenuItem2) {
     _this5.autoActivate = false;
     _this5.openOnHover = false;
     _this5.delay = false;
-    _this5.closeOnSelect = "auto";
+    _this5.closeOnSelect = "auto"; // noinspection JSUnusedGlobalSymbols
+
     _this5.closeOnBlur = true;
     _this5.timeout = timeout;
-    _this5.multiSelect = multiSelect;
-    _this5.MenuItemClass = SelectOption;
+    _this5.multiSelect = multiSelect; // noinspection JSUnusedGlobalSymbols
+
+    _this5.MenuItemClass = SelectOption; // noinspection JSUnusedGlobalSymbols
+
     _this5.SubMenuClass = SelectMenu;
-    _this5.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this5.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
+
     _this5.clearSubItemsOnHover = false;
     _this5.labelToItemMap = new WeakMap();
     _this5.itemToLabelMap = new WeakMap();
@@ -9091,11 +9140,12 @@ function (_AbstractMenuItem2) {
         }
       });
 
-      _this5.filter.input.addEventListener('focus', function (event) {
+      _this5.filter.input.addEventListener('focus', function () {
         _this5.element.classList.add('select-highlight');
       });
 
       _this5.filter.input.addEventListener('blur', function (event) {
+        // noinspection JSCheckFunctionSignatures
         if (!_this5.element.contains(event.relatedTarget)) {
           _this5.element.classList.remove('select-highlight');
 
@@ -9104,7 +9154,7 @@ function (_AbstractMenuItem2) {
       });
     }
 
-    _this5.addEventListener('focus', function (event) {
+    _this5.addEventListener('focus', function () {
       if (_this5.filter) {
         _this5.filter.focus();
       }
@@ -9318,20 +9368,26 @@ function (_AbstractMenuItem2) {
     key: "getLabels",
     value: function getLabels() {
       return this.button.querySelectorAll('.choice');
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "getValue",
     value: function getValue() {
       return this.widget.getValue();
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "setValue",
-    value: function setValue(value) {}
+    value: function setValue(value) {
+      this.widget.setValue(value);
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "getName",
     value: function getName() {
       return this.widget.getName();
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "setName",
     value: function setName(name) {
@@ -9347,14 +9403,16 @@ function (_AbstractMenuItem2) {
   }, {
     key: "onClick",
     value: function onClick(topic) {
-      var event = topic.originalEvent;
+      var event = topic.originalEvent; // noinspection JSUnresolvedFunction
 
       if (topic.target === this && event.target.closest('.exit-button')) {
+        // noinspection JSUnresolvedFunction
         var li = event.target.closest('li'),
             item = this.labelToItemMap.get(li);
         item.deselect();
       } else {
         if (this.filter) {
+          // noinspection JSCheckFunctionSignatures
           var inFilter = this.filter.element.contains(event.target);
 
           if (!this.isActive && inFilter) {
@@ -9521,16 +9579,17 @@ function (_AbstractMenuItem3) {
       _this7.textbox = textbox;
     }
 
-    _this7.toggle = "both";
+    _this7.toggle = true;
     _this7.autoActivate = false;
     _this7.openOnHover = false;
     _this7.delay = false;
-    _this7.timeout = timeout;
+    _this7.timeout = timeout; // noinspection JSUnusedGlobalSymbols
+
     _this7.closeOnBlur = true;
     _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
     _this7.closeOnSelect = true;
-    _this7._label = '';
-    _this7.enableKeyboardNavigation = true;
+    _this7._label = ''; // noinspection JSUnusedGlobalSymbols
+
     _this7.clearSubItemsOnHover = false;
     _this7.SubMenuClass = SelectMenu;
     _this7.element.tabIndex = 0;
@@ -9571,7 +9630,11 @@ function (_AbstractMenuItem3) {
       }
     });
 
-    _this7.textbox.addEventListener('input', function (event) {
+    var _timer = null;
+
+    var applyFilter = function applyFilter() {
+      _timer = null;
+
       _this7.submenu.filter(filter(_this7.textbox.value)); // Flag if we found a select item.
 
 
@@ -9638,6 +9701,28 @@ function (_AbstractMenuItem3) {
           }
         }
       }
+    };
+
+    _this7.textbox.addEventListener('input', function () {
+      if (_timer) {
+        clearTimeout(_timer);
+        _timer = null;
+      }
+
+      if (wait === false || wait < 0) {
+        applyFilter();
+      } else {
+        _timer = setTimeout(applyFilter, wait);
+      }
+    });
+
+    _this7.textbox.addEventListener('keydown', function (event) {
+      // Apply the filter immediately on enter.
+      if (event.key === "Enter" && _timer) {
+        clearTimeout(_timer);
+        _timer = null;
+        applyFilter();
+      }
     });
 
     _this7.initKeyboardNavigation();
@@ -9671,7 +9756,7 @@ function (_AbstractMenuItem3) {
 
         _this8.textbox.focus();
       });
-      this.on('menuitem.selected', function (topic) {
+      this.on('menuitem.select', function () {
         _this8._renderLabel();
 
         if (_this8.isActive && _this8.closeOnSelect) {
@@ -9719,12 +9804,13 @@ function (_AbstractMenuItem3) {
   }, {
     key: "_rootKeyDown",
     value: function _rootKeyDown(topic) {
-      if (this.enableKeyboardNavigation && this.isRoot) {
+      if (this.isRoot) {
         var event = topic.originalEvent,
             key = event.key;
 
         if (key === "Escape") {
-          this.deactivate();
+          this.deactivate(); // noinspection JSUnresolvedFunction
+
           document.activeElement.blur();
         } else if (key !== 'ArrowLeft' && key !== 'ArrowRight') {
           // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
@@ -10035,7 +10121,7 @@ function getInheritedPosition(menu) {
   }
 }
 
-function _applyPosition(target, overlay, container, flip) {
+function _applyPosition(target, overlay, container) {
   var position = overlay.dataset.position,
       _position$split = position.split(/\s*;\s*/),
       _position$split2 = _slicedToArray(_position$split, 3),
@@ -10161,15 +10247,16 @@ function dropdown() {
     if (!parentMenu || parentMenu.isRoot) {
       menu.element.dataset.position = topLevelPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
 
-      _applyPosition(target.element, menu.element, containerElement, 'xy');
+      _applyPosition(target.element, menu.element, containerElement);
     } else {
       menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
 
-      _applyPosition(target.element, menu.element, containerElement, 'xy');
+      _applyPosition(target.element, menu.element, containerElement);
     }
   };
 }
-var DROPDOWN = dropdown();
+var DROPDOWN = dropdown(); // noinspection JSUnusedGlobalSymbols
+
 var SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");
 
 /***/ }),
@@ -10229,7 +10316,7 @@ function hasMenuInstance(element) {
 /**
  * Retrieves the mapped menu node controller instance for the element.
  * @param element
- * @returns {any}
+ * @returns {null|MenuNode|*}
  */
 
 function getMenuInstance(element) {
@@ -10253,7 +10340,8 @@ function getClosestMenuNodeByElement(element) {
   }
 
   return null;
-}
+} // noinspection JSUnusedGlobalSymbols
+
 /**
  * Finds the closest menuitem controller for the element in the DOM tree.
  * @param element

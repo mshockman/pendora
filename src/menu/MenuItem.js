@@ -37,7 +37,6 @@ export class AbstractMenuItem extends MenuNode {
 
     constructor() {
         super();
-        this.menuNodeType = "menuitem";
 
         /**
          * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
@@ -116,7 +115,7 @@ export class AbstractMenuItem extends MenuNode {
             this.on('event.click', (event) => this.onClick(event));
             this.on('event.mouseover', (event) => this.onMouseOver(event));
             this.on('event.mouseout', (event) => this.onMouseOut(event));
-            this.on('menuitem.selected', (event) => this.onSelect(event));
+            this.on('menuitem.select', (event) => this.onSelect(event));
         }
     }
 
@@ -187,10 +186,10 @@ export class AbstractMenuItem extends MenuNode {
      * Triggers a select item event.
      */
     select() {
-        this.publish('selected');
-        this.dispatchTopic('menuitem.selected', {target: this});
+        this.publish('select');
+        this.dispatchTopic('menuitem.select', {target: this});
 
-        this.element.dispatchEvent(new CustomEvent('menuitem.selected', {
+        this.element.dispatchEvent(new CustomEvent('menuitem.select', {
             detail: this,
             bubbles: true
         }));
@@ -220,36 +219,39 @@ export class AbstractMenuItem extends MenuNode {
                 window.location = action;
             };
 
-            this.on('selected', fn);
+            this.on('select', fn);
             return fn;
         } else {
-            this.on('selected', action);
+            this.on('select', action);
             return action;
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Removes an action.
      * @param action
      */
     removeAction(action) {
-        this.off('selected', action);
+        this.off('select', action);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Tests to see if the item has an action.
      * @param action
      * @returns {boolean}
      */
     hasAction(action) {
-        return this.hasEvent('selected', action);
+        return this.hasEvent('select', action);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Removes all actions from the item.
      */
     clearActions() {
-        this.off('selected');
+        this.off('select');
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -357,10 +359,6 @@ export class AbstractMenuItem extends MenuNode {
 
         if(event.target !== this) return;
 
-        if(this.parent) {
-            this.parent.publish('click-item', {sender: this, event});
-        }
-
         if(!isDisabled) {
             if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
                 this.showSubMenu();
@@ -373,6 +371,8 @@ export class AbstractMenuItem extends MenuNode {
             if (this.isActive && !this.hasSubMenu()) {
                 this.select();
             }
+
+            this.dispatchTopic('menuitem.click', event);
         }
     }
 
@@ -484,7 +484,7 @@ export class AbstractMenuItem extends MenuNode {
 export default class MenuItem extends AbstractMenuItem {
     constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
                     delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
-                    nodeName="div", positioner="inherit", ...context}={}) {
+                    nodeName="div", positioner="inherit", SubMenuClass=Menu, MenuItemClass=MenuItem, ...context}={}) {
         super();
 
         if(target) {
@@ -505,16 +505,20 @@ export default class MenuItem extends AbstractMenuItem {
         this.delay = delay;
 
         this.closeOnSelect = closeOnSelect;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = closeOnBlur;
         this.timeout = timeout;
 
         this.positioner = positioner;
 
+        // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = true;
         this.autoDeactivateItems = true;
 
-        this.MenuItemClass = MenuItem;
-        this.SubMenuClass = Menu;
+        // noinspection JSUnusedGlobalSymbols
+        this.MenuItemClass = MenuItemClass;
+        // noinspection JSUnusedGlobalSymbols
+        this.SubMenuClass = SubMenuClass;
 
         this.element.tabIndex = -1;
 

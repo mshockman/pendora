@@ -18,7 +18,7 @@ function getInheritedPosition(menu) {
 }
 
 
-function _applyPosition(target, overlay, container, flip) {
+function _applyPosition(target, overlay, container) {
     let position = overlay.dataset.position,
         [my, at, method] = position.split(/\s*;\s*/),
         overlayRect = Rect.getBoundingClientRect(overlay),
@@ -106,15 +106,16 @@ export function dropdown(container=null, topLevelPosition="left top; left bottom
         if (!parentMenu || parentMenu.isRoot) {
             menu.element.dataset.position = topLevelPosition;
             // flipPositionIfOutOfBounds(menu.element, container, 'xy');
-            _applyPosition(target.element, menu.element, containerElement, 'xy');
+            _applyPosition(target.element, menu.element, containerElement);
         } else {
             menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
             // flipPositionIfOutOfBounds(menu.element, container, 'xy');
-            _applyPosition(target.element, menu.element, containerElement, 'xy');
+            _applyPosition(target.element, menu.element, containerElement);
         }
     }
 }
 
 
 export const DROPDOWN = dropdown();
+// noinspection JSUnusedGlobalSymbols
 export const SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");

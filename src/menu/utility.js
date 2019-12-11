@@ -41,7 +41,7 @@ export function hasMenuInstance(element) {
 /**
  * Retrieves the mapped menu node controller instance for the element.
  * @param element
- * @returns {any}
+ * @returns {null|MenuNode|*}
  */
 export function getMenuInstance(element) {
     return MENU_MAP.get(element);
@@ -68,6 +68,7 @@ export function getClosestMenuNodeByElement(element) {
 }
 
 
+// noinspection JSUnusedGlobalSymbols
 /**
  * Finds the closest menuitem controller for the element in the DOM tree.
  * @param element

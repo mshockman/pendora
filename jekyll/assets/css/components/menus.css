@@ -118,6 +118,12 @@
 .select-menu {
   user-select: none;
 }
+.select-menu .checkmark {
+  visibility: hidden;
+}
+.select-menu .option.selected .checkmark {
+  visibility: visible;
+}
 .select-menu.has-filter .menu__header {
   background-color: #eaeaea;
   padding: 0.5rem;

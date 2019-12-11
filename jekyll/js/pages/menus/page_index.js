@@ -11,6 +11,9 @@ export default class MenuPageIndex {
         testMenu.isVisible = true;
         testMenu.multiSelect = true;
         testMenu.toggle = "ctrl";
+        testMenu.clearOldSelection = true;
+        testMenu.enableShiftSelect = true;
+        testMenu.enableCtrlToggle = true;
 
         for(let i = 0; i < 10; i++) {
             let option = new SelectOption({text: `Option #${i+1}`, value: i+1});

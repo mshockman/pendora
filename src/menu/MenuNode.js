@@ -24,7 +24,6 @@ export default class MenuNode extends Publisher {
          * @private
          */
         this._element = undefined;
-        this.menuNodeType = "node";
 
         this.nodeType = null;
         this.isController = false;
@@ -82,6 +81,7 @@ export default class MenuNode extends Publisher {
         this.clearAllRegisteredEvents();
 
         this.isController = false;
+        // noinspection JSUnusedGlobalSymbols
         this.__keyboardNavigationEnabled = false;
         this.element = null;
 
@@ -142,6 +142,7 @@ export default class MenuNode extends Publisher {
         return parent ? parent.closest(node => node.isMenu()) : null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Reference to the first ancestor node in the menu tree who is an item. Returns null if it does not exist.
      *
@@ -162,6 +163,7 @@ export default class MenuNode extends Publisher {
         return this.getOffsetSibling(1);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Reference to the previous sibling node in the menu tree.
      *
@@ -298,6 +300,7 @@ export default class MenuNode extends Publisher {
         return false;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Yields all descendants.
      *
@@ -339,6 +342,7 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns the target item for the given HTMLElement in the current menu tree.
      *
@@ -365,6 +369,7 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns the target menu for the given HTMLElement in the current menu tree.
      *
@@ -461,6 +466,7 @@ export default class MenuNode extends Publisher {
         this.isDisabled = value;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns true if the nodes element is defined.
      *
@@ -568,6 +574,7 @@ export default class MenuNode extends Publisher {
         return addClasses(this.element, classes);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     removeClass(classes) {
         return removeClasses(this.element, classes);
     }
@@ -722,6 +729,7 @@ export default class MenuNode extends Publisher {
         return false;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns the timer object if it exists.
      *
@@ -780,7 +788,7 @@ export default class MenuNode extends Publisher {
             }
         }
 
-        this._events = {};
+        this._eventListeners = {};
     }
 
     _registerAllEvents() {
@@ -833,6 +841,7 @@ export default class MenuNode extends Publisher {
         return null;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     hasEventListener(name, callback, bubble=false) {
         if(this._eventListeners[name]) {
             for(let listener of this._eventListeners[name]) {
@@ -846,11 +855,12 @@ export default class MenuNode extends Publisher {
     }
 
     _rootKeyDown(topic) {
-        if(this.enableKeyboardNavigation && this.isRoot) {
+        if(this.isRoot) {
             let event = topic.originalEvent;
 
             if(event.key === "Escape") {
                 this.deactivate();
+                // noinspection JSUnresolvedFunction
                 document.activeElement.blur();
                 return;
             }
@@ -877,8 +887,6 @@ export default class MenuNode extends Publisher {
 
         let walk = (node) => {
             for(let child of node.children) {
-                let role = child.dataset.role;
-
                 if(hasMenuInstance(child)) {
                     let instance = getMenuInstance(child);
                     instance.setParent(this);
@@ -920,6 +928,7 @@ export default class MenuNode extends Publisher {
     //------------------------------------------------------------------------------------------------------------------
     // Static functions
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns the bound menu controller for the provided node.
      *
