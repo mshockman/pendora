@@ -354,7 +354,7 @@ export class AbstractMenuItem extends MenuNode {
         let isDisabled = this.getDisabled();
 
         if(isDisabled) {
-            event.preventDefault();
+            event.originalEvent.preventDefault();
         }
 
         if(event.target !== this) return;

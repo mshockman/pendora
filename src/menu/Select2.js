@@ -113,25 +113,39 @@ export class SelectOption extends AbstractMenuItem {
             return;
         }
 
-        event.willSelect = false;
-        event.willDeselect = false;
+        // Implements an event preventDefault like interface for the topic
+        // so that other handlers can prevent the default action why the topic
+        // bubble up the menu tree.
 
-        if(this.isSelected) {
-            if(this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) {
-                event.willDeselect = true;
-            }
-        } else {
-            event.willSelect = true;
+        if(!event.preventDefault) {
+            let preventDefault = false;
+
+            event.preventDefault = function() {
+                preventDefault = true;
+            };
+
+            event.isDefaultPrevented = function() {
+                return preventDefault;
+            };
         }
 
-        // Trigger and menuitem.click event.  Behavior
+        // Notify every parent node that an item was clicked.
         this.dispatchTopic('menuitem.click', event);
 
-        if(event.willSelect) {
-            this.select();
-        } else if(event.willDeselect) {
-            this.deselect();
+        // If the default action wasn't prevented either select or deselect the item.
+        if(!event.isDefaultPrevented()) {
+            if (this.isSelected) {
+                if (this.toggle === true || (this.toggle === 'ctrl' && event.originalEvent.ctrlKey)) {
+                    this.deselect();
+                }
+            } else {
+                this.select();
+            }
         }
+    }
+
+    isSelectMenu() {
+        return true;
     }
 
     /**
@@ -362,7 +376,11 @@ export class SelectMenu extends AbstractMenu {
                 }
             }
 
-            this.dispatchTopic('selection-change', this);
+            this.dispatchTopic('selection.change', this);
+        });
+
+        this.on('option.deselect', topic => {
+            this.dispatchTopic('selection.change', this);
         });
 
         this.on('menuitem.click', topic => {
@@ -371,6 +389,8 @@ export class SelectMenu extends AbstractMenu {
             let event = topic.originalEvent;
 
             if(this._lastClick && event.shiftKey && this.enableShiftSelect) {
+                topic.preventDefault();
+
                 let children = this.children,
                     targetIndex = children.indexOf(topic.target),
                     lastIndex = children.indexOf(this._lastClick);
@@ -395,10 +415,12 @@ export class SelectMenu extends AbstractMenu {
                     }
 
                     if(change) {
-                        this.dispatchTopic('selection-change', this);
+                        this.dispatchTopic('selection.change', this);
                     }
                 }
             } else if(event.ctrlKey && this.enableCtrlToggle) {
+                topic.preventDefault();
+
                 let change = false;
 
                 if(!topic.target.isSelected && !topic.deselected) {
@@ -412,7 +434,7 @@ export class SelectMenu extends AbstractMenu {
                 this._lastClick = topic.target;
 
                 if(change) {
-                    this.dispatchTopic('selection-change', this);
+                    this.dispatchTopic('selection.change', this);
                 }
             } else if(this.clearOldSelection) {
                 for(let child of this.children) {
@@ -1134,14 +1156,12 @@ export class ComboBox extends AbstractMenuItem {
         super.registerTopics();
 
         this.on('option.select', () => {
-            this._renderLabel();
-
             if(this.closeOnSelect) {
                 this.deactivate();
             }
         });
 
-        this.on('option.deselect', () => {
+        this.on('selection.change', () => {
             this._renderLabel();
         });
 
@@ -1202,19 +1222,13 @@ export class ComboBox extends AbstractMenuItem {
 
     _rootKeyDown(topic) {
         if(this.isRoot) {
-            let event = topic.originalEvent,
-                key = event.key;
+            let key = topic.originalEvent.key;
 
-            if(key === "Escape") {
-                this.deactivate();
-                // noinspection JSUnresolvedFunction
-                document.activeElement.blur();
-            } else if(key !== 'ArrowLeft' && key !== 'ArrowRight') { // Arrow left and arrow right are for text input navigation and not tree navigation for ComboBox.
-                let activeItem = this.activeItem,
-                    target = activeItem ? activeItem.parentMenu : this;
-
-                target._navigate(event);
+            if(key === 'ArrowLeft' || key === 'ArrowRight') {
+                return;
             }
+
+            return super._rootKeyDown(topic);
         }
     }
 
@@ -1283,11 +1297,155 @@ export class ComboBox extends AbstractMenuItem {
 
 
 export class MultiComboBox extends AbstractMenuItem {
+    constructor({target=null, timeout=false}={}) {
+        super();
+
+        this.optionToPillMap = new WeakMap();
+        this.pilltoOptionMap = new WeakMap();
+
+        if(target) {
+            this.element = target;
+            this.textbox = this.element.querySelector('[data-text]');
+            this.body = this.element.querySelector('.multi-combo-box__body');
+        } else {
+            let {element, textbox, body} = this.render();
+            this.element = element;
+            this.textbox = textbox;
+            this.body = body;
+        }
+
+        this.toggle = true;
+        this.autoActivate = false;
+        this.openOnHover = false;
+        this.delay = false;
+        this.timeout = timeout;
+        this.closeOnBlur = true;
+        this.positioner = positioners.DROPDOWN;
+        this.closeOnSelect = true;
+        this.clearSubItemsOnHover = false;
+
+        this.SubMenuClass = SelectMenu;
+
+        this.parseDOM();
+
+        if(!this.submenu) {
+            this.submenu = new this.SubMenuClass();
+            this.attachSubMenu(this.submenu);
+        }
+
+        this.submenu.multiSelect = true;
+        this.submenu.toggle = true;
+        this.submenu.enableShiftSelect = true;
+
+        this.initKeyboardNavigation();
+        this.registerTopics();
+        this.init();
+
+        this.element.addEventListener('click', event => {
+            this.textbox.focus();
+        });
+    }
+
+    registerTopics() {
+        super.registerTopics();
+
+        this.on('selection.change', () => {
+            this._renderLabel();
+            this.submenu.position();
+        });
+    }
 
     render(context) {
+        let html = `
+            <div class="multi-combo-box">
+                <div class="multi-combo-box__body">
+                    <input type="text" class="multi-combo-box__input" data-text />
+                </div>
+            </div>
+        `;
+
+        let element = parseHTML(html).children[0];
+
+        return {
+            element: element,
+            textbox: element.querySelector('[data-text]'),
+            body: element.querySelector('.multi-combo-box__body')
+        };
+    }
+
+    append(option) {
+        return this.submenu.append(option);
+    }
+
+    _buildChoicePill(text) {
+        let pill = document.createElement('div');
+        pill.className = "multi-combo-box__pill";
+
+        let exitButton = document.createElement('div'),
+            textContainer = document.createElement('div');
+
+        exitButton.className = "pill__exit-button";
+        exitButton.innerHTML = `<i class="far fa-times-circle"></i>`;
+        textContainer.className = "pill__text";
+        textContainer.innerHTML = text;
+        pill.tabIndex = -1;
+
+        pill.appendChild(textContainer);
+        pill.appendChild(exitButton);
+
+        return pill;
+    }
+
+    _renderLabel() {
+        let fragment = document.createDocumentFragment(),
+            _new = false;
+
+        for(let option of this.options) {
+            let pill = this.optionToPillMap.get(option);
+
+            if(option.isSelected) {
+                if(!pill) {
+                    pill = this._buildChoicePill(option.text);
+                    this.pilltoOptionMap.set(pill, option);
+                    this.optionToPillMap.set(option, pill);
+                    fragment.appendChild(pill);
+                    _new = true;
+                }
+            } else if(pill) {
+                if(pill.parentElement) pill.parentElement.removeChild(pill);
+                this.optionToPillMap.delete(option);
+                this.pilltoOptionMap.delete(pill);
+            }
+        }
+
+        if(_new) {
+            this.body.insertBefore(fragment, this.textbox);
+        }
+    }
+
+    get options() {
+        return this.submenu.options;
+    }
+
+    static FromHTML(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        let instance = new MultiComboBox();
+
+        for(let child of element.querySelectorAll('li')) {
+            let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
+            instance.append(option);
+        }
+
+        element.parentElement.replaceChild(instance.element, element);
+
+        return instance;
     }
 }
 
 
 AutoLoader.register('select', (element) => Select2.FromHTML(element));
 AutoLoader.register('combobox', (element) => ComboBox.FromHTML(element));
+AutoLoader.register('multi-combobox', (element) => MultiComboBox.FromHTML(element));

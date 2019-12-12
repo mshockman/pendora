@@ -8,6 +8,10 @@
   cursor: pointer;
   position: relative;
   white-space: nowrap;
+  border-bottom: 1px solid #e0e0e0;
+}
+.menuitem.hidden, .select-menu .hidden.option {
+  display: none;
 }
 
 .menuitem.active, .select-menu .active.option {
@@ -138,14 +142,6 @@
 .select-menu.all-items-filtered .placeholder {
   display: block;
 }
-.select-menu .option.selected {
-  background-color: #66FCF1;
-}
-
-.menuitem.hidden, .select-menu .hidden.option {
-  display: none;
-}
-
 .select-highlight {
   outline: 2px solid Highlight;
 }
@@ -166,6 +162,7 @@
   background-color: #eaeaea;
   padding: 0.5rem;
   border-bottom: 1px solid #333;
+  display: none;
 }
 .select-menu h3 {
   margin: 0;
@@ -209,6 +206,53 @@
 
 .combobox__menu .select-menu__header, .combobox__menu .select-menu__footer {
   display: none;
+}
+
+.multi-combo-box {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 230px;
+  max-width: 500px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  position: relative;
+}
+.multi-combo-box:focus-within {
+  border: 1px solid #2a7ae2;
+}
+.multi-combo-box .multi-combo-box__input {
+  border: none;
+  width: 50px;
+}
+.multi-combo-box .multi-combo-box__input:focus {
+  outline: none;
+}
+.multi-combo-box .select-menu {
+  width: 100%;
+}
+.multi-combo-box .multi-combo-box__pill {
+  display: inline-flex;
+  margin-right: 4px;
+  flex-direction: row;
+  background-color: #EBEDF0;
+  color: #333;
+  border-radius: 100px;
+  padding: 3px 10px;
+  margin-bottom: 3px;
+}
+.multi-combo-box .multi-combo-box__body {
+  padding: 5px 5px 0 5px;
+  overflow-y: scroll;
+  display: block;
+  width: 100%;
+}
+.multi-combo-box .pill__text {
+  display: inline-block;
+  margin-right: 4px;
+}
+.multi-combo-box .pill__exit-button {
+  color: #333 !important;
 }
 
 /*# sourceMappingURL=pendora.css.map */
