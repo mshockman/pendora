@@ -188,7 +188,6 @@ export class AbstractMenuItem extends MenuNode {
     select() {
         this.publish('select');
         this.dispatchTopic('menuitem.select', {target: this});
-
         this.element.dispatchEvent(new CustomEvent('menuitem.select', {
             detail: this,
             bubbles: true
@@ -359,20 +358,42 @@ export class AbstractMenuItem extends MenuNode {
 
         if(event.target !== this) return;
 
-        if(!isDisabled) {
-            if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
+        let isDefaultPrevented = false;
+
+        this.dispatchTopic('menuitem.click', {
+            ...event,
+            relatedTarget: event.target,
+            target: this,
+
+            preventDefault() {
+                isDefaultPrevented = true;
+            },
+
+            isDefaultPrevented() {
+                return isDefaultPrevented;
+            }
+        });
+
+        let isActive = this.isActive,
+            hasSubMenu = this.hasSubMenu(),
+            isSubMenuVisible = this.isSubMenuVisible(),
+            toggle = this.toggle;
+
+        // Recheck in case it was updated by an event.
+        isDisabled = this.getDisabled();
+
+        if(!isDisabled && !isDefaultPrevented) {
+            if (isActive && hasSubMenu && !isSubMenuVisible) {
                 this.showSubMenu();
-            } else if (!this.isActive) {
+            } else if (!isActive) {
                 this.activate();
-            } else if (this.isActive && this.toggle && this.hasSubMenu()) {
+            } else if (isActive && toggle && hasSubMenu) {
                 this.deactivate();
             }
 
-            if (this.isActive && !this.hasSubMenu()) {
+            if (isActive && !hasSubMenu) {
                 this.select();
             }
-
-            this.dispatchTopic('menuitem.click', event);
         }
     }
 

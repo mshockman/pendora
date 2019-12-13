@@ -3957,21 +3957,35 @@ function (_FormWidgetBase) {
     var element = container || document.createElement('span');
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MultiHiddenInputWidget).call(this, element));
     _this.element.style.display = "none";
+    _this._name = "";
+    _this.inputs = [];
+    _this._value = [];
     return _this;
   }
 
   _createClass(MultiHiddenInputWidget, [{
-    key: "getValue",
-    value: function getValue() {
-      var r = [];
+    key: "render",
+    value: function render() {
+      var value = this.value;
+      Object(_core_utility__WEBPACK_IMPORTED_MODULE_0__["emptyElement"])(this.element);
+
+      if (!Array.isArray(value)) {
+        value = [value];
+      }
+
+      var fragment = document.createDocumentFragment();
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
 
       try {
-        for (var _iterator = this.element.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var input = _step.value;
-          r.push(input.value);
+        for (var _iterator = value[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var v = _step.value;
+          var input = document.createElement('input');
+          input.type = "hidden";
+          input.value = v + "";
+          if (this.name) input.name = this.name;
+          fragment.appendChild(input);
         }
       } catch (err) {
         _didIteratorError = true;
@@ -3988,33 +4002,46 @@ function (_FormWidgetBase) {
         }
       }
 
-      if (r.length === 1) {
-        return r[0];
-      } else if (r.length > 1) {
-        return r;
+      this.element.appendChild(fragment);
+    }
+  }, {
+    key: "getValue",
+    value: function getValue() {
+      if (this._value.length === 1) {
+        return this._value[0];
+      } else {
+        return this._value;
       }
     }
   }, {
     key: "setValue",
     value: function setValue(value) {
-      var fragment = document.createDocumentFragment();
-
       if (!Array.isArray(value)) {
         value = [value];
       }
 
+      this._value = value.map(function (item) {
+        return item + '';
+      });
+      this.render();
+    }
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this._name;
+    }
+  }, {
+    key: "setName",
+    value: function setName(name) {
+      this._name = name;
       var _iteratorNormalCompletion2 = true;
       var _didIteratorError2 = false;
       var _iteratorError2 = undefined;
 
       try {
-        for (var _iterator2 = value[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var v = _step2.value;
-          var input = document.createElement('input');
-          input.type = "hidden";
-          input.value = v + "";
-          if (this.name) input.name = this.name;
-          fragment.appendChild(input);
+        for (var _iterator2 = this.element.querySelectorAll('input')[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var input = _step2.value;
+          input.name = name;
         }
       } catch (err) {
         _didIteratorError2 = true;
@@ -4027,42 +4054,6 @@ function (_FormWidgetBase) {
         } finally {
           if (_didIteratorError2) {
             throw _iteratorError2;
-          }
-        }
-      }
-
-      Object(_core_utility__WEBPACK_IMPORTED_MODULE_0__["emptyElement"])(this.element);
-      this.element.appendChild(fragment);
-    }
-  }, {
-    key: "getName",
-    value: function getName() {
-      return this.name;
-    }
-  }, {
-    key: "setName",
-    value: function setName(name) {
-      this.name = name;
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = this.element.querySelectorAll('input')[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var input = _step3.value;
-          input.name = name;
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-            _iterator3["return"]();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
           }
         }
       }
@@ -5834,12 +5825,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
@@ -5847,6 +5832,12 @@ function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) r
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6357,21 +6348,36 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         if (event.target !== this) return;
+        var _isDefaultPrevented = false;
+        this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
+          relatedTarget: event.target,
+          target: this,
+          preventDefault: function preventDefault() {
+            _isDefaultPrevented = true;
+          },
+          isDefaultPrevented: function isDefaultPrevented() {
+            return _isDefaultPrevented;
+          }
+        }));
+        var isActive = this.isActive,
+            hasSubMenu = this.hasSubMenu(),
+            isSubMenuVisible = this.isSubMenuVisible(),
+            toggle = this.toggle; // Recheck in case it was updated by an event.
 
-        if (!isDisabled) {
-          if (this.isActive && this.hasSubMenu() && !this.isSubMenuVisible()) {
+        isDisabled = this.getDisabled();
+
+        if (!isDisabled && !_isDefaultPrevented) {
+          if (isActive && hasSubMenu && !isSubMenuVisible) {
             this.showSubMenu();
-          } else if (!this.isActive) {
+          } else if (!isActive) {
             this.activate();
-          } else if (this.isActive && this.toggle && this.hasSubMenu()) {
+          } else if (isActive && toggle && hasSubMenu) {
             this.deactivate();
           }
 
-          if (this.isActive && !this.hasSubMenu()) {
+          if (isActive && !hasSubMenu) {
             this.select();
           }
-
-          this.dispatchTopic('menuitem.click', event);
         }
       }
       /**
@@ -7960,11 +7966,17 @@ function (_Publisher) {
     key: "classList",
     get: function get() {
       return this.element.classList;
+    },
+    set: function set(value) {
+      this.element.classList = value;
     }
   }, {
     key: "dataset",
     get: function get() {
       return this.element.dataset;
+    },
+    set: function set(value) {
+      this.element.dataset = value;
     }
   }, {
     key: "style",
@@ -8034,7 +8046,7 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, ComboBox, MultiComboBox */
+/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, AbstractSelect, ComboBox, MultiComboBox */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8043,6 +8055,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FILTERS", function() { return FILTERS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractSelect", function() { return AbstractSelect; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiComboBox", function() { return MultiComboBox; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
@@ -8262,24 +8275,25 @@ function (_AbstractMenuItem) {
       // bubble up the menu tree.
 
 
-      if (!event.preventDefault) {
-        var preventDefault = false;
+      var _isDefaultPrevented = false; // Notify every parent node that an item was clicked.
 
-        event.preventDefault = function () {
-          preventDefault = true;
-        };
+      this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
+        target: this,
+        relatedTarget: event.target,
+        preventDefault: function preventDefault() {
+          _isDefaultPrevented = true;
+        },
+        isDefaultPrevented: function isDefaultPrevented() {
+          return _isDefaultPrevented;
+        }
+      }));
+      var toggle = this.toggle,
+          isSelected = this.isSelected;
+      isDisabled = this.getDisabled(); // If the default action wasn't prevented either select or deselect the item.
 
-        event.isDefaultPrevented = function () {
-          return preventDefault;
-        };
-      } // Notify every parent node that an item was clicked.
-
-
-      this.dispatchTopic('menuitem.click', event); // If the default action wasn't prevented either select or deselect the item.
-
-      if (!event.isDefaultPrevented()) {
-        if (this.isSelected) {
-          if (this.toggle === true || this.toggle === 'ctrl' && event.originalEvent.ctrlKey) {
+      if (!_isDefaultPrevented && !isDisabled) {
+        if (isSelected) {
+          if (toggle === true || toggle === 'ctrl' && event.originalEvent.ctrlKey) {
             this.deselect();
           }
         } else {
@@ -9549,18 +9563,194 @@ function (_AbstractMenuItem2) {
 
   return Select2;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+/**
+ * @implements FormWidgetBase
+ * @abstract
+ */
 
 _defineProperty(Select2, "__attributes__", _objectSpread({
   multiSelect: new core_attributes__WEBPACK_IMPORTED_MODULE_7__["default"](core_utility__WEBPACK_IMPORTED_MODULE_5__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["TRUE"])
 }, _MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"].__attributes__));
 
-var ComboBox =
+var AbstractSelect =
 /*#__PURE__*/
 function (_AbstractMenuItem3) {
-  _inherits(ComboBox, _AbstractMenuItem3);
+  _inherits(AbstractSelect, _AbstractMenuItem3);
+
+  function AbstractSelect() {
+    _classCallCheck(this, AbstractSelect);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(AbstractSelect).apply(this, arguments));
+  }
+
+  _createClass(AbstractSelect, [{
+    key: "isSelect",
+    value: function isSelect() {
+      return true;
+    }
+    /**
+     * @abstract
+     * @param context
+     */
+
+  }, {
+    key: "render",
+    value: function render() {
+      var context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    }
+    /**
+     * Refresh ui
+     *
+     * @abstract
+     * @private
+     */
+
+  }, {
+    key: "refreshUI",
+    value: function refreshUI() {}
+  }, {
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this7 = this;
+
+      _get(_getPrototypeOf(AbstractSelect.prototype), "registerTopics", this).call(this);
+
+      this.on('menuitem.click', function (topic) {
+        // Close the select if the user clicks a disabled select item.
+        if (_this7.closeOnSelect && _this7.isActive) {
+          if (topic.target.isDisabled) {
+            topic.preventDefault();
+
+            _this7.deactivate();
+          }
+        }
+      });
+      this.on('option.select', function () {
+        if (_this7.closeOnSelect && _this7.isActive) {
+          _this7.deactivate();
+        }
+      });
+      this.on('option.deselect', function () {
+        if (_this7.closeOnSelect && _this7.isActive) {
+          _this7.deactivate();
+        }
+      });
+      this.on('selection.change', function () {
+        _this7.refreshUI();
+
+        _this7.submenu.position();
+      });
+    }
+  }, {
+    key: "append",
+    value: function append(option) {
+      return this.submenu.append(option);
+    } //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+  }, {
+    key: "getName",
+    value: function getName() {
+      return this.widget.name;
+    }
+  }, {
+    key: "setName",
+    value: function setName(value) {
+      this.widget.name = value;
+    }
+  }, {
+    key: "getValue",
+    value: function getValue() {
+      return this.widget.value;
+    }
+    /**
+     * Sets the value of the widget and updates the ui without triggering any topics.
+     *
+     * @abstract
+     * @param value
+     */
+
+  }, {
+    key: "setValue",
+    value: function setValue(value) {}
+  }, {
+    key: "options",
+    get: function get() {
+      return this.submenu.options;
+    }
+  }, {
+    key: "selectedOptions",
+    get: function get() {
+      return this.submenu.selectedOptions;
+    }
+  }, {
+    key: "value",
+    get: function get() {
+      return this.getValue();
+    },
+    set: function set(value) {
+      this.setValue(value);
+    }
+  }, {
+    key: "name",
+    get: function get() {
+      return this.getName();
+    },
+    set: function set(value) {
+      this.setName(value);
+    } //------------------------------------------------------------------------------------------------------------------
+    //
+
+  }], [{
+    key: "FromHTML",
+    value: function FromHTML(element) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      }
+
+      var instance = new this();
+      var _iteratorNormalCompletion14 = true;
+      var _didIteratorError14 = false;
+      var _iteratorError14 = undefined;
+
+      try {
+        for (var _iterator14 = element.querySelectorAll('li')[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+          var child = _step14.value;
+          var option = new SelectOption({
+            text: child.innerHTML.trim(),
+            value: child.dataset.value || null
+          });
+          instance.append(option);
+        }
+      } catch (err) {
+        _didIteratorError14 = true;
+        _iteratorError14 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+            _iterator14["return"]();
+          }
+        } finally {
+          if (_didIteratorError14) {
+            throw _iteratorError14;
+          }
+        }
+      }
+
+      element.parentElement.replaceChild(instance.element, element);
+      return instance;
+    }
+  }]);
+
+  return AbstractSelect;
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+var ComboBox =
+/*#__PURE__*/
+function (_AbstractSelect) {
+  _inherits(ComboBox, _AbstractSelect);
 
   function ComboBox() {
-    var _this7;
+    var _this8;
 
     var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         _ref6$target = _ref6.target,
@@ -9578,41 +9768,41 @@ function (_AbstractMenuItem3) {
 
     _classCallCheck(this, ComboBox);
 
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
+    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
 
     if (target) {
-      _this7.element = target;
+      _this8.element = target;
 
-      if (_this7.element.nodeName === 'INPUT') {
-        _this7.textbox = _this7.element;
+      if (_this8.element.nodeName === 'INPUT') {
+        _this8.textbox = _this8.element;
       } else {
-        _this7.textbox = _this7.element.querySelector('[data-text]');
+        _this8.textbox = _this8.element.querySelector('[data-text]');
       }
     } else {
-      var _this7$render = _this7.render(),
-          element = _this7$render.element,
-          textbox = _this7$render.textbox;
+      var _this8$render = _this8.render(),
+          element = _this8$render.element,
+          textbox = _this8$render.textbox;
 
-      _this7.element = element;
-      _this7.textbox = textbox;
+      _this8.element = element;
+      _this8.textbox = textbox;
     }
 
-    _this7.toggle = true;
-    _this7.autoActivate = false;
-    _this7.openOnHover = false;
-    _this7.delay = false;
-    _this7.timeout = timeout; // noinspection JSUnusedGlobalSymbols
+    _this8.toggle = true;
+    _this8.autoActivate = false;
+    _this8.openOnHover = false;
+    _this8.delay = false;
+    _this8.timeout = timeout; // noinspection JSUnusedGlobalSymbols
 
-    _this7.closeOnBlur = true;
-    _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this7.closeOnSelect = true;
-    _this7._label = ''; // noinspection JSUnusedGlobalSymbols
+    _this8.closeOnBlur = true;
+    _this8.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
+    _this8.closeOnSelect = true;
+    _this8._label = ''; // noinspection JSUnusedGlobalSymbols
 
-    _this7.clearSubItemsOnHover = false;
-    _this7.SubMenuClass = SelectMenu;
-    _this7.element.tabIndex = 0;
+    _this8.clearSubItemsOnHover = false;
+    _this8.SubMenuClass = SelectMenu;
+    _this8.element.tabIndex = 0;
 
-    _this7.parseDOM();
+    _this8.parseDOM();
 
     if (submenu) {
       if (typeof submenu === 'string') {
@@ -9620,31 +9810,31 @@ function (_AbstractMenuItem3) {
       }
 
       if (!submenu.isSelectMenu || !submenu.isSelectMenu()) {
-        submenu = new _this7.SubMenuClass({
+        submenu = new _this8.SubMenuClass({
           target: submenu
         });
 
-        _this7.attachSubMenu(submenu);
+        _this8.attachSubMenu(submenu);
       }
     } else {
-      var _submenu = new _this7.SubMenuClass();
+      var _submenu = new _this8.SubMenuClass();
 
-      _this7.attachSubMenu(_submenu);
+      _this8.attachSubMenu(_submenu);
     }
 
-    _this7.submenu.classList.add('combobox__menu');
+    _this8.submenu.classList.add('combobox__menu');
 
     if (!widget) {
-      _this7.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
+      _this8.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
 
-      _this7.widget.appendTo(_this7.element);
+      _this8.widget.appendTo(_this8.element);
     } else {
-      _this7.widget = widget;
+      _this8.widget = widget;
     }
 
-    _this7.textbox.addEventListener('blur', function (event) {
-      if (!_this7.containsElement(event.relatedTarget)) {
-        _this7.textbox.value = _this7._label;
+    _this8.textbox.addEventListener('blur', function (event) {
+      if (!_this8.containsElement(event.relatedTarget)) {
+        _this8.textbox.value = _this8._label;
       }
     });
 
@@ -9653,54 +9843,23 @@ function (_AbstractMenuItem3) {
     var applyFilter = function applyFilter() {
       _timer = null;
 
-      _this7.submenu.filter(filter(_this7.textbox.value)); // Flag if we found a select item.
+      _this8.submenu.filter(filter(_this8.textbox.value)); // Flag if we found a select item.
 
 
       var f = false; // Activate the selected items.
 
-      if (!_this7.multiSelect) {
-        var _iteratorNormalCompletion14 = true;
-        var _didIteratorError14 = false;
-        var _iteratorError14 = undefined;
-
-        try {
-          for (var _iterator14 = _this7.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-            var option = _step14.value;
-
-            if (!option.isDisabled && !option.isFiltered && option.isSelected) {
-              option.activate();
-              f = true;
-              break;
-            }
-          }
-        } catch (err) {
-          _didIteratorError14 = true;
-          _iteratorError14 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
-              _iterator14["return"]();
-            }
-          } finally {
-            if (_didIteratorError14) {
-              throw _iteratorError14;
-            }
-          }
-        }
-      }
-
-      if (!f) {
+      if (!_this8.multiSelect) {
         var _iteratorNormalCompletion15 = true;
         var _didIteratorError15 = false;
         var _iteratorError15 = undefined;
 
         try {
-          for (var _iterator15 = _this7.submenu.options[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-            var _option = _step15.value;
+          for (var _iterator15 = _this8.submenu.options[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+            var option = _step15.value;
 
-            if (!_option.isDisabled && !_option.isFiltered) {
-              _option.activate();
-
+            if (!option.isDisabled && !option.isFiltered && option.isSelected) {
+              option.activate();
+              f = true;
               break;
             }
           }
@@ -9719,9 +9878,40 @@ function (_AbstractMenuItem3) {
           }
         }
       }
+
+      if (!f) {
+        var _iteratorNormalCompletion16 = true;
+        var _didIteratorError16 = false;
+        var _iteratorError16 = undefined;
+
+        try {
+          for (var _iterator16 = _this8.submenu.options[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+            var _option = _step16.value;
+
+            if (!_option.isDisabled && !_option.isFiltered) {
+              _option.activate();
+
+              break;
+            }
+          }
+        } catch (err) {
+          _didIteratorError16 = true;
+          _iteratorError16 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion16 && _iterator16["return"] != null) {
+              _iterator16["return"]();
+            }
+          } finally {
+            if (_didIteratorError16) {
+              throw _iteratorError16;
+            }
+          }
+        }
+      }
     };
 
-    _this7.textbox.addEventListener('input', function () {
+    _this8.textbox.addEventListener('input', function () {
       if (_timer) {
         clearTimeout(_timer);
         _timer = null;
@@ -9734,7 +9924,7 @@ function (_AbstractMenuItem3) {
       }
     });
 
-    _this7.textbox.addEventListener('keydown', function (event) {
+    _this8.textbox.addEventListener('keydown', function (event) {
       // Apply the filter immediately on enter.
       if (event.key === "Enter" && _timer) {
         clearTimeout(_timer);
@@ -9743,44 +9933,16 @@ function (_AbstractMenuItem3) {
       }
     });
 
-    _this7.initKeyboardNavigation();
+    _this8.initKeyboardNavigation();
 
-    _this7.registerTopics();
+    _this8.registerTopics();
 
-    _this7.init();
+    _this8.init();
 
-    return _this7;
+    return _this8;
   }
 
   _createClass(ComboBox, [{
-    key: "registerTopics",
-    value: function registerTopics() {
-      var _this8 = this;
-
-      _get(_getPrototypeOf(ComboBox.prototype), "registerTopics", this).call(this);
-
-      this.on('option.select', function () {
-        if (_this8.closeOnSelect) {
-          _this8.deactivate();
-        }
-      });
-      this.on('selection.change', function () {
-        _this8._renderLabel();
-      });
-      this.on('event.click', function (event) {
-        event.originalEvent.preventDefault();
-
-        _this8.textbox.focus();
-      });
-      this.on('menuitem.select', function () {
-        _this8._renderLabel();
-
-        if (_this8.isActive && _this8.closeOnSelect) {
-          _this8.deactivate();
-        }
-      });
-    }
-  }, {
     key: "render",
     value: function render(context) {
       var element = "\n        <div class=\"combobox\">\n            <input type=\"text\" class=\"combobox__input\" data-text />\n            <span class=\"combobox__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
@@ -9790,25 +9952,11 @@ function (_AbstractMenuItem3) {
         textbox: element.querySelector('[data-text]')
       };
     } //------------------------------------------------------------------------------------------------------------------
-    // Tree methods
-
-  }, {
-    key: "append",
-    value: function append(option) {
-      return this.submenu.append(option);
-    } //------------------------------------------------------------------------------------------------------------------
-    // Event & topic handling methods
-
-  }, {
-    key: "onSelect",
-    value: function onSelect(topic) {
-      return _get(_getPrototypeOf(ComboBox.prototype), "onSelect", this).call(this, topic);
-    } //------------------------------------------------------------------------------------------------------------------
     // Private methods
 
   }, {
-    key: "_renderLabel",
-    value: function _renderLabel() {
+    key: "refreshUI",
+    value: function refreshUI() {
       var options = this.selectedOptions,
           labels = options.map(function (item) {
         return item.text;
@@ -9833,38 +9981,8 @@ function (_AbstractMenuItem3) {
     // Properties
 
   }, {
-    key: "isSelect",
-    //------------------------------------------------------------------------------------------------------------------
-    // Interface methods
-    value: function isSelect() {
-      return true;
-    } //------------------------------------------------------------------------------------------------------------------
-    // Static methods
-
-  }, {
-    key: "options",
-    get: function get() {
-      return this.submenu.options;
-    }
-  }, {
-    key: "selectedOptions",
-    get: function get() {
-      return this.submenu.selectedOptions;
-    }
-  }, {
-    key: "name",
-    get: function get() {
-      return this.widget.name;
-    },
-    set: function set(value) {
-      this.widget.name = value;
-    }
-  }, {
-    key: "value",
-    get: function get() {
-      return this.widget.value;
-    },
-    set: function set(value) {
+    key: "setValue",
+    value: function setValue(value) {
       this.widget.value = value;
     }
   }, {
@@ -9875,53 +9993,14 @@ function (_AbstractMenuItem3) {
     set: function set(value) {
       this.textbox.placeholder = value;
     }
-  }], [{
-    key: "FromHTML",
-    value: function FromHTML(element) {
-      if (typeof element === 'string') {
-        element = document.querySelector(element);
-      }
-
-      var instance = new ComboBox();
-      var _iteratorNormalCompletion16 = true;
-      var _didIteratorError16 = false;
-      var _iteratorError16 = undefined;
-
-      try {
-        for (var _iterator16 = element.querySelectorAll('li')[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-          var child = _step16.value;
-          var option = new SelectOption({
-            text: child.innerHTML.trim(),
-            value: child.dataset.value || null
-          });
-          instance.append(option);
-        }
-      } catch (err) {
-        _didIteratorError16 = true;
-        _iteratorError16 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion16 && _iterator16["return"] != null) {
-            _iterator16["return"]();
-          }
-        } finally {
-          if (_didIteratorError16) {
-            throw _iteratorError16;
-          }
-        }
-      }
-
-      element.parentElement.replaceChild(instance.element, element);
-      return instance;
-    }
   }]);
 
   return ComboBox;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+}(AbstractSelect);
 var MultiComboBox =
 /*#__PURE__*/
-function (_AbstractMenuItem4) {
-  _inherits(MultiComboBox, _AbstractMenuItem4);
+function (_AbstractSelect2) {
+  _inherits(MultiComboBox, _AbstractSelect2);
 
   function MultiComboBox() {
     var _this9;
@@ -9930,7 +10009,13 @@ function (_AbstractMenuItem4) {
         _ref7$target = _ref7.target,
         target = _ref7$target === void 0 ? null : _ref7$target,
         _ref7$timeout = _ref7.timeout,
-        timeout = _ref7$timeout === void 0 ? false : _ref7$timeout;
+        timeout = _ref7$timeout === void 0 ? false : _ref7$timeout,
+        _ref7$widget = _ref7.widget,
+        widget = _ref7$widget === void 0 ? null : _ref7$widget,
+        _ref7$filter = _ref7.filter,
+        filter = _ref7$filter === void 0 ? FILTERS.istartsWith : _ref7$filter,
+        _ref7$wait = _ref7.wait,
+        wait = _ref7$wait === void 0 ? 500 : _ref7$wait;
 
     _classCallCheck(this, MultiComboBox);
 
@@ -9960,7 +10045,8 @@ function (_AbstractMenuItem4) {
     _this9.timeout = timeout;
     _this9.closeOnBlur = true;
     _this9.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this9.closeOnSelect = true;
+    _this9.closeOnSelect = false;
+    _this9.multiSelect = true;
     _this9.clearSubItemsOnHover = false;
     _this9.SubMenuClass = SelectMenu;
 
@@ -9976,14 +10062,132 @@ function (_AbstractMenuItem4) {
     _this9.submenu.toggle = true;
     _this9.submenu.enableShiftSelect = true;
 
+    if (!widget) {
+      _this9.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["MultiHiddenInputWidget"]();
+
+      _this9.widget.appendTo(_this9.element);
+    } else {
+      _this9.widget = widget;
+
+      if (!_this9.widget.element.parentElement) {
+        _this9.widget.appendTo(_this9.element);
+      }
+    }
+
     _this9.initKeyboardNavigation();
 
     _this9.registerTopics();
 
     _this9.init();
 
-    _this9.element.addEventListener('click', function (event) {
-      _this9.textbox.focus();
+    _this9.textbox.addEventListener('keydown', function (event) {
+      if (!_this9.isActive) {
+        _this9.activate();
+
+        return;
+      }
+
+      if (event.key === "Backspace" && _this9.textbox.value === "") {
+        var pills = _this9.body.querySelectorAll('.multi-combo-box__pill'),
+            pill = pills[pills.length - 1],
+            option = pill ? _this9.pilltoOptionMap.get(pill) : null;
+
+        if (option) {
+          option.deselect();
+        }
+      } else if (event.key === 'Enter') {
+        if (_timer) {
+          clearTimeout(_timer);
+          _timer = null;
+          applyFilter();
+        } else {
+          var _iteratorNormalCompletion17 = true;
+          var _didIteratorError17 = false;
+          var _iteratorError17 = undefined;
+
+          try {
+            for (var _iterator17 = _this9.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+              var _option2 = _step17.value;
+
+              if (!_option2.isFiltered && _option2.isActive) {
+                if (!_option2.isSelected) {
+                  _option2.select();
+                } else {
+                  _option2.deselect();
+                }
+
+                if (_this9.isActive) _this9.deactivate();
+                _this9.textbox.value = "";
+                return;
+              }
+            }
+          } catch (err) {
+            _didIteratorError17 = true;
+            _iteratorError17 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
+                _iterator17["return"]();
+              }
+            } finally {
+              if (_didIteratorError17) {
+                throw _iteratorError17;
+              }
+            }
+          }
+
+          var _iteratorNormalCompletion18 = true;
+          var _didIteratorError18 = false;
+          var _iteratorError18 = undefined;
+
+          try {
+            for (var _iterator18 = _this9.options[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+              var _option3 = _step18.value;
+
+              if (!_option3.isFiltered) {
+                if (!_option3.isSelected) _option3.select();
+                if (_this9.isActive) _this9.deactivate();
+                _this9.textbox.value = "";
+                return;
+              }
+            }
+          } catch (err) {
+            _didIteratorError18 = true;
+            _iteratorError18 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion18 && _iterator18["return"] != null) {
+                _iterator18["return"]();
+              }
+            } finally {
+              if (_didIteratorError18) {
+                throw _iteratorError18;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    var _timer = null;
+
+    var applyFilter = function applyFilter() {
+      _timer = null;
+
+      _this9.submenu.filter(filter(_this9.textbox.value));
+    };
+
+    _this9.textbox.addEventListener('input', function () {
+      if (_timer) {
+        clearTimeout(_timer);
+        _timer = null;
+      }
+
+      if (wait === false || wait < 0) {
+        applyFilter();
+      } else {
+        _timer = setTimeout(applyFilter, wait);
+      }
     });
 
     return _this9;
@@ -9996,10 +10200,16 @@ function (_AbstractMenuItem4) {
 
       _get(_getPrototypeOf(MultiComboBox.prototype), "registerTopics", this).call(this);
 
-      this.on('selection.change', function () {
-        _this10._renderLabel();
+      this.on('event.click', function (topic) {
+        var exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
+            pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
+            option = pill ? _this10.pilltoOptionMap.get(pill) : null;
 
-        _this10.submenu.position();
+        if (option) {
+          option.deselect();
+        }
+
+        _this10.textbox.focus();
       });
     }
   }, {
@@ -10014,11 +10224,6 @@ function (_AbstractMenuItem4) {
       };
     }
   }, {
-    key: "append",
-    value: function append(option) {
-      return this.submenu.append(option);
-    }
-  }, {
     key: "_buildChoicePill",
     value: function _buildChoicePill(text) {
       var pill = document.createElement('div');
@@ -10029,23 +10234,37 @@ function (_AbstractMenuItem4) {
       exitButton.innerHTML = "<i class=\"far fa-times-circle\"></i>";
       textContainer.className = "pill__text";
       textContainer.innerHTML = text;
-      pill.tabIndex = -1;
       pill.appendChild(textContainer);
       pill.appendChild(exitButton);
       return pill;
     }
   }, {
-    key: "_renderLabel",
-    value: function _renderLabel() {
+    key: "_rootKeyDown",
+    value: function _rootKeyDown(topic) {
+      var event = topic.originalEvent,
+          key = event.key;
+
+      if (this.isRoot) {
+        if (key === 'ArrowLeft' || key === 'ArrowRight' || key === "Enter") {
+          return;
+        }
+
+        return _get(_getPrototypeOf(MultiComboBox.prototype), "_rootKeyDown", this).call(this, topic);
+      }
+    }
+  }, {
+    key: "refreshUI",
+    value: function refreshUI() {
       var fragment = document.createDocumentFragment(),
-          _new = false;
-      var _iteratorNormalCompletion17 = true;
-      var _didIteratorError17 = false;
-      var _iteratorError17 = undefined;
+          _new = false,
+          values = [];
+      var _iteratorNormalCompletion19 = true;
+      var _didIteratorError19 = false;
+      var _iteratorError19 = undefined;
 
       try {
-        for (var _iterator17 = this.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-          var option = _step17.value;
+        for (var _iterator19 = this.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+          var option = _step19.value;
           var pill = this.optionToPillMap.get(option);
 
           if (option.isSelected) {
@@ -10056,6 +10275,8 @@ function (_AbstractMenuItem4) {
               fragment.appendChild(pill);
               _new = true;
             }
+
+            values.push(option.value || option.text);
           } else if (pill) {
             if (pill.parentElement) pill.parentElement.removeChild(pill);
             this.optionToPillMap["delete"](option);
@@ -10063,16 +10284,16 @@ function (_AbstractMenuItem4) {
           }
         }
       } catch (err) {
-        _didIteratorError17 = true;
-        _iteratorError17 = err;
+        _didIteratorError19 = true;
+        _iteratorError19 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
-            _iterator17["return"]();
+          if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
+            _iterator19["return"]();
           }
         } finally {
-          if (_didIteratorError17) {
-            throw _iteratorError17;
+          if (_didIteratorError19) {
+            throw _iteratorError19;
           }
         }
       }
@@ -10080,55 +10301,61 @@ function (_AbstractMenuItem4) {
       if (_new) {
         this.body.insertBefore(fragment, this.textbox);
       }
-    }
-  }, {
-    key: "options",
-    get: function get() {
-      return this.submenu.options;
-    }
-  }], [{
-    key: "FromHTML",
-    value: function FromHTML(element) {
-      if (typeof element === 'string') {
-        element = document.querySelector(element);
-      }
 
-      var instance = new MultiComboBox();
-      var _iteratorNormalCompletion18 = true;
-      var _didIteratorError18 = false;
-      var _iteratorError18 = undefined;
+      if (this.widget) {
+        this.widget.setValue(values);
+      }
+    } //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+  }, {
+    key: "setValue",
+    value: function setValue(values) {
+      var changed = false;
+      var _iteratorNormalCompletion20 = true;
+      var _didIteratorError20 = false;
+      var _iteratorError20 = undefined;
 
       try {
-        for (var _iterator18 = element.querySelectorAll('li')[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-          var child = _step18.value;
-          var option = new SelectOption({
-            text: child.innerHTML.trim(),
-            value: child.dataset.value || null
-          });
-          instance.append(option);
+        for (var _iterator20 = this.options[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+          var option = _step20.value;
+          var index = values.indexOf(option.value);
+
+          if (index !== -1) {
+            if (!option.isSelected && !option.isDisabled) {
+              option.isSelected = true;
+              changed = true;
+            }
+
+            values.splice(index, 1);
+          } else {
+            if (option.isSelected) {
+              option.isSelected = false;
+              changed = true;
+            }
+          }
         }
       } catch (err) {
-        _didIteratorError18 = true;
-        _iteratorError18 = err;
+        _didIteratorError20 = true;
+        _iteratorError20 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion18 && _iterator18["return"] != null) {
-            _iterator18["return"]();
+          if (!_iteratorNormalCompletion20 && _iterator20["return"] != null) {
+            _iterator20["return"]();
           }
         } finally {
-          if (_didIteratorError18) {
-            throw _iteratorError18;
+          if (_didIteratorError20) {
+            throw _iteratorError20;
           }
         }
       }
 
-      element.parentElement.replaceChild(instance.element, element);
-      return instance;
+      this._renderLabel();
     }
   }]);
 
   return MultiComboBox;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
+}(AbstractSelect);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return Select2.FromHTML(element);
 });

@@ -8,28 +8,21 @@ export class MultiHiddenInputWidget extends FormWidgetBase {
         let element = container || document.createElement('span');
         super(element);
         this.element.style.display = "none";
+        this._name = "";
+        this.inputs = [];
+        this._value = [];
     }
 
-    getValue() {
-        let r = [];
+    render() {
+        let value = this.value;
 
-        for(let input of this.element.children) {
-            r.push(input.value);
-        }
-
-        if(r.length === 1) {
-            return r[0];
-        } else if(r.length > 1) {
-            return r;
-        }
-    }
-
-    setValue(value) {
-        let fragment = document.createDocumentFragment();
+        emptyElement(this.element);
 
         if(!Array.isArray(value)) {
             value = [value];
         }
+
+        let fragment = document.createDocumentFragment();
 
         for(let v of value) {
             let input = document.createElement('input');
@@ -39,16 +32,32 @@ export class MultiHiddenInputWidget extends FormWidgetBase {
             fragment.appendChild(input);
         }
 
-        emptyElement(this.element);
         this.element.appendChild(fragment);
     }
 
+    getValue() {
+        if(this._value.length === 1) {
+            return this._value[0];
+        } else {
+            return this._value;
+        }
+    }
+
+    setValue(value) {
+        if(!Array.isArray(value)) {
+            value = [value];
+        }
+
+        this._value = value.map(item => item+'');
+        this.render();
+    }
+
     getName() {
-        return this.name;
+        return this._name;
     }
 
     setName(name) {
-        this.name = name;
+        this._name = name;
 
         for(let input of this.element.querySelectorAll('input')) {
             input.name = name;

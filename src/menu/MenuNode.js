@@ -558,8 +558,16 @@ export default class MenuNode extends Publisher {
         return this.element.classList;
     }
 
+    set classList(value) {
+        this.element.classList = value;
+    }
+
     get dataset() {
         return this.element.dataset;
+    }
+
+    set dataset(value) {
+        this.element.dataset = value;
     }
 
     get style() {

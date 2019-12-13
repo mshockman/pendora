@@ -6,7 +6,7 @@ import {getMenuInstance, getClosestMenuByElement} from "./utility";
 import {parseHTML, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
 import Attribute, {DROP, TRUE} from "core/attributes";
-import {SelectInputWidget, HiddenInputWidget} from "../forms/";
+import {SelectInputWidget, HiddenInputWidget, MultiHiddenInputWidget} from "../forms/";
 import ItemFilter from "../ui/ItemFilter";
 
 
@@ -117,25 +117,32 @@ export class SelectOption extends AbstractMenuItem {
         // so that other handlers can prevent the default action why the topic
         // bubble up the menu tree.
 
-        if(!event.preventDefault) {
-            let preventDefault = false;
-
-            event.preventDefault = function() {
-                preventDefault = true;
-            };
-
-            event.isDefaultPrevented = function() {
-                return preventDefault;
-            };
-        }
+        let isDefaultPrevented = false;
 
         // Notify every parent node that an item was clicked.
-        this.dispatchTopic('menuitem.click', event);
+        this.dispatchTopic('menuitem.click', {
+            ...event,
+            target: this,
+            relatedTarget: event.target,
+
+            preventDefault() {
+                isDefaultPrevented = true;
+            },
+
+            isDefaultPrevented() {
+                return isDefaultPrevented;
+            }
+        });
+
+        let toggle = this.toggle,
+            isSelected = this.isSelected;
+
+        isDisabled = this.getDisabled();
 
         // If the default action wasn't prevented either select or deselect the item.
-        if(!event.isDefaultPrevented()) {
-            if (this.isSelected) {
-                if (this.toggle === true || (this.toggle === 'ctrl' && event.originalEvent.ctrlKey)) {
+        if(!isDefaultPrevented && !isDisabled) {
+            if (isSelected) {
+                if (toggle === true || (toggle === 'ctrl' && event.originalEvent.ctrlKey)) {
                     this.deselect();
                 }
             } else {
@@ -1029,7 +1036,140 @@ export class Select2 extends AbstractMenuItem {
 }
 
 
-export class ComboBox extends AbstractMenuItem {
+/**
+ * @implements FormWidgetBase
+ * @abstract
+ */
+export class AbstractSelect extends AbstractMenuItem {
+    isSelect() {
+        return true;
+    }
+
+    /**
+     * @abstract
+     * @param context
+     */
+    render(context={}) {
+
+    }
+
+    /**
+     * Refresh ui
+     *
+     * @abstract
+     * @private
+     */
+    refreshUI() {
+
+    }
+
+    registerTopics() {
+        super.registerTopics();
+
+        this.on('menuitem.click', topic => {
+            // Close the select if the user clicks a disabled select item.
+            if(this.closeOnSelect && this.isActive) {
+                if(topic.target.isDisabled) {
+                    topic.preventDefault();
+                    this.deactivate();
+                }
+            }
+        });
+
+        this.on('option.select', () => {
+            if(this.closeOnSelect && this.isActive) {
+                this.deactivate();
+            }
+        });
+
+        this.on('option.deselect', () => {
+            if(this.closeOnSelect && this.isActive) {
+                this.deactivate();
+            }
+        });
+
+        this.on('selection.change', () => {
+            this.refreshUI();
+            this.submenu.position();
+        });
+    }
+
+    append(option) {
+        return this.submenu.append(option);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+    get options() {
+        return this.submenu.options;
+    }
+
+    get selectedOptions() {
+        return this.submenu.selectedOptions;
+    }
+
+    getName() {
+        return this.widget.name;
+    }
+
+    setName(value) {
+        this.widget.name = value;
+    }
+
+    getValue() {
+        return this.widget.value;
+    }
+
+    /**
+     * Sets the value of the widget and updates the ui without triggering any topics.
+     *
+     * @abstract
+     * @param value
+     */
+    setValue(value) {
+
+    }
+
+    get value() {
+        return this.getValue();
+    }
+
+    set value(value) {
+        this.setValue(value);
+    }
+
+    get name() {
+        return this.getName();
+    }
+
+    set name(value) {
+        this.setName(value);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    //
+
+    static FromHTML(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        let instance = new this();
+
+        for(let child of element.querySelectorAll('li')) {
+            let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
+            instance.append(option);
+        }
+
+        element.parentElement.replaceChild(instance.element, element);
+
+        return instance;
+    }
+}
+
+
+export class ComboBox extends AbstractSelect {
     constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith}={}) {
         super();
 
@@ -1152,33 +1292,6 @@ export class ComboBox extends AbstractMenuItem {
         this.init();
     }
 
-    registerTopics() {
-        super.registerTopics();
-
-        this.on('option.select', () => {
-            if(this.closeOnSelect) {
-                this.deactivate();
-            }
-        });
-
-        this.on('selection.change', () => {
-            this._renderLabel();
-        });
-
-        this.on('event.click', (event) => {
-            event.originalEvent.preventDefault();
-            this.textbox.focus();
-        });
-
-        this.on('menuitem.select', () => {
-            this._renderLabel();
-
-            if(this.isActive && this.closeOnSelect) {
-                this.deactivate();
-            }
-        });
-    }
-
     render(context) {
         let element = `
         <div class="combobox">
@@ -1195,23 +1308,9 @@ export class ComboBox extends AbstractMenuItem {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    // Tree methods
-
-    append(option) {
-        return this.submenu.append(option);
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Event & topic handling methods
-
-    onSelect(topic) {
-        return super.onSelect(topic);
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
     // Private methods
 
-    _renderLabel() {
+    refreshUI() {
         let options = this.selectedOptions,
             labels = options.map(item => item.text);
 
@@ -1235,27 +1334,7 @@ export class ComboBox extends AbstractMenuItem {
     //------------------------------------------------------------------------------------------------------------------
     // Properties
 
-    get options() {
-        return this.submenu.options;
-    }
-
-    get selectedOptions() {
-        return this.submenu.selectedOptions;
-    }
-
-    get name() {
-        return this.widget.name;
-    }
-
-    set name(value) {
-        this.widget.name = value;
-    }
-
-    get value() {
-        return this.widget.value;
-    }
-
-    set value(value) {
+    setValue(value) {
         this.widget.value = value;
     }
 
@@ -1266,38 +1345,11 @@ export class ComboBox extends AbstractMenuItem {
     set placeholder(value) {
         this.textbox.placeholder = value;
     }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Interface methods
-
-    isSelect() {
-        return true;
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Static methods
-
-    static FromHTML(element) {
-        if(typeof element === 'string') {
-            element = document.querySelector(element);
-        }
-
-        let instance = new ComboBox();
-
-        for(let child of element.querySelectorAll('li')) {
-            let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
-            instance.append(option);
-        }
-
-        element.parentElement.replaceChild(instance.element, element);
-
-        return instance;
-    }
 }
 
 
-export class MultiComboBox extends AbstractMenuItem {
-    constructor({target=null, timeout=false}={}) {
+export class MultiComboBox extends AbstractSelect {
+    constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500}={}) {
         super();
 
         this.optionToPillMap = new WeakMap();
@@ -1321,7 +1373,8 @@ export class MultiComboBox extends AbstractMenuItem {
         this.timeout = timeout;
         this.closeOnBlur = true;
         this.positioner = positioners.DROPDOWN;
-        this.closeOnSelect = true;
+        this.closeOnSelect = false;
+        this.multiSelect = true;
         this.clearSubItemsOnHover = false;
 
         this.SubMenuClass = SelectMenu;
@@ -1337,21 +1390,100 @@ export class MultiComboBox extends AbstractMenuItem {
         this.submenu.toggle = true;
         this.submenu.enableShiftSelect = true;
 
+        if(!widget) {
+            this.widget = new MultiHiddenInputWidget();
+            this.widget.appendTo(this.element);
+        } else {
+            this.widget = widget;
+
+            if(!this.widget.element.parentElement) {
+                this.widget.appendTo(this.element);
+            }
+        }
+
         this.initKeyboardNavigation();
         this.registerTopics();
         this.init();
 
-        this.element.addEventListener('click', event => {
-            this.textbox.focus();
+        this.textbox.addEventListener('keydown', event => {
+            if(!this.isActive) {
+                this.activate();
+                return;
+            }
+
+            if(event.key === "Backspace" && this.textbox.value === "") {
+                let pills = this.body.querySelectorAll('.multi-combo-box__pill'),
+                    pill = pills[pills.length-1],
+                    option = pill ? this.pilltoOptionMap.get(pill) : null;
+
+                if(option) {
+                    option.deselect();
+                }
+            } else if(event.key === 'Enter') {
+                if(_timer) {
+                    clearTimeout(_timer);
+                    _timer = null;
+                    applyFilter();
+                } else {
+                    for(let option of this.options) {
+                        if(!option.isFiltered && option.isActive) {
+                            if(!option.isSelected) {
+                                option.select();
+                            } else {
+                                option.deselect();
+                            }
+                            if(this.isActive) this.deactivate();
+                            this.textbox.value = "";
+                            return;
+                        }
+                    }
+
+                    for(let option of this.options) {
+                        if(!option.isFiltered) {
+                            if(!option.isSelected) option.select();
+                            if(this.isActive) this.deactivate();
+                            this.textbox.value = "";
+                            return;
+                        }
+                    }
+                }
+            }
+        });
+
+        let _timer = null;
+
+        let applyFilter = () => {
+            _timer = null;
+            this.submenu.filter(filter(this.textbox.value));
+        };
+
+        this.textbox.addEventListener('input', () => {
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
+            }
+
+            if(wait === false || wait < 0) {
+                applyFilter();
+            } else {
+                _timer = setTimeout(applyFilter, wait);
+            }
         });
     }
 
     registerTopics() {
         super.registerTopics();
 
-        this.on('selection.change', () => {
-            this._renderLabel();
-            this.submenu.position();
+        this.on('event.click', topic => {
+            let exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
+                pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
+                option = pill ? this.pilltoOptionMap.get(pill) : null;
+
+            if(option) {
+                option.deselect();
+            }
+
+            this.textbox.focus();
         });
     }
 
@@ -1373,10 +1505,6 @@ export class MultiComboBox extends AbstractMenuItem {
         };
     }
 
-    append(option) {
-        return this.submenu.append(option);
-    }
-
     _buildChoicePill(text) {
         let pill = document.createElement('div');
         pill.className = "multi-combo-box__pill";
@@ -1388,7 +1516,6 @@ export class MultiComboBox extends AbstractMenuItem {
         exitButton.innerHTML = `<i class="far fa-times-circle"></i>`;
         textContainer.className = "pill__text";
         textContainer.innerHTML = text;
-        pill.tabIndex = -1;
 
         pill.appendChild(textContainer);
         pill.appendChild(exitButton);
@@ -1396,9 +1523,23 @@ export class MultiComboBox extends AbstractMenuItem {
         return pill;
     }
 
-    _renderLabel() {
+    _rootKeyDown(topic) {
+        let event = topic.originalEvent,
+            key = event.key;
+
+        if(this.isRoot) {
+            if(key === 'ArrowLeft' || key === 'ArrowRight' || key === "Enter") {
+                return;
+            }
+
+            return super._rootKeyDown(topic);
+        }
+    }
+
+    refreshUI() {
         let fragment = document.createDocumentFragment(),
-            _new = false;
+            _new = false,
+            values = [];
 
         for(let option of this.options) {
             let pill = this.optionToPillMap.get(option);
@@ -1411,6 +1552,8 @@ export class MultiComboBox extends AbstractMenuItem {
                     fragment.appendChild(pill);
                     _new = true;
                 }
+
+                values.push(option.value || option.text);
             } else if(pill) {
                 if(pill.parentElement) pill.parentElement.removeChild(pill);
                 this.optionToPillMap.delete(option);
@@ -1421,27 +1564,36 @@ export class MultiComboBox extends AbstractMenuItem {
         if(_new) {
             this.body.insertBefore(fragment, this.textbox);
         }
+
+        if(this.widget) {
+            this.widget.setValue(values);
+        }
     }
 
-    get options() {
-        return this.submenu.options;
-    }
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
 
-    static FromHTML(element) {
-        if(typeof element === 'string') {
-            element = document.querySelector(element);
+    setValue(values) {
+        let changed = false;
+
+        for(let option of this.options) {
+            let index = values.indexOf(option.value);
+            if(index !== -1) {
+                if(!option.isSelected && !option.isDisabled) {
+                    option.isSelected = true;
+                    changed = true;
+                }
+
+                values.splice(index, 1);
+            } else {
+                if(option.isSelected) {
+                    option.isSelected = false;
+                    changed = true;
+                }
+            }
         }
 
-        let instance = new MultiComboBox();
-
-        for(let child of element.querySelectorAll('li')) {
-            let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
-            instance.append(option);
-        }
-
-        element.parentElement.replaceChild(instance.element, element);
-
-        return instance;
+        this._renderLabel();
     }
 }
 
