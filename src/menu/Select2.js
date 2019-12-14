@@ -1405,6 +1405,20 @@ export class MultiComboBox extends AbstractSelect {
         this.registerTopics();
         this.init();
 
+        let _timer = null;
+
+        let applyFilter = () => {
+            _timer = null;
+            this.submenu.filter(filter(this.textbox.value));
+
+            for(let option of this.options) {
+                if(!option.isFiltered && !option.isDisabled) {
+                    option.activate();
+                    break;
+                }
+            }
+        };
+
         this.textbox.addEventListener('keydown', event => {
             if(!this.isActive) {
                 this.activate();
@@ -1425,37 +1439,32 @@ export class MultiComboBox extends AbstractSelect {
                     _timer = null;
                     applyFilter();
                 } else {
+                    let targetOption = null;
+
                     for(let option of this.options) {
                         if(!option.isFiltered && option.isActive) {
-                            if(!option.isSelected) {
-                                option.select();
-                            } else {
-                                option.deselect();
-                            }
-                            if(this.isActive) this.deactivate();
-                            this.textbox.value = "";
-                            return;
+                            targetOption = option;
                         }
                     }
 
-                    for(let option of this.options) {
-                        if(!option.isFiltered) {
-                            if(!option.isSelected) option.select();
-                            if(this.isActive) this.deactivate();
-                            this.textbox.value = "";
-                            return;
+                    if(targetOption && !targetOption.isSelected) {
+                        targetOption.select();
+                        targetOption.deactivate();
+                        this.textbox.value = "";
+                        this.submenu.clearFilter();
+                    } else if(targetOption) {
+                        targetOption.deselect();
+                    } else {
+                        for(let option of this.options) {
+                            if(!option.isFiltered && !option.isDisabled) {
+                                option.activate();
+                                break;
+                            }
                         }
                     }
                 }
             }
         });
-
-        let _timer = null;
-
-        let applyFilter = () => {
-            _timer = null;
-            this.submenu.filter(filter(this.textbox.value));
-        };
 
         this.textbox.addEventListener('input', () => {
             if(_timer) {

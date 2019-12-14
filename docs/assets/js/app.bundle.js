@@ -10080,6 +10080,42 @@ function (_AbstractSelect2) {
 
     _this9.init();
 
+    var _timer = null;
+
+    var applyFilter = function applyFilter() {
+      _timer = null;
+
+      _this9.submenu.filter(filter(_this9.textbox.value));
+
+      var _iteratorNormalCompletion17 = true;
+      var _didIteratorError17 = false;
+      var _iteratorError17 = undefined;
+
+      try {
+        for (var _iterator17 = _this9.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+          var option = _step17.value;
+
+          if (!option.isFiltered && !option.isDisabled) {
+            option.activate();
+            break;
+          }
+        }
+      } catch (err) {
+        _didIteratorError17 = true;
+        _iteratorError17 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
+            _iterator17["return"]();
+          }
+        } finally {
+          if (_didIteratorError17) {
+            throw _iteratorError17;
+          }
+        }
+      }
+    };
+
     _this9.textbox.addEventListener('keydown', function (event) {
       if (!_this9.isActive) {
         _this9.activate();
@@ -10101,41 +10137,7 @@ function (_AbstractSelect2) {
           _timer = null;
           applyFilter();
         } else {
-          var _iteratorNormalCompletion17 = true;
-          var _didIteratorError17 = false;
-          var _iteratorError17 = undefined;
-
-          try {
-            for (var _iterator17 = _this9.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-              var _option2 = _step17.value;
-
-              if (!_option2.isFiltered && _option2.isActive) {
-                if (!_option2.isSelected) {
-                  _option2.select();
-                } else {
-                  _option2.deselect();
-                }
-
-                if (_this9.isActive) _this9.deactivate();
-                _this9.textbox.value = "";
-                return;
-              }
-            }
-          } catch (err) {
-            _didIteratorError17 = true;
-            _iteratorError17 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
-                _iterator17["return"]();
-              }
-            } finally {
-              if (_didIteratorError17) {
-                throw _iteratorError17;
-              }
-            }
-          }
-
+          var targetOption = null;
           var _iteratorNormalCompletion18 = true;
           var _didIteratorError18 = false;
           var _iteratorError18 = undefined;
@@ -10144,11 +10146,8 @@ function (_AbstractSelect2) {
             for (var _iterator18 = _this9.options[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
               var _option3 = _step18.value;
 
-              if (!_option3.isFiltered) {
-                if (!_option3.isSelected) _option3.select();
-                if (_this9.isActive) _this9.deactivate();
-                _this9.textbox.value = "";
-                return;
+              if (!_option3.isFiltered && _option3.isActive) {
+                targetOption = _option3;
               }
             }
           } catch (err) {
@@ -10165,17 +10164,48 @@ function (_AbstractSelect2) {
               }
             }
           }
+
+          if (targetOption && !targetOption.isSelected) {
+            targetOption.select();
+            targetOption.deactivate();
+            _this9.textbox.value = "";
+
+            _this9.submenu.clearFilter();
+          } else if (targetOption) {
+            targetOption.deselect();
+          } else {
+            var _iteratorNormalCompletion19 = true;
+            var _didIteratorError19 = false;
+            var _iteratorError19 = undefined;
+
+            try {
+              for (var _iterator19 = _this9.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+                var _option2 = _step19.value;
+
+                if (!_option2.isFiltered && !_option2.isDisabled) {
+                  _option2.activate();
+
+                  break;
+                }
+              }
+            } catch (err) {
+              _didIteratorError19 = true;
+              _iteratorError19 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
+                  _iterator19["return"]();
+                }
+              } finally {
+                if (_didIteratorError19) {
+                  throw _iteratorError19;
+                }
+              }
+            }
+          }
         }
       }
     });
-
-    var _timer = null;
-
-    var applyFilter = function applyFilter() {
-      _timer = null;
-
-      _this9.submenu.filter(filter(_this9.textbox.value));
-    };
 
     _this9.textbox.addEventListener('input', function () {
       if (_timer) {
@@ -10258,13 +10288,13 @@ function (_AbstractSelect2) {
       var fragment = document.createDocumentFragment(),
           _new = false,
           values = [];
-      var _iteratorNormalCompletion19 = true;
-      var _didIteratorError19 = false;
-      var _iteratorError19 = undefined;
+      var _iteratorNormalCompletion20 = true;
+      var _didIteratorError20 = false;
+      var _iteratorError20 = undefined;
 
       try {
-        for (var _iterator19 = this.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-          var option = _step19.value;
+        for (var _iterator20 = this.options[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+          var option = _step20.value;
           var pill = this.optionToPillMap.get(option);
 
           if (option.isSelected) {
@@ -10284,16 +10314,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError19 = true;
-        _iteratorError19 = err;
+        _didIteratorError20 = true;
+        _iteratorError20 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
-            _iterator19["return"]();
+          if (!_iteratorNormalCompletion20 && _iterator20["return"] != null) {
+            _iterator20["return"]();
           }
         } finally {
-          if (_didIteratorError19) {
-            throw _iteratorError19;
+          if (_didIteratorError20) {
+            throw _iteratorError20;
           }
         }
       }
@@ -10312,13 +10342,13 @@ function (_AbstractSelect2) {
     key: "setValue",
     value: function setValue(values) {
       var changed = false;
-      var _iteratorNormalCompletion20 = true;
-      var _didIteratorError20 = false;
-      var _iteratorError20 = undefined;
+      var _iteratorNormalCompletion21 = true;
+      var _didIteratorError21 = false;
+      var _iteratorError21 = undefined;
 
       try {
-        for (var _iterator20 = this.options[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-          var option = _step20.value;
+        for (var _iterator21 = this.options[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
+          var option = _step21.value;
           var index = values.indexOf(option.value);
 
           if (index !== -1) {
@@ -10336,16 +10366,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError20 = true;
-        _iteratorError20 = err;
+        _didIteratorError21 = true;
+        _iteratorError21 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion20 && _iterator20["return"] != null) {
-            _iterator20["return"]();
+          if (!_iteratorNormalCompletion21 && _iterator21["return"] != null) {
+            _iterator21["return"]();
           }
         } finally {
-          if (_didIteratorError20) {
-            throw _iteratorError20;
+          if (_didIteratorError21) {
+            throw _iteratorError21;
           }
         }
       }
