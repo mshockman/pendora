@@ -188,8 +188,10 @@ export class SelectOption extends AbstractMenuItem {
     set isFiltered(value) {
         if(value) {
             this.classList.add('filtered');
+            this.isVisible = false;
         } else {
             this.classList.remove('filtered');
+            this.isVisible = true;
         }
     }
 
@@ -254,6 +256,10 @@ export class SelectOption extends AbstractMenuItem {
 
     set autoDeactivateItems(value) {
         this._props.autoDeactivateItems = value;
+    }
+
+    get isNavigable() {
+        return !this.isDisabled && this.isVisible && !this.isFiltered;
     }
 }
 
@@ -539,7 +545,7 @@ export class SelectMenu extends AbstractMenu {
 
     clearFilter() {
         for(let option of this.options) {
-            option.classList.remove('filtered');
+            option.isFiltered = false;
         }
 
         if(this.placeholder && this.placeholder.parentElement && this.getFilteredItems().length < this.options.length) {
@@ -1409,14 +1415,10 @@ export class MultiComboBox extends AbstractSelect {
 
         let applyFilter = () => {
             _timer = null;
+
             this.submenu.filter(filter(this.textbox.value));
 
-            for(let option of this.options) {
-                if(!option.isFiltered && !option.isDisabled) {
-                    option.activate();
-                    break;
-                }
-            }
+            if(this.submenu.activeItem) this.submenu.activeItem.deactivate();
         };
 
         this.textbox.addEventListener('keydown', event => {
@@ -1439,27 +1441,36 @@ export class MultiComboBox extends AbstractSelect {
                     _timer = null;
                     applyFilter();
                 } else {
-                    let targetOption = null;
+                    let activeItem = null,
+                        firstItem = null;
 
+                    // Find both the first none filtered item and the active item.
                     for(let option of this.options) {
+                        if(!option.isFiltered && firstItem === null) {
+                            firstItem = option;
+                        }
+
                         if(!option.isFiltered && option.isActive) {
-                            targetOption = option;
+                            activeItem = option;
                         }
                     }
 
-                    if(targetOption && !targetOption.isSelected) {
-                        targetOption.select();
-                        targetOption.deactivate();
+                    if(!activeItem) {
                         this.textbox.value = "";
                         this.submenu.clearFilter();
-                    } else if(targetOption) {
-                        targetOption.deselect();
+                        this.submenu.position();
+
+                        if(firstItem && !firstItem.isSelected) {
+                            firstItem.select();
+                        }
+
+                        firstItem.deactivate();
                     } else {
-                        for(let option of this.options) {
-                            if(!option.isFiltered && !option.isDisabled) {
-                                option.activate();
-                                break;
-                            }
+                        if(activeItem.isSelected) {
+                            activeItem.deselect();
+                            activeItem.activate();
+                        } else {
+                            activeItem.select();
                         }
                     }
                 }

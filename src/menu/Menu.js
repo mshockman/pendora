@@ -24,6 +24,21 @@ export const MENU_PARAMETERS = {
 };
 
 
+function _isNavigableChild(item) {
+    return item.isNavigable;
+}
+
+
+function _findFirstNavigableChild(children) {
+    return children.find(_isNavigableChild);
+}
+
+
+function _findAllNavigableChildren(children) {
+    return children.filter(_isNavigableChild);
+}
+
+
 /**
  * @abstract
  */
@@ -437,7 +452,7 @@ export class AbstractMenu extends MenuNode {
                 return true;
             }
 
-            let children = this.enabledChildren,
+            let children = _findAllNavigableChildren(this.children),
                 index = children.indexOf(this.activeChild),
                 child = children[index];
 
@@ -469,7 +484,7 @@ export class AbstractMenu extends MenuNode {
                         child.showSubMenu();
                     }
 
-                    let firstChild = child.submenu.firstEnabledChild;
+                    let firstChild = _findFirstNavigableChild(child.submenu.children);
 
                     if(firstChild) {
                         ret = true;
@@ -481,13 +496,13 @@ export class AbstractMenu extends MenuNode {
                         return true;
                     }
                 } else if(!child) {
-                    let firstChild = this.firstEnabledChild;
+                    let firstChild = _findFirstNavigableChild(this.children);
 
                     if(firstChild) {
                         this._navigateToItem(firstChild, this.isRoot);
 
                         if(firstChild.hasSubMenu() && firstChild.submenu.isVisible) {
-                            let firstSubMenuChild = firstChild.submenu.firstEnabledChild;
+                            let firstSubMenuChild = _findFirstNavigableChild(firstChild.submenu.children);
 
                             if(firstSubMenuChild) {
                                 this._navigateToItem(firstSubMenuChild, false);
@@ -513,7 +528,7 @@ export class AbstractMenu extends MenuNode {
                     if(child && child.submenu) {
                         return child._navigate(event, allowTargetKeys, 0);
                     } else if(!child) {
-                        let firstChild = this.firstEnabledChild;
+                        let firstChild = _findFirstNavigableChild(this.children);
 
                         if(firstChild) {
                             return firstChild._navigate(event, allowTargetKeys, 0);
@@ -527,8 +542,9 @@ export class AbstractMenu extends MenuNode {
                 this.show();
                 event.preventDefault();
 
-                if(!this.activeChild && this.firstEnabledChild) {
-                    this.firstEnabledChild.activate();
+                if(!this.activeChild) {
+                    let childToActivate = _findFirstNavigableChild(this.children);
+                    if(childToActivate) this.firstEnabledChild.activate();
                 }
 
                 return true;
@@ -536,31 +552,32 @@ export class AbstractMenu extends MenuNode {
 
             if(this.activeChild) {
                 if(this.activeChild.hasSubMenu()) {
+                    let ret = false;
+
                     if(!this.activeChild.submenu.isVisible) {
                         this.activeChild.showSubMenu();
-
-                        if(!this.activeChild.submenu.activeChild && this.activeChild.submenu.firstEnabledChild) {
-                            this.activeChild.submenu.firstEnabledChild.activate(false);
-                        }
-
                         event.preventDefault();
-                        return true;
-                    } else if(!this.activeChild.submenu.activeChild) {
-                        let firstChild = this.activeChild.submenu.firstEnabledChild;
+                        ret = true;
+                    }
 
-                        if(firstChild) {
-                            firstChild.activate(false);
+                    if(!this.activeChild.submenu.activeChild) {
+                        let childToActivate = _findFirstNavigableChild(this.activeChild.submenu.children);
+
+                        if(childToActivate) {
+                            childToActivate.activate(false);
                             event.preventDefault();
-                            return true;
+                            ret = true;
                         }
                     }
+
+                    if(ret) return true;
                 } else {
                     this.activeChild.select();
                     event.preventDefault();
                     return true;
                 }
             } else {
-                let firstChild = this.firstEnabledChild;
+                let firstChild = _findFirstNavigableChild(this.children);
 
                 if(firstChild) {
                     firstChild.activate();
@@ -568,8 +585,10 @@ export class AbstractMenu extends MenuNode {
                     if(firstChild.hasSubMenu()) {
                         firstChild.showSubMenu();
 
-                        if(!firstChild.submenu.activeChild && firstChild.submenu.firstEnabledChild) {
-                            firstChild.submenu.firstEnabledChild.activate(false);
+                        if(!firstChild.submenu.activeChild) {
+                            let targetChild = _findFirstNavigableChild(firstChild.submenu.children);
+
+                            if(targetChild) targetChild.activate(false);
                         }
                     }
 
@@ -578,7 +597,9 @@ export class AbstractMenu extends MenuNode {
                 }
             }
         } else if(allowTargetKeys) {
-            for(let child of this.enabledChildren) {
+            let children = _findAllNavigableChildren(this.children);
+
+            for(let child of children) {
                 if(child.targetKey === key) {
                     event.preventDefault();
 

@@ -4680,9 +4680,22 @@ var MENU_PARAMETERS = {
   toggle: boolAttribute,
   visible: boolAttribute
 };
+
+function _isNavigableChild(item) {
+  return item.isNavigable;
+}
+
+function _findFirstNavigableChild(children) {
+  return children.find(_isNavigableChild);
+}
+
+function _findAllNavigableChildren(children) {
+  return children.filter(_isNavigableChild);
+}
 /**
  * @abstract
  */
+
 
 var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
   var AbstractMenu =
@@ -5320,7 +5333,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             return true;
           }
 
-          var children = this.enabledChildren,
+          var children = _findAllNavigableChildren(this.children),
               index = children.indexOf(this.activeChild),
               child = children[index];
 
@@ -5352,7 +5365,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                 child.showSubMenu();
               }
 
-              var firstChild = child.submenu.firstEnabledChild;
+              var firstChild = _findFirstNavigableChild(child.submenu.children);
 
               if (firstChild) {
                 ret = true;
@@ -5365,13 +5378,13 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                 return true;
               }
             } else if (!child) {
-              var _firstChild = this.firstEnabledChild;
+              var _firstChild = _findFirstNavigableChild(this.children);
 
               if (_firstChild) {
                 this._navigateToItem(_firstChild, this.isRoot);
 
                 if (_firstChild.hasSubMenu() && _firstChild.submenu.isVisible) {
-                  var firstSubMenuChild = _firstChild.submenu.firstEnabledChild;
+                  var firstSubMenuChild = _findFirstNavigableChild(_firstChild.submenu.children);
 
                   if (firstSubMenuChild) {
                     this._navigateToItem(firstSubMenuChild, false);
@@ -5397,7 +5410,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               if (child && child.submenu) {
                 return child._navigate(event, allowTargetKeys, 0);
               } else if (!child) {
-                var _firstChild2 = this.firstEnabledChild;
+                var _firstChild2 = _findFirstNavigableChild(this.children);
 
                 if (_firstChild2) {
                   return _firstChild2._navigate(event, allowTargetKeys, 0);
@@ -5411,8 +5424,10 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             this.show();
             event.preventDefault();
 
-            if (!this.activeChild && this.firstEnabledChild) {
-              this.firstEnabledChild.activate();
+            if (!this.activeChild) {
+              var childToActivate = _findFirstNavigableChild(this.children);
+
+              if (childToActivate) this.firstEnabledChild.activate();
             }
 
             return true;
@@ -5420,41 +5435,44 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
           if (this.activeChild) {
             if (this.activeChild.hasSubMenu()) {
+              var _ret = false;
+
               if (!this.activeChild.submenu.isVisible) {
                 this.activeChild.showSubMenu();
-
-                if (!this.activeChild.submenu.activeChild && this.activeChild.submenu.firstEnabledChild) {
-                  this.activeChild.submenu.firstEnabledChild.activate(false);
-                }
-
                 event.preventDefault();
-                return true;
-              } else if (!this.activeChild.submenu.activeChild) {
-                var _firstChild3 = this.activeChild.submenu.firstEnabledChild;
+                _ret = true;
+              }
 
-                if (_firstChild3) {
-                  _firstChild3.activate(false);
+              if (!this.activeChild.submenu.activeChild) {
+                var _childToActivate = _findFirstNavigableChild(this.activeChild.submenu.children);
+
+                if (_childToActivate) {
+                  _childToActivate.activate(false);
 
                   event.preventDefault();
-                  return true;
+                  _ret = true;
                 }
               }
+
+              if (_ret) return true;
             } else {
               this.activeChild.select();
               event.preventDefault();
               return true;
             }
           } else {
-            var _firstChild4 = this.firstEnabledChild;
+            var _firstChild3 = _findFirstNavigableChild(this.children);
 
-            if (_firstChild4) {
-              _firstChild4.activate();
+            if (_firstChild3) {
+              _firstChild3.activate();
 
-              if (_firstChild4.hasSubMenu()) {
-                _firstChild4.showSubMenu();
+              if (_firstChild3.hasSubMenu()) {
+                _firstChild3.showSubMenu();
 
-                if (!_firstChild4.submenu.activeChild && _firstChild4.submenu.firstEnabledChild) {
-                  _firstChild4.submenu.firstEnabledChild.activate(false);
+                if (!_firstChild3.submenu.activeChild) {
+                  var targetChild = _findFirstNavigableChild(_firstChild3.submenu.children);
+
+                  if (targetChild) targetChild.activate(false);
                 }
               }
 
@@ -5463,12 +5481,14 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         } else if (allowTargetKeys) {
+          var _children = _findAllNavigableChildren(this.children);
+
           var _iteratorNormalCompletion6 = true;
           var _didIteratorError6 = false;
           var _iteratorError6 = undefined;
 
           try {
-            for (var _iterator6 = this.enabledChildren[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            for (var _iterator6 = _children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
               var _child = _step6.value;
 
               if (_child.targetKey === key) {
@@ -8010,6 +8030,17 @@ function (_Publisher) {
         }
       }
     }
+  }, {
+    key: "isNavigable",
+
+    /**
+     * Used to determine if an item is navigable during keyboard navigation.
+     * @returns {boolean}
+     * @private
+     */
+    get: function get() {
+      return !this.isDisabled && this.isVisible;
+    }
   }], [{
     key: "getInstance",
     value: function getInstance(element) {
@@ -8342,8 +8373,10 @@ function (_AbstractMenuItem) {
     set: function set(value) {
       if (value) {
         this.classList.add('filtered');
+        this.isVisible = false;
       } else {
         this.classList.remove('filtered');
+        this.isVisible = true;
       }
     }
     /**
@@ -8414,6 +8447,11 @@ function (_AbstractMenuItem) {
     },
     set: function set(value) {
       this._props.autoDeactivateItems = value;
+    }
+  }, {
+    key: "isNavigable",
+    get: function get() {
+      return !this.isDisabled && this.isVisible && !this.isFiltered;
     }
   }]);
 
@@ -8860,7 +8898,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         try {
           for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
             var option = _step6.value;
-            option.classList.remove('filtered');
+            option.isFiltered = false;
           }
         } catch (err) {
           _didIteratorError6 = true;
@@ -10087,33 +10125,7 @@ function (_AbstractSelect2) {
 
       _this9.submenu.filter(filter(_this9.textbox.value));
 
-      var _iteratorNormalCompletion17 = true;
-      var _didIteratorError17 = false;
-      var _iteratorError17 = undefined;
-
-      try {
-        for (var _iterator17 = _this9.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-          var option = _step17.value;
-
-          if (!option.isFiltered && !option.isDisabled) {
-            option.activate();
-            break;
-          }
-        }
-      } catch (err) {
-        _didIteratorError17 = true;
-        _iteratorError17 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
-            _iterator17["return"]();
-          }
-        } finally {
-          if (_didIteratorError17) {
-            throw _iteratorError17;
-          }
-        }
-      }
+      if (_this9.submenu.activeItem) _this9.submenu.activeItem.deactivate();
     };
 
     _this9.textbox.addEventListener('keydown', function (event) {
@@ -10137,70 +10149,58 @@ function (_AbstractSelect2) {
           _timer = null;
           applyFilter();
         } else {
-          var targetOption = null;
-          var _iteratorNormalCompletion18 = true;
-          var _didIteratorError18 = false;
-          var _iteratorError18 = undefined;
+          var activeItem = null,
+              firstItem = null; // Find both the first none filtered item and the active item.
+
+          var _iteratorNormalCompletion17 = true;
+          var _didIteratorError17 = false;
+          var _iteratorError17 = undefined;
 
           try {
-            for (var _iterator18 = _this9.options[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-              var _option3 = _step18.value;
+            for (var _iterator17 = _this9.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+              var _option2 = _step17.value;
 
-              if (!_option3.isFiltered && _option3.isActive) {
-                targetOption = _option3;
+              if (!_option2.isFiltered && firstItem === null) {
+                firstItem = _option2;
+              }
+
+              if (!_option2.isFiltered && _option2.isActive) {
+                activeItem = _option2;
               }
             }
           } catch (err) {
-            _didIteratorError18 = true;
-            _iteratorError18 = err;
+            _didIteratorError17 = true;
+            _iteratorError17 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion18 && _iterator18["return"] != null) {
-                _iterator18["return"]();
+              if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
+                _iterator17["return"]();
               }
             } finally {
-              if (_didIteratorError18) {
-                throw _iteratorError18;
+              if (_didIteratorError17) {
+                throw _iteratorError17;
               }
             }
           }
 
-          if (targetOption && !targetOption.isSelected) {
-            targetOption.select();
-            targetOption.deactivate();
+          if (!activeItem) {
             _this9.textbox.value = "";
 
             _this9.submenu.clearFilter();
-          } else if (targetOption) {
-            targetOption.deselect();
+
+            _this9.submenu.position();
+
+            if (firstItem && !firstItem.isSelected) {
+              firstItem.select();
+            }
+
+            firstItem.deactivate();
           } else {
-            var _iteratorNormalCompletion19 = true;
-            var _didIteratorError19 = false;
-            var _iteratorError19 = undefined;
-
-            try {
-              for (var _iterator19 = _this9.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-                var _option2 = _step19.value;
-
-                if (!_option2.isFiltered && !_option2.isDisabled) {
-                  _option2.activate();
-
-                  break;
-                }
-              }
-            } catch (err) {
-              _didIteratorError19 = true;
-              _iteratorError19 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
-                  _iterator19["return"]();
-                }
-              } finally {
-                if (_didIteratorError19) {
-                  throw _iteratorError19;
-                }
-              }
+            if (activeItem.isSelected) {
+              activeItem.deselect();
+              activeItem.activate();
+            } else {
+              activeItem.select();
             }
           }
         }
@@ -10288,13 +10288,13 @@ function (_AbstractSelect2) {
       var fragment = document.createDocumentFragment(),
           _new = false,
           values = [];
-      var _iteratorNormalCompletion20 = true;
-      var _didIteratorError20 = false;
-      var _iteratorError20 = undefined;
+      var _iteratorNormalCompletion18 = true;
+      var _didIteratorError18 = false;
+      var _iteratorError18 = undefined;
 
       try {
-        for (var _iterator20 = this.options[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
-          var option = _step20.value;
+        for (var _iterator18 = this.options[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+          var option = _step18.value;
           var pill = this.optionToPillMap.get(option);
 
           if (option.isSelected) {
@@ -10314,16 +10314,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError20 = true;
-        _iteratorError20 = err;
+        _didIteratorError18 = true;
+        _iteratorError18 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion20 && _iterator20["return"] != null) {
-            _iterator20["return"]();
+          if (!_iteratorNormalCompletion18 && _iterator18["return"] != null) {
+            _iterator18["return"]();
           }
         } finally {
-          if (_didIteratorError20) {
-            throw _iteratorError20;
+          if (_didIteratorError18) {
+            throw _iteratorError18;
           }
         }
       }
@@ -10342,13 +10342,13 @@ function (_AbstractSelect2) {
     key: "setValue",
     value: function setValue(values) {
       var changed = false;
-      var _iteratorNormalCompletion21 = true;
-      var _didIteratorError21 = false;
-      var _iteratorError21 = undefined;
+      var _iteratorNormalCompletion19 = true;
+      var _didIteratorError19 = false;
+      var _iteratorError19 = undefined;
 
       try {
-        for (var _iterator21 = this.options[Symbol.iterator](), _step21; !(_iteratorNormalCompletion21 = (_step21 = _iterator21.next()).done); _iteratorNormalCompletion21 = true) {
-          var option = _step21.value;
+        for (var _iterator19 = this.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+          var option = _step19.value;
           var index = values.indexOf(option.value);
 
           if (index !== -1) {
@@ -10366,16 +10366,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError21 = true;
-        _iteratorError21 = err;
+        _didIteratorError19 = true;
+        _iteratorError19 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion21 && _iterator21["return"] != null) {
-            _iterator21["return"]();
+          if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
+            _iterator19["return"]();
           }
         } finally {
-          if (_didIteratorError21) {
-            throw _iteratorError21;
+          if (_didIteratorError19) {
+            throw _iteratorError19;
           }
         }
       }

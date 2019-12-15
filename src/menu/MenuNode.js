@@ -964,4 +964,13 @@ export default class MenuNode extends Publisher {
 
         return new this(parameters);
     }
+
+    /**
+     * Used to determine if an item is navigable during keyboard navigation.
+     * @returns {boolean}
+     * @private
+     */
+    get isNavigable() {
+        return !this.isDisabled && this.isVisible;
+    }
 }
