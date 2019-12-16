@@ -64,13 +64,14 @@ export default class MenuNode extends Publisher {
     initKeyboardNavigation() {
         if(!this._keyboardNavigationEnabled) {
             this._keyboardNavigationEnabled = true;
-            this.on('event.keydown', (topic) => this._rootKeyDown(topic));
         }
     }
 
     registerTopics() {
         if (this._isTopicInit) return;
         this._isTopicInit = true;
+
+        this.on('event.keydown', (topic) => this.onKeyDown(topic));
     }
 
     /**
@@ -81,7 +82,7 @@ export default class MenuNode extends Publisher {
 
         this.isController = false;
         // noinspection JSUnusedGlobalSymbols
-        this.__keyboardNavigationEnabled = false;
+        this._keyboardNavigationEnabled = false;
         this.element = null;
 
         this.publish('destroy', this);
@@ -863,6 +864,7 @@ export default class MenuNode extends Publisher {
 
     _rootKeyDown(topic) {
         if(this.isRoot) {
+            console.log("HERE ROOT NAV");
             let event = topic.originalEvent;
 
             if(event.key === "Escape") {
@@ -876,6 +878,12 @@ export default class MenuNode extends Publisher {
                 target = activeItem ? activeItem.parentMenu : this;
 
             target._navigate(event);
+        }
+    }
+
+    onKeyDown(topic) {
+        if(this._keyboardNavigationEnabled) {
+            this._rootKeyDown(topic);
         }
     }
 

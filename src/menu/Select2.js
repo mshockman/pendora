@@ -1,12 +1,11 @@
-import MenuItem, {AbstractMenuItem} from "./MenuItem";
-import Menu, {AbstractMenu} from "./Menu";
+import {AbstractMenuItem} from "./MenuItem";
+import {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
-import {getMenuInstance, getClosestMenuByElement} from "./utility";
-import {parseHTML, parseBoolean} from "core/utility";
+import {getClosestMenuByElement} from "./utility";
+import {parseHTML} from "core/utility";
 import {inherit} from "./decorators";
-import {SelectInputWidget, HiddenInputWidget, MultiHiddenInputWidget} from "../forms/";
-import ItemFilter from "../ui/ItemFilter";
+import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
 
 
@@ -32,6 +31,7 @@ export class SelectOption extends AbstractMenuItem {
         this.autoActivate = true;
         this.openOnHover = true;
         this.delay = 0;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
         // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = false;
@@ -56,6 +56,34 @@ export class SelectOption extends AbstractMenuItem {
         }
     }
 
+    registerTopics() {
+        super.registerTopics();
+
+        this.on('menuitem.select', topic => {
+            if(this.isSelected && this.toggle) {
+                this.isSelected = false;
+
+                this.dispatchTopic('option.deselect', {
+                    ...topic,
+                    target: this,
+                    menu: this,
+                    relatedTarget: topic.target,
+                    trigger: topic
+                });
+            } else if(!this.isSelected) {
+                this.isSelected = true;
+
+                this.dispatchTopic('option.select', {
+                    ...topic,
+                    target: this,
+                    menu: this,
+                    relatedTarget: topic.target,
+                    trigger: topic
+                });
+            }
+        });
+    }
+
     /**
      * Creates the dom elements for the SelectOption.
      * @param text
@@ -76,7 +104,7 @@ export class SelectOption extends AbstractMenuItem {
      *
      * @param topicData
      */
-    select(topicData={}) {
+    optionSelect(topicData={}) {
         super.select();
 
         if(this.isSelected) return;
@@ -94,63 +122,14 @@ export class SelectOption extends AbstractMenuItem {
      * Deselect the SelectOption if it is selected and publishes an [option.deselect] topic.
      * @param topicData
      */
-    deselect(topicData={}) {
+    optionDeselect(topicData={}) {
         if(!this.isSelected) return;
         this.isSelected = false;
         if(this.isActive) this.deactivate();
         this.dispatchTopic('option.deselect', {target: this, menu: this, ...topicData});
     }
 
-    onClick(event) {
-        let isDisabled = this.getDisabled();
-
-        if(isDisabled) {
-            event.originalEvent.preventDefault();
-            return;
-        }
-
-        if(event.target !== this) {
-            return;
-        }
-
-        // Implements an event preventDefault like interface for the topic
-        // so that other handlers can prevent the default action why the topic
-        // bubble up the menu tree.
-
-        let isDefaultPrevented = false;
-
-        // Notify every parent node that an item was clicked.
-        this.dispatchTopic('menuitem.click', {
-            ...event,
-            target: this,
-            relatedTarget: event.target,
-
-            preventDefault() {
-                isDefaultPrevented = true;
-            },
-
-            isDefaultPrevented() {
-                return isDefaultPrevented;
-            }
-        });
-
-        let toggle = this.toggle,
-            isSelected = this.isSelected;
-
-        isDisabled = this.getDisabled();
-
-        // If the default action wasn't prevented either select or deselect the item.
-        if(!isDefaultPrevented && !isDisabled) {
-            if (isSelected) {
-                if (toggle === true || (toggle === 'ctrl' && event.originalEvent.ctrlKey)) {
-                    this.deselect();
-                }
-            } else {
-                this.select();
-            }
-        }
-    }
-
+    // noinspection JSUnusedGlobalSymbols
     isSelectMenu() {
         return true;
     }
@@ -320,6 +299,7 @@ export class SelectMenu extends AbstractMenu {
         // noinspection JSUnusedGlobalSymbols
         this.openOnHover = false;
         this.multiSelect = "inherit";
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
         // noinspection JSUnusedGlobalSymbols
         this.delay = 0;
@@ -348,22 +328,6 @@ export class SelectMenu extends AbstractMenu {
         }
     }
 
-    show() {
-        if(!this.isVisible) {
-            this.clearFilter();
-
-            if(!this.multiSelect && !this.activeChild) {
-                for (let child of this.children) {
-                    if (child.isSelected && !child.isActive) {
-                        child.activate();
-                    }
-                }
-            }
-
-            super.show();
-        }
-    }
-
     render({arrow=false}={}) {
         let html = `
             <div class="select-menu">
@@ -384,7 +348,7 @@ export class SelectMenu extends AbstractMenu {
             if(!this.multiSelect) {
                 for(let item of this.selection) {
                     if(item !== topic.target) {
-                        item.deselect();
+                        item.isSelected = false;
                     }
                 }
             }
@@ -393,7 +357,10 @@ export class SelectMenu extends AbstractMenu {
         });
 
         this.on('option.deselect', topic => {
-            this.dispatchTopic('selection.change', this);
+            this.dispatchTopic('selection.change', {
+                target: this,
+                trigger: topic
+            });
         });
 
         this.on('menuitem.click', topic => {
@@ -434,19 +401,19 @@ export class SelectMenu extends AbstractMenu {
             } else if(event.ctrlKey && this.enableCtrlToggle) {
                 topic.preventDefault();
 
-                let change = false;
+                let changed = false;
 
-                if(!topic.target.isSelected && !topic.deselected) {
-                    event.target.isSelected = true;
-                    change = true
-                } else if(topic.target.isSelected && !topic.selected) {
+                if(topic.target.isSelected) {
                     event.target.isSelected = false;
-                    change = true;
+                    changed = true;
+                } else {
+                    event.target.isSelected = true;
+                    changed = true;
                 }
 
                 this._lastClick = topic.target;
 
-                if(change) {
+                if(changed) {
                     this.dispatchTopic('selection.change', this);
                 }
             } else if(this.clearOldSelection) {
@@ -461,8 +428,21 @@ export class SelectMenu extends AbstractMenu {
                 this._lastClick = topic.target;
             }
         });
+
+        this.on('menu.show', topic => {
+            this.clearFilter();
+
+            if(!this.multiSelect && !this.activeChild) {
+                for (let child of this.children) {
+                    if (child.isSelected && !child.isActive) {
+                        child.activate();
+                    }
+                }
+            }
+        });
     }
 
+    // noinspection JSUnusedGlobalSymbols
     isSelectMenu() {
         return true;
     }
@@ -485,39 +465,6 @@ export class SelectMenu extends AbstractMenu {
 
     get options() {
         return this.children;
-    }
-
-    onClick(topic) {
-        let event = topic.originalEvent,
-            target = topic.target,
-            isDisabled = target.getDisabled();
-
-        super.onClick(topic);
-
-        if(!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
-            if(event.shiftKey) {
-                let lastTarget = this.lastTarget || target,
-                    children = this.children,
-                    lastIndex = children.indexOf(lastTarget),
-                    targetIndex = children.indexOf(target),
-                    start = Math.min(lastIndex, targetIndex),
-                    end = Math.max(lastIndex, targetIndex);
-
-                for(let i = 0; i < children.length; i++) {
-                    let item = children[i];
-
-                    if(i >= start && i <= end) {
-                        if(!item.isSelected) {
-                            item.select();
-                        }
-                    } else if(item.isSelected) {
-                        item.deselect();
-                    }
-                }
-            } else {
-                this.lastTarget = target;
-            }
-        }
     }
 
     filter(fn) {
@@ -672,6 +619,9 @@ export class AbstractSelect extends AbstractMenuItem {
     //------------------------------------------------------------------------------------------------------------------
     // Properties
 
+    /**
+     * @returns {SelectOption}
+     */
     get options() {
         return this.submenu.options;
     }
@@ -728,8 +678,6 @@ export class AbstractSelect extends AbstractMenuItem {
 
         let config = this.getAttributes(element);
 
-        console.log(config);
-
         let instance = new this(config);
 
         for(let child of element.querySelectorAll('li')) {
@@ -778,6 +726,7 @@ export class RichSelect extends AbstractSelect {
         // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = true;
         this.positioner = positioners.DROPDOWN;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = true;
         this._label = '';
         // noinspection JSUnusedGlobalSymbols
@@ -927,10 +876,13 @@ export class MultiComboBox extends AbstractSelect {
         this.openOnHover = false;
         this.delay = false;
         this.timeout = timeout;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = true;
         this.positioner = positioners.DROPDOWN;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
         this.multiSelect = true;
+        // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = false;
 
         this.SubMenuClass = SelectMenu;
@@ -961,82 +913,26 @@ export class MultiComboBox extends AbstractSelect {
         this.registerTopics();
         this.init();
 
-        let _timer = null;
+        this._filterTimer = null;
 
-        let applyFilter = () => {
-            _timer = null;
+        this._applyFilter = () => {
+            this._filterTimer = null;
 
             this.submenu.filter(filter(this.textbox.value));
 
             if(this.submenu.activeItem) this.submenu.activeItem.deactivate();
         };
 
-        this.textbox.addEventListener('keydown', event => {
-            if(!this.isActive) {
-                this.activate();
-                return;
-            }
-
-            if(event.key === "Backspace" && this.textbox.value === "") {
-                let pills = this.body.querySelectorAll('.multi-combo-box__pill'),
-                    pill = pills[pills.length-1],
-                    option = pill ? this.pilltoOptionMap.get(pill) : null;
-
-                if(option) {
-                    option.deselect();
-                }
-            } else if(event.key === 'Enter') {
-                if(_timer) {
-                    clearTimeout(_timer);
-                    _timer = null;
-                    applyFilter();
-                } else {
-                    let activeItem = null,
-                        firstItem = null;
-
-                    // Find both the first none filtered item and the active item.
-                    for(let option of this.options) {
-                        if(!option.isFiltered && firstItem === null) {
-                            firstItem = option;
-                        }
-
-                        if(!option.isFiltered && option.isActive) {
-                            activeItem = option;
-                        }
-                    }
-
-                    if(!activeItem) {
-                        this.textbox.value = "";
-                        this.submenu.clearFilter();
-                        this.submenu.position();
-
-                        if(firstItem && !firstItem.isSelected) {
-                            firstItem.select();
-                        }
-
-                        firstItem.deactivate();
-                    } else {
-                        if(activeItem.isSelected) {
-                            activeItem.deselect();
-                            activeItem.activate();
-                        } else {
-                            activeItem.select();
-                        }
-                    }
-                }
-            }
-        });
-
         this.textbox.addEventListener('input', () => {
-            if(_timer) {
-                clearTimeout(_timer);
-                _timer = null;
+            if(this._filterTimer) {
+                clearTimeout(this._filterTimer);
+                this._filterTimer = null;
             }
 
             if(wait === false || wait < 0) {
-                applyFilter();
+                this._applyFilter();
             } else {
-                _timer = setTimeout(applyFilter, wait);
+                this._filterTimer = setTimeout(this._applyFilter, wait);
             }
         });
     }
@@ -1050,7 +946,7 @@ export class MultiComboBox extends AbstractSelect {
                 option = pill ? this.pilltoOptionMap.get(pill) : null;
 
             if(option) {
-                option.deselect();
+                option.optionDeselect();
             }
 
             this.textbox.focus();
@@ -1093,16 +989,68 @@ export class MultiComboBox extends AbstractSelect {
         return pill;
     }
 
-    _rootKeyDown(topic) {
-        let event = topic.originalEvent,
-            key = event.key;
+    onKeyDown(topic) {
+        if(!this._keyboardNavigationEnabled || !this.isRoot) {
+            return;
+        }
 
-        if(this.isRoot) {
-            if(key === 'ArrowLeft' || key === 'ArrowRight' || key === "Enter") {
-                return;
+        let event = topic.originalEvent;
+
+        if(!this.isActive) {
+            this.activate();
+            return;
+        }
+
+        if(event.key === "Backspace" && this.textbox.value === "") {
+            let pills = this.body.querySelectorAll('.multi-combo-box__pill'),
+                pill = pills[pills.length-1],
+                option = pill ? this.pilltoOptionMap.get(pill) : null;
+
+            if(option) {
+                option.optionDeselect();
             }
+        } else if(event.key === 'Enter') {
+            if(this._filterTimer) {
+                clearTimeout(this._filterTimer);
+                this._filterTimer = null;
+                this._applyFilter();
+            } else {
+                /**
+                 * @type {null|SelectOption}
+                 */
+                let activeItem = null,
+                    /**
+                     * @type {null|SelectOption}
+                     */
+                    firstItem = null;
 
-            return super._rootKeyDown(topic);
+                // Find both the first none filtered item and the active item.
+                for(let option of this.options) {
+                    if(!option.isFiltered && firstItem === null) {
+                        firstItem = option;
+                    }
+
+                    if(!option.isFiltered && option.isActive) {
+                        activeItem = option;
+                    }
+                }
+
+                if(!activeItem) {
+                    this.textbox.value = "";
+                    this.submenu.clearFilter();
+                    this.submenu.position();
+
+                    if(firstItem && !firstItem.isSelected) {
+                        firstItem.select();
+                    }
+
+                    firstItem.deactivate();
+                } else {
+                    activeItem.select();
+                }
+            }
+        } else if(event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+            return super.onKeyDown(topic);
         }
     }
 
@@ -1163,7 +1111,7 @@ export class MultiComboBox extends AbstractSelect {
             }
         }
 
-        this._renderLabel();
+        this.refreshUI();
     }
 }
 

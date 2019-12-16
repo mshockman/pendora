@@ -182,11 +182,15 @@ export class AbstractMenuItem extends MenuNode {
     /**
      * Triggers a select item event.
      */
-    select() {
-        this.publish('select');
-        this.dispatchTopic('menuitem.select', {target: this});
+    select(data={}) {
+        let topic = {target: this, ...data};
+
+        this.publish('select', topic);
+
+        this.dispatchTopic('menuitem.select', topic);
+
         this.element.dispatchEvent(new CustomEvent('menuitem.select', {
-            detail: this,
+            detail: topic,
             bubbles: true
         }));
     }
@@ -389,7 +393,7 @@ export class AbstractMenuItem extends MenuNode {
             }
 
             if (isActive && !hasSubMenu) {
-                this.select();
+                this.select({trigger: event});
             }
         }
     }

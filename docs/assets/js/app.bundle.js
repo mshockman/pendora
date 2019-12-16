@@ -854,125 +854,6 @@ function () {
 
 /***/ }),
 
-/***/ "./src/core/attributes.js":
-/*!********************************!*\
-  !*** ./src/core/attributes.js ***!
-  \********************************/
-/*! exports provided: DROP, REQUIRED, FALSE, TRUE, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROP", function() { return DROP; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "REQUIRED", function() { return REQUIRED; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FALSE", function() { return FALSE; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TRUE", function() { return TRUE; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Attribute; });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
-var DROP = {};
-var REQUIRED = {};
-var FALSE = {};
-var TRUE = {};
-/**
- * Used to help deserialize attributes on an element.
- * @deprecated
- */
-
-var Attribute =
-/*#__PURE__*/
-function () {
-  function Attribute(type) {
-    var missing = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : DROP;
-    var nullable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var validator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-    _classCallCheck(this, Attribute);
-
-    this.type = type;
-    this.missing = missing;
-    this.validator = validator;
-    this.nullable = nullable;
-  }
-
-  _createClass(Attribute, null, [{
-    key: "deserialize",
-    value: function deserialize(data, fields) {
-      var r = {};
-
-      for (var key in fields) {
-        if (fields.hasOwnProperty(key)) {
-          var field = fields[key],
-              missing = field ? field.missing : DROP,
-              nullable = field ? field.nullable : null,
-              value = data.hasOwnProperty(key) ? data[key] : undefined;
-
-          if (value === undefined) {
-            if (missing === REQUIRED) {
-              throw new _errors__WEBPACK_IMPORTED_MODULE_0__["KeyError"]("".concat(key, " is required"));
-            } else if (missing === DROP) {
-              continue;
-            } else {
-              r[key] = missing;
-              continue;
-            }
-          }
-
-          if (value === null) {
-            if (nullable === FALSE) {
-              throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValueError"]("".concat(key, " cannot be null"));
-            } else if (nullable === TRUE || nullable === null) {
-              r[key] = null;
-              continue;
-            } else if (nullable === DROP) {
-              continue;
-            } else {
-              r[key] = nullable;
-              continue;
-            }
-          }
-
-          if (field) {
-            if (field.type) {
-              value = field.type(value);
-            }
-
-            if (field.validator) {
-              value = field.validator(value);
-            }
-          }
-
-          r[key] = value;
-        }
-      }
-
-      return r;
-    }
-  }]);
-
-  return Attribute;
-}();
-
-_defineProperty(Attribute, "DROP", DROP);
-
-_defineProperty(Attribute, "REQUIRED", REQUIRED);
-
-_defineProperty(Attribute, "FALSE", FALSE);
-
-_defineProperty(Attribute, "TRUE", TRUE);
-
-
-
-/***/ }),
-
 /***/ "./src/core/data.js":
 /*!**************************!*\
   !*** ./src/core/data.js ***!
@@ -2437,7 +2318,7 @@ function () {
           throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Attribute ".concat(key, " cannot be null."));
         }
 
-        if (this.nullable === null || this.nullable === true) {
+        if (this.nullable === null || this.nullable === TRUE || this.nullable === NULL) {
           return null;
         } else {
           return this.nullable;
@@ -6638,12 +6519,16 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "select",
       value: function select() {
-        this.publish('select');
-        this.dispatchTopic('menuitem.select', {
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var topic = _objectSpread({
           target: this
-        });
+        }, data);
+
+        this.publish('select', topic);
+        this.dispatchTopic('menuitem.select', topic);
         this.element.dispatchEvent(new CustomEvent('menuitem.select', {
-          detail: this,
+          detail: topic,
           bubbles: true
         }));
       }
@@ -6877,7 +6762,9 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           }
 
           if (isActive && !hasSubMenu) {
-            this.select();
+            this.select({
+              trigger: event
+            });
           }
         }
       }
@@ -7247,20 +7134,20 @@ function (_Publisher) {
   }, {
     key: "initKeyboardNavigation",
     value: function initKeyboardNavigation() {
-      var _this3 = this;
-
       if (!this._keyboardNavigationEnabled) {
         this._keyboardNavigationEnabled = true;
-        this.on('event.keydown', function (topic) {
-          return _this3._rootKeyDown(topic);
-        });
       }
     }
   }, {
     key: "registerTopics",
     value: function registerTopics() {
+      var _this3 = this;
+
       if (this._isTopicInit) return;
       this._isTopicInit = true;
+      this.on('event.keydown', function (topic) {
+        return _this3.onKeyDown(topic);
+      });
     }
     /**
      * Unbinds all event listeners.
@@ -7272,7 +7159,7 @@ function (_Publisher) {
       this.clearAllRegisteredEvents();
       this.isController = false; // noinspection JSUnusedGlobalSymbols
 
-      this.__keyboardNavigationEnabled = false;
+      this._keyboardNavigationEnabled = false;
       this.element = null;
       this.publish('destroy', this);
     }
@@ -8063,6 +7950,7 @@ function (_Publisher) {
     key: "_rootKeyDown",
     value: function _rootKeyDown(topic) {
       if (this.isRoot) {
+        console.log("HERE ROOT NAV");
         var event = topic.originalEvent;
 
         if (event.key === "Escape") {
@@ -8076,6 +7964,13 @@ function (_Publisher) {
             target = activeItem ? activeItem.parentMenu : this;
 
         target._navigate(event);
+      }
+    }
+  }, {
+    key: "onKeyDown",
+    value: function onKeyDown(topic) {
+      if (this._keyboardNavigationEnabled) {
+        this._rootKeyDown(topic);
       }
     } //------------------------------------------------------------------------------------------------------------------
     // Tree parsing functions.
@@ -8578,7 +8473,7 @@ function (_Publisher) {
 /*!*****************************!*\
   !*** ./src/menu/Select2.js ***!
   \*****************************/
-/*! exports provided: SelectOption, FILTERS, SelectMenu, Select2, AbstractSelect, ComboBox, MultiComboBox, RichSelect */
+/*! exports provided: SelectOption, FILTERS, SelectMenu, AbstractSelect, RichSelect, MultiComboBox, ComboBox */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8586,11 +8481,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return SelectOption; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FILTERS", function() { return FILTERS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return SelectMenu; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return Select2; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractSelect", function() { return AbstractSelect; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiComboBox", function() { return MultiComboBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RichSelect", function() { return RichSelect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiComboBox", function() { return MultiComboBox; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
@@ -8598,9 +8492,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
 /* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
 /* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var core_attributes__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core/attributes */ "./src/core/attributes.js");
-/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
-/* harmony import */ var _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../ui/ItemFilter */ "./src/ui/ItemFilter.js");
+/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
@@ -8670,7 +8563,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
@@ -8709,7 +8601,8 @@ function (_AbstractMenuItem) {
     _this.toggle = "inherit";
     _this.autoActivate = true;
     _this.openOnHover = true;
-    _this.delay = 0;
+    _this.delay = 0; // noinspection JSUnusedGlobalSymbols
+
     _this.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
 
     _this.closeOnBlur = false;
@@ -8734,14 +8627,43 @@ function (_AbstractMenuItem) {
 
     return _this;
   }
-  /**
-   * Creates the dom elements for the SelectOption.
-   * @param text
-   * @returns {Element}
-   */
-
 
   _createClass(SelectOption, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this2 = this;
+
+      _get(_getPrototypeOf(SelectOption.prototype), "registerTopics", this).call(this);
+
+      this.on('menuitem.select', function (topic) {
+        if (_this2.isSelected && _this2.toggle) {
+          _this2.isSelected = false;
+
+          _this2.dispatchTopic('option.deselect', _objectSpread({}, topic, {
+            target: _this2,
+            menu: _this2,
+            relatedTarget: topic.target,
+            trigger: topic
+          }));
+        } else if (!_this2.isSelected) {
+          _this2.isSelected = true;
+
+          _this2.dispatchTopic('option.select', _objectSpread({}, topic, {
+            target: _this2,
+            menu: _this2,
+            relatedTarget: topic.target,
+            trigger: topic
+          }));
+        }
+      });
+    }
+    /**
+     * Creates the dom elements for the SelectOption.
+     * @param text
+     * @returns {Element}
+     */
+
+  }, {
     key: "render",
     value: function render(_ref2) {
       var text = _ref2.text;
@@ -8756,8 +8678,8 @@ function (_AbstractMenuItem) {
      */
 
   }, {
-    key: "select",
-    value: function select() {
+    key: "optionSelect",
+    value: function optionSelect() {
       var topicData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       _get(_getPrototypeOf(SelectOption.prototype), "select", this).call(this);
@@ -8780,8 +8702,8 @@ function (_AbstractMenuItem) {
      */
 
   }, {
-    key: "deselect",
-    value: function deselect() {
+    key: "optionDeselect",
+    value: function optionDeselect() {
       var topicData = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       if (!this.isSelected) return;
       this.isSelected = false;
@@ -8790,50 +8712,8 @@ function (_AbstractMenuItem) {
         target: this,
         menu: this
       }, topicData));
-    }
-  }, {
-    key: "onClick",
-    value: function onClick(event) {
-      var isDisabled = this.getDisabled();
+    } // noinspection JSUnusedGlobalSymbols
 
-      if (isDisabled) {
-        event.originalEvent.preventDefault();
-        return;
-      }
-
-      if (event.target !== this) {
-        return;
-      } // Implements an event preventDefault like interface for the topic
-      // so that other handlers can prevent the default action why the topic
-      // bubble up the menu tree.
-
-
-      var _isDefaultPrevented = false; // Notify every parent node that an item was clicked.
-
-      this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
-        target: this,
-        relatedTarget: event.target,
-        preventDefault: function preventDefault() {
-          _isDefaultPrevented = true;
-        },
-        isDefaultPrevented: function isDefaultPrevented() {
-          return _isDefaultPrevented;
-        }
-      }));
-      var toggle = this.toggle,
-          isSelected = this.isSelected;
-      isDisabled = this.getDisabled(); // If the default action wasn't prevented either select or deselect the item.
-
-      if (!_isDefaultPrevented && !isDisabled) {
-        if (isSelected) {
-          if (toggle === true || toggle === 'ctrl' && event.originalEvent.ctrlKey) {
-            this.deselect();
-          }
-        } else {
-          this.select();
-        }
-      }
-    }
   }, {
     key: "isSelectMenu",
     value: function isSelectMenu() {
@@ -8993,7 +8873,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     _inherits(SelectMenu, _AbstractMenu2);
 
     function SelectMenu() {
-      var _this2;
+      var _this3;
 
       var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
           target = _ref3.target,
@@ -9017,57 +8897,58 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _classCallCheck(this, SelectMenu);
 
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this)); // noinspection JSUnusedGlobalSymbols
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this)); // noinspection JSUnusedGlobalSymbols
 
-      _initialize(_assertThisInitialized(_this2));
+      _initialize(_assertThisInitialized(_this3));
 
-      _this2.MenuItemClass = SelectOption;
+      _this3.MenuItemClass = SelectOption;
 
       if (target) {
-        _this2.element = target;
+        _this3.element = target;
       } else {
-        _this2.element = _this2.render(context);
+        _this3.element = _this3.render(context);
       } // noinspection JSUnusedGlobalSymbols
 
 
-      _this2.closeOnBlur = false;
-      _this2.timeout = false; // noinspection JSUnusedGlobalSymbols
+      _this3.closeOnBlur = false;
+      _this3.timeout = false; // noinspection JSUnusedGlobalSymbols
 
-      _this2.autoActivate = true; // noinspection JSUnusedGlobalSymbols
+      _this3.autoActivate = true; // noinspection JSUnusedGlobalSymbols
 
-      _this2.openOnHover = false;
-      _this2.multiSelect = "inherit";
-      _this2.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
+      _this3.openOnHover = false;
+      _this3.multiSelect = "inherit"; // noinspection JSUnusedGlobalSymbols
 
-      _this2.delay = 0;
-      _this2.positioner = "inherit";
-      _this2.enableShiftSelect = enableShiftSelect;
-      _this2.enableCtrlToggle = enableCtrlToggle;
-      _this2.clearOldSelection = clearOldSelection;
+      _this3.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
 
-      _this2.element.classList.add('select-menu');
+      _this3.delay = 0;
+      _this3.positioner = "inherit";
+      _this3.enableShiftSelect = enableShiftSelect;
+      _this3.enableCtrlToggle = enableCtrlToggle;
+      _this3.clearOldSelection = clearOldSelection;
 
-      _this2.placeholder = document.createElement('div');
+      _this3.element.classList.add('select-menu');
 
-      _this2.placeholder.classList.add('placeholder');
+      _this3.placeholder = document.createElement('div');
 
-      _this2.placeholder.innerHTML = placeholder;
-      _this2.isVisible = false;
+      _this3.placeholder.classList.add('placeholder');
 
-      _this2.registerTopics();
+      _this3.placeholder.innerHTML = placeholder;
+      _this3.isVisible = false;
 
-      _this2.parseDOM();
+      _this3.registerTopics();
 
-      _this2.init();
+      _this3.parseDOM();
+
+      _this3.init();
 
       if (filter) {
-        _this2.filterDelay = filterDelay;
-        _this2.placeholder = placeholder;
+        _this3.filterDelay = filterDelay;
+        _this3.placeholder = placeholder;
 
-        _this2._initFilter(filter, filterPlaceholderText);
+        _this3._initFilter(filter, filterPlaceholderText);
       }
 
-      return _this2;
+      return _this3;
     }
 
     return SelectMenu;
@@ -9082,22 +8963,36 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       value: void 0
     }, {
       kind: "method",
-      key: "show",
-      value: function show() {
-        if (!this.isVisible) {
-          this.clearFilter();
+      key: "render",
+      value: function render() {
+        var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref4$arrow = _ref4.arrow,
+            arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-          if (!this.multiSelect && !this.activeChild) {
+        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <div class=\"select-menu__body menu__body\"></div>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
+        var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
+        return fragment.children[0];
+      }
+    }, {
+      kind: "method",
+      key: "registerTopics",
+      value: function registerTopics() {
+        var _this4 = this;
+
+        _get(_getPrototypeOf(SelectMenu.prototype), "registerTopics", this).call(this);
+
+        this.on('option.select', function (topic) {
+          if (!_this4.multiSelect) {
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
 
             try {
-              for (var _iterator = this.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var child = _step.value;
+              for (var _iterator = _this4.selection[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var item = _step.value;
 
-                if (child.isSelected && !child.isActive) {
-                  child.activate();
+                if (item !== topic.target) {
+                  item.isSelected = false;
                 }
               }
             } catch (err) {
@@ -9116,73 +9011,23 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             }
           }
 
-          _get(_getPrototypeOf(SelectMenu.prototype), "show", this).call(this);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            _ref4$arrow = _ref4.arrow,
-            arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
-
-        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <div class=\"select-menu__body menu__body\"></div>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
-        var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
-        return fragment.children[0];
-      }
-    }, {
-      kind: "method",
-      key: "registerTopics",
-      value: function registerTopics() {
-        var _this3 = this;
-
-        _get(_getPrototypeOf(SelectMenu.prototype), "registerTopics", this).call(this);
-
-        this.on('option.select', function (topic) {
-          if (!_this3.multiSelect) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-              for (var _iterator2 = _this3.selection[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var item = _step2.value;
-
-                if (item !== topic.target) {
-                  item.deselect();
-                }
-              }
-            } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
-                }
-              } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
-                }
-              }
-            }
-          }
-
-          _this3.dispatchTopic('selection.change', _this3);
+          _this4.dispatchTopic('selection.change', _this4);
         });
         this.on('option.deselect', function (topic) {
-          _this3.dispatchTopic('selection.change', _this3);
+          _this4.dispatchTopic('selection.change', {
+            target: _this4,
+            trigger: topic
+          });
         });
         this.on('menuitem.click', function (topic) {
-          if (topic.target.parent !== _this3) return;
+          if (topic.target.parent !== _this4) return;
           var event = topic.originalEvent;
 
-          if (_this3._lastClick && event.shiftKey && _this3.enableShiftSelect) {
+          if (_this4._lastClick && event.shiftKey && _this4.enableShiftSelect) {
             topic.preventDefault();
-            var children = _this3.children,
+            var children = _this4.children,
                 targetIndex = children.indexOf(topic.target),
-                lastIndex = children.indexOf(_this3._lastClick);
+                lastIndex = children.indexOf(_this4._lastClick);
 
             if (targetIndex !== -1 && lastIndex !== -1) {
               var startIndex = Math.min(targetIndex, lastIndex),
@@ -9204,37 +9049,73 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
               }
 
               if (change) {
-                _this3.dispatchTopic('selection.change', _this3);
+                _this4.dispatchTopic('selection.change', _this4);
               }
             }
-          } else if (event.ctrlKey && _this3.enableCtrlToggle) {
+          } else if (event.ctrlKey && _this4.enableCtrlToggle) {
             topic.preventDefault();
-            var _change = false;
+            var changed = false;
 
-            if (!topic.target.isSelected && !topic.deselected) {
-              event.target.isSelected = true;
-              _change = true;
-            } else if (topic.target.isSelected && !topic.selected) {
+            if (topic.target.isSelected) {
               event.target.isSelected = false;
-              _change = true;
+              changed = true;
+            } else {
+              event.target.isSelected = true;
+              changed = true;
             }
 
-            _this3._lastClick = topic.target;
+            _this4._lastClick = topic.target;
 
-            if (_change) {
-              _this3.dispatchTopic('selection.change', _this3);
+            if (changed) {
+              _this4.dispatchTopic('selection.change', _this4);
             }
-          } else if (_this3.clearOldSelection) {
+          } else if (_this4.clearOldSelection) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+              for (var _iterator2 = _this4.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var _child = _step2.value;
+
+                if (_child !== topic.target && _child.isSelected) {
+                  _child.isSelected = false;
+                }
+              }
+            } catch (err) {
+              _didIteratorError2 = true;
+              _iteratorError2 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                  _iterator2["return"]();
+                }
+              } finally {
+                if (_didIteratorError2) {
+                  throw _iteratorError2;
+                }
+              }
+            }
+
+            _this4._lastClick = topic.target;
+          } else {
+            _this4._lastClick = topic.target;
+          }
+        });
+        this.on('menu.show', function (topic) {
+          _this4.clearFilter();
+
+          if (!_this4.multiSelect && !_this4.activeChild) {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
 
             try {
-              for (var _iterator3 = _this3.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var _child = _step3.value;
+              for (var _iterator3 = _this4.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                var child = _step3.value;
 
-                if (_child !== topic.target && _child.isSelected) {
-                  _child.isSelected = false;
+                if (child.isSelected && !child.isActive) {
+                  child.activate();
                 }
               }
             } catch (err) {
@@ -9251,13 +9132,10 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
                 }
               }
             }
-
-            _this3._lastClick = topic.target;
-          } else {
-            _this3._lastClick = topic.target;
           }
         });
-      }
+      } // noinspection JSUnusedGlobalSymbols
+
     }, {
       kind: "method",
       key: "isSelectMenu",
@@ -9309,41 +9187,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       key: "options",
       value: function options() {
         return this.children;
-      }
-    }, {
-      kind: "method",
-      key: "onClick",
-      value: function onClick(topic) {
-        var event = topic.originalEvent,
-            target = topic.target,
-            isDisabled = target.getDisabled();
-
-        _get(_getPrototypeOf(SelectMenu.prototype), "onClick", this).call(this, topic);
-
-        if (!isDisabled && target.parent === this && target.isMenuItem && target.isMenuItem() && this.multiSelect && this.shiftSelect) {
-          if (event.shiftKey) {
-            var lastTarget = this.lastTarget || target,
-                children = this.children,
-                lastIndex = children.indexOf(lastTarget),
-                targetIndex = children.indexOf(target),
-                start = Math.min(lastIndex, targetIndex),
-                end = Math.max(lastIndex, targetIndex);
-
-            for (var i = 0; i < children.length; i++) {
-              var item = children[i];
-
-              if (i >= start && i <= end) {
-                if (!item.isSelected) {
-                  item.select();
-                }
-              } else if (item.isSelected) {
-                item.deselect();
-              }
-            }
-          } else {
-            this.lastTarget = target;
-          }
-        }
       }
     }, {
       kind: "method",
@@ -9465,11 +9308,11 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       kind: "method",
       key: "_initFilter",
       value: function _initFilter(fn, filterPlaceholderText) {
-        var _this4 = this;
+        var _this5 = this;
 
         // let filterInput = this.element.querySelectorAll('[data-filter]');
         var filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(function (node) {
-          return Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(node) === _this4;
+          return Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(node) === _this5;
         });
 
         if (!filterInput) {
@@ -9495,627 +9338,22 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           _timer = setTimeout(function () {
             _timer = null;
 
-            _this4.filter(fn(_this4.filterInput.value));
-          }, _this4.filterDelay);
+            _this5.filter(fn(_this5.filterInput.value));
+          }, _this5.filterDelay);
         });
       }
     }]
   };
 }, _Menu__WEBPACK_IMPORTED_MODULE_1__["AbstractMenu"]);
 /**
- * A component that can be used as an alternative to the built in <select> element.
- * @implements FormWidgetBase
- */
-
-var Select2 =
-/*#__PURE__*/
-function (_AbstractMenuItem2) {
-  _inherits(Select2, _AbstractMenuItem2);
-
-  function Select2() {
-    var _this5;
-
-    var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        target = _ref5.target,
-        _ref5$multiSelect = _ref5.multiSelect,
-        multiSelect = _ref5$multiSelect === void 0 ? false : _ref5$multiSelect,
-        _ref5$timeout = _ref5.timeout,
-        timeout = _ref5$timeout === void 0 ? false : _ref5$timeout,
-        _ref5$id = _ref5.id,
-        id = _ref5$id === void 0 ? null : _ref5$id,
-        _ref5$classes = _ref5.classes,
-        classes = _ref5$classes === void 0 ? null : _ref5$classes,
-        _ref5$widget = _ref5.widget,
-        widget = _ref5$widget === void 0 ? null : _ref5$widget,
-        _ref5$filter = _ref5.filter,
-        filter = _ref5$filter === void 0 ? false : _ref5$filter,
-        _ref5$placeholder = _ref5.placeholder,
-        placeholder = _ref5$placeholder === void 0 ? "No Items Found" : _ref5$placeholder;
-
-    _classCallCheck(this, Select2);
-
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Select2).call(this));
-
-    if (target) {
-      _this5.element = target;
-    } else {
-      _this5.element = _this5.render();
-    }
-
-    if (classes) {
-      _this5.addClass(classes);
-    }
-
-    if (id) {
-      _this5.element.id = id;
-    }
-
-    _this5.toggle = "both";
-    _this5.autoActivate = false;
-    _this5.openOnHover = false;
-    _this5.delay = false;
-    _this5.closeOnSelect = "auto"; // noinspection JSUnusedGlobalSymbols
-
-    _this5.closeOnBlur = true;
-    _this5.timeout = timeout;
-    _this5.multiSelect = multiSelect; // noinspection JSUnusedGlobalSymbols
-
-    _this5.MenuItemClass = SelectOption; // noinspection JSUnusedGlobalSymbols
-
-    _this5.SubMenuClass = SelectMenu;
-    _this5.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
-
-    _this5.clearSubItemsOnHover = false;
-    _this5.labelToItemMap = new WeakMap();
-    _this5.itemToLabelMap = new WeakMap();
-
-    _this5.element.classList.add('select');
-
-    _this5.element.tabIndex = 0;
-
-    _this5.registerTopics();
-
-    _this5.parseDOM();
-
-    if (widget) {
-      _this5.widget = widget;
-    } else {
-      _this5.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
-
-      _this5.widget.appendTo(_this5.element);
-    }
-
-    if (!_this5.submenu) {
-      var submenu = new SelectMenu();
-      submenu.isVisible = false;
-
-      _this5.attachSubMenu(submenu);
-    }
-
-    _this5.init();
-
-    if (filter) {
-      if (_this5.multiSelect) {
-        _this5.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
-          items: function items() {
-            var r = [];
-            var _iteratorNormalCompletion8 = true;
-            var _didIteratorError8 = false;
-            var _iteratorError8 = undefined;
-
-            try {
-              for (var _iterator8 = _this5.submenu.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                var child = _step8.value;
-                r.push(child.element);
-              }
-            } catch (err) {
-              _didIteratorError8 = true;
-              _iteratorError8 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-                  _iterator8["return"]();
-                }
-              } finally {
-                if (_didIteratorError8) {
-                  throw _iteratorError8;
-                }
-              }
-            }
-
-            return r;
-          },
-          tabindex: -1
-        });
-        var li = document.createElement('li');
-        li.className = "select-filter-container";
-
-        _this5.filter.appendTo(li);
-
-        _this5.filter.wrapper = li;
-
-        _this5.button.appendChild(li);
-      } else {
-        _this5.filter = new _ui_ItemFilter__WEBPACK_IMPORTED_MODULE_9__["default"]({
-          items: function items() {
-            var r = [];
-            var _iteratorNormalCompletion9 = true;
-            var _didIteratorError9 = false;
-            var _iteratorError9 = undefined;
-
-            try {
-              for (var _iterator9 = _this5.submenu.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                var child = _step9.value;
-                r.push(child.element);
-              }
-            } catch (err) {
-              _didIteratorError9 = true;
-              _iteratorError9 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
-                  _iterator9["return"]();
-                }
-              } finally {
-                if (_didIteratorError9) {
-                  throw _iteratorError9;
-                }
-              }
-            }
-
-            return r;
-          },
-          placeholder: "Filter"
-        });
-
-        _this5.filter.appendTo(_this5.submenu.element.querySelector('.select-menu__header'));
-
-        _this5.submenu.element.classList.add('has-filter');
-      }
-
-      _this5.filter.on('filter-change', function (topic) {
-        if (topic.allItemsFiltered) {
-          _this5.submenu.element.classList.add('all-items-filtered');
-        } else {
-          _this5.submenu.element.classList.remove('all-items-filtered');
-        }
-      });
-
-      if (placeholder) {
-        var placeholderNode = document.createElement('li');
-        placeholderNode.className = "placeholder";
-        placeholderNode.innerHTML = placeholder;
-
-        var body = _this5.submenu.getMenuBody();
-
-        body = body[body.length - 1];
-        body.appendChild(placeholderNode);
-      }
-
-      _this5.addEventListener('keydown', function (event) {
-        if (_this5.filter && event.key === 'Backspace') {
-          if (_this5.filter.isFocused() && _this5.filter.input.value !== "") {
-            return;
-          }
-
-          if (!_this5._isChoiceElement(document.activeElement)) {
-            var choices = _this5.getLabels();
-
-            if (choices.length) {
-              choices[choices.length - 1].focus();
-            }
-          } else {
-            _this5.labelToItemMap.get(document.activeElement).deselect();
-
-            _this5.filter.focus();
-          }
-        }
-      });
-
-      _this5.filter.input.addEventListener('focus', function () {
-        _this5.element.classList.add('select-highlight');
-      });
-
-      _this5.filter.input.addEventListener('blur', function (event) {
-        // noinspection JSCheckFunctionSignatures
-        if (!_this5.element.contains(event.relatedTarget)) {
-          _this5.element.classList.remove('select-highlight');
-
-          if (_this5.isActive) _this5.deactivate();
-        }
-      });
-    }
-
-    _this5.addEventListener('focus', function () {
-      if (_this5.filter) {
-        _this5.filter.focus();
-      }
-
-      _this5.element.classList.add('select-highlight');
-    });
-
-    _this5.addEventListener('blur', function (event) {
-      if (!_this5.element.contains(event.relatedTarget)) {
-        if (_this5.isActive) _this5.deactivate();
-
-        _this5.element.classList.remove('select-highlight');
-      }
-    });
-
-    return _this5;
-  }
-
-  _createClass(Select2, [{
-    key: "activate",
-    value: function activate() {
-      var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-
-      if (!this.isActive) {
-        var r = _get(_getPrototypeOf(Select2.prototype), "activate", this).call(this);
-
-        if (this.filter) {
-          this.filter.clear();
-
-          if (!this.multiSelect || !this.element.contains(document.activeElement) || !document.activeElement.classList.contains('choice')) {
-            this.filter.focus();
-          }
-        }
-
-        return r;
-      }
-    }
-  }, {
-    key: "deactivate",
-    value: function deactivate() {
-      if (this.isActive) {
-        var r = _get(_getPrototypeOf(Select2.prototype), "deactivate", this).call(this);
-
-        if (this.filter) {
-          this.filter.clear();
-          this.filter.blur();
-        }
-
-        return r;
-      }
-    }
-  }, {
-    key: "isSelect",
-    value: function isSelect() {
-      return true;
-    }
-  }, {
-    key: "registerTopics",
-    value: function registerTopics() {
-      var _this6 = this;
-
-      _get(_getPrototypeOf(Select2.prototype), "registerTopics", this).call(this);
-
-      this.on('option.select', function () {
-        _this6.renderLabels();
-
-        if (_this6.closeOnSelect === true && _this6.isActive) {
-          _this6.deactivate();
-        }
-      });
-      this.on('option.deselect', function () {
-        _this6.renderLabels();
-      });
-    }
-  }, {
-    key: "renderLabels",
-    value: function renderLabels() {
-      var output = this.button,
-          fragment = document.createDocumentFragment();
-      var _iteratorNormalCompletion10 = true;
-      var _didIteratorError10 = false;
-      var _iteratorError10 = undefined;
-
-      try {
-        for (var _iterator10 = this.options[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-          var item = _step10.value;
-
-          if (item.isSelected) {
-            var pill = this.itemToLabelMap.get(item);
-
-            if (!pill) {
-              pill = document.createElement('li');
-              var exitButton = document.createElement('div'),
-                  span = document.createElement('span');
-              pill.className = "choice";
-              exitButton.className = "exit-button";
-              span.innerText = item.text;
-              if (this.multiSelect) pill.tabIndex = -1;
-              pill.appendChild(exitButton);
-              pill.appendChild(span);
-              this.itemToLabelMap.set(item, pill);
-              this.labelToItemMap.set(pill, item);
-              fragment.appendChild(pill);
-            }
-          } else {
-            var _pill = this.itemToLabelMap.get(item);
-
-            if (_pill) {
-              _pill.parentElement.removeChild(_pill);
-
-              this.itemToLabelMap["delete"](item);
-              this.labelToItemMap["delete"](_pill);
-            }
-          }
-        }
-      } catch (err) {
-        _didIteratorError10 = true;
-        _iteratorError10 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
-            _iterator10["return"]();
-          }
-        } finally {
-          if (_didIteratorError10) {
-            throw _iteratorError10;
-          }
-        }
-      }
-
-      if (this.filter && this.filter.wrapper && this.filter.wrapper.parentElement === output) {
-        output.insertBefore(fragment, this.filter.wrapper);
-      } else {
-        output.appendChild(fragment);
-      }
-
-      if (this.widget) this.widget.setValue(this._getSelectedValues());
-    }
-  }, {
-    key: "append",
-    value: function append(option) {
-      this.submenu.append(option);
-    }
-  }, {
-    key: "_getSelectedValues",
-    value: function _getSelectedValues() {
-      var r = [];
-      var _iteratorNormalCompletion11 = true;
-      var _didIteratorError11 = false;
-      var _iteratorError11 = undefined;
-
-      try {
-        for (var _iterator11 = this.selection[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-          var item = _step11.value;
-          r.push(item.value);
-        }
-      } catch (err) {
-        _didIteratorError11 = true;
-        _iteratorError11 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
-            _iterator11["return"]();
-          }
-        } finally {
-          if (_didIteratorError11) {
-            throw _iteratorError11;
-          }
-        }
-      }
-
-      if (this.multiSelect) {
-        return r;
-      } else {
-        return r[0];
-      }
-    }
-  }, {
-    key: "_isChoiceElement",
-    value: function _isChoiceElement(element) {
-      var _iteratorNormalCompletion12 = true;
-      var _didIteratorError12 = false;
-      var _iteratorError12 = undefined;
-
-      try {
-        for (var _iterator12 = this.options[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-          var option = _step12.value;
-
-          if (this.itemToLabelMap.get(option) === element) {
-            return true;
-          }
-        }
-      } catch (err) {
-        _didIteratorError12 = true;
-        _iteratorError12 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion12 && _iterator12["return"] != null) {
-            _iterator12["return"]();
-          }
-        } finally {
-          if (_didIteratorError12) {
-            throw _iteratorError12;
-          }
-        }
-      }
-
-      return false;
-    }
-  }, {
-    key: "getLabels",
-    value: function getLabels() {
-      return this.button.querySelectorAll('.choice');
-    } // noinspection JSUnusedGlobalSymbols
-
-  }, {
-    key: "getValue",
-    value: function getValue() {
-      return this.widget.getValue();
-    } // noinspection JSUnusedGlobalSymbols
-
-  }, {
-    key: "setValue",
-    value: function setValue(value) {
-      this.widget.setValue(value);
-    } // noinspection JSUnusedGlobalSymbols
-
-  }, {
-    key: "getName",
-    value: function getName() {
-      return this.widget.getName();
-    } // noinspection JSUnusedGlobalSymbols
-
-  }, {
-    key: "setName",
-    value: function setName(name) {
-      this.widget.setName(name);
-    }
-  }, {
-    key: "render",
-    value: function render(context) {
-      var html = "\n        <article class=\"dropdown select\">\n            <ul class=\"selection\"></ul>\n        </article>\n        ";
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
-      return fragment.children[0];
-    }
-  }, {
-    key: "onClick",
-    value: function onClick(topic) {
-      var event = topic.originalEvent; // noinspection JSUnresolvedFunction
-
-      if (topic.target === this && event.target.closest('.exit-button')) {
-        // noinspection JSUnresolvedFunction
-        var li = event.target.closest('li'),
-            item = this.labelToItemMap.get(li);
-        item.deselect();
-      } else {
-        if (this.filter) {
-          // noinspection JSCheckFunctionSignatures
-          var inFilter = this.filter.element.contains(event.target);
-
-          if (!this.isActive && inFilter) {
-            this.activate();
-          } else if (this.submenu.element.contains(event.target)) {
-            this.filter.focus();
-          } else if (!inFilter) {
-            _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
-          }
-        } else {
-          _get(_getPrototypeOf(Select2.prototype), "onClick", this).call(this, topic);
-        }
-      }
-    }
-  }, {
-    key: "button",
-    get: function get() {
-      return Array.prototype.find.call(this.element.children, function (node) {
-        return node.matches('.selection');
-      });
-    }
-  }, {
-    key: "selection",
-    get: function get() {
-      return this.submenu.selection;
-    }
-  }, {
-    key: "options",
-    get: function get() {
-      return this.submenu.children;
-    }
-  }, {
-    key: "multiSelect",
-    get: function get() {
-      return this._props.multiSelect;
-    },
-    set: function set(value) {
-      value = !!value;
-
-      if (value !== this.multiSelect) {
-        this._props.multiSelect = value;
-
-        if (value) {
-          this.element.classList.add('multiple');
-        } else {
-          this.element.classList.remove('multiple');
-        }
-      }
-    }
-  }, {
-    key: "closeOnSelect",
-    get: function get() {
-      if (this._props.closeOnSelect === "auto") {
-        return !this.multiSelect;
-      } else {
-        return this._props.closeOnSelect;
-      }
-    },
-    set: function set(value) {
-      this._props.closeOnSelect = value;
-    }
-  }], [{
-    key: "FromHTML",
-    value: function FromHTML(element) {
-      if (typeof element === 'string') {
-        element = document.querySelector(element);
-      }
-
-      if (element.nodeName === "SELECT") {
-        // noinspection JSUnresolvedVariable
-        var select = new Select2({
-          multiSelect: element.multiple,
-          widget: new _forms___WEBPACK_IMPORTED_MODULE_8__["SelectInputWidget"](element, null, null, true),
-          filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
-        });
-        var _iteratorNormalCompletion13 = true;
-        var _didIteratorError13 = false;
-        var _iteratorError13 = undefined;
-
-        try {
-          for (var _iterator13 = element.querySelectorAll('option')[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-            var option = _step13.value;
-            var item = new SelectOption({
-              text: option.innerText.trim(),
-              value: option.value
-            });
-            select.append(item);
-
-            if (option.selected) {
-              item.select();
-            }
-          }
-        } catch (err) {
-          _didIteratorError13 = true;
-          _iteratorError13 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion13 && _iterator13["return"] != null) {
-              _iterator13["return"]();
-            }
-          } finally {
-            if (_didIteratorError13) {
-              throw _iteratorError13;
-            }
-          }
-        }
-
-        element.replaceWith(select.element);
-        select.element.appendChild(select.widget.element);
-        return select;
-      } else {
-        return _get(_getPrototypeOf(Select2), "FromHTML", this).call(this, element);
-      }
-    }
-  }]);
-
-  return Select2;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-/**
  * @implements FormWidgetBase
  * @abstract
  */
 
-_defineProperty(Select2, "__attributes__", _objectSpread({
-  multiSelect: new core_attributes__WEBPACK_IMPORTED_MODULE_7__["default"](core_utility__WEBPACK_IMPORTED_MODULE_5__["parseBoolean"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["DROP"], core_attributes__WEBPACK_IMPORTED_MODULE_7__["TRUE"])
-}, _MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"].__attributes__));
-
 var AbstractSelect =
 /*#__PURE__*/
-function (_AbstractMenuItem3) {
-  _inherits(AbstractSelect, _AbstractMenuItem3);
+function (_AbstractMenuItem2) {
+  _inherits(AbstractSelect, _AbstractMenuItem2);
 
   function AbstractSelect() {
     _classCallCheck(this, AbstractSelect);
@@ -10151,34 +9389,34 @@ function (_AbstractMenuItem3) {
   }, {
     key: "registerTopics",
     value: function registerTopics() {
-      var _this7 = this;
+      var _this6 = this;
 
       _get(_getPrototypeOf(AbstractSelect.prototype), "registerTopics", this).call(this);
 
       this.on('menuitem.click', function (topic) {
         // Close the select if the user clicks a disabled select item.
-        if (_this7.closeOnSelect && _this7.isActive) {
+        if (_this6.closeOnSelect && _this6.isActive) {
           if (topic.target.isDisabled) {
             topic.preventDefault();
 
-            _this7.deactivate();
+            _this6.deactivate();
           }
         }
       });
       this.on('option.select', function () {
-        if (_this7.closeOnSelect && _this7.isActive) {
-          _this7.deactivate();
+        if (_this6.closeOnSelect && _this6.isActive) {
+          _this6.deactivate();
         }
       });
       this.on('option.deselect', function () {
-        if (_this7.closeOnSelect && _this7.isActive) {
-          _this7.deactivate();
+        if (_this6.closeOnSelect && _this6.isActive) {
+          _this6.deactivate();
         }
       });
       this.on('selection.change', function () {
-        _this7.refreshUI();
+        _this6.refreshUI();
 
-        _this7.submenu.position();
+        _this6.submenu.position();
       });
     }
   }, {
@@ -10187,6 +9425,10 @@ function (_AbstractMenuItem3) {
       return this.submenu.append(option);
     } //------------------------------------------------------------------------------------------------------------------
     // Properties
+
+    /**
+     * @returns {SelectOption}
+     */
 
   }, {
     key: "getName",
@@ -10248,14 +9490,15 @@ function (_AbstractMenuItem3) {
         element = document.querySelector(element);
       }
 
-      var instance = new this();
-      var _iteratorNormalCompletion14 = true;
-      var _didIteratorError14 = false;
-      var _iteratorError14 = undefined;
+      var config = this.getAttributes(element);
+      var instance = new this(config);
+      var _iteratorNormalCompletion8 = true;
+      var _didIteratorError8 = false;
+      var _iteratorError8 = undefined;
 
       try {
-        for (var _iterator14 = element.querySelectorAll('li')[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-          var child = _step14.value;
+        for (var _iterator8 = element.querySelectorAll('li')[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+          var child = _step8.value;
           var option = new SelectOption({
             text: child.innerHTML.trim(),
             value: child.dataset.value || null
@@ -10263,16 +9506,16 @@ function (_AbstractMenuItem3) {
           instance.append(option);
         }
       } catch (err) {
-        _didIteratorError14 = true;
-        _iteratorError14 = err;
+        _didIteratorError8 = true;
+        _iteratorError8 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
-            _iterator14["return"]();
+          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+            _iterator8["return"]();
           }
         } finally {
-          if (_didIteratorError14) {
-            throw _iteratorError14;
+          if (_didIteratorError8) {
+            throw _iteratorError8;
           }
         }
       }
@@ -10284,112 +9527,104 @@ function (_AbstractMenuItem3) {
 
   return AbstractSelect;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var ComboBox =
+var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["AttributeSchema"]({
+  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
+  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP)
+});
+var RichSelect =
 /*#__PURE__*/
 function (_AbstractSelect) {
-  _inherits(ComboBox, _AbstractSelect);
+  _inherits(RichSelect, _AbstractSelect);
 
-  function ComboBox() {
-    var _this8;
+  function RichSelect() {
+    var _this7;
 
-    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref6$target = _ref6.target,
-        target = _ref6$target === void 0 ? null : _ref6$target,
-        _ref6$timeout = _ref6.timeout,
-        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
-        _ref6$submenu = _ref6.submenu,
-        submenu = _ref6$submenu === void 0 ? null : _ref6$submenu,
-        _ref6$widget = _ref6.widget,
-        widget = _ref6$widget === void 0 ? null : _ref6$widget,
-        _ref6$wait = _ref6.wait,
-        wait = _ref6$wait === void 0 ? 500 : _ref6$wait,
-        _ref6$filter = _ref6.filter,
-        filter = _ref6$filter === void 0 ? FILTERS.istartsWith : _ref6$filter;
+    var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref5$target = _ref5.target,
+        target = _ref5$target === void 0 ? null : _ref5$target,
+        _ref5$timeout = _ref5.timeout,
+        timeout = _ref5$timeout === void 0 ? false : _ref5$timeout,
+        _ref5$widget = _ref5.widget,
+        widget = _ref5$widget === void 0 ? null : _ref5$widget,
+        _ref5$multiple = _ref5.multiple,
+        multiple = _ref5$multiple === void 0 ? false : _ref5$multiple,
+        _ref5$maxItems = _ref5.maxItems,
+        maxItems = _ref5$maxItems === void 0 ? 5 : _ref5$maxItems;
 
-    _classCallCheck(this, ComboBox);
+    _classCallCheck(this, RichSelect);
 
-    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this));
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this));
 
     if (target) {
-      _this8.element = target;
+      _this7.element = target;
 
-      if (_this8.element.nodeName === 'INPUT') {
-        _this8.textbox = _this8.element;
+      if (_this7.element.nodeName === 'INPUT') {
+        _this7.textbox = _this7.element;
       } else {
-        _this8.textbox = _this8.element.querySelector('[data-text]');
+        _this7.textbox = _this7.element.querySelector('[data-text]');
       }
     } else {
-      var _this8$render = _this8.render(),
-          element = _this8$render.element,
-          textbox = _this8$render.textbox;
+      var _this7$render = _this7.render(),
+          element = _this7$render.element,
+          textbox = _this7$render.textbox;
 
-      _this8.element = element;
-      _this8.textbox = textbox;
+      _this7.element = element;
+      _this7.textbox = textbox;
     }
 
-    _this8.toggle = true;
-    _this8.autoActivate = false;
-    _this8.openOnHover = false;
-    _this8.delay = false;
-    _this8.timeout = timeout; // noinspection JSUnusedGlobalSymbols
+    _this7.textbox.readOnly = true;
+    _this7.toggle = true;
+    _this7.autoActivate = false;
+    _this7.openOnHover = false;
+    _this7.delay = false;
+    _this7.timeout = timeout; // noinspection JSUnusedGlobalSymbols
 
-    _this8.closeOnBlur = true;
-    _this8.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this8.closeOnSelect = true;
-    _this8._label = ''; // noinspection JSUnusedGlobalSymbols
+    _this7.closeOnBlur = true;
+    _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
 
-    _this8.clearSubItemsOnHover = false;
-    _this8.wait = wait;
-    _this8.SubMenuClass = SelectMenu;
-    _this8.element.tabIndex = 0;
+    _this7.closeOnSelect = true;
+    _this7._label = ''; // noinspection JSUnusedGlobalSymbols
 
-    _this8.parseDOM();
+    _this7.clearSubItemsOnHover = false;
+    _this7.SubMenuClass = SelectMenu;
+    _this7.element.tabIndex = 0;
 
-    if (submenu) {
-      if (typeof submenu === 'string') {
-        submenu = document.querySelector(submenu);
-      }
+    _this7.parseDOM();
 
-      if (!submenu.isSelectMenu || !submenu.isSelectMenu()) {
-        submenu = new _this8.SubMenuClass({
-          target: submenu
-        });
+    if (!_this7.submenu) {
+      var submenu = new _this7.SubMenuClass();
 
-        _this8.attachSubMenu(submenu);
-      }
-    } else {
-      var _submenu = new _this8.SubMenuClass();
-
-      _this8.attachSubMenu(_submenu);
+      _this7.attachSubMenu(submenu);
     }
 
-    _this8.submenu.classList.add('combobox__menu');
+    _this7.submenu.classList.add('combobox__menu');
 
     if (!widget) {
-      _this8.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["HiddenInputWidget"]();
+      _this7.widget = new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
 
-      _this8.widget.appendTo(_this8.element);
+      _this7.widget.appendTo(_this7.element);
     } else {
-      _this8.widget = widget;
+      _this7.widget = widget;
     }
 
-    _this8.textbox.addEventListener('blur', function (event) {
-      if (!_this8.containsElement(event.relatedTarget)) {
-        _this8.textbox.value = _this8._label;
+    _this7.textbox.addEventListener('blur', function (event) {
+      if (!_this7.containsElement(event.relatedTarget)) {
+        _this7.textbox.value = _this7._label;
       }
     });
 
-    _this8.initKeyboardNavigation();
+    _this7.initKeyboardNavigation();
 
-    _this8.registerTopics();
+    _this7.registerTopics();
 
-    _this8.init();
+    _this7.init();
 
-    _this8.filter = filter;
-    return _this8;
+    _this7.multiple = multiple;
+    _this7.maxItems = maxItems;
+    return _this7;
   }
 
-  _createClass(ComboBox, [{
+  _createClass(RichSelect, [{
     key: "render",
     value: function render(context) {
       var element = "\n        <div class=\"combobox\">\n            <input type=\"text\" class=\"combobox__input\" data-text />\n            <span class=\"combobox__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
@@ -10406,29 +9641,40 @@ function (_AbstractSelect) {
           labels = options.map(function (item) {
         return item.text;
       });
-      this.value = options.length ? options[0].value || options[0].text || '' : '';
-      this._label = labels.join(", ");
-      this.textbox.value = this._label;
-    }
-  }, {
-    key: "destroy",
-    value: function destroy() {
-      _get(_getPrototypeOf(ComboBox.prototype), "destroy", this).call(this);
-    } //------------------------------------------------------------------------------------------------------------------
-    // Private methods
+      var values = [];
+      var _iteratorNormalCompletion9 = true;
+      var _didIteratorError9 = false;
+      var _iteratorError9 = undefined;
 
-  }, {
-    key: "_rootKeyDown",
-    value: function _rootKeyDown(topic) {
-      if (this.isRoot) {
-        var key = topic.originalEvent.key;
-
-        if (this.hasFilter && (key === 'ArrowLeft' || key === 'ArrowRight')) {
-          return;
+      try {
+        for (var _iterator9 = options[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+          var option = _step9.value;
+          values.push(option.value || option.text || '');
         }
-
-        return _get(_getPrototypeOf(ComboBox.prototype), "_rootKeyDown", this).call(this, topic);
+      } catch (err) {
+        _didIteratorError9 = true;
+        _iteratorError9 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+            _iterator9["return"]();
+          }
+        } finally {
+          if (_didIteratorError9) {
+            throw _iteratorError9;
+          }
+        }
       }
+
+      this.value = values;
+
+      if (labels.length <= this.maxItems) {
+        this._label = labels.join(", ");
+      } else {
+        this._label = "".concat(labels.length, " Items Selected");
+      }
+
+      this.textbox.value = this._label;
     } //------------------------------------------------------------------------------------------------------------------
     // Properties
 
@@ -10446,136 +9692,40 @@ function (_AbstractSelect) {
       this.textbox.placeholder = value;
     }
   }, {
-    key: "filter",
-    set: function set(method) {
-      var _this9 = this;
-
-      if (this._destroyFilter) {
-        this._destroyFilter();
-
-        this._destroyFilter = null;
-      }
-
-      if (!method) return;
-      this._filterMethod = method;
-      var _timer = null;
-
-      var applyFilter = function applyFilter() {
-        _timer = null;
-
-        _this9.submenu.filter(_this9._filterMethod(_this9.textbox.value)); // Flag if we found a select item.
-
-
-        var f = false; // Activate the selected items.
-
-        if (!_this9.multiSelect) {
-          var _iteratorNormalCompletion15 = true;
-          var _didIteratorError15 = false;
-          var _iteratorError15 = undefined;
-
-          try {
-            for (var _iterator15 = _this9.submenu.options[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
-              var option = _step15.value;
-
-              if (!option.isDisabled && !option.isFiltered && option.isSelected) {
-                option.activate();
-                f = true;
-                break;
-              }
-            }
-          } catch (err) {
-            _didIteratorError15 = true;
-            _iteratorError15 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion15 && _iterator15["return"] != null) {
-                _iterator15["return"]();
-              }
-            } finally {
-              if (_didIteratorError15) {
-                throw _iteratorError15;
-              }
-            }
-          }
-        }
-
-        if (!f) {
-          var _iteratorNormalCompletion16 = true;
-          var _didIteratorError16 = false;
-          var _iteratorError16 = undefined;
-
-          try {
-            for (var _iterator16 = _this9.submenu.options[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
-              var _option = _step16.value;
-
-              if (!_option.isDisabled && !_option.isFiltered) {
-                _option.activate();
-
-                break;
-              }
-            }
-          } catch (err) {
-            _didIteratorError16 = true;
-            _iteratorError16 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion16 && _iterator16["return"] != null) {
-                _iterator16["return"]();
-              }
-            } finally {
-              if (_didIteratorError16) {
-                throw _iteratorError16;
-              }
-            }
-          }
-        }
-      };
-
-      var onInput = function onInput() {
-        if (_timer) {
-          clearTimeout(_timer);
-          _timer = null;
-        }
-
-        if (_this9.wait === false || _this9.wait < 0) {
-          applyFilter();
-        } else {
-          _timer = setTimeout(applyFilter, _this9.wait);
-        }
-      };
-
-      var onKeyDown = function onKeyDown(event) {
-        // Apply the filter immediately on enter.
-        if (event.key === "Enter" && _timer) {
-          clearTimeout(_timer);
-          _timer = null;
-          applyFilter();
-        }
-      };
-
-      this.textbox.addEventListener('input', onInput);
-      this.textbox.addEventListener('keydown', onKeyDown); // Create method to destroy event listener.
-
-      this._destroyFilter = function () {
-        _this9.textbox.removeEventListener('input', onInput);
-
-        _this9.textbox.removeEventListener('keydown', onKeyDown);
-
-        _this9.textbox.readOnly = true;
-        _this9._destroyFilter = null;
-      };
-    },
+    key: "multiple",
     get: function get() {
-      return !!this._filterMethod;
+      return this.submenu.multiSelect;
+    },
+    set: function set(value) {
+      value = !!value;
+
+      if (value) {
+        this.submenu.multiSelect = true;
+        this.submenu.toggle = true;
+        this.closeOnSelect = false;
+      } else {
+        this.submenu.multiSelect = false;
+        this.submenu.toggle = false;
+        this.closeOnSelect = true;
+      }
     }
   }, {
-    key: "hasFilter",
+    key: "maxItems",
     get: function get() {
-      return !!this._destroyFilter;
+      return this._maxItems;
+    },
+    set: function set(value) {
+      this._maxItems = value;
+      this.refreshUI();
+    }
+  }], [{
+    key: "getAttributes",
+    value: function getAttributes(element) {
+      return _objectSpread({}, _get(_getPrototypeOf(RichSelect), "getAttributes", this).call(this, element), {}, RICH_SELECT_SCHEMA.deserialize(element.dataset));
     }
   }]);
 
-  return ComboBox;
+  return RichSelect;
 }(AbstractSelect);
 var MultiComboBox =
 /*#__PURE__*/
@@ -10583,205 +9733,129 @@ function (_AbstractSelect2) {
   _inherits(MultiComboBox, _AbstractSelect2);
 
   function MultiComboBox() {
-    var _this10;
+    var _this8;
 
-    var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref7$target = _ref7.target,
-        target = _ref7$target === void 0 ? null : _ref7$target,
-        _ref7$timeout = _ref7.timeout,
-        timeout = _ref7$timeout === void 0 ? false : _ref7$timeout,
-        _ref7$widget = _ref7.widget,
-        widget = _ref7$widget === void 0 ? null : _ref7$widget,
-        _ref7$filter = _ref7.filter,
-        filter = _ref7$filter === void 0 ? FILTERS.istartsWith : _ref7$filter,
-        _ref7$wait = _ref7.wait,
-        wait = _ref7$wait === void 0 ? 500 : _ref7$wait;
+    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref6$target = _ref6.target,
+        target = _ref6$target === void 0 ? null : _ref6$target,
+        _ref6$timeout = _ref6.timeout,
+        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
+        _ref6$widget = _ref6.widget,
+        widget = _ref6$widget === void 0 ? null : _ref6$widget,
+        _ref6$filter = _ref6.filter,
+        filter = _ref6$filter === void 0 ? FILTERS.istartsWith : _ref6$filter,
+        _ref6$wait = _ref6.wait,
+        wait = _ref6$wait === void 0 ? 500 : _ref6$wait;
 
     _classCallCheck(this, MultiComboBox);
 
-    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this));
-    _this10.optionToPillMap = new WeakMap();
-    _this10.pilltoOptionMap = new WeakMap();
+    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this));
+    _this8.optionToPillMap = new WeakMap();
+    _this8.pilltoOptionMap = new WeakMap();
 
     if (target) {
-      _this10.element = target;
-      _this10.textbox = _this10.element.querySelector('[data-text]');
-      _this10.body = _this10.element.querySelector('.multi-combo-box__body');
+      _this8.element = target;
+      _this8.textbox = _this8.element.querySelector('[data-text]');
+      _this8.body = _this8.element.querySelector('.multi-combo-box__body');
     } else {
-      var _this10$render = _this10.render(),
-          element = _this10$render.element,
-          textbox = _this10$render.textbox,
-          body = _this10$render.body;
+      var _this8$render = _this8.render(),
+          element = _this8$render.element,
+          textbox = _this8$render.textbox,
+          body = _this8$render.body;
 
-      _this10.element = element;
-      _this10.textbox = textbox;
-      _this10.body = body;
+      _this8.element = element;
+      _this8.textbox = textbox;
+      _this8.body = body;
     }
 
-    _this10.toggle = true;
-    _this10.autoActivate = false;
-    _this10.openOnHover = false;
-    _this10.delay = false;
-    _this10.timeout = timeout;
-    _this10.closeOnBlur = true;
-    _this10.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this10.closeOnSelect = false;
-    _this10.multiSelect = true;
-    _this10.clearSubItemsOnHover = false;
-    _this10.SubMenuClass = SelectMenu;
+    _this8.toggle = true;
+    _this8.autoActivate = false;
+    _this8.openOnHover = false;
+    _this8.delay = false;
+    _this8.timeout = timeout; // noinspection JSUnusedGlobalSymbols
 
-    _this10.parseDOM();
+    _this8.closeOnBlur = true;
+    _this8.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
 
-    if (!_this10.submenu) {
-      _this10.submenu = new _this10.SubMenuClass();
+    _this8.closeOnSelect = false;
+    _this8.multiSelect = true; // noinspection JSUnusedGlobalSymbols
 
-      _this10.attachSubMenu(_this10.submenu);
+    _this8.clearSubItemsOnHover = false;
+    _this8.SubMenuClass = SelectMenu;
+
+    _this8.parseDOM();
+
+    if (!_this8.submenu) {
+      _this8.submenu = new _this8.SubMenuClass();
+
+      _this8.attachSubMenu(_this8.submenu);
     }
 
-    _this10.submenu.multiSelect = true;
-    _this10.submenu.toggle = true;
-    _this10.submenu.enableShiftSelect = true;
+    _this8.submenu.multiSelect = true;
+    _this8.submenu.toggle = true;
+    _this8.submenu.enableShiftSelect = true;
 
     if (!widget) {
-      _this10.widget = new _forms___WEBPACK_IMPORTED_MODULE_8__["MultiHiddenInputWidget"]();
+      _this8.widget = new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
 
-      _this10.widget.appendTo(_this10.element);
+      _this8.widget.appendTo(_this8.element);
     } else {
-      _this10.widget = widget;
+      _this8.widget = widget;
 
-      if (!_this10.widget.element.parentElement) {
-        _this10.widget.appendTo(_this10.element);
+      if (!_this8.widget.element.parentElement) {
+        _this8.widget.appendTo(_this8.element);
       }
     }
 
-    _this10.initKeyboardNavigation();
+    _this8.initKeyboardNavigation();
 
-    _this10.registerTopics();
+    _this8.registerTopics();
 
-    _this10.init();
+    _this8.init();
 
-    var _timer = null;
+    _this8._filterTimer = null;
 
-    var applyFilter = function applyFilter() {
-      _timer = null;
+    _this8._applyFilter = function () {
+      _this8._filterTimer = null;
 
-      _this10.submenu.filter(filter(_this10.textbox.value));
+      _this8.submenu.filter(filter(_this8.textbox.value));
 
-      if (_this10.submenu.activeItem) _this10.submenu.activeItem.deactivate();
+      if (_this8.submenu.activeItem) _this8.submenu.activeItem.deactivate();
     };
 
-    _this10.textbox.addEventListener('keydown', function (event) {
-      if (!_this10.isActive) {
-        _this10.activate();
-
-        return;
-      }
-
-      if (event.key === "Backspace" && _this10.textbox.value === "") {
-        var pills = _this10.body.querySelectorAll('.multi-combo-box__pill'),
-            pill = pills[pills.length - 1],
-            option = pill ? _this10.pilltoOptionMap.get(pill) : null;
-
-        if (option) {
-          option.deselect();
-        }
-      } else if (event.key === 'Enter') {
-        if (_timer) {
-          clearTimeout(_timer);
-          _timer = null;
-          applyFilter();
-        } else {
-          var activeItem = null,
-              firstItem = null; // Find both the first none filtered item and the active item.
-
-          var _iteratorNormalCompletion17 = true;
-          var _didIteratorError17 = false;
-          var _iteratorError17 = undefined;
-
-          try {
-            for (var _iterator17 = _this10.options[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
-              var _option2 = _step17.value;
-
-              if (!_option2.isFiltered && firstItem === null) {
-                firstItem = _option2;
-              }
-
-              if (!_option2.isFiltered && _option2.isActive) {
-                activeItem = _option2;
-              }
-            }
-          } catch (err) {
-            _didIteratorError17 = true;
-            _iteratorError17 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion17 && _iterator17["return"] != null) {
-                _iterator17["return"]();
-              }
-            } finally {
-              if (_didIteratorError17) {
-                throw _iteratorError17;
-              }
-            }
-          }
-
-          if (!activeItem) {
-            _this10.textbox.value = "";
-
-            _this10.submenu.clearFilter();
-
-            _this10.submenu.position();
-
-            if (firstItem && !firstItem.isSelected) {
-              firstItem.select();
-            }
-
-            firstItem.deactivate();
-          } else {
-            if (activeItem.isSelected) {
-              activeItem.deselect();
-              activeItem.activate();
-            } else {
-              activeItem.select();
-            }
-          }
-        }
-      }
-    });
-
-    _this10.textbox.addEventListener('input', function () {
-      if (_timer) {
-        clearTimeout(_timer);
-        _timer = null;
+    _this8.textbox.addEventListener('input', function () {
+      if (_this8._filterTimer) {
+        clearTimeout(_this8._filterTimer);
+        _this8._filterTimer = null;
       }
 
       if (wait === false || wait < 0) {
-        applyFilter();
+        _this8._applyFilter();
       } else {
-        _timer = setTimeout(applyFilter, wait);
+        _this8._filterTimer = setTimeout(_this8._applyFilter, wait);
       }
     });
 
-    return _this10;
+    return _this8;
   }
 
   _createClass(MultiComboBox, [{
     key: "registerTopics",
     value: function registerTopics() {
-      var _this11 = this;
+      var _this9 = this;
 
       _get(_getPrototypeOf(MultiComboBox.prototype), "registerTopics", this).call(this);
 
       this.on('event.click', function (topic) {
         var exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
             pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
-            option = pill ? _this11.pilltoOptionMap.get(pill) : null;
+            option = pill ? _this9.pilltoOptionMap.get(pill) : null;
 
         if (option) {
-          option.deselect();
+          option.optionDeselect();
         }
 
-        _this11.textbox.focus();
+        _this9.textbox.focus();
       });
     }
   }, {
@@ -10811,17 +9885,91 @@ function (_AbstractSelect2) {
       return pill;
     }
   }, {
-    key: "_rootKeyDown",
-    value: function _rootKeyDown(topic) {
-      var event = topic.originalEvent,
-          key = event.key;
+    key: "onKeyDown",
+    value: function onKeyDown(topic) {
+      if (!this._keyboardNavigationEnabled || !this.isRoot) {
+        return;
+      }
 
-      if (this.isRoot) {
-        if (key === 'ArrowLeft' || key === 'ArrowRight' || key === "Enter") {
-          return;
+      var event = topic.originalEvent;
+
+      if (!this.isActive) {
+        this.activate();
+        return;
+      }
+
+      if (event.key === "Backspace" && this.textbox.value === "") {
+        var pills = this.body.querySelectorAll('.multi-combo-box__pill'),
+            pill = pills[pills.length - 1],
+            option = pill ? this.pilltoOptionMap.get(pill) : null;
+
+        if (option) {
+          option.optionDeselect();
         }
+      } else if (event.key === 'Enter') {
+        if (this._filterTimer) {
+          clearTimeout(this._filterTimer);
+          this._filterTimer = null;
 
-        return _get(_getPrototypeOf(MultiComboBox.prototype), "_rootKeyDown", this).call(this, topic);
+          this._applyFilter();
+        } else {
+          /**
+           * @type {null|SelectOption}
+           */
+          var activeItem = null,
+
+          /**
+           * @type {null|SelectOption}
+           */
+          firstItem = null; // Find both the first none filtered item and the active item.
+
+          var _iteratorNormalCompletion10 = true;
+          var _didIteratorError10 = false;
+          var _iteratorError10 = undefined;
+
+          try {
+            for (var _iterator10 = this.options[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+              var _option = _step10.value;
+
+              if (!_option.isFiltered && firstItem === null) {
+                firstItem = _option;
+              }
+
+              if (!_option.isFiltered && _option.isActive) {
+                activeItem = _option;
+              }
+            }
+          } catch (err) {
+            _didIteratorError10 = true;
+            _iteratorError10 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
+                _iterator10["return"]();
+              }
+            } finally {
+              if (_didIteratorError10) {
+                throw _iteratorError10;
+              }
+            }
+          }
+
+          if (!activeItem) {
+            this.textbox.value = "";
+            this.submenu.clearFilter();
+            this.submenu.position();
+
+            if (firstItem && !firstItem.isSelected) {
+              firstItem.select();
+            }
+
+            firstItem.deactivate();
+          } else {
+            activeItem.select();
+          }
+        }
+      } else if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return _get(_getPrototypeOf(MultiComboBox.prototype), "onKeyDown", this).call(this, topic);
       }
     }
   }, {
@@ -10830,13 +9978,13 @@ function (_AbstractSelect2) {
       var fragment = document.createDocumentFragment(),
           _new = false,
           values = [];
-      var _iteratorNormalCompletion18 = true;
-      var _didIteratorError18 = false;
-      var _iteratorError18 = undefined;
+      var _iteratorNormalCompletion11 = true;
+      var _didIteratorError11 = false;
+      var _iteratorError11 = undefined;
 
       try {
-        for (var _iterator18 = this.options[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
-          var option = _step18.value;
+        for (var _iterator11 = this.options[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+          var option = _step11.value;
           var pill = this.optionToPillMap.get(option);
 
           if (option.isSelected) {
@@ -10856,16 +10004,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError18 = true;
-        _iteratorError18 = err;
+        _didIteratorError11 = true;
+        _iteratorError11 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion18 && _iterator18["return"] != null) {
-            _iterator18["return"]();
+          if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
+            _iterator11["return"]();
           }
         } finally {
-          if (_didIteratorError18) {
-            throw _iteratorError18;
+          if (_didIteratorError11) {
+            throw _iteratorError11;
           }
         }
       }
@@ -10884,13 +10032,13 @@ function (_AbstractSelect2) {
     key: "setValue",
     value: function setValue(values) {
       var changed = false;
-      var _iteratorNormalCompletion19 = true;
-      var _didIteratorError19 = false;
-      var _iteratorError19 = undefined;
+      var _iteratorNormalCompletion12 = true;
+      var _didIteratorError12 = false;
+      var _iteratorError12 = undefined;
 
       try {
-        for (var _iterator19 = this.options[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
-          var option = _step19.value;
+        for (var _iterator12 = this.options[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+          var option = _step12.value;
           var index = values.indexOf(option.value);
 
           if (index !== -1) {
@@ -10908,69 +10056,218 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError19 = true;
-        _iteratorError19 = err;
+        _didIteratorError12 = true;
+        _iteratorError12 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion19 && _iterator19["return"] != null) {
-            _iterator19["return"]();
+          if (!_iteratorNormalCompletion12 && _iterator12["return"] != null) {
+            _iterator12["return"]();
           }
         } finally {
-          if (_didIteratorError19) {
-            throw _iteratorError19;
+          if (_didIteratorError12) {
+            throw _iteratorError12;
           }
         }
       }
 
-      this._renderLabel();
+      this.refreshUI();
     }
   }]);
 
   return MultiComboBox;
 }(AbstractSelect);
-var RichSelect =
+var ComboBox =
 /*#__PURE__*/
-function (_AbstractSelect3) {
-  _inherits(RichSelect, _AbstractSelect3);
+function (_RichSelect) {
+  _inherits(ComboBox, _RichSelect);
 
-  function RichSelect(_ref8) {
-    var _this12;
+  function ComboBox() {
+    var _this10;
 
-    var _ref8$target = _ref8.target,
-        target = _ref8$target === void 0 ? null : _ref8$target,
-        _ref8$multiple = _ref8.multiple,
-        multiple = _ref8$multiple === void 0 ? false : _ref8$multiple;
+    var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref7$target = _ref7.target,
+        target = _ref7$target === void 0 ? null : _ref7$target,
+        _ref7$timeout = _ref7.timeout,
+        timeout = _ref7$timeout === void 0 ? false : _ref7$timeout,
+        _ref7$submenu = _ref7.submenu,
+        submenu = _ref7$submenu === void 0 ? null : _ref7$submenu,
+        _ref7$widget = _ref7.widget,
+        widget = _ref7$widget === void 0 ? null : _ref7$widget,
+        _ref7$wait = _ref7.wait,
+        wait = _ref7$wait === void 0 ? 500 : _ref7$wait,
+        _ref7$filter = _ref7.filter,
+        filter = _ref7$filter === void 0 ? FILTERS.istartsWith : _ref7$filter;
 
-    _classCallCheck(this, RichSelect);
+    _classCallCheck(this, ComboBox);
 
-    _this12 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this));
+    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this, {
+      target: target,
+      timeout: timeout,
+      submenu: submenu,
+      widget: widget,
+      multiple: false,
+      filter: null
+    }));
+    _this10.wait = wait;
+    _this10.filter = filter;
+    return _this10;
+  } //------------------------------------------------------------------------------------------------------------------
+  // Private methods
 
-    if (target) {
-      _this12.element = target;
 
-      if (_this12.element.nodeName === "INPUT") {
-        _this12.textbox = _this12.element;
+  _createClass(ComboBox, [{
+    key: "_rootKeyDown",
+    value: function _rootKeyDown(topic) {
+      if (this.isRoot) {
+        var key = topic.originalEvent.key;
+
+        if (this.hasFilter && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+          return;
+        }
+
+        return _get(_getPrototypeOf(ComboBox.prototype), "_rootKeyDown", this).call(this, topic);
       }
     }
-
-    return _this12;
-  }
-
-  _createClass(RichSelect, [{
-    key: "render",
-    value: function render() {}
   }, {
-    key: "refreshUI",
-    value: function refreshUI() {}
-  }, {
-    key: "setValue",
-    value: function setValue(value) {} //------------------------------------------------------------------------------------------------------------------
-    // Properties
+    key: "filter",
+    set: function set(method) {
+      var _this11 = this;
 
+      if (this._destroyFilter) {
+        this._destroyFilter();
+
+        this._destroyFilter = null;
+      }
+
+      if (!method) return;
+      this._filterMethod = method;
+      var _timer = null;
+
+      var applyFilter = function applyFilter() {
+        _timer = null;
+
+        _this11.submenu.filter(_this11._filterMethod(_this11.textbox.value)); // Flag if we found a select item.
+
+
+        var f = false; // Activate the selected items.
+
+        if (!_this11.multiSelect) {
+          var _iteratorNormalCompletion13 = true;
+          var _didIteratorError13 = false;
+          var _iteratorError13 = undefined;
+
+          try {
+            for (var _iterator13 = _this11.submenu.options[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+              var option = _step13.value;
+
+              if (!option.isDisabled && !option.isFiltered && option.isSelected) {
+                option.activate();
+                f = true;
+                break;
+              }
+            }
+          } catch (err) {
+            _didIteratorError13 = true;
+            _iteratorError13 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion13 && _iterator13["return"] != null) {
+                _iterator13["return"]();
+              }
+            } finally {
+              if (_didIteratorError13) {
+                throw _iteratorError13;
+              }
+            }
+          }
+        }
+
+        if (!f) {
+          var _iteratorNormalCompletion14 = true;
+          var _didIteratorError14 = false;
+          var _iteratorError14 = undefined;
+
+          try {
+            for (var _iterator14 = _this11.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+              var _option2 = _step14.value;
+
+              if (!_option2.isDisabled && !_option2.isFiltered) {
+                _option2.activate();
+
+                break;
+              }
+            }
+          } catch (err) {
+            _didIteratorError14 = true;
+            _iteratorError14 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+                _iterator14["return"]();
+              }
+            } finally {
+              if (_didIteratorError14) {
+                throw _iteratorError14;
+              }
+            }
+          }
+        }
+      };
+
+      var onInput = function onInput() {
+        if (_timer) {
+          clearTimeout(_timer);
+          _timer = null;
+        }
+
+        if (_this11.wait === false || _this11.wait < 0) {
+          applyFilter();
+        } else {
+          _timer = setTimeout(applyFilter, _this11.wait);
+        }
+      };
+
+      var onKeyDown = function onKeyDown(event) {
+        // Apply the filter immediately on enter.
+        if (event.key === "Enter" && _timer) {
+          clearTimeout(_timer);
+          _timer = null;
+          applyFilter();
+        }
+      };
+
+      this.textbox.addEventListener('input', onInput);
+      this.textbox.addEventListener('keydown', onKeyDown);
+      this.textbox.readOnly = false; // Create method to destroy event listener.
+
+      this._destroyFilter = function () {
+        _this11.textbox.removeEventListener('input', onInput);
+
+        _this11.textbox.removeEventListener('keydown', onKeyDown);
+
+        _this11.textbox.readOnly = true;
+        _this11._destroyFilter = null;
+      };
+    },
+    get: function get() {
+      return !!this._filterMethod;
+    }
+  }, {
+    key: "hasFilter",
+    get: function get() {
+      return !!this._destroyFilter;
+    }
+  }], [{
+    key: "getAttributes",
+    value: function getAttributes(element) {
+      return _objectSpread({}, _get(_getPrototypeOf(ComboBox), "getAttributes", this).call(this, element), {
+        multiple: false
+      });
+    }
   }]);
 
-  return RichSelect;
-}(AbstractSelect);
+  return ComboBox;
+}(RichSelect);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
   return RichSelect.FromHTML(element);
 });
@@ -11090,7 +10387,7 @@ function publishTargetEvent(topic) {
 /*!***************************!*\
   !*** ./src/menu/index.js ***!
   \***************************/
-/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, Select2, SelectMenu */
+/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11111,8 +10408,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MenuNode", function() { return _MenuNode__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
 /* harmony import */ var _Select2__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Select2 */ "./src/menu/Select2.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Select2", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["Select2"]; });
-
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
 
 
@@ -11427,317 +10722,6 @@ function getClosestMenuByElement(element) {
 
   return null;
 }
-
-/***/ }),
-
-/***/ "./src/ui/ItemFilter.js":
-/*!******************************!*\
-  !*** ./src/ui/ItemFilter.js ***!
-  \******************************/
-/*! exports provided: innerTextCompare, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "innerTextCompare", function() { return innerTextCompare; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ItemFilter; });
-/* harmony import */ var _core_Publisher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/Publisher */ "./src/core/Publisher.js");
-/* harmony import */ var _core_utility_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/utility.js */ "./src/core/utility.js");
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-
-
-/**
- * Compares if the item innerText matches the value with case insensitive matching.
- * @param item
- * @param value
- * @returns {boolean}
- */
-
-function innerTextCompare(item, value) {
-  value = value.trim().toLowerCase(); // If value is empty clear the filter.
-
-  if (!value) {
-    return true;
-  }
-
-  return item.innerText.toLowerCase().indexOf(value) !== -1;
-}
-/**
- * A component that filters items in a container by an the input value of the text field.
- */
-
-var ItemFilter =
-/*#__PURE__*/
-function (_Publisher) {
-  _inherits(ItemFilter, _Publisher);
-
-  function ItemFilter() {
-    var _this;
-
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        element = _ref.element,
-        target = _ref.target,
-        _ref$items = _ref.items,
-        items = _ref$items === void 0 ? ".filter-item" : _ref$items,
-        _ref$compareFunction = _ref.compareFunction,
-        compareFunction = _ref$compareFunction === void 0 ? innerTextCompare : _ref$compareFunction,
-        _ref$onHide = _ref.onHide,
-        onHide = _ref$onHide === void 0 ? "hidden" : _ref$onHide,
-        _ref$onShow = _ref.onShow,
-        onShow = _ref$onShow === void 0 ? null : _ref$onShow,
-        _ref$delay = _ref.delay,
-        delay = _ref$delay === void 0 ? 500 : _ref$delay,
-        _ref$placeholder = _ref.placeholder,
-        placeholder = _ref$placeholder === void 0 ? "" : _ref$placeholder,
-        _ref$tabindex = _ref.tabindex,
-        tabindex = _ref$tabindex === void 0 ? 0 : _ref$tabindex;
-
-    _classCallCheck(this, ItemFilter);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ItemFilter).call(this));
-
-    if (element) {
-      _this.element = Object(_core_utility_js__WEBPACK_IMPORTED_MODULE_1__["selectElement"])(element);
-      _this.input = _this.element.querySelector('input[type="text"], [data-filter-input]');
-    } else {
-      _this.element = document.createElement('div');
-      _this.input = document.createElement("input");
-      _this.input.placeholder = placeholder;
-
-      _this.element.appendChild(_this.input);
-
-      _this.input.classList.add("item-filter__input");
-
-      _this.input.tabIndex = tabindex;
-    }
-
-    _this.target = target;
-    _this.items = items;
-    _this.compareFunction = compareFunction;
-    _this.onHide = onHide;
-    _this.onShow = onShow;
-    _this.delay = delay;
-
-    _this.element.classList.add("item-filter");
-
-    var timer;
-
-    _this.element.addEventListener('input', function (event) {
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
-      }
-
-      setTimeout(function () {
-        var value = _this.input.value,
-            allItemsHidden = true;
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = _this.getFilterItems()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var item = _step.value;
-
-            if (_this.compareFunction(item, value)) {
-              _this._showItem(item);
-
-              allItemsHidden = false;
-            } else {
-              _this._hideItem(item);
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        _this.publish('filter-change', {
-          filter: _assertThisInitialized(_this),
-          allItemsFiltered: allItemsHidden
-        });
-      }, _this.delay);
-    });
-
-    return _this;
-  }
-  /**
-   * Shows the item.
-   * @param item
-   * @private
-   */
-
-
-  _createClass(ItemFilter, [{
-    key: "_showItem",
-    value: function _showItem(item) {
-      if (typeof this.onHide === 'string') {
-        Object(_core_utility_js__WEBPACK_IMPORTED_MODULE_1__["removeClasses"])(item, this.onHide);
-      }
-
-      if (this.onShow) {
-        if (typeof this.onShow === 'function') {
-          this.onShow(item);
-        } else if (typeof this.onShow === 'string') {
-          Object(_core_utility_js__WEBPACK_IMPORTED_MODULE_1__["addClasses"])(item, this.onShow);
-        }
-      }
-    }
-    /**
-     * Hides the item.
-     * @param item
-     * @private
-     */
-
-  }, {
-    key: "_hideItem",
-    value: function _hideItem(item) {
-      if (typeof this.onShow === 'string') {
-        Object(_core_utility_js__WEBPACK_IMPORTED_MODULE_1__["removeClasses"])(item, this.onShow);
-      }
-
-      if (this.onHide) {
-        if (typeof this.onHide === 'function') {
-          this.onHide(item);
-        } else if (typeof this.onHide === 'string') {
-          Object(_core_utility_js__WEBPACK_IMPORTED_MODULE_1__["addClasses"])(item, this.onHide);
-        }
-      }
-    }
-    /**
-     * Returns a list of the filterable items.
-     * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]>}
-     */
-
-  }, {
-    key: "getFilterItems",
-    value: function getFilterItems() {
-      var target, items;
-
-      if (typeof this.target === 'function') {
-        target = this.target();
-      } else if (typeof this.target === 'string') {
-        target = document.querySelector(this.target);
-      } else {
-        target = this.target;
-      }
-
-      if (typeof this.items === 'function') {
-        items = this.items(target);
-      } else {
-        items = target.querySelectorAll(this.items);
-      }
-
-      return items;
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      this.input.value = "";
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.getFilterItems()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var item = _step2.value;
-
-          this._showItem(item);
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-            _iterator2["return"]();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-
-      this.publish('filter-change', {
-        filter: this,
-        allItemsFiltered: false
-      });
-    }
-    /**
-     * Appends the widget to the element.
-     * @param element
-     */
-
-  }, {
-    key: "appendTo",
-    value: function appendTo(element) {
-      if (typeof element === 'string') {
-        document.querySelector(element).appendChild(this.element);
-      } else if (element.appendChild) {
-        element.appendChild(this.element);
-      } else if (element.append) {
-        element.append(this.element);
-      }
-    }
-    /**
-     * Removes the widget from the dom.
-     * @returns {Element|Document|DocumentFragment|HTMLDivElement}
-     */
-
-  }, {
-    key: "remove",
-    value: function remove() {
-      return this.element.parentElement.removeChild(this.element);
-    }
-  }, {
-    key: "focus",
-    value: function focus() {
-      this.input.focus();
-    }
-  }, {
-    key: "blur",
-    value: function blur() {
-      this.input.blur();
-    }
-  }, {
-    key: "isFocused",
-    value: function isFocused() {
-      return document.activeElement === this.input;
-    }
-  }]);
-
-  return ItemFilter;
-}(_core_Publisher__WEBPACK_IMPORTED_MODULE_0__["default"]);
-
-
 
 /***/ }),
 
