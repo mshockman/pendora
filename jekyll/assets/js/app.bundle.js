@@ -7950,7 +7950,6 @@ function (_Publisher) {
     key: "_rootKeyDown",
     value: function _rootKeyDown(topic) {
       if (this.isRoot) {
-        console.log("HERE ROOT NAV");
         var event = topic.originalEvent;
 
         if (event.key === "Escape") {
@@ -9968,7 +9967,7 @@ function (_AbstractSelect2) {
             activeItem.select();
           }
         }
-      } else if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
         return _get(_getPrototypeOf(MultiComboBox.prototype), "onKeyDown", this).call(this, topic);
       }
     }

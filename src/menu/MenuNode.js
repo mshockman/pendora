@@ -864,7 +864,6 @@ export default class MenuNode extends Publisher {
 
     _rootKeyDown(topic) {
         if(this.isRoot) {
-            console.log("HERE ROOT NAV");
             let event = topic.originalEvent;
 
             if(event.key === "Escape") {

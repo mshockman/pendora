@@ -1049,7 +1049,7 @@ export class MultiComboBox extends AbstractSelect {
                     activeItem.select();
                 }
             }
-        } else if(event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        } else if(event.key === "ArrowUp" || event.key === "ArrowDown") {
             return super.onKeyDown(topic);
         }
     }
