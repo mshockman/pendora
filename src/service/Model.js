@@ -175,7 +175,7 @@ export class Model {
 
     /**
      * Static method that returns the primary key field.
-     * @returns {{pk}|any}
+     * @returns {{pk}|*}
      */
     static getPrimaryKeyField() {
         for(let field of Object.values(this.c)) {

@@ -51,7 +51,7 @@ export function getMenuInstance(element) {
 /**
  * Finds the closest menu node controller for the element in the DOM tree.
  * @param element
- * @returns {null|any}
+ * @returns {null|*}
  */
 export function getClosestMenuNodeByElement(element) {
     while(element) {

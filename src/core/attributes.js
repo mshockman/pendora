@@ -9,6 +9,7 @@ export const TRUE = {};
 
 /**
  * Used to help deserialize attributes on an element.
+ * @deprecated
  */
 export default class Attribute {
     static DROP = DROP;

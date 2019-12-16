@@ -1,27 +1,26 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 import {modulo} from "core/utility";
-import {parseBoolean, parseIntValue, parseAny, parseHTML} from "core/utility";
+import {parseHTML} from "core/utility";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
-import Attribute, {DROP, TRUE} from "core/attributes";
+import {Attribute, AttributeSchema, Integer, Bool, CompoundType} from "../core/serialize";
 
 
-const parseBooleanOrInt = (value) => parseAny(value, parseBoolean, parseIntValue),
-    timeAttribute = new Attribute(parseBooleanOrInt, DROP, TRUE),
-    boolAttribute = new Attribute(parseBoolean, DROP, TRUE);
+const INT_OR_BOOL_TYPE = new Attribute(new CompoundType(Bool, Integer), Attribute.DROP, Attribute.DROP),
+    BOOL_TYPE = new Attribute(Bool, Attribute.DROP, Attribute.DROP);
 
 
-export const MENU_PARAMETERS = {
-    closeOnBlur: timeAttribute,
-    timeout: timeAttribute,
-    autoActivate: timeAttribute,
-    openOnHover: timeAttribute,
-    closeOnSelect: boolAttribute,
-    delay: timeAttribute,
-    toggle: boolAttribute,
-    visible: boolAttribute
-};
+export const MENU_ATTRIBUTE_SCHEMA = new AttributeSchema({
+    closeOnBlur: INT_OR_BOOL_TYPE,
+    timeout: INT_OR_BOOL_TYPE,
+    autoActivate: INT_OR_BOOL_TYPE,
+    openOnHover: INT_OR_BOOL_TYPE,
+    closeOnSelect: INT_OR_BOOL_TYPE,
+    delay: INT_OR_BOOL_TYPE,
+    toggle: BOOL_TYPE,
+    visible: BOOL_TYPE
+});
 
 
 function _isNavigableChild(item) {
@@ -43,10 +42,6 @@ function _findAllNavigableChildren(children) {
  * @abstract
  */
 export class AbstractMenu extends MenuNode {
-    // Used to parse attributes on elements to their correct type during initializing by
-    // parsing the DOM tree.
-    static __attributes__ = MENU_PARAMETERS;
-
     @inherit positioner;
 
     constructor({
@@ -620,6 +615,13 @@ export class AbstractMenu extends MenuNode {
         }
 
         return false;
+    }
+
+    static getAttributes(element) {
+        return {
+            ...super.getAttributes(element),
+            ...MENU_ATTRIBUTE_SCHEMA.deserialize(element.dataset)
+        };
     }
 }
 

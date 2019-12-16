@@ -1205,6 +1205,7 @@ export class ComboBox extends AbstractSelect {
         this._label = '';
         // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = false;
+        this.wait = wait;
 
         this.SubMenuClass = SelectMenu;
 
@@ -1241,11 +1242,86 @@ export class ComboBox extends AbstractSelect {
             }
         });
 
+        this.initKeyboardNavigation();
+        this.registerTopics();
+        this.init();
+
+        this.filter = filter;
+    }
+
+    render(context) {
+        let element = `
+        <div class="combobox">
+            <input type="text" class="combobox__input" data-text />
+            <span class="combobox__caret"><i class="fas fa-caret-down"></i></span>
+        </div>
+        `;
+
+        element = parseHTML(element).children[0];
+        return {
+            element: element,
+            textbox: element.querySelector('[data-text]')
+        };
+    }
+
+    refreshUI() {
+        let options = this.selectedOptions,
+            labels = options.map(item => item.text);
+
+        this.value = options.length ? options[0].value || options[0].text || '' : '';
+        this._label = labels.join(", ");
+        this.textbox.value = this._label;
+    }
+
+    destroy() {
+        super.destroy();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Private methods
+
+    _rootKeyDown(topic) {
+        if(this.isRoot) {
+            let key = topic.originalEvent.key;
+
+            if(this.hasFilter && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+                return;
+            }
+
+            return super._rootKeyDown(topic);
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
+
+    setValue(value) {
+        this.widget.value = value;
+    }
+
+    get placeholder() {
+        return this.textbox.placeholder;
+    }
+
+    set placeholder(value) {
+        this.textbox.placeholder = value;
+    }
+
+    set filter(method) {
+        if(this._destroyFilter) {
+            this._destroyFilter();
+            this._destroyFilter = null;
+        }
+
+        if(!method) return;
+
+        this._filterMethod = method;
+
         let _timer = null;
 
         let applyFilter = () => {
             _timer = null;
-            this.submenu.filter(filter(this.textbox.value));
+            this.submenu.filter(this._filterMethod(this.textbox.value));
 
             // Flag if we found a select item.
             let f = false;
@@ -1271,85 +1347,47 @@ export class ComboBox extends AbstractSelect {
             }
         };
 
-        this.textbox.addEventListener('input', () => {
+        let onInput = () => {
             if(_timer) {
                 clearTimeout(_timer);
                 _timer = null;
             }
 
-            if(wait === false || wait < 0) {
+            if(this.wait === false || this.wait < 0) {
                 applyFilter();
             } else {
-                _timer = setTimeout(applyFilter, wait);
+                _timer = setTimeout(applyFilter, this.wait);
             }
-        });
+        };
 
-        this.textbox.addEventListener('keydown', event => {
+        let onKeyDown = event => {
             // Apply the filter immediately on enter.
             if(event.key === "Enter" && _timer) {
                 clearTimeout(_timer);
                 _timer = null;
                 applyFilter();
             }
-        });
+        };
 
-        this.initKeyboardNavigation();
-        this.registerTopics();
-        this.init();
-    }
+        this.textbox.addEventListener('input', onInput);
+        this.textbox.addEventListener('keydown', onKeyDown);
 
-    render(context) {
-        let element = `
-        <div class="combobox">
-            <input type="text" class="combobox__input" data-text />
-            <span class="combobox__caret"><i class="fas fa-caret-down"></i></span>
-        </div>
-        `;
+        // Create method to destroy event listener.
+        this._destroyFilter = () => {
+            this.textbox.removeEventListener('input', onInput);
+            this.textbox.removeEventListener('keydown', onKeyDown);
+            this.textbox.readOnly = true;
 
-        element = parseHTML(element).children[0];
-        return {
-            element: element,
-            textbox: element.querySelector('[data-text]')
+            this._destroyFilter = null;
         };
     }
 
-    //------------------------------------------------------------------------------------------------------------------
-    // Private methods
-
-    refreshUI() {
-        let options = this.selectedOptions,
-            labels = options.map(item => item.text);
-
-        this.value = options.length ? options[0].value || options[0].text || '' : '';
-        this._label = labels.join(", ");
-        this.textbox.value = this._label;
+    get filter() {
+        return !!this._filterMethod;
     }
 
-    _rootKeyDown(topic) {
-        if(this.isRoot) {
-            let key = topic.originalEvent.key;
-
-            if(key === 'ArrowLeft' || key === 'ArrowRight') {
-                return;
-            }
-
-            return super._rootKeyDown(topic);
-        }
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Properties
-
-    setValue(value) {
-        this.widget.value = value;
-    }
-
-    get placeholder() {
-        return this.textbox.placeholder;
-    }
-
-    set placeholder(value) {
-        this.textbox.placeholder = value;
+    get hasFilter() {
+        return !!this._destroyFilter;
     }
 }
 
@@ -1618,6 +1656,36 @@ export class MultiComboBox extends AbstractSelect {
 }
 
 
-AutoLoader.register('select', (element) => Select2.FromHTML(element));
+export class RichSelect extends AbstractSelect {
+    constructor({target=null, multiple=false}) {
+        super();
+
+        if(target) {
+            this.element = target;
+
+            if(this.element.nodeName === "INPUT") {
+                this.textbox = this.element;
+            }
+        }
+    }
+
+    render() {
+
+    }
+
+    refreshUI() {
+
+    }
+
+    setValue(value) {
+
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
+    // Properties
+}
+
+
+AutoLoader.register('select', (element) => RichSelect.FromHTML(element));
 AutoLoader.register('combobox', (element) => ComboBox.FromHTML(element));
 AutoLoader.register('multi-combobox', (element) => MultiComboBox.FromHTML(element));

@@ -1,26 +1,25 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
 import Menu from './Menu';
-import {parseAny, parseBoolean, parseIntValue, parseHTML} from "../core/utility";
-import Attribute, {DROP, TRUE} from "core/attributes";
+import {parseHTML} from "../core/utility";
+import {AttributeSchema, Attribute, CompoundType, Bool, Integer, Str} from "../core/serialize";
 
 
-const parseBooleanOrInt = (value) => parseAny(value, parseBoolean, parseIntValue),
-    timeAttribute = new Attribute(parseBooleanOrInt, DROP, TRUE),
-    boolAttribute = new Attribute(parseBoolean, DROP, TRUE),
-    stringAttribute = new Attribute(null, DROP, TRUE);
+const INT_OR_BOOL_TYPE = new Attribute(new CompoundType(Bool, Integer), Attribute.DROP, Attribute.DROP),
+    BOOL_TYPE = new Attribute(Bool, Attribute.DROP, Attribute.DROP),
+    STRING_TYPE = new Attribute(Str, Attribute.DROP, Attribute.DROP);
 
 
-export const ITEM_ATTRIBUTES = {
-    closeOnBlur: timeAttribute,
-    timeout: timeAttribute,
-    autoActivate: timeAttribute,
-    openOnHover: timeAttribute,
-    closeOnSelect: boolAttribute,
-    delay: timeAttribute,
-    positioner: stringAttribute,
-    toggle: boolAttribute
-};
+export const MENU_ITEM_ATTRIBUTE_SCHEMA = new AttributeSchema({
+    closeOnBlur: INT_OR_BOOL_TYPE,
+    timeout: INT_OR_BOOL_TYPE,
+    autoActivate: INT_OR_BOOL_TYPE,
+    openOnHover: INT_OR_BOOL_TYPE,
+    closeOnSelect: BOOL_TYPE,
+    delay: INT_OR_BOOL_TYPE,
+    positioner: STRING_TYPE,
+    toggle: BOOL_TYPE
+});
 
 
 /**
@@ -32,8 +31,6 @@ export class AbstractMenuItem extends MenuNode {
     @inherit openOnHover;
     @inherit delay = false;
     @inherit positioner;
-
-    static __attributes__ = ITEM_ATTRIBUTES;
 
     constructor() {
         super();
@@ -497,6 +494,13 @@ export class AbstractMenuItem extends MenuNode {
             return this.submenu._navigate(event, 0);
         } else if(this.parent) {
             return this.parent._navigate(event, _depth);
+        }
+    }
+
+    static getAttributes(element) {
+        return {
+            ...super.getAttributes(element),
+            ...MENU_ITEM_ATTRIBUTE_SCHEMA.deserialize(element.dataset)
         }
     }
 }

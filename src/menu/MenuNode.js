@@ -2,7 +2,6 @@ import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
 import {addClasses, removeClasses} from "core/utility";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
-import Attribute from "../core/attributes";
 
 
 /**
@@ -751,7 +750,7 @@ export default class MenuNode extends Publisher {
     /**
      * Returns the MenuNode that is responsible for delegating the events.
      *
-     * @returns {null|{isController}|any}
+     * @returns {null|{isController}|*}
      */
     getEventDelegator() {
         let o = this.element;
@@ -947,6 +946,10 @@ export default class MenuNode extends Publisher {
         return getMenuInstance(element);
     }
 
+    static getAttributes(element) {
+        return {};
+    }
+
     /**
      * Constructs a menu node element for an HTMLElement.
      * @param element {HTMLElement|string}
@@ -958,11 +961,16 @@ export default class MenuNode extends Publisher {
             element = document.querySelector(element);
         }
 
-        let parameters = Attribute.deserialize(element.dataset, this.__attributes__);
+        let config = this.getAttributes(element);
 
-        parameters.target = element;
+        // let parameters = Attribute.deserialize(element.dataset, this.__attributes__);
+        //
+        // parameters.target = element;
 
-        return new this(parameters);
+        return new this({
+            target: element,
+            ...config
+        });
     }
 
     /**

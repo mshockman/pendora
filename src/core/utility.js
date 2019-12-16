@@ -27,47 +27,6 @@ export function modulo(value, mod) {
 }
 
 
-/**
- * Takes an iterable and returns the first none null or undefined value.
- * @param args
- */
-export function firstValue(args) {
-    for(let item of args) {
-        if(item !== null && item !== undefined) {
-            return item;
-        }
-    }
-}
-
-
-/**
- * Takes an iterable and returns true if all of the values are trueish.
- * @param iterable
- */
-export function all(iterable) {
-    for(let item of iterable) {
-        if(!item) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-/**
- * Takes an iterable and returns true if any of the values are trueish.
- * @param iterable
- */
-export function any(iterable) {
-    for(let item of iterable) {
-        if(item) return true;
-    }
-
-    return false;
-}
-
-
 export function proto(descriptor) {
     descriptor.placement = "prototype";
     return descriptor;

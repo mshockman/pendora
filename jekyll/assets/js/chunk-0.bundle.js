@@ -28,7 +28,11 @@ function () {
 
   _createClass(MenuPageIndex, [{
     key: "load",
-    value: function load() {
+    value: function load() {// this.createSelectMenuTest(document.body);
+    }
+  }, {
+    key: "createSelectMenuTest",
+    value: function createSelectMenuTest(container) {
       var testMenu = new menu_Select2__WEBPACK_IMPORTED_MODULE_0__["SelectMenu"]();
       testMenu.isVisible = true;
       testMenu.multiSelect = true;
@@ -46,7 +50,7 @@ function () {
       }
 
       window.testMenu = testMenu;
-      testMenu.appendTo(document.body);
+      testMenu.appendTo(container);
       console.log("Debugging SelectMenu as testMenu");
       console.log(testMenu);
     }

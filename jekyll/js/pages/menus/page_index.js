@@ -7,6 +7,10 @@ export default class MenuPageIndex {
     }
 
     load() {
+        // this.createSelectMenuTest(document.body);
+    }
+
+    createSelectMenuTest(container) {
         let testMenu = new SelectMenu();
         testMenu.isVisible = true;
         testMenu.multiSelect = true;
@@ -21,7 +25,7 @@ export default class MenuPageIndex {
         }
 
         window.testMenu = testMenu;
-        testMenu.appendTo(document.body);
+        testMenu.appendTo(container);
         console.log("Debugging SelectMenu as testMenu");
         console.log(testMenu);
     }
