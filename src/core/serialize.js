@@ -313,7 +313,7 @@ export class Attribute {
         } else if(value === null) {
             if(this.nullable === FALSE || this.nullable === REQUIRED) {
                 throw new ValidationError(`Attribute ${key} cannot be null.`);
-            } if(this.nullable === null || this.nullable === true) {
+            } if(this.nullable === null || this.nullable === TRUE || this.nullable === NULL) {
                 return null;
             } else {
                 return this.nullable;

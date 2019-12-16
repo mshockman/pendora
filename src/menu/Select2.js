@@ -5,9 +5,9 @@ import * as positioners from "./positioners";
 import {getMenuInstance, getClosestMenuByElement} from "./utility";
 import {parseHTML, parseBoolean} from "core/utility";
 import {inherit} from "./decorators";
-import Attribute, {DROP, TRUE} from "core/attributes";
 import {SelectInputWidget, HiddenInputWidget, MultiHiddenInputWidget} from "../forms/";
 import ItemFilter from "../ui/ItemFilter";
+import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
 
 
 /**
@@ -608,441 +608,6 @@ export class SelectMenu extends AbstractMenu {
 
 
 /**
- * A component that can be used as an alternative to the built in <select> element.
- * @implements FormWidgetBase
- */
-export class Select2 extends AbstractMenuItem {
-    static __attributes__ = {
-        multiSelect: new Attribute(parseBoolean, DROP, TRUE),
-        ...AbstractMenuItem.__attributes__
-    };
-
-    constructor({target, multiSelect=false, timeout=false, id=null, classes=null, widget=null, filter=false, placeholder="No Items Found"}={}) {
-        super();
-
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = this.render();
-        }
-
-        if(classes) {
-            this.addClass(classes);
-        }
-
-        if(id) {
-            this.element.id = id;
-        }
-
-        this.toggle = "both";
-        this.autoActivate = false;
-        this.openOnHover = false;
-        this.delay = false;
-        this.closeOnSelect = "auto";
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = true;
-        this.timeout = timeout;
-        this.multiSelect = multiSelect;
-        // noinspection JSUnusedGlobalSymbols
-        this.MenuItemClass = SelectOption;
-        // noinspection JSUnusedGlobalSymbols
-        this.SubMenuClass = SelectMenu;
-        this.positioner = positioners.DROPDOWN;
-        // noinspection JSUnusedGlobalSymbols
-        this.clearSubItemsOnHover = false;
-        this.labelToItemMap = new WeakMap();
-        this.itemToLabelMap = new WeakMap();
-
-        this.element.classList.add('select');
-        this.element.tabIndex = 0;
-
-        this.registerTopics();
-        this.parseDOM();
-
-        if(widget) {
-            this.widget = widget;
-        } else {
-            this.widget = new HiddenInputWidget();
-            this.widget.appendTo(this.element);
-        }
-
-        if(!this.submenu) {
-            let submenu = new SelectMenu();
-            submenu.isVisible = false;
-            this.attachSubMenu(submenu);
-        }
-
-        this.init();
-
-        if(filter) {
-            if(this.multiSelect) {
-                this.filter = new ItemFilter({
-                    items: () => {
-                        let r = [];
-
-                        for(let child of this.submenu.children) {
-                            r.push(child.element);
-                        }
-
-                        return r;
-                    },
-                    tabindex: -1
-                });
-
-                let li = document.createElement('li');
-                li.className = "select-filter-container";
-                this.filter.appendTo(li);
-                this.filter.wrapper = li;
-                this.button.appendChild(li);
-            } else {
-                this.filter = new ItemFilter({
-                    items: () => {
-                        let r = [];
-
-                        for(let child of this.submenu.children) {
-                            r.push(child.element);
-                        }
-
-                        return r;
-                    },
-
-                    placeholder: "Filter"
-                });
-
-                this.filter.appendTo(this.submenu.element.querySelector('.select-menu__header'));
-                this.submenu.element.classList.add('has-filter');
-            }
-
-            this.filter.on('filter-change', (topic) => {
-                if(topic.allItemsFiltered) {
-                    this.submenu.element.classList.add('all-items-filtered');
-                } else {
-                    this.submenu.element.classList.remove('all-items-filtered');
-                }
-            });
-
-            if(placeholder) {
-                let placeholderNode = document.createElement('li');
-                placeholderNode.className = "placeholder";
-                placeholderNode.innerHTML = placeholder;
-                let body = this.submenu.getMenuBody();
-                body = body[body.length-1];
-                body.appendChild(placeholderNode);
-            }
-
-            this.addEventListener('keydown', event => {
-                if(this.filter && event.key === 'Backspace') {
-                    if(this.filter.isFocused() && this.filter.input.value !== "") {
-                        return;
-                    }
-
-                    if(!this._isChoiceElement(document.activeElement)) {
-                        let choices = this.getLabels();
-
-                        if(choices.length) {
-                            choices[choices.length-1].focus();
-                        }
-                    } else {
-                        this.labelToItemMap.get(document.activeElement).deselect();
-                        this.filter.focus();
-                    }
-                }
-            });
-
-            this.filter.input.addEventListener('focus', () => {
-                this.element.classList.add('select-highlight');
-            });
-
-            this.filter.input.addEventListener('blur', event => {
-                // noinspection JSCheckFunctionSignatures
-                if(!this.element.contains(event.relatedTarget)) {
-                    this.element.classList.remove('select-highlight');
-                    if(this.isActive) this.deactivate();
-                }
-            });
-        }
-
-        this.addEventListener('focus', () => {
-            if(this.filter) {
-                this.filter.focus();
-            }
-
-            this.element.classList.add('select-highlight');
-        });
-
-        this.addEventListener('blur', event => {
-            if(!this.element.contains(event.relatedTarget)) {
-                if(this.isActive) this.deactivate();
-                this.element.classList.remove('select-highlight');
-            }
-        });
-    }
-
-    activate(show=true) {
-        if(!this.isActive) {
-            let r = super.activate();
-
-            if(this.filter) {
-                this.filter.clear();
-
-                if(!this.multiSelect || !this.element.contains(document.activeElement) || !document.activeElement.classList.contains('choice')) {
-                    this.filter.focus();
-                }
-            }
-
-            return r;
-        }
-    }
-
-    deactivate() {
-        if(this.isActive) {
-            let r = super.deactivate();
-
-            if(this.filter) {
-                this.filter.clear();
-                this.filter.blur();
-            }
-
-            return r;
-        }
-    }
-
-    isSelect() {
-        return true;
-    }
-
-    registerTopics() {
-        super.registerTopics();
-
-        this.on('option.select', () => {
-            this.renderLabels();
-
-            if(this.closeOnSelect === true && this.isActive) {
-                this.deactivate();
-            }
-        });
-
-        this.on('option.deselect', () => {
-            this.renderLabels();
-        });
-    }
-
-    renderLabels() {
-        let output = this.button,
-            fragment = document.createDocumentFragment();
-
-        for(let item of this.options) {
-            if(item.isSelected) {
-                let pill = this.itemToLabelMap.get(item);
-
-                if (!pill) {
-                    pill = document.createElement('li');
-
-                    let exitButton = document.createElement('div'),
-                        span = document.createElement('span');
-
-                    pill.className = "choice";
-                    exitButton.className = "exit-button";
-                    span.innerText = item.text;
-                    if(this.multiSelect) pill.tabIndex = -1;
-
-                    pill.appendChild(exitButton);
-                    pill.appendChild(span);
-                    this.itemToLabelMap.set(item, pill);
-                    this.labelToItemMap.set(pill, item);
-
-                    fragment.appendChild(pill);
-                }
-            } else {
-                let pill = this.itemToLabelMap.get(item);
-
-                if(pill) {
-                    pill.parentElement.removeChild(pill);
-                    this.itemToLabelMap.delete(item);
-                    this.labelToItemMap.delete(pill);
-                }
-            }
-        }
-
-        if(this.filter && this.filter.wrapper && this.filter.wrapper.parentElement === output) {
-            output.insertBefore(fragment, this.filter.wrapper);
-        } else {
-            output.appendChild(fragment);
-        }
-
-        if(this.widget) this.widget.setValue(this._getSelectedValues());
-    }
-
-    append(option) {
-        this.submenu.append(option);
-    }
-
-    get button() {
-        return Array.prototype.find.call(this.element.children, node => node.matches('.selection'));
-    }
-
-    _getSelectedValues() {
-        let r = [];
-
-        for(let item of this.selection) {
-            r.push(item.value);
-        }
-
-        if(this.multiSelect) {
-            return r;
-        } else {
-            return r[0];
-        }
-    }
-
-    _isChoiceElement(element) {
-        for(let option of this.options) {
-            if(this.itemToLabelMap.get(option) === element) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    getLabels() {
-        return this.button.querySelectorAll('.choice');
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    getValue() {
-        return this.widget.getValue();
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    setValue(value) {
-        this.widget.setValue(value);
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    getName() {
-        return this.widget.getName();
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    setName(name) {
-        this.widget.setName(name);
-    }
-
-    get selection() {
-        return this.submenu.selection;
-    }
-
-    get options() {
-        return this.submenu.children;
-    }
-
-    render(context) {
-        let html = `
-        <article class="dropdown select">
-            <ul class="selection"></ul>
-        </article>
-        `;
-
-        let fragment = parseHTML(html);
-        return fragment.children[0];
-    }
-
-    onClick(topic) {
-        let event = topic.originalEvent;
-
-        // noinspection JSUnresolvedFunction
-        if(topic.target === this && event.target.closest('.exit-button')) {
-            // noinspection JSUnresolvedFunction
-            let li = event.target.closest('li'),
-                item = this.labelToItemMap.get(li);
-
-            item.deselect();
-        } else {
-            if(this.filter) {
-                // noinspection JSCheckFunctionSignatures
-                let inFilter = this.filter.element.contains(event.target);
-
-                if(!this.isActive && inFilter) {
-                    this.activate();
-                } else if(this.submenu.element.contains(event.target)) {
-                    this.filter.focus();
-                } else if(!inFilter) {
-                    super.onClick(topic);
-                }
-            } else {
-                super.onClick(topic);
-            }
-        }
-    }
-
-    get multiSelect() {
-        return this._props.multiSelect;
-    }
-
-    set multiSelect(value) {
-        value = !!value;
-
-        if(value !== this.multiSelect) {
-            this._props.multiSelect = value;
-
-            if(value) {
-                this.element.classList.add('multiple');
-            } else {
-                this.element.classList.remove('multiple');
-            }
-        }
-    }
-
-    get closeOnSelect() {
-        if(this._props.closeOnSelect === "auto") {
-            return !this.multiSelect;
-        } else {
-            return this._props.closeOnSelect;
-        }
-    }
-
-    set closeOnSelect(value) {
-        this._props.closeOnSelect = value;
-    }
-
-    static FromHTML(element) {
-        if(typeof element === 'string') {
-            element = document.querySelector(element);
-        }
-
-        if(element.nodeName === "SELECT") {
-            // noinspection JSUnresolvedVariable
-            let select = new Select2({
-                multiSelect: element.multiple,
-                widget: new SelectInputWidget(element, null, null, true),
-                filter: element.dataset.filter ? element.dataset.filter.toLowerCase().trim() === 'true' : false
-            });
-
-            for(let option of element.querySelectorAll('option')) {
-                let item = new SelectOption({
-                    text: option.innerText.trim(),
-                    value: option.value
-                });
-
-                select.append(item);
-
-                if(option.selected) {
-                    item.select();
-                }
-            }
-
-            element.replaceWith(select.element);
-            select.element.appendChild(select.widget.element);
-            return select;
-        } else {
-            return super.FromHTML(element);
-        }
-    }
-}
-
-
-/**
  * @implements FormWidgetBase
  * @abstract
  */
@@ -1161,7 +726,11 @@ export class AbstractSelect extends AbstractMenuItem {
             element = document.querySelector(element);
         }
 
-        let instance = new this();
+        let config = this.getAttributes(element);
+
+        console.log(config);
+
+        let instance = new this(config);
 
         for(let child of element.querySelectorAll('li')) {
             let option = new SelectOption({text: child.innerHTML.trim(), value: child.dataset.value || null});
@@ -1175,8 +744,14 @@ export class AbstractSelect extends AbstractMenuItem {
 }
 
 
-export class ComboBox extends AbstractSelect {
-    constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith}={}) {
+const RICH_SELECT_SCHEMA = new AttributeSchema({
+    multiple: new Attribute(Bool, Attribute.DROP, Attribute.DROP),
+    maxItems: new Attribute(Integer, Attribute.DROP, Attribute.DROP)
+});
+
+
+export class RichSelect extends AbstractSelect {
+    constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5}={}) {
         super();
 
         if(target) {
@@ -1193,6 +768,8 @@ export class ComboBox extends AbstractSelect {
             this.textbox = textbox;
         }
 
+        this.textbox.readOnly = true;
+
         this.toggle = true;
         this.autoActivate = false;
         this.openOnHover = false;
@@ -1205,7 +782,6 @@ export class ComboBox extends AbstractSelect {
         this._label = '';
         // noinspection JSUnusedGlobalSymbols
         this.clearSubItemsOnHover = false;
-        this.wait = wait;
 
         this.SubMenuClass = SelectMenu;
 
@@ -1213,16 +789,7 @@ export class ComboBox extends AbstractSelect {
 
         this.parseDOM();
 
-        if(submenu) {
-            if(typeof submenu === 'string') {
-                submenu = document.querySelector(submenu);
-            }
-
-            if(!submenu.isSelectMenu || !submenu.isSelectMenu()) {
-                submenu = new this.SubMenuClass({target: submenu});
-                this.attachSubMenu(submenu);
-            }
-        } else {
+        if(!this.submenu) {
             let submenu = new this.SubMenuClass();
             this.attachSubMenu(submenu);
         }
@@ -1230,7 +797,7 @@ export class ComboBox extends AbstractSelect {
         this.submenu.classList.add('combobox__menu');
 
         if(!widget) {
-            this.widget = new HiddenInputWidget();
+            this.widget = new MultiHiddenInputWidget();
             this.widget.appendTo(this.element);
         } else {
             this.widget = widget;
@@ -1246,7 +813,8 @@ export class ComboBox extends AbstractSelect {
         this.registerTopics();
         this.init();
 
-        this.filter = filter;
+        this.multiple = multiple;
+        this.maxItems = maxItems;
     }
 
     render(context) {
@@ -1268,28 +836,21 @@ export class ComboBox extends AbstractSelect {
         let options = this.selectedOptions,
             labels = options.map(item => item.text);
 
-        this.value = options.length ? options[0].value || options[0].text || '' : '';
-        this._label = labels.join(", ");
-        this.textbox.value = this._label;
-    }
+        let values = [];
 
-    destroy() {
-        super.destroy();
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Private methods
-
-    _rootKeyDown(topic) {
-        if(this.isRoot) {
-            let key = topic.originalEvent.key;
-
-            if(this.hasFilter && (key === 'ArrowLeft' || key === 'ArrowRight')) {
-                return;
-            }
-
-            return super._rootKeyDown(topic);
+        for(let option of options) {
+            values.push(option.value || option.text || '');
         }
+
+        this.value = values;
+
+        if(labels.length <= this.maxItems) {
+            this._label = labels.join(", ");
+        } else {
+            this._label = `${labels.length} Items Selected`;
+        }
+
+        this.textbox.value = this._label;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -1307,87 +868,38 @@ export class ComboBox extends AbstractSelect {
         this.textbox.placeholder = value;
     }
 
-    set filter(method) {
-        if(this._destroyFilter) {
-            this._destroyFilter();
-            this._destroyFilter = null;
+    get multiple() {
+        return this.submenu.multiSelect;
+    }
+
+    set multiple(value) {
+        value = !!value;
+
+        if(value) {
+            this.submenu.multiSelect = true;
+            this.submenu.toggle = true;
+            this.closeOnSelect = false;
+        } else {
+            this.submenu.multiSelect = false;
+            this.submenu.toggle = false;
+            this.closeOnSelect = true;
         }
-
-        if(!method) return;
-
-        this._filterMethod = method;
-
-        let _timer = null;
-
-        let applyFilter = () => {
-            _timer = null;
-            this.submenu.filter(this._filterMethod(this.textbox.value));
-
-            // Flag if we found a select item.
-            let f = false;
-
-            // Activate the selected items.
-            if (!this.multiSelect) {
-                for (let option of this.submenu.options) {
-                    if (!option.isDisabled && !option.isFiltered && option.isSelected) {
-                        option.activate();
-                        f = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!f) {
-                for (let option of this.submenu.options) {
-                    if (!option.isDisabled && !option.isFiltered) {
-                        option.activate();
-                        break;
-                    }
-                }
-            }
-        };
-
-        let onInput = () => {
-            if(_timer) {
-                clearTimeout(_timer);
-                _timer = null;
-            }
-
-            if(this.wait === false || this.wait < 0) {
-                applyFilter();
-            } else {
-                _timer = setTimeout(applyFilter, this.wait);
-            }
-        };
-
-        let onKeyDown = event => {
-            // Apply the filter immediately on enter.
-            if(event.key === "Enter" && _timer) {
-                clearTimeout(_timer);
-                _timer = null;
-                applyFilter();
-            }
-        };
-
-        this.textbox.addEventListener('input', onInput);
-        this.textbox.addEventListener('keydown', onKeyDown);
-
-        // Create method to destroy event listener.
-        this._destroyFilter = () => {
-            this.textbox.removeEventListener('input', onInput);
-            this.textbox.removeEventListener('keydown', onKeyDown);
-            this.textbox.readOnly = true;
-
-            this._destroyFilter = null;
-        };
     }
 
-    get filter() {
-        return !!this._filterMethod;
+    get maxItems() {
+        return this._maxItems;
     }
 
-    get hasFilter() {
-        return !!this._destroyFilter;
+    set maxItems(value) {
+        this._maxItems = value;
+        this.refreshUI();
+    }
+
+    static getAttributes(element) {
+        return {
+            ...super.getAttributes(element),
+            ...RICH_SELECT_SCHEMA.deserialize(element.dataset)
+        };
     }
 }
 
@@ -1656,33 +1168,126 @@ export class MultiComboBox extends AbstractSelect {
 }
 
 
-export class RichSelect extends AbstractSelect {
-    constructor({target=null, multiple=false}) {
-        super();
+export class ComboBox extends RichSelect {
+    constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith}={}) {
+        super({
+            target,
+            timeout,
+            submenu,
+            widget,
+            multiple: false,
+            filter: null
+        });
 
-        if(target) {
-            this.element = target;
-
-            if(this.element.nodeName === "INPUT") {
-                this.textbox = this.element;
-            }
-        }
-    }
-
-    render() {
-
-    }
-
-    refreshUI() {
-
-    }
-
-    setValue(value) {
-
+        this.wait = wait;
+        this.filter = filter;
     }
 
     //------------------------------------------------------------------------------------------------------------------
-    // Properties
+    // Private methods
+
+    _rootKeyDown(topic) {
+        if(this.isRoot) {
+            let key = topic.originalEvent.key;
+
+            if(this.hasFilter && (key === 'ArrowLeft' || key === 'ArrowRight')) {
+                return;
+            }
+
+            return super._rootKeyDown(topic);
+        }
+    }
+
+    set filter(method) {
+        if(this._destroyFilter) {
+            this._destroyFilter();
+            this._destroyFilter = null;
+        }
+
+        if(!method) return;
+
+        this._filterMethod = method;
+
+        let _timer = null;
+
+        let applyFilter = () => {
+            _timer = null;
+            this.submenu.filter(this._filterMethod(this.textbox.value));
+
+            // Flag if we found a select item.
+            let f = false;
+
+            // Activate the selected items.
+            if (!this.multiSelect) {
+                for (let option of this.submenu.options) {
+                    if (!option.isDisabled && !option.isFiltered && option.isSelected) {
+                        option.activate();
+                        f = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!f) {
+                for (let option of this.submenu.options) {
+                    if (!option.isDisabled && !option.isFiltered) {
+                        option.activate();
+                        break;
+                    }
+                }
+            }
+        };
+
+        let onInput = () => {
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
+            }
+
+            if(this.wait === false || this.wait < 0) {
+                applyFilter();
+            } else {
+                _timer = setTimeout(applyFilter, this.wait);
+            }
+        };
+
+        let onKeyDown = event => {
+            // Apply the filter immediately on enter.
+            if(event.key === "Enter" && _timer) {
+                clearTimeout(_timer);
+                _timer = null;
+                applyFilter();
+            }
+        };
+
+        this.textbox.addEventListener('input', onInput);
+        this.textbox.addEventListener('keydown', onKeyDown);
+        this.textbox.readOnly = false;
+
+        // Create method to destroy event listener.
+        this._destroyFilter = () => {
+            this.textbox.removeEventListener('input', onInput);
+            this.textbox.removeEventListener('keydown', onKeyDown);
+            this.textbox.readOnly = true;
+
+            this._destroyFilter = null;
+        };
+    }
+
+    get filter() {
+        return !!this._filterMethod;
+    }
+
+    get hasFilter() {
+        return !!this._destroyFilter;
+    }
+
+    static getAttributes(element) {
+        return {
+            ...super.getAttributes(element),
+            multiple: false
+        };
+    }
 }
 
 
