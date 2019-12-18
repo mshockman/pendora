@@ -484,10 +484,15 @@ export function choice(...args) {
 /**
  * Returns first child element that matches the test function.
  * @param element - Parent element
- * @param fn - Test Function
- * @returns {Element}
+ * @param fn {Function|String} - Test Function
+ * @returns {Element|null}
  */
 export function findChild(element, fn) {
+    if(typeof fn === 'string') {
+        let selector = fn;
+        fn = (child) => child.matches(selector);
+    }
+
     for(let i = 0, l = element.children.length; i < l; i++) {
         let child = element.children[i];
 
@@ -495,6 +500,8 @@ export function findChild(element, fn) {
             return child;
         }
     }
+
+    return null;
 }
 
 

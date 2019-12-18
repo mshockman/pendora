@@ -2923,11 +2923,19 @@ function choice() {
 /**
  * Returns first child element that matches the test function.
  * @param element - Parent element
- * @param fn - Test Function
- * @returns {Element}
+ * @param fn {Function|String} - Test Function
+ * @returns {Element|null}
  */
 
 function findChild(element, fn) {
+  if (typeof fn === 'string') {
+    var selector = fn;
+
+    fn = function fn(child) {
+      return child.matches(selector);
+    };
+  }
+
   for (var i = 0, l = element.children.length; i < l; i++) {
     var child = element.children[i];
 
@@ -2935,6 +2943,8 @@ function findChild(element, fn) {
       return child;
     }
   }
+
+  return null;
 }
 /**
  * Creates a filtered list of element from the children that match the test function.
@@ -8583,17 +8593,41 @@ function (_AbstractMenuItem) {
     _classCallCheck(this, SelectOption);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this));
+    var targetChildren = null;
 
     if (target) {
+      if (typeof target === 'string') {
+        target = document.querySelector(target);
+      } // Save target children to add to the text output later.
+
+
+      targetChildren = document.createDocumentFragment();
+
+      while (target.firstChild) {
+        targetChildren.appendChild(target.firstChild);
+      }
+
       _this.element = target;
     } else {
-      _this.element = _this.render({
-        text: text
-      });
+      _this.element = document.createElement('div');
+
+      _this.element.classList.add('select-option');
     }
 
-    _this.textNode = _this.element.querySelector('[data-text], button, a');
-    if (!_this.textNode) _this.textNode = _this.element;
+    var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+
+    _this.element.appendChild(fragment);
+
+    _this.textNode = _this.element.querySelector('[data-text]'); // If initializing the object from a target element
+    // the label text is gathered from the children of the target
+
+    if (targetChildren) {
+      _this.textNode.appendChild(targetChildren);
+    } else if (text) {
+      var textNode = document.createTextNode(text);
+
+      _this.textNode.appendChild(textNode);
+    }
 
     _this.element.setAttribute('aria-role', 'option');
 
@@ -8613,8 +8647,6 @@ function (_AbstractMenuItem) {
 
     _this.SubMenuClass = null;
     _this.autoDeactivateItems = "auto";
-
-    _this.element.classList.add("option");
 
     _this.registerTopics();
 
@@ -8666,10 +8698,11 @@ function (_AbstractMenuItem) {
     key: "render",
     value: function render(_ref2) {
       var text = _ref2.text;
-      var html = "<div data-role=\"menuitem\" class=\"menuitem\">\n            <span class=\"checkmark\"><i class=\"fas fa-check\"></i></span>\n            <a data-text>".concat(text, "</a>\n        </div>"),
-          fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
+      var html = "\n        <div data-role=\"menuitem\" class=\"menuitem\">\n            <span class=\"checkmark\"><i class=\"fas fa-check\"></i></span>\n            <a data-text>".concat(text, "</a>\n        </div>");
+      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
       return fragment.children[0];
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Selects the options and publishes a [option.select] topic.
      *
@@ -8903,11 +8936,19 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this3.MenuItemClass = SelectOption;
 
       if (target) {
+        if (typeof target === 'string') {
+          target = document.querySelector(target);
+        }
+
         _this3.element = target;
       } else {
         _this3.element = _this3.render(context);
-      } // noinspection JSUnusedGlobalSymbols
+      }
 
+      _this3.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-header]');
+      _this3.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-body]');
+      _this3.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-footer]');
+      _this3.filterInput = null; // noinspection JSUnusedGlobalSymbols
 
       _this3.closeOnBlur = false;
       _this3.timeout = false; // noinspection JSUnusedGlobalSymbols
@@ -8935,8 +8976,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this3.isVisible = false;
 
       _this3.registerTopics();
-
-      _this3.parseDOM();
 
       _this3.init();
 
@@ -8968,7 +9007,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\"></div>\n                <div class=\"select-menu__body menu__body\"></div>\n                <div class=\"select-menu__footer\"></div>\n            </div>\n        ";
+        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\" data-header></div>\n                <div class=\"select-menu__body menu__body\" data-body></div>\n                <div class=\"select-menu__footer\" data-footer></div>\n            </div>\n        ";
         var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
         return fragment.children[0];
       }
@@ -9101,7 +9140,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             _this4._lastClick = topic.target;
           }
         });
-        this.on('menu.show', function (topic) {
+        this.on('menu.show', function () {
           _this4.clearFilter();
 
           if (!_this4.multiSelect && !_this4.activeChild) {
@@ -9318,28 +9357,47 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
           this.filterInput = document.createElement('input');
           this.filterInput.type = 'text';
           this.filterInput.placeholder = filterPlaceholderText || "";
+          this.filterInput.setAttribute('data-filter', "");
           var filterContainer = document.createElement('div');
           filterContainer.className = "select-menu__filter";
           filterContainer.appendChild(this.filterInput);
-          var container = this.element.querySelector(".select-menu__header") || this.element;
+          var container = this.header || this.element;
           container.insertBefore(filterContainer, container.firstChild);
         } else {
           this.filterInput = filterInput;
         }
 
         var _timer = null;
-        this.filterInput.addEventListener('keydown', function () {
-          if (_timer) {
-            clearTimeout(_timer);
-            _timer = null;
+        this.element.addEventListener('input', function (event) {
+          if (event.target.hasAttribute('data-filter') && Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(event.target) === _this5) {
+            if (_timer) {
+              clearTimeout(_timer);
+              _timer = null;
+            }
+
+            _timer = setTimeout(function () {
+              _timer = null;
+
+              _this5.filter(fn(_this5.filterInput.value));
+            }, _this5.filterDelay);
           }
-
-          _timer = setTimeout(function () {
-            _timer = null;
-
-            _this5.filter(fn(_this5.filterInput.value));
-          }, _this5.filterDelay);
         });
+      }
+    }, {
+      kind: "method",
+      key: "setContent",
+      value: function setContent(content) {
+        Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["emptyElement"])(this.element);
+
+        if (typeof content === 'string') {
+          this.element.innerHTML = content;
+        } else {
+          this.element.appendChild(content);
+        }
+
+        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-header]');
+        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-body]');
+        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-footer]');
       }
     }]
   };
@@ -9522,6 +9580,26 @@ function (_AbstractMenuItem2) {
       element.parentElement.replaceChild(instance.element, element);
       return instance;
     }
+  }, {
+    key: "ConstructFromHTML",
+    value: function ConstructFromHTML(element) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      } // todo move into constructor.
+
+
+      var config = this.getAttributes(element);
+      var fragment = document.createDocumentFragment();
+
+      while (element.firstChild) {
+        fragment.appendChild(element.firstChild);
+      }
+
+      var instance = new this(_objectSpread({}, config, {
+        target: element
+      }));
+      instance.submenu.setContent(fragment);
+    }
   }]);
 
   return AbstractSelect;
@@ -9552,16 +9630,24 @@ function (_AbstractSelect) {
 
     _classCallCheck(this, RichSelect);
 
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this));
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this)); // if(target) {
+    //     this.element = target;
+    //
+    //     if(this.element.nodeName === 'INPUT') {
+    //         this.textbox = this.element;
+    //     } else {
+    //         this.textbox = this.element.querySelector('[data-text]');
+    //     }
+    // } else {
+    //     let {element, textbox} = this.render();
+    //     this.element = element;
+    //     this.textbox = textbox;
+    // }
+
+    var submenuContent = document.createDocumentFragment();
 
     if (target) {
-      _this7.element = target;
-
-      if (_this7.element.nodeName === 'INPUT') {
-        _this7.textbox = _this7.element;
-      } else {
-        _this7.textbox = _this7.element.querySelector('[data-text]');
-      }
+      if (typeof target === 'string') target = document.querySelector(target);
     } else {
       var _this7$render = _this7.render(),
           element = _this7$render.element,
@@ -9846,6 +9932,7 @@ function (_AbstractSelect2) {
       _get(_getPrototypeOf(MultiComboBox.prototype), "registerTopics", this).call(this);
 
       this.on('event.click', function (topic) {
+        // noinspection JSUnresolvedFunction
         var exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
             pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
             option = pill ? _this9.pilltoOptionMap.get(pill) : null;

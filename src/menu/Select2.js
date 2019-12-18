@@ -3,7 +3,7 @@ import {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {getClosestMenuByElement} from "./utility";
-import {parseHTML} from "core/utility";
+import {parseHTML, findChild, emptyElement} from "core/utility";
 import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
@@ -16,14 +16,44 @@ export class SelectOption extends AbstractMenuItem {
     constructor({target, text, value=null}={}) {
         super();
 
+        let targetChildren = null;
+
         if(target) {
+            if(typeof target === 'string') {
+                target = document.querySelector(target);
+            }
+
+            // Save target children to add to the text output later.
+            targetChildren = document.createDocumentFragment();
+            while(target.firstChild) {
+                targetChildren.appendChild(target.firstChild);
+            }
+
             this.element = target;
         } else {
-            this.element = this.render({text});
+            this.element = document.createElement('div');
+            this.element.classList.add('select-option');
         }
 
-        this.textNode = this.element.querySelector('[data-text], button, a');
-        if(!this.textNode) this.textNode = this.element;
+        let fragment = parseHTML(`
+            <a class="select-option__body">
+                <span class="select-option__check" data-check><i class="fas fa-check"></i></span>
+                <span data-text class="select-option__text"></span>
+                <span data-alt-text class="select-option__alt"></span>
+            </a>
+        `);
+
+        this.element.appendChild(fragment);
+        this.textNode = this.element.querySelector('[data-text]');
+
+        // If initializing the object from a target element
+        // the label text is gathered from the children of the target
+        if(targetChildren) {
+            this.textNode.appendChild(targetChildren);
+        } else if(text) {
+            let textNode = document.createTextNode(text);
+            this.textNode.appendChild(textNode);
+        }
 
         this.element.setAttribute('aria-role', 'option');
 
@@ -45,8 +75,6 @@ export class SelectOption extends AbstractMenuItem {
         this.SubMenuClass = null;
 
         this.autoDeactivateItems = "auto";
-
-        this.element.classList.add("option");
 
         this.registerTopics();
         this.parseDOM();
@@ -90,15 +118,18 @@ export class SelectOption extends AbstractMenuItem {
      * @returns {Element}
      */
     render({text}) {
-        let html = `<div data-role="menuitem" class="menuitem">
+        let html = `
+        <div data-role="menuitem" class="menuitem">
             <span class="checkmark"><i class="fas fa-check"></i></span>
             <a data-text>${text}</a>
-        </div>`,
-            fragment = parseHTML(html);
+        </div>`;
+
+        let fragment = parseHTML(html);
 
         return fragment.children[0];
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Selects the options and publishes a [option.select] topic.
      *
@@ -286,10 +317,19 @@ export class SelectMenu extends AbstractMenu {
         this.MenuItemClass = SelectOption;
 
         if(target) {
+            if(typeof target === 'string') {
+                target = document.querySelector(target);
+            }
+
             this.element = target;
         } else {
             this.element = this.render(context);
         }
+
+        this.header = findChild(this.element, '[data-header]');
+        this.body = findChild(this.element, '[data-body]');
+        this.footer = findChild(this.element, '[data-footer]');
+        this.filterInput = null;
 
         // noinspection JSUnusedGlobalSymbols
         this.closeOnBlur = false;
@@ -318,7 +358,6 @@ export class SelectMenu extends AbstractMenu {
         this.isVisible = false;
 
         this.registerTopics();
-        this.parseDOM();
         this.init();
 
         if(filter) {
@@ -331,9 +370,9 @@ export class SelectMenu extends AbstractMenu {
     render({arrow=false}={}) {
         let html = `
             <div class="select-menu">
-                <div class="select-menu__header"></div>
-                <div class="select-menu__body menu__body"></div>
-                <div class="select-menu__footer"></div>
+                <div class="select-menu__header" data-header></div>
+                <div class="select-menu__body menu__body" data-body></div>
+                <div class="select-menu__footer" data-footer></div>
             </div>
         `;
 
@@ -429,7 +468,7 @@ export class SelectMenu extends AbstractMenu {
             }
         });
 
-        this.on('menu.show', topic => {
+        this.on('menu.show', () => {
             this.clearFilter();
 
             if(!this.multiSelect && !this.activeChild) {
@@ -526,12 +565,13 @@ export class SelectMenu extends AbstractMenu {
             this.filterInput = document.createElement('input');
             this.filterInput.type = 'text';
             this.filterInput.placeholder = filterPlaceholderText || "";
+            this.filterInput.setAttribute('data-filter', "");
 
             let filterContainer = document.createElement('div');
             filterContainer.className = "select-menu__filter";
             filterContainer.appendChild(this.filterInput);
 
-            let container = this.element.querySelector(".select-menu__header") || this.element;
+            let container = this.header || this.element;
             container.insertBefore(filterContainer, container.firstChild);
         } else {
             this.filterInput = filterInput;
@@ -539,17 +579,33 @@ export class SelectMenu extends AbstractMenu {
 
         let _timer = null;
 
-        this.filterInput.addEventListener('keydown', () => {
-            if(_timer) {
-                clearTimeout(_timer);
-                _timer = null;
-            }
+        this.element.addEventListener('input', event => {
+            if(event.target.hasAttribute('data-filter') && getClosestMenuByElement(event.target) === this) {
+                if(_timer) {
+                    clearTimeout(_timer);
+                    _timer = null;
+                }
 
-            _timer = setTimeout(() => {
-                _timer = null;
-                this.filter(fn(this.filterInput.value));
-            }, this.filterDelay);
+                _timer = setTimeout(() => {
+                    _timer = null;
+                    this.filter(fn(this.filterInput.value));
+                }, this.filterDelay);
+            }
         });
+    }
+
+    setContent(content) {
+        emptyElement(this.element);
+
+        if(typeof content === 'string') {
+            this.element.innerHTML = content;
+        } else {
+            this.element.appendChild(content);
+        }
+
+        this.header = findChild(this.element, '[data-header]');
+        this.body = findChild(this.element, '[data-body]');
+        this.footer = findChild(this.element, '[data-footer]');
     }
 }
 
@@ -689,6 +745,26 @@ export class AbstractSelect extends AbstractMenuItem {
 
         return instance;
     }
+
+    static ConstructFromHTML(element) {
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        // todo move into constructor.
+        let config = this.getAttributes(element);
+
+        let fragment = document.createDocumentFragment();
+
+        while(element.firstChild) fragment.appendChild(element.firstChild);
+
+        let instance = new this({
+           ...config,
+           target: element
+        });
+
+        instance.submenu.setContent(fragment);
+    }
 }
 
 
@@ -702,14 +778,26 @@ export class RichSelect extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5}={}) {
         super();
 
-        if(target) {
-            this.element = target;
+        // if(target) {
+        //     this.element = target;
+        //
+        //     if(this.element.nodeName === 'INPUT') {
+        //         this.textbox = this.element;
+        //     } else {
+        //         this.textbox = this.element.querySelector('[data-text]');
+        //     }
+        // } else {
+        //     let {element, textbox} = this.render();
+        //     this.element = element;
+        //     this.textbox = textbox;
+        // }
 
-            if(this.element.nodeName === 'INPUT') {
-                this.textbox = this.element;
-            } else {
-                this.textbox = this.element.querySelector('[data-text]');
-            }
+        let submenuContent = document.createDocumentFragment();
+
+        if(target) {
+            if(typeof target === 'string') target = document.querySelector(target);
+
+
         } else {
             let {element, textbox} = this.render();
             this.element = element;
@@ -941,6 +1029,7 @@ export class MultiComboBox extends AbstractSelect {
         super.registerTopics();
 
         this.on('event.click', topic => {
+            // noinspection JSUnresolvedFunction
             let exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
                 pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
                 option = pill ? this.pilltoOptionMap.get(pill) : null;
