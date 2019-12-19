@@ -43,12 +43,12 @@ function _findAllNavigableChildren(children) {
  */
 export class AbstractMenu extends MenuNode {
     @inherit positioner;
+    @inherit delay = false;
 
     constructor({
             closeOnBlur=false, timeout=false, autoActivate=false, openOnHover=false, toggle=false,
-            closeOnSelect=true, delay=false, positioner="inherit", direction="vertical", SubMenuClass=null,
-            MenuItemClass=null}={}) {
-        super();
+            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...data}={}) {
+        super(data);
 
         this.closeOnBlur = closeOnBlur; // both sub-item and menu
         this.timeout = timeout; // both sub-item and menu
@@ -62,9 +62,6 @@ export class AbstractMenu extends MenuNode {
         this.delay = delay; // sub-item property
         this.positioner = positioner;
         this.direction = direction;
-
-        this.SubMenuClass = SubMenuClass;
-        this.MenuItemClass = MenuItemClass;
     }
 
     registerTopics() {
@@ -642,14 +639,14 @@ export default class Menu extends AbstractMenu {
      * @param delay {Boolean|Number}
      * @param id {String}
      * @param children {Array}
-     * @param context
+     * @param data
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle=false, closeOnSelect=true, delay=0, children=null, MenuClass=Menu, MenuItemClass=MenuItem,
-                    ...context}={}) {
+                    toggle=false, closeOnSelect=true, delay=0, children=null,
+                    ...data}={}) {
         super({
-            closeOnBlur, timeout, autoActivate, open, toggle, closeOnSelect, delay, positioner: 'inherit',
-            direction: 'vertical', SubMenuClass: MenuClass, MenuItemClass: MenuItemClass, openOnHover
+            closeOnBlur, timeout, autoActivate, toggle, closeOnSelect, delay, positioner: 'inherit',
+            direction: 'vertical', openOnHover, ...data
         });
 
         this.events = null;
@@ -657,7 +654,7 @@ export default class Menu extends AbstractMenu {
         if(target) {
             this.element = target;
         } else {
-            this.element = this.render(context);
+            this.element = this.render();
         }
 
         this.registerTopics();
@@ -679,12 +676,20 @@ export default class Menu extends AbstractMenu {
         let html = `
             <div class="menu">
                 ${arrow ? `<div class="menu__arrow"></div>` : ""}
-                <div class="menu__body"></div>
+                <div class="menu__body" data-body></div>
             </div>
         `;
 
         let fragment = parseHTML(html);
         return fragment.children[0];
+    }
+
+    constructSubMenu(config) {
+        return new Menu(config);
+    }
+
+    constructMenuItem(config) {
+        return new MenuItem(config);
     }
 }
 

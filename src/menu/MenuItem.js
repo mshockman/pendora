@@ -1,7 +1,7 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
 import Menu from './Menu';
-import {parseHTML} from "../core/utility";
+import {parseHTML, findChild} from "../core/utility";
 import {AttributeSchema, Attribute, CompoundType, Bool, Integer, Str} from "../core/serialize";
 
 
@@ -32,78 +32,79 @@ export class AbstractMenuItem extends MenuNode {
     @inherit delay = false;
     @inherit positioner;
 
-    constructor() {
-        super();
+    constructor({targetKey, toggle, autoActivate, openOnHover, delay, closeOnSelect, closeOnBlur, timeout, positioner,
+                clearSubItemsOnHover, autoDeactivateItems, ...data}) {
+        super(data);
 
         /**
          * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
          * @type {null|String}
          */
-        this.targetKey = null;
+        this.targetKey = targetKey;
 
         /**
          * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
          * will toggle both on and off and none will cause the item to not be toggleable.
          * @type {string}
          */
-        this.toggle = true;
+        this.toggle = toggle;
 
         /**
          * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
          * When the parent is active, openOnHover is used instead.
          * @type {string|Number|Boolean}
          */
-        this.autoActivate = false;
+        this.autoActivate = autoActivate;
 
         /**
          * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
          * See autoActivate for more details.
          * @type {string}
          */
-        this.openOnHover = false;
+        this.openOnHover = openOnHover;
 
         /**
          * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
          * @type {string|Number|Boolean}
          */
-        this.delay = false;
+        this.delay = delay;
 
         /**
          * If true the item will close when a descendent menuitem is selected.
          * @type {boolean}
          */
-        this.closeOnSelect = false;
+        this.closeOnSelect = closeOnSelect;
 
         /**
          * If true the menuitem will close when the user clicks the page outside of the item.
          * @type {boolean}
          */
-        this.closeOnBlur = false;
+        this.closeOnBlur = closeOnBlur;
 
         /**
          * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
          * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
          * @type {boolean|Number}
          */
-        this.timeout = false;
+        this.timeout = timeout;
 
         /**
          * A function that is used to position the menuitem's submenu.
          * @type {null|Function}
          */
-        this.positioner = "inherit";
+        this.positioner = positioner;
 
         /**
          * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
          * @type {boolean}
          */
-        this.clearSubItemsOnHover = true;
+        this.clearSubItemsOnHover = clearSubItemsOnHover;
 
         /**
          * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
          * @type {boolean}
          */
-        this.autoDeactivateItems = true;
+        this.autoDeactivateItems = autoDeactivateItems;
     }
 
     registerTopics() {
@@ -461,14 +462,6 @@ export class AbstractMenuItem extends MenuNode {
     //------------------------------------------------------------------------------------------------------------------
     // Getters and Setters
 
-    get button() {
-        if(!this._button) {
-            this._button = Array.prototype.slice.call(this.element.children).find(node => node.matches("button, a, .btn, [data-role='button']"));
-        }
-
-        return this._button;
-    }
-
     get submenu() {
         return this._children[0];
     }
@@ -486,11 +479,27 @@ export class AbstractMenuItem extends MenuNode {
     }
 
     get text() {
-        return this.button.innerText;
+        return this.textContainer.innerText;
     }
 
     set text(value) {
-        this.button.innerText = value;
+        this.textContainer.innerText = value;
+    }
+
+    get href() {
+        if(this.button.nodeName === "A") {
+            return this.button.href;
+        } else {
+            return null;
+        }
+    }
+
+    set href(value) {
+        if(this.button.nodeName === 'A') {
+            this.button.href=  value;
+        } else {
+            throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
+        }
     }
 
     _navigate(event, _depth=0) {
@@ -512,47 +521,60 @@ export class AbstractMenuItem extends MenuNode {
 
 export default class MenuItem extends AbstractMenuItem {
     constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
-                    delay='inherit', closeOnSelect=false, closeOnBlur=false, classes, timeout=false,
-                    nodeName="div", positioner="inherit", SubMenuClass=Menu, MenuItemClass=MenuItem, ...context}={}) {
-        super();
+                    delay='inherit', closeOnSelect=false, closeOnBlur=false, timeout=false,
+                    nodeName="div", positioner="inherit"}={}) {
+        super({
+            toggle,
+            autoActivate,
+            openOnHover,
+            delay,
+            closeOnSelect,
+            closeOnBlur,
+            timeout,
+            positioner,
+            clearSubItemsOnHover: true,
+            autoDeactivateItems: true
+        });
+
+        /**
+         * @type {null|HTMLElement}
+         */
+        let submenu = null;
 
         if(target) {
             this.element = target;
+            submenu = findChild(this.element, '[data-menu]');
+
+            if(submenu) {
+                submenu.parentElement.removeChild(submenu);
+            }
         } else {
-            this.element = this.render({text, nodeName, href, ...context});
+            this.element = this.render({text, nodeName});
         }
 
-        if(classes) {
-            this.addClass(classes);
-        }
+        this.button = this.element.querySelector("[data-button]");
+        this.textContainer = this.element.querySelector("[data-text]");
+        this.altTextContainer = this.element.querySelector('[data-alt-text]');
+
+        if(href !== null) this.href = href;
+        this.element.tabIndex = -1;
 
         if(action) this.addAction(action);
 
-        this.toggle = toggle;
-        this.autoActivate = autoActivate;
-        this.openOnHover = openOnHover;
-        this.delay = delay;
-
-        this.closeOnSelect = closeOnSelect;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
-
-        this.positioner = positioner;
-
-        // noinspection JSUnusedGlobalSymbols
-        this.clearSubItemsOnHover = true;
-        this.autoDeactivateItems = true;
-
-        // noinspection JSUnusedGlobalSymbols
-        this.MenuItemClass = MenuItemClass;
-        // noinspection JSUnusedGlobalSymbols
-        this.SubMenuClass = SubMenuClass;
-
-        this.element.tabIndex = -1;
+        if(submenu) {
+            this.attachSubMenu(this.constructSubMenu({target: submenu}));
+        }
 
         this.registerTopics();
-        this.parseDOM();
+        // this.parseDOM();
+    }
+
+    constructMenuItem(config) {
+        return new MenuItem(config);
+    }
+
+    constructSubMenu(config) {
+        return new Menu(config);
     }
 
     /**
@@ -563,14 +585,21 @@ export default class MenuItem extends AbstractMenuItem {
      * @param href
      * @returns {HTMLElement|Element}
      */
-    render({text, nodeName="div", href=null}={}) {
+    render({text, nodeName="div"}={}) {
+        let element = document.createElement(nodeName);
+        element.className = "menuitem";
+
         let html = `
-            <${nodeName} class="menuitem">
-                <a class="menuitem__button" ${href ? `href="${href}"` : ""}>${text}</a>
-            </${nodeName}>
-        `;
+                <a class="menuitem__button" data-button>
+                    <span class="menuitem__check"></span>
+                    <span class="menuitem__text" data-text>${text}</span>
+                    <span class="menuitem__alt-text" data-alt-text></span>
+                    <span class="menuitem__caret"></span>
+                </a>`;
 
         let fragment = parseHTML(html);
-        return fragment.children[0];
+        element.appendChild(fragment);
+
+        return element;
     }
 }

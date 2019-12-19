@@ -64,6 +64,7 @@ export function arraysEqual(array1, array2) {
 /**
  * Parses an html string into a document fragment.
  *
+ * @deprecated
  * @param html
  * @return {DocumentFragment}
  */
@@ -79,6 +80,12 @@ export function parseHTML(html) {
         while(template.firstChild) fragment.appendChild(template.firstChild);
         return fragment;
     }
+}
+
+
+export function createFragment(html) {
+    // noinspection JSDeprecatedSymbols
+    return parseHTML(html);
 }
 
 
@@ -485,7 +492,7 @@ export function choice(...args) {
  * Returns first child element that matches the test function.
  * @param element - Parent element
  * @param fn {Function|String} - Test Function
- * @returns {Element|null}
+ * @returns {HTMLElement|Element|null}
  */
 export function findChild(element, fn) {
     if(typeof fn === 'string') {

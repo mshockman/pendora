@@ -1,9 +1,9 @@
-import {AbstractMenuItem} from "./MenuItem";
-import {AbstractMenu} from "./Menu";
+import MenuItem, {AbstractMenuItem} from "./MenuItem";
+import Menu, {AbstractMenu} from "./Menu";
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {getClosestMenuByElement} from "./utility";
-import {parseHTML, findChild, emptyElement} from "core/utility";
+import {findChild, createFragment} from "core/utility";
 import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
@@ -13,8 +13,19 @@ import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
 export class SelectOption extends AbstractMenuItem {
-    constructor({target, text, value=null}={}) {
-        super();
+    constructor({target, text, value=null, targetKey=null}={}) {
+        super({
+            toggle: "inherit",
+            autoActivate: true,
+            openOnHover: true,
+            delay: 0,
+            closeOnSelect: false,
+            closeOnBlur: false,
+            timeout: false,
+            clearSubItemsOnHover: true,
+            autoDeactivateItems: "auto",
+            targetKey
+        });
 
         let targetChildren = null;
 
@@ -25,6 +36,7 @@ export class SelectOption extends AbstractMenuItem {
 
             // Save target children to add to the text output later.
             targetChildren = document.createDocumentFragment();
+
             while(target.firstChild) {
                 targetChildren.appendChild(target.firstChild);
             }
@@ -35,7 +47,7 @@ export class SelectOption extends AbstractMenuItem {
             this.element.classList.add('select-option');
         }
 
-        let fragment = parseHTML(`
+        let fragment = createFragment(`
             <a class="select-option__body">
                 <span class="select-option__check" data-check><i class="fas fa-check"></i></span>
                 <span data-text class="select-option__text"></span>
@@ -57,27 +69,8 @@ export class SelectOption extends AbstractMenuItem {
 
         this.element.setAttribute('aria-role', 'option');
 
-        this.toggle = "inherit";
-        this.autoActivate = true;
-        this.openOnHover = true;
-        this.delay = 0;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnSelect = false;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = false;
-        this.timeout = false;
-        // noinspection JSUnusedGlobalSymbols
-        this.clearSubItemsOnHover = true;
-
-        // noinspection JSUnusedGlobalSymbols
-        this.MenuItemClass = null;
-        // noinspection JSUnusedGlobalSymbols
-        this.SubMenuClass = null;
-
-        this.autoDeactivateItems = "auto";
-
         this.registerTopics();
-        this.parseDOM();
+        // this.parseDOM();
 
         if(value !== null && value !== undefined) {
             this.value = value;
@@ -124,7 +117,7 @@ export class SelectOption extends AbstractMenuItem {
             <a data-text>${text}</a>
         </div>`;
 
-        let fragment = parseHTML(html);
+        let fragment = createFragment(html);
 
         return fragment.children[0];
     }
@@ -271,6 +264,14 @@ export class SelectOption extends AbstractMenuItem {
     get isNavigable() {
         return !this.isDisabled && this.isVisible && !this.isFiltered;
     }
+
+    constructMenuItem(config) {
+        return new MenuItem(config);
+    }
+
+    constructSubMenu(config) {
+        return new Menu(config);
+    }
 }
 
 
@@ -312,9 +313,16 @@ export class SelectMenu extends AbstractMenu {
                 target, filter=null, placeholder="No Items Found", filterDelay=500,
                 filterPlaceholderText="Search", toggle=false, enableShiftSelect=true, enableCtrlToggle=true, clearOldSelection=false, ...context
     }={}) {
-        super();
-        // noinspection JSUnusedGlobalSymbols
-        this.MenuItemClass = SelectOption;
+        super({
+            closeOnBlur: false,
+            timeout: false,
+            autoActivate: true,
+            openOnHover: false,
+            multiSelect: "inherit",
+            closeOnSelect: false,
+            delay: 0,
+            positioner: "inherit",
+        });
 
         if(target) {
             if(typeof target === 'string') {
@@ -331,20 +339,6 @@ export class SelectMenu extends AbstractMenu {
         this.footer = findChild(this.element, '[data-footer]');
         this.filterInput = null;
 
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = false;
-        this.timeout = false;
-        // noinspection JSUnusedGlobalSymbols
-        this.autoActivate = true;
-        // noinspection JSUnusedGlobalSymbols
-        this.openOnHover = false;
-        this.multiSelect = "inherit";
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnSelect = false;
-        // noinspection JSUnusedGlobalSymbols
-        this.delay = 0;
-        this.positioner = "inherit";
-
         this.enableShiftSelect = enableShiftSelect;
         this.enableCtrlToggle = enableCtrlToggle;
         this.clearOldSelection = clearOldSelection;
@@ -358,6 +352,7 @@ export class SelectMenu extends AbstractMenu {
         this.isVisible = false;
 
         this.registerTopics();
+        this.parseDOM();
         this.init();
 
         if(filter) {
@@ -376,7 +371,7 @@ export class SelectMenu extends AbstractMenu {
             </div>
         `;
 
-        let fragment = parseHTML(html);
+        let fragment = createFragment(html);
         return fragment.children[0];
     }
 
@@ -594,18 +589,12 @@ export class SelectMenu extends AbstractMenu {
         });
     }
 
-    setContent(content) {
-        emptyElement(this.element);
+    constructMenuItem(config) {
+        return new SelectOption(config);
+    }
 
-        if(typeof content === 'string') {
-            this.element.innerHTML = content;
-        } else {
-            this.element.appendChild(content);
-        }
-
-        this.header = findChild(this.element, '[data-header]');
-        this.body = findChild(this.element, '[data-body]');
-        this.footer = findChild(this.element, '[data-footer]');
+    constructSubMenu(config) {
+        return new SelectMenu(config);
     }
 }
 
@@ -752,19 +741,44 @@ export class AbstractSelect extends AbstractMenuItem {
         }
 
         // todo move into constructor.
-        let config = this.getAttributes(element);
+        let config = this.getAttributes(element),
+            children = [];
 
-        let fragment = document.createDocumentFragment();
-
-        while(element.firstChild) fragment.appendChild(element.firstChild);
+        for(let child of [...element.children]) {
+            if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+                element.removeChild(child);
+                children.push(child);
+            }
+        }
 
         let instance = new this({
            ...config,
            target: element
         });
 
-        instance.submenu.setContent(fragment);
+        for(let child of children) {
+            if(child.hasAttribute('data-menuitem')) {
+                let item = instance.constructMenuItem({target: child});
+                instance.append(item);
+            } else {
+                instance.append(child);
+            }
+        }
+
+        return instance;
     }
+
+    /**
+     * @abstract
+     * @param config
+     */
+    constructMenuItem(config) {}
+
+    /**
+     * @abstract
+     * @param config
+     */
+    constructSubMenu(config) {}
 }
 
 
@@ -776,62 +790,58 @@ const RICH_SELECT_SCHEMA = new AttributeSchema({
 
 export class RichSelect extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5}={}) {
-        super();
+        super({
+            toggle: true,
+            autoActivate: false,
+            openOnHover: false,
+            delay: false,
+            timeout,
+            closeOnBlur: true,
+            clearSubItemsOnHover: false,
+            positioner: positioners.DROPDOWN,
+            closeOnSelect: true
+        });
 
-        // if(target) {
-        //     this.element = target;
-        //
-        //     if(this.element.nodeName === 'INPUT') {
-        //         this.textbox = this.element;
-        //     } else {
-        //         this.textbox = this.element.querySelector('[data-text]');
-        //     }
-        // } else {
-        //     let {element, textbox} = this.render();
-        //     this.element = element;
-        //     this.textbox = textbox;
-        // }
-
-        let submenuContent = document.createDocumentFragment();
+        let submenu = null;
 
         if(target) {
             if(typeof target === 'string') target = document.querySelector(target);
 
+            submenu = findChild(target, '[data-menu]');
 
+            if(submenu) {
+                target.removeChild(submenu);
+            }
+
+            this.element = target;
+
+            if(this.element.nodeName === 'INPUT') {
+                this.textbox = this.element;
+            } else {
+                let button = findChild(this.element, '[data-button]');
+
+                if(!button) {
+                    this.element.appendChild(this.render());
+                }
+            }
         } else {
-            let {element, textbox} = this.render();
-            this.element = element;
-            this.textbox = textbox;
+            this.element = document.createElement('div');
+            this.element.appendChild(this.render());
+        }
+
+        if(!this.textbox) {
+            this.textbox = this.element.querySelector('input, [data-text]');
         }
 
         this.textbox.readOnly = true;
 
-        this.toggle = true;
-        this.autoActivate = false;
-        this.openOnHover = false;
-        this.delay = false;
-        this.timeout = timeout;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = true;
-        this.positioner = positioners.DROPDOWN;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnSelect = true;
         this._label = '';
-        // noinspection JSUnusedGlobalSymbols
-        this.clearSubItemsOnHover = false;
-
-        this.SubMenuClass = SelectMenu;
 
         this.element.tabIndex = 0;
 
-        this.parseDOM();
+        this.attachSubMenu(this.constructSubMenu({target: submenu}));
 
-        if(!this.submenu) {
-            let submenu = new this.SubMenuClass();
-            this.attachSubMenu(submenu);
-        }
-
-        this.submenu.classList.add('combobox__menu');
+        this.classList.add('rich-select');
 
         if(!widget) {
             this.widget = new MultiHiddenInputWidget();
@@ -855,18 +865,12 @@ export class RichSelect extends AbstractSelect {
     }
 
     render(context) {
-        let element = `
-        <div class="combobox">
-            <input type="text" class="combobox__input" data-text />
-            <span class="combobox__caret"><i class="fas fa-caret-down"></i></span>
+        return createFragment(`
+        <div class="select-button">
+            <input type="text" class="select-button__input" data-text />
+            <span class="select-button__caret"><i class="fas fa-caret-down"></i></span>
         </div>
-        `;
-
-        element = parseHTML(element).children[0];
-        return {
-            element: element,
-            textbox: element.querySelector('[data-text]')
-        };
+        `);
     }
 
     refreshUI() {
@@ -938,49 +942,65 @@ export class RichSelect extends AbstractSelect {
             ...RICH_SELECT_SCHEMA.deserialize(element.dataset)
         };
     }
+
+    constructMenuItem(config) {
+        return new SelectOption(config);
+    }
+
+    constructSubMenu(config) {
+        return new SelectMenu(config);
+    }
 }
 
 
 export class MultiComboBox extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500}={}) {
-        super();
+        super({
+            toggle: true,
+            autoActivate: false,
+            openOnHover: false,
+            delay: false,
+            timeout,
+            closeOnBlur: true,
+            positioner: positioners.DROPDOWN,
+            closeOnSelect: false,
+            multiSelect: true,
+            clearSubItemsOnHover: false
+        });
 
         this.optionToPillMap = new WeakMap();
         this.pilltoOptionMap = new WeakMap();
 
+        let submenu = null;
+
         if(target) {
+            if(typeof target === 'string') target = document.querySelector(target);
+
+            submenu = findChild(target, '[data-menu]');
+
+            if(submenu) {
+                target.removeChild(submenu);
+            }
+
             this.element = target;
-            this.textbox = this.element.querySelector('[data-text]');
-            this.body = this.element.querySelector('.multi-combo-box__body');
+
+            let button = findChild(this.element, '[data-button]');
+
+            if(!button) {
+                this.element.appendChild(this.render());
+            }
         } else {
-            let {element, textbox, body} = this.render();
-            this.element = element;
-            this.textbox = textbox;
-            this.body = body;
+            this.element = document.createElement('div');
+            this.element.appendChild(this.render());
         }
 
-        this.toggle = true;
-        this.autoActivate = false;
-        this.openOnHover = false;
-        this.delay = false;
-        this.timeout = timeout;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnBlur = true;
-        this.positioner = positioners.DROPDOWN;
-        // noinspection JSUnusedGlobalSymbols
-        this.closeOnSelect = false;
-        this.multiSelect = true;
-        // noinspection JSUnusedGlobalSymbols
-        this.clearSubItemsOnHover = false;
-
-        this.SubMenuClass = SelectMenu;
+        this.textbox = this.element.querySelector('[data-text]');
+        this.body = this.element.querySelector('[data-body]');
+        this.element.classList.add('multi-combo-box');
 
         this.parseDOM();
 
-        if(!this.submenu) {
-            this.submenu = new this.SubMenuClass();
-            this.attachSubMenu(this.submenu);
-        }
+        this.attachSubMenu(this.constructSubMenu({target: submenu}));
 
         this.submenu.multiSelect = true;
         this.submenu.toggle = true;
@@ -1044,20 +1064,12 @@ export class MultiComboBox extends AbstractSelect {
 
     render(context) {
         let html = `
-            <div class="multi-combo-box">
-                <div class="multi-combo-box__body">
-                    <input type="text" class="multi-combo-box__input" data-text />
-                </div>
+            <div class="multi-combo-box__button" data-body>
+                <input type="text" class="multi-combo-box__input" data-text />
             </div>
         `;
 
-        let element = parseHTML(html).children[0];
-
-        return {
-            element: element,
-            textbox: element.querySelector('[data-text]'),
-            body: element.querySelector('.multi-combo-box__body')
-        };
+        return createFragment(html);
     }
 
     _buildChoicePill(text) {
@@ -1202,6 +1214,14 @@ export class MultiComboBox extends AbstractSelect {
 
         this.refreshUI();
     }
+
+    constructMenuItem(config) {
+        return new SelectOption(config);
+    }
+
+    constructSubMenu(config) {
+        return new SelectMenu(config);
+    }
 }
 
 
@@ -1215,6 +1235,9 @@ export class ComboBox extends RichSelect {
             multiple: false,
             filter: null
         });
+
+        this.element.classList.add('combo-box');
+        this.element.classList.remove('rich-select');
 
         this.wait = wait;
         this.filter = filter;
@@ -1328,6 +1351,6 @@ export class ComboBox extends RichSelect {
 }
 
 
-AutoLoader.register('select', (element) => RichSelect.FromHTML(element));
-AutoLoader.register('combobox', (element) => ComboBox.FromHTML(element));
-AutoLoader.register('multi-combobox', (element) => MultiComboBox.FromHTML(element));
+AutoLoader.register('select', (element) => RichSelect.ConstructFromHTML(element));
+AutoLoader.register('combobox', (element) => ComboBox.ConstructFromHTML(element));
+AutoLoader.register('multi-combobox', (element) => MultiComboBox.ConstructFromHTML(element));

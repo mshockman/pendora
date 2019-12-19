@@ -339,38 +339,47 @@ pageClass: menu_page_index
 </article>
 
 <article class="example">
-<h2>ComboBox</h2>
-<p>
-    A text input control with a drop down menu.
-</p>
+    <h2>ComboBox</h2>
+    <p>
+        A text input control with a drop down menu.
+    </p>
 
-<ul data-init="combobox" data-window-bind="testcb" data-name="test">
-    <li data-value="1">Apple</li>
-    <li data-value="2">Orange</li>
-    <li data-value="3">Cherry</li>
-    <li data-value="4">Blueberry</li>
-    <li data-value="5">Pineapple</li>
-</ul>
+    <div class="test" data-init="combobox" id="test4">
+        <div data-menuitem data-value="1" data-selected>Apple</div>
+        <div data-menuitem data-value="2">Orange</div>
+        <div data-menuitem data-value="3">Cherry</div>
+        <div data-menuitem data-value="4">Blueberry</div>
+        <div data-menuitem data-value="5">Pineapple</div>
+        <hr class="separator" />
+        <div data-menuitem data-value="6">Grape</div>
+        <div data-menuitem data-value="7">Avacado</div>
+        <div data-menuitem data-value="8">Peach</div>
+        <div data-menuitem data-value="9">Pear</div>
+        <div data-menuitem data-value="10">Watermelon</div>
+    </div>
+
 </article>
 
 <article class="example">
-<h2>MultiComboBox</h2>
-<p>
-    A text input control with a drop down menu.
-</p>
+    <h2>MultiComboBox</h2>
+    <p>
+        A text input control with a drop down menu.
+    </p>
 
-<ul data-init="multi-combobox" data-window-bind="testms" data-name="test">
-    <li data-value="1">Apple</li>
-    <li data-value="2">Orange</li>
-    <li data-value="3">Cherry</li>
-    <li data-value="4">Blueberry</li>
-    <li data-value="5">Pineapple</li>
-    <li data-value="6">Grape</li>
-    <li data-value="7">Avacado</li>
-    <li data-value="8">Peach</li>
-    <li data-value="9">Pear</li>
-    <li data-value="10">Watermelon</li>
-</ul>
+    <div class="test" data-init="multi-combobox" id="test3">
+        <div data-menuitem data-value="1" data-selected>Apple</div>
+        <div data-menuitem data-value="2">Orange</div>
+        <div data-menuitem data-value="3">Cherry</div>
+        <div data-menuitem data-value="4">Blueberry</div>
+        <div data-menuitem data-value="5">Pineapple</div>
+        <hr class="separator" />
+        <div data-menuitem data-value="6">Grape</div>
+        <div data-menuitem data-value="7">Avacado</div>
+        <div data-menuitem data-value="8">Peach</div>
+        <div data-menuitem data-value="9">Pear</div>
+        <div data-menuitem data-value="10">Watermelon</div>
+    </div>
+
 </article>
 
 <article class="example">
@@ -379,19 +388,18 @@ pageClass: menu_page_index
         An replacement for the default select element that allows for more control over the style of the menu and layout
         of the items.
     </p>
-    <div>
-        <ul data-init="select" data-name="test2" data-window-bind="testSelect" data-max-items="3">
-            <li data-value="1">Apple</li>
-            <li data-value="2">Orange</li>
-            <li data-value="3">Cherry</li>
-            <li data-value="4">Blueberry</li>
-            <li data-value="5">Pineapple</li>
-            <li data-value="6">Grape</li>
-            <li data-value="7">Avacado</li>
-            <li data-value="8">Peach</li>
-            <li data-value="9">Pear</li>
-            <li data-value="10">Watermelon</li>
-        </ul>
+    <div class="test" data-init="select" id="test2" data-multiple="false">
+        <div data-menuitem data-value="1" data-selected>Apple</div>
+        <div data-menuitem data-value="2">Orange</div>
+        <div data-menuitem data-value="3">Cherry</div>
+        <div data-menuitem data-value="4">Blueberry</div>
+        <div data-menuitem data-value="5">Pineapple</div>
+        <hr class="separator" />
+        <div data-menuitem data-value="6">Grape</div>
+        <div data-menuitem data-value="7">Avacado</div>
+        <div data-menuitem data-value="8">Peach</div>
+        <div data-menuitem data-value="9">Pear</div>
+        <div data-menuitem data-value="10">Watermelon</div>
     </div>
 </article>
 
@@ -402,22 +410,8 @@ pageClass: menu_page_index
         An replacement for the default select element that allows for more control over the style of the menu and layout
         of the items.
     </p>
-    <div>
-        <ul data-init="select" data-multiple="true" data-name="test3" data-window-bind="testSelect" data-max-items="3">
-            <li data-value="1">Apple</li>
-            <li data-value="2">Orange</li>
-            <li data-value="3">Cherry</li>
-            <li data-value="4">Blueberry</li>
-            <li data-value="5">Pineapple</li>
-            <li data-value="6">Grape</li>
-            <li data-value="7">Avacado</li>
-            <li data-value="8">Peach</li>
-            <li data-value="9">Pear</li>
-            <li data-value="10">Watermelon</li>
-        </ul>
-    </div>
 
-    <div class="test" data-init="combobox" id="1">
+    <div class="test" data-init="select" id="test1" data-multiple="true">
         <div data-menuitem data-value="1" data-selected>Apple</div>
         <div data-menuitem data-value="2">Orange</div>
         <div data-menuitem data-value="3">Cherry</div>

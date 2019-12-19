@@ -1,44 +1,32 @@
 import Menu, {AbstractMenu} from "./Menu";
-import MenuItem from './MenuItem';
+import MenuItem, {AbstractMenuItem} from './MenuItem';
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
+import {createFragment} from "../core/utility";
+
+
+export class MenuBarItem extends MenuItem {
+    render({text='', nodeName='div'}={}) {
+        let fragment = createFragment(`
+            <${nodeName} class="menuitem">
+                <a class="menuitem__button" data-button>${text}</a>
+            </${nodeName}>
+        `);
+
+        return fragment.children[0];
+    }
+}
 
 
 export default class MenuBar extends AbstractMenu {
     constructor({target=null, closeOnBlur=true, timeout=false, autoActivate=false, multiple=false, openOnHover=true,
                     toggle=true, closeOnSelect=true, delay=false, enableKeyboardNavigation=true, ...context}={}) {
 
-        class SubMenuClass extends Menu {
-            constructor(args={}) {
-                super({
-                    delay,
-                    SubMenuClass: SubMenuClass,
-                    MenuItemClass: MenuItemClass,
-                    ...args
-                });
-            }
-        }
-
-        class MenuItemClass extends MenuItem {
-            constructor(args={}) {
-                super({
-                    MenuItemClass: MenuItemClass,
-                    SubMenuClass: SubMenuClass,
-                    ...args
-                })
-            }
-        }
-
         super({
             closeOnBlur, timeout, autoActivate, openOnHover, toggle, closeOnSelect, delay,
             positioner: positioners.DROPDOWN,
-            direction: 'horizontal',
-            SubMenuClass: SubMenuClass,
-            MenuItemClass: MenuItemClass
+            direction: 'horizontal'
         });
-
-        this.positioner = positioners.DROPDOWN;
-        this.direction = 'horizontal';
 
         if(target) {
             this.element = target;
@@ -65,6 +53,14 @@ export default class MenuBar extends AbstractMenu {
 
     getMenuBody() {
         return [this.element];
+    }
+
+    constructMenuItem(config) {
+        return new MenuBarItem(config);
+    }
+
+    constructSubMenu(config) {
+        return new Menu(config);
     }
 }
 

@@ -10,7 +10,7 @@ import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance
  * @extends {Publisher}
  */
 export default class MenuNode extends Publisher {
-    constructor() {
+    constructor(data={}) {
         super();
         this._parent = null;
         this._children = [];
@@ -26,10 +26,10 @@ export default class MenuNode extends Publisher {
 
         this.nodeType = null;
         this.isController = false;
+        // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
 
-        this.SubMenuClass = null;
-        this.MenuItemClass = null;
+        Object.assign(this, data);
     }
 
     /**
@@ -186,6 +186,7 @@ export default class MenuNode extends Publisher {
         return this.root === this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get enabledChildren() {
         return this.children.filter(item => !item.isDisabled);
     }
@@ -911,10 +912,10 @@ export default class MenuNode extends Publisher {
                     if(hasMenuAttribute && hasMenuItemAttribute) {
                         throw new Error("Element cannot be both a menuitem and a menu.");
                     } else if(hasMenuAttribute) {
-                        let menu = this.SubMenuClass.FromHTML(child);
+                        let menu = this.constructSubMenu({target: child});
                         menu.setParent(this);
                     } else if(hasMenuItemAttribute) {
-                        let item = this.MenuItemClass.FromHTML(child);
+                        let item = this.constructMenuItem({target: child});
                         item.setParent(this);
                     } else {
                         walk(child);
@@ -924,6 +925,22 @@ export default class MenuNode extends Publisher {
         };
 
         walk(this.element);
+    }
+
+    /**
+     * @abstract
+     * @param config
+     */
+    constructMenuItem(config) {
+
+    }
+
+    /**
+     * @abstract
+     * @param config
+     */
+    constructSubMenu(config) {
+
     }
 
     /**
@@ -953,6 +970,7 @@ export default class MenuNode extends Publisher {
         return getMenuInstance(element);
     }
 
+    // noinspection JSUnusedLocalSymbols
     static getAttributes(element) {
         return {};
     }
