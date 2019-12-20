@@ -177,13 +177,7 @@ export class AbstractMenu extends MenuNode {
         if(!this.isVisible) {
             this.isVisible = true;
 
-            if(this.parent) this.parent.publish('submenu.show', this);
-            this.publish('menu.show', this);
-
-            this.element.dispatchEvent(new CustomEvent('menu.show', {
-                detail: this,
-                bubbles: true
-            }));
+            this.dispatchTopic('menu.show', {target: this});
         }
     }
 
@@ -191,13 +185,7 @@ export class AbstractMenu extends MenuNode {
         if(this.isVisible) {
             this.isVisible = false;
 
-            if(this.parent) this.parent.publish('submenu.hide', this);
-            this.publish('menu.hide', this);
-
-            this.element.dispatchEvent(new CustomEvent('menu.hide', {
-                detail: this,
-                bubbles: true
-            }));
+            this.dispatchTopic('menu.hide', {target: this});
         }
     }
 

@@ -56,6 +56,7 @@ export class SelectOption extends AbstractMenuItem {
         `);
 
         this.element.appendChild(fragment);
+        this.element.classList.add('select-option');
         this.textNode = this.element.querySelector('[data-text]');
 
         // If initializing the object from a target element
@@ -1026,7 +1027,7 @@ export class MultiComboBox extends AbstractSelect {
         this._applyFilter = () => {
             this._filterTimer = null;
 
-            this.submenu.filter(filter(this.textbox.value));
+            this.submenu.filter(filter(this.getFilterValue()));
 
             if(this.submenu.activeItem) this.submenu.activeItem.deactivate();
         };
@@ -1045,6 +1046,22 @@ export class MultiComboBox extends AbstractSelect {
         });
     }
 
+    getFilterValue() {
+        if(this.textbox.nodeName === "INPUT") {
+            return this.textbox.value;
+        } else {
+            return this.textbox.innerText;
+        }
+    }
+
+    setFilterValue(value) {
+        if(this.textbox.nodeName === "INPUT") {
+            this.textbox.value = value;
+        } else {
+            this.textbox.innerText = value;
+        }
+    }
+
     registerTopics() {
         super.registerTopics();
 
@@ -1058,14 +1075,22 @@ export class MultiComboBox extends AbstractSelect {
                 option.optionDeselect();
             }
 
+            topic.originalEvent.preventDefault();
             this.textbox.focus();
         });
+
+        this.on('menu.hide', topic => {
+            if(topic.target === this.submenu) {
+                this.setFilterValue("");
+                this.submenu.clearFilter();
+            }
+        })
     }
 
     render(context) {
         let html = `
             <div class="multi-combo-box__button" data-body>
-                <input type="text" class="multi-combo-box__input" data-text />
+                <div contenteditable="true" class="multi-combo-box__input" data-text />
             </div>
         `;
 
@@ -1102,7 +1127,7 @@ export class MultiComboBox extends AbstractSelect {
             return;
         }
 
-        if(event.key === "Backspace" && this.textbox.value === "") {
+        if(event.key === "Backspace" && this.getFilterValue() === "") {
             let pills = this.body.querySelectorAll('.multi-combo-box__pill'),
                 pill = pills[pills.length-1],
                 option = pill ? this.pilltoOptionMap.get(pill) : null;
@@ -1111,6 +1136,8 @@ export class MultiComboBox extends AbstractSelect {
                 option.optionDeselect();
             }
         } else if(event.key === 'Enter') {
+            event.preventDefault();
+
             if(this._filterTimer) {
                 clearTimeout(this._filterTimer);
                 this._filterTimer = null;
@@ -1137,7 +1164,7 @@ export class MultiComboBox extends AbstractSelect {
                 }
 
                 if(!activeItem) {
-                    this.textbox.value = "";
+                    this.setFilterValue("");
                     this.submenu.clearFilter();
                     this.submenu.position();
 

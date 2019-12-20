@@ -2387,7 +2387,7 @@ function () {
 /*!*****************************!*\
   !*** ./src/core/utility.js ***!
   \*****************************/
-/*! exports provided: clamp, modulo, proto, randomChoice, arraysEqual, parseHTML, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
+/*! exports provided: clamp, modulo, proto, randomChoice, arraysEqual, parseHTML, createFragment, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2398,6 +2398,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomChoice", function() { return randomChoice; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return arraysEqual; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseHTML", function() { return parseHTML; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFragment", function() { return createFragment; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return isEmptyObject; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "emptyElement", function() { return emptyElement; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addClasses", function() { return addClasses; });
@@ -2494,6 +2495,7 @@ function arraysEqual(array1, array2) {
 /**
  * Parses an html string into a document fragment.
  *
+ * @deprecated
  * @param html
  * @return {DocumentFragment}
  */
@@ -2514,6 +2516,10 @@ function parseHTML(html) {
 
     return fragment;
   }
+}
+function createFragment(html) {
+  // noinspection JSDeprecatedSymbols
+  return parseHTML(html);
 }
 /**
  * Tests to see if the object is empty.
@@ -2924,7 +2930,7 @@ function choice() {
  * Returns first child element that matches the test function.
  * @param element - Parent element
  * @param fn {Function|String} - Test Function
- * @returns {Element|null}
+ * @returns {HTMLElement|Element|null}
  */
 
 function findChild(element, fn) {
@@ -5106,19 +5112,16 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           _ref$closeOnSelect = _ref.closeOnSelect,
           closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
           _ref$delay = _ref.delay,
-          delay = _ref$delay === void 0 ? false : _ref$delay,
+          delay = _ref$delay === void 0 ? "inherit" : _ref$delay,
           _ref$positioner = _ref.positioner,
           positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
           _ref$direction = _ref.direction,
           direction = _ref$direction === void 0 ? "vertical" : _ref$direction,
-          _ref$SubMenuClass = _ref.SubMenuClass,
-          SubMenuClass = _ref$SubMenuClass === void 0 ? null : _ref$SubMenuClass,
-          _ref$MenuItemClass = _ref.MenuItemClass,
-          MenuItemClass = _ref$MenuItemClass === void 0 ? null : _ref$MenuItemClass;
+          data = _objectWithoutProperties(_ref, ["closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "positioner", "direction"]);
 
       _classCallCheck(this, AbstractMenu);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this, data));
 
       _initialize(_assertThisInitialized(_this));
 
@@ -5140,8 +5143,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.positioner = positioner;
       _this.direction = direction;
-      _this.SubMenuClass = SubMenuClass;
-      _this.MenuItemClass = MenuItemClass;
       return _this;
     }
 
@@ -5155,6 +5156,13 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
       key: "positioner",
       value: void 0
+    }, {
+      kind: "field",
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      key: "delay",
+      value: function value() {
+        return false;
+      }
     }, {
       kind: "method",
       key: "registerTopics",
@@ -5322,12 +5330,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       value: function show() {
         if (!this.isVisible) {
           this.isVisible = true;
-          if (this.parent) this.parent.publish('submenu.show', this);
-          this.publish('menu.show', this);
-          this.element.dispatchEvent(new CustomEvent('menu.show', {
-            detail: this,
-            bubbles: true
-          }));
+          this.dispatchTopic('menu.show', {
+            target: this
+          });
         }
       }
     }, {
@@ -5336,12 +5341,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       value: function hide() {
         if (this.isVisible) {
           this.isVisible = false;
-          if (this.parent) this.parent.publish('submenu.hide', this);
-          this.publish('menu.hide', this);
-          this.element.dispatchEvent(new CustomEvent('menu.hide', {
-            detail: this,
-            bubbles: true
-          }));
+          this.dispatchTopic('menu.hide', {
+            target: this
+          });
         }
       }
     }, {
@@ -5935,7 +5937,7 @@ function (_AbstractMenu) {
    * @param delay {Boolean|Number}
    * @param id {String}
    * @param children {Array}
-   * @param context
+   * @param data
    */
   function Menu() {
     var _this5;
@@ -5959,34 +5961,27 @@ function (_AbstractMenu) {
         delay = _ref2$delay === void 0 ? 0 : _ref2$delay,
         _ref2$children = _ref2.children,
         children = _ref2$children === void 0 ? null : _ref2$children,
-        _ref2$MenuClass = _ref2.MenuClass,
-        MenuClass = _ref2$MenuClass === void 0 ? Menu : _ref2$MenuClass,
-        _ref2$MenuItemClass = _ref2.MenuItemClass,
-        MenuItemClass = _ref2$MenuItemClass === void 0 ? _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"] : _ref2$MenuItemClass,
-        context = _objectWithoutProperties(_ref2, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "children", "MenuClass", "MenuItemClass"]);
+        data = _objectWithoutProperties(_ref2, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "children"]);
 
     _classCallCheck(this, Menu);
 
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, _objectSpread({
       closeOnBlur: closeOnBlur,
       timeout: timeout,
       autoActivate: autoActivate,
-      open: open,
       toggle: toggle,
       closeOnSelect: closeOnSelect,
       delay: delay,
       positioner: 'inherit',
       direction: 'vertical',
-      SubMenuClass: MenuClass,
-      MenuItemClass: MenuItemClass,
       openOnHover: openOnHover
-    }));
+    }, data)));
     _this5.events = null;
 
     if (target) {
       _this5.element = target;
     } else {
-      _this5.element = _this5.render(context);
+      _this5.element = _this5.render();
     }
 
     _this5.registerTopics();
@@ -6016,9 +6011,19 @@ function (_AbstractMenu) {
           _ref3$arrow = _ref3.arrow,
           arrow = _ref3$arrow === void 0 ? false : _ref3$arrow;
 
-      var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\"></div>\n            </div>\n        ");
+      var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
       var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(html);
       return fragment.children[0];
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new Menu(config);
+    }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
     }
   }]);
 
@@ -6036,23 +6041,19 @@ autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (el
 /*!*****************************!*\
   !*** ./src/menu/MenuBar.js ***!
   \*****************************/
-/*! exports provided: default */
+/*! exports provided: MenuBarItem, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MenuBarItem", function() { return MenuBarItem; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBar; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
@@ -6079,6 +6080,34 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+var MenuBarItem =
+/*#__PURE__*/
+function (_MenuItem) {
+  _inherits(MenuBarItem, _MenuItem);
+
+  function MenuBarItem() {
+    _classCallCheck(this, MenuBarItem);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(MenuBarItem).apply(this, arguments));
+  }
+
+  _createClass(MenuBarItem, [{
+    key: "render",
+    value: function render() {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref$text = _ref.text,
+          text = _ref$text === void 0 ? '' : _ref$text,
+          _ref$nodeName = _ref.nodeName,
+          nodeName = _ref$nodeName === void 0 ? 'div' : _ref$nodeName;
+
+      var fragment = Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n            <".concat(nodeName, " class=\"menuitem\">\n                <a class=\"menuitem__button\" data-button>").concat(text, "</a>\n            </").concat(nodeName, ">\n        "));
+      return fragment.children[0];
+    }
+  }]);
+
+  return MenuBarItem;
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
 var MenuBar =
 /*#__PURE__*/
 function (_AbstractMenu) {
@@ -6087,69 +6116,30 @@ function (_AbstractMenu) {
   function MenuBar() {
     var _this;
 
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$target = _ref.target,
-        target = _ref$target === void 0 ? null : _ref$target,
-        _ref$closeOnBlur = _ref.closeOnBlur,
-        closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
-        _ref$timeout = _ref.timeout,
-        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
-        _ref$autoActivate = _ref.autoActivate,
-        autoActivate = _ref$autoActivate === void 0 ? false : _ref$autoActivate,
-        _ref$multiple = _ref.multiple,
-        multiple = _ref$multiple === void 0 ? false : _ref$multiple,
-        _ref$openOnHover = _ref.openOnHover,
-        openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
-        _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? true : _ref$toggle,
-        _ref$closeOnSelect = _ref.closeOnSelect,
-        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
-        _ref$delay = _ref.delay,
-        delay = _ref$delay === void 0 ? false : _ref$delay,
-        _ref$enableKeyboardNa = _ref.enableKeyboardNavigation,
-        enableKeyboardNavigation = _ref$enableKeyboardNa === void 0 ? true : _ref$enableKeyboardNa,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
+    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref2$target = _ref2.target,
+        target = _ref2$target === void 0 ? null : _ref2$target,
+        _ref2$closeOnBlur = _ref2.closeOnBlur,
+        closeOnBlur = _ref2$closeOnBlur === void 0 ? true : _ref2$closeOnBlur,
+        _ref2$timeout = _ref2.timeout,
+        timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
+        _ref2$autoActivate = _ref2.autoActivate,
+        autoActivate = _ref2$autoActivate === void 0 ? false : _ref2$autoActivate,
+        _ref2$multiple = _ref2.multiple,
+        multiple = _ref2$multiple === void 0 ? false : _ref2$multiple,
+        _ref2$openOnHover = _ref2.openOnHover,
+        openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
+        _ref2$toggle = _ref2.toggle,
+        toggle = _ref2$toggle === void 0 ? true : _ref2$toggle,
+        _ref2$closeOnSelect = _ref2.closeOnSelect,
+        closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
+        _ref2$delay = _ref2.delay,
+        delay = _ref2$delay === void 0 ? false : _ref2$delay,
+        _ref2$enableKeyboardN = _ref2.enableKeyboardNavigation,
+        enableKeyboardNavigation = _ref2$enableKeyboardN === void 0 ? true : _ref2$enableKeyboardN,
+        context = _objectWithoutProperties(_ref2, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
 
     _classCallCheck(this, MenuBar);
-
-    var SubMenuClass =
-    /*#__PURE__*/
-    function (_Menu) {
-      _inherits(SubMenuClass, _Menu);
-
-      function SubMenuClass() {
-        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, SubMenuClass);
-
-        return _possibleConstructorReturn(this, _getPrototypeOf(SubMenuClass).call(this, _objectSpread({
-          delay: delay,
-          SubMenuClass: SubMenuClass,
-          MenuItemClass: MenuItemClass
-        }, args)));
-      }
-
-      return SubMenuClass;
-    }(_Menu__WEBPACK_IMPORTED_MODULE_0__["default"]);
-
-    var MenuItemClass =
-    /*#__PURE__*/
-    function (_MenuItem) {
-      _inherits(MenuItemClass, _MenuItem);
-
-      function MenuItemClass() {
-        var args = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, MenuItemClass);
-
-        return _possibleConstructorReturn(this, _getPrototypeOf(MenuItemClass).call(this, _objectSpread({
-          MenuItemClass: MenuItemClass,
-          SubMenuClass: SubMenuClass
-        }, args)));
-      }
-
-      return MenuItemClass;
-    }(_MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, {
       closeOnBlur: closeOnBlur,
@@ -6160,12 +6150,8 @@ function (_AbstractMenu) {
       closeOnSelect: closeOnSelect,
       delay: delay,
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
-      direction: 'horizontal',
-      SubMenuClass: SubMenuClass,
-      MenuItemClass: MenuItemClass
+      direction: 'horizontal'
     }));
-    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"];
-    _this.direction = 'horizontal';
 
     if (target) {
       _this.element = target;
@@ -6198,6 +6184,16 @@ function (_AbstractMenu) {
     value: function getMenuBody() {
       return [this.element];
     }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new MenuBarItem(config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new _Menu__WEBPACK_IMPORTED_MODULE_0__["default"](config);
+    }
   }]);
 
   return MenuBar;
@@ -6229,10 +6225,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
@@ -6242,6 +6234,10 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6315,12 +6311,25 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
   function (_MenuNode2) {
     _inherits(AbstractMenuItem, _MenuNode2);
 
-    function AbstractMenuItem() {
+    function AbstractMenuItem(_ref) {
       var _this;
+
+      var targetKey = _ref.targetKey,
+          toggle = _ref.toggle,
+          autoActivate = _ref.autoActivate,
+          openOnHover = _ref.openOnHover,
+          delay = _ref.delay,
+          closeOnSelect = _ref.closeOnSelect,
+          closeOnBlur = _ref.closeOnBlur,
+          timeout = _ref.timeout,
+          positioner = _ref.positioner,
+          clearSubItemsOnHover = _ref.clearSubItemsOnHover,
+          autoDeactivateItems = _ref.autoDeactivateItems,
+          data = _objectWithoutProperties(_ref, ["targetKey", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "timeout", "positioner", "clearSubItemsOnHover", "autoDeactivateItems"]);
 
       _classCallCheck(this, AbstractMenuItem);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this, data));
       /**
        * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
        * @type {null|String}
@@ -6328,71 +6337,71 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
       _initialize(_assertThisInitialized(_this));
 
-      _this.targetKey = null;
+      _this.targetKey = targetKey;
       /**
        * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
        * will toggle both on and off and none will cause the item to not be toggleable.
        * @type {string}
        */
 
-      _this.toggle = true;
+      _this.toggle = toggle;
       /**
        * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
        * When the parent is active, openOnHover is used instead.
        * @type {string|Number|Boolean}
        */
 
-      _this.autoActivate = false;
+      _this.autoActivate = autoActivate;
       /**
        * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
        * See autoActivate for more details.
        * @type {string}
        */
 
-      _this.openOnHover = false;
+      _this.openOnHover = openOnHover;
       /**
        * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
        * @type {string|Number|Boolean}
        */
 
-      _this.delay = false;
+      _this.delay = delay;
       /**
        * If true the item will close when a descendent menuitem is selected.
        * @type {boolean}
        */
 
-      _this.closeOnSelect = false;
+      _this.closeOnSelect = closeOnSelect;
       /**
        * If true the menuitem will close when the user clicks the page outside of the item.
        * @type {boolean}
        */
 
-      _this.closeOnBlur = false;
+      _this.closeOnBlur = closeOnBlur;
       /**
        * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
        * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
        * @type {boolean|Number}
        */
 
-      _this.timeout = false;
+      _this.timeout = timeout;
       /**
        * A function that is used to position the menuitem's submenu.
        * @type {null|Function}
        */
 
-      _this.positioner = "inherit";
+      _this.positioner = positioner;
       /**
        * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
        * @type {boolean}
        */
 
-      _this.clearSubItemsOnHover = true;
+      _this.clearSubItemsOnHover = clearSubItemsOnHover;
       /**
        * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
        * @type {boolean}
        */
 
-      _this.autoDeactivateItems = true;
+      _this.autoDeactivateItems = autoDeactivateItems;
       return _this;
     }
 
@@ -6658,6 +6667,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         submenu._parent = this;
         this._children = [submenu];
+        this.element.classList.add('has-submenu');
 
         if (!submenu.element.parentElement) {
           submenu.appendTo(this.element);
@@ -6682,6 +6692,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           if (remove) submenu.remove();
         }
 
+        this.element.classList.remove('has-submenu');
         return submenu;
       }
       /**
@@ -6850,18 +6861,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
     }, {
       kind: "get",
-      key: "button",
-      value: function button() {
-        if (!this._button) {
-          this._button = Array.prototype.slice.call(this.element.children).find(function (node) {
-            return node.matches("button, a, .btn, [data-role='button']");
-          });
-        }
-
-        return this._button;
-      }
-    }, {
-      kind: "get",
       key: "submenu",
       value: function submenu() {
         return this._children[0];
@@ -6885,13 +6884,33 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "get",
       key: "text",
       value: function text() {
-        return this.button.innerText;
+        return this.textContainer.innerText;
       }
     }, {
       kind: "set",
       key: "text",
       value: function text(value) {
-        this.button.innerText = value;
+        this.textContainer.innerText = value;
+      }
+    }, {
+      kind: "get",
+      key: "href",
+      value: function href() {
+        if (this.button.nodeName === "A") {
+          return this.button.href;
+        } else {
+          return null;
+        }
+      }
+    }, {
+      kind: "set",
+      key: "href",
+      value: function href(value) {
+        if (this.button.nodeName === 'A') {
+          this.button.href = value;
+        } else {
+          throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
+        }
       }
     }, {
       kind: "method",
@@ -6924,103 +6943,117 @@ function (_AbstractMenuItem) {
   function MenuItem() {
     var _this6;
 
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        target = _ref.target,
-        text = _ref.text,
-        action = _ref.action,
-        _ref$href = _ref.href,
-        href = _ref$href === void 0 ? null : _ref$href,
-        _ref$toggle = _ref.toggle,
-        toggle = _ref$toggle === void 0 ? "inherit" : _ref$toggle,
-        _ref$autoActivate = _ref.autoActivate,
-        autoActivate = _ref$autoActivate === void 0 ? "inherit" : _ref$autoActivate,
-        _ref$openOnHover = _ref.openOnHover,
-        openOnHover = _ref$openOnHover === void 0 ? "inherit" : _ref$openOnHover,
-        _ref$delay = _ref.delay,
-        delay = _ref$delay === void 0 ? 'inherit' : _ref$delay,
-        _ref$closeOnSelect = _ref.closeOnSelect,
-        closeOnSelect = _ref$closeOnSelect === void 0 ? false : _ref$closeOnSelect,
-        _ref$closeOnBlur = _ref.closeOnBlur,
-        closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
-        classes = _ref.classes,
-        _ref$timeout = _ref.timeout,
-        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
-        _ref$nodeName = _ref.nodeName,
-        nodeName = _ref$nodeName === void 0 ? "div" : _ref$nodeName,
-        _ref$positioner = _ref.positioner,
-        positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
-        _ref$SubMenuClass = _ref.SubMenuClass,
-        SubMenuClass = _ref$SubMenuClass === void 0 ? _Menu__WEBPACK_IMPORTED_MODULE_2__["default"] : _ref$SubMenuClass,
-        _ref$MenuItemClass = _ref.MenuItemClass,
-        MenuItemClass = _ref$MenuItemClass === void 0 ? MenuItem : _ref$MenuItemClass,
-        context = _objectWithoutProperties(_ref, ["target", "text", "action", "href", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "classes", "timeout", "nodeName", "positioner", "SubMenuClass", "MenuItemClass"]);
+    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        target = _ref2.target,
+        text = _ref2.text,
+        action = _ref2.action,
+        _ref2$href = _ref2.href,
+        href = _ref2$href === void 0 ? null : _ref2$href,
+        _ref2$toggle = _ref2.toggle,
+        toggle = _ref2$toggle === void 0 ? "inherit" : _ref2$toggle,
+        _ref2$autoActivate = _ref2.autoActivate,
+        autoActivate = _ref2$autoActivate === void 0 ? "inherit" : _ref2$autoActivate,
+        _ref2$openOnHover = _ref2.openOnHover,
+        openOnHover = _ref2$openOnHover === void 0 ? "inherit" : _ref2$openOnHover,
+        _ref2$delay = _ref2.delay,
+        delay = _ref2$delay === void 0 ? 'inherit' : _ref2$delay,
+        _ref2$closeOnSelect = _ref2.closeOnSelect,
+        closeOnSelect = _ref2$closeOnSelect === void 0 ? false : _ref2$closeOnSelect,
+        _ref2$closeOnBlur = _ref2.closeOnBlur,
+        closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
+        _ref2$timeout = _ref2.timeout,
+        timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
+        _ref2$nodeName = _ref2.nodeName,
+        nodeName = _ref2$nodeName === void 0 ? "div" : _ref2$nodeName,
+        _ref2$positioner = _ref2.positioner,
+        positioner = _ref2$positioner === void 0 ? "inherit" : _ref2$positioner;
 
     _classCallCheck(this, MenuItem);
 
-    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(MenuItem).call(this));
+    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(MenuItem).call(this, {
+      toggle: toggle,
+      autoActivate: autoActivate,
+      openOnHover: openOnHover,
+      delay: delay,
+      closeOnSelect: closeOnSelect,
+      closeOnBlur: closeOnBlur,
+      timeout: timeout,
+      positioner: positioner,
+      clearSubItemsOnHover: true,
+      autoDeactivateItems: true
+    }));
+    /**
+     * @type {null|HTMLElement}
+     */
+
+    var submenu = null;
 
     if (target) {
       _this6.element = target;
+      submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(_this6.element, '[data-menu]');
+
+      if (submenu) {
+        submenu.parentElement.removeChild(submenu);
+      }
     } else {
-      _this6.element = _this6.render(_objectSpread({
+      _this6.element = _this6.render({
         text: text,
-        nodeName: nodeName,
-        href: href
-      }, context));
+        nodeName: nodeName
+      });
     }
 
-    if (classes) {
-      _this6.addClass(classes);
-    }
-
-    if (action) _this6.addAction(action);
-    _this6.toggle = toggle;
-    _this6.autoActivate = autoActivate;
-    _this6.openOnHover = openOnHover;
-    _this6.delay = delay;
-    _this6.closeOnSelect = closeOnSelect; // noinspection JSUnusedGlobalSymbols
-
-    _this6.closeOnBlur = closeOnBlur;
-    _this6.timeout = timeout;
-    _this6.positioner = positioner; // noinspection JSUnusedGlobalSymbols
-
-    _this6.clearSubItemsOnHover = true;
-    _this6.autoDeactivateItems = true; // noinspection JSUnusedGlobalSymbols
-
-    _this6.MenuItemClass = MenuItemClass; // noinspection JSUnusedGlobalSymbols
-
-    _this6.SubMenuClass = SubMenuClass;
+    _this6.button = _this6.element.querySelector("[data-button]");
+    _this6.textContainer = _this6.element.querySelector("[data-text]");
+    _this6.altTextContainer = _this6.element.querySelector('[data-alt-text]');
+    if (href !== null) _this6.href = href;
     _this6.element.tabIndex = -1;
+    if (action) _this6.addAction(action);
 
-    _this6.registerTopics();
+    if (submenu) {
+      _this6.attachSubMenu(_this6.constructSubMenu({
+        target: submenu
+      }));
+    }
 
-    _this6.parseDOM();
+    _this6.registerTopics(); // this.parseDOM();
+
 
     return _this6;
   }
-  /**
-   * Renders the domElement.
-   *
-   * @param text {String}
-   * @param nodeName
-   * @param href
-   * @returns {HTMLElement|Element}
-   */
-
 
   _createClass(MenuItem, [{
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new MenuItem(config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new _Menu__WEBPACK_IMPORTED_MODULE_2__["default"](config);
+    }
+    /**
+     * Renders the domElement.
+     *
+     * @param text {String}
+     * @param nodeName
+     * @param href
+     * @returns {HTMLElement|Element}
+     */
+
+  }, {
     key: "render",
     value: function render() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          text = _ref2.text,
-          _ref2$nodeName = _ref2.nodeName,
-          nodeName = _ref2$nodeName === void 0 ? "div" : _ref2$nodeName,
-          _ref2$href = _ref2.href,
-          href = _ref2$href === void 0 ? null : _ref2$href;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          text = _ref3.text,
+          _ref3$nodeName = _ref3.nodeName,
+          nodeName = _ref3$nodeName === void 0 ? "div" : _ref3$nodeName;
 
-      var html = "\n            <".concat(nodeName, " class=\"menuitem\">\n                <a class=\"menuitem__button\" ").concat(href ? "href=\"".concat(href, "\"") : "", ">").concat(text, "</a>\n            </").concat(nodeName, ">\n        ");
+      var element = document.createElement(nodeName);
+      element.className = "menuitem";
+      var html = "\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text>".concat(text, "</span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>");
       var fragment = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(html);
-      return fragment.children[0];
+      element.appendChild(fragment);
+      return element;
     }
   }]);
 
@@ -7061,9 +7094,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -7087,6 +7120,8 @@ function (_Publisher) {
   function MenuNode() {
     var _this;
 
+    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     _classCallCheck(this, MenuNode);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuNode).call(this));
@@ -7103,10 +7138,10 @@ function (_Publisher) {
 
     _this._element = undefined;
     _this.nodeType = null;
-    _this.isController = false;
+    _this.isController = false; // noinspection JSUnusedGlobalSymbols
+
     _this.closeOnSelect = false;
-    _this.SubMenuClass = null;
-    _this.MenuItemClass = null;
+    Object.assign(_assertThisInitialized(_this), data);
     return _this;
   }
   /**
@@ -8038,11 +8073,15 @@ function (_Publisher) {
               if (hasMenuAttribute && hasMenuItemAttribute) {
                 throw new Error("Element cannot be both a menuitem and a menu.");
               } else if (hasMenuAttribute) {
-                var menu = _this5.SubMenuClass.FromHTML(_child);
+                var menu = _this5.constructSubMenu({
+                  target: _child
+                });
 
                 menu.setParent(_this5);
               } else if (hasMenuItemAttribute) {
-                var item = _this5.MenuItemClass.FromHTML(_child);
+                var item = _this5.constructMenuItem({
+                  target: _child
+                });
 
                 item.setParent(_this5);
               } else {
@@ -8068,6 +8107,22 @@ function (_Publisher) {
 
       walk(this.element);
     }
+    /**
+     * @abstract
+     * @param config
+     */
+
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {}
+    /**
+     * @abstract
+     * @param config
+     */
+
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {}
     /**
      * Invalidates all parent and child references.
      */
@@ -8208,7 +8263,8 @@ function (_Publisher) {
     key: "isRoot",
     get: function get() {
       return this.root === this;
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "enabledChildren",
     get: function get() {
@@ -8441,7 +8497,8 @@ function (_Publisher) {
     key: "getInstance",
     value: function getInstance(element) {
       return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(element);
-    }
+    } // noinspection JSUnusedLocalSymbols
+
   }, {
     key: "getAttributes",
     value: function getAttributes(element) {
@@ -8504,6 +8561,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
 /* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
@@ -8588,11 +8651,24 @@ function (_AbstractMenuItem) {
         target = _ref.target,
         text = _ref.text,
         _ref$value = _ref.value,
-        value = _ref$value === void 0 ? null : _ref$value;
+        value = _ref$value === void 0 ? null : _ref$value,
+        _ref$targetKey = _ref.targetKey,
+        targetKey = _ref$targetKey === void 0 ? null : _ref$targetKey;
 
     _classCallCheck(this, SelectOption);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this, {
+      toggle: "inherit",
+      autoActivate: true,
+      openOnHover: true,
+      delay: 0,
+      closeOnSelect: false,
+      closeOnBlur: false,
+      timeout: false,
+      clearSubItemsOnHover: true,
+      autoDeactivateItems: "auto",
+      targetKey: targetKey
+    }));
     var targetChildren = null;
 
     if (target) {
@@ -8614,9 +8690,11 @@ function (_AbstractMenuItem) {
       _this.element.classList.add('select-option');
     }
 
-    var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+    var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
 
     _this.element.appendChild(fragment);
+
+    _this.element.classList.add('select-option');
 
     _this.textNode = _this.element.querySelector('[data-text]'); // If initializing the object from a target element
     // the label text is gathered from the children of the target
@@ -8631,26 +8709,8 @@ function (_AbstractMenuItem) {
 
     _this.element.setAttribute('aria-role', 'option');
 
-    _this.toggle = "inherit";
-    _this.autoActivate = true;
-    _this.openOnHover = true;
-    _this.delay = 0; // noinspection JSUnusedGlobalSymbols
+    _this.registerTopics(); // this.parseDOM();
 
-    _this.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
-
-    _this.closeOnBlur = false;
-    _this.timeout = false; // noinspection JSUnusedGlobalSymbols
-
-    _this.clearSubItemsOnHover = true; // noinspection JSUnusedGlobalSymbols
-
-    _this.MenuItemClass = null; // noinspection JSUnusedGlobalSymbols
-
-    _this.SubMenuClass = null;
-    _this.autoDeactivateItems = "auto";
-
-    _this.registerTopics();
-
-    _this.parseDOM();
 
     if (value !== null && value !== undefined) {
       _this.value = value;
@@ -8699,7 +8759,7 @@ function (_AbstractMenuItem) {
     value: function render(_ref2) {
       var text = _ref2.text;
       var html = "\n        <div data-role=\"menuitem\" class=\"menuitem\">\n            <span class=\"checkmark\"><i class=\"fas fa-check\"></i></span>\n            <a data-text>".concat(text, "</a>\n        </div>");
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
+      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
       return fragment.children[0];
     } // noinspection JSUnusedGlobalSymbols
 
@@ -8756,6 +8816,16 @@ function (_AbstractMenuItem) {
      * @returns {boolean}
      */
 
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"](config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new _Menu__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+    }
   }, {
     key: "isSelected",
     get: function get() {
@@ -8929,11 +8999,18 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _classCallCheck(this, SelectMenu);
 
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this)); // noinspection JSUnusedGlobalSymbols
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, {
+        closeOnBlur: false,
+        timeout: false,
+        autoActivate: true,
+        openOnHover: false,
+        multiSelect: "inherit",
+        closeOnSelect: false,
+        delay: 0,
+        positioner: "inherit"
+      }));
 
       _initialize(_assertThisInitialized(_this3));
-
-      _this3.MenuItemClass = SelectOption;
 
       if (target) {
         if (typeof target === 'string') {
@@ -8948,20 +9025,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this3.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-header]');
       _this3.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-body]');
       _this3.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-footer]');
-      _this3.filterInput = null; // noinspection JSUnusedGlobalSymbols
-
-      _this3.closeOnBlur = false;
-      _this3.timeout = false; // noinspection JSUnusedGlobalSymbols
-
-      _this3.autoActivate = true; // noinspection JSUnusedGlobalSymbols
-
-      _this3.openOnHover = false;
-      _this3.multiSelect = "inherit"; // noinspection JSUnusedGlobalSymbols
-
-      _this3.closeOnSelect = false; // noinspection JSUnusedGlobalSymbols
-
-      _this3.delay = 0;
-      _this3.positioner = "inherit";
+      _this3.filterInput = null;
       _this3.enableShiftSelect = enableShiftSelect;
       _this3.enableCtrlToggle = enableCtrlToggle;
       _this3.clearOldSelection = clearOldSelection;
@@ -8976,6 +9040,8 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       _this3.isVisible = false;
 
       _this3.registerTopics();
+
+      _this3.parseDOM();
 
       _this3.init();
 
@@ -9008,7 +9074,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
         var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\" data-header></div>\n                <div class=\"select-menu__body menu__body\" data-body></div>\n                <div class=\"select-menu__footer\" data-footer></div>\n            </div>\n        ";
-        var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html);
+        var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
         return fragment.children[0];
       }
     }, {
@@ -9385,19 +9451,15 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       }
     }, {
       kind: "method",
-      key: "setContent",
-      value: function setContent(content) {
-        Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["emptyElement"])(this.element);
-
-        if (typeof content === 'string') {
-          this.element.innerHTML = content;
-        } else {
-          this.element.appendChild(content);
-        }
-
-        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-header]');
-        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-body]');
-        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-footer]');
+      key: "constructMenuItem",
+      value: function constructMenuItem(config) {
+        return new SelectOption(config);
+      }
+    }, {
+      kind: "method",
+      key: "constructSubMenu",
+      value: function constructSubMenu(config) {
+        return new SelectMenu(config);
       }
     }]
   };
@@ -9513,6 +9575,22 @@ function (_AbstractMenuItem2) {
     key: "setValue",
     value: function setValue(value) {}
   }, {
+    key: "constructMenuItem",
+
+    /**
+     * @abstract
+     * @param config
+     */
+    value: function constructMenuItem(config) {}
+    /**
+     * @abstract
+     * @param config
+     */
+
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {}
+  }, {
     key: "options",
     get: function get() {
       return this.submenu.options;
@@ -9588,17 +9666,36 @@ function (_AbstractMenuItem2) {
       } // todo move into constructor.
 
 
-      var config = this.getAttributes(element);
-      var fragment = document.createDocumentFragment();
+      var config = this.getAttributes(element),
+          children = [];
 
-      while (element.firstChild) {
-        fragment.appendChild(element.firstChild);
+      for (var _i = 0, _arr = _toConsumableArray(element.children); _i < _arr.length; _i++) {
+        var child = _arr[_i];
+
+        if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+          element.removeChild(child);
+          children.push(child);
+        }
       }
 
       var instance = new this(_objectSpread({}, config, {
         target: element
       }));
-      instance.submenu.setContent(fragment);
+
+      for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
+        var _child2 = _children[_i2];
+
+        if (_child2.hasAttribute('data-menuitem')) {
+          var item = instance.constructMenuItem({
+            target: _child2
+          });
+          instance.append(item);
+        } else {
+          instance.append(_child2);
+        }
+      }
+
+      return instance;
     }
   }]);
 
@@ -9630,59 +9727,57 @@ function (_AbstractSelect) {
 
     _classCallCheck(this, RichSelect);
 
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this)); // if(target) {
-    //     this.element = target;
-    //
-    //     if(this.element.nodeName === 'INPUT') {
-    //         this.textbox = this.element;
-    //     } else {
-    //         this.textbox = this.element.querySelector('[data-text]');
-    //     }
-    // } else {
-    //     let {element, textbox} = this.render();
-    //     this.element = element;
-    //     this.textbox = textbox;
-    // }
-
-    var submenuContent = document.createDocumentFragment();
+    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
+      toggle: true,
+      autoActivate: false,
+      openOnHover: false,
+      delay: false,
+      timeout: timeout,
+      closeOnBlur: true,
+      clearSubItemsOnHover: false,
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      closeOnSelect: true
+    }));
+    var submenu = null;
 
     if (target) {
       if (typeof target === 'string') target = document.querySelector(target);
-    } else {
-      var _this7$render = _this7.render(),
-          element = _this7$render.element,
-          textbox = _this7$render.textbox;
+      submenu = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(target, '[data-menu]');
 
-      _this7.element = element;
-      _this7.textbox = textbox;
+      if (submenu) {
+        target.removeChild(submenu);
+      }
+
+      _this7.element = target;
+
+      if (_this7.element.nodeName === 'INPUT') {
+        _this7.textbox = _this7.element;
+      } else {
+        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this7.element, '[data-button]');
+
+        if (!button) {
+          _this7.element.appendChild(_this7.render());
+        }
+      }
+    } else {
+      _this7.element = document.createElement('div');
+
+      _this7.element.appendChild(_this7.render());
+    }
+
+    if (!_this7.textbox) {
+      _this7.textbox = _this7.element.querySelector('input, [data-text]');
     }
 
     _this7.textbox.readOnly = true;
-    _this7.toggle = true;
-    _this7.autoActivate = false;
-    _this7.openOnHover = false;
-    _this7.delay = false;
-    _this7.timeout = timeout; // noinspection JSUnusedGlobalSymbols
-
-    _this7.closeOnBlur = true;
-    _this7.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
-
-    _this7.closeOnSelect = true;
-    _this7._label = ''; // noinspection JSUnusedGlobalSymbols
-
-    _this7.clearSubItemsOnHover = false;
-    _this7.SubMenuClass = SelectMenu;
+    _this7._label = '';
     _this7.element.tabIndex = 0;
 
-    _this7.parseDOM();
+    _this7.attachSubMenu(_this7.constructSubMenu({
+      target: submenu
+    }));
 
-    if (!_this7.submenu) {
-      var submenu = new _this7.SubMenuClass();
-
-      _this7.attachSubMenu(submenu);
-    }
-
-    _this7.submenu.classList.add('combobox__menu');
+    _this7.classList.add('rich-select');
 
     if (!widget) {
       _this7.widget = new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
@@ -9712,12 +9807,7 @@ function (_AbstractSelect) {
   _createClass(RichSelect, [{
     key: "render",
     value: function render(context) {
-      var element = "\n        <div class=\"combobox\">\n            <input type=\"text\" class=\"combobox__input\" data-text />\n            <span class=\"combobox__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
-      element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(element).children[0];
-      return {
-        element: element,
-        textbox: element.querySelector('[data-text]')
-      };
+      return Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ");
     }
   }, {
     key: "refreshUI",
@@ -9767,6 +9857,16 @@ function (_AbstractSelect) {
     key: "setValue",
     value: function setValue(value) {
       this.widget.value = value;
+    }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new SelectOption(config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new SelectMenu(config);
     }
   }, {
     key: "placeholder",
@@ -9834,47 +9934,52 @@ function (_AbstractSelect2) {
 
     _classCallCheck(this, MultiComboBox);
 
-    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this));
+    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
+      toggle: true,
+      autoActivate: false,
+      openOnHover: false,
+      delay: false,
+      timeout: timeout,
+      closeOnBlur: true,
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      closeOnSelect: false,
+      multiSelect: true,
+      clearSubItemsOnHover: false
+    }));
     _this8.optionToPillMap = new WeakMap();
     _this8.pilltoOptionMap = new WeakMap();
+    var submenu = null;
 
     if (target) {
-      _this8.element = target;
-      _this8.textbox = _this8.element.querySelector('[data-text]');
-      _this8.body = _this8.element.querySelector('.multi-combo-box__body');
-    } else {
-      var _this8$render = _this8.render(),
-          element = _this8$render.element,
-          textbox = _this8$render.textbox,
-          body = _this8$render.body;
+      if (typeof target === 'string') target = document.querySelector(target);
+      submenu = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(target, '[data-menu]');
 
-      _this8.element = element;
-      _this8.textbox = textbox;
-      _this8.body = body;
+      if (submenu) {
+        target.removeChild(submenu);
+      }
+
+      _this8.element = target;
+      var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this8.element, '[data-button]');
+
+      if (!button) {
+        _this8.element.appendChild(_this8.render());
+      }
+    } else {
+      _this8.element = document.createElement('div');
+
+      _this8.element.appendChild(_this8.render());
     }
 
-    _this8.toggle = true;
-    _this8.autoActivate = false;
-    _this8.openOnHover = false;
-    _this8.delay = false;
-    _this8.timeout = timeout; // noinspection JSUnusedGlobalSymbols
+    _this8.textbox = _this8.element.querySelector('[data-text]');
+    _this8.body = _this8.element.querySelector('[data-body]');
 
-    _this8.closeOnBlur = true;
-    _this8.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"]; // noinspection JSUnusedGlobalSymbols
-
-    _this8.closeOnSelect = false;
-    _this8.multiSelect = true; // noinspection JSUnusedGlobalSymbols
-
-    _this8.clearSubItemsOnHover = false;
-    _this8.SubMenuClass = SelectMenu;
+    _this8.element.classList.add('multi-combo-box');
 
     _this8.parseDOM();
 
-    if (!_this8.submenu) {
-      _this8.submenu = new _this8.SubMenuClass();
-
-      _this8.attachSubMenu(_this8.submenu);
-    }
+    _this8.attachSubMenu(_this8.constructSubMenu({
+      target: submenu
+    }));
 
     _this8.submenu.multiSelect = true;
     _this8.submenu.toggle = true;
@@ -9903,7 +10008,7 @@ function (_AbstractSelect2) {
     _this8._applyFilter = function () {
       _this8._filterTimer = null;
 
-      _this8.submenu.filter(filter(_this8.textbox.value));
+      _this8.submenu.filter(filter(_this8.getFilterValue()));
 
       if (_this8.submenu.activeItem) _this8.submenu.activeItem.deactivate();
     };
@@ -9925,6 +10030,24 @@ function (_AbstractSelect2) {
   }
 
   _createClass(MultiComboBox, [{
+    key: "getFilterValue",
+    value: function getFilterValue() {
+      if (this.textbox.nodeName === "INPUT") {
+        return this.textbox.value;
+      } else {
+        return this.textbox.innerText;
+      }
+    }
+  }, {
+    key: "setFilterValue",
+    value: function setFilterValue(value) {
+      if (this.textbox.nodeName === "INPUT") {
+        this.textbox.value = value;
+      } else {
+        this.textbox.innerText = value;
+      }
+    }
+  }, {
     key: "registerTopics",
     value: function registerTopics() {
       var _this9 = this;
@@ -9941,19 +10064,23 @@ function (_AbstractSelect2) {
           option.optionDeselect();
         }
 
+        topic.originalEvent.preventDefault();
+
         _this9.textbox.focus();
+      });
+      this.on('menu.hide', function (topic) {
+        if (topic.target === _this9.submenu) {
+          _this9.setFilterValue("");
+
+          _this9.submenu.clearFilter();
+        }
       });
     }
   }, {
     key: "render",
     value: function render(context) {
-      var html = "\n            <div class=\"multi-combo-box\">\n                <div class=\"multi-combo-box__body\">\n                    <input type=\"text\" class=\"multi-combo-box__input\" data-text />\n                </div>\n            </div>\n        ";
-      var element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["parseHTML"])(html).children[0];
-      return {
-        element: element,
-        textbox: element.querySelector('[data-text]'),
-        body: element.querySelector('.multi-combo-box__body')
-      };
+      var html = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
+      return Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
     }
   }, {
     key: "_buildChoicePill",
@@ -9984,7 +10111,7 @@ function (_AbstractSelect2) {
         return;
       }
 
-      if (event.key === "Backspace" && this.textbox.value === "") {
+      if (event.key === "Backspace" && this.getFilterValue() === "") {
         var pills = this.body.querySelectorAll('.multi-combo-box__pill'),
             pill = pills[pills.length - 1],
             option = pill ? this.pilltoOptionMap.get(pill) : null;
@@ -9993,6 +10120,8 @@ function (_AbstractSelect2) {
           option.optionDeselect();
         }
       } else if (event.key === 'Enter') {
+        event.preventDefault();
+
         if (this._filterTimer) {
           clearTimeout(this._filterTimer);
           this._filterTimer = null;
@@ -10041,7 +10170,7 @@ function (_AbstractSelect2) {
           }
 
           if (!activeItem) {
-            this.textbox.value = "";
+            this.setFilterValue("");
             this.submenu.clearFilter();
             this.submenu.position();
 
@@ -10158,6 +10287,16 @@ function (_AbstractSelect2) {
 
       this.refreshUI();
     }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new SelectOption(config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new SelectMenu(config);
+    }
   }]);
 
   return MultiComboBox;
@@ -10194,6 +10333,11 @@ function (_RichSelect) {
       multiple: false,
       filter: null
     }));
+
+    _this10.element.classList.add('combo-box');
+
+    _this10.element.classList.remove('rich-select');
+
     _this10.wait = wait;
     _this10.filter = filter;
     return _this10;
@@ -10355,13 +10499,13 @@ function (_RichSelect) {
   return ComboBox;
 }(RichSelect);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
-  return RichSelect.FromHTML(element);
+  return RichSelect.ConstructFromHTML(element);
 });
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('combobox', function (element) {
-  return ComboBox.FromHTML(element);
+  return ComboBox.ConstructFromHTML(element);
 });
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('multi-combobox', function (element) {
-  return MultiComboBox.FromHTML(element);
+  return MultiComboBox.ConstructFromHTML(element);
 });
 
 /***/ }),

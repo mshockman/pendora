@@ -291,6 +291,7 @@ export class AbstractMenuItem extends MenuNode {
 
         submenu._parent = this;
         this._children = [submenu];
+        this.element.classList.add('has-submenu');
 
         if(!submenu.element.parentElement) {
             submenu.appendTo(this.element);
@@ -310,6 +311,8 @@ export class AbstractMenuItem extends MenuNode {
             submenu._parent = null;
             if(remove) submenu.remove();
         }
+
+        this.element.classList.remove('has-submenu');
 
         return submenu;
     }
