@@ -1,5 +1,5 @@
 import Menu, {AbstractMenu} from "./Menu";
-import MenuItem, {AbstractMenuItem} from './MenuItem';
+import MenuItem from './MenuItem';
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {createFragment} from "../core/utility";
@@ -65,4 +65,17 @@ export default class MenuBar extends AbstractMenu {
 }
 
 
+export class SideMenuBar extends MenuBar {
+    constructor(config={}) {
+        super(config);
+        this.direction = 'vertical';
+        this.positioner = positioners.SIDE_MENU;
+
+        this.element.classList.remove('menubar');
+        this.element.classList.add('side-menu-bar');
+    }
+}
+
+
 AutoLoader.register('menubar', (element) => MenuBar.FromHTML(element));
+AutoLoader.register('side-menubar', (element) => SideMenuBar.FromHTML(element));
