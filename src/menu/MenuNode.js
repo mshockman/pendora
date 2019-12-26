@@ -10,7 +10,7 @@ import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance
  * @extends {Publisher}
  */
 export default class MenuNode extends Publisher {
-    constructor(data={}) {
+    constructor() {
         super();
         this._parent = null;
         this._children = [];
@@ -28,8 +28,6 @@ export default class MenuNode extends Publisher {
         this.isController = false;
         // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
-
-        Object.assign(this, data);
     }
 
     /**

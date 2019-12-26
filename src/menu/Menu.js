@@ -1,7 +1,6 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
-import {modulo} from "core/utility";
-import {parseHTML} from "core/utility";
+import {createFragment, modulo} from "core/utility";
 import {inherit} from './decorators';
 import AutoLoader from "autoloader";
 import {Attribute, AttributeSchema, Integer, Bool, CompoundType} from "../core/serialize";
@@ -46,9 +45,10 @@ export class AbstractMenu extends MenuNode {
     @inherit delay = false;
 
     constructor({
+            target,
             closeOnBlur=false, timeout=false, autoActivate=false, openOnHover=false, toggle=false,
-            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...data}={}) {
-        super(data);
+            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...context}={}) {
+        super();
 
         this.closeOnBlur = closeOnBlur; // both sub-item and menu
         this.timeout = timeout; // both sub-item and menu
@@ -62,6 +62,9 @@ export class AbstractMenu extends MenuNode {
         this.delay = delay; // sub-item property
         this.positioner = positioner;
         this.direction = direction;
+
+        this.render({target, context});
+        this.parseDOM();
     }
 
     registerTopics() {
@@ -202,10 +205,10 @@ export class AbstractMenu extends MenuNode {
 
     createItems(data) {
         for(let {submenu, ...args} of data) {
-            let item = new this.MenuItemClass(args);
+            let item = this.constructMenuItem(args);
 
             if(submenu) {
-                let _submenu = new this.SubMenuClass(submenu);
+                let _submenu = this.constructSubMenu(submenu);
                 item.attachSubMenu(_submenu);
             }
 
@@ -215,7 +218,7 @@ export class AbstractMenu extends MenuNode {
 
     // noinspection JSUnusedGlobalSymbols
     addItem(text, action=null) {
-        let item = new this.MenuItemClass({text, action});
+        let item = this.constructMenuItem({text, action});
         this.append(item);
         return this;
     }
@@ -627,26 +630,17 @@ export default class Menu extends AbstractMenu {
      * @param delay {Boolean|Number}
      * @param id {String}
      * @param children {Array}
-     * @param data
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle=false, closeOnSelect=true, delay=0, children=null,
-                    ...data}={}) {
+                    toggle=false, closeOnSelect=true, delay=0, children=null}={}) {
         super({
             closeOnBlur, timeout, autoActivate, toggle, closeOnSelect, delay, positioner: 'inherit',
-            direction: 'vertical', openOnHover, ...data
+            direction: 'vertical', openOnHover, target
         });
 
         this.events = null;
 
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = this.render();
-        }
-
         this.registerTopics();
-        this.parseDOM();
         this.init();
 
         if(children) {
@@ -657,19 +651,23 @@ export default class Menu extends AbstractMenu {
     /**
      * Renders the domElement of the widget.
      *
+     * @param target
      * @param arrow
      * @returns {HTMLElement|Element}
      */
-    render({arrow=false}={}) {
-        let html = `
+    render({target, arrow=true}={}) {
+        const TEMPLATE = `
             <div class="menu">
                 ${arrow ? `<div class="menu__arrow"></div>` : ""}
                 <div class="menu__body" data-body></div>
             </div>
         `;
 
-        let fragment = parseHTML(html);
-        return fragment.children[0];
+        if(target) {
+            this.element = target;
+        } else {
+            this.element = createFragment(TEMPLATE);
+        }
     }
 
     constructSubMenu(config) {

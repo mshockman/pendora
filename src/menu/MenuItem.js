@@ -1,7 +1,7 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
 import Menu from './Menu';
-import {parseHTML, findChild} from "../core/utility";
+import {findChild, createFragment} from "../core/utility";
 import {AttributeSchema, Attribute, CompoundType, Bool, Integer, Str} from "../core/serialize";
 
 
@@ -32,9 +32,9 @@ export class AbstractMenuItem extends MenuNode {
     @inherit delay = false;
     @inherit positioner;
 
-    constructor({targetKey, toggle, autoActivate, openOnHover, delay, closeOnSelect, closeOnBlur, timeout, positioner,
-                clearSubItemsOnHover, autoDeactivateItems, ...data}) {
-        super(data);
+    constructor({target, targetKey, toggle, autoActivate, openOnHover, delay, closeOnSelect, closeOnBlur, timeout, positioner,
+                clearSubItemsOnHover, autoDeactivateItems, ...context}) {
+        super();
 
         /**
          * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
@@ -105,6 +105,29 @@ export class AbstractMenuItem extends MenuNode {
          * @type {boolean}
          */
         this.autoDeactivateItems = autoDeactivateItems;
+
+        this.button = null;
+        // this.element;
+
+        let submenu = null;
+
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        if(target) {
+            submenu = findChild(target, '[data-menu]');
+
+            if(submenu) {
+                submenu.parentElement.removeChild(submenu);
+            }
+        }
+
+        this.render({target, ...context});
+
+        if(submenu) {
+            this.attachSubMenu(this.constructSubMenu({target: submenu}));
+        }
     }
 
     registerTopics() {
@@ -481,30 +504,6 @@ export class AbstractMenuItem extends MenuNode {
         }
     }
 
-    get text() {
-        return this.textContainer.innerText;
-    }
-
-    set text(value) {
-        this.textContainer.innerText = value;
-    }
-
-    get href() {
-        if(this.button.nodeName === "A") {
-            return this.button.href;
-        } else {
-            return null;
-        }
-    }
-
-    set href(value) {
-        if(this.button.nodeName === 'A') {
-            this.button.href=  value;
-        } else {
-            throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
-        }
-    }
-
     _navigate(event, _depth=0) {
         if(_depth === 0 && this.hasSubMenu()) {
             return this.submenu._navigate(event, 0);
@@ -536,40 +535,17 @@ export default class MenuItem extends AbstractMenuItem {
             timeout,
             positioner,
             clearSubItemsOnHover: true,
-            autoDeactivateItems: true
+            autoDeactivateItems: true,
+
+            target,
+            text,
+            href,
+            nodeName
         });
-
-        /**
-         * @type {null|HTMLElement}
-         */
-        let submenu = null;
-
-        if(target) {
-            this.element = target;
-            submenu = findChild(this.element, '[data-menu]');
-
-            if(submenu) {
-                submenu.parentElement.removeChild(submenu);
-            }
-        } else {
-            this.element = this.render({text, nodeName});
-        }
-
-        this.button = this.element.querySelector("[data-button]");
-        this.textContainer = this.element.querySelector("[data-text]");
-        this.altTextContainer = this.element.querySelector('[data-alt-text]');
-
-        if(href !== null) this.href = href;
-        this.element.tabIndex = -1;
 
         if(action) this.addAction(action);
 
-        if(submenu) {
-            this.attachSubMenu(this.constructSubMenu({target: submenu}));
-        }
-
         this.registerTopics();
-        // this.parseDOM();
     }
 
     constructMenuItem(config) {
@@ -582,27 +558,80 @@ export default class MenuItem extends AbstractMenuItem {
 
     /**
      * Renders the domElement.
-     *
-     * @param text {String}
-     * @param nodeName
-     * @param href
-     * @returns {HTMLElement|Element}
      */
-    render({text, nodeName="div"}={}) {
-        let element = document.createElement(nodeName);
-        element.className = "menuitem";
+    render({target, text, href, nodeName}) {
+        let content = null;
 
-        let html = `
+        if(target) {
+            this.element = target;
+
+            let btn = findChild(this.element, '[data-button]');
+
+            if(!btn) {
+                content = document.createDocumentFragment();
+
+                while(this.element.firstChild) {
+                    content.appendChild(this.element.firstChild);
+                }
+
+                this.element.appendChild(createFragment(`
                 <a class="menuitem__button" data-button>
                     <span class="menuitem__check"></span>
-                    <span class="menuitem__text" data-text>${text}</span>
+                    <span class="menuitem__text" data-text></span>
                     <span class="menuitem__alt-text" data-alt-text></span>
                     <span class="menuitem__caret"></span>
-                </a>`;
+                </a>`));
+            }
+        } else {
+            let element = document.createElement(nodeName);
+            element.appendChild(createFragment(`
+                <a class="menuitem__button" data-button>
+                    <span class="menuitem__check"></span>
+                    <span class="menuitem__text" data-text></span>
+                    <span class="menuitem__alt-text" data-alt-text></span>
+                    <span class="menuitem__caret"></span>
+                </a>`));
+            this.element = element;
+        }
 
-        let fragment = parseHTML(html);
-        element.appendChild(fragment);
+        this.button = this.element.querySelector("[data-button]");
+        this.textContainer = this.element.querySelector("[data-text]") || this.button;
+        this.altTextContainer = this.element.querySelector('[data-alt-text]');
+        this.element.classList.add('menuitem');
 
-        return element;
+        if(content) {
+            this.textContainer.appendChild(content);
+        }
+
+        if(text !== null && text !== undefined) {
+            this.text = text;
+        }
+
+        if(href !== null) this.href = href;
+        this.element.tabIndex = -1;
+    }
+
+    get text() {
+        return this.textContainer.innerText;
+    }
+
+    set text(value) {
+        this.textContainer.innerText = value;
+    }
+
+    get href() {
+        if(this.button.nodeName === "A") {
+            return this.button.href;
+        } else {
+            return null;
+        }
+    }
+
+    set href(value) {
+        if(this.button.nodeName === 'A') {
+            this.button.href=  value;
+        } else {
+            throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
+        }
     }
 }

@@ -2,18 +2,48 @@ import Menu, {AbstractMenu} from "./Menu";
 import MenuItem from './MenuItem';
 import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
-import {createFragment} from "../core/utility";
+import {createFragment, findChild} from "../core/utility";
 
 
 export class MenuBarItem extends MenuItem {
-    render({text='', nodeName='div'}={}) {
-        let fragment = createFragment(`
-            <${nodeName} class="menuitem">
-                <a class="menuitem__button" data-button>${text}</a>
-            </${nodeName}>
-        `);
+    render({target, text, nodeName='div', href=null}={}) {
+        let content = null;
 
-        return fragment.children[0];
+        if(target) {
+            this.element = target;
+
+            let btn = findChild(this.element, '[data-button]');
+
+            if(!btn) {
+                content = document.createDocumentFragment();
+
+                while(this.element.firstChild) {
+                    content.appendChild(this.element.firstChild);
+                }
+
+                this.element.appendChild(createFragment(`
+                <a class="menuitem__button" data-button>${text}</a>`));
+            }
+        } else {
+            let element = document.createElement(nodeName);
+            element.appendChild(createFragment(`<a class="menuitem__button" data-button>${text}</a>`));
+            this.element = element;
+        }
+
+        this.button = this.element.querySelector("[data-button]");
+        this.textContainer = this.element.querySelector("[data-text]") || this.button;
+        this.element.classList.add('menuitem');
+
+        if(content) {
+            this.textContainer.appendChild(content);
+        }
+
+        if(text !== null && text !== undefined) {
+            this.text = text;
+        }
+
+        if(href !== null) this.href = href;
+        this.element.tabIndex = -1;
     }
 }
 
@@ -43,12 +73,14 @@ export default class MenuBar extends AbstractMenu {
         this.initKeyboardNavigation();
     }
 
-    render(context) {
-        let element = document.createElement('div');
+    render({target}) {
+        if(target) {
+            this.element = target;
+        } else {
+            this.element = document.createElement('div');
+        }
 
-        element.className = "menubar";
-
-        return element;
+        this.element.classList.add("menubar");
     }
 
     getMenuBody() {

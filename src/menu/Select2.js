@@ -12,8 +12,23 @@ import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
-export class SelectOption extends AbstractMenuItem {
+export class SelectOption extends MenuItem {
     constructor({target, text, value=null, targetKey=null}={}) {
+        let targetChildren = null;
+
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        if(target) {
+            // Save target children to add to the text output later.
+            targetChildren = document.createDocumentFragment();
+
+            while(target.firstChild) {
+                targetChildren.appendChild(target.firstChild);
+            }
+        }
+
         super({
             toggle: "inherit",
             autoActivate: true,
@@ -24,54 +39,18 @@ export class SelectOption extends AbstractMenuItem {
             timeout: false,
             clearSubItemsOnHover: true,
             autoDeactivateItems: "auto",
-            targetKey
+            targetKey,
+            target
         });
-
-        let targetChildren = null;
-
-        if(target) {
-            if(typeof target === 'string') {
-                target = document.querySelector(target);
-            }
-
-            // Save target children to add to the text output later.
-            targetChildren = document.createDocumentFragment();
-
-            while(target.firstChild) {
-                targetChildren.appendChild(target.firstChild);
-            }
-
-            this.element = target;
-        } else {
-            this.element = document.createElement('div');
-            this.element.classList.add('select-option');
-        }
-
-        let fragment = createFragment(`
-            <a class="select-option__body">
-                <span class="select-option__check" data-check><i class="fas fa-check"></i></span>
-                <span data-text class="select-option__text"></span>
-                <span data-alt-text class="select-option__alt"></span>
-            </a>
-        `);
-
-        this.element.appendChild(fragment);
-        this.element.classList.add('select-option');
-        this.textNode = this.element.querySelector('[data-text]');
 
         // If initializing the object from a target element
         // the label text is gathered from the children of the target
         if(targetChildren) {
-            this.textNode.appendChild(targetChildren);
+            this.textContainer.appendChild(targetChildren);
         } else if(text) {
             let textNode = document.createTextNode(text);
-            this.textNode.appendChild(textNode);
+            this.textContainer.appendChild(textNode);
         }
-
-        this.element.setAttribute('aria-role', 'option');
-
-        this.registerTopics();
-        // this.parseDOM();
 
         if(value !== null && value !== undefined) {
             this.value = value;
@@ -108,19 +87,27 @@ export class SelectOption extends AbstractMenuItem {
 
     /**
      * Creates the dom elements for the SelectOption.
-     * @param text
-     * @returns {Element}
      */
-    render({text}) {
-        let html = `
-        <div data-role="menuitem" class="menuitem">
-            <span class="checkmark"><i class="fas fa-check"></i></span>
-            <a data-text>${text}</a>
-        </div>`;
+    render({target}) {
+        if(target) {
+            this.element = target;
+        } else {
+            this.element = document.createElement('div');
+            this.element.classList.add('select-option');
+        }
 
-        let fragment = createFragment(html);
+        let fragment = createFragment(`
+            <a class="select-option__body">
+                <span class="select-option__check" data-check><i class="fas fa-check"></i></span>
+                <span data-text class="select-option__text"></span>
+                <span data-alt-text class="select-option__alt"></span>
+            </a>
+        `);
 
-        return fragment.children[0];
+        this.element.appendChild(fragment);
+        this.element.classList.add('select-option');
+        this.textContainer = this.element.querySelector('[data-text]');
+        this.element.setAttribute('aria-role', 'option');
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -220,7 +207,7 @@ export class SelectOption extends AbstractMenuItem {
      * @returns {*}
      */
     get text() {
-        return this.textNode.innerText.trim();
+        return this.textContainer.innerText.trim();
     }
 
     /**
@@ -228,7 +215,7 @@ export class SelectOption extends AbstractMenuItem {
      * @param value
      */
     set text(value) {
-        this.textNode.innerText = (value+"").trim();
+        this.textContainer.innerText = (value+"").trim();
     }
 
     /**
@@ -319,32 +306,17 @@ export class SelectMenu extends AbstractMenu {
             timeout: false,
             autoActivate: true,
             openOnHover: false,
-            multiSelect: "inherit",
             closeOnSelect: false,
             delay: 0,
             positioner: "inherit",
+            target
         });
 
-        if(target) {
-            if(typeof target === 'string') {
-                target = document.querySelector(target);
-            }
-
-            this.element = target;
-        } else {
-            this.element = this.render(context);
-        }
-
-        this.header = findChild(this.element, '[data-header]');
-        this.body = findChild(this.element, '[data-body]');
-        this.footer = findChild(this.element, '[data-footer]');
-        this.filterInput = null;
+        this.multiSelect = 'inherit';
 
         this.enableShiftSelect = enableShiftSelect;
         this.enableCtrlToggle = enableCtrlToggle;
         this.clearOldSelection = clearOldSelection;
-
-        this.element.classList.add('select-menu');
 
         this.placeholder = document.createElement('div');
         this.placeholder.classList.add('placeholder');
@@ -363,8 +335,8 @@ export class SelectMenu extends AbstractMenu {
         }
     }
 
-    render({arrow=false}={}) {
-        let html = `
+    render({target, arrow=false}={}) {
+        let TEMPLATE = `
             <div class="select-menu">
                 <div class="select-menu__header" data-header></div>
                 <div class="select-menu__body menu__body" data-body></div>
@@ -372,8 +344,21 @@ export class SelectMenu extends AbstractMenu {
             </div>
         `;
 
-        let fragment = createFragment(html);
-        return fragment.children[0];
+        if(target) {
+            if(typeof target === 'string') {
+                target = document.querySelector(target);
+            }
+
+            this.element = target;
+        } else {
+            this.element = createFragment(TEMPLATE).children[0];
+        }
+
+        this.header = findChild(this.element, '[data-header]');
+        this.body = findChild(this.element, '[data-body]');
+        this.footer = findChild(this.element, '[data-footer]');
+        this.filterInput = null;
+        this.element.classList.add('select-menu');
     }
 
     registerTopics() {
@@ -800,49 +785,9 @@ export class RichSelect extends AbstractSelect {
             closeOnBlur: true,
             clearSubItemsOnHover: false,
             positioner: positioners.DROPDOWN,
-            closeOnSelect: true
+            closeOnSelect: true,
+            target
         });
-
-        let submenu = null;
-
-        if(target) {
-            if(typeof target === 'string') target = document.querySelector(target);
-
-            submenu = findChild(target, '[data-menu]');
-
-            if(submenu) {
-                target.removeChild(submenu);
-            }
-
-            this.element = target;
-
-            if(this.element.nodeName === 'INPUT') {
-                this.textbox = this.element;
-            } else {
-                let button = findChild(this.element, '[data-button]');
-
-                if(!button) {
-                    this.element.appendChild(this.render());
-                }
-            }
-        } else {
-            this.element = document.createElement('div');
-            this.element.appendChild(this.render());
-        }
-
-        if(!this.textbox) {
-            this.textbox = this.element.querySelector('input, [data-text]');
-        }
-
-        this.textbox.readOnly = true;
-
-        this._label = '';
-
-        this.element.tabIndex = 0;
-
-        this.attachSubMenu(this.constructSubMenu({target: submenu}));
-
-        this.classList.add('rich-select');
 
         if(!widget) {
             this.widget = new MultiHiddenInputWidget();
@@ -857,21 +802,55 @@ export class RichSelect extends AbstractSelect {
             }
         });
 
-        this.initKeyboardNavigation();
+        if(!this.submenu) {
+            this.attachSubMenu(this.constructSubMenu({}));
+        }
+
         this.registerTopics();
+        this.initKeyboardNavigation();
         this.init();
 
         this.multiple = multiple;
         this.maxItems = maxItems;
     }
 
-    render(context) {
-        return createFragment(`
+    render({target}) {
+        const TEMPLATE = `
         <div class="select-button">
             <input type="text" class="select-button__input" data-text />
             <span class="select-button__caret"><i class="fas fa-caret-down"></i></span>
         </div>
-        `);
+        `;
+
+        if(target) {
+            if(typeof target === 'string') target = document.querySelector(target);
+
+            this.element = target;
+
+            if(this.element.nodeName === 'INPUT') {
+                this.textbox = this.element;
+            } else {
+                let button = findChild(this.element, '[data-button]');
+
+                if(!button) {
+                    this.element.appendChild(createFragment(TEMPLATE));
+                }
+            }
+        } else {
+            this.element = document.createElement('div');
+            this.element.appendChild(createFragment(TEMPLATE));
+        }
+
+        if(!this.textbox) {
+            this.textbox = this.element.querySelector('input, [data-text]');
+        }
+
+        this.textbox.readOnly = true;
+
+        this._label = '';
+
+        this.element.tabIndex = 0;
+        this.classList.add('rich-select');
     }
 
     refreshUI() {
@@ -965,43 +944,16 @@ export class MultiComboBox extends AbstractSelect {
             closeOnBlur: true,
             positioner: positioners.DROPDOWN,
             closeOnSelect: false,
-            multiSelect: true,
-            clearSubItemsOnHover: false
+            clearSubItemsOnHover: false,
+            target
         });
+
+        this.multiSelect = true;
 
         this.optionToPillMap = new WeakMap();
         this.pilltoOptionMap = new WeakMap();
 
-        let submenu = null;
-
-        if(target) {
-            if(typeof target === 'string') target = document.querySelector(target);
-
-            submenu = findChild(target, '[data-menu]');
-
-            if(submenu) {
-                target.removeChild(submenu);
-            }
-
-            this.element = target;
-
-            let button = findChild(this.element, '[data-button]');
-
-            if(!button) {
-                this.element.appendChild(this.render());
-            }
-        } else {
-            this.element = document.createElement('div');
-            this.element.appendChild(this.render());
-        }
-
-        this.textbox = this.element.querySelector('[data-text]');
-        this.body = this.element.querySelector('[data-body]');
-        this.element.classList.add('multi-combo-box');
-
-        this.parseDOM();
-
-        this.attachSubMenu(this.constructSubMenu({target: submenu}));
+        if(!this.submenu) this.attachSubMenu(this.constructSubMenu({}));
 
         this.submenu.multiSelect = true;
         this.submenu.toggle = true;
@@ -1087,14 +1039,29 @@ export class MultiComboBox extends AbstractSelect {
         })
     }
 
-    render(context) {
-        let html = `
+    render({target}) {
+        const TEMPLATE = `
             <div class="multi-combo-box__button" data-body>
                 <div contenteditable="true" class="multi-combo-box__input" data-text />
             </div>
         `;
 
-        return createFragment(html);
+        if(target) {
+            this.element = target;
+
+            let button = findChild(this.element, '[data-button]');
+
+            if(!button) {
+                this.element.appendChild(createFragment(TEMPLATE));
+            }
+        } else {
+            this.element = document.createElement('div');
+            this.element.appendChild(createFragment(TEMPLATE));
+        }
+
+        this.textbox = this.element.querySelector('[data-text]');
+        this.body = this.element.querySelector('[data-body]');
+        this.element.classList.add('multi-combo-box');
     }
 
     _buildChoicePill(text) {
