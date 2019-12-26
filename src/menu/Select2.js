@@ -14,7 +14,8 @@ import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
  */
 export class SelectOption extends MenuItem {
     constructor({target, text, value=null, targetKey=null}={}) {
-        let targetChildren = null;
+        let targetChildren = null,
+            isSelected = false;
 
         if(typeof target === 'string') {
             target = document.querySelector(target);
@@ -590,6 +591,51 @@ export class SelectMenu extends AbstractMenu {
  * @abstract
  */
 export class AbstractSelect extends AbstractMenuItem {
+    constructor({target, widget, ...config}) {
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        // Find any child and store them and add them to the submenu after it is initialized.
+        let children = [];
+
+        if(target) {
+            for(let child of [...target.children]) {
+                if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+                    target.removeChild(child);
+                    children.push(child);
+                }
+            }
+        }
+
+        super({target, ...config});
+
+        // Set the widget component control.
+        this.widget = widget;
+        if(!this.widget.element.parentElement) {
+            this.widget.appendTo(this.element);
+        }
+
+        // If the submenu hasn't been initialized at this point it wasn't part of the dom.
+        // Create a default submenu instance to use.
+        if(!this.submenu) {
+            this.attachSubMenu(this.constructSubMenu({}));
+        }
+
+        // Add any found children from above to the submenu.
+        for(let child of children) {
+            if(child.hasAttribute('data-menuitem')) {
+                let item = this.constructMenuItem({target: child});
+                this.append(item);
+            } else {
+                this.append(child);
+            }
+        }
+
+        // Register a UI refresh.
+        this.refreshUI();
+    }
+
     isSelect() {
         return true;
     }
@@ -727,31 +773,12 @@ export class AbstractSelect extends AbstractMenuItem {
         }
 
         // todo move into constructor.
-        let config = this.getAttributes(element),
-            children = [];
+        let config = this.getAttributes(element);
 
-        for(let child of [...element.children]) {
-            if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
-                element.removeChild(child);
-                children.push(child);
-            }
-        }
-
-        let instance = new this({
-           ...config,
-           target: element
+        return new this({
+            ...config,
+            target: element
         });
-
-        for(let child of children) {
-            if(child.hasAttribute('data-menuitem')) {
-                let item = instance.constructMenuItem({target: child});
-                instance.append(item);
-            } else {
-                instance.append(child);
-            }
-        }
-
-        return instance;
     }
 
     /**
@@ -776,6 +803,8 @@ const RICH_SELECT_SCHEMA = new AttributeSchema({
 
 export class RichSelect extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5}={}) {
+        widget = widget || new MultiHiddenInputWidget();
+
         super({
             toggle: true,
             autoActivate: false,
@@ -786,15 +815,9 @@ export class RichSelect extends AbstractSelect {
             clearSubItemsOnHover: false,
             positioner: positioners.DROPDOWN,
             closeOnSelect: true,
-            target
+            target,
+            widget
         });
-
-        if(!widget) {
-            this.widget = new MultiHiddenInputWidget();
-            this.widget.appendTo(this.element);
-        } else {
-            this.widget = widget;
-        }
 
         this.textbox.addEventListener('blur', event => {
             if(!this.containsElement(event.relatedTarget)) {
@@ -802,16 +825,14 @@ export class RichSelect extends AbstractSelect {
             }
         });
 
-        if(!this.submenu) {
-            this.attachSubMenu(this.constructSubMenu({}));
-        }
-
         this.registerTopics();
         this.initKeyboardNavigation();
         this.init();
 
         this.multiple = multiple;
         this.maxItems = maxItems;
+
+        this.refreshUI();
     }
 
     render({target}) {
@@ -935,6 +956,8 @@ export class RichSelect extends AbstractSelect {
 
 export class MultiComboBox extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500}={}) {
+        widget = widget || new MultiHiddenInputWidget();
+
         super({
             toggle: true,
             autoActivate: false,
@@ -945,7 +968,8 @@ export class MultiComboBox extends AbstractSelect {
             positioner: positioners.DROPDOWN,
             closeOnSelect: false,
             clearSubItemsOnHover: false,
-            target
+            target,
+            widget
         });
 
         this.multiSelect = true;
@@ -953,22 +977,9 @@ export class MultiComboBox extends AbstractSelect {
         this.optionToPillMap = new WeakMap();
         this.pilltoOptionMap = new WeakMap();
 
-        if(!this.submenu) this.attachSubMenu(this.constructSubMenu({}));
-
         this.submenu.multiSelect = true;
         this.submenu.toggle = true;
         this.submenu.enableShiftSelect = true;
-
-        if(!widget) {
-            this.widget = new MultiHiddenInputWidget();
-            this.widget.appendTo(this.element);
-        } else {
-            this.widget = widget;
-
-            if(!this.widget.element.parentElement) {
-                this.widget.appendTo(this.element);
-            }
-        }
 
         this.initKeyboardNavigation();
         this.registerTopics();
@@ -1150,36 +1161,42 @@ export class MultiComboBox extends AbstractSelect {
     }
 
     refreshUI() {
-        let fragment = document.createDocumentFragment(),
-            _new = false,
-            values = [];
+        if(!this._refreshUIId) {
+            this._refreshUIId = window.requestAnimationFrame(() => {
+                this._refreshUIId = null;
 
-        for(let option of this.options) {
-            let pill = this.optionToPillMap.get(option);
+                let fragment = document.createDocumentFragment(),
+                    _new = false,
+                    values = [];
 
-            if(option.isSelected) {
-                if(!pill) {
-                    pill = this._buildChoicePill(option.text);
-                    this.pilltoOptionMap.set(pill, option);
-                    this.optionToPillMap.set(option, pill);
-                    fragment.appendChild(pill);
-                    _new = true;
+                for(let option of this.options) {
+                    let pill = this.optionToPillMap.get(option);
+
+                    if(option.isSelected) {
+                        if(!pill) {
+                            pill = this._buildChoicePill(option.text);
+                            this.pilltoOptionMap.set(pill, option);
+                            this.optionToPillMap.set(option, pill);
+                            fragment.appendChild(pill);
+                            _new = true;
+                        }
+
+                        values.push(option.value || option.text);
+                    } else if(pill) {
+                        if(pill.parentElement) pill.parentElement.removeChild(pill);
+                        this.optionToPillMap.delete(option);
+                        this.pilltoOptionMap.delete(pill);
+                    }
                 }
 
-                values.push(option.value || option.text);
-            } else if(pill) {
-                if(pill.parentElement) pill.parentElement.removeChild(pill);
-                this.optionToPillMap.delete(option);
-                this.pilltoOptionMap.delete(pill);
-            }
-        }
+                if(_new) {
+                    this.body.insertBefore(fragment, this.textbox);
+                }
 
-        if(_new) {
-            this.body.insertBefore(fragment, this.textbox);
-        }
-
-        if(this.widget) {
-            this.widget.setValue(values);
+                if(this.widget) {
+                    this.widget.setValue(values);
+                }
+            });
         }
     }
 
@@ -1235,6 +1252,7 @@ export class ComboBox extends RichSelect {
 
         this.wait = wait;
         this.filter = filter;
+        this.refreshUI();
     }
 
     //------------------------------------------------------------------------------------------------------------------

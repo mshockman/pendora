@@ -5059,7 +5059,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-
 var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP),
     BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP);
 var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["AttributeSchema"]({
@@ -5099,6 +5098,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       var _this;
 
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          target = _ref.target,
           _ref$closeOnBlur = _ref.closeOnBlur,
           closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
           _ref$timeout = _ref.timeout,
@@ -5117,11 +5117,11 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
           _ref$direction = _ref.direction,
           direction = _ref$direction === void 0 ? "vertical" : _ref$direction,
-          data = _objectWithoutProperties(_ref, ["closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "positioner", "direction"]);
+          context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "positioner", "direction"]);
 
       _classCallCheck(this, AbstractMenu);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this, data));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this));
 
       _initialize(_assertThisInitialized(_this));
 
@@ -5143,6 +5143,14 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.positioner = positioner;
       _this.direction = direction;
+
+      _this.render({
+        target: target,
+        context: context
+      });
+
+      _this.parseDOM();
+
       return _this;
     }
 
@@ -5372,10 +5380,10 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                 submenu = _step3$value.submenu,
                 args = _objectWithoutProperties(_step3$value, ["submenu"]);
 
-            var item = new this.MenuItemClass(args);
+            var item = this.constructMenuItem(args);
 
             if (submenu) {
-              var _submenu = new this.SubMenuClass(submenu);
+              var _submenu = this.constructSubMenu(submenu);
 
               item.attachSubMenu(_submenu);
             }
@@ -5403,7 +5411,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       key: "addItem",
       value: function addItem(text) {
         var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-        var item = new this.MenuItemClass({
+        var item = this.constructMenuItem({
           text: text,
           action: action
         });
@@ -5937,7 +5945,6 @@ function (_AbstractMenu) {
    * @param delay {Boolean|Number}
    * @param id {String}
    * @param children {Array}
-   * @param data
    */
   function Menu() {
     var _this5;
@@ -5960,12 +5967,11 @@ function (_AbstractMenu) {
         _ref2$delay = _ref2.delay,
         delay = _ref2$delay === void 0 ? 0 : _ref2$delay,
         _ref2$children = _ref2.children,
-        children = _ref2$children === void 0 ? null : _ref2$children,
-        data = _objectWithoutProperties(_ref2, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "children"]);
+        children = _ref2$children === void 0 ? null : _ref2$children;
 
     _classCallCheck(this, Menu);
 
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, _objectSpread({
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
       closeOnBlur: closeOnBlur,
       timeout: timeout,
       autoActivate: autoActivate,
@@ -5974,19 +5980,12 @@ function (_AbstractMenu) {
       delay: delay,
       positioner: 'inherit',
       direction: 'vertical',
-      openOnHover: openOnHover
-    }, data)));
+      openOnHover: openOnHover,
+      target: target
+    }));
     _this5.events = null;
 
-    if (target) {
-      _this5.element = target;
-    } else {
-      _this5.element = _this5.render();
-    }
-
     _this5.registerTopics();
-
-    _this5.parseDOM();
 
     _this5.init();
 
@@ -5999,6 +5998,7 @@ function (_AbstractMenu) {
   /**
    * Renders the domElement of the widget.
    *
+   * @param target
    * @param arrow
    * @returns {HTMLElement|Element}
    */
@@ -6008,12 +6008,17 @@ function (_AbstractMenu) {
     key: "render",
     value: function render() {
       var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          target = _ref3.target,
           _ref3$arrow = _ref3.arrow,
-          arrow = _ref3$arrow === void 0 ? false : _ref3$arrow;
+          arrow = _ref3$arrow === void 0 ? true : _ref3$arrow;
 
-      var html = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["parseHTML"])(html);
-      return fragment.children[0];
+      var TEMPLATE = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
+
+      if (target) {
+        this.element = target;
+      } else {
+        this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])(TEMPLATE);
+      }
     }
   }, {
     key: "constructSubMenu",
@@ -6041,13 +6046,14 @@ autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (el
 /*!*****************************!*\
   !*** ./src/menu/MenuBar.js ***!
   \*****************************/
-/*! exports provided: MenuBarItem, default */
+/*! exports provided: MenuBarItem, default, SideMenuBar */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MenuBarItem", function() { return MenuBarItem; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuBar; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SideMenuBar", function() { return SideMenuBar; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
@@ -6095,13 +6101,48 @@ function (_MenuItem) {
     key: "render",
     value: function render() {
       var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          _ref$text = _ref.text,
-          text = _ref$text === void 0 ? '' : _ref$text,
+          target = _ref.target,
+          text = _ref.text,
           _ref$nodeName = _ref.nodeName,
-          nodeName = _ref$nodeName === void 0 ? 'div' : _ref$nodeName;
+          nodeName = _ref$nodeName === void 0 ? 'div' : _ref$nodeName,
+          _ref$href = _ref.href,
+          href = _ref$href === void 0 ? null : _ref$href;
 
-      var fragment = Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n            <".concat(nodeName, " class=\"menuitem\">\n                <a class=\"menuitem__button\" data-button>").concat(text, "</a>\n            </").concat(nodeName, ">\n        "));
-      return fragment.children[0];
+      var content = null;
+
+      if (target) {
+        this.element = target;
+        var btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
+
+        if (!btn) {
+          content = document.createDocumentFragment();
+
+          while (this.element.firstChild) {
+            content.appendChild(this.element.firstChild);
+          }
+
+          this.element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
+        }
+      } else {
+        var element = document.createElement(nodeName);
+        element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("<a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
+        this.element = element;
+      }
+
+      this.button = this.element.querySelector("[data-button]");
+      this.textContainer = this.element.querySelector("[data-text]") || this.button;
+      this.element.classList.add('menuitem');
+
+      if (content) {
+        this.textContainer.appendChild(content);
+      }
+
+      if (text !== null && text !== undefined) {
+        this.text = text;
+      }
+
+      if (href !== null) this.href = href;
+      this.element.tabIndex = -1;
     }
   }]);
 
@@ -6174,10 +6215,16 @@ function (_AbstractMenu) {
 
   _createClass(MenuBar, [{
     key: "render",
-    value: function render(context) {
-      var element = document.createElement('div');
-      element.className = "menubar";
-      return element;
+    value: function render(_ref3) {
+      var target = _ref3.target;
+
+      if (target) {
+        this.element = target;
+      } else {
+        this.element = document.createElement('div');
+      }
+
+      this.element.classList.add("menubar");
     }
   }, {
     key: "getMenuBody",
@@ -6200,8 +6247,36 @@ function (_AbstractMenu) {
 }(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
+var SideMenuBar =
+/*#__PURE__*/
+function (_MenuBar) {
+  _inherits(SideMenuBar, _MenuBar);
+
+  function SideMenuBar() {
+    var _this2;
+
+    var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, SideMenuBar);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SideMenuBar).call(this, config));
+    _this2.direction = 'vertical';
+    _this2.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["SIDE_MENU"];
+
+    _this2.element.classList.remove('menubar');
+
+    _this2.element.classList.add('side-menu-bar');
+
+    return _this2;
+  }
+
+  return SideMenuBar;
+}(MenuBar);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('menubar', function (element) {
   return MenuBar.FromHTML(element);
+});
+autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('side-menubar', function (element) {
+  return SideMenuBar.FromHTML(element);
 });
 
 /***/ }),
@@ -6314,7 +6389,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
     function AbstractMenuItem(_ref) {
       var _this;
 
-      var targetKey = _ref.targetKey,
+      var target = _ref.target,
+          targetKey = _ref.targetKey,
           toggle = _ref.toggle,
           autoActivate = _ref.autoActivate,
           openOnHover = _ref.openOnHover,
@@ -6325,11 +6401,11 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           positioner = _ref.positioner,
           clearSubItemsOnHover = _ref.clearSubItemsOnHover,
           autoDeactivateItems = _ref.autoDeactivateItems,
-          data = _objectWithoutProperties(_ref, ["targetKey", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "timeout", "positioner", "clearSubItemsOnHover", "autoDeactivateItems"]);
+          context = _objectWithoutProperties(_ref, ["target", "targetKey", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "timeout", "positioner", "clearSubItemsOnHover", "autoDeactivateItems"]);
 
       _classCallCheck(this, AbstractMenuItem);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this, data));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this));
       /**
        * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
        * @type {null|String}
@@ -6402,6 +6478,32 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
        */
 
       _this.autoDeactivateItems = autoDeactivateItems;
+      _this.button = null; // this.element;
+
+      var submenu = null;
+
+      if (typeof target === 'string') {
+        target = document.querySelector(target);
+      }
+
+      if (target) {
+        submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, '[data-menu]');
+
+        if (submenu) {
+          submenu.parentElement.removeChild(submenu);
+        }
+      }
+
+      _this.render(_objectSpread({
+        target: target
+      }, context));
+
+      if (submenu) {
+        _this.attachSubMenu(_this.constructSubMenu({
+          target: submenu
+        }));
+      }
+
       return _this;
     }
 
@@ -6881,38 +6983,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         }
       }
     }, {
-      kind: "get",
-      key: "text",
-      value: function text() {
-        return this.textContainer.innerText;
-      }
-    }, {
-      kind: "set",
-      key: "text",
-      value: function text(value) {
-        this.textContainer.innerText = value;
-      }
-    }, {
-      kind: "get",
-      key: "href",
-      value: function href() {
-        if (this.button.nodeName === "A") {
-          return this.button.href;
-        } else {
-          return null;
-        }
-      }
-    }, {
-      kind: "set",
-      key: "href",
-      value: function href(value) {
-        if (this.button.nodeName === 'A') {
-          this.button.href = value;
-        } else {
-          throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
-        }
-      }
-    }, {
       kind: "method",
       key: "_navigate",
       value: function _navigate(event) {
@@ -6980,43 +7050,15 @@ function (_AbstractMenuItem) {
       timeout: timeout,
       positioner: positioner,
       clearSubItemsOnHover: true,
-      autoDeactivateItems: true
+      autoDeactivateItems: true,
+      target: target,
+      text: text,
+      href: href,
+      nodeName: nodeName
     }));
-    /**
-     * @type {null|HTMLElement}
-     */
-
-    var submenu = null;
-
-    if (target) {
-      _this6.element = target;
-      submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(_this6.element, '[data-menu]');
-
-      if (submenu) {
-        submenu.parentElement.removeChild(submenu);
-      }
-    } else {
-      _this6.element = _this6.render({
-        text: text,
-        nodeName: nodeName
-      });
-    }
-
-    _this6.button = _this6.element.querySelector("[data-button]");
-    _this6.textContainer = _this6.element.querySelector("[data-text]");
-    _this6.altTextContainer = _this6.element.querySelector('[data-alt-text]');
-    if (href !== null) _this6.href = href;
-    _this6.element.tabIndex = -1;
     if (action) _this6.addAction(action);
 
-    if (submenu) {
-      _this6.attachSubMenu(_this6.constructSubMenu({
-        target: submenu
-      }));
-    }
-
-    _this6.registerTopics(); // this.parseDOM();
-
+    _this6.registerTopics();
 
     return _this6;
   }
@@ -7033,27 +7075,75 @@ function (_AbstractMenuItem) {
     }
     /**
      * Renders the domElement.
-     *
-     * @param text {String}
-     * @param nodeName
-     * @param href
-     * @returns {HTMLElement|Element}
      */
 
   }, {
     key: "render",
-    value: function render() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+    value: function render(_ref3) {
+      var target = _ref3.target,
           text = _ref3.text,
-          _ref3$nodeName = _ref3.nodeName,
-          nodeName = _ref3$nodeName === void 0 ? "div" : _ref3$nodeName;
+          href = _ref3.href,
+          nodeName = _ref3.nodeName;
+      var content = null;
 
-      var element = document.createElement(nodeName);
-      element.className = "menuitem";
-      var html = "\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text>".concat(text, "</span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>");
-      var fragment = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["parseHTML"])(html);
-      element.appendChild(fragment);
-      return element;
+      if (target) {
+        this.element = target;
+        var btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(this.element, '[data-button]');
+
+        if (!btn) {
+          content = document.createDocumentFragment();
+
+          while (this.element.firstChild) {
+            content.appendChild(this.element.firstChild);
+          }
+
+          this.element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+        }
+      } else {
+        var element = document.createElement(nodeName);
+        element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+        this.element = element;
+      }
+
+      this.button = this.element.querySelector("[data-button]");
+      this.textContainer = this.element.querySelector("[data-text]") || this.button;
+      this.altTextContainer = this.element.querySelector('[data-alt-text]');
+      this.element.classList.add('menuitem');
+
+      if (content) {
+        this.textContainer.appendChild(content);
+      }
+
+      if (text !== null && text !== undefined) {
+        this.text = text;
+      }
+
+      if (href !== null) this.href = href;
+      this.element.tabIndex = -1;
+    }
+  }, {
+    key: "text",
+    get: function get() {
+      return this.textContainer.innerText;
+    },
+    set: function set(value) {
+      this.textContainer.innerText = value;
+    }
+  }, {
+    key: "href",
+    get: function get() {
+      if (this.button.nodeName === "A") {
+        return this.button.href;
+      } else {
+        return null;
+      }
+    },
+    set: function set(value) {
+      if (this.button.nodeName === 'A') {
+        this.button.href = value;
+      } else {
+        throw new Error("Cannot assign href to menuitem who's button is not an anchor tag.");
+      }
     }
   }]);
 
@@ -7094,9 +7184,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -7120,8 +7210,6 @@ function (_Publisher) {
   function MenuNode() {
     var _this;
 
-    var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
     _classCallCheck(this, MenuNode);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuNode).call(this));
@@ -7141,7 +7229,6 @@ function (_Publisher) {
     _this.isController = false; // noinspection JSUnusedGlobalSymbols
 
     _this.closeOnSelect = false;
-    Object.assign(_assertThisInitialized(_this), data);
     return _this;
   }
   /**
@@ -8641,8 +8728,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var SelectOption =
 /*#__PURE__*/
-function (_AbstractMenuItem) {
-  _inherits(SelectOption, _AbstractMenuItem);
+function (_MenuItem) {
+  _inherits(SelectOption, _MenuItem);
 
   function SelectOption() {
     var _this;
@@ -8657,6 +8744,22 @@ function (_AbstractMenuItem) {
 
     _classCallCheck(this, SelectOption);
 
+    var targetChildren = null,
+        isSelected = false;
+
+    if (typeof target === 'string') {
+      target = document.querySelector(target);
+    }
+
+    if (target) {
+      // Save target children to add to the text output later.
+      targetChildren = document.createDocumentFragment();
+
+      while (target.firstChild) {
+        targetChildren.appendChild(target.firstChild);
+      }
+    }
+
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this, {
       toggle: "inherit",
       autoActivate: true,
@@ -8667,50 +8770,18 @@ function (_AbstractMenuItem) {
       timeout: false,
       clearSubItemsOnHover: true,
       autoDeactivateItems: "auto",
-      targetKey: targetKey
-    }));
-    var targetChildren = null;
-
-    if (target) {
-      if (typeof target === 'string') {
-        target = document.querySelector(target);
-      } // Save target children to add to the text output later.
-
-
-      targetChildren = document.createDocumentFragment();
-
-      while (target.firstChild) {
-        targetChildren.appendChild(target.firstChild);
-      }
-
-      _this.element = target;
-    } else {
-      _this.element = document.createElement('div');
-
-      _this.element.classList.add('select-option');
-    }
-
-    var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
-
-    _this.element.appendChild(fragment);
-
-    _this.element.classList.add('select-option');
-
-    _this.textNode = _this.element.querySelector('[data-text]'); // If initializing the object from a target element
+      targetKey: targetKey,
+      target: target
+    })); // If initializing the object from a target element
     // the label text is gathered from the children of the target
 
     if (targetChildren) {
-      _this.textNode.appendChild(targetChildren);
+      _this.textContainer.appendChild(targetChildren);
     } else if (text) {
       var textNode = document.createTextNode(text);
 
-      _this.textNode.appendChild(textNode);
+      _this.textContainer.appendChild(textNode);
     }
-
-    _this.element.setAttribute('aria-role', 'option');
-
-    _this.registerTopics(); // this.parseDOM();
-
 
     if (value !== null && value !== undefined) {
       _this.value = value;
@@ -8750,17 +8821,25 @@ function (_AbstractMenuItem) {
     }
     /**
      * Creates the dom elements for the SelectOption.
-     * @param text
-     * @returns {Element}
      */
 
   }, {
     key: "render",
     value: function render(_ref2) {
-      var text = _ref2.text;
-      var html = "\n        <div data-role=\"menuitem\" class=\"menuitem\">\n            <span class=\"checkmark\"><i class=\"fas fa-check\"></i></span>\n            <a data-text>".concat(text, "</a>\n        </div>");
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
-      return fragment.children[0];
+      var target = _ref2.target;
+
+      if (target) {
+        this.element = target;
+      } else {
+        this.element = document.createElement('div');
+        this.element.classList.add('select-option');
+      }
+
+      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+      this.element.appendChild(fragment);
+      this.element.classList.add('select-option');
+      this.textContainer = this.element.querySelector('[data-text]');
+      this.element.setAttribute('aria-role', 'option');
     } // noinspection JSUnusedGlobalSymbols
 
     /**
@@ -8889,7 +8968,7 @@ function (_AbstractMenuItem) {
   }, {
     key: "text",
     get: function get() {
-      return this.textNode.innerText.trim();
+      return this.textContainer.innerText.trim();
     }
     /**
      * Sets the options inner html.
@@ -8897,7 +8976,7 @@ function (_AbstractMenuItem) {
      */
     ,
     set: function set(value) {
-      this.textNode.innerText = (value + "").trim();
+      this.textContainer.innerText = (value + "").trim();
     }
     /**
      * Returns the options parent select-menu or null.
@@ -8940,7 +9019,7 @@ function (_AbstractMenuItem) {
   }]);
 
   return SelectOption;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]); // noinspection JSUnusedGlobalSymbols
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"]); // noinspection JSUnusedGlobalSymbols
 
 var FILTERS = {
   startsWith: function startsWith(value) {
@@ -9004,34 +9083,18 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         timeout: false,
         autoActivate: true,
         openOnHover: false,
-        multiSelect: "inherit",
         closeOnSelect: false,
         delay: 0,
-        positioner: "inherit"
+        positioner: "inherit",
+        target: target
       }));
 
       _initialize(_assertThisInitialized(_this3));
 
-      if (target) {
-        if (typeof target === 'string') {
-          target = document.querySelector(target);
-        }
-
-        _this3.element = target;
-      } else {
-        _this3.element = _this3.render(context);
-      }
-
-      _this3.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-header]');
-      _this3.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-body]');
-      _this3.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this3.element, '[data-footer]');
-      _this3.filterInput = null;
+      _this3.multiSelect = 'inherit';
       _this3.enableShiftSelect = enableShiftSelect;
       _this3.enableCtrlToggle = enableCtrlToggle;
       _this3.clearOldSelection = clearOldSelection;
-
-      _this3.element.classList.add('select-menu');
-
       _this3.placeholder = document.createElement('div');
 
       _this3.placeholder.classList.add('placeholder');
@@ -9070,12 +9133,27 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       key: "render",
       value: function render() {
         var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            target = _ref4.target,
             _ref4$arrow = _ref4.arrow,
             arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
 
-        var html = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\" data-header></div>\n                <div class=\"select-menu__body menu__body\" data-body></div>\n                <div class=\"select-menu__footer\" data-footer></div>\n            </div>\n        ";
-        var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
-        return fragment.children[0];
+        var TEMPLATE = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\" data-header></div>\n                <div class=\"select-menu__body menu__body\" data-body></div>\n                <div class=\"select-menu__footer\" data-footer></div>\n            </div>\n        ";
+
+        if (target) {
+          if (typeof target === 'string') {
+            target = document.querySelector(target);
+          }
+
+          this.element = target;
+        } else {
+          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE).children[0];
+        }
+
+        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-header]');
+        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-body]');
+        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-footer]');
+        this.filterInput = null;
+        this.element.classList.add('select-menu');
       }
     }, {
       kind: "method",
@@ -9471,13 +9549,71 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
 var AbstractSelect =
 /*#__PURE__*/
-function (_AbstractMenuItem2) {
-  _inherits(AbstractSelect, _AbstractMenuItem2);
+function (_AbstractMenuItem) {
+  _inherits(AbstractSelect, _AbstractMenuItem);
 
-  function AbstractSelect() {
+  function AbstractSelect(_ref5) {
+    var _this6;
+
+    var target = _ref5.target,
+        widget = _ref5.widget,
+        config = _objectWithoutProperties(_ref5, ["target", "widget"]);
+
     _classCallCheck(this, AbstractSelect);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(AbstractSelect).apply(this, arguments));
+    if (typeof target === 'string') {
+      target = document.querySelector(target);
+    } // Find any child and store them and add them to the submenu after it is initialized.
+
+
+    var children = [];
+
+    if (target) {
+      for (var _i = 0, _arr = _toConsumableArray(target.children); _i < _arr.length; _i++) {
+        var child = _arr[_i];
+
+        if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+          target.removeChild(child);
+          children.push(child);
+        }
+      }
+    }
+
+    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(AbstractSelect).call(this, _objectSpread({
+      target: target
+    }, config))); // Set the widget component control.
+
+    _this6.widget = widget;
+
+    if (!_this6.widget.element.parentElement) {
+      _this6.widget.appendTo(_this6.element);
+    } // If the submenu hasn't been initialized at this point it wasn't part of the dom.
+    // Create a default submenu instance to use.
+
+
+    if (!_this6.submenu) {
+      _this6.attachSubMenu(_this6.constructSubMenu({}));
+    } // Add any found children from above to the submenu.
+
+
+    for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
+      var _child2 = _children[_i2];
+
+      if (_child2.hasAttribute('data-menuitem')) {
+        var item = _this6.constructMenuItem({
+          target: _child2
+        });
+
+        _this6.append(item);
+      } else {
+        _this6.append(_child2);
+      }
+    } // Register a UI refresh.
+
+
+    _this6.refreshUI();
+
+    return _this6;
   }
 
   _createClass(AbstractSelect, [{
@@ -9508,34 +9644,34 @@ function (_AbstractMenuItem2) {
   }, {
     key: "registerTopics",
     value: function registerTopics() {
-      var _this6 = this;
+      var _this7 = this;
 
       _get(_getPrototypeOf(AbstractSelect.prototype), "registerTopics", this).call(this);
 
       this.on('menuitem.click', function (topic) {
         // Close the select if the user clicks a disabled select item.
-        if (_this6.closeOnSelect && _this6.isActive) {
+        if (_this7.closeOnSelect && _this7.isActive) {
           if (topic.target.isDisabled) {
             topic.preventDefault();
 
-            _this6.deactivate();
+            _this7.deactivate();
           }
         }
       });
       this.on('option.select', function () {
-        if (_this6.closeOnSelect && _this6.isActive) {
-          _this6.deactivate();
+        if (_this7.closeOnSelect && _this7.isActive) {
+          _this7.deactivate();
         }
       });
       this.on('option.deselect', function () {
-        if (_this6.closeOnSelect && _this6.isActive) {
-          _this6.deactivate();
+        if (_this7.closeOnSelect && _this7.isActive) {
+          _this7.deactivate();
         }
       });
       this.on('selection.change', function () {
-        _this6.refreshUI();
+        _this7.refreshUI();
 
-        _this6.submenu.position();
+        _this7.submenu.position();
       });
     }
   }, {
@@ -9666,36 +9802,10 @@ function (_AbstractMenuItem2) {
       } // todo move into constructor.
 
 
-      var config = this.getAttributes(element),
-          children = [];
-
-      for (var _i = 0, _arr = _toConsumableArray(element.children); _i < _arr.length; _i++) {
-        var child = _arr[_i];
-
-        if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
-          element.removeChild(child);
-          children.push(child);
-        }
-      }
-
-      var instance = new this(_objectSpread({}, config, {
+      var config = this.getAttributes(element);
+      return new this(_objectSpread({}, config, {
         target: element
       }));
-
-      for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
-        var _child2 = _children[_i2];
-
-        if (_child2.hasAttribute('data-menuitem')) {
-          var item = instance.constructMenuItem({
-            target: _child2
-          });
-          instance.append(item);
-        } else {
-          instance.append(_child2);
-        }
-      }
-
-      return instance;
     }
   }]);
 
@@ -9711,23 +9821,24 @@ function (_AbstractSelect) {
   _inherits(RichSelect, _AbstractSelect);
 
   function RichSelect() {
-    var _this7;
+    var _this8;
 
-    var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref5$target = _ref5.target,
-        target = _ref5$target === void 0 ? null : _ref5$target,
-        _ref5$timeout = _ref5.timeout,
-        timeout = _ref5$timeout === void 0 ? false : _ref5$timeout,
-        _ref5$widget = _ref5.widget,
-        widget = _ref5$widget === void 0 ? null : _ref5$widget,
-        _ref5$multiple = _ref5.multiple,
-        multiple = _ref5$multiple === void 0 ? false : _ref5$multiple,
-        _ref5$maxItems = _ref5.maxItems,
-        maxItems = _ref5$maxItems === void 0 ? 5 : _ref5$maxItems;
+    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref6$target = _ref6.target,
+        target = _ref6$target === void 0 ? null : _ref6$target,
+        _ref6$timeout = _ref6.timeout,
+        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
+        _ref6$widget = _ref6.widget,
+        widget = _ref6$widget === void 0 ? null : _ref6$widget,
+        _ref6$multiple = _ref6.multiple,
+        multiple = _ref6$multiple === void 0 ? false : _ref6$multiple,
+        _ref6$maxItems = _ref6.maxItems,
+        maxItems = _ref6$maxItems === void 0 ? 5 : _ref6$maxItems;
 
     _classCallCheck(this, RichSelect);
 
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
+    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
       toggle: true,
       autoActivate: false,
       openOnHover: false,
@@ -9736,78 +9847,63 @@ function (_AbstractSelect) {
       closeOnBlur: true,
       clearSubItemsOnHover: false,
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
-      closeOnSelect: true
-    }));
-    var submenu = null;
-
-    if (target) {
-      if (typeof target === 'string') target = document.querySelector(target);
-      submenu = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(target, '[data-menu]');
-
-      if (submenu) {
-        target.removeChild(submenu);
-      }
-
-      _this7.element = target;
-
-      if (_this7.element.nodeName === 'INPUT') {
-        _this7.textbox = _this7.element;
-      } else {
-        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this7.element, '[data-button]');
-
-        if (!button) {
-          _this7.element.appendChild(_this7.render());
-        }
-      }
-    } else {
-      _this7.element = document.createElement('div');
-
-      _this7.element.appendChild(_this7.render());
-    }
-
-    if (!_this7.textbox) {
-      _this7.textbox = _this7.element.querySelector('input, [data-text]');
-    }
-
-    _this7.textbox.readOnly = true;
-    _this7._label = '';
-    _this7.element.tabIndex = 0;
-
-    _this7.attachSubMenu(_this7.constructSubMenu({
-      target: submenu
+      closeOnSelect: true,
+      target: target,
+      widget: widget
     }));
 
-    _this7.classList.add('rich-select');
-
-    if (!widget) {
-      _this7.widget = new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
-
-      _this7.widget.appendTo(_this7.element);
-    } else {
-      _this7.widget = widget;
-    }
-
-    _this7.textbox.addEventListener('blur', function (event) {
-      if (!_this7.containsElement(event.relatedTarget)) {
-        _this7.textbox.value = _this7._label;
+    _this8.textbox.addEventListener('blur', function (event) {
+      if (!_this8.containsElement(event.relatedTarget)) {
+        _this8.textbox.value = _this8._label;
       }
     });
 
-    _this7.initKeyboardNavigation();
+    _this8.registerTopics();
 
-    _this7.registerTopics();
+    _this8.initKeyboardNavigation();
 
-    _this7.init();
+    _this8.init();
 
-    _this7.multiple = multiple;
-    _this7.maxItems = maxItems;
-    return _this7;
+    _this8.multiple = multiple;
+    _this8.maxItems = maxItems;
+
+    _this8.refreshUI();
+
+    return _this8;
   }
 
   _createClass(RichSelect, [{
     key: "render",
-    value: function render(context) {
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ");
+    value: function render(_ref7) {
+      var target = _ref7.target;
+      var TEMPLATE = "\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
+
+      if (target) {
+        if (typeof target === 'string') target = document.querySelector(target);
+        this.element = target;
+
+        if (this.element.nodeName === 'INPUT') {
+          this.textbox = this.element;
+        } else {
+          var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-button]');
+
+          if (!button) {
+            this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+          }
+        }
+      } else {
+        this.element = document.createElement('div');
+        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+      }
+
+      if (!this.textbox) {
+        this.textbox = this.element.querySelector('input, [data-text]');
+      }
+
+      this.textbox.readOnly = true;
+      this._label = '';
+      this.element.tabIndex = 0;
+      this.classList.add('rich-select');
     }
   }, {
     key: "refreshUI",
@@ -9918,23 +10014,24 @@ function (_AbstractSelect2) {
   _inherits(MultiComboBox, _AbstractSelect2);
 
   function MultiComboBox() {
-    var _this8;
+    var _this9;
 
-    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref6$target = _ref6.target,
-        target = _ref6$target === void 0 ? null : _ref6$target,
-        _ref6$timeout = _ref6.timeout,
-        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
-        _ref6$widget = _ref6.widget,
-        widget = _ref6$widget === void 0 ? null : _ref6$widget,
-        _ref6$filter = _ref6.filter,
-        filter = _ref6$filter === void 0 ? FILTERS.istartsWith : _ref6$filter,
-        _ref6$wait = _ref6.wait,
-        wait = _ref6$wait === void 0 ? 500 : _ref6$wait;
+    var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref8$target = _ref8.target,
+        target = _ref8$target === void 0 ? null : _ref8$target,
+        _ref8$timeout = _ref8.timeout,
+        timeout = _ref8$timeout === void 0 ? false : _ref8$timeout,
+        _ref8$widget = _ref8.widget,
+        widget = _ref8$widget === void 0 ? null : _ref8$widget,
+        _ref8$filter = _ref8.filter,
+        filter = _ref8$filter === void 0 ? FILTERS.istartsWith : _ref8$filter,
+        _ref8$wait = _ref8.wait,
+        wait = _ref8$wait === void 0 ? 500 : _ref8$wait;
 
     _classCallCheck(this, MultiComboBox);
 
-    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
+    _this9 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
       toggle: true,
       autoActivate: false,
       openOnHover: false,
@@ -9943,90 +10040,47 @@ function (_AbstractSelect2) {
       closeOnBlur: true,
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
       closeOnSelect: false,
-      multiSelect: true,
-      clearSubItemsOnHover: false
+      clearSubItemsOnHover: false,
+      target: target,
+      widget: widget
     }));
-    _this8.optionToPillMap = new WeakMap();
-    _this8.pilltoOptionMap = new WeakMap();
-    var submenu = null;
+    _this9.multiSelect = true;
+    _this9.optionToPillMap = new WeakMap();
+    _this9.pilltoOptionMap = new WeakMap();
+    _this9.submenu.multiSelect = true;
+    _this9.submenu.toggle = true;
+    _this9.submenu.enableShiftSelect = true;
 
-    if (target) {
-      if (typeof target === 'string') target = document.querySelector(target);
-      submenu = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(target, '[data-menu]');
+    _this9.initKeyboardNavigation();
 
-      if (submenu) {
-        target.removeChild(submenu);
-      }
+    _this9.registerTopics();
 
-      _this8.element = target;
-      var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(_this8.element, '[data-button]');
+    _this9.init();
 
-      if (!button) {
-        _this8.element.appendChild(_this8.render());
-      }
-    } else {
-      _this8.element = document.createElement('div');
+    _this9._filterTimer = null;
 
-      _this8.element.appendChild(_this8.render());
-    }
+    _this9._applyFilter = function () {
+      _this9._filterTimer = null;
 
-    _this8.textbox = _this8.element.querySelector('[data-text]');
-    _this8.body = _this8.element.querySelector('[data-body]');
+      _this9.submenu.filter(filter(_this9.getFilterValue()));
 
-    _this8.element.classList.add('multi-combo-box');
-
-    _this8.parseDOM();
-
-    _this8.attachSubMenu(_this8.constructSubMenu({
-      target: submenu
-    }));
-
-    _this8.submenu.multiSelect = true;
-    _this8.submenu.toggle = true;
-    _this8.submenu.enableShiftSelect = true;
-
-    if (!widget) {
-      _this8.widget = new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
-
-      _this8.widget.appendTo(_this8.element);
-    } else {
-      _this8.widget = widget;
-
-      if (!_this8.widget.element.parentElement) {
-        _this8.widget.appendTo(_this8.element);
-      }
-    }
-
-    _this8.initKeyboardNavigation();
-
-    _this8.registerTopics();
-
-    _this8.init();
-
-    _this8._filterTimer = null;
-
-    _this8._applyFilter = function () {
-      _this8._filterTimer = null;
-
-      _this8.submenu.filter(filter(_this8.getFilterValue()));
-
-      if (_this8.submenu.activeItem) _this8.submenu.activeItem.deactivate();
+      if (_this9.submenu.activeItem) _this9.submenu.activeItem.deactivate();
     };
 
-    _this8.textbox.addEventListener('input', function () {
-      if (_this8._filterTimer) {
-        clearTimeout(_this8._filterTimer);
-        _this8._filterTimer = null;
+    _this9.textbox.addEventListener('input', function () {
+      if (_this9._filterTimer) {
+        clearTimeout(_this9._filterTimer);
+        _this9._filterTimer = null;
       }
 
       if (wait === false || wait < 0) {
-        _this8._applyFilter();
+        _this9._applyFilter();
       } else {
-        _this8._filterTimer = setTimeout(_this8._applyFilter, wait);
+        _this9._filterTimer = setTimeout(_this9._applyFilter, wait);
       }
     });
 
-    return _this8;
+    return _this9;
   }
 
   _createClass(MultiComboBox, [{
@@ -10050,7 +10104,7 @@ function (_AbstractSelect2) {
   }, {
     key: "registerTopics",
     value: function registerTopics() {
-      var _this9 = this;
+      var _this10 = this;
 
       _get(_getPrototypeOf(MultiComboBox.prototype), "registerTopics", this).call(this);
 
@@ -10058,7 +10112,7 @@ function (_AbstractSelect2) {
         // noinspection JSUnresolvedFunction
         var exitButton = topic.originalEvent.target.closest('.pill__exit-button'),
             pill = exitButton ? exitButton.closest('.multi-combo-box__pill') : null,
-            option = pill ? _this9.pilltoOptionMap.get(pill) : null;
+            option = pill ? _this10.pilltoOptionMap.get(pill) : null;
 
         if (option) {
           option.optionDeselect();
@@ -10066,21 +10120,37 @@ function (_AbstractSelect2) {
 
         topic.originalEvent.preventDefault();
 
-        _this9.textbox.focus();
+        _this10.textbox.focus();
       });
       this.on('menu.hide', function (topic) {
-        if (topic.target === _this9.submenu) {
-          _this9.setFilterValue("");
+        if (topic.target === _this10.submenu) {
+          _this10.setFilterValue("");
 
-          _this9.submenu.clearFilter();
+          _this10.submenu.clearFilter();
         }
       });
     }
   }, {
     key: "render",
-    value: function render(context) {
-      var html = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(html);
+    value: function render(_ref9) {
+      var target = _ref9.target;
+      var TEMPLATE = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
+
+      if (target) {
+        this.element = target;
+        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-button]');
+
+        if (!button) {
+          this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+        }
+      } else {
+        this.element = document.createElement('div');
+        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+      }
+
+      this.textbox = this.element.querySelector('[data-text]');
+      this.body = this.element.querySelector('[data-body]');
+      this.element.classList.add('multi-combo-box');
     }
   }, {
     key: "_buildChoicePill",
@@ -10190,55 +10260,68 @@ function (_AbstractSelect2) {
   }, {
     key: "refreshUI",
     value: function refreshUI() {
-      var fragment = document.createDocumentFragment(),
-          _new = false,
-          values = [];
-      var _iteratorNormalCompletion11 = true;
-      var _didIteratorError11 = false;
-      var _iteratorError11 = undefined;
+      var _this11 = this;
 
-      try {
-        for (var _iterator11 = this.options[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-          var option = _step11.value;
-          var pill = this.optionToPillMap.get(option);
+      if (!this._refreshUIId) {
+        this._refreshUIId = window.requestAnimationFrame(function () {
+          _this11._refreshUIId = null;
+          var fragment = document.createDocumentFragment(),
+              _new = false,
+              values = [];
+          var _iteratorNormalCompletion11 = true;
+          var _didIteratorError11 = false;
+          var _iteratorError11 = undefined;
 
-          if (option.isSelected) {
-            if (!pill) {
-              pill = this._buildChoicePill(option.text);
-              this.pilltoOptionMap.set(pill, option);
-              this.optionToPillMap.set(option, pill);
-              fragment.appendChild(pill);
-              _new = true;
+          try {
+            for (var _iterator11 = _this11.options[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+              var option = _step11.value;
+
+              var pill = _this11.optionToPillMap.get(option);
+
+              if (option.isSelected) {
+                if (!pill) {
+                  pill = _this11._buildChoicePill(option.text);
+
+                  _this11.pilltoOptionMap.set(pill, option);
+
+                  _this11.optionToPillMap.set(option, pill);
+
+                  fragment.appendChild(pill);
+                  _new = true;
+                }
+
+                values.push(option.value || option.text);
+              } else if (pill) {
+                if (pill.parentElement) pill.parentElement.removeChild(pill);
+
+                _this11.optionToPillMap["delete"](option);
+
+                _this11.pilltoOptionMap["delete"](pill);
+              }
             }
-
-            values.push(option.value || option.text);
-          } else if (pill) {
-            if (pill.parentElement) pill.parentElement.removeChild(pill);
-            this.optionToPillMap["delete"](option);
-            this.pilltoOptionMap["delete"](pill);
+          } catch (err) {
+            _didIteratorError11 = true;
+            _iteratorError11 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
+                _iterator11["return"]();
+              }
+            } finally {
+              if (_didIteratorError11) {
+                throw _iteratorError11;
+              }
+            }
           }
-        }
-      } catch (err) {
-        _didIteratorError11 = true;
-        _iteratorError11 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
-            _iterator11["return"]();
-          }
-        } finally {
-          if (_didIteratorError11) {
-            throw _iteratorError11;
-          }
-        }
-      }
 
-      if (_new) {
-        this.body.insertBefore(fragment, this.textbox);
-      }
+          if (_new) {
+            _this11.body.insertBefore(fragment, _this11.textbox);
+          }
 
-      if (this.widget) {
-        this.widget.setValue(values);
+          if (_this11.widget) {
+            _this11.widget.setValue(values);
+          }
+        });
       }
     } //------------------------------------------------------------------------------------------------------------------
     // Properties
@@ -10307,25 +10390,25 @@ function (_RichSelect) {
   _inherits(ComboBox, _RichSelect);
 
   function ComboBox() {
-    var _this10;
+    var _this12;
 
-    var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref7$target = _ref7.target,
-        target = _ref7$target === void 0 ? null : _ref7$target,
-        _ref7$timeout = _ref7.timeout,
-        timeout = _ref7$timeout === void 0 ? false : _ref7$timeout,
-        _ref7$submenu = _ref7.submenu,
-        submenu = _ref7$submenu === void 0 ? null : _ref7$submenu,
-        _ref7$widget = _ref7.widget,
-        widget = _ref7$widget === void 0 ? null : _ref7$widget,
-        _ref7$wait = _ref7.wait,
-        wait = _ref7$wait === void 0 ? 500 : _ref7$wait,
-        _ref7$filter = _ref7.filter,
-        filter = _ref7$filter === void 0 ? FILTERS.istartsWith : _ref7$filter;
+    var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref10$target = _ref10.target,
+        target = _ref10$target === void 0 ? null : _ref10$target,
+        _ref10$timeout = _ref10.timeout,
+        timeout = _ref10$timeout === void 0 ? false : _ref10$timeout,
+        _ref10$submenu = _ref10.submenu,
+        submenu = _ref10$submenu === void 0 ? null : _ref10$submenu,
+        _ref10$widget = _ref10.widget,
+        widget = _ref10$widget === void 0 ? null : _ref10$widget,
+        _ref10$wait = _ref10.wait,
+        wait = _ref10$wait === void 0 ? 500 : _ref10$wait,
+        _ref10$filter = _ref10.filter,
+        filter = _ref10$filter === void 0 ? FILTERS.istartsWith : _ref10$filter;
 
     _classCallCheck(this, ComboBox);
 
-    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this, {
+    _this12 = _possibleConstructorReturn(this, _getPrototypeOf(ComboBox).call(this, {
       target: target,
       timeout: timeout,
       submenu: submenu,
@@ -10334,13 +10417,16 @@ function (_RichSelect) {
       filter: null
     }));
 
-    _this10.element.classList.add('combo-box');
+    _this12.element.classList.add('combo-box');
 
-    _this10.element.classList.remove('rich-select');
+    _this12.element.classList.remove('rich-select');
 
-    _this10.wait = wait;
-    _this10.filter = filter;
-    return _this10;
+    _this12.wait = wait;
+    _this12.filter = filter;
+
+    _this12.refreshUI();
+
+    return _this12;
   } //------------------------------------------------------------------------------------------------------------------
   // Private methods
 
@@ -10361,7 +10447,7 @@ function (_RichSelect) {
   }, {
     key: "filter",
     set: function set(method) {
-      var _this11 = this;
+      var _this13 = this;
 
       if (this._destroyFilter) {
         this._destroyFilter();
@@ -10376,18 +10462,18 @@ function (_RichSelect) {
       var applyFilter = function applyFilter() {
         _timer = null;
 
-        _this11.submenu.filter(_this11._filterMethod(_this11.textbox.value)); // Flag if we found a select item.
+        _this13.submenu.filter(_this13._filterMethod(_this13.textbox.value)); // Flag if we found a select item.
 
 
         var f = false; // Activate the selected items.
 
-        if (!_this11.multiSelect) {
+        if (!_this13.multiSelect) {
           var _iteratorNormalCompletion13 = true;
           var _didIteratorError13 = false;
           var _iteratorError13 = undefined;
 
           try {
-            for (var _iterator13 = _this11.submenu.options[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+            for (var _iterator13 = _this13.submenu.options[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
               var option = _step13.value;
 
               if (!option.isDisabled && !option.isFiltered && option.isSelected) {
@@ -10418,7 +10504,7 @@ function (_RichSelect) {
           var _iteratorError14 = undefined;
 
           try {
-            for (var _iterator14 = _this11.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+            for (var _iterator14 = _this13.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
               var _option2 = _step14.value;
 
               if (!_option2.isDisabled && !_option2.isFiltered) {
@@ -10450,10 +10536,10 @@ function (_RichSelect) {
           _timer = null;
         }
 
-        if (_this11.wait === false || _this11.wait < 0) {
+        if (_this13.wait === false || _this13.wait < 0) {
           applyFilter();
         } else {
-          _timer = setTimeout(applyFilter, _this11.wait);
+          _timer = setTimeout(applyFilter, _this13.wait);
         }
       };
 
@@ -10471,12 +10557,12 @@ function (_RichSelect) {
       this.textbox.readOnly = false; // Create method to destroy event listener.
 
       this._destroyFilter = function () {
-        _this11.textbox.removeEventListener('input', onInput);
+        _this13.textbox.removeEventListener('input', onInput);
 
-        _this11.textbox.removeEventListener('keydown', onKeyDown);
+        _this13.textbox.removeEventListener('keydown', onKeyDown);
 
-        _this11.textbox.readOnly = true;
-        _this11._destroyFilter = null;
+        _this13.textbox.readOnly = true;
+        _this13._destroyFilter = null;
       };
     },
     get: function get() {
