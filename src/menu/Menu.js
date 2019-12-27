@@ -63,7 +63,7 @@ export class AbstractMenu extends MenuNode {
         this.positioner = positioner;
         this.direction = direction;
 
-        this.render({target, context});
+        this.render({target, ...context});
         this.parseDOM();
     }
 

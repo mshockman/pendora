@@ -303,6 +303,8 @@ export class AbstractMenuItem extends MenuNode {
      * @param submenu
      */
     attachSubMenu(submenu) {
+        if(submenu._parent === this) return;
+
         if(this.submenu) {
             if(this.submenu === submenu) return;
             throw new Error("MenuItem can only have one submenu.");
@@ -357,6 +359,14 @@ export class AbstractMenuItem extends MenuNode {
     }
 
     setParent(parent) {
+        if(this._parent === parent) return;
+
+        if(this._parent) {
+            let i = this._parent._children.indexOf(parent);
+            this._parent._children.splice(i, 1);
+            this._parent = null;
+        }
+
         this._parent = parent;
         parent._children.push(this);
     }

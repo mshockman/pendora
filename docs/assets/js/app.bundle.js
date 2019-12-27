@@ -5144,10 +5144,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       _this.positioner = positioner;
       _this.direction = direction;
 
-      _this.render({
-        target: target,
-        context: context
-      });
+      _this.render(_objectSpread({
+        target: target
+      }, context));
 
       _this.parseDOM();
 
@@ -6061,6 +6060,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
@@ -6182,7 +6187,7 @@ function (_AbstractMenu) {
 
     _classCallCheck(this, MenuBar);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, {
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, _objectSpread({
       closeOnBlur: closeOnBlur,
       timeout: timeout,
       autoActivate: autoActivate,
@@ -6191,20 +6196,19 @@ function (_AbstractMenu) {
       closeOnSelect: closeOnSelect,
       delay: delay,
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
-      direction: 'horizontal'
-    }));
-
-    if (target) {
-      _this.element = target;
-    } else {
-      _this.element = _this.render(context);
-    }
+      direction: 'horizontal',
+      target: target
+    }, context))); // if(target) {
+    //     this.element = target;
+    // } else {
+    //     this.element = this.render(context);
+    // }
 
     _this.isVisible = true;
 
-    _this.registerTopics();
-
     _this.parseDOM();
+
+    _this.registerTopics();
 
     _this.init();
 
@@ -6765,6 +6769,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "attachSubMenu",
       value: function attachSubMenu(submenu) {
+        if (submenu._parent === this) return;
+
         if (this.submenu) {
           if (this.submenu === submenu) return;
           throw new Error("MenuItem can only have one submenu.");
@@ -6830,6 +6836,16 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "setParent",
       value: function setParent(parent) {
+        if (this._parent === parent) return;
+
+        if (this._parent) {
+          var i = this._parent._children.indexOf(parent);
+
+          this._parent._children.splice(i, 1);
+
+          this._parent = null;
+        }
+
         this._parent = parent;
 
         parent._children.push(this);
@@ -8122,15 +8138,45 @@ function (_Publisher) {
     value: function parseDOM() {
       var _this5 = this;
 
-      if (this._children.length) {
+      // if(this._children.length) {
+      //     for(let child of this._children) {
+      //         child.invalidateTree();
+      //     }
+      // }
+      var walk = function walk(node) {
         var _iteratorNormalCompletion7 = true;
         var _didIteratorError7 = false;
         var _iteratorError7 = undefined;
 
         try {
-          for (var _iterator7 = this._children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+          for (var _iterator7 = node.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
             var child = _step7.value;
-            child.invalidateTree();
+
+            if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(child)) {
+              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(child);
+              instance.setParent(_this5);
+            } else {
+              var hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
+                  hasMenuAttribute = child.hasAttribute('data-menu');
+
+              if (hasMenuAttribute && hasMenuItemAttribute) {
+                throw new Error("Element cannot be both a menuitem and a menu.");
+              } else if (hasMenuAttribute) {
+                var menu = _this5.constructSubMenu({
+                  target: child
+                });
+
+                menu.setParent(_this5);
+              } else if (hasMenuItemAttribute) {
+                var item = _this5.constructMenuItem({
+                  target: child
+                });
+
+                item.setParent(_this5);
+              } else {
+                walk(child);
+              }
+            }
           }
         } catch (err) {
           _didIteratorError7 = true;
@@ -8143,57 +8189,6 @@ function (_Publisher) {
           } finally {
             if (_didIteratorError7) {
               throw _iteratorError7;
-            }
-          }
-        }
-      }
-
-      var walk = function walk(node) {
-        var _iteratorNormalCompletion8 = true;
-        var _didIteratorError8 = false;
-        var _iteratorError8 = undefined;
-
-        try {
-          for (var _iterator8 = node.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-            var _child = _step8.value;
-
-            if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(_child)) {
-              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(_child);
-              instance.setParent(_this5);
-            } else {
-              var hasMenuItemAttribute = _child.hasAttribute('data-menuitem'),
-                  hasMenuAttribute = _child.hasAttribute('data-menu');
-
-              if (hasMenuAttribute && hasMenuItemAttribute) {
-                throw new Error("Element cannot be both a menuitem and a menu.");
-              } else if (hasMenuAttribute) {
-                var menu = _this5.constructSubMenu({
-                  target: _child
-                });
-
-                menu.setParent(_this5);
-              } else if (hasMenuItemAttribute) {
-                var item = _this5.constructMenuItem({
-                  target: _child
-                });
-
-                item.setParent(_this5);
-              } else {
-                walk(_child);
-              }
-            }
-          }
-        } catch (err) {
-          _didIteratorError8 = true;
-          _iteratorError8 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-              _iterator8["return"]();
-            }
-          } finally {
-            if (_didIteratorError8) {
-              throw _iteratorError8;
             }
           }
         }
@@ -8225,26 +8220,26 @@ function (_Publisher) {
     key: "invalidateTree",
     value: function invalidateTree() {
       this._parent = null;
-      var _iteratorNormalCompletion9 = true;
-      var _didIteratorError9 = false;
-      var _iteratorError9 = undefined;
+      var _iteratorNormalCompletion8 = true;
+      var _didIteratorError8 = false;
+      var _iteratorError8 = undefined;
 
       try {
-        for (var _iterator9 = this.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-          var child = _step9.value;
+        for (var _iterator8 = this.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+          var child = _step8.value;
           child.invalidateTree();
         }
       } catch (err) {
-        _didIteratorError9 = true;
-        _iteratorError9 = err;
+        _didIteratorError8 = true;
+        _iteratorError8 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
-            _iterator9["return"]();
+          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+            _iterator8["return"]();
           }
         } finally {
-          if (_didIteratorError9) {
-            throw _iteratorError9;
+          if (_didIteratorError8) {
+            throw _iteratorError8;
           }
         }
       }
@@ -8377,13 +8372,13 @@ function (_Publisher) {
       var activeItem = null;
 
       if (this.isActive) {
-        var _iteratorNormalCompletion10 = true;
-        var _didIteratorError10 = false;
-        var _iteratorError10 = undefined;
+        var _iteratorNormalCompletion9 = true;
+        var _didIteratorError9 = false;
+        var _iteratorError9 = undefined;
 
         try {
-          for (var _iterator10 = this.children[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-            var child = _step10.value;
+          for (var _iterator9 = this.children[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+            var child = _step9.value;
 
             if (child.isActive) {
               if (child.isMenuItem && child.isMenuItem()) {
@@ -8396,16 +8391,16 @@ function (_Publisher) {
             }
           }
         } catch (err) {
-          _didIteratorError10 = true;
-          _iteratorError10 = err;
+          _didIteratorError9 = true;
+          _iteratorError9 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
-              _iterator10["return"]();
+            if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+              _iterator9["return"]();
             }
           } finally {
-            if (_didIteratorError10) {
-              throw _iteratorError10;
+            if (_didIteratorError9) {
+              throw _iteratorError9;
             }
           }
         }

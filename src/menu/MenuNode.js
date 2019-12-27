@@ -892,11 +892,11 @@ export default class MenuNode extends Publisher {
      * Parses the dom and initializes any menu or menuitem elements that are found.
      */
     parseDOM() {
-        if(this._children.length) {
-            for(let child of this._children) {
-                child.invalidateTree();
-            }
-        }
+        // if(this._children.length) {
+        //     for(let child of this._children) {
+        //         child.invalidateTree();
+        //     }
+        // }
 
         let walk = (node) => {
             for(let child of node.children) {

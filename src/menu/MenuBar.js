@@ -55,19 +55,20 @@ export default class MenuBar extends AbstractMenu {
         super({
             closeOnBlur, timeout, autoActivate, openOnHover, toggle, closeOnSelect, delay,
             positioner: positioners.DROPDOWN,
-            direction: 'horizontal'
+            direction: 'horizontal',
+            target,
+            ...context
         });
 
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = this.render(context);
-        }
+        // if(target) {
+        //     this.element = target;
+        // } else {
+        //     this.element = this.render(context);
+        // }
 
         this.isVisible = true;
-
-        this.registerTopics();
         this.parseDOM();
+        this.registerTopics();
         this.init();
 
         this.initKeyboardNavigation();
