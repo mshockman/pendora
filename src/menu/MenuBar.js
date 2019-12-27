@@ -60,12 +60,6 @@ export default class MenuBar extends AbstractMenu {
             ...context
         });
 
-        // if(target) {
-        //     this.element = target;
-        // } else {
-        //     this.element = this.render(context);
-        // }
-
         this.isVisible = true;
         this.parseDOM();
         this.registerTopics();

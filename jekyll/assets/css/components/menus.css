@@ -1,5 +1,5 @@
 @charset "UTF-8";
-.menubar, .menu {
+.menubar, .menu, .context-menu {
   user-select: none;
   cursor: default;
 }
@@ -34,7 +34,7 @@
   padding: 0.5rem;
 }
 
-.menu {
+.menu, .context-menu {
   position: absolute;
   border: 1px solid #ccc;
   background-color: #ffffff;
@@ -44,13 +44,13 @@
   z-index: 2;
   margin: 0;
 }
-.menu a:hover {
+.menu a:hover, .context-menu a:hover {
   text-decoration: none;
 }
-.menu.hidden {
+.menu.hidden, .hidden.context-menu {
   display: none;
 }
-.menu .menuitem > a {
+.menu .menuitem > a, .context-menu .menuitem > a {
   display: block;
   padding: 0.5rem;
   text-decoration: none;

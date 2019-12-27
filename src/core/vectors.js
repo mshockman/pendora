@@ -17,7 +17,11 @@ const positionShortHandValues = {
     top: 'center top',
     right: 'right middle',
     bottom: 'center bottom',
-    left: 'left middle'
+    left: 'left middle',
+    topleft: 'left top',
+    topright: 'right top',
+    bottomleft: 'left bottom',
+    bottomright: 'right bottom'
 };
 
 

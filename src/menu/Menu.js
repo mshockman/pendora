@@ -87,12 +87,22 @@ export class AbstractMenu extends MenuNode {
             }
         });
 
+        let _timer = null;
+
         this.on('menuitem.deactivate', (target) => {
-            if(target.parent === this) {
-                if (this.isActive && !this.activeChild) {
-                    this.deactivate();
-                }
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
             }
+
+            _timer = setTimeout( () => {
+                _timer = null;
+                if (target.parent === this) {
+                    if (this.isActive && !this.activeChild) {
+                        this.deactivate();
+                    }
+                }
+            }, 0);
         });
 
         this.on('event.click', (event) => this.onClick(event));
@@ -126,10 +136,13 @@ export class AbstractMenu extends MenuNode {
             // Notify parent that submenu activated.
             if(parent) {
                 if(!parent.isActive) parent.activate();
-                parent.publish('submenu.activate', this);
             }
 
             this.publish('menu.activate');
+
+            this.dispatchTopic('menu.activate', {
+                target: this
+            });
 
             // Dispatch dom events.
             this.element.dispatchEvent(new CustomEvent('menu.activate', {
@@ -160,13 +173,9 @@ export class AbstractMenu extends MenuNode {
                 child.clearTimer('activateItem');
             }
 
-            // Notify parent that submenu deactivated.
-            let parent = this.parent;
-            if(parent) {
-                parent.publish('submenu.deactivate', this);
-            }
-
-            this.publish('menu.deactivate');
+            this.dispatchTopic('menu.deactivate', {
+                target: this
+            });
 
             // Dispatch dom events.
             this.element.dispatchEvent(new CustomEvent('menu.deactivate', {

@@ -555,3 +555,6 @@ export function getDistanceBetweenRects(rect1, rect2) {
         return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
     }
 }
+
+
+export {Vec2, Vec3, Rect};

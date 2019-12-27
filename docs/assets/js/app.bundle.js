@@ -1168,7 +1168,7 @@ function (_ExtendableError6) {
 /*!******************************!*\
   !*** ./src/core/position.js ***!
   \******************************/
-/*! exports provided: getOffsetElement, getClientRect, getBoundingOffsetRect, getBoundingDocumentRect, getTranslation, setTranslation, getCssPosition, setCssPosition, setElementClientPosition, clientRectToDocumentSpace, documentRectToClientSpace, snapToGrid, convertDomRectToObject, getPointOnElement, getSubBoundingBox, getDistanceBetweenRects */
+/*! exports provided: getOffsetElement, getClientRect, getBoundingOffsetRect, getBoundingDocumentRect, getTranslation, setTranslation, getCssPosition, setCssPosition, setElementClientPosition, clientRectToDocumentSpace, documentRectToClientSpace, snapToGrid, convertDomRectToObject, getPointOnElement, getSubBoundingBox, getDistanceBetweenRects, Vec2, Vec3, Rect */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1190,6 +1190,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSubBoundingBox", function() { return getSubBoundingBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDistanceBetweenRects", function() { return getDistanceBetweenRects; });
 /* harmony import */ var _vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vectors */ "./src/core/vectors.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec2", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec3", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec3"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Rect", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"]; });
+
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
 
 
@@ -1784,6 +1790,7 @@ function getDistanceBetweenRects(rect1, rect2) {
     return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
   }
 }
+
 
 /***/ }),
 
@@ -3089,7 +3096,11 @@ var positionShortHandValues = {
   top: 'center top',
   right: 'right middle',
   bottom: 'center bottom',
-  left: 'left middle'
+  left: 'left middle',
+  topleft: 'left top',
+  topright: 'right top',
+  bottomleft: 'left bottom',
+  bottomright: 'right bottom'
 };
 /**
  * Stores a 2 value Vector.
@@ -4894,6 +4905,206 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/menu/ContextMenu.js":
+/*!*********************************!*\
+  !*** ./src/menu/ContextMenu.js ***!
+  \*********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return ContextMenu; });
+/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
+/* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _autoloader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../autoloader */ "./src/autoloader.js");
+/* harmony import */ var _core_position__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/position */ "./src/core/position.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+
+
+
+var ContextMenu =
+/*#__PURE__*/
+function (_AbstractMenu) {
+  _inherits(ContextMenu, _AbstractMenu);
+
+  function ContextMenu(_ref) {
+    var _this;
+
+    var _ref$target = _ref.target,
+        target = _ref$target === void 0 ? null : _ref$target,
+        _ref$closeOnBlur = _ref.closeOnBlur,
+        closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
+        _ref$timeout = _ref.timeout,
+        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
+        _ref$autoActivate = _ref.autoActivate,
+        autoActivate = _ref$autoActivate === void 0 ? true : _ref$autoActivate,
+        _ref$multiple = _ref.multiple,
+        multiple = _ref$multiple === void 0 ? false : _ref$multiple,
+        _ref$openOnHover = _ref.openOnHover,
+        openOnHover = _ref$openOnHover === void 0 ? true : _ref$openOnHover,
+        _ref$toggle = _ref.toggle,
+        toggle = _ref$toggle === void 0 ? true : _ref$toggle,
+        _ref$closeOnSelect = _ref.closeOnSelect,
+        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === void 0 ? 500 : _ref$delay,
+        _ref$enableKeyboardNa = _ref.enableKeyboardNavigation,
+        enableKeyboardNavigation = _ref$enableKeyboardNa === void 0 ? true : _ref$enableKeyboardNa,
+        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
+
+    _classCallCheck(this, ContextMenu);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(ContextMenu).call(this, _objectSpread({
+      closeOnBlur: closeOnBlur,
+      timeout: timeout,
+      autoActivate: autoActivate,
+      openOnHover: openOnHover,
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      delay: delay,
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["SIDE_MENU"],
+      direction: 'vertical',
+      target: target
+    }, context)));
+    _this.isVisible = false;
+
+    _this.registerTopics();
+
+    _this.parseDOM();
+
+    _this.init();
+
+    _this.initKeyboardNavigation();
+
+    return _this;
+  }
+
+  _createClass(ContextMenu, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this2 = this;
+
+      _get(_getPrototypeOf(ContextMenu.prototype), "registerTopics", this).call(this);
+
+      var onClick = function onClick(event) {
+        // noinspection JSUnresolvedFunction
+        if (!_this2.element.contains(event.target)) {
+          _this2.hide();
+        }
+      };
+
+      this.on('menu.show', function (topic) {
+        document.addEventListener('click', onClick);
+      });
+      this.on('menu.hide', function (topic) {
+        if (topic.target === _this2) {
+          if (_this2.isActive) _this2.deactivate();
+          document.removeEventListener('click', onClick);
+        }
+      });
+    }
+  }, {
+    key: "render",
+    value: function render(_ref2) {
+      var target = _ref2.target;
+      console.log(target);
+
+      if (target) {
+        this.element = target;
+      } else {
+        var TEMPLATE = "\n                <div class=\"menu\">\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ";
+        this.element = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])(TEMPLATE).children[0];
+      }
+
+      this.element.classList.add('context-menu');
+    }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new _Menu__WEBPACK_IMPORTED_MODULE_0__["default"](config);
+    }
+  }]);
+
+  return ContextMenu;
+}(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
+
+
+_autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('context-menu', function (element) {
+  // todo most of this code should be place in context menu constructor.
+  // todo positioner isn't properly inheriting.
+  var instance = ContextMenu.FromHTML(element),
+      target = document.querySelector(element.dataset.target);
+  instance.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["dropdown"](target, "left top; right top;", "left top; right top;");
+  target.addEventListener('contextmenu', function (event) {
+    if (instance.isActive) {
+      instance.deactivate();
+      instance.hide();
+    }
+
+    event.preventDefault();
+    instance.show();
+    var rect = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(instance.element),
+        space = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(target),
+        deltaX = event.clientX - space.left,
+        deltaY = event.clientY - space.top;
+    rect = rect.position({
+      my: "left top",
+      at: "".concat(deltaX, "px ").concat(deltaY, "px"),
+      of: space,
+      inside: space,
+      collision: 'fit fit'
+    });
+    Object(_core_position__WEBPACK_IMPORTED_MODULE_5__["setElementClientPosition"])(instance.element, rect);
+  });
+  return instance;
+});
+
+/***/ }),
+
 /***/ "./src/menu/DropDown.js":
 /*!******************************!*\
   !*** ./src/menu/DropDown.js ***!
@@ -5216,12 +5427,22 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
         });
+        var _timer = null;
         this.on('menuitem.deactivate', function (target) {
-          if (target.parent === _this2) {
-            if (_this2.isActive && !_this2.activeChild) {
-              _this2.deactivate();
-            }
+          if (_timer) {
+            clearTimeout(_timer);
+            _timer = null;
           }
+
+          _timer = setTimeout(function () {
+            _timer = null;
+
+            if (target.parent === _this2) {
+              if (_this2.isActive && !_this2.activeChild) {
+                _this2.deactivate();
+              }
+            }
+          }, 0);
         });
         this.on('event.click', function (event) {
           return _this2.onClick(event);
@@ -5263,10 +5484,12 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
           if (parent) {
             if (!parent.isActive) parent.activate();
-            parent.publish('submenu.activate', this);
           }
 
-          this.publish('menu.activate'); // Dispatch dom events.
+          this.publish('menu.activate');
+          this.dispatchTopic('menu.activate', {
+            target: this
+          }); // Dispatch dom events.
 
           this.element.dispatchEvent(new CustomEvent('menu.activate', {
             detail: this,
@@ -5300,8 +5523,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               var child = _step2.value;
               child.clearTimer('activateItem');
-            } // Notify parent that submenu deactivated.
-
+            }
           } catch (err) {
             _didIteratorError2 = true;
             _iteratorError2 = err;
@@ -5317,13 +5539,9 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             }
           }
 
-          var parent = this.parent;
-
-          if (parent) {
-            parent.publish('submenu.deactivate', this);
-          }
-
-          this.publish('menu.deactivate'); // Dispatch dom events.
+          this.dispatchTopic('menu.deactivate', {
+            target: this
+          }); // Dispatch dom events.
 
           this.element.dispatchEvent(new CustomEvent('menu.deactivate', {
             detail: this,
@@ -6198,12 +6416,7 @@ function (_AbstractMenu) {
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
       direction: 'horizontal',
       target: target
-    }, context))); // if(target) {
-    //     this.element = target;
-    // } else {
-    //     this.element = this.render(context);
-    // }
-
+    }, context)));
     _this.isVisible = true;
 
     _this.parseDOM();
@@ -10826,7 +11039,7 @@ function publishTargetEvent(topic) {
 /*!***************************!*\
   !*** ./src/menu/index.js ***!
   \***************************/
-/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectMenu */
+/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectMenu, ContextMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10848,6 +11061,11 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony import */ var _Select2__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Select2 */ "./src/menu/Select2.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
+
+/* harmony import */ var _ContextMenu__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ContextMenu */ "./src/menu/ContextMenu.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ContextMenu", function() { return _ContextMenu__WEBPACK_IMPORTED_MODULE_6__["default"]; });
+
+
 
 
 
