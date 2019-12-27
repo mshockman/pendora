@@ -6,7 +6,7 @@ import {getClosestMenuByElement} from "./utility";
 import {findChild, createFragment} from "core/utility";
 import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
-import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
+import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
 
 
 /**
@@ -14,8 +14,7 @@ import {AttributeSchema, Attribute, Bool, Integer} from "../core/serialize";
  */
 export class SelectOption extends MenuItem {
     constructor({target, text, value=null, targetKey=null}={}) {
-        let targetChildren = null,
-            isSelected = false;
+        let targetChildren = null;
 
         if(typeof target === 'string') {
             target = document.querySelector(target);
@@ -310,7 +309,8 @@ export class SelectMenu extends AbstractMenu {
             closeOnSelect: false,
             delay: 0,
             positioner: "inherit",
-            target
+            target,
+            ...context
         });
 
         this.multiSelect = 'inherit';
@@ -591,7 +591,7 @@ export class SelectMenu extends AbstractMenu {
  * @abstract
  */
 export class AbstractSelect extends AbstractMenuItem {
-    constructor({target, widget, ...config}) {
+    constructor({target, widget, name=null, ...config}) {
         if(typeof target === 'string') {
             target = document.querySelector(target);
         }
@@ -630,6 +630,10 @@ export class AbstractSelect extends AbstractMenuItem {
             } else {
                 this.append(child);
             }
+        }
+
+        if(name !== null) {
+            this.name = name;
         }
 
         // Register a UI refresh.
@@ -797,12 +801,13 @@ export class AbstractSelect extends AbstractMenuItem {
 
 const RICH_SELECT_SCHEMA = new AttributeSchema({
     multiple: new Attribute(Bool, Attribute.DROP, Attribute.DROP),
-    maxItems: new Attribute(Integer, Attribute.DROP, Attribute.DROP)
+    maxItems: new Attribute(Integer, Attribute.DROP, Attribute.DROP),
+    name: new Attribute(Str, Attribute.DROP, Attribute.DROP)
 });
 
 
 export class RichSelect extends AbstractSelect {
-    constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5}={}) {
+    constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5, name=null}={}) {
         widget = widget || new MultiHiddenInputWidget();
 
         super({
@@ -816,7 +821,8 @@ export class RichSelect extends AbstractSelect {
             positioner: positioners.DROPDOWN,
             closeOnSelect: true,
             target,
-            widget
+            widget,
+            name
         });
 
         this.textbox.addEventListener('blur', event => {
@@ -955,7 +961,7 @@ export class RichSelect extends AbstractSelect {
 
 
 export class MultiComboBox extends AbstractSelect {
-    constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500}={}) {
+    constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500, name=null}={}) {
         widget = widget || new MultiHiddenInputWidget();
 
         super({
@@ -969,7 +975,8 @@ export class MultiComboBox extends AbstractSelect {
             closeOnSelect: false,
             clearSubItemsOnHover: false,
             target,
-            widget
+            widget,
+            name
         });
 
         this.multiSelect = true;
@@ -1237,14 +1244,15 @@ export class MultiComboBox extends AbstractSelect {
 
 
 export class ComboBox extends RichSelect {
-    constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith}={}) {
+    constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith, name=null}={}) {
         super({
             target,
             timeout,
             submenu,
             widget,
             multiple: false,
-            filter: null
+            filter: null,
+            name
         });
 
         this.element.classList.add('combo-box');

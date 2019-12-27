@@ -388,7 +388,7 @@ pageClass: menu_page_index
         An replacement for the default select element that allows for more control over the style of the menu and layout
         of the items.
     </p>
-    <div class="test" data-init="select" data-window-bind="testselect1" id="test2" data-multiple="false">
+    <div class="test" data-init="select" data-window-bind="testselect1" data-name="test4" id="test2" data-multiple="false">
         <div data-menuitem data-value="1" class="selected">Apple</div>
         <div data-menuitem data-value="2">Orange</div>
         <div data-menuitem data-value="3">Cherry</div>
@@ -401,6 +401,18 @@ pageClass: menu_page_index
         <div data-menuitem data-value="9">Pear</div>
         <div data-menuitem data-value="10">Watermelon</div>
     </div>
+
+    <br><br>
+
+    <select data-init="select" data-window-bind="testselect2" name="test5">
+        <optgroup label="Test">
+            <option value="1">Apple</option>
+            <option value="2">Apple2</option>
+            <option value="3">Apple3</option>
+            <option value="4">Apple4</option>
+            <option value="5">Apple5</option>
+        </optgroup>
+    </select>
 </article>
 
 
