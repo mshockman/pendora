@@ -8722,9 +8722,68 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+
+function copyNodeData(targetNode, referenceNode) {
+  targetNode.className = referenceNode.className;
+  targetNode.id = referenceNode.id;
+  Object.assign(targetNode.dataset, referenceNode.dataset);
+}
+
+function createOption(node) {
+  var option = document.createElement('div');
+  copyNodeData(option, node);
+  option.dataset.value = node.value;
+  option.innerHTML = node.innerHTML;
+  option.setAttribute('data-menuitem', '');
+
+  if (node.selected) {
+    option.classList.add('selected');
+  }
+
+  return option;
+}
+
+function createOptGroup(node) {
+  var r = document.createElement('div');
+  copyNodeData(r, node);
+  r.classList.add('menu__optgroup');
+
+  if (node.label) {
+    var title = document.createElement('h3');
+    title.innerHTML = node.label;
+    r.appendChild(title);
+  }
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = node.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var child = _step.value;
+      r.appendChild(createOption(child));
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+        _iterator["return"]();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return r;
+}
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
+
 
 var SelectOption =
 /*#__PURE__*/
@@ -8744,8 +8803,7 @@ function (_MenuItem) {
 
     _classCallCheck(this, SelectOption);
 
-    var targetChildren = null,
-        isSelected = false;
+    var targetChildren = null;
 
     if (typeof target === 'string') {
       target = document.querySelector(target);
@@ -9078,7 +9136,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _classCallCheck(this, SelectMenu);
 
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, {
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, _objectSpread({
         closeOnBlur: false,
         timeout: false,
         autoActivate: true,
@@ -9087,7 +9145,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         delay: 0,
         positioner: "inherit",
         target: target
-      }));
+      }, context)));
 
       _initialize(_assertThisInitialized(_this3));
 
@@ -9165,29 +9223,29 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
         this.on('option.select', function (topic) {
           if (!_this4.multiSelect) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
 
             try {
-              for (var _iterator = _this4.selection[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var item = _step.value;
+              for (var _iterator2 = _this4.selection[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var item = _step2.value;
 
                 if (item !== topic.target) {
                   item.isSelected = false;
                 }
               }
             } catch (err) {
-              _didIteratorError = true;
-              _iteratorError = err;
+              _didIteratorError2 = true;
+              _iteratorError2 = err;
             } finally {
               try {
-                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                  _iterator["return"]();
+                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                  _iterator2["return"]();
                 }
               } finally {
-                if (_didIteratorError) {
-                  throw _iteratorError;
+                if (_didIteratorError2) {
+                  throw _iteratorError2;
                 }
               }
             }
@@ -9252,52 +9310,16 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
               _this4.dispatchTopic('selection.change', _this4);
             }
           } else if (_this4.clearOldSelection) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-              for (var _iterator2 = _this4.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var _child = _step2.value;
-
-                if (_child !== topic.target && _child.isSelected) {
-                  _child.isSelected = false;
-                }
-              }
-            } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
-                }
-              } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
-                }
-              }
-            }
-
-            _this4._lastClick = topic.target;
-          } else {
-            _this4._lastClick = topic.target;
-          }
-        });
-        this.on('menu.show', function () {
-          _this4.clearFilter();
-
-          if (!_this4.multiSelect && !_this4.activeChild) {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
 
             try {
               for (var _iterator3 = _this4.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var child = _step3.value;
+                var _child = _step3.value;
 
-                if (child.isSelected && !child.isActive) {
-                  child.activate();
+                if (_child !== topic.target && _child.isSelected) {
+                  _child.isSelected = false;
                 }
               }
             } catch (err) {
@@ -9311,6 +9333,42 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
               } finally {
                 if (_didIteratorError3) {
                   throw _iteratorError3;
+                }
+              }
+            }
+
+            _this4._lastClick = topic.target;
+          } else {
+            _this4._lastClick = topic.target;
+          }
+        });
+        this.on('menu.show', function () {
+          _this4.clearFilter();
+
+          if (!_this4.multiSelect && !_this4.activeChild) {
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+              for (var _iterator4 = _this4.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                var child = _step4.value;
+
+                if (child.isSelected && !child.isActive) {
+                  child.activate();
+                }
+              }
+            } catch (err) {
+              _didIteratorError4 = true;
+              _iteratorError4 = err;
+            } finally {
+              try {
+                if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+                  _iterator4["return"]();
+                }
+              } finally {
+                if (_didIteratorError4) {
+                  throw _iteratorError4;
                 }
               }
             }
@@ -9329,29 +9387,29 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       key: "selection",
       value: function selection() {
         var r = [];
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
 
         try {
-          for (var _iterator4 = this.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var item = _step4.value;
+          for (var _iterator5 = this.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var item = _step5.value;
 
             if (item.isSelected) {
               r.push(item);
             }
           }
         } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
+          _didIteratorError5 = true;
+          _iteratorError5 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-              _iterator4["return"]();
+            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+              _iterator5["return"]();
             }
           } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
+            if (_didIteratorError5) {
+              throw _iteratorError5;
             }
           }
         }
@@ -9379,26 +9437,26 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
         }
 
         this.element.classList.add('items-filtered');
-        var _iteratorNormalCompletion5 = true;
-        var _didIteratorError5 = false;
-        var _iteratorError5 = undefined;
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
 
         try {
-          for (var _iterator5 = this.options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var option = _step5.value;
+          for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var option = _step6.value;
             option.isFiltered = fn(option);
           }
         } catch (err) {
-          _didIteratorError5 = true;
-          _iteratorError5 = err;
+          _didIteratorError6 = true;
+          _iteratorError6 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-              _iterator5["return"]();
+            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+              _iterator6["return"]();
             }
           } finally {
-            if (_didIteratorError5) {
-              throw _iteratorError5;
+            if (_didIteratorError6) {
+              throw _iteratorError6;
             }
           }
         }
@@ -9418,26 +9476,26 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       kind: "method",
       key: "clearFilter",
       value: function clearFilter() {
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
 
         try {
-          for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var option = _step6.value;
+          for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var option = _step7.value;
             option.isFiltered = false;
           }
         } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
+          _didIteratorError7 = true;
+          _iteratorError7 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-              _iterator6["return"]();
+            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+              _iterator7["return"]();
             }
           } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
+            if (_didIteratorError7) {
+              throw _iteratorError7;
             }
           }
         }
@@ -9457,29 +9515,29 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       key: "getFilteredItems",
       value: function getFilteredItems() {
         var r = [];
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
+        var _iteratorNormalCompletion8 = true;
+        var _didIteratorError8 = false;
+        var _iteratorError8 = undefined;
 
         try {
-          for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var option = _step7.value;
+          for (var _iterator8 = this.options[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+            var option = _step8.value;
 
             if (option.isFiltered) {
               r.push(option);
             }
           }
         } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
+          _didIteratorError8 = true;
+          _iteratorError8 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
-              _iterator7["return"]();
+            if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+              _iterator8["return"]();
             }
           } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
+            if (_didIteratorError8) {
+              throw _iteratorError8;
             }
           }
         }
@@ -9557,7 +9615,9 @@ function (_AbstractMenuItem) {
 
     var target = _ref5.target,
         widget = _ref5.widget,
-        config = _objectWithoutProperties(_ref5, ["target", "widget"]);
+        _ref5$name = _ref5.name,
+        name = _ref5$name === void 0 ? null : _ref5$name,
+        config = _objectWithoutProperties(_ref5, ["target", "widget", "name"]);
 
     _classCallCheck(this, AbstractSelect);
 
@@ -9608,6 +9668,10 @@ function (_AbstractMenuItem) {
       } else {
         _this6.append(_child2);
       }
+    }
+
+    if (name !== null) {
+      _this6.name = name;
     } // Register a UI refresh.
 
 
@@ -9763,13 +9827,13 @@ function (_AbstractMenuItem) {
 
       var config = this.getAttributes(element);
       var instance = new this(config);
-      var _iteratorNormalCompletion8 = true;
-      var _didIteratorError8 = false;
-      var _iteratorError8 = undefined;
+      var _iteratorNormalCompletion9 = true;
+      var _didIteratorError9 = false;
+      var _iteratorError9 = undefined;
 
       try {
-        for (var _iterator8 = element.querySelectorAll('li')[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-          var child = _step8.value;
+        for (var _iterator9 = element.querySelectorAll('li')[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+          var child = _step9.value;
           var option = new SelectOption({
             text: child.innerHTML.trim(),
             value: child.dataset.value || null
@@ -9777,16 +9841,16 @@ function (_AbstractMenuItem) {
           instance.append(option);
         }
       } catch (err) {
-        _didIteratorError8 = true;
-        _iteratorError8 = err;
+        _didIteratorError9 = true;
+        _iteratorError9 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-            _iterator8["return"]();
+          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
+            _iterator9["return"]();
           }
         } finally {
-          if (_didIteratorError8) {
-            throw _iteratorError8;
+          if (_didIteratorError9) {
+            throw _iteratorError9;
           }
         }
       }
@@ -9799,6 +9863,51 @@ function (_AbstractMenuItem) {
     value: function ConstructFromHTML(element) {
       if (typeof element === 'string') {
         element = document.querySelector(element);
+      }
+
+      if (element.nodeName === 'SELECT') {
+        var select = element;
+        element = document.createElement('div');
+        copyNodeData(element, select);
+
+        if (select.name) {
+          element.dataset.name = select.name;
+        }
+
+        if (select.multiple) {
+          element.dataset.multiple = select.multiple;
+        }
+
+        var _iteratorNormalCompletion10 = true;
+        var _didIteratorError10 = false;
+        var _iteratorError10 = undefined;
+
+        try {
+          for (var _iterator10 = select.children[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+            var child = _step10.value;
+
+            if (child.nodeName === "OPTION") {
+              element.appendChild(createOption(child));
+            } else if (child.nodeName === 'OPTGROUP') {
+              element.appendChild(createOptGroup(child));
+            }
+          }
+        } catch (err) {
+          _didIteratorError10 = true;
+          _iteratorError10 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
+              _iterator10["return"]();
+            }
+          } finally {
+            if (_didIteratorError10) {
+              throw _iteratorError10;
+            }
+          }
+        }
+
+        select.parentElement.replaceChild(element, select);
       } // todo move into constructor.
 
 
@@ -9813,7 +9922,9 @@ function (_AbstractMenuItem) {
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
 var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["AttributeSchema"]({
   multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
-  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP)
+  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
+  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
+  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP)
 });
 var RichSelect =
 /*#__PURE__*/
@@ -9833,7 +9944,11 @@ function (_AbstractSelect) {
         _ref6$multiple = _ref6.multiple,
         multiple = _ref6$multiple === void 0 ? false : _ref6$multiple,
         _ref6$maxItems = _ref6.maxItems,
-        maxItems = _ref6$maxItems === void 0 ? 5 : _ref6$maxItems;
+        maxItems = _ref6$maxItems === void 0 ? 5 : _ref6$maxItems,
+        _ref6$name = _ref6.name,
+        name = _ref6$name === void 0 ? null : _ref6$name,
+        _ref6$placeholder = _ref6.placeholder,
+        placeholder = _ref6$placeholder === void 0 ? null : _ref6$placeholder;
 
     _classCallCheck(this, RichSelect);
 
@@ -9849,7 +9964,8 @@ function (_AbstractSelect) {
       positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
       closeOnSelect: true,
       target: target,
-      widget: widget
+      widget: widget,
+      name: name
     }));
 
     _this8.textbox.addEventListener('blur', function (event) {
@@ -9866,6 +9982,7 @@ function (_AbstractSelect) {
 
     _this8.multiple = multiple;
     _this8.maxItems = maxItems;
+    if (placeholder !== null) _this8.placeholder = placeholder;
 
     _this8.refreshUI();
 
@@ -9913,26 +10030,26 @@ function (_AbstractSelect) {
         return item.text;
       });
       var values = [];
-      var _iteratorNormalCompletion9 = true;
-      var _didIteratorError9 = false;
-      var _iteratorError9 = undefined;
+      var _iteratorNormalCompletion11 = true;
+      var _didIteratorError11 = false;
+      var _iteratorError11 = undefined;
 
       try {
-        for (var _iterator9 = options[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-          var option = _step9.value;
+        for (var _iterator11 = options[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+          var option = _step11.value;
           values.push(option.value || option.text || '');
         }
       } catch (err) {
-        _didIteratorError9 = true;
-        _iteratorError9 = err;
+        _didIteratorError11 = true;
+        _iteratorError11 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion9 && _iterator9["return"] != null) {
-            _iterator9["return"]();
+          if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
+            _iterator11["return"]();
           }
         } finally {
-          if (_didIteratorError9) {
-            throw _iteratorError9;
+          if (_didIteratorError11) {
+            throw _iteratorError11;
           }
         }
       }
@@ -10026,7 +10143,9 @@ function (_AbstractSelect2) {
         _ref8$filter = _ref8.filter,
         filter = _ref8$filter === void 0 ? FILTERS.istartsWith : _ref8$filter,
         _ref8$wait = _ref8.wait,
-        wait = _ref8$wait === void 0 ? 500 : _ref8$wait;
+        wait = _ref8$wait === void 0 ? 500 : _ref8$wait,
+        _ref8$name = _ref8.name,
+        name = _ref8$name === void 0 ? null : _ref8$name;
 
     _classCallCheck(this, MultiComboBox);
 
@@ -10042,7 +10161,8 @@ function (_AbstractSelect2) {
       closeOnSelect: false,
       clearSubItemsOnHover: false,
       target: target,
-      widget: widget
+      widget: widget,
+      name: name
     }));
     _this9.multiSelect = true;
     _this9.optionToPillMap = new WeakMap();
@@ -10208,13 +10328,13 @@ function (_AbstractSelect2) {
            */
           firstItem = null; // Find both the first none filtered item and the active item.
 
-          var _iteratorNormalCompletion10 = true;
-          var _didIteratorError10 = false;
-          var _iteratorError10 = undefined;
+          var _iteratorNormalCompletion12 = true;
+          var _didIteratorError12 = false;
+          var _iteratorError12 = undefined;
 
           try {
-            for (var _iterator10 = this.options[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-              var _option = _step10.value;
+            for (var _iterator12 = this.options[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+              var _option = _step12.value;
 
               if (!_option.isFiltered && firstItem === null) {
                 firstItem = _option;
@@ -10225,16 +10345,16 @@ function (_AbstractSelect2) {
               }
             }
           } catch (err) {
-            _didIteratorError10 = true;
-            _iteratorError10 = err;
+            _didIteratorError12 = true;
+            _iteratorError12 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion10 && _iterator10["return"] != null) {
-                _iterator10["return"]();
+              if (!_iteratorNormalCompletion12 && _iterator12["return"] != null) {
+                _iterator12["return"]();
               }
             } finally {
-              if (_didIteratorError10) {
-                throw _iteratorError10;
+              if (_didIteratorError12) {
+                throw _iteratorError12;
               }
             }
           }
@@ -10268,13 +10388,13 @@ function (_AbstractSelect2) {
           var fragment = document.createDocumentFragment(),
               _new = false,
               values = [];
-          var _iteratorNormalCompletion11 = true;
-          var _didIteratorError11 = false;
-          var _iteratorError11 = undefined;
+          var _iteratorNormalCompletion13 = true;
+          var _didIteratorError13 = false;
+          var _iteratorError13 = undefined;
 
           try {
-            for (var _iterator11 = _this11.options[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-              var option = _step11.value;
+            for (var _iterator13 = _this11.options[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+              var option = _step13.value;
 
               var pill = _this11.optionToPillMap.get(option);
 
@@ -10300,16 +10420,16 @@ function (_AbstractSelect2) {
               }
             }
           } catch (err) {
-            _didIteratorError11 = true;
-            _iteratorError11 = err;
+            _didIteratorError13 = true;
+            _iteratorError13 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion11 && _iterator11["return"] != null) {
-                _iterator11["return"]();
+              if (!_iteratorNormalCompletion13 && _iterator13["return"] != null) {
+                _iterator13["return"]();
               }
             } finally {
-              if (_didIteratorError11) {
-                throw _iteratorError11;
+              if (_didIteratorError13) {
+                throw _iteratorError13;
               }
             }
           }
@@ -10330,13 +10450,13 @@ function (_AbstractSelect2) {
     key: "setValue",
     value: function setValue(values) {
       var changed = false;
-      var _iteratorNormalCompletion12 = true;
-      var _didIteratorError12 = false;
-      var _iteratorError12 = undefined;
+      var _iteratorNormalCompletion14 = true;
+      var _didIteratorError14 = false;
+      var _iteratorError14 = undefined;
 
       try {
-        for (var _iterator12 = this.options[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-          var option = _step12.value;
+        for (var _iterator14 = this.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+          var option = _step14.value;
           var index = values.indexOf(option.value);
 
           if (index !== -1) {
@@ -10354,16 +10474,16 @@ function (_AbstractSelect2) {
           }
         }
       } catch (err) {
-        _didIteratorError12 = true;
-        _iteratorError12 = err;
+        _didIteratorError14 = true;
+        _iteratorError14 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion12 && _iterator12["return"] != null) {
-            _iterator12["return"]();
+          if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
+            _iterator14["return"]();
           }
         } finally {
-          if (_didIteratorError12) {
-            throw _iteratorError12;
+          if (_didIteratorError14) {
+            throw _iteratorError14;
           }
         }
       }
@@ -10404,7 +10524,9 @@ function (_RichSelect) {
         _ref10$wait = _ref10.wait,
         wait = _ref10$wait === void 0 ? 500 : _ref10$wait,
         _ref10$filter = _ref10.filter,
-        filter = _ref10$filter === void 0 ? FILTERS.istartsWith : _ref10$filter;
+        filter = _ref10$filter === void 0 ? FILTERS.istartsWith : _ref10$filter,
+        _ref10$name = _ref10.name,
+        name = _ref10$name === void 0 ? null : _ref10$name;
 
     _classCallCheck(this, ComboBox);
 
@@ -10414,7 +10536,8 @@ function (_RichSelect) {
       submenu: submenu,
       widget: widget,
       multiple: false,
-      filter: null
+      filter: null,
+      name: name
     }));
 
     _this12.element.classList.add('combo-box');
@@ -10468,13 +10591,13 @@ function (_RichSelect) {
         var f = false; // Activate the selected items.
 
         if (!_this13.multiSelect) {
-          var _iteratorNormalCompletion13 = true;
-          var _didIteratorError13 = false;
-          var _iteratorError13 = undefined;
+          var _iteratorNormalCompletion15 = true;
+          var _didIteratorError15 = false;
+          var _iteratorError15 = undefined;
 
           try {
-            for (var _iterator13 = _this13.submenu.options[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-              var option = _step13.value;
+            for (var _iterator15 = _this13.submenu.options[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+              var option = _step15.value;
 
               if (!option.isDisabled && !option.isFiltered && option.isSelected) {
                 option.activate();
@@ -10483,29 +10606,29 @@ function (_RichSelect) {
               }
             }
           } catch (err) {
-            _didIteratorError13 = true;
-            _iteratorError13 = err;
+            _didIteratorError15 = true;
+            _iteratorError15 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion13 && _iterator13["return"] != null) {
-                _iterator13["return"]();
+              if (!_iteratorNormalCompletion15 && _iterator15["return"] != null) {
+                _iterator15["return"]();
               }
             } finally {
-              if (_didIteratorError13) {
-                throw _iteratorError13;
+              if (_didIteratorError15) {
+                throw _iteratorError15;
               }
             }
           }
         }
 
         if (!f) {
-          var _iteratorNormalCompletion14 = true;
-          var _didIteratorError14 = false;
-          var _iteratorError14 = undefined;
+          var _iteratorNormalCompletion16 = true;
+          var _didIteratorError16 = false;
+          var _iteratorError16 = undefined;
 
           try {
-            for (var _iterator14 = _this13.submenu.options[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
-              var _option2 = _step14.value;
+            for (var _iterator16 = _this13.submenu.options[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+              var _option2 = _step16.value;
 
               if (!_option2.isDisabled && !_option2.isFiltered) {
                 _option2.activate();
@@ -10514,16 +10637,16 @@ function (_RichSelect) {
               }
             }
           } catch (err) {
-            _didIteratorError14 = true;
-            _iteratorError14 = err;
+            _didIteratorError16 = true;
+            _iteratorError16 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion14 && _iterator14["return"] != null) {
-                _iterator14["return"]();
+              if (!_iteratorNormalCompletion16 && _iterator16["return"] != null) {
+                _iterator16["return"]();
               }
             } finally {
-              if (_didIteratorError14) {
-                throw _iteratorError14;
+              if (_didIteratorError16) {
+                throw _iteratorError16;
               }
             }
           }

@@ -9,6 +9,46 @@ import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
 
 
+function copyNodeData(targetNode, referenceNode) {
+    targetNode.className = referenceNode.className;
+    targetNode.id = referenceNode.id;
+    Object.assign(targetNode.dataset, referenceNode.dataset);
+}
+
+function createOption(node) {
+    let option = document.createElement('div');
+    copyNodeData(option, node);
+
+    option.dataset.value = node.value;
+    option.innerHTML = node.innerHTML;
+    option.setAttribute('data-menuitem', '');
+
+    if(node.selected) {
+        option.classList.add('selected');
+    }
+
+    return option;
+}
+
+function createOptGroup(node) {
+    let r = document.createElement('div');
+    copyNodeData(r, node);
+    r.classList.add('menu__optgroup');
+
+    if(node.label) {
+        let title = document.createElement('h3');
+        title.innerHTML = node.label;
+        r.appendChild(title);
+    }
+
+    for(let child of node.children) {
+        r.appendChild(createOption(child));
+    }
+
+    return r;
+}
+
+
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
@@ -776,6 +816,30 @@ export class AbstractSelect extends AbstractMenuItem {
             element = document.querySelector(element);
         }
 
+        if(element.nodeName === 'SELECT') {
+            let select = element;
+            element = document.createElement('div');
+            copyNodeData(element, select);
+
+            if(select.name) {
+                element.dataset.name = select.name;
+            }
+
+            if(select.multiple) {
+                element.dataset.multiple = select.multiple;
+            }
+
+            for(let child of select.children) {
+                if(child.nodeName === "OPTION") {
+                    element.appendChild(createOption(child));
+                } else if(child.nodeName === 'OPTGROUP') {
+                    element.appendChild(createOptGroup(child));
+                }
+            }
+
+            select.parentElement.replaceChild(element, select);
+        }
+
         // todo move into constructor.
         let config = this.getAttributes(element);
 
@@ -802,12 +866,13 @@ export class AbstractSelect extends AbstractMenuItem {
 const RICH_SELECT_SCHEMA = new AttributeSchema({
     multiple: new Attribute(Bool, Attribute.DROP, Attribute.DROP),
     maxItems: new Attribute(Integer, Attribute.DROP, Attribute.DROP),
-    name: new Attribute(Str, Attribute.DROP, Attribute.DROP)
+    name: new Attribute(Str, Attribute.DROP, Attribute.DROP),
+    placeholder: new Attribute(Str, Attribute.DROP, Attribute.DROP)
 });
 
 
 export class RichSelect extends AbstractSelect {
-    constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5, name=null}={}) {
+    constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5, name=null, placeholder=null}={}) {
         widget = widget || new MultiHiddenInputWidget();
 
         super({
@@ -837,6 +902,8 @@ export class RichSelect extends AbstractSelect {
 
         this.multiple = multiple;
         this.maxItems = maxItems;
+
+        if(placeholder !== null) this.placeholder = placeholder;
 
         this.refreshUI();
     }
