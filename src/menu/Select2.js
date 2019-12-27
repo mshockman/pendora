@@ -663,14 +663,13 @@ export class AbstractSelect extends AbstractMenuItem {
         }
 
         // Add any found children from above to the submenu.
+        let addedChildren = false;
         for(let child of children) {
-            if(child.hasAttribute('data-menuitem')) {
-                let item = this.constructMenuItem({target: child});
-                this.append(item);
-            } else {
-                this.append(child);
-            }
+            this.append(child);
+            addedChildren = true;
         }
+
+        if(addedChildren) this.submenu.parseDOM();
 
         if(name !== null) {
             this.name = name;

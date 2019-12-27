@@ -106,6 +106,10 @@ export class SideMenuBar extends MenuBar {
         this.element.classList.remove('menubar');
         this.element.classList.add('side-menu-bar');
     }
+
+    constructMenuItem(config) {
+        return new MenuItem(config);
+    }
 }
 
 

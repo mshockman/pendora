@@ -27,6 +27,9 @@
   padding: 0;
   margin: 0;
 }
+.menubar a:hover {
+  text-decoration: none;
+}
 .menubar .menuitem {
   padding: 0.5rem;
 }
@@ -40,6 +43,9 @@
   min-width: 15rem;
   z-index: 2;
   margin: 0;
+}
+.menu a:hover {
+  text-decoration: none;
 }
 .menu.hidden {
   display: none;
@@ -216,6 +222,19 @@
 
 .rich-select, .multi-combo-box, .combo-box {
   min-width: 13rem;
+}
+
+.side-menubar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background-color: #d7dce1;
+}
+.side-menubar a:hover {
+  text-decoration: none;
+}
+.side-menubar .menuitem {
+  padding: 0.5rem;
 }
 
 /*# sourceMappingURL=menus.css.map */

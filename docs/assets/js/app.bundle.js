@@ -6270,6 +6270,13 @@ function (_MenuBar) {
     return _this2;
   }
 
+  _createClass(SideMenuBar, [{
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+    }
+  }]);
+
   return SideMenuBar;
 }(MenuBar);
 autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('menubar', function (element) {
@@ -9656,19 +9663,17 @@ function (_AbstractMenuItem) {
     } // Add any found children from above to the submenu.
 
 
+    var addedChildren = false;
+
     for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
       var _child2 = _children[_i2];
 
-      if (_child2.hasAttribute('data-menuitem')) {
-        var item = _this6.constructMenuItem({
-          target: _child2
-        });
+      _this6.append(_child2);
 
-        _this6.append(item);
-      } else {
-        _this6.append(_child2);
-      }
+      addedChildren = true;
     }
+
+    if (addedChildren) _this6.submenu.parseDOM();
 
     if (name !== null) {
       _this6.name = name;
