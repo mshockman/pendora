@@ -12,8 +12,8 @@ const opposites = {
 
 
 function getInheritedPosition(menu) {
-    if(menu.parent && menu.parent.parent && !menu.parent.parent.isRoot) {
-        return menu.element.dataset.position;
+    if(menu.parentMenu && !menu.parentMenu.isRoot) {
+        return menu.parentMenu.element.dataset.position;
     }
 }
 
