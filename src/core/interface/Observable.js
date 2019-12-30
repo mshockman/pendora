@@ -45,6 +45,7 @@ export class Message {
  * fired all parent scopes are also fired for that event.  For example the scoped event `modal.open` will all listeners
  * registered to the events modal.open, modal, and *.  * is a special event that fires for any event.  It's the global
  * event listener.
+ * @deprecated
  */
 export default class Observable {
     constructor() {
