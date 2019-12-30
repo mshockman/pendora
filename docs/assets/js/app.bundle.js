@@ -4960,7 +4960,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
 var ContextMenu =
 /*#__PURE__*/
 function (_AbstractMenu) {
@@ -4971,6 +4970,8 @@ function (_AbstractMenu) {
 
     var _ref$target = _ref.target,
         target = _ref$target === void 0 ? null : _ref$target,
+        _ref$targetMenu = _ref.targetMenu,
+        targetMenu = _ref$targetMenu === void 0 ? null : _ref$targetMenu,
         _ref$closeOnBlur = _ref.closeOnBlur,
         closeOnBlur = _ref$closeOnBlur === void 0 ? true : _ref$closeOnBlur,
         _ref$timeout = _ref.timeout,
@@ -4989,7 +4990,7 @@ function (_AbstractMenu) {
         delay = _ref$delay === void 0 ? 500 : _ref$delay,
         _ref$enableKeyboardNa = _ref.enableKeyboardNavigation,
         enableKeyboardNavigation = _ref$enableKeyboardNa === void 0 ? true : _ref$enableKeyboardNa,
-        context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
+        context = _objectWithoutProperties(_ref, ["target", "targetMenu", "closeOnBlur", "timeout", "autoActivate", "multiple", "openOnHover", "toggle", "closeOnSelect", "delay", "enableKeyboardNavigation"]);
 
     _classCallCheck(this, ContextMenu);
 
@@ -5001,7 +5002,7 @@ function (_AbstractMenu) {
       toggle: toggle,
       closeOnSelect: closeOnSelect,
       delay: delay,
-      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["SIDE_MENU"],
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["CONTEXT_MENU"],
       direction: 'vertical',
       target: target
     }, context)));
@@ -5014,6 +5015,31 @@ function (_AbstractMenu) {
     _this.init();
 
     _this.initKeyboardNavigation();
+
+    _this._onContextMenu = function (event) {
+      if (_this.isActive) {
+        _this.deactivate();
+
+        _this.hide();
+      }
+
+      event.preventDefault();
+
+      _this.show();
+
+      var rect = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(_this.element),
+          space = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(event.target),
+          deltaX = event.clientX - space.left,
+          deltaY = event.clientY - space.top;
+      rect = rect.position({
+        my: "left top",
+        at: "".concat(deltaX, "px ").concat(deltaY, "px"),
+        of: space,
+        inside: space,
+        collision: 'fit fit'
+      });
+      Object(_core_position__WEBPACK_IMPORTED_MODULE_5__["setElementClientPosition"])(_this.element, rect);
+    };
 
     return _this;
   }
@@ -5032,7 +5058,7 @@ function (_AbstractMenu) {
         }
       };
 
-      this.on('menu.show', function (topic) {
+      this.on('menu.show', function () {
         document.addEventListener('click', onClick);
       });
       this.on('menu.hide', function (topic) {
@@ -5041,7 +5067,7 @@ function (_AbstractMenu) {
           document.removeEventListener('click', onClick);
         }
       });
-      this.on('menuitem.select', function (topic) {
+      this.on('menuitem.select', function () {
         if (_this2.closeOnSelect) {
           _this2.hide();
 
@@ -5053,7 +5079,6 @@ function (_AbstractMenu) {
     key: "render",
     value: function render(_ref2) {
       var target = _ref2.target;
-      console.log(target);
 
       if (target) {
         this.element = target;
@@ -5074,6 +5099,34 @@ function (_AbstractMenu) {
     value: function constructSubMenu(config) {
       return new _Menu__WEBPACK_IMPORTED_MODULE_0__["default"](config);
     }
+  }, {
+    key: "setContainer",
+    value: function setContainer(container) {
+      if (typeof container === 'string') {
+        container = document.querySelector(container);
+      }
+
+      this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["contextMenuPosition"](container);
+    }
+  }, {
+    key: "setTargetMenu",
+    value: function setTargetMenu(target) {
+      if (this._targetMenu) {
+        this._targetMenu.removeEventListener('contextmenu', this._onContextMenu);
+
+        this._targetMenu = null;
+      }
+
+      if (!target) return;
+
+      if (typeof target === 'string') {
+        target = document.querySelector(target);
+      }
+
+      this._targetMenu = target;
+
+      this._targetMenu.addEventListener('contextmenu', this._onContextMenu);
+    }
   }]);
 
   return ContextMenu;
@@ -5081,32 +5134,10 @@ function (_AbstractMenu) {
 
 
 _autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('context-menu', function (element) {
-  // todo most of this code should be place in context menu constructor.
-  // todo positioner isn't properly inheriting.
   var instance = ContextMenu.FromHTML(element),
       target = document.querySelector(element.dataset.target);
-  instance.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["dropdown"](target, "left top; right top;", "left top; right top;");
-  target.addEventListener('contextmenu', function (event) {
-    if (instance.isActive) {
-      instance.deactivate();
-      instance.hide();
-    }
-
-    event.preventDefault();
-    instance.show();
-    var rect = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(instance.element),
-        space = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(target),
-        deltaX = event.clientX - space.left,
-        deltaY = event.clientY - space.top;
-    rect = rect.position({
-      my: "left top",
-      at: "".concat(deltaX, "px ").concat(deltaY, "px"),
-      of: space,
-      inside: space,
-      collision: 'fit fit'
-    });
-    Object(_core_position__WEBPACK_IMPORTED_MODULE_5__["setElementClientPosition"])(instance.element, rect);
-  });
+  instance.setTargetMenu(target);
+  instance.setContainer(target);
   return instance;
 });
 
@@ -5212,10 +5243,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
 /* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -6152,112 +6179,130 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
  * A component for rendering nestable list of selectable items.
  */
 
-var Menu =
-/*#__PURE__*/
-function (_AbstractMenu) {
-  _inherits(Menu, _AbstractMenu);
+var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
+  var Menu =
+  /*#__PURE__*/
+  function (_AbstractMenu2) {
+    _inherits(Menu, _AbstractMenu2);
 
-  /**
-   *
-   * @param target {String|HTMLElement}
-   * @param closeOnBlur {Boolean|Number}
-   * @param timeout {Boolean|Number}
-   * @param autoActivate {Boolean|Number}
-   * @param openOnHover {Boolean|Number}
-   * @param toggle {boolean}
-   * @param closeOnSelect {Boolean}
-   * @param delay {Boolean|Number}
-   * @param id {String}
-   * @param children {Array}
-   */
-  function Menu() {
-    var _this5;
+    /**
+     *
+     * @param target {String|HTMLElement}
+     * @param closeOnBlur {Boolean|Number}
+     * @param timeout {Boolean|Number}
+     * @param autoActivate {Boolean|Number}
+     * @param openOnHover {Boolean|Number}
+     * @param toggle {boolean}
+     * @param closeOnSelect {Boolean}
+     * @param delay {Boolean|Number|'inherit'}
+     * @param id {String}
+     * @param children {Array}
+     */
+    function Menu() {
+      var _this5;
 
-    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref2$target = _ref2.target,
-        target = _ref2$target === void 0 ? null : _ref2$target,
-        _ref2$closeOnBlur = _ref2.closeOnBlur,
-        closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
-        _ref2$timeout = _ref2.timeout,
-        timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
-        _ref2$autoActivate = _ref2.autoActivate,
-        autoActivate = _ref2$autoActivate === void 0 ? true : _ref2$autoActivate,
-        _ref2$openOnHover = _ref2.openOnHover,
-        openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
-        _ref2$toggle = _ref2.toggle,
-        toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
-        _ref2$closeOnSelect = _ref2.closeOnSelect,
-        closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
-        _ref2$delay = _ref2.delay,
-        delay = _ref2$delay === void 0 ? 0 : _ref2$delay,
-        _ref2$children = _ref2.children,
-        children = _ref2$children === void 0 ? null : _ref2$children;
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref2$target = _ref2.target,
+          target = _ref2$target === void 0 ? null : _ref2$target,
+          _ref2$closeOnBlur = _ref2.closeOnBlur,
+          closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
+          _ref2$timeout = _ref2.timeout,
+          timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
+          _ref2$autoActivate = _ref2.autoActivate,
+          autoActivate = _ref2$autoActivate === void 0 ? true : _ref2$autoActivate,
+          _ref2$openOnHover = _ref2.openOnHover,
+          openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
+          _ref2$toggle = _ref2.toggle,
+          toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
+          _ref2$closeOnSelect = _ref2.closeOnSelect,
+          closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
+          _ref2$delay = _ref2.delay,
+          delay = _ref2$delay === void 0 ? 'inherit' : _ref2$delay,
+          _ref2$children = _ref2.children,
+          children = _ref2$children === void 0 ? null : _ref2$children;
 
-    _classCallCheck(this, Menu);
+      _classCallCheck(this, Menu);
 
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
-      closeOnBlur: closeOnBlur,
-      timeout: timeout,
-      autoActivate: autoActivate,
-      toggle: toggle,
-      closeOnSelect: closeOnSelect,
-      delay: delay,
-      positioner: 'inherit',
-      direction: 'vertical',
-      openOnHover: openOnHover,
-      target: target
-    }));
-    _this5.events = null;
+      _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
+        closeOnBlur: closeOnBlur,
+        timeout: timeout,
+        autoActivate: autoActivate,
+        toggle: toggle,
+        closeOnSelect: closeOnSelect,
+        delay: delay,
+        positioner: 'inherit',
+        direction: 'vertical',
+        openOnHover: openOnHover,
+        target: target
+      }));
 
-    _this5.registerTopics();
+      _initialize2(_assertThisInitialized(_this5));
 
-    _this5.init();
+      _this5.events = null;
 
-    if (children) {
-      _this5.createItems(children);
-    }
+      _this5.registerTopics();
 
-    return _this5;
-  }
-  /**
-   * Renders the domElement of the widget.
-   *
-   * @param target
-   * @param arrow
-   * @returns {HTMLElement|Element}
-   */
+      _this5.init();
 
-
-  _createClass(Menu, [{
-    key: "render",
-    value: function render() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          target = _ref3.target,
-          _ref3$arrow = _ref3.arrow,
-          arrow = _ref3$arrow === void 0 ? true : _ref3$arrow;
-
-      var TEMPLATE = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
-
-      if (target) {
-        this.element = target;
-      } else {
-        this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])(TEMPLATE);
+      if (children) {
+        _this5.createItems(children);
       }
-    }
-  }, {
-    key: "constructSubMenu",
-    value: function constructSubMenu(config) {
-      return new Menu(config);
-    }
-  }, {
-    key: "constructMenuItem",
-    value: function constructMenuItem(config) {
-      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
-    }
-  }]);
 
-  return Menu;
-}(AbstractMenu);
+      return _this5;
+    }
+    /**
+     * Renders the domElement of the widget.
+     *
+     * @param target
+     * @param arrow
+     * @returns {HTMLElement|Element}
+     */
+
+
+    return Menu;
+  }(_AbstractMenu);
+
+  return {
+    F: Menu,
+    d: [{
+      kind: "field",
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      key: "delay",
+      value: function value() {
+        return 0;
+      }
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            target = _ref3.target,
+            _ref3$arrow = _ref3.arrow,
+            arrow = _ref3$arrow === void 0 ? true : _ref3$arrow;
+
+        var TEMPLATE = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
+
+        if (target) {
+          this.element = target;
+        } else {
+          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])(TEMPLATE);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "constructSubMenu",
+      value: function constructSubMenu(config) {
+        return new Menu(config);
+      }
+    }, {
+      kind: "method",
+      key: "constructMenuItem",
+      value: function constructMenuItem(config) {
+        return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+      }
+    }]
+  };
+}, AbstractMenu);
 
 
 autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (element) {
@@ -11092,14 +11137,16 @@ __webpack_require__.r(__webpack_exports__);
 /*!*********************************!*\
   !*** ./src/menu/positioners.js ***!
   \*********************************/
-/*! exports provided: dropdown, DROPDOWN, SIDE_MENU */
+/*! exports provided: dropdown, contextMenuPosition, DROPDOWN, SIDE_MENU, CONTEXT_MENU */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dropdown", function() { return dropdown; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "contextMenuPosition", function() { return contextMenuPosition; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROPDOWN", function() { return DROPDOWN; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SIDE_MENU", function() { return SIDE_MENU; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CONTEXT_MENU", function() { return CONTEXT_MENU; });
 /* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors.js");
 /* harmony import */ var core_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/position */ "./src/core/position.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
@@ -11254,6 +11301,10 @@ function dropdown() {
       menu.element.dataset.position = topLevelPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
 
       _applyPosition(target.element, menu.element, containerElement);
+    } else if (!parentMenu.parentMenu || parentMenu.parentMenu.isRoot) {
+      menu.element.dataset.position = defaultPosition;
+
+      _applyPosition(target.element, menu.element, containerElement);
     } else {
       menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition; // flipPositionIfOutOfBounds(menu.element, container, 'xy');
 
@@ -11261,9 +11312,43 @@ function dropdown() {
     }
   };
 }
+function contextMenuPosition() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var position = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "left top; right top;";
+
+  if (!container) {
+    container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
+  } else if (typeof container === 'string') {
+    var target = document.querySelector(container);
+
+    container = function container() {
+      return core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(target);
+    };
+  } else {
+    var _target2 = container;
+
+    container = function container() {
+      return core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(_target2);
+    };
+  }
+
+  return function (menu) {
+    var containerElement = container,
+        target = menu.parent;
+
+    if (typeof containerElement === 'function') {
+      containerElement = containerElement(target, menu);
+    }
+
+    menu.element.dataset.position = getInheritedPosition(menu) || position;
+
+    _applyPosition(target.element, menu.element, containerElement);
+  };
+}
 var DROPDOWN = dropdown(); // noinspection JSUnusedGlobalSymbols
 
 var SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");
+var CONTEXT_MENU = contextMenuPosition();
 
 /***/ }),
 

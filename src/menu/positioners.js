@@ -107,15 +107,44 @@ export function dropdown(container=null, topLevelPosition="left top; left bottom
             menu.element.dataset.position = topLevelPosition;
             // flipPositionIfOutOfBounds(menu.element, container, 'xy');
             _applyPosition(target.element, menu.element, containerElement);
+        } else if(!parentMenu.parentMenu || parentMenu.parentMenu.isRoot) {
+            menu.element.dataset.position = defaultPosition;
+            _applyPosition(target.element, menu.element, containerElement);
         } else {
             menu.element.dataset.position = getInheritedPosition(menu) || defaultPosition;
             // flipPositionIfOutOfBounds(menu.element, container, 'xy');
             _applyPosition(target.element, menu.element, containerElement);
         }
+    };
+}
+
+
+export function contextMenuPosition(container=null, position="left top; right top;") {
+    if(!container) {
+        container = getClientRect;
+    } else if(typeof container === 'string') {
+        let target = document.querySelector(container);
+        container = () => Rect.getBoundingClientRect(target);
+    } else {
+        let target = container;
+        container = () => Rect.getBoundingClientRect(target);
     }
+
+    return function(menu) {
+        let containerElement = container,
+            target = menu.parent;
+
+        if(typeof containerElement === 'function') {
+            containerElement = containerElement(target, menu);
+        }
+
+        menu.element.dataset.position = getInheritedPosition(menu) || position;
+        _applyPosition(target.element, menu.element, containerElement);
+    };
 }
 
 
 export const DROPDOWN = dropdown();
 // noinspection JSUnusedGlobalSymbols
 export const SIDE_MENU = dropdown(null, "left top; right top;", "left top; right top;");
+export const CONTEXT_MENU = contextMenuPosition();

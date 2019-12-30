@@ -627,6 +627,8 @@ export class AbstractMenu extends MenuNode {
  * A component for rendering nestable list of selectable items.
  */
 export default class Menu extends AbstractMenu {
+    @inherit delay = 0;
+
     /**
      *
      * @param target {String|HTMLElement}
@@ -636,12 +638,12 @@ export default class Menu extends AbstractMenu {
      * @param openOnHover {Boolean|Number}
      * @param toggle {boolean}
      * @param closeOnSelect {Boolean}
-     * @param delay {Boolean|Number}
+     * @param delay {Boolean|Number|'inherit'}
      * @param id {String}
      * @param children {Array}
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle=false, closeOnSelect=true, delay=0, children=null}={}) {
+                    toggle=false, closeOnSelect=true, delay='inherit', children=null}={}) {
         super({
             closeOnBlur, timeout, autoActivate, toggle, closeOnSelect, delay, positioner: 'inherit',
             direction: 'vertical', openOnHover, target

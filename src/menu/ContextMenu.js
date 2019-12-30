@@ -3,12 +3,11 @@ import MenuItem from "./MenuItem";
 import * as positioners from "./positioners";
 import {createFragment} from "../core/utility";
 import AutoLoader from "../autoloader";
-import {getClientRect, Rect, setElementClientPosition} from "../core/position";
-import {dropdown} from "./positioners";
+import {Rect, setElementClientPosition} from "../core/position";
 
 
 export default class ContextMenu extends AbstractMenu {
-    constructor({target=null, closeOnBlur=true, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
+    constructor({target=null, targetMenu=null, closeOnBlur=true, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
                 toggle=true, closeOnSelect=true, delay=500, enableKeyboardNavigation=true, ...context}) {
         super({
             closeOnBlur,
@@ -18,7 +17,7 @@ export default class ContextMenu extends AbstractMenu {
             toggle,
             closeOnSelect,
             delay,
-            positioner: positioners.SIDE_MENU,
+            positioner: positioners.CONTEXT_MENU,
             direction: 'vertical',
             target,
             ...context
@@ -29,6 +28,31 @@ export default class ContextMenu extends AbstractMenu {
         this.parseDOM();
         this.init();
         this.initKeyboardNavigation();
+
+        this._onContextMenu = event => {
+            if(this.isActive) {
+                this.deactivate();
+                this.hide();
+            }
+
+            event.preventDefault();
+            this.show();
+
+            let rect = Rect.getBoundingClientRect(this.element),
+                space = Rect.getBoundingClientRect(event.target),
+                deltaX = event.clientX - space.left,
+                deltaY = event.clientY - space.top;
+
+            rect = rect.position({
+                my: "left top",
+                at: `${deltaX}px ${deltaY}px`,
+                of: space,
+                inside: space,
+                collision: 'fit fit'
+            });
+
+            setElementClientPosition(this.element, rect);
+        };
     }
 
     registerTopics() {
@@ -41,7 +65,7 @@ export default class ContextMenu extends AbstractMenu {
             }
         };
 
-        this.on('menu.show', topic => {
+        this.on('menu.show', () => {
             document.addEventListener('click', onClick);
         });
 
@@ -52,7 +76,7 @@ export default class ContextMenu extends AbstractMenu {
             }
         });
 
-        this.on('menuitem.select', topic => {
+        this.on('menuitem.select', () => {
             if(this.closeOnSelect) {
                 this.hide();
                 if(this.isActive) this.deactivate();
@@ -61,7 +85,6 @@ export default class ContextMenu extends AbstractMenu {
     }
 
     render({target}) {
-        console.log(target);
         if(target) {
             this.element = target;
         } else {
@@ -84,41 +107,39 @@ export default class ContextMenu extends AbstractMenu {
     constructSubMenu(config) {
         return new Menu(config);
     }
+
+    setContainer(container) {
+        if(typeof container === 'string') {
+            container = document.querySelector(container);
+        }
+
+        this.positioner = positioners.contextMenuPosition(container);
+    }
+
+    setTargetMenu(target) {
+        if(this._targetMenu) {
+            this._targetMenu.removeEventListener('contextmenu', this._onContextMenu);
+            this._targetMenu = null;
+        }
+
+        if(!target) return;
+
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        this._targetMenu = target;
+        this._targetMenu.addEventListener('contextmenu', this._onContextMenu);
+    }
 }
 
 
 AutoLoader.register('context-menu', (element) => {
-    // todo most of this code should be place in context menu constructor.
-    // todo positioner isn't properly inheriting.
     let instance = ContextMenu.FromHTML(element),
         target = document.querySelector(element.dataset.target);
 
-    instance.positioner = positioners.dropdown(target, "left top; right top;", "left top; right top;");
-
-    target.addEventListener('contextmenu', event => {
-        if(instance.isActive) {
-            instance.deactivate();
-            instance.hide();
-        }
-
-        event.preventDefault();
-        instance.show();
-
-        let rect = Rect.getBoundingClientRect(instance.element),
-            space = Rect.getBoundingClientRect(target),
-            deltaX = event.clientX - space.left,
-            deltaY = event.clientY - space.top;
-
-        rect = rect.position({
-            my: "left top",
-            at: `${deltaX}px ${deltaY}px`,
-            of: space,
-            inside: space,
-            collision: 'fit fit'
-        });
-
-        setElementClientPosition(instance.element, rect);
-    });
+    instance.setTargetMenu(target);
+    instance.setContainer(target);
 
     return instance;
 });
