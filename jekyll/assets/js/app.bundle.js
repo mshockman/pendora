@@ -5041,6 +5041,13 @@ function (_AbstractMenu) {
           document.removeEventListener('click', onClick);
         }
       });
+      this.on('menuitem.select', function (topic) {
+        if (_this2.closeOnSelect) {
+          _this2.hide();
+
+          if (_this2.isActive) _this2.deactivate();
+        }
+      });
     }
   }, {
     key: "render",
@@ -11115,8 +11122,8 @@ var opposites = {
 };
 
 function getInheritedPosition(menu) {
-  if (menu.parent && menu.parent.parent && !menu.parent.parent.isRoot) {
-    return menu.element.dataset.position;
+  if (menu.parentMenu && !menu.parentMenu.isRoot) {
+    return menu.parentMenu.element.dataset.position;
   }
 }
 

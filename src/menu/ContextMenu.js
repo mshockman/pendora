@@ -51,6 +51,13 @@ export default class ContextMenu extends AbstractMenu {
                 document.removeEventListener('click', onClick);
             }
         });
+
+        this.on('menuitem.select', topic => {
+            if(this.closeOnSelect) {
+                this.hide();
+                if(this.isActive) this.deactivate();
+            }
+        });
     }
 
     render({target}) {
