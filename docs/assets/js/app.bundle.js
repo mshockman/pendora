@@ -4919,8 +4919,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
 /* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
-/* harmony import */ var _autoloader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../autoloader */ "./src/autoloader.js");
-/* harmony import */ var _core_position__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/position */ "./src/core/position.js");
+/* harmony import */ var _core_position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/position */ "./src/core/position.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -4952,7 +4951,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
 
 
 
@@ -5027,8 +5025,8 @@ function (_AbstractMenu) {
 
       _this.show();
 
-      var rect = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(_this.element),
-          space = _core_position__WEBPACK_IMPORTED_MODULE_5__["Rect"].getBoundingClientRect(event.target),
+      var rect = _core_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(_this.element),
+          space = _core_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(event.target),
           deltaX = event.clientX - space.left,
           deltaY = event.clientY - space.top;
       rect = rect.position({
@@ -5038,7 +5036,7 @@ function (_AbstractMenu) {
         inside: space,
         collision: 'fit fit'
       });
-      Object(_core_position__WEBPACK_IMPORTED_MODULE_5__["setElementClientPosition"])(_this.element, rect);
+      Object(_core_position__WEBPACK_IMPORTED_MODULE_4__["setElementClientPosition"])(_this.element, rect);
     };
 
     return _this;
@@ -5133,13 +5131,6 @@ function (_AbstractMenu) {
 }(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
-_autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('context-menu', function (element) {
-  var instance = ContextMenu.FromHTML(element),
-      target = document.querySelector(element.dataset.target);
-  instance.setTargetMenu(target);
-  instance.setContainer(target);
-  return instance;
-});
 
 /***/ }),
 
@@ -5154,8 +5145,7 @@ _autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('context-menu', fun
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return DropDown; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -5183,7 +5173,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
 var DropDown =
 /*#__PURE__*/
 function (_MenuItem) {
@@ -5207,7 +5196,7 @@ function (_MenuItem) {
       closeOnSelect: closeOnSelect,
       closeOnBlur: closeOnBlur
     }, options)));
-    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"];
+    _this.positioner = _positioners__WEBPACK_IMPORTED_MODULE_1__["DROPDOWN"];
 
     _this.init();
 
@@ -5218,9 +5207,6 @@ function (_MenuItem) {
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
 
-autoloader__WEBPACK_IMPORTED_MODULE_1__["default"].register('dropdown', function (element) {
-  return DropDown.FromHTML(element);
-});
 
 /***/ }),
 
@@ -5240,8 +5226,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
 /* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -5303,10 +5288,9 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-
-var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP),
-    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP);
-var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["AttributeSchema"]({
+var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP),
+    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP);
+var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["AttributeSchema"]({
   closeOnBlur: INT_OR_BOOL_TYPE,
   timeout: INT_OR_BOOL_TYPE,
   autoActivate: INT_OR_BOOL_TYPE,
@@ -6305,9 +6289,6 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
 }, AbstractMenu);
 
 
-autoloader__WEBPACK_IMPORTED_MODULE_4__["default"].register('menu', function (element) {
-  return Menu.FromHTML(element);
-});
 
 /***/ }),
 
@@ -6325,9 +6306,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SideMenuBar", function() { return SideMenuBar; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -6360,7 +6340,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
 var MenuBarItem =
 /*#__PURE__*/
 function (_MenuItem) {
@@ -6387,7 +6366,7 @@ function (_MenuItem) {
 
       if (target) {
         this.element = target;
-        var btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
+        var btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(this.element, '[data-button]');
 
         if (!btn) {
           content = document.createDocumentFragment();
@@ -6396,11 +6375,11 @@ function (_MenuItem) {
             content.appendChild(this.element.firstChild);
           }
 
-          this.element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
+          this.element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
         }
       } else {
         var element = document.createElement(nodeName);
-        element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("<a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
+        element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("<a class=\"menuitem__button\" data-button>".concat(text, "</a>")));
         this.element = element;
       }
 
@@ -6465,7 +6444,7 @@ function (_AbstractMenu) {
       toggle: toggle,
       closeOnSelect: closeOnSelect,
       delay: delay,
-      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"],
       direction: 'horizontal',
       target: target
     }, context)));
@@ -6530,7 +6509,7 @@ function (_MenuBar) {
 
     _this2 = _possibleConstructorReturn(this, _getPrototypeOf(SideMenuBar).call(this, config));
     _this2.direction = 'vertical';
-    _this2.positioner = _positioners__WEBPACK_IMPORTED_MODULE_3__["SIDE_MENU"];
+    _this2.positioner = _positioners__WEBPACK_IMPORTED_MODULE_2__["SIDE_MENU"];
 
     _this2.element.classList.remove('menubar');
 
@@ -6548,12 +6527,6 @@ function (_MenuBar) {
 
   return SideMenuBar;
 }(MenuBar);
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('menubar', function (element) {
-  return MenuBar.FromHTML(element);
-});
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('side-menubar', function (element) {
-  return SideMenuBar.FromHTML(element);
-});
 
 /***/ }),
 
@@ -7145,7 +7118,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         }
 
         if (event.target !== this) return;
-        var _isDefaultPrevented = false;
+        var _isDefaultPrevented = false; // noinspection JSUnusedGlobalSymbols
+
         this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
           relatedTarget: event.target,
           target: this,
@@ -7394,7 +7368,8 @@ function (_AbstractMenuItem) {
       }
 
       this.button = this.element.querySelector("[data-button]");
-      this.textContainer = this.element.querySelector("[data-text]") || this.button;
+      this.textContainer = this.element.querySelector("[data-text]") || this.button; // noinspection JSUnusedGlobalSymbols
+
       this.altTextContainer = this.element.querySelector('[data-alt-text]');
       this.element.classList.add('menuitem');
 
@@ -8000,6 +7975,7 @@ function (_Publisher) {
     }
   }, {
     key: "addClass",
+    // noinspection JSUnusedGlobalSymbols
     value: function addClass(classes) {
       return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(this.element, classes);
     } // noinspection JSUnusedGlobalSymbols
@@ -8476,7 +8452,8 @@ function (_Publisher) {
 
   }, {
     key: "constructSubMenu",
-    value: function constructSubMenu(config) {}
+    value: function constructSubMenu(config) {} // noinspection JSUnusedGlobalSymbols
+
     /**
      * Invalidates all parent and child references.
      */
@@ -8907,13 +8884,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return ComboBox; });
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
-/* harmony import */ var autoloader__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autoloader */ "./src/autoloader.js");
-/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
-/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
+/* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
+/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
+/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -8979,7 +8955,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
 
 
 
@@ -9160,7 +9135,7 @@ function (_MenuItem) {
         this.element.classList.add('select-option');
       }
 
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
       this.element.appendChild(fragment);
       this.element.classList.add('select-option');
       this.textContainer = this.element.querySelector('[data-text]');
@@ -9450,7 +9425,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     F: SelectMenu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_6__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_5__["inherit"]],
       key: "multiSelect",
       value: void 0
     }, {
@@ -9471,12 +9446,12 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
           this.element = target;
         } else {
-          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE).children[0];
+          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE).children[0];
         }
 
-        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-header]');
-        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-body]');
-        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-footer]');
+        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-header]');
+        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-body]');
+        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-footer]');
         this.filterInput = null;
         this.element.classList.add('select-menu');
       }
@@ -9819,7 +9794,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
         // let filterInput = this.element.querySelectorAll('[data-filter]');
         var filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(function (node) {
-          return Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(node) === _this5;
+          return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(node) === _this5;
         });
 
         if (!filterInput) {
@@ -9838,7 +9813,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
         var _timer = null;
         this.element.addEventListener('input', function (event) {
-          if (event.target.hasAttribute('data-filter') && Object(_utility__WEBPACK_IMPORTED_MODULE_4__["getClosestMenuByElement"])(event.target) === _this5) {
+          if (event.target.hasAttribute('data-filter') && Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(event.target) === _this5) {
             if (_timer) {
               clearTimeout(_timer);
               _timer = null;
@@ -10185,11 +10160,11 @@ function (_AbstractMenuItem) {
 
   return AbstractSelect;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["AttributeSchema"]({
-  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
-  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
-  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP),
-  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_8__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_8__["Attribute"].DROP)
+var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["AttributeSchema"]({
+  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
+  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
+  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
+  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP)
 });
 var RichSelect =
 /*#__PURE__*/
@@ -10217,7 +10192,7 @@ function (_AbstractSelect) {
 
     _classCallCheck(this, RichSelect);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_6__["MultiHiddenInputWidget"]();
     _this8 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
       toggle: true,
       autoActivate: false,
@@ -10226,7 +10201,7 @@ function (_AbstractSelect) {
       timeout: timeout,
       closeOnBlur: true,
       clearSubItemsOnHover: false,
-      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"],
       closeOnSelect: true,
       target: target,
       widget: widget,
@@ -10267,15 +10242,15 @@ function (_AbstractSelect) {
         if (this.element.nodeName === 'INPUT') {
           this.textbox = this.element;
         } else {
-          var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-button]');
+          var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
 
           if (!button) {
-            this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+            this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
           }
         }
       } else {
         this.element = document.createElement('div');
-        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
       }
 
       if (!this.textbox) {
@@ -10414,7 +10389,7 @@ function (_AbstractSelect2) {
 
     _classCallCheck(this, MultiComboBox);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_7__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_6__["MultiHiddenInputWidget"]();
     _this9 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
       toggle: true,
       autoActivate: false,
@@ -10422,7 +10397,7 @@ function (_AbstractSelect2) {
       delay: false,
       timeout: timeout,
       closeOnBlur: true,
-      positioner: _positioners__WEBPACK_IMPORTED_MODULE_3__["DROPDOWN"],
+      positioner: _positioners__WEBPACK_IMPORTED_MODULE_2__["DROPDOWN"],
       closeOnSelect: false,
       clearSubItemsOnHover: false,
       target: target,
@@ -10523,14 +10498,14 @@ function (_AbstractSelect2) {
 
       if (target) {
         this.element = target;
-        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["findChild"])(this.element, '[data-button]');
+        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
 
         if (!button) {
-          this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+          this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
         }
       } else {
         this.element = document.createElement('div');
-        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE));
+        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
       }
 
       this.textbox = this.element.querySelector('[data-text]');
@@ -10972,15 +10947,6 @@ function (_RichSelect) {
 
   return ComboBox;
 }(RichSelect);
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('select', function (element) {
-  return RichSelect.ConstructFromHTML(element);
-});
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('combobox', function (element) {
-  return ComboBox.ConstructFromHTML(element);
-});
-autoloader__WEBPACK_IMPORTED_MODULE_2__["default"].register('multi-combobox', function (element) {
-  return MultiComboBox.ConstructFromHTML(element);
-});
 
 /***/ }),
 
@@ -11091,7 +11057,7 @@ function publishTargetEvent(topic) {
 /*!***************************!*\
   !*** ./src/menu/index.js ***!
   \***************************/
-/*! exports provided: MenuBar, MenuItem, Menu, DropDown, MenuNode, SelectMenu, ContextMenu */
+/*! exports provided: MenuBar, MenuItem, AbstractMenuItem, Menu, AbstractMenu, DropDown, MenuNode, SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect, ContextMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11102,8 +11068,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MenuItem", function() { return _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AbstractMenuItem", function() { return _MenuItem__WEBPACK_IMPORTED_MODULE_1__["AbstractMenuItem"]; });
+
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Menu", function() { return _Menu__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AbstractMenu", function() { return _Menu__WEBPACK_IMPORTED_MODULE_2__["AbstractMenu"]; });
 
 /* harmony import */ var _DropDown__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./DropDown */ "./src/menu/DropDown.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DropDown", function() { return _DropDown__WEBPACK_IMPORTED_MODULE_3__["default"]; });
@@ -11114,9 +11084,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Select2__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Select2 */ "./src/menu/Select2.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectMenu", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["SelectMenu"]; });
 
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RichSelect", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["RichSelect"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ComboBox", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["ComboBox"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MultiComboBox", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["MultiComboBox"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SelectOption", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["SelectOption"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AbstractSelect", function() { return _Select2__WEBPACK_IMPORTED_MODULE_5__["AbstractSelect"]; });
+
 /* harmony import */ var _ContextMenu__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ContextMenu */ "./src/menu/ContextMenu.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ContextMenu", function() { return _ContextMenu__WEBPACK_IMPORTED_MODULE_6__["default"]; });
 
+/* harmony import */ var _loaders_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./loaders.js */ "./src/menu/loaders.js");
 
 
 
@@ -11130,6 +11111,61 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+
+
+/***/ }),
+
+/***/ "./src/menu/loaders.js":
+/*!*****************************!*\
+  !*** ./src/menu/loaders.js ***!
+  \*****************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _autoloader__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../autoloader */ "./src/autoloader.js");
+/* harmony import */ var _ContextMenu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ContextMenu */ "./src/menu/ContextMenu.js");
+/* harmony import */ var _DropDown__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./DropDown */ "./src/menu/DropDown.js");
+/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
+/* harmony import */ var _MenuBar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./MenuBar */ "./src/menu/MenuBar.js");
+/* harmony import */ var _Select2__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./Select2 */ "./src/menu/Select2.js");
+
+
+
+
+
+
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('dropdown', function (element) {
+  return _DropDown__WEBPACK_IMPORTED_MODULE_2__["default"].FromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('context-menu', function (element) {
+  var instance = _ContextMenu__WEBPACK_IMPORTED_MODULE_1__["default"].FromHTML(element),
+      target = document.querySelector(element.dataset.target);
+  instance.setTargetMenu(target);
+  instance.setContainer(target);
+  return instance;
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('menu', function (element) {
+  return _Menu__WEBPACK_IMPORTED_MODULE_3__["default"].FromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('menubar', function (element) {
+  return _MenuBar__WEBPACK_IMPORTED_MODULE_4__["default"].FromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('side-menubar', function (element) {
+  return _MenuBar__WEBPACK_IMPORTED_MODULE_4__["SideMenuBar"].FromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('select', function (element) {
+  return _Select2__WEBPACK_IMPORTED_MODULE_5__["RichSelect"].ConstructFromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('combobox', function (element) {
+  return _Select2__WEBPACK_IMPORTED_MODULE_5__["ComboBox"].ConstructFromHTML(element);
+});
+_autoloader__WEBPACK_IMPORTED_MODULE_0__["default"].register('multi-combobox', function (element) {
+  return _Select2__WEBPACK_IMPORTED_MODULE_5__["MultiComboBox"].ConstructFromHTML(element);
+});
 
 /***/ }),
 

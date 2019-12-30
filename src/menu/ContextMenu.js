@@ -2,7 +2,6 @@ import Menu, {AbstractMenu} from "./Menu";
 import MenuItem from "./MenuItem";
 import * as positioners from "./positioners";
 import {createFragment} from "../core/utility";
-import AutoLoader from "../autoloader";
 import {Rect, setElementClientPosition} from "../core/position";
 
 
@@ -132,14 +131,3 @@ export default class ContextMenu extends AbstractMenu {
         this._targetMenu.addEventListener('contextmenu', this._onContextMenu);
     }
 }
-
-
-AutoLoader.register('context-menu', (element) => {
-    let instance = ContextMenu.FromHTML(element),
-        target = document.querySelector(element.dataset.target);
-
-    instance.setTargetMenu(target);
-    instance.setContainer(target);
-
-    return instance;
-});

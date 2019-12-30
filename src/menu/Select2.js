@@ -1,6 +1,5 @@
 import MenuItem, {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
-import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {getClosestMenuByElement} from "./utility";
 import {findChild, createFragment} from "core/utility";
@@ -1435,8 +1434,3 @@ export class ComboBox extends RichSelect {
         };
     }
 }
-
-
-AutoLoader.register('select', (element) => RichSelect.ConstructFromHTML(element));
-AutoLoader.register('combobox', (element) => ComboBox.ConstructFromHTML(element));
-AutoLoader.register('multi-combobox', (element) => MultiComboBox.ConstructFromHTML(element));

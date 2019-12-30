@@ -398,6 +398,7 @@ export class AbstractMenuItem extends MenuNode {
 
         let isDefaultPrevented = false;
 
+        // noinspection JSUnusedGlobalSymbols
         this.dispatchTopic('menuitem.click', {
             ...event,
             relatedTarget: event.target,
@@ -606,6 +607,7 @@ export default class MenuItem extends AbstractMenuItem {
 
         this.button = this.element.querySelector("[data-button]");
         this.textContainer = this.element.querySelector("[data-text]") || this.button;
+        // noinspection JSUnusedGlobalSymbols
         this.altTextContainer = this.element.querySelector('[data-alt-text]');
         this.element.classList.add('menuitem');
 

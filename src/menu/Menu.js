@@ -2,7 +2,6 @@ import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 import {createFragment, modulo} from "core/utility";
 import {inherit} from './decorators';
-import AutoLoader from "autoloader";
 import {Attribute, AttributeSchema, Integer, Bool, CompoundType} from "../core/serialize";
 
 
@@ -689,8 +688,3 @@ export default class Menu extends AbstractMenu {
         return new MenuItem(config);
     }
 }
-
-
-AutoLoader.register('menu', (element) => {
-    return Menu.FromHTML(element);
-});

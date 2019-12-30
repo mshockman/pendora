@@ -1,6 +1,5 @@
 import Menu, {AbstractMenu} from "./Menu";
 import MenuItem from './MenuItem';
-import AutoLoader from "autoloader";
 import * as positioners from "./positioners";
 import {createFragment, findChild} from "../core/utility";
 
@@ -106,7 +105,3 @@ export class SideMenuBar extends MenuBar {
         return new MenuItem(config);
     }
 }
-
-
-AutoLoader.register('menubar', (element) => MenuBar.FromHTML(element));
-AutoLoader.register('side-menubar', (element) => SideMenuBar.FromHTML(element));

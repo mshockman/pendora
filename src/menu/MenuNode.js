@@ -577,6 +577,7 @@ export default class MenuNode extends Publisher {
         this.element.style = style;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     addClass(classes) {
         return addClasses(this.element, classes);
     }
@@ -941,6 +942,7 @@ export default class MenuNode extends Publisher {
 
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Invalidates all parent and child references.
      */
