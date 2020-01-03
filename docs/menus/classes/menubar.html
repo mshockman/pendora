@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MenuBar</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body data-page="menu_page_index">
+    <header id="header">
+        <nav>
+            <ul>
+                <li>Pendora</li>
+                <li>Examples</li>
+                <li>Download</li>
+                <li>Documentation</li>
+                <li class="mr-auto">Changelog</li>
+                <li><i class="fab fa-github"></i> Github</li>
+            </ul>
+        </nav>
+    </header>
+    <article id="splash">
+        <header>
+            <h2>MenuBar</h2>
+            <p>A horizontally aligned navigation menu with dropdown items.</p>
+        </header>
+    </article>
+    <main id="main">
+        <article id="content">
+            
+<h1>MenuNode</h1>
+<p>The base class for all Menu and MenuItem classes.</p>
+
+
+
+<article class="info-table methods">
+    <h4>Properties</h4>
+    <table>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>_parent</td>
+            <td class="desc">
+                Pointer to the object parent node.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode[] </strong>_children</td>
+            <td class="desc">
+                An array of objects children.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Object </strong>_props</td>
+            <td class="desc">
+                Contains private properties that are only accessed though getters and setters.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Object </strong>_eventListeners</td>
+            <td class="desc">
+                Map of events registered with the addEventListener method.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>_keyboardNavigationEnabled</td>
+            <td class="desc">
+                A flag to mark that keyboard navigation has been initialized.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Object </strong>_timers</td>
+            <td class="desc">
+                A map that maps all timer names to their respective timers.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>HTMLElement </strong>_element</td>
+            <td class="desc">
+                The root element for the component.  Should only be accessed through the MenuNode.element property.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>String </strong>nodeType</td>
+            <td class="desc">
+                A string that is used to mark what type of menu node the instance is.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isController</td>
+            <td class="desc">
+                A boolean that marks if the instance is a controller node.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>closeOnSelect</td>
+            <td class="desc">
+                If true the menu node will deactivate when it encounters a select topic is encountered.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>parent</td>
+            <td class="desc">
+                Point the the node parent node or null if it is the root.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>root</td>
+            <td class="desc">
+                A pointer to the root of the tree.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>parentMenu</td>
+            <td class="desc">
+                A pointer to the closest parent menu node.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>parentItem</td>
+            <td class="desc">
+                A pointer to the closest parent menu item.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>nextSibling</td>
+            <td class="desc">
+                A pointer to the next sibling menu node or null.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode </strong>previousSibling</td>
+            <td class="desc">
+                A pointer to the previous sibling menu node or null.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode[] </strong>children</td>
+            <td class="desc">
+                A array of the of the menu nodes children.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isRoot</td>
+            <td class="desc">
+                Is true if the menu node is the root of the tree.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode[] </strong>enabledChildren</td>
+            <td class="desc">
+                An array of all of the menu node enabled children.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>MenuNode|null </strong>activeItem</td>
+            <td class="desc">
+                A pointer to the currently active child node or null.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isVisible</td>
+            <td class="desc">
+                A flag the determines the menu nodes visibility state.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isDisabled</td>
+            <td class="desc">
+                Sets the menu nodes disabled state.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>disabled</td>
+            <td class="desc">
+                Alias for isDisabled.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>HTMLElement </strong>element</td>
+            <td class="desc">
+                The root elemenet of the componenet.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>String </strong>id</td>
+            <td class="desc">
+                Pointer to the root elements id.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>ClassList </strong>classList</td>
+            <td class="desc">
+                Pointer to the root element classList property.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Dataset </strong>dataset</td>
+            <td class="desc">
+                Pointer to the root element dataset property.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Object </strong>style</td>
+            <td class="desc">
+                Pointer to the root element style property.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isActive</td>
+            <td class="desc">
+                Sets the menu active or inactive.
+                <div class="tags"></div>
+            </td>
+        </tr>
+        
+        <tr>
+            <td class="name"><strong>Boolean </strong>isNavigable</td>
+            <td class="desc">
+                If true the menu node is navigable by keyboard navigation.
+                <div class="tags"><span class="readonly tag">@readonly</span></div>
+            </td>
+        </tr>
+        
+    </table>
+</article>
+
+
+
+<article class="info-table methods">
+    <h4>Methods</h4>
+    <table>
+        
+        <tr><td class="name"><a href="#method-constructor">constructor</a></td><td class="desc"></td></tr>
+        
+        <tr><td class="name"><a href="#method-init">init</a></td><td class="desc">Initializes root menu control events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-destroy">destroy</a></td><td class="desc">Deconstructor for the class.  Cleans up any registered events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-initKeyboardNavigation">initKeyboardNavigation</a></td><td class="desc">Initializer for keyboard navigation.</td></tr>
+        
+        <tr><td class="name"><a href="#method-registerTopics">registerTopics</a></td><td class="desc">Initializer for registering topics.</td></tr>
+        
+        <tr><td class="name"><a href="#method-render">render</a></td><td class="desc">The method that renders the dom elements that make up the component.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getOffsetSibling">getOffsetSibling</a></td><td class="desc">Returns the sibling node offset from the current nodes position by the given offset amount.</td></tr>
+        
+        <tr><td class="name"><a href="#method-closest">closest</a></td><td class="desc">Starting with the current node, the closest method transverses parents (heading towards the root node) and searches for a node that passes the given test function.</td></tr>
+        
+        <tr><td class="name"><a href="#method-contains">contains</a></td><td class="desc">Tests to see if the provided node is a descendant of the current node.</td></tr>
+        
+        <tr><td class="name"><a href="#method-containsElement">containsElement</a></td><td class="desc">Checks to see if the given element is contained within the current menu node or any of it's descedants.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getDescendants">getDescendants</a></td><td class="desc">Iterates though all descendenant nodes.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getTargetNode">getTargetNode</a></td><td class="desc">Find the closest MenuNode instance bound to the dom for the given HTMLElement in the current menu tree.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getTargetItem">getTargetItem</a></td><td class="desc">Find the closest MenuItem instance bound to the dom for the given HTMLElement in the current menu tree.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getTargetMenu">getTargetMenu</a></td><td class="desc">Find the closest Menu instance bound to the dom for the given HTMLElement in the current menu tree.</td></tr>
+        
+        <tr><td class="name"><a href="#method-hasElement">hasElement</a></td><td class="desc">Returns true if the menu node instance has an element attached.</td></tr>
+        
+        <tr><td class="name"><a href="#method-appendTo">appendTo</a></td><td class="desc">Appends the menu node DOM to the end of the given element.</td></tr>
+        
+        <tr><td class="name"><a href="#method-remove">remove</a></td><td class="desc">Removes the component from the DOM.</td></tr>
+        
+        <tr><td class="name"><a href="#method-addClass">addClass</a></td><td class="desc">Takes a list of space seperated class names and adds them to the components classList.</td></tr>
+        
+        <tr><td class="name"><a href="#method-removeClass">removeClass</a></td><td class="desc">Takes a list of space seperated class names and removes them from the components classList.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getDisabled">getDisabled</a></td><td class="desc">Returns true if the node or any of it's parents are disabled.</td></tr>
+        
+        <tr><td class="name"><a href="#method-isMenuItem">isMenuItem</a></td><td class="desc">Returns true if the current node is a menu item.  Should be overriden by subclasses.</td></tr>
+        
+        <tr><td class="name"><a href="#method-isMenu">isMenu</a></td><td class="desc">Returns true if the current node is a menu.  Should be overridden by subclasses.</td></tr>
+        
+        <tr><td class="name"><a href="#method-startTimer">startTimer</a></td><td class="desc">Creates a named timer for the object.</td></tr>
+        
+        <tr><td class="name"><a href="#method-clearTimer">clearTimer</a></td><td class="desc">Destroys the timer with the given name.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getTimer">getTimer</a></td><td class="desc">Retrieves the timer with the given name.</td></tr>
+        
+        <tr><td class="name"><a href="#method-getEventDelegator">getEventDelegator</a></td><td class="desc">Returns the menu node that is responsible for delegating events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-dispatchTopic">dispatchTopic</a></td><td class="desc">Dispatches a topic to the current node and any parent nodes.</td></tr>
+        
+        <tr><td class="name"><a href="#method-clearAllRegisteredEvents">clearAllRegisteredEvents</a></td><td class="desc">Removes all registered events.</td></tr>
+        
+        <tr><td class="name"><a href="#method-_registerAllEvents">_registerAllEvents</a></td><td class="desc">Register all events with the dom.</td></tr>
+        
+        <tr><td class="name"><a href="#method-addEventListener">addEventListener</a></td><td class="desc">Attaches an event.</td></tr>
+        
+        <tr><td class="name"><a href="#method-removeEventListener">removeEventListener</a></td><td class="desc">The removeEventListener method detaches an event listener from the root elemeent.</td></tr>
+        
+        <tr><td class="name"><a href="#method-hasEventListener">hasEventListener</a></td><td class="desc">Tests to see if an event is registered.</td></tr>
+        
+        <tr><td class="name"><a href="#method-parseDOM">parseDOM</a></td><td class="desc">Walks the dom tree and initializes menu node components.</td></tr>
+        
+        <tr><td class="name"><a href="#method-invalidateTree">invalidateTree</a></td><td class="desc">Invalidates the dom.</td></tr>
+        
+        <tr><td class="name"><a href="#method-_rootKeyDown">_rootKeyDown</a></td><td class="desc">Handles key down events for keyboard navigation.</td></tr>
+        
+        <tr><td class="name"><a href="#method-onKeyDown">onKeyDown</a></td><td class="desc">Handles event.keydown topics.</td></tr>
+        
+        <tr><td class="name"><a href="#method-constructMenuItem">constructMenuItem</a></td><td class="desc">Factory function that contructs MenuItems from a config object.</td></tr>
+        
+        <tr><td class="name"><a href="#method-constructSubMenu">constructSubMenu</a></td><td class="desc">Factory function that contructs Menus from a config object.</td></tr>
+        
+    </table>
+</article>
+
+
+
+<article class="method-info">
+    <h3><a href="#method-constructor" id="method-constructor">constructor(
+        
+        );</a></h3>
+    <section class="description">
+        <p></p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-init" id="method-init">init(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Initializes root menu control events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-destroy" id="method-destroy">destroy(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Deconstructor for the class.  Cleans up any registered events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-initKeyboardNavigation" id="method-initKeyboardNavigation">initKeyboardNavigation(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Initializer for keyboard navigation.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-registerTopics" id="method-registerTopics">registerTopics(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Initializer for registering topics.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-render" id="method-render">render(
+        
+        Object 
+        context
+         = {}
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>The method that renders the dom elements that make up the component.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Object</strong> context</td>
+                <td class="desc">Configuration object for rendering.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getOffsetSibling" id="method-getOffsetSibling">MenuNode|null getOffsetSibling(
+        
+        Number 
+        offset
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns the sibling node offset from the current nodes position by the given offset amount.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Number</strong> offset</td>
+                <td class="desc">The amount to offset.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-closest" id="method-closest">MenuNode|null closest(
+        
+        function(node) 
+        fn
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Starting with the current node, the closest method transverses parents (heading towards the root node) and searches for a node that passes the given test function.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>function(node)</strong> fn</td>
+                <td class="desc">A function that returns true if the given item should be returned.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-contains" id="method-contains">Boolean contains(
+        
+        MenuNode|HTMLElement 
+        node
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Tests to see if the provided node is a descendant of the current node.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>MenuNode|HTMLElement</strong> node</td>
+                <td class="desc">The node to check for.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-containsElement" id="method-containsElement">Boolean containsElement(
+        
+        HTMLElement 
+        element
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Checks to see if the given element is contained within the current menu node or any of it's descedants.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>HTMLElement</strong> element</td>
+                <td class="desc">The element to check for.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getDescendants" id="method-getDescendants">Iterator<MenuNode> getDescendants(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Iterates though all descendenant nodes.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getTargetNode" id="method-getTargetNode">MenuNode|null getTargetNode(
+        
+        HTMLElement 
+        target
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Find the closest MenuNode instance bound to the dom for the given HTMLElement in the current menu tree.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>HTMLElement</strong> target</td>
+                <td class="desc">The element to search from.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getTargetItem" id="method-getTargetItem">AbstractItem|null getTargetItem(
+        
+        HTMLElement 
+        target
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Find the closest MenuItem instance bound to the dom for the given HTMLElement in the current menu tree.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>HTMLElement</strong> target</td>
+                <td class="desc">The element to search from.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getTargetMenu" id="method-getTargetMenu">AbstractMenu|null getTargetMenu(
+        
+        HTMLElement 
+        target
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Find the closest Menu instance bound to the dom for the given HTMLElement in the current menu tree.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>HTMLElement</strong> target</td>
+                <td class="desc">The element to search from.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-hasElement" id="method-hasElement">Boolean hasElement(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns true if the menu node instance has an element attached.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-appendTo" id="method-appendTo">appendTo(
+        
+        HTMLElement|String 
+        selector
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Appends the menu node DOM to the end of the given element.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>HTMLElement|String</strong> selector</td>
+                <td class="desc">The element to append to.  If passed a string the element will be looked up with document.querySelector().</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-remove" id="method-remove">remove(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Removes the component from the DOM.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-addClass" id="method-addClass">addClass(
+        
+        String 
+        classes
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Takes a list of space seperated class names and adds them to the components classList.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> classes</td>
+                <td class="desc">A string of space seperated class names.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-removeClass" id="method-removeClass">removeClass(
+        
+        String 
+        classes
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Takes a list of space seperated class names and removes them from the components classList.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> classes</td>
+                <td class="desc">A string of space seperated class names.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getDisabled" id="method-getDisabled">Boolean getDisabled(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns true if the node or any of it's parents are disabled.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-isMenuItem" id="method-isMenuItem">Boolean isMenuItem(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns true if the current node is a menu item.  Should be overriden by subclasses.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-isMenu" id="method-isMenu">Boolean isMenu(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns true if the current node is a menu.  Should be overridden by subclasses.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-startTimer" id="method-startTimer">{"status"=>nil, "id"=>nil, "cancel"=>nil, "type"=>nil} startTimer(
+        
+        String 
+        name
+        
+        , 
+        
+        function 
+        fn
+        
+        , 
+        
+        Number 
+        time
+        
+        , 
+        
+        
+        interval
+        
+        , 
+        
+        
+        clear
+         = true
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Creates a named timer for the object.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the timer.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>function</strong> fn</td>
+                <td class="desc">The callback function to call.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>Number</strong> time</td>
+                <td class="desc">The time in milliseconds.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong></strong> interval</td>
+                <td class="desc">If true setInterval will be used instead of setTimeout to create a periodic timer.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong></strong> clear</td>
+                <td class="desc">If true any existing timer of the same name will be destroyed before initialzing a new one.  Otherwise, if false, a KeyError will be thrown if their is a duplicate timer.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-clearTimer" id="method-clearTimer">Boolean clearTimer(
+        
+        String 
+        name
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Destroys the timer with the given name.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the timer to cancel.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    <section class="function-return">
+        <h4>Returns</h4>
+        <table>
+            <tr>
+                <td><strong>Boolean</strong></td>
+                <td>
+                    Returns true if a timer was destroyed.
+                </td>
+            </tr>
+        </table>
+    </section>
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getTimer" id="method-getTimer">Timer|undefined getTimer(
+        
+        String 
+        name
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Retrieves the timer with the given name.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the timer to find.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-getEventDelegator" id="method-getEventDelegator">MenuNode|null getEventDelegator(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Returns the menu node that is responsible for delegating events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-dispatchTopic" id="method-dispatchTopic">dispatchTopic(
+        
+        String 
+        topic
+        
+        , 
+        
+        * 
+        ...args
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Dispatches a topic to the current node and any parent nodes.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> topic</td>
+                <td class="desc">The name of the topic to dispatch.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>*</strong> ...args</td>
+                <td class="desc">Any additional arguments are passed to the topic handlers.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-clearAllRegisteredEvents" id="method-clearAllRegisteredEvents">clearAllRegisteredEvents(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Removes all registered events.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-_registerAllEvents" id="method-_registerAllEvents">_registerAllEvents(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Register all events with the dom.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-addEventListener" id="method-addEventListener">addEventListener(
+        
+        String 
+        name
+        
+        , 
+        
+        function 
+        callback
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Attaches an event.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the event.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>function</strong> callback</td>
+                <td class="desc">The event handler.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-removeEventListener" id="method-removeEventListener">removeEventListener(
+        
+        String 
+        name
+        
+        , 
+        
+        function 
+        callback
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>The removeEventListener method detaches an event listener from the root elemeent.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the event.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>function</strong> callback</td>
+                <td class="desc">The event handler.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-hasEventListener" id="method-hasEventListener">hasEventListener(
+        
+        String 
+        name
+        
+        , 
+        
+        function 
+        callback
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Tests to see if an event is registered.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>String</strong> name</td>
+                <td class="desc">The name of the event.</td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong>function</strong> callback</td>
+                <td class="desc">The event handler.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-parseDOM" id="method-parseDOM">parseDOM(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Walks the dom tree and initializes menu node components.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-invalidateTree" id="method-invalidateTree">invalidateTree(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Invalidates the dom.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-_rootKeyDown" id="method-_rootKeyDown">_rootKeyDown(
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles key down events for keyboard navigation.</p>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-onKeyDown" id="method-onKeyDown">onKeyDown(
+        
+        
+        topic
+        
+        , 
+        
+        
+        
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Handles event.keydown topics.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong></strong> topic</td>
+                <td class="desc"></td>
+            </tr>
+
+            
+
+            
+
+            <tr>
+                <td class="name"><strong></strong> </td>
+                <td class="desc">The topic to handle.</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-constructMenuItem" id="method-constructMenuItem">AbstractMenuItem constructMenuItem(
+        
+        Object 
+        config
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Factory function that contructs MenuItems from a config object.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Object</strong> config</td>
+                <td class="desc">Configuration object</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+<article class="method-info">
+    <h3><a href="#method-constructSubMenu" id="method-constructSubMenu">AbstractMenuItem constructSubMenu(
+        
+        Object 
+        config
+        
+        
+        
+        );</a></h3>
+    <section class="description">
+        <p>Factory function that contructs Menus from a config object.</p>
+    </section>
+    
+    <section class="parameters">
+        <h4>Parameters</h4>
+        <table>
+            
+
+            <tr>
+                <td class="name"><strong>Object</strong> config</td>
+                <td class="desc">Configuration object</td>
+            </tr>
+
+            
+
+            
+        </table>
+    </section>
+    
+    
+    
+
+</article>
+
+
+
+
+        </article>
+    </main>
+    <footer id="footer">
+
+    </footer>
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+</body>
+</html>

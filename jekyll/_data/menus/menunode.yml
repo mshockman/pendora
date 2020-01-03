@@ -1,0 +1,400 @@
+name: MenuNode
+description: The base class for all Menu and MenuItem classes.
+extends: Publisher
+methods:
+  - name: constructor
+  - name: init
+    description: Initializes root menu control events.
+    long_description: |+
+      Marks the node as a controller and register the core UI events for the menu.
+      These events are responsible for delegating the event to the correct targeted menu node.
+      This method is not called by default during construction.  Subclasses of menunode should call this method of they
+      are acting as a menu controller.
+  - name: destroy
+    description: Deconstructor for the class.  Cleans up any registered events.
+  - name: initKeyboardNavigation
+    description: Initializer for keyboard navigation.
+  - name: registerTopics
+    description: Initializer for registering topics.
+  - name: render
+    description: The method that renders the dom elements that make up the component.
+    abstract: true
+    long_description: |+
+      Renders the dom elements needed to build the component.  The method is abstract and should be overridden by
+      any subclasses.  The render method receives an optional context object that contains any options that are needed
+      to render the menu.
+    parameters:
+      - name: context
+        type: Object
+        description: Configuration object for rendering.
+        defaultValue: {}
+        required: false
+  - name: getOffsetSibling
+    description: Returns the sibling node offset from the current nodes position by the given offset amount.
+    returnType: MenuNode|null
+    parameters:
+      - name: offset
+        type: Number
+        default: 1
+        required: false
+        description: The amount to offset.
+  - name: closest
+    description: Starting with the current node, the closest method transverses parents (heading towards the root node) and searches for a node that passes the given test function.
+    returnType: MenuNode|null
+    parameters:
+      - name: fn
+        description: A function that returns true if the given item should be returned.
+        type: function(node)
+        required: true
+  - name: contains
+    description: Tests to see if the provided node is a descendant of the current node.
+    long_description: |+
+      Tests to see if the provided node is a descedant of the current node.  If the provided node is an html element the
+      method will attempt to match it to a MenuNode instance before testing.
+    returnType: Boolean
+    parameters:
+      - name: node
+        description: The node to check for.
+        type: MenuNode|HTMLElement
+        required: true
+  - name: containsElement
+    description: Checks to see if the given element is contained within the current menu node or any of it's descedants.
+    long_description: |+
+      Checks to see if the given element is contained within the current menu node or any of it's descedants.
+      Because menu node are not garanteed to be direct descendents of their parent in the DOM is must check every node individually, so this operation could be quite expensive.
+    returnType: Boolean
+    parameters:
+      - name: element
+        description: The element to check for.
+        type: HTMLElement
+        required: true
+  - name: getDescendants
+    description: Iterates though all descendenant nodes.
+    returnType: Iterator<MenuNode>
+  - name: getTargetNode
+    returnType: MenuNode|null
+    description: Find the closest MenuNode instance bound to the dom for the given HTMLElement in the current menu tree.
+    parameters:
+      - name: target
+        type: HTMLElement
+        required: true
+        description: The element to search from.
+  - name: getTargetItem
+    returnType: AbstractItem|null
+    description: Find the closest MenuItem instance bound to the dom for the given HTMLElement in the current menu tree.
+    parameters:
+      - name: target
+        type: HTMLElement
+        required: true
+        description: The element to search from.
+  - name: getTargetMenu
+    returnType: AbstractMenu|null
+    description: Find the closest Menu instance bound to the dom for the given HTMLElement in the current menu tree.
+    parameters:
+      - name: target
+        type: HTMLElement
+        required: true
+        description: The element to search from.
+  - name: hasElement
+    description: Returns true if the menu node instance has an element attached.
+    returnType: Boolean
+  - name: appendTo
+    description: Appends the menu node DOM to the end of the given element.
+    parameters:
+      - name: selector
+        type: HTMLElement|String
+        description: The element to append to.  If passed a string the element will be looked up with document.querySelector().
+        required: true
+  - name: remove
+    description: Removes the component from the DOM.
+  - name: addClass
+    description: Takes a list of space seperated class names and adds them to the components classList.
+    parameters:
+      - name: classes
+        type: String
+        required: true
+        description: A string of space seperated class names.
+  - name: removeClass
+    description: Takes a list of space seperated class names and removes them from the components classList.
+    parameters:
+        - name: classes
+          type: String
+          required: true
+          description: A string of space seperated class names.
+  - name: getDisabled
+    description: Returns true if the node or any of it's parents are disabled.
+    returnType: Boolean
+  - name: isMenuItem
+    description: Returns true if the current node is a menu item.  Should be overriden by subclasses.
+    returnType: Boolean
+  - name: isMenu
+    description: Returns true if the current node is a menu.  Should be overridden by subclasses.
+    returnType: Boolean
+  - name: startTimer
+    description: Creates a named timer for the object.
+    long_description: |+
+      Creates a named timer for the object.  Only one timer may exist with the same name on the object.  If a new
+      timer is created with the same name, the old timer will be destroyed. if clear is true.  If clear is false then a
+      KeyError will be thrown instead.
+
+      If interval is true setInterval will be used instead to create a periodic timer.  The time for the timer is passed
+      in milliseconds to 1000 is equal to 1 second.  Finally the fn callbacked is bound to the current instance and passed
+      the timer object as it's only parameter.  It is equivalenet to the following:
+
+      this::fn(timer);
+    returnType: {status, id, cancel, type}
+    parameters:
+      - name: name
+        type: String
+        description: The name of the timer.
+        required: true
+      - name: fn
+        type: function
+        description: The callback function to call.
+        required: true
+      - name: time
+        type: Number
+        description: The time in milliseconds.
+        required: true
+      - name: interval
+        description: If true setInterval will be used instead of setTimeout to create a periodic timer.
+        required: false
+        defaultValue: false
+      - name: clear
+        description: If true any existing timer of the same name will be destroyed before initialzing a new one.  Otherwise, if false, a KeyError will be thrown if their is a duplicate timer.
+        required: false
+        defaultValue: true
+  - name: clearTimer
+    description: Destroys the timer with the given name.
+    returnType: Boolean
+    returnDescription: Returns true if a timer was destroyed.
+    parameters:
+      - name: name
+        type: String
+        description: The name of the timer to cancel.
+        required: true
+  - name: getTimer
+    description: Retrieves the timer with the given name.
+    returnType: Timer|undefined
+    parameters:
+      - name: name
+        type: String
+        description: The name of the timer to find.
+        required: true
+  - name: getEventDelegator
+    description: Returns the menu node that is responsible for delegating events.
+    returnType: MenuNode|null
+  - name: dispatchTopic
+    description: Dispatches a topic to the current node and any parent nodes.
+    long_description: Dispatches a topic to the current node and any parent nodes.  Any additional arguments are passed to the topic handlers as additional arguments.
+    parameters:
+      - name: topic
+        type: String
+        description: The name of the topic to dispatch.
+      - name: '...args'
+        description: Any additional arguments are passed to the topic handlers.
+        type: '*'
+  - name: clearAllRegisteredEvents
+    description: Removes all registered events.
+  - name: _registerAllEvents
+    private: true
+    description: Register all events with the dom.
+  - name: addEventListener
+    description: Attaches an event.
+    long_description: |+
+      The addEventListener method registers an element listener of the components root element.  If the components element
+      hasn't been initiazed yet it will be registed with the instance and attached after the element is initialized.
+    parameters:
+      - name: name
+        type: String
+        description: The name of the event.
+        required: true
+      - name: callback
+        type: function
+        description: The event handler.
+        required: true
+  - name: removeEventListener
+    description: The removeEventListener method detaches an event listener from the root elemeent.
+    parameters:
+      - name: name
+        type: String
+        description: The name of the event.
+        required: true
+      - name: callback
+        type: function
+        description: The event handler.
+        required: true
+  - name: hasEventListener
+    description: Tests to see if an event is registered.
+    parameters:
+        - name: name
+          type: String
+          description: The name of the event.
+          required: true
+        - name: callback
+          type: function
+          description: The event handler.
+          required: true
+  - name: parseDOM
+    description: Walks the dom tree and initializes menu node components.
+  - name: invalidateTree
+    description: Invalidates the dom.
+  - name: _rootKeyDown
+    description: Handles key down events for keyboard navigation.
+  - name: onKeyDown
+    description: Handles event.keydown topics.
+    parameters:
+      - name: topic
+      - description: The topic to handle.
+  - name: constructMenuItem
+    abstract: true
+    description: Factory function that contructs MenuItems from a config object.
+    returnType: AbstractMenuItem
+    parameters:
+      - name: config
+        type: Object
+        description: Configuration object
+        required: true
+  - name: constructSubMenu
+    abstract: true
+    description: Factory function that contructs Menus from a config object.
+    returnType: AbstractMenuItem
+    parameters:
+      - name: config
+        type: Object
+        description: Configuration object
+        required: true
+staticmethods:
+  - name: getInstance
+    description: Returns the bound menu node instance for the provided element or null if not instance is bound.
+    returnType: MenuNode|null
+    parameters:
+      - name: element
+        type: HTMLElement
+        required: true
+        description: The element to retrieve the bound menunode instance from.
+  - name: getAttributes
+    description: Retrieve configuration attributes off of an element when intializing from the DOM.
+    returnType: Object
+    parameters:
+      - name: element
+        description: The element to parse
+        type: HTMLElement
+  - name: FromHTML
+    description: Constructs a MenuNode instance from the html element.  If the element is a string it will be queried using document.querySelector.
+    returnType: MenuNode
+    parameters:
+      - name: element
+        type: HTMLElement
+        description: The element to parse.
+properties:
+  - name: _parent
+    description: Pointer to the object parent node.
+    private: true
+    type: MenuNode
+  - name: _children
+    description: An array of objects children.
+    type: MenuNode[]
+    private: true
+  - name: _props
+    description: Contains private properties that are only accessed though getters and setters.
+    private: true
+    type: Object
+  - name: _eventListeners
+    description: Map of events registered with the addEventListener method.
+    private: true
+    type: Object
+  - name: _keyboardNavigationEnabled
+    description: A flag to mark that keyboard navigation has been initialized.
+    type: Boolean
+    private: true
+  - name: _timers
+    type: Object
+    description: A map that maps all timer names to their respective timers.
+    private: true
+  - name: _element
+    type: HTMLElement
+    description: The root element for the component.  Should only be accessed through the MenuNode.element property.
+    private: true
+  - name: nodeType
+    readonly: true
+    type: String
+    description: A string that is used to mark what type of menu node the instance is.
+  - name: isController
+    readonly: true
+    type: Boolean
+    description: A boolean that marks if the instance is a controller node.
+  - name: closeOnSelect
+    type: Boolean
+    description: If true the menu node will deactivate when it encounters a select topic is encountered.
+  - name: parent
+    readonly: true
+    type: MenuNode
+    description: Point the the node parent node or null if it is the root.
+  - name: root
+    readonly: true
+    type: MenuNode
+    description: A pointer to the root of the tree.
+  - name: parentMenu
+    readonly: true
+    type: MenuNode
+    description: A pointer to the closest parent menu node.
+  - name: parentItem
+    type: MenuNode
+    readonly: true
+    description: A pointer to the closest parent menu item.
+  - name: nextSibling
+    readonly: true
+    type: MenuNode
+    description: A pointer to the next sibling menu node or null.
+  - name: previousSibling
+    readonly: true
+    type: MenuNode
+    description: A pointer to the previous sibling menu node or null.
+  - name: children
+    readonly: true
+    type: MenuNode[]
+    description: A array of the of the menu nodes children.
+  - name: isRoot
+    readonly: true
+    type: Boolean
+    description: Is true if the menu node is the root of the tree.
+  - name: enabledChildren
+    readonly: true
+    type: MenuNode[]
+    description: An array of all of the menu node enabled children.
+  - name: activeItem
+    readonly: true
+    type: MenuNode|null
+    description: A pointer to the currently active child node or null.
+  - name: isVisible
+    type: Boolean
+    description: A flag the determines the menu nodes visibility state.
+  - name: isDisabled
+    type: Boolean
+    description: Sets the menu nodes disabled state.
+  - name: disabled
+    type: Boolean
+    description: Alias for isDisabled.
+  - name: element
+    type: HTMLElement
+    description: The root elemenet of the componenet.
+  - name: id
+    type: String
+    description: Pointer to the root elements id.
+  - name: classList
+    type: ClassList
+    description: Pointer to the root element classList property.
+  - name: dataset
+    type: Dataset
+    description: Pointer to the root element dataset property.
+  - name: style
+    type: Object
+    description: Pointer to the root element style property.
+  - name: isActive
+    type: Boolean
+    description: Sets the menu active or inactive.
+  - name: isNavigable
+    readonly: true
+    type: Boolean
+    description: If true the menu node is navigable by keyboard navigation.

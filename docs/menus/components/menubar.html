@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MenuBar</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body data-page="menu_page_index">
+    <header id="header">
+        <nav>
+            <ul>
+                <li>Pendora</li>
+                <li>Examples</li>
+                <li>Download</li>
+                <li>Documentation</li>
+                <li class="mr-auto">Changelog</li>
+                <li><i class="fab fa-github"></i> Github</li>
+            </ul>
+        </nav>
+    </header>
+    <article id="splash">
+        <header>
+            <h2>MenuBar</h2>
+            <p>A horizontally aligned navigation menu with dropdown items.</p>
+        </header>
+    </article>
+    <main id="main">
+        <article id="content">
+            <article class="example">
+    <h2>MenuBar</h2>
+    <p>
+        MenuBar is a horizontal list of dropdown menus that can contain navigation links and more.  By default, the MenuBar
+        is activated when the user clicks on a root level menu-item.  After the MenuBar is activated child items can then
+        be activated on hover.  This is designed to simulate the normal behavior of MenuBars found in Window's and Mac applications.
+    </p>
+
+    <ul class="menubar" data-init="menubar" data-window-bind="testMenuBar">
+        <li class="menuitem" data-menuitem>
+            <a data-button>Root Item #1</a>
+            <ul class="menu hidden" data-menu>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #1</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="http://google.com">Google</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #2</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #3</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #4</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #5</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menuitem" data-menuitem>
+            <a data-button>Root Item #2</a>
+            <ul class="menu hidden" data-menu>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #1</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #2</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #3</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #4</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #5</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menuitem" data-menuitem>
+            <a data-button>Root Item #3</a>
+            <ul class="menu hidden" data-menu>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #1</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #2</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #3</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #4</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #5</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menuitem" data-menuitem>
+            <a data-button>Root Item #4</a>
+            <ul class="menu hidden" data-menu>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #1</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #2</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #3</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #4</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #5</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menuitem" data-menuitem>
+            <a data-button>Root Item #5</a>
+            <ul class="menu hidden" data-menu>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #1</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #2</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #3</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #4</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+                <li class="menuitem" data-menuitem>
+                    <a>Item #5</a>
+                    <ul class="menu hidden" data-menu>
+                        <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                        <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <br><br>
+
+    <figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+</pre></td><td class="code"><pre>    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menubar</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">init</span><span class="o">=</span><span class="dl">"</span><span class="s2">menubar</span><span class="dl">"</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">data</span><span class="o">-</span><span class="nx">button</span><span class="o">&gt;</span><span class="nx">Root</span> <span class="nx">Item</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">http://google.com</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Google</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="nx">a</span> <span class="nx">data</span><span class="o">-</span><span class="nx">button</span><span class="o">&gt;</span><span class="nx">Root</span> <span class="nx">Item</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="nx">a</span><span class="o">&gt;</span><span class="nx">Item</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a</span><span class="err">&gt;
+</span>                    <span class="o">&lt;</span><span class="nx">ul</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menu hidden</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menu</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">1</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">2</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">3</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">4</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                        <span class="o">&lt;</span><span class="nx">li</span> <span class="kd">class</span><span class="o">=</span><span class="dl">"</span><span class="s2">menuitem</span><span class="dl">"</span> <span class="nx">data</span><span class="o">-</span><span class="nx">menuitem</span><span class="o">&gt;&lt;</span><span class="nx">a</span> <span class="nx">href</span><span class="o">=</span><span class="dl">"</span><span class="s2">#</span><span class="dl">"</span><span class="o">&gt;</span><span class="nx">Link</span> <span class="err">#</span><span class="mi">5</span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="nx">li</span><span class="o">&gt;</span>
+                    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>                <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>        <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/ul</span><span class="err">&gt;
+</span>    
+</pre></td></tr></tbody></table></code></pre></figure>
+</article>
+<br>
+<article>
+    Above is the most common way to initialize a menubar.  By using the <strong>data-init="menubar"</strong> attribute and marking buttons, menuitems and submenus with their respective marker attributes.
+    You can also build a menubar directly by calling the <a href="../classes/menubar.html">Menubar</a> class and adding <a href="../classes/menubar.html#menubaritem">MenuBarItem</a> components to it directly.
+</article>
+<br><br>
+
+        </article>
+    </main>
+    <footer id="footer">
+
+    </footer>
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+</body>
+</html>
