@@ -1,6 +1,6 @@
 import {Rect} from "../../src/core/vectors";
 import {setElementClientPosition} from "../../src/core/position";
-import Draggable from "../../src/ui/Draggable";
+import Draggable from "../../src/core/interactions/Draggable";
 
 
 window.Rect = Rect;

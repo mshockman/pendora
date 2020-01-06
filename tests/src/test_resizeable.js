@@ -1,5 +1,5 @@
-import Resizeable, {CONTAINERS} from 'ui/Resizeable';
-import Draggable from 'ui/Draggable';
+import Resizeable, {CONTAINERS} from 'core/interactions/Resizeable';
+import Draggable from 'core/interactions/Draggable';
 import {clientRectToDocumentSpace, documentRectToClientSpace} from 'core/position';
 
 

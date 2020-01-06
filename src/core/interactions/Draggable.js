@@ -644,20 +644,24 @@ export default class Draggable {
                 this._triggerEvent(element, 'drag-complete');
             } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation({
-                    '0%': {
-                        left: translation.x + (position.left - startingRect.left),
-                        top: translation.y + (position.top - startingRect.top)
-                    },
-
-                    '100%': {
-                        left: startingTranslation.x,
-                        top: startingTranslation.y
-                    }
-                }, {
                     applyFrame(element, frame) {
                         _translate(element, frame.left, frame.top);
                     },
 
+                    frames: {
+                        '0%': {
+                            left: translation.x + (position.left - startingRect.left),
+                            top: translation.y + (position.top - startingRect.top)
+                        },
+
+                        '100%': {
+                            left: startingTranslation.x,
+                            top: startingTranslation.y
+                        }
+                    }
+                });
+
+                this._revertFX = animation.animate(target, this.revert, {
                     onEnd() {
                         if(target !== element && target.parentElement) {
                             target.parentElement.removeChild(target);
@@ -668,8 +672,6 @@ export default class Draggable {
                         this._triggerEvent(element, 'drag-complete');
                     }
                 });
-
-                this._revertFX = animation.animate(target, this.revert, null);
             } else {
                 if(target !== element && target.parentElement) {
                     target.parentElement.removeChild(target);
