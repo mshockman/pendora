@@ -1,4 +1,4 @@
-import {RGBA} from "./vectors";
+import {RGBA} from "../vectors";
 
 
 const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,

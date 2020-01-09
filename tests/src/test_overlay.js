@@ -1,6 +1,6 @@
 import Overlay, {Tooltip, Notification} from 'ui/Overlay';
-import Draggable, {CONTAINERS} from 'core/interactions/Draggable';
-import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
+import Draggable, {CONTAINERS} from 'core/ui/Draggable';
+import {getPointOnElement, getSubBoundingBox, getDistanceBetweenRects} from 'core/ui/position';
 import {Vec2, Rect} from "core/vectors";
 
 

@@ -1,9 +1,9 @@
-import Draggable from 'core/interactions/Draggable';
-import {CONTAINERS} from 'core/interactions/Draggable';
-import Sortable from 'core/interactions/Sortable';
-import Animation from 'core/Animation';
+import Draggable from 'core/ui/Draggable';
+import {CONTAINERS} from 'core/ui/Draggable';
+import Sortable from 'core/ui/Sortable';
+import Animation from 'core/ui/Animation';
 import {privateCache} from "../../src/core/data";
-import {getTranslation} from "core/position";
+import {getTranslation} from "core/ui/position";
 
 
 window.Animation = Animation;

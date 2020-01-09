@@ -1,6 +1,6 @@
-import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/position';
+import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/ui/position';
 import {Rect, Vec2} from "core/vectors";
-import Animation from "core/Animation";
+import Animation from "core/ui/Animation";
 import {privateCache} from "core/data";
 import {addClasses, assignAttributes} from "core/utility";
 

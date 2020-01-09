@@ -1,4 +1,4 @@
-import Animation from 'core/Animation';
+import Animation from 'core/ui/Animation';
 import {Vec3} from 'core/vectors';
 
 

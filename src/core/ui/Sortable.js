@@ -1,4 +1,4 @@
-import {getTranslation, setElementClientPosition} from "core/position";
+import {getTranslation, setElementClientPosition} from "core/ui/position";
 import Draggable, {cursor} from './Draggable';
 
 

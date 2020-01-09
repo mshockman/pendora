@@ -2,7 +2,7 @@ import Menu, {AbstractMenu} from "./Menu";
 import MenuItem from "./MenuItem";
 import * as positioners from "./positioners";
 import {createFragment} from "../core/utility";
-import {Rect, setElementClientPosition} from "../core/position";
+import {Rect, setElementClientPosition} from "../core/ui/position";
 
 
 export default class ContextMenu extends AbstractMenu {

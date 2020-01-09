@@ -1,5 +1,5 @@
-import {Vec2, Vec3, Rect} from "./vectors";
-import {clamp} from "./utility";
+import {Vec2, Vec3, Rect} from "../vectors";
+import {clamp} from "../utility";
 
 
 const regMatrix = /matrix(3d)?\(([^)]+)\)/;

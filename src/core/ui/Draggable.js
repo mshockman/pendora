@@ -1,5 +1,5 @@
 import {clamp} from 'core/utility';
-import Animation from "core/Animation";
+import Animation from "core/ui/Animation";
 import {privateCache} from "core/data";
 import {
     getTranslation,
@@ -7,7 +7,7 @@ import {
     documentRectToClientSpace,
     clientRectToDocumentSpace,
     snapToGrid
-} from "core/position";
+} from "core/ui/position";
 
 
 /**

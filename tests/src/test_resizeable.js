@@ -1,6 +1,6 @@
-import Resizeable, {CONTAINERS} from 'core/interactions/Resizeable';
-import Draggable from 'core/interactions/Draggable';
-import {clientRectToDocumentSpace, documentRectToClientSpace} from 'core/position';
+import Resizeable, {CONTAINERS} from 'core/ui/Resizeable';
+import Draggable from 'core/ui/Draggable';
+import {clientRectToDocumentSpace, documentRectToClientSpace} from 'core/ui/position';
 
 
 window.clientRectToDocumentSpace = clientRectToDocumentSpace;

@@ -1,5 +1,5 @@
 import {isSuperset} from 'core/set';
-import {clientRectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/position';
+import {clientRectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/ui/position';
 import {addClasses, clamp} from 'core/utility';
 
 
