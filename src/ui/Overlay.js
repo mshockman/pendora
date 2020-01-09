@@ -2,7 +2,7 @@ import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} fr
 import {Rect, Vec2} from "core/vectors";
 import Animation from "core/ui/Animation";
 import {privateCache} from "core/data";
-import {addClasses, assignAttributes} from "core/utility";
+import {addClasses, assignAttributes} from "../core/utility/dom";
 
 
 // arrow controls the alignment of the arrow.

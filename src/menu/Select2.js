@@ -2,10 +2,10 @@ import MenuItem, {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
 import * as positioners from "./positioners";
 import {getClosestMenuByElement} from "./utility";
-import {findChild, createFragment} from "core/utility";
 import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
+import {createFragment, findChild} from "../core/utility/dom";
 
 
 function copyNodeData(targetNode, referenceNode) {

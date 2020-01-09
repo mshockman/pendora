@@ -1,4 +1,3 @@
-import {clamp} from 'core/utility';
 import Animation from "core/ui/Animation";
 import {privateCache} from "core/data";
 import {
@@ -8,6 +7,7 @@ import {
     clientRectToDocumentSpace,
     snapToGrid
 } from "core/ui/position";
+import {clamp} from "../utility/math";
 
 
 /**

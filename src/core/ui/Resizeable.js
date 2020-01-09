@@ -1,6 +1,7 @@
-import {isSuperset} from 'core/set';
+import {isSuperset} from 'core/utility/set';
 import {clientRectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/ui/position';
-import {addClasses, clamp} from 'core/utility';
+import {clamp} from "../utility/math";
+import {addClasses} from "../utility/dom";
 
 
 const DIRECTIONS = new Set([

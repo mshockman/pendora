@@ -1,4 +1,4 @@
-import {selectElement} from 'core/utility';
+import {selectElement} from "../core/utility/dom";
 
 
 /**

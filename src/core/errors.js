@@ -55,3 +55,16 @@ export class AssertionError extends ExtendableError {
 export class UnitError extends ExtendableError {
 
 }
+
+
+/**
+ * Asserts that a condition is true or raises an AssertionError.
+ * @param condition - condition to check.
+ * @param message - message on fail.
+ * @throws AssertionError
+ */
+export function assert(condition, message) {
+    if (!condition) {
+        throw new AssertionError(message);
+    }
+}

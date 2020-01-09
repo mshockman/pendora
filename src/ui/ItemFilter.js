@@ -1,5 +1,5 @@
 import Publisher from "../core/Publisher";
-import {selectElement, addClasses, removeClasses} from "../core/utility.js";
+import {addClasses, removeClasses, selectElement} from "../core/utility/dom";
 
 /**
  * Compares if the item innerText matches the value with case insensitive matching.
