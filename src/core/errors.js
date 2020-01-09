@@ -50,3 +50,8 @@ export class AssertionError extends ExtendableError {
         super(message);
     }
 }
+
+
+export class UnitError extends ExtendableError {
+
+}
