@@ -13,6 +13,7 @@ __webpack_public_path__ = "dist/";
 let app = new Application({
     'test_resizeable': () => import("test_resizeable.js"),
     'test_overlay': () => import("test_overlay.js"),
+    'test_overlay2': () => import("test_overlay2.js"),
     'test_animation': () => import("test_animation.js"),
     'test_positioner': () => import("test_positioner.js")
 });

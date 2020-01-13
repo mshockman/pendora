@@ -148,13 +148,15 @@ export default class Rect extends Vec4 {
         return this._new(left, top, left + width, top + height);
     }
 
-    clamp(rect) {
+    clamp(rect, anchor=null) {
         rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
 
         let width = this.width,
             height = this.height,
-            left = clamp(this.left, rect.left, rect.right),
-            top = clamp(this.top, rect.top, rect.bottom);
+            left = clamp(this.left + anchor.left, rect.left, rect.right) - anchor.left,
+            top = clamp(this.top + anchor.top, rect.top, rect.bottom) - anchor.top;
 
         return this._new(
             left,
@@ -164,32 +166,97 @@ export default class Rect extends Vec4 {
         );
     }
 
-    clampX(rect) {
+    clampX(rect, anchor=null) {
         rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+
+        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
 
         let width = this.width,
-            left = clamp(this.left, rect.left, rect.right);
+            height = this.height,
+            left = clamp(this.left + anchor.left, rect.left, rect.right) - anchor.left,
+            top = this.top;
 
         return this._new(
             left,
-            this.top,
+            top,
             left + width,
-            this.bottom
+            top + height
         );
     }
 
-    clampY(rect) {
+    clampY(rect, anchor=null) {
         rect = rect.subtract(new Rect(0, 0, this.width, this.height));
 
-        let height = this.height,
-            top = clamp(this.top, rect.top, rect.bottom);
+        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
+
+        let width = this.width,
+            height = this.height,
+            left = this.left,
+            top = clamp(this.top + anchor.top, rect.top, rect.bottom) - anchor.top;
 
         return this._new(
-            this.left,
+            left,
             top,
-            this.right,
+            left + width,
             top + height
         );
+    }
+
+    fit(container) {
+        container = new Rect(container);
+        let start = container;
+
+        container = container.add(new Rect(
+            this.width,
+            this.height,
+            -this.width,
+            -this.height
+        ));
+
+        container.left = clamp(container.left, start.left, start.right);
+        container.right = clamp(container.left, start.left, start.right);
+        container.top = clamp(container.top, start.top, start.bottom);
+        container.bottom = clamp(container.bottom, start.top, start.bottom);
+
+        return this.clamp(container);
+    }
+
+    fitX(container) {
+        container = new Rect(container);
+        let start = container;
+
+        container = container.add(new Rect(
+            this.width,
+            this.height,
+            -this.width,
+            -this.height
+        ));
+
+        container.left = clamp(container.left, start.left, start.right);
+        container.right = clamp(container.left, start.left, start.right);
+        container.top = clamp(container.top, start.top, start.bottom);
+        container.bottom = clamp(container.bottom, start.top, start.bottom);
+
+        return this.clampX(container);
+    }
+
+    fitY(container) {
+        container = new Rect(container);
+        let start = container;
+
+        container = container.add(new Rect(
+            this.width,
+            this.height,
+            -this.width,
+            -this.height
+        ));
+
+        container.left = clamp(container.left, start.left, start.right);
+        container.right = clamp(container.left, start.left, start.right);
+        container.top = clamp(container.top, start.top, start.bottom);
+        container.bottom = clamp(container.bottom, start.top, start.bottom);
+
+        return this.clampY(container);
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -347,6 +414,45 @@ export default class Rect extends Vec4 {
         }
 
         return new Vec2(rx, ry);
+    }
+
+    /**
+     * Gets the anchor position relative to the element.  The anchor can be any of the following:
+     *
+     * A position string.
+     * A [x, y, offsetX=0, offsetY=0] array.
+     * An object of {left, top, offsetX=0, offsetY=0} properties.
+     *
+     * @param anchor
+     * @returns {Vec2}
+     */
+    getAnchor(anchor) {
+        if(positionShortHandValues[anchor]) {
+            anchor = positionShortHandValues[anchor];
+        }
+
+        let x, y, offsetX = 0, offsetY = 0;
+
+        if(typeof anchor === 'string') {
+            [x, y] = anchor.trim().split(regWhitespace);
+        } else if(Array.isArray(anchor)) {
+            [x, y, offsetX=0, offsetY=0] = anchor;
+        } else {
+            x = anchor.left;
+            y = anchor.top;
+            offsetX = anchor.offsetX || 0;
+            offsetY = anchor.offsetY || 0;
+        }
+
+        if(typeof x === 'string') {
+            x = this._evaluatePositionStringComponent(x, 'x');
+        }
+
+        if(typeof y === 'string') {
+            y = this._evaluatePositionStringComponent(y, 'y');
+        }
+
+        return new Vec2(x + offsetX, y + offsetY);
     }
 
     /**

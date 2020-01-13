@@ -1,4 +1,6 @@
 import Animation from "core/ui/Animation";
+import Publisher from "../Publisher";
+
 import {privateCache} from "core/data";
 import {
     getTranslation,
@@ -178,8 +180,9 @@ const TOLERANCE_FUNCTIONS = {
 /**
  * Behavior class to add the draggable behavior to an element for group of elements.
  */
-export default class Draggable {
+export default class Draggable extends Publisher {
     static CLONE = clone;
+    // noinspection JSUnusedGlobalSymbols
     static OFFSET_CURSOR = cursor;
 
     /**
@@ -225,6 +228,7 @@ export default class Draggable {
     constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
         distance=null, handle=null, helper=null, revert=null, scroll=null, selector=null, droppables=null, tolerance='intersect',
         setHelperSize=false, grid=null}={}) {
+        super();
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -495,30 +499,30 @@ export default class Draggable {
 
             for(let droppable of dropData) {
                 if(!droppable.intersectsBefore && droppable.intersectsAfter) {
-                    // drag-enter
-                    let event = new CustomEvent('drag-enter', {
+                    this._dispatchDroppableEvent(droppable.target, 'drag-enter', {
                         bubbles: true,
 
                         detail: {
-                            draggable: this,
                             item: target
                         }
                     });
-
-                    droppable.target.dispatchEvent(event);
                 }
             }
 
             this._triggerEvent(element, 'drag-move', {
-                mouseX: event.clientX + window.scrollX,
-                mouseY: event.clientY + window.scrollY,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                startMouseX,
-                startMouseY,
-                offset,
-                helper: target,
-                originalEvent: event
+                bubbles: false,
+                details: {
+                    mouseX: event.clientX + window.scrollX,
+                    mouseY: event.clientY + window.scrollY,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    startMouseX,
+                    startMouseY,
+                    offset,
+                    helper: target,
+                    originalEvent: event
+                },
+                topic: 'draggable.move'
             });
 
             // Refresh dropData incase something moved.
@@ -526,16 +530,12 @@ export default class Draggable {
 
             for(let droppable of dropData) {
                 if(droppable.intersectsBefore && !droppable.intersectsAfter) {
-                    // drag-leave
-                    let event = new CustomEvent('drag-leave', {
+                    this._dispatchDroppableEvent(droppable.target, 'drag-leave', {
                         bubbles: true,
                         detail: {
-                            draggable: this,
                             item: target
                         }
                     });
-
-                    droppable.target.dispatchEvent(event);
                 }
             }
 
@@ -621,18 +621,27 @@ export default class Draggable {
             }
 
             this._triggerEvent(element, 'drag-end', {
-                startX: startMouseX - window.scrollX,
-                startMouseY,
-                offset,
-                clientX: event.clientX,
-                clientY: event.clientY,
+                bubbles: true,
 
-                originalEvent: event,
-                helper: target,
+                details: {
+                    startX: startMouseX - window.scrollX,
+                    startMouseY,
+                    offset,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+
+                    originalEvent: event,
+                    helper: target,
+
+                    accept,
+                    isAccepted
+                },
+
+                topic: 'draggable.end',
 
                 accept,
                 isAccepted
-            },true, {accept, isAccepted});
+            });
 
             if(!accepted && this.revert === true) {
                 _translate(target, startingTranslation.x, startingTranslation.y);
@@ -641,7 +650,7 @@ export default class Draggable {
                     target.parentElement.removeChild(target);
                 }
 
-                this._triggerEvent(element, 'drag-complete');
+                this._triggerEvent(element, 'drag-complete', {bubbles: true, topic: 'draggable.complete'});
             } else if(!accepted && typeof this.revert === 'number') {
                 let animation = new Animation({
                     applyFrame(element, frame) {
@@ -669,7 +678,7 @@ export default class Draggable {
                     },
 
                     onComplete: () => {
-                        this._triggerEvent(element, 'drag-complete');
+                        this._triggerEvent(element, 'drag-complete', {bubbles: true, topic: 'draggable.complete'});
                     }
                 });
             } else {
@@ -684,25 +693,26 @@ export default class Draggable {
 
                 for(let droppable of droppables) {
                     if(this._intersects(element.dataset.tolerance, droppable.getBoundingClientRect(), position)) {
-                        let dropEvent = new CustomEvent('drop', {
+                        this._dispatchDroppableEvent(droppable, 'drop', {
                             bubbles: true,
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            relatedTarget: element,
                             detail: {
-                                draggable: this,
                                 originalEvent: event,
                                 startingBoundingClientRect: startingRect,
                                 droppable: droppable
                             }
                         });
-
-                        dropEvent.clientX = event.clientX;
-                        dropEvent.clientY = event.clientY;
-                        dropEvent.relatedTarget = element;
-
-                        droppable.dispatchEvent(dropEvent);
                     }
                 }
 
                 this._triggerEvent(element, 'drag-complete', {
+                    topic: 'draggable.complete',
+                    details: {
+                        dropped
+                    },
+                    bubbles: true,
                     dropped
                 });
             }
@@ -713,14 +723,18 @@ export default class Draggable {
         element.classList.add('ui-dragging');
 
         this._triggerEvent(element, 'drag-start', {
-            startMouseY,
-            startMouseX,
-            offset,
-            mouseX: posX,
-            mouseY: posY,
-            clientX: posX - window.scrollX,
-            clientY: posY - window.scrollY,
-            helper: target
+            bubbles: true,
+            details: {
+                startMouseY,
+                startMouseX,
+                offset,
+                mouseX: posX,
+                mouseY: posY,
+                clientX: posX - window.scrollX,
+                clientY: posY - window.scrollY,
+                helper: target
+            },
+            topic: 'draggable.start'
         });
     }
 
@@ -794,10 +808,11 @@ export default class Draggable {
      * @param eventName
      * @param details
      * @param bubbles
-     * @param assign
+     * @param topic
+     * @param properties
      * @private
      */
-    _triggerEvent(item, eventName, details, bubbles=true, assign=null) {
+    _triggerEvent(item, eventName, {bubbles, details, topic, ...properties}) {
         details = {
             draggable: this,
             item: item,
@@ -810,11 +825,48 @@ export default class Draggable {
             detail: details
         });
 
-        if(assign) {
-            Object.assign(event, assign);
+        if(properties) {
+            Object.assign(event, properties);
         }
 
         item.dispatchEvent(event);
+
+        if(topic !== false) {
+            topic = topic || eventName;
+
+            this.publish(topic, {
+                draggable: this,
+                item: this,
+
+                ...details
+            });
+        }
+    }
+
+    _dispatchDroppableEvent(dropElement, name, {bubbles=true, detail={}, ...properties}={}) {
+        let customEvent = new CustomEvent(name, {
+            bubbles,
+            detail: {
+                dropElement: dropElement,
+                draggable: this,
+                ...detail
+            }
+        });
+
+        // if(topic !== false && droppable.publish) {
+        //     topic = topic || name;
+        //
+        //     droppable.publish(topic, {
+        //         target: droppable,
+        //         draggable: this,
+        //         name: topic,
+        //         ...detail
+        //     });
+        // }
+
+        Object.assign(customEvent, properties);
+
+        dropElement.dispatchEvent(customEvent);
     }
 
     /**

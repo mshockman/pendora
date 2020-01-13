@@ -1,3 +1,4 @@
+let TOPICS = Symbol('topics');
 
 
 export function STOP() {
@@ -7,12 +8,12 @@ export function STOP() {
 
 export default class Publisher {
     constructor() {
-        this._topics = {};
+        this[TOPICS] = {};
     }
 
     on(topic, callback) {
-        if(!this._topics[topic]) this._topics[topic] = [];
-        this._topics[topic].push(callback);
+        if(!this[TOPICS][topic]) this[TOPICS][topic] = [];
+        this[TOPICS][topic].push(callback);
         return this;
     }
 
@@ -30,20 +31,20 @@ export default class Publisher {
     off(topic, callback) {
         if(arguments.length === 0) {
             // CLear all topics.
-            this._topics = {};
+            this[TOPICS] = {};
             return this;
         } else if(arguments.length === 1) {
             // Clear single topic.
-            this._topics[topic] = [];
+            this[TOPICS][topic] = [];
             return this;
         }
 
-        if(!this._topics || !this._topics[topic] || !this._topics[topic].length) {
+        if(!this[TOPICS] || !this[TOPICS][topic] || !this[TOPICS][topic].length) {
             // Topic list was either empty or didn't exist.  No need to remove anything.  Return;
             return this;
         }
 
-        let callbacks = this._topics[topic];
+        let callbacks = this[TOPICS][topic];
 
         for(let i = 0; i < callback.length; i++) {
             let cb = callbacks[i];
@@ -54,7 +55,7 @@ export default class Publisher {
         }
 
         if(callbacks.length === 0) {
-            delete this._topics[topic];
+            delete this[TOPICS][topic];
         }
 
         return this;
@@ -62,9 +63,9 @@ export default class Publisher {
 
     hasEvent(topic, callback) {
         if(arguments.length === 1) {
-            return !!this._topics[topic];
+            return !!this[TOPICS][topic];
         } else {
-            let callbacks = this._topics[topic];
+            let callbacks = this[TOPICS][topic];
 
             for(let i = 0; i < callbacks.length; i++) {
                 let cb = callbacks[i];
@@ -78,8 +79,8 @@ export default class Publisher {
     }
 
     publish(topic, ...args) {
-        if(this._topics[topic]) {
-            let callbacks = this._topics[topic].slice(0);
+        if(this[TOPICS][topic]) {
+            let callbacks = this[TOPICS][topic].slice(0);
 
             for(let cb of callbacks) {
                 try {
