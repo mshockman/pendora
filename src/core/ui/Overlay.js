@@ -6,7 +6,6 @@ import {selectElement} from "../utility";
 export default class Overlay {
     constructor(element) {
         this.placements = [];
-        this.arrows = [];
         this.sticky = true;
         this.fit = false;
         this.container = null;
@@ -30,14 +29,6 @@ export default class Overlay {
         });
     }
 
-    addArrow(arrow) {
-
-    }
-
-    removeArrow(arrow) {
-
-    }
-
     show() {
 
     }
@@ -50,18 +41,19 @@ export default class Overlay {
         let targetRect = this.getTargetRect(),
             containerRect = this.getContainerRect(),
             startingIndex = 0,
-            currentPos = null;
+            currentPos;
 
         if(this.sticky) {
             startingIndex = this._currentIndex;
         }
 
+        // Position Overlay
         for(let i = 0; i < this.placements.length; i++) {
             let index = (startingIndex + i) % this.placements.length,
                 position = this.getPlacement(index),
                 rect = null,
                 space = targetRect,
-                pos = null;
+                pos;
 
             this.element.dataset.placement = position.name;
 
@@ -89,18 +81,23 @@ export default class Overlay {
                 pos = pos.fit(containerRect);
             }
 
-            pos = pos.fit(space, position.my);
+            pos = pos.clamp(space, position.my);
 
             // noinspection JSCheckFunctionSignatures
-            if(!currentPos || getDistanceBetweenRects(pos, containerRect) < getDistanceBetweenRects(currentPos, containerRect)) {
+            if(!currentPos || containerRect.contains(pos) || getDistanceBetweenRects(pos, containerRect) < getDistanceBetweenRects(currentPos, containerRect)) {
                 currentPos = pos;
+                let breakFlag = false;
 
-                if(this.fit === true || this.fit === "xy") {
-                    pos = pos.fit(containerRect);
-                } else if(this.fit === "y") {
-                    pos = pos.fitY(containerRect);
-                } else if(this.fit === "x") {
-                    pos = pos.fitX(containerRect);
+                if(!containerRect || containerRect.contains(pos)) {
+                    breakFlag = true;
+                } else if(containerRect) {
+                    if(this.fit === true || this.fit === "xy") {
+                        pos = pos.fit(containerRect);
+                    } else if(this.fit === "y") {
+                        pos = pos.fitY(containerRect);
+                    } else if(this.fit === "x") {
+                        pos = pos.fitX(containerRect);
+                    }
                 }
 
                 setElementClientPosition(this.element, pos, position.method || "top-left");
@@ -171,18 +168,24 @@ export default class Overlay {
     }
 
     get disabled() {
-
+        return this.isDisabled;
     }
 
     set disabled(value) {
-
+        this.isDisabled = value;
     }
 
     get isDisabled() {
-
+        return this.element.classList.contains('disabled');
     }
 
     set isDisabled(value) {
+        let disabled = this.isDisabled;
 
+        if(value && !disabled) {
+            this.element.classList.add('disabled');
+        } else if(disabled) {
+            this.element.classList.remove('disabled');
+        }
     }
 }

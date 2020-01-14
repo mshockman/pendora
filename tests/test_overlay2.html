@@ -9,6 +9,7 @@
 
     <style type="text/css">
         #draggable {
+            box-sizing: border-box;
             border: 1px solid #000;
             background-color: #00aaff;
             font-weight: 700;
@@ -26,9 +27,11 @@
             font-size: 2rem;
             left: 200px;
             top: 200px;
+            z-index: 100;
         }
 
         #container {
+            box-sizing: border-box;
             border: 1px solid #000;
             background-color: #8e908c;
             width: 900px;
@@ -39,6 +42,7 @@
         }
 
         #overlay1 {
+            box-sizing: border-box;
             position: absolute;
             width: 200px;
             height: 50px;
@@ -50,6 +54,7 @@
             justify-items: center;
             font-weight: 700;
             font-size: 1.5rem;
+            z-index: 200;
         }
     </style>
 </head>

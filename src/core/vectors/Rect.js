@@ -1,7 +1,7 @@
 import {ValueError} from "../errors";
 import Vec2 from "./Vec2";
 import Vec4 from "./Vec4";
-import {clamp} from '../utility';
+import {clamp, calcDistance} from '../utility';
 import {UnitError} from '../errors';
 
 
@@ -23,7 +23,7 @@ const positionShortHandValues = {
 
 export default class Rect extends Vec4 {
     constructor(left, top, right, bottom, domElement=null) {
-        if(typeof left === 'object' && left.getBoundingClientRect) {
+        if(typeof left === 'object') {
             if(left.getBoundingClientRect) {
                 domElement = left;
                 let bb = domElement.getBoundingClientRect();
@@ -40,7 +40,13 @@ export default class Rect extends Vec4 {
         }
 
         super(left, top, right, bottom);
+
+        // noinspection JSUnusedGlobalSymbols
         this.domElement = domElement;
+
+        if(arguments.length === 1 && left instanceof Rect) {
+            Object.assign(this, left);
+        }
     }
 
     bind(element) {
@@ -48,7 +54,13 @@ export default class Rect extends Vec4 {
     }
 
     _new(left, top, right, bottom, domElement=undefined) {
-        return new this.constructor(left, top, right, bottom, domElement === undefined ? this.domElement : domElement);
+        let r = new this.constructor(this);
+        r.left = left;
+        r.top = top;
+        r.right = right;
+        r.bottom = bottom;
+        if(domElement !== undefined) r.domElement = domElement;
+        return r;
     }
 
     toPoint() {
@@ -138,20 +150,68 @@ export default class Rect extends Vec4 {
         return (rect.top <= this.bottom && rect.bottom >= this.top);
     }
 
-    // noinspection JSUnusedGlobalSymbols
-    clampXY(rect) {
-        let width = this.right - this.left,
-            height = this.bottom - this.top,
-            left = clamp(this.left, rect.left, rect.right),
-            top = clamp(this.top, rect.top, rect.bottom);
+    /**
+     * Attempts to fit the rect inside of the container anchoring from the anchor point.  The anchor point defaults
+     * to the top left corner or (0, 0).
+     *
+     * If possible entire rect should be clamped to the closest position inside of the container.
+     * Else position anchor point the closest possible point inside container.
+     *
+     * @param container
+     * @param anchor
+     */
+    fit(container, anchor=null) {
+        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
+        container = new Rect(container);
+        let starting = container;
 
-        return this._new(left, top, left + width, top + height);
+        container = container.add(new Rect(
+            anchor.left,
+            anchor.top,
+            -this.width + anchor.left,
+            -this.height + anchor.top
+        ));
+
+        container = new Rect(
+            clamp(container.left, starting.left, starting.right),
+            clamp(container.top, starting.top, starting.bottom),
+            clamp(container.right, starting.left, starting.right),
+            clamp(container.bottom, starting.top, starting.bottom)
+        );
+
+        let left = clamp(this.left, container.left, container.right) - anchor.left,
+            top = clamp(this.top, container.top, container.bottom) - anchor.top,
+            width = this.width,
+            height = this.height;
+
+        return this._new(
+            left,
+            top,
+            left + width,
+            top + height
+        );
     }
 
-    clamp(rect, anchor=null) {
-        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
+    fitX(container, anchor=null) {
+        let pos = this.fit(container, anchor);
+        return this._new(pos.left, this.top, pos.right, this.bottom);
+    }
 
+    fitY(container, anchor=null) {
+        let pos = this.fit(container, anchor);
+        return this._new(this.left, pos.top, this.right, pos.bottom);
+    }
+
+    /**
+     * Clamps the anchor point inside the rect.  Anchor point defaults to top left or (0, 0).
+     *
+     * @param rect
+     * @param anchor
+     * @returns {Rect}
+     */
+    clamp(rect, anchor=null) {
         anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
+        rect = new Rect(rect);
 
         let width = this.width,
             height = this.height,
@@ -167,96 +227,13 @@ export default class Rect extends Vec4 {
     }
 
     clampX(rect, anchor=null) {
-        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
-
-        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
-
-        let width = this.width,
-            height = this.height,
-            left = clamp(this.left + anchor.left, rect.left, rect.right) - anchor.left,
-            top = this.top;
-
-        return this._new(
-            left,
-            top,
-            left + width,
-            top + height
-        );
+        let pos = this.clamp(rect, anchor);
+        return this._new(pos.left, this.top, pos.right, this.bottom);
     }
 
     clampY(rect, anchor=null) {
-        rect = rect.subtract(new Rect(0, 0, this.width, this.height));
-
-        anchor = anchor ? this.getAnchor(anchor) : new Vec2(0, 0);
-
-        let width = this.width,
-            height = this.height,
-            left = this.left,
-            top = clamp(this.top + anchor.top, rect.top, rect.bottom) - anchor.top;
-
-        return this._new(
-            left,
-            top,
-            left + width,
-            top + height
-        );
-    }
-
-    fit(container) {
-        container = new Rect(container);
-        let start = container;
-
-        container = container.add(new Rect(
-            this.width,
-            this.height,
-            -this.width,
-            -this.height
-        ));
-
-        container.left = clamp(container.left, start.left, start.right);
-        container.right = clamp(container.left, start.left, start.right);
-        container.top = clamp(container.top, start.top, start.bottom);
-        container.bottom = clamp(container.bottom, start.top, start.bottom);
-
-        return this.clamp(container);
-    }
-
-    fitX(container) {
-        container = new Rect(container);
-        let start = container;
-
-        container = container.add(new Rect(
-            this.width,
-            this.height,
-            -this.width,
-            -this.height
-        ));
-
-        container.left = clamp(container.left, start.left, start.right);
-        container.right = clamp(container.left, start.left, start.right);
-        container.top = clamp(container.top, start.top, start.bottom);
-        container.bottom = clamp(container.bottom, start.top, start.bottom);
-
-        return this.clampX(container);
-    }
-
-    fitY(container) {
-        container = new Rect(container);
-        let start = container;
-
-        container = container.add(new Rect(
-            this.width,
-            this.height,
-            -this.width,
-            -this.height
-        ));
-
-        container.left = clamp(container.left, start.left, start.right);
-        container.right = clamp(container.left, start.left, start.right);
-        container.top = clamp(container.top, start.top, start.bottom);
-        container.bottom = clamp(container.bottom, start.top, start.bottom);
-
-        return this.clampY(container);
+        let pos = this.clamp(rect, anchor);
+        return this._new(this.left, pos.top, this.right, pos.bottom);
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -306,6 +283,25 @@ export default class Rect extends Vec4 {
             // Use distance formula to calculate distance.
             return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
         }
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    getDistanceFromPoint(point) {
+        point = new Rect(point.left, point.top, point.left, point.top);
+
+        let closestX = Math.abs(this.left - point.left) < Math.abs(this.right - point.left) ? this.left : this.right,
+            closestY = Math.abs(this.top - point.top) < Math.abs(this.bottom - point.top) ? this.top : this.bottom,
+            distance = calcDistance(closestX, closestY, point.left, point.top);
+
+        return this.contains(point) ? -distance : distance;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    getCenterPoint() {
+        return new Vec2(
+            this.left + (this.width / 2),
+            this.top + (this.height / 2)
+        );
     }
 
     position({my, at, of, inside=null, collision=null}) {
@@ -445,14 +441,25 @@ export default class Rect extends Vec4 {
         }
 
         if(typeof x === 'string') {
-            x = this._evaluatePositionStringComponent(x, 'x');
+            x = this._evaluatePositionStringComponent(x, 'x') - this.left;
         }
 
         if(typeof y === 'string') {
-            y = this._evaluatePositionStringComponent(y, 'y');
+            y = this._evaluatePositionStringComponent(y, 'y') - this.top;
         }
 
         return new Vec2(x + offsetX, y + offsetY);
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Takes a anchor point coordient relative the the rect and returns the true coordients.
+     * @param anchor
+     * @returns {Vec2}
+     */
+    getPoint(anchor) {
+        let point = this.getAnchor(anchor);
+        return new Vec2(point.left + this.left, point.top + this.top);
     }
 
     /**
