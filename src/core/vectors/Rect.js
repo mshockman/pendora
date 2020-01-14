@@ -305,10 +305,12 @@ export default class Rect extends Vec4 {
     }
 
     position({my, at, of, inside=null, collision=null}) {
+        // Of should be a Rect object.
         if(of.getBoundingClientRect) {
             of = new Rect(of);
         }
 
+        // inside should be a Rect object.
         if(inside && inside.getBoundingClientRect) {
             inside = new Rect(inside);
         }
@@ -331,6 +333,8 @@ export default class Rect extends Vec4 {
 
         let rect = this.translate(deltaX, deltaY);
 
+        // If the rect is already inside the container or if not container or collision function where given
+        // return immediately, there is not more work to be done.
         if(!collision || !inside || inside.contains(rect)) {
             return rect;
         }

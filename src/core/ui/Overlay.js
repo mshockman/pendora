@@ -3,6 +3,22 @@ import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} fr
 import {selectElement} from "../utility";
 
 
+function getXIntersectAmount(rect1, rect2) {
+    let left = Math.max(rect1.left, rect2.left),
+        right = Math.min(rect1.right, rect2.right);
+
+    return left > right ? 0 : right - left;
+}
+
+
+function getYIntersectAmount(rect1, rect2) {
+    let top = Math.max(rect1.top, rect2.top),
+        bottom = Math.min(rect1.bottom, rect2.bottom);
+
+    return top > bottom ? 0 : bottom - top;
+}
+
+
 export default class Overlay {
     constructor(element) {
         this.placements = [];
@@ -41,7 +57,8 @@ export default class Overlay {
         let targetRect = this.getTargetRect(),
             containerRect = this.getContainerRect(),
             startingIndex = 0,
-            currentPos;
+            currentPos,
+            currentIntersectAmount = 0;
 
         if(this.sticky) {
             startingIndex = this._currentIndex;
@@ -52,40 +69,53 @@ export default class Overlay {
             let index = (startingIndex + i) % this.placements.length,
                 position = this.getPlacement(index),
                 rect = null,
-                space = targetRect,
-                pos;
+                clampSpace = targetRect,
+                anchor,
+                pos,
+                newIntersectAmount,
+                subBoundingBox = position.of ? getSubBoundingBox(targetRect, position.of) : targetRect;
 
             this.element.dataset.placement = position.name;
 
             rect = this.getBoundingClientRect();
             pos = rect;
-
-            if(position.of) {
-                space = getSubBoundingBox(space, position.of);
-            }
-
-            space = space.add(new Rect(
-                position.paddingLeft || 0,
-                position.paddingTop || 0,
-                -position.paddingRight || 0,
-                -position.paddingBottom || 0
-            ));
+            anchor = rect.getAnchor(position.my);
 
             pos = pos.position({
                 my: position.my,
                 at: position.at,
-                of: space
+                of: subBoundingBox
             });
 
             if(containerRect) {
                 pos = pos.fit(containerRect);
             }
 
-            pos = pos.clamp(space, position.my);
+            clampSpace = targetRect.add(new Rect(
+                -rect.width,
+                -rect.height,
+                0,
+                0
+            ));
+
+            clampSpace = clampSpace.add(new Rect(
+                position.paddingLeft || 0,
+                position.paddingTop || 0,
+                -position.paddingRight || 0,
+                -position.paddingBottom || 0
+            ));
+
+            if(position.of) {
+                clampSpace = getSubBoundingBox(clampSpace, position.of);
+            }
+
+            pos = pos.clamp(clampSpace);
+            newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
 
             // noinspection JSCheckFunctionSignatures
-            if(!currentPos || containerRect.contains(pos) || getDistanceBetweenRects(pos, containerRect) < getDistanceBetweenRects(currentPos, containerRect)) {
+            if(!currentPos || containerRect.contains(pos) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
                 currentPos = pos;
+                currentIntersectAmount = newIntersectAmount;
                 let breakFlag = false;
 
                 if(!containerRect || containerRect.contains(pos)) {
