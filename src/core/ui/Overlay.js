@@ -50,11 +50,7 @@ export default class Overlay extends Component {
             my: options.my,
             at: options.at,
             of: options.of,
-            arrow: options.arrow || "auto",
-            paddingLeft: options.paddingLeft || 0,
-            paddingTop: options.paddingTop || 0,
-            paddingRight: options.paddingRight || 0,
-            paddingBottom: options.paddingBottom || 0
+            arrow: options.arrow
         });
     }
 
@@ -74,11 +70,12 @@ export default class Overlay extends Component {
             currentIntersectAmount = 0,
             currentPlacement;
 
+        // If sticky start searching from the last position instead of starting from the begining.
         if(this.sticky) {
             startingIndex = this._currentIndex;
         }
 
-        // Position Overlay
+        // Find the best position.
         for(let i = 0; i < this.placements.length; i++) {
             let index = (startingIndex + i) % this.placements.length,
                 position = this.getPlacement(index),
@@ -112,26 +109,27 @@ export default class Overlay extends Component {
                 0
             ));
 
-            clampSpace = clampSpace.add(new Rect(
-                position.paddingLeft || 0,
-                position.paddingTop || 0,
-                -position.paddingRight || 0,
-                -position.paddingBottom || 0
-            ));
-
             if(position.of) {
                 clampSpace = getSubBoundingBox(clampSpace, position.of);
             }
 
             pos = pos.clamp(clampSpace);
+
+            if(this.arrow && position.arrow) {
+                this.arrow.direction = position.arrow;
+
+                let arrowPos = this.arrow.getTargetPosition(pos, targetRect),
+                    newArrowPos = position.arrow === "up" || position.arrow === "down" ? arrowPos.fitX(targetRect) : arrowPos.fitY(targetRect),
+                    deltaX = newArrowPos.left - arrowPos.left,
+                    deltaY = newArrowPos.top - arrowPos.top;
+
+                pos = pos.translate(deltaX, deltaY);
+            }
+
             newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
 
             // noinspection JSCheckFunctionSignatures
             if(!currentPos || containerRect.contains(pos) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
-                currentPos = pos;
-                currentIntersectAmount = newIntersectAmount;
-                currentPlacement = position;
-
                 if(containerRect) {
                     if(this.fit === true || this.fit === "xy") {
                         pos = pos.fit(containerRect);
@@ -142,7 +140,10 @@ export default class Overlay extends Component {
                     }
                 }
 
-                setElementClientPosition(this.element, pos, position.method || "top-left");
+                currentPos = pos;
+                currentIntersectAmount = newIntersectAmount;
+                currentPlacement = position;
+
                 this._currentIndex = index;
 
                 if(!containerRect || containerRect.contains(pos)) {
@@ -151,6 +152,8 @@ export default class Overlay extends Component {
             }
         }
 
+        // Apply the best position.
+        setElementClientPosition(this.element, currentPos, currentPlacement.method || "top-left");
         this.element.dataset.placement = currentPlacement.name;
 
         if(this.arrow) {
@@ -158,6 +161,7 @@ export default class Overlay extends Component {
             this.arrow.render();
         }
 
+        // Publish topics.
         this.publish("overlay.render", {
             target: this,
             name: 'overlay.render',

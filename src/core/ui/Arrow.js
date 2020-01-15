@@ -27,16 +27,11 @@ export default class Arrow extends Component {
         return this.element.dataset.direction;
     }
 
-    render() {
-        this.element.dataset.direction = this.direction;
-        this.element.style.left = "";
-        this.element.style.right = "";
-        this.element.style.top = "";
-        this.element.style.bottom = "";
+    getTargetPosition(parentRect, targetRect) {
+        parentRect = parentRect || new Rect(this.parent);
+        targetRect = targetRect || new Rect(this.target);
 
-        let parentRect = this.parent ? new Rect(this.parent) : null,
-            targetRect = this.target ? new Rect(this.target) : null,
-            pos;
+        let pos;
 
         pos = new Rect(this.element);
 
@@ -77,6 +72,18 @@ export default class Arrow extends Component {
             pos = pos.fitY(targetRect);
             pos = pos.fitY(parentRect);
         }
+
+        return pos;
+    }
+
+    render() {
+        this.element.dataset.direction = this.direction;
+        this.element.style.left = "";
+        this.element.style.right = "";
+        this.element.style.top = "";
+        this.element.style.bottom = "";
+
+        let pos = this.getTargetPosition();
 
         setElementClientPosition(this.element, pos);
     }
