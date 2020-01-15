@@ -1,6 +1,7 @@
 import Rect from "../vectors/Rect";
 import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} from "core/ui/position";
 import {selectElement} from "../utility";
+import Component from "../Component";
 
 
 function getXIntersectAmount(rect1, rect2) {
@@ -19,17 +20,28 @@ function getYIntersectAmount(rect1, rect2) {
 }
 
 
-export default class Overlay {
+export default class Overlay extends Component {
     constructor(element) {
+        super(element);
+
         this.placements = [];
         this.sticky = true;
         this.fit = false;
         this.container = null;
         this.referenceTarget = null;
+        this.arrow = null;
 
         this._currentIndex = 0; // The index of the current placement.
+    }
 
-        this.element = selectElement(element);
+    setArrow(arrow) {
+        if(this.arrow) {
+            this.arrow.removeFrom();
+            this.arrow = null;
+        }
+
+        this.arrow = arrow;
+        this.arrow.appendTo(this.element);
     }
 
     addPlacement(name, options) {
@@ -38,6 +50,7 @@ export default class Overlay {
             my: options.my,
             at: options.at,
             of: options.of,
+            arrow: options.arrow || "auto",
             paddingLeft: options.paddingLeft || 0,
             paddingTop: options.paddingTop || 0,
             paddingRight: options.paddingRight || 0,
@@ -58,7 +71,8 @@ export default class Overlay {
             containerRect = this.getContainerRect(),
             startingIndex = 0,
             currentPos,
-            currentIntersectAmount = 0;
+            currentIntersectAmount = 0,
+            currentPlacement;
 
         if(this.sticky) {
             startingIndex = this._currentIndex;
@@ -116,11 +130,9 @@ export default class Overlay {
             if(!currentPos || containerRect.contains(pos) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
                 currentPos = pos;
                 currentIntersectAmount = newIntersectAmount;
-                let breakFlag = false;
+                currentPlacement = position;
 
-                if(!containerRect || containerRect.contains(pos)) {
-                    breakFlag = true;
-                } else if(containerRect) {
+                if(containerRect) {
                     if(this.fit === true || this.fit === "xy") {
                         pos = pos.fit(containerRect);
                     } else if(this.fit === "y") {
@@ -138,20 +150,21 @@ export default class Overlay {
                 }
             }
         }
-    }
 
-    appendTo(element) {
-        if(typeof element === 'string') {
-            document.querySelector(element).appendChild(this.element);
-        } else if(element.appendChild) {
-            element.appendChild(this.element);
-        } else if(element.append) {
-            element.append(this.element);
+        this.element.dataset.placement = currentPlacement.name;
+
+        if(this.arrow) {
+            this.arrow.direction = currentPlacement.arrow;
+            this.arrow.render();
         }
-    }
 
-    getBoundingClientRect() {
-        return Rect.getBoundingClientRect(this.element);
+        this.publish("overlay.render", {
+            target: this,
+            name: 'overlay.render',
+            position: currentPos,
+            placement: currentPlacement,
+            index: this._currentIndex
+        });
     }
 
     getPlacement(index) {
@@ -183,39 +196,6 @@ export default class Overlay {
             this.referenceTarget = selectElement(target);
         } else {
             this.referenceTarget = null;
-        }
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Properties
-
-    get isVisible() {
-
-    }
-
-    set isVisible(value) {
-
-    }
-
-    get disabled() {
-        return this.isDisabled;
-    }
-
-    set disabled(value) {
-        this.isDisabled = value;
-    }
-
-    get isDisabled() {
-        return this.element.classList.contains('disabled');
-    }
-
-    set isDisabled(value) {
-        let disabled = this.isDisabled;
-
-        if(value && !disabled) {
-            this.element.classList.add('disabled');
-        } else if(disabled) {
-            this.element.classList.remove('disabled');
         }
     }
 }

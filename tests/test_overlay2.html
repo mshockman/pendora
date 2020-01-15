@@ -44,6 +44,11 @@
         #overlay1 {
             box-sizing: border-box;
             position: absolute;
+            z-index: 200;
+        }
+
+        #overlay1 .overlay-body {
+            box-sizing: border-box;
             width: 200px;
             height: 50px;
             border: 1px solid #000;
@@ -54,14 +59,61 @@
             justify-items: center;
             font-weight: 700;
             font-size: 1.5rem;
-            z-index: 200;
+        }
+
+        #overlay1[data-placement="top"] {
+            padding-bottom: 20px;
+        }
+
+        #overlay1[data-placement="right"] {
+            padding-left: 20px;
+        }
+
+        #overlay1[data-placement="bottom"] {
+            padding-top: 20px;
+        }
+
+        #overlay1[data-placement="left"] {
+            padding-right: 20px;
+        }
+
+        #overlay1 .arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        #overlay1 .arrow[data-direction="up"] {
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 20px solid #000000;
+        }
+
+        #overlay1 .arrow[data-direction="down"] {
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 20px solid #000000;
+        }
+
+        #overlay1 .arrow[data-direction="left"] {
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-right: 20px solid #000000;
+        }
+
+        #overlay1 .arrow[data-direction="right"] {
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-left: 20px solid #000000;
         }
     </style>
 </head>
 <body>
 
 <div id="container">
-    <div id="overlay1">Hello World</div>
+    <div id="overlay1">
+        <div class="overlay-body">Hello World</div>
+    </div>
     <div id="draggable">
         Draggable
     </div>

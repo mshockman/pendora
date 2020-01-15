@@ -23,6 +23,10 @@ const positionShortHandValues = {
 
 export default class Rect extends Vec4 {
     constructor(left, top, right, bottom, domElement=null) {
+        if(typeof left === 'function') {
+            left = left();
+        }
+
         if(typeof left === 'object') {
             if(left.getBoundingClientRect) {
                 domElement = left;
@@ -148,6 +152,35 @@ export default class Rect extends Vec4 {
 
     isYOverlapping(rect) {
         return (rect.top <= this.bottom && rect.bottom >= this.top);
+    }
+
+    isAbove(rect) {
+        rect = new Rect(rect);
+
+        return rect.top > this.bottom;
+    }
+
+    isBelow(rect) {
+        rect = new Rect(rect);
+
+        return rect.bottom < this.top;
+    }
+
+    isLeftOf(rect) {
+        rect = new Rect(rect);
+
+        return rect.left > this.right;
+    }
+
+    isRightOf(rect) {
+        rect = new Rect(rect);
+
+        return rect.right < this.left;
+    }
+
+    isOverlapping(rect) {
+        rect = new Rect(rect);
+        return this.isXOverlapping(rect) && this.isYOverlapping(rect);
     }
 
     /**
