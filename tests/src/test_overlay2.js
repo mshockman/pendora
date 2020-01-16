@@ -1,6 +1,10 @@
 import Draggable from "../../src/core/ui/Draggable";
 import Overlay from "../../src/core/ui/Overlay";
 import Arrow from "../../src/core/ui/Arrow";
+import Animation from "../../src/core/ui/Animation";
+
+
+window.Animation = Animation;
 
 
 export default class OverlayTestPage {

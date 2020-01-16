@@ -13,6 +13,15 @@ const TYPE_FUNCTIONS = {
 };
 
 
+export function defaultApplyFrame(element, frame) {
+    for(let key in frame) {
+        if(frame.hasOwnProperty(key)) {
+            element.style[key] = frame[key].toString();
+        }
+    }
+}
+
+
 export class NumberWithUnit {
     constructor(value, unit) {
         this.value = value;
@@ -68,6 +77,7 @@ export class NumberWithUnit {
         return new NumberWithUnit(this.value * value, this.unit);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     divide(value) {
         if(typeof value !== "number") {
             if(!(value instanceof NumberWithUnit)) {
@@ -119,33 +129,57 @@ export function linear(p) {
 }
 
 
+// noinspection JSUnusedGlobalSymbols
 export const EASING = {
     linear: linear
 };
 
 
+const FX_STATUS = {
+    pending: "Pending",
+    complete: "Complete",
+    error: "Error",
+    paused: "Paused",
+    canceled: "Canceled",
+    playing: "Playing"
+};
+
+
 export class FX {
-    constructor(element, frames, applyFrame, duration, {animation=null, easing=null, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false}={}) {
+    #animation;
+
+    #frameId;
+    #status;
+    #position;
+
+    #finishFrame;
+    #applyFrame;
+    #easing;
+    #duration;
+
+    constructor(element, frames, duration, {applyFrame=defaultApplyFrame, animation=null, easing=EASING.linear, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false, finishFrame=null}={}) {
         this.frames = [];
 
         this.element = element;
 
-        this.applyFrame = applyFrame;
         this.onComplete = onComplete;
         this.onCancel = onCancel;
         this.onFrame = onFrame;
         this.onStart = onStart;
         this.onEnd = onEnd;
         this.bubbleFrameEvent = bubbleFrameEvent;
-        this.easing = easing;
-        this.animation = animation;
 
-        this.frameId = null;
+        this.#animation = animation;
+        this.#finishFrame = finishFrame;
+        this.#applyFrame = applyFrame;
+        this.#easing = easing;
+        this.#duration = duration;
+
+        this.#frameId = null;
+        this.#status = FX_STATUS.pending;
+        this.#position = 0;
+
         this.lastFrame = null;
-
-        this.status = 'pending';
-        this._position = 0;
-        this.duration = duration;
 
         for(let key in frames) {
             if(frames.hasOwnProperty(key)) {
@@ -164,6 +198,38 @@ export class FX {
         }
 
         this.frames.sort((a, b) => a.position - b.pos);
+    }
+
+    get animation() {
+        return this.#animation;
+    }
+
+    get easing() {
+        return this.#easing;
+    }
+
+    get frameId() {
+        return this.#frameId;
+    }
+
+    get status() {
+        return this.#status;
+    }
+
+    get position() {
+        return this.#position;
+    }
+
+    get duration() {
+        return this.#duration;
+    }
+
+    set position(value) {
+        if(typeof value === 'string') {
+            value = (parseFloat(value) / 100) * this.duration;
+        }
+
+        this.#position = Math.max(0.0, Math.min(this.duration, value));
     }
 
     getProperties() {
@@ -234,6 +300,7 @@ export class FX {
             position = position / this.duration;
         }
 
+        // Takes the frame config options and calculates the final values.
         for(let property in frame) {
             if(frame.hasOwnProperty(property)) {
                 let options = frame[property];
@@ -257,6 +324,11 @@ export class FX {
                     }
                 }
             }
+        }
+
+        // User provided hook that can perform the final touch ups on the frame.
+        if(this.#finishFrame) {
+            r = this.#finishFrame(this, frame);
         }
 
         return r;
@@ -372,18 +444,6 @@ export class FX {
         }
     }
 
-    set position(value) {
-        if(typeof value === 'string') {
-            value = (parseFloat(value) / 100) * this.duration;
-        }
-
-        this._position = Math.max(0.0, Math.min(this.duration, value));
-    }
-
-    get position() {
-        return this._position;
-    }
-
     _triggerEndEvent() {
         if(this.onEnd) this.onEnd.call(this, this);
 
@@ -396,27 +456,24 @@ export class FX {
 
 
 export default class Animation {
+    static defaultApplyFrame = defaultApplyFrame;
+
     /**
      *
      * @param frames {{}|function(Element element, Animation animation):{}}
-     * @param applyFrame
+     * @param applyFrame - The function that takes a frame and applies it to the element.
      * @param init
      * @param destroy
      * @param bubbleFrameEvent
+     * @param finishFrame
      */
-    constructor({frames, applyFrame=null, init=null, destroy=null, bubbleFrameEvent=false}) {
+    constructor({frames, applyFrame=defaultApplyFrame, init=null, destroy=null, bubbleFrameEvent=false, finishFrame=null}) {
         this.frames = frames;
         this.applyFrame = applyFrame || Animation.defaultApplyFrame;
         this.bubbleFrameEvent = bubbleFrameEvent;
         this.init = init;
         this.destroy = destroy;
-    }
-
-    static defaultApplyFrame(element, frame) {
-        for(let key in frame) {
-            if(!frame.hasOwnProperty(key)) continue;
-            element.style[key] = frame[key].toString();
-        }
+        this.finishFrame = finishFrame;
     }
 
     /**
@@ -434,7 +491,7 @@ export default class Animation {
      * @param autoStart {Boolean} If true the animation will play immediately.
      * @returns {FX}
      */
-    animate(element, duration, {easing=null, onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null, autoStart=true}={}) {
+    animate(element, duration, {easing=EASING.linear, onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null, autoStart=true}={}) {
         if(this.init) {
             this.init.call(this, element, this);
         }
@@ -446,7 +503,8 @@ export default class Animation {
             if(that.destroy) that.destroy(element, fx);
         }
 
-        let fx = new FX(element, this.getFrames(element), this.applyFrame, duration, {
+        let fx = new FX(element, this.getFrames(element), duration, {
+            applyFrame: this.applyFrame,
             easing,
             animation: this,
             onStart,
@@ -455,7 +513,8 @@ export default class Animation {
             onCancel,
             onEnd: _onEnd,
             onComplete,
-            bubbleFrameEvent: this.bubbleFrameEvent
+            bubbleFrameEvent: this.bubbleFrameEvent,
+            finishFrame: this.finishFrame
         });
 
         if(autoStart) {
