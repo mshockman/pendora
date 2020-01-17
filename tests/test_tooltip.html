@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
+
+    <style type="text/css">
+        #container {
+            margin-top: 200px;
+            margin-left: 200px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div id="container">
+    <button type="button" data-tooltip="Top">Tooltip Top</button>
+    <button type="button" data-tooltip="Right">Tooltip Right</button>
+    <button type="button" data-tooltip="Bottom">Tooltip Bottom</button>
+    <button type="button" data-tooltip="Left">Tooltip Left</button>
+</div>
+
+
+<script type="text/javascript">
+    app.init('test_tooltip');
+</script>
+
+</body>
+</html>

@@ -6,8 +6,24 @@ import {clamp} from '../utility';
  */
 export default class Vec2 {
     constructor(x=0, y=0) {
-        this[0] = x;
-        this[1] = y;
+        if(x instanceof Vec2) {
+            this[0] = x.x;
+            this[1] = x.y;
+        } else if(Array.isArray(x)) {
+            this[0] = x[0];
+            this[1] = x[1];
+        } else if(typeof x === 'object') {
+            if(x.left !== undefined) {
+                this[0] = x.left;
+                this[0] = x.top;
+            } else {
+                this[0] = x.x;
+                this[1] = x.y;
+            }
+        } else {
+            this[0] = x;
+            this[1] = y;
+        }
     }
 
     add(vec2) {
@@ -90,7 +106,15 @@ export default class Vec2 {
         return this[0];
     }
 
+    get right() {
+        return this[0];
+    }
+
     get top() {
+        return this[1];
+    }
+
+    get bottom() {
         return this[1];
     }
 

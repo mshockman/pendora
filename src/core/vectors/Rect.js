@@ -134,6 +134,27 @@ export default class Rect extends Vec4 {
         return this._new(left, top, right, bottom);
     }
 
+    /**
+     * Creates a new rectangle exactly big enough to hold the current rectangle and the provided rectangle.
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @returns {null|Rect}
+     */
+    union({left, top, right, bottom}) {
+        left = Math.min(left, this.left);
+        right = Math.max(right, this.right);
+        bottom = Math.max(bottom, this.bottom);
+        top = Math.min(top, this.top);
+
+        if(left > right || top > bottom) {
+            return null;
+        }
+
+        return this._new(left, top, right, bottom);
+    }
+
     contains(rect) {
         return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
     }
@@ -337,6 +358,27 @@ export default class Rect extends Vec4 {
         );
     }
 
+    reflect(point=null, axis='xy') {
+        // Reflect around the given point or origin
+        point = point ? new Vec2(point) : new Vec2(0, 0);
+
+        let x = this.left + (this.width / 2) - point.x,
+            y = this.top + (this.height / 2) - point.y;
+
+        if(axis === 'x' || axis === 'xy') {
+            x *= -1;
+        }
+
+        if(axis === 'y' || axis === 'xy') {
+            y *= -1;
+        }
+
+        x = x - (this.width / 2) + point.x;
+        y = y - (this.height / 2) + point.y;
+
+        return this._new(x, y, x + this.width, y + this.height);
+    }
+
     position({my, at, of, inside=null, collision=null}) {
         // Of should be a Rect object.
         if(of.getBoundingClientRect) {
@@ -372,58 +414,22 @@ export default class Rect extends Vec4 {
             return rect;
         }
 
-        let flip = false,
-            collisionX = 'none',
-            collisionY = 'none';
-
-        if(!inside.containsX(rect)) {
-            if(collision.x === 'flip' || collision.x === 'flipfit') {
-                let center = this.left + (this.width / 2);
-                anchor.x = ((anchor.x - center) * -1) + center;
-
-                center = of.left + (of.width / 2);
-                reference.x = ((reference.x - center)*-1) + center;
-                flip = true;
-                collisionX = 'flip';
-            }
+        if(!inside.containsX(rect) && (collision.x === 'flip' || collision.x === 'flipfit')) {
+            rect = rect.reflect(of.getCenterPoint(), 'x');
         }
 
-        if(!inside.containsY(rect)) {
-            if(collision.y === 'flip' || collision.y === 'flipfit') {
-                let middle = this.top + (this.height / 2);
-                anchor.y = ((anchor.y - middle)*-1) + middle;
-
-                middle = of.top + (of.height / 2);
-                reference.y = ((reference.y - middle)*-1) + middle;
-                flip = true;
-                collisionY = 'flip';
-            }
-        }
-
-        if(flip) {
-            deltaX = reference.x - anchor.x;
-            deltaY = reference.y - anchor.y;
-            rect = this.translate(deltaX, deltaY);
-
-            if(inside.contains(rect)) {
-                rect.collsionX = collisionX;
-                rect.collsionY = collisionY;
-                return rect;
-            }
+        if(!inside.containsY(rect) && (collision.y === 'flip' || collision.y === 'flipfit')) {
+            rect = rect.reflect(of.getCenterPoint(), 'y');
         }
 
         if(collision.x === 'fit' || collision.x === 'flipfit') {
-            rect = rect.clampX(inside);
-            collisionX = collisionX === 'flip' ? 'flipfit': 'fit';
+            rect = rect.fitX(inside);
         }
 
         if(collision.y === 'fit' || collision.y === 'flipfit') {
-            rect = rect.clampY(inside);
-            collisionY = collisionY === 'flip' ? 'flipfit': 'fit';
+            rect = rect.fitY(inside);
         }
 
-        rect.collsionX = collisionX;
-        rect.collsionY = collisionY;
         return rect;
     }
 
