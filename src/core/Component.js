@@ -4,15 +4,19 @@ import Rect from "./vectors/Rect";
 import {KeyError} from "./errors";
 
 
-const ELEMENT = Symbol("Element"),
-    TIMERS = Symbol("Timers");
+export const SYMBOLS = {
+    appendChild: Symbol("appendChild")
+};
 
 
 export default class Component extends Publisher {
+    #element;
+    #timers;
+
     constructor(element) {
         super();
 
-        this[ELEMENT] = selectElement(element);
+        this.#element = selectElement(element);
     }
 
     render() {
@@ -21,49 +25,49 @@ export default class Component extends Publisher {
 
     appendTo(selector) {
         if(typeof selector === 'string') {
-            document.querySelector(selector).appendChild(this.element);
-        } else if(selector.appendChild) {
-            selector.appendChild(this.element);
-        } else if(selector.append) {
-            selector.append(this.element);
-        } else if(selector.element) {
-            selector.element.appendChild(this.element);
+            document.querySelector(selector).appendChild(this.#element);
+        } else if(selector.nodeType && selector.appendChild) {
+            selector.appendChild(this.#element);
+        } else if(selector[SYMBOLS.appendChild]) {
+            selector[SYMBOLS].appendChild(this.#element);
+        } else if(selector.#element) {
+            selector.#element.appendChild(this.#element);
         }
     }
 
     // noinspection JSUnusedGlobalSymbols
     removeFrom() {
-        if(this.element.parentElement) {
-            this.element.parentElement.removeChild(this.element);
+        if(this.#element.parentElement) {
+            this.#element.parentElement.removeChild(this.#element);
         }
     }
 
     getBoundingClientRect() {
-        return Rect.getBoundingClientRect(this.element);
+        return Rect.getBoundingClientRect(this.#element);
     }
 
     getAttribute(name) {
-        return this.element.getAttribute(name);
+        return this.#element.getAttribute(name);
     }
 
     hasAttribute(name) {
-        return this.element.hasAttribute(name);
+        return this.#element.hasAttribute(name);
     }
 
     removeAttribute(name) {
-        return this.element.removeAttribute(name);
+        return this.#element.removeAttribute(name);
     }
 
     setAttribute(name, value) {
-        return this.element.setAttribute(name, value);
+        return this.#element.setAttribute(name, value);
     }
 
     addClass(classes) {
-        return addClasses(this.element, classes);
+        return addClasses(this.#element, classes);
     }
 
     removeClass(classes) {
-        return removeClasses(this.element, classes);
+        return removeClasses(this.#element, classes);
     }
 
     /**
@@ -82,17 +86,17 @@ export default class Component extends Publisher {
      * @returns {{status, id, cancel, type}}
      */
     startTimer(name, fn, time, interval=false, clear=true) {
-        if(!this[TIMERS]) {
-            this[TIMERS] = {};
+        if(!this.#timers) {
+            this.#timers = {};
         }
 
-        if(clear && this[TIMERS][name]) {
-            this[TIMERS][name].cancel();
+        if(clear && this.#timers[name]) {
+            this.#timers[name].cancel();
         } else if(this._timers[name]) {
             throw new KeyError("Timer already exists.");
         }
 
-        let timer = this[TIMERS][name] = {
+        let timer = this.#timers[name] = {
             status: 'running',
             id: null,
             cancel: null,
@@ -107,15 +111,15 @@ export default class Component extends Publisher {
             timer.type = 'interval';
 
             timer.cancel = () => {
-                if(this[TIMERS][name] === timer) {
+                if(this.#timers[name] === timer) {
                     clearInterval(id);
-                    delete this[TIMERS][name];
+                    delete this.#timers[name];
                     timer.status = 'canceled';
                 }
             };
         } else {
             let id = timer.id = setTimeout((timer) => {
-                delete this[TIMERS][name];
+                delete this.#timers[name];
                 timer.status = 'complete';
                 fn.call(this, timer);
             }, time, timer);
@@ -123,9 +127,9 @@ export default class Component extends Publisher {
             timer.type = 'timeout';
 
             timer.cancel = () => {
-                if(this[TIMERS][name] === timer) {
+                if(this.#timers[name] === timer) {
                     clearTimeout(id);
-                    delete this[TIMERS][name];
+                    delete this.#timers[name];
                     timer.status = 'canceled';
                 }
             };
@@ -141,8 +145,8 @@ export default class Component extends Publisher {
      * @returns {boolean} True if a timer was canceled. False if not timer exists.
      */
     clearTimer(name) {
-        if(this[TIMERS] && this[TIMERS][name]) {
-            this[TIMERS][name].cancel();
+        if(this.#timers && this.#timers[name]) {
+            this.#timers[name].cancel();
             return true;
         }
 
@@ -157,7 +161,7 @@ export default class Component extends Publisher {
      * @returns {*}
      */
     getTimer(name) {
-        return this[TIMERS] && this[TIMERS][name] ? this[TIMERS][name] : null;
+        return this.#timers && this.#timers[name] ? this.#timers[name] : null;
     }
 
     hasTimer(name) {
@@ -201,38 +205,38 @@ export default class Component extends Publisher {
     }
 
     get id() {
-        return this.element.id;
+        return this.#element.id;
     }
 
     set id(value) {
-        this.element.id = value;
+        this.#element.id = value;
     }
 
     get style() {
-        return this.element.style;
+        return this.#element.style;
     }
 
     set style(value) {
-        this.element.style = value;
+        this.#element.style = value;
     }
 
     get classList() {
-        return this.element.classList;
+        return this.#element.classList;
     }
 
     set classList(value) {
-        this.element.classList = value;
+        this.#element.classList = value;
     }
 
     get dataset() {
-        return this.element.dataset;
+        return this.#element.dataset;
     }
 
     set dataset(value) {
-        this.element.dataset = value;
+        this.#element.dataset = value;
     }
 
     get element() {
-        return this[ELEMENT];
+        return this.#element;
     }
 }

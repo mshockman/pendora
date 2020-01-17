@@ -21,9 +21,7 @@ function getYIntersectAmount(rect1, rect2) {
 
 
 export default class Overlay extends Component {
-    #lastShow;
-    #lastHide;
-    #fx;
+    #currentIndex;
 
     constructor(element) {
         super(element);
@@ -35,10 +33,7 @@ export default class Overlay extends Component {
         this.referenceTarget = null;
         this.arrow = null;
 
-        this.showFX = null;
-        this.hideFX = null;
-
-        this._currentIndex = 0; // The index of the current placement.
+        this.#currentIndex = 0; // The index of the current placement.
     }
 
     setArrow(arrow) {
@@ -61,48 +56,6 @@ export default class Overlay extends Component {
         });
     }
 
-    /**
-     *
-     * @returns {Promise<>}
-     */
-    show() {
-        if(this.isVisible) {
-            return this.#lastShow || Promise.resolve();
-        }
-
-        this.#lastShow = new Promise((resolve, reject) => {
-            this.isVisible = true;
-
-            if(this.#fx) {
-                this.#fx.cancel(true);
-                this.#fx = null;
-            }
-
-            if(typeof this.hideFX === 'string') {
-                this.removeClass(this.hideFX);
-            }
-
-            this.render();
-
-            if(typeof this.showFX === 'string') {
-                this.addClass(this.showFX);
-                resolve();
-            } else if(typeof this.showFX === 'function') {
-
-            } else if(this.showFX) {
-
-            } else {
-                resolve();
-            }
-        });
-
-        return this.#lastShow;
-    }
-
-    hide() {
-
-    }
-
     render() {
         let targetRect = this.getTargetRect(),
             containerRect = this.getContainerRect(),
@@ -113,7 +66,7 @@ export default class Overlay extends Component {
 
         // If sticky start searching from the last position instead of starting from the begining.
         if(this.sticky) {
-            startingIndex = this._currentIndex;
+            startingIndex = this.#currentIndex;
         }
 
         // Find the best position.
@@ -185,7 +138,7 @@ export default class Overlay extends Component {
                 currentIntersectAmount = newIntersectAmount;
                 currentPlacement = position;
 
-                this._currentIndex = index;
+                this.#currentIndex = index;
 
                 if(!containerRect || containerRect.contains(pos)) {
                     break;
@@ -208,7 +161,7 @@ export default class Overlay extends Component {
             name: 'overlay.render',
             position: currentPos,
             placement: currentPlacement,
-            index: this._currentIndex
+            index: this.#currentIndex
         });
     }
 
