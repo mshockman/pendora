@@ -1,4 +1,6 @@
 import {RGBA} from "../vectors";
+import {selectElement} from "../utility";
+import {ExtendableError} from "../errors";
 
 
 const regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
@@ -135,6 +137,25 @@ export const EASING = {
 };
 
 
+class DeadFXError extends ExtendableError {}
+
+
+function assertFXAlive(fx) {
+    if(fx.status === FX_STATUS.complete || fx.status === FX_STATUS.error || fx.status === FX_STATUS.complete) {
+        throw new DeadFXError("FX object is dead.");
+    }
+}
+
+
+function doPromiseAction(onAction, value, resolveOrReject) {
+    if(typeof onAction === 'function') {
+        value = onAction(value);
+    }
+
+    resolveOrReject(value);
+}
+
+
 const FX_STATUS = {
     pending: "Pending",
     complete: "Complete",
@@ -145,7 +166,15 @@ const FX_STATUS = {
 };
 
 
+/**
+ * @implements Promise
+ */
 export class FX {
+    #element;
+    #chained;
+    #frames;
+    #internalValue;
+
     #animation;
 
     #frameId;
@@ -157,10 +186,13 @@ export class FX {
     #easing;
     #duration;
 
-    constructor(element, frames, duration, {applyFrame=defaultApplyFrame, animation=null, easing=EASING.linear, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false, finishFrame=null}={}) {
-        this.frames = [];
+    [Symbol.toStringTag] = "[Object FX]";
 
-        this.element = element;
+    constructor(element, frames, duration, {applyFrame=defaultApplyFrame, animation=null, easing=EASING.linear, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false, finishFrame=null}={}) {
+        this.#frames = [];
+        this.#chained = [];
+        this.#element = selectElement(element);
+        this.#internalValue = undefined;
 
         this.onComplete = onComplete;
         this.onCancel = onCancel;
@@ -179,37 +211,34 @@ export class FX {
         this.#status = FX_STATUS.pending;
         this.#position = 0;
 
-        this.lastFrame = null;
-
         for(let key in frames) {
             if(frames.hasOwnProperty(key)) {
                 let frame = frames[key],
                     pos = parseFloat(key) / 100;
 
                 if(typeof frame === 'function') {
-                    frame = frame.call(this, this.element);
+                    frame = frame.call(this, this.#element);
                 }
 
-                this.frames.push({
+                frame = Object.freeze(Object.assign({}, frame));
+
+                this.#frames.push(Object.freeze({
                     position: pos,
                     properties: frame
-                });
+                }));
             }
         }
 
-        this.frames.sort((a, b) => a.position - b.pos);
+        this.#frames.sort((a, b) => a.position - b.pos);
     }
 
     get animation() {
         return this.#animation;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get easing() {
         return this.#easing;
-    }
-
-    get frameId() {
-        return this.#frameId;
     }
 
     get status() {
@@ -220,54 +249,62 @@ export class FX {
         return this.#position;
     }
 
+    // noinspection JSUnusedGlobalSymbols
     get duration() {
         return this.#duration;
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    get frames() {
+        return this.#frames.slice();
+    }
+
+    get element() {
+        return this.#element;
+    }
+
     set position(value) {
         if(typeof value === 'string') {
-            value = (parseFloat(value) / 100) * this.duration;
+            value = (parseFloat(value) / 100) * this.#duration;
         }
 
-        this.#position = Math.max(0.0, Math.min(this.duration, value));
+        this.#position = Math.max(0.0, Math.min(this.#duration, value));
     }
 
-    getProperties() {
-        let keys = [];
-
-        for(let frame of this.frames) {
-            for(let key in frame.properties) {
-                if(frame.properties.hasOwnProperty(key)) {
-                    if(keys.indexOf(key) === -1) {
-                        keys.push(key);
-                    }
-                }
-            }
+    get state() {
+        if(this.status === FX_STATUS.complete || this.status === FX_STATUS.canceled) {
+            return "Fulfilled";
+        } else if(this.status === FX_STATUS.error) {
+            return "Rejected";
+        } else {
+            return "Pending";
         }
-
-        return keys;
     }
 
+    /**
+     * Returns the frame options at the given position.
+     * @param position
+     */
     getFrameFX(position) {
         // position can either be a percentage string (aka 50%) or the time in milliseconds into the animation
         // which will be converted into a percentage.
         if(typeof position === 'string') {
             position = parseFloat(position) / 100;
         } else {
-            position = position / this.duration;
+            position = position / this.#duration;
         }
 
         // At this point position should be a value between 0.0 and 1.0.
         // Easing functions specify that rate of change in the properties.
         // It takes the position and maps it to another value between 0.0f and 1.0f.
         // By default linear easing is used.
-        if(this.easing) {
-            position = this.easing(position);
+        if(this.#easing) {
+            position = this.#easing(position);
         }
 
         let r = {};
 
-        for(let frame of this.frames) {
+        for(let frame of this.#frames) {
             for(let key in frame.properties) {
                 if(frame.properties.hasOwnProperty(key)) {
                     let value = frame.properties[key];
@@ -290,6 +327,12 @@ export class FX {
         return r;
     }
 
+    /**
+     * Returns the final frame at the given position.  All options at this point should be parsed and there final values
+     * should be available.
+     *
+     * @param position
+     */
     getFrame(position) {
         let frame = this.getFrameFX(position),
             r = {};
@@ -297,7 +340,7 @@ export class FX {
         if(typeof position === 'string') {
             position = parseFloat(position) / 100;
         } else {
-            position = position / this.duration;
+            position = position / this.#duration;
         }
 
         // Takes the frame config options and calculates the final values.
@@ -335,22 +378,32 @@ export class FX {
     }
 
     play() {
-        if(this.frameId === null) {
+        assertFXAlive(this);
+
+        if(this.#frameId === null) {
             let tick = performance.now();
 
             let frameFN = () => {
                 let timestamp = performance.now(),
                     delta = timestamp - tick,
-                    position = this.position + delta;
+                    position = this.#position + delta;
 
                 tick = timestamp;
-                this.runFrame(position);
+                let frame = this.goto(position);
+                this.#status = FX_STATUS.playing;
 
-                if (this.position < this.duration) {
-                    this.frameId = window.requestAnimationFrame(frameFN);
+                if (this.onFrame) this.onFrame.call(this, this, frame);
+
+                this.#element.dispatchEvent(new CustomEvent('animation.frame', {
+                    bubbles: this.bubbleFrameEvent,
+                    detail: this
+                }));
+
+                if (this.#position < this.#duration) {
+                    this.#frameId = window.requestAnimationFrame(frameFN);
                 } else {
-                    this._triggerEndEvent();
-                    this.frameId = null;
+                    this._complete();
+                    this.#frameId = null;
                 }
             };
 
@@ -358,24 +411,29 @@ export class FX {
                 this.onStart.call(this, this);
             }
 
-            this.element.dispatchEvent(new CustomEvent('animation.start', {
+            this.#element.dispatchEvent(new CustomEvent('animation.start', {
                 bubbles: true,
                 detail: this
             }));
 
-            this.frameId = window.requestAnimationFrame(frameFN);
+            this.#frameId = window.requestAnimationFrame(frameFN);
         }
 
         return this;
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Pauses the animation.  Does not resolve it.
+     * @returns {FX}
+     */
     pause() {
-        if(this.frameId) {
-            window.cancelAnimationFrame(this.frameId);
-            this.frameId = null;
-            this.status = 'paused';
+        if(this.#frameId) {
+            window.cancelAnimationFrame(this.#frameId);
+            this.#frameId = null;
+            this.#status = FX_STATUS.paused;
 
-            this.element.dispatchEvent(new CustomEvent('animation.paused', {
+            this.#element.dispatchEvent(new CustomEvent('animation.paused', {
                 bubbles: true,
                 detail: this
             }));
@@ -383,74 +441,122 @@ export class FX {
             this._triggerEndEvent();
         }
 
-        return this;
-    }
-
-    restart() {
-        this.cancel(false);
-        this.position = 0;
-        this.play();
         return this;
     }
 
     cancel(complete=false) {
-        if(this.frameId) {
-            window.cancelAnimationFrame(this.frameId);
-            this.frameId = null;
+        if(this.#frameId) {
+            window.cancelAnimationFrame(this.#frameId);
+            this.#frameId = null;
 
             if(complete) {
-                this.runFrame('100%');
+                this.goto('100%');
             }
 
-            this.status = 'canceled';
+            this.#status = FX_STATUS.canceled;
 
             if(this.onCancel) this.onCancel.call(this, this);
 
-            this.element.dispatchEvent(new CustomEvent('animation.canceled', {
+            this.#element.dispatchEvent(new CustomEvent('animation.canceled', {
                 bubbles: true,
                 detail: this
             }));
 
             this._triggerEndEvent();
+
+            for(let {onResolve} of this.#chained) {
+                if(onResolve) resolve(this.#internalValue);
+            }
+            this.#chained = [];
         }
 
         return this;
     }
 
-    runFrame(position) {
-        this.position = position;
-        let frame = this.getFrame(this.position);
+    goto(position) {
+        this.#position = position;
+        return this.applyFrame(this.position);
+    }
 
-        this.status = 'playing';
-        this.applyFrame.call(this, this.element, frame, this);
-        this.lastFrame = frame;
-
-        if (this.onFrame) this.onFrame.call(this, this, frame);
-
-        this.element.dispatchEvent(new CustomEvent('animation.frame', {
-            bubbles: this.bubbleFrameEvent,
-            detail: this
-        }));
-
-        if(this.position === this.duration) {
-            this.status = "complete";
-
-            if(this.onComplete) this.onComplete.call(this, this);
-
-            this.element.dispatchEvent(new CustomEvent('animation.complete', {
-                bubbles: true,
-                detail: this
-            }));
-        }
+    applyFrame(position) {
+        let frame = this.getFrame(position);
+        this.#applyFrame.call(this, this.#element, frame, this);
+        return frame;
     }
 
     _triggerEndEvent() {
         if(this.onEnd) this.onEnd.call(this, this);
 
-        this.element.dispatchEvent(new CustomEvent('animation.end', {
+        this.#element.dispatchEvent(new CustomEvent('animation.end', {
             bubbles: true,
             detail: this
         }));
+    }
+
+    _complete(value) {
+        if(this.state !== "Pending") {
+            return;
+        }
+
+        this.#status = FX_STATUS.complete;
+        this.#internalValue = value;
+
+        if(this.onComplete) this.onComplete.call(this, this);
+
+        this.#element.dispatchEvent(new CustomEvent('animation.complete', {
+            bubbles: true,
+            detail: this
+        }));
+
+        this._triggerEndEvent();
+
+        for(let {onResolve} of this.#chained) {
+            if(onResolve) onResolve(this.#internalValue);
+        }
+        this.#chained = [];
+    }
+
+    then(onResolve, onReject) {
+        if(this.state === "Pending") {
+            return new Promise((resolve, reject) => {
+                // noinspection JSUnusedGlobalSymbols
+                this.#chained.push({
+                    onResolve: (value) => {
+                        doPromiseAction(onResolve, value, resolve);
+                    },
+
+                    onReject: (value) => {
+                        doPromiseAction(onReject, value, reject);
+                    }
+                });
+            });
+        } else if(this.state === 'Fulfilled' && typeof onResolve === 'function') {
+            return new Promise((resolve) => {
+                doPromiseAction(onResolve, this.#internalValue, resolve);
+            });
+        } else if(this.state === 'Rejected' && typeof onReject === 'function') {
+            return new Promise((resolve, reject) => {
+                doPromiseAction(onReject, this.#internalValue, reject);
+            });
+        }
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    finally(onFinally) {
+        onFinally = (value) => {
+            if(typeof onFinally === 'function') {
+                onFinally();
+            }
+
+            return value;
+        };
+
+        return this.then(onFinally, onFinally);
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    catch(onReject) {
+        return this.then(undefined, onReject);
     }
 }
 

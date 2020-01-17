@@ -44,12 +44,25 @@ window.testAnimation = new Animation({
     },
 
     applyFrame(element, frame) {
-        console.log(frame);
+        // console.log(frame);
         element.style.transform = `translate(${frame.left}, ${frame.top}) rotate(${frame.rotation}deg) scale(${frame.scale})`;
         element.style.display = frame.display;
         element.style.background = frame.backgroundColor.toHex();
         if(frame.opacity) element.style.opacity = frame.opacity;
     }
+});
+
+
+window.t = new Promise(function(resolve, reject) {
+    setTimeout(() => resolve(2), 1000);
+}).then(function(result) {
+    console.log(result);
+
+    return new Promise(function(resolve, reject) {
+        setTimeout(() => resolve(result * 2), 2000);
+    });
+}).then(function(result) {
+    console.log(result);
 });
 
 
@@ -62,7 +75,15 @@ export default class TestAnimationPage {
         let box1 = document.querySelector('#test_box1');
         let box2 = document.querySelector('#test_box2');
 
-        testAnimation.animate(box1, 10000);
-        testAnimation.animate(box2, 5000);
+        window.fx1 = testAnimation.animate(box1, 10000);
+        window.fx2 = testAnimation.animate(box2, 5000);
+
+        window.fx1.then(() => {
+            console.log("Animation Complete");
+
+            return new Promise((resolve) => {
+                setTimeout(resolve, 2000);
+            });
+        }).then(() => console.log("Hello World!"));
     }
 }
