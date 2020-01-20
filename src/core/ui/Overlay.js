@@ -20,6 +20,37 @@ function getYIntersectAmount(rect1, rect2) {
 }
 
 
+const DEFAULT_PLACEMENTS = {
+    top: {
+        my: "bottom",
+        at: "top",
+        of: "border-top",
+        arrow: "bottom"
+    },
+
+    bottom: {
+        my: "top",
+        at: "bottom",
+        of: "border-bottom",
+        arrow: "top"
+    },
+
+    right: {
+        my: "left",
+        at: "right",
+        of: "border-right",
+        arrow: "left"
+    },
+
+    left: {
+        my: "right",
+        at: "left",
+        of: "border-left",
+        arrow: "right"
+    }
+};
+
+
 export default class Overlay extends Component {
     #currentIndex;
 
@@ -46,7 +77,11 @@ export default class Overlay extends Component {
         this.arrow.appendTo(this.element);
     }
 
-    addPlacement(name, options) {
+    addPlacement(name, options=undefined) {
+        if(!options) {
+            options = DEFAULT_PLACEMENTS[name];
+        }
+
         this.placements.push({
             name,
             my: options.my,
@@ -62,7 +97,8 @@ export default class Overlay extends Component {
             startingIndex = 0,
             currentPos,
             currentIntersectAmount = 0,
-            currentPlacement;
+            currentPlacement,
+            overlayOffset = new Rect(0, 0, 0, 0);
 
         // If sticky start searching from the last position instead of starting from the begining.
         if(this.sticky) {
@@ -73,52 +109,65 @@ export default class Overlay extends Component {
         for(let i = 0; i < this.placements.length; i++) {
             let index = (startingIndex + i) % this.placements.length,
                 position = this.getPlacement(index),
-                rect = null,
                 clampSpace = targetRect,
-                anchor,
                 pos,
                 newIntersectAmount,
-                subBoundingBox = position.of ? getSubBoundingBox(targetRect, position.of) : targetRect;
+                subBoundingBox = position.of ? getSubBoundingBox(targetRect, position.of) : targetRect,
+                arrowOffset = new Rect(0, 0, 0, 0),
+                arrowRect;
 
             this.element.dataset.placement = position.name;
 
-            rect = this.getBoundingClientRect();
-            pos = rect;
-            anchor = rect.getAnchor(position.my);
+            pos = this.getBoundingClientRect();
+
+            if(this.arrow && position.arrow) {
+                this.arrow.setPlacement(position.arrow);
+                arrowRect = this.arrow.getBoundingClientRect();
+                let unionBox = pos.union(arrowRect);
+                arrowOffset = pos.subtract(unionBox);
+                pos = unionBox;
+            }
+
+            clampSpace = targetRect.add(new Rect(
+                -pos.width,
+                -pos.height,
+                0,
+                0
+            ));
+
+            if(arrowRect) {
+                if(this.arrow.placement === "top" || this.arrow.placement === "bottom") {
+                    clampSpace = clampSpace.add(new Rect(
+                        arrowRect.width,
+                        0,
+                        -arrowRect.width,
+                        0
+                    ));
+                } else {
+                    clampSpace = clampSpace.add(new Rect(
+                        0,
+                        arrowRect.height,
+                        0,
+                        -arrowRect.height
+                    ));
+                }
+            }
 
             pos = pos.position({
                 my: position.my,
                 at: position.at,
-                of: subBoundingBox
+                of: targetRect
             });
 
             if(containerRect) {
                 pos = pos.fit(containerRect);
             }
 
-            clampSpace = targetRect.add(new Rect(
-                -rect.width,
-                -rect.height,
-                0,
-                0
-            ));
-
             if(position.of) {
                 clampSpace = getSubBoundingBox(clampSpace, position.of);
             }
 
             pos = pos.clamp(clampSpace);
-
-            if(this.arrow && position.arrow) {
-                this.arrow.direction = position.arrow;
-
-                let arrowPos = this.arrow.getTargetPosition(pos, targetRect),
-                    newArrowPos = position.arrow === "up" || position.arrow === "down" ? arrowPos.fitX(targetRect) : arrowPos.fitY(targetRect),
-                    deltaX = newArrowPos.left - arrowPos.left,
-                    deltaY = newArrowPos.top - arrowPos.top;
-
-                pos = pos.translate(deltaX, deltaY);
-            }
 
             newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
 
@@ -134,7 +183,7 @@ export default class Overlay extends Component {
                     }
                 }
 
-                currentPos = pos;
+                currentPos = pos.add(arrowOffset);
                 currentIntersectAmount = newIntersectAmount;
                 currentPlacement = position;
 
@@ -151,8 +200,7 @@ export default class Overlay extends Component {
         this.element.dataset.placement = currentPlacement.name;
 
         if(this.arrow) {
-            this.arrow.direction = currentPlacement.arrow;
-            this.arrow.render();
+            this.arrow.setPlacement(currentPlacement.arrow);
         }
 
         // Publish topics.

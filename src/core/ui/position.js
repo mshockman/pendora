@@ -28,12 +28,7 @@ export function getOffsetElement(element) {
  * @returns {Rect}
  */
 export function getClientRect() {
-    return new Rect(
-        0,
-        0,
-        window.innerWidth,
-        window.innerHeight
-    );
+    return Rect.getClientRect();
 }
 
 

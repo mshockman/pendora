@@ -8,7 +8,13 @@ import {setElementClientPosition} from "./position";
  * The arrow will be positioned to be as close to the target why still fitting inside it's parent.
  */
 export default class Arrow extends Component {
-    constructor(direction="down") {
+    /**
+     * The starting alignment of the arrow.
+     * Can be start, end, or center.
+     */
+    #align;
+
+    constructor(placement="bottom", align="center") {
         let element = document.createElement('div');
         element.className = "arrow";
 
@@ -16,64 +22,41 @@ export default class Arrow extends Component {
 
         this.parent = null;
         this.target = null;
-        this.direction = direction;
+        this.#align = align;
+
+        this.element.dataset.placement = placement;
     }
 
-    set direction(value) {
-        this.element.dataset.direction = value;
+    set align(value) {
+        this.#align = value;
+        this.render();
     }
 
-    get direction() {
-        return this.element.dataset.direction;
+    get align() {
+        return this.#align;
     }
 
-    getTargetPosition(parentRect, targetRect) {
-        parentRect = parentRect || new Rect(this.parent);
-        targetRect = targetRect || new Rect(this.target);
+    set placement(value) {
+        this.element.dataset.placement = value;
+        this.render();
+    }
 
-        let pos;
+    get placement() {
+        return this.element.dataset.placement;
+    }
 
-        pos = new Rect(this.element);
+    /**
+     * Sets the placement and align of the arrow.  Can take a string of placement-align separated by a dash.
+     *
+     * @param placementString
+     */
+    setPlacement(placementString) {
+        let [placement, align] = placementString.split("-");
 
-        if(this.direction === "down") {
-            pos = pos.position({
-                my: "top",
-                at: "bottom",
-                of: parentRect
-            });
+        this.placement = placement;
+        this.align = align || "center";
 
-            pos = pos.fitX(targetRect);
-            pos = pos.fitX(parentRect);
-        } else if(this.direction === 'up') {
-            pos = pos.position({
-                my: "bottom",
-                at: "top",
-                of: parentRect
-            });
-
-            pos = pos.fitX(targetRect);
-            pos = pos.fitX(parentRect);
-        } else if(this.direction === "left") {
-            pos = pos.position({
-                my: "right",
-                at: "left",
-                of: parentRect
-            });
-
-            pos = pos.fitY(targetRect);
-            pos = pos.fitY(parentRect);
-        } else if(this.direction === "right") {
-            pos = pos.position({
-                my: "left",
-                at: "right",
-                of: parentRect
-            });
-
-            pos = pos.fitY(targetRect);
-            pos = pos.fitY(parentRect);
-        }
-
-        return pos;
+        this.render();
     }
 
     render() {
@@ -83,7 +66,55 @@ export default class Arrow extends Component {
         this.element.style.top = "";
         this.element.style.bottom = "";
 
-        let pos = this.getTargetPosition();
+        let parentRect = new Rect(this.parent || this.element.offsetParent),
+            targetRect = this.target ? new Rect(this.target) : null,
+            pos = new Rect(this.element);
+
+        if(this.placement === "top") {
+            if(this.align === "start") {
+                pos = pos.position({my: "left bottom", at: "left top", of: parentRect});
+            } else if(this.align === "end") {
+                pos = pos.position({my: "right bottom", at: "right top", of: parentRect});
+            } else {
+                pos = pos.position({my: "bottom", at: "top", of: parentRect});
+            }
+
+            if(targetRect) pos = pos.fitX(targetRect);
+            pos = pos.fitX(parentRect);
+        } else if(this.placement === "right") {
+            if(this.align === "start") {
+                pos = pos.position({my: "left top", at: "right top", of: parentRect});
+            } else if(this.align === "end") {
+                pos = pos.position({my: "left bottom", at: "right bottom", of: parentRect});
+            } else {
+                pos = pos.position({my: "left", at: "right", of: parentRect});
+            }
+
+            if(targetRect) pos = pos.fitY(targetRect);
+            pos = pos.fitY(parentRect);
+        } else if(this.placement === "bottom") {
+            if(this.align === "start") {
+                pos = pos.position({my: "left top", at: "left bottom", of: parentRect});
+            } else if(this.align === "end") {
+                pos = pos.position({my: "right top", at: "right bottom", of: parentRect});
+            } else {
+                pos = pos.position({my: "top", at: "bottom", of: parentRect});
+            }
+
+            if(targetRect) pos = pos.fitX(targetRect);
+            pos = pos.fitX(parentRect);
+        } else if(this.placement === "left") {
+            if(this.align === "start") {
+                pos = pos.position({my: "right top", at: "left top", of: parentRect});
+            } else if(this.align === "end") {
+                pos = pos.position({my: "right bottom", at: "left bottom", of: parentRect});
+            } else {
+                pos = pos.position({my: "right", at: "left", of: parentRect});
+            }
+
+            if(targetRect) pos = pos.fitY(targetRect);
+            pos = pos.fitY(parentRect);
+        }
 
         setElementClientPosition(this.element, pos);
     }

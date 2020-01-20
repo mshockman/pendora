@@ -156,6 +156,56 @@ function doPromiseAction(onAction, value, resolveOrReject) {
 }
 
 
+function _prepareValue(value) {
+    if(typeof value === 'string') {
+        value = value.trim();
+
+        let m = regNumberWithUnit.exec(value);
+
+        if(m) {
+            return  new NumberWithUnit(parseFloat(m[1]), m[2]);
+        }
+
+        m = regColor.exec(value);
+
+        if(m) {
+            return TYPE_FUNCTIONS.hex(m[0]);
+        }
+
+        m = regFunction.exec(value);
+
+        if(m) {
+            return TYPE_FUNCTIONS[m[1]](m[2]);
+        }
+    }
+
+    return value;
+}
+
+
+function _getFrames(fx, element, frames) {
+    let r = {};
+
+    if(typeof frames === 'function') {
+        frames = frames.call(fx, element, fx);
+    }
+
+    for(let keyframeIndex in frames) {
+        if(!frames.hasOwnProperty(keyframeIndex)) continue;
+
+        let frame = frames[keyframeIndex];
+        r[keyframeIndex] = {};
+
+        for(let property in frame) {
+            if(!frame.hasOwnProperty(property)) continue;
+            r[keyframeIndex][property] = _prepareValue(frame[property]);
+        }
+    }
+
+    return r;
+}
+
+
 const FX_STATUS = {
     pending: "Pending",
     complete: "Complete",
@@ -188,7 +238,7 @@ export class FX {
 
     [Symbol.toStringTag] = "[Object FX]";
 
-    constructor(element, frames, duration, {applyFrame=defaultApplyFrame, animation=null, easing=EASING.linear, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false, finishFrame=null}={}) {
+    constructor(element, frames, duration, {applyFrame=defaultApplyFrame, animation=null, easing=EASING.linear, onComplete=null, onCancel=null, onFrame=null, onStart=null, onEnd=null, bubbleFrameEvent=false, finishFrame=null, init=null, destroy=null}={}) {
         this.#frames = [];
         this.#chained = [];
         this.#element = selectElement(element);
@@ -200,6 +250,7 @@ export class FX {
         this.onStart = onStart;
         this.onEnd = onEnd;
         this.bubbleFrameEvent = bubbleFrameEvent;
+        this.destroy = destroy;
 
         this.#animation = animation;
         this.#finishFrame = finishFrame;
@@ -210,6 +261,13 @@ export class FX {
         this.#frameId = null;
         this.#status = FX_STATUS.pending;
         this.#position = 0;
+
+        if(init) {
+            init.call(this, this);
+        }
+
+        // Prepare frames
+        frames = _getFrames(this, this.#element, frames);
 
         for(let key in frames) {
             if(frames.hasOwnProperty(key)) {
@@ -437,8 +495,6 @@ export class FX {
                 bubbles: true,
                 detail: this
             }));
-
-            this._triggerEndEvent();
         }
 
         return this;
@@ -463,11 +519,6 @@ export class FX {
             }));
 
             this._triggerEndEvent();
-
-            for(let {onResolve} of this.#chained) {
-                if(onResolve) resolve(this.#internalValue);
-            }
-            this.#chained = [];
         }
 
         return this;
@@ -480,7 +531,7 @@ export class FX {
 
     applyFrame(position) {
         let frame = this.getFrame(position);
-        this.#applyFrame.call(this, this.#element, frame, this);
+        this.#applyFrame.call(this, this, frame);
         return frame;
     }
 
@@ -491,6 +542,15 @@ export class FX {
             bubbles: true,
             detail: this
         }));
+
+        if(this.destroy) {
+            this.destroy.call(this, this);
+        }
+
+        for(let {onResolve} of this.#chained) {
+            if(onResolve) onResolve(this.#internalValue);
+        }
+        this.#chained = [];
     }
 
     _complete(value) {
@@ -509,11 +569,6 @@ export class FX {
         }));
 
         this._triggerEndEvent();
-
-        for(let {onResolve} of this.#chained) {
-            if(onResolve) onResolve(this.#internalValue);
-        }
-        this.#chained = [];
     }
 
     then(onResolve, onReject) {
@@ -598,18 +653,7 @@ export default class Animation {
      * @returns {FX}
      */
     animate(element, duration, {easing=EASING.linear, onStart=null, onFrame=null, onPause=null, onCancel=null, onEnd=null, onComplete=null, autoStart=true}={}) {
-        if(this.init) {
-            this.init.call(this, element, this);
-        }
-
-        let that = this;
-
-        function _onEnd(fx) {
-            if(onEnd) onEnd.call(this, fx);
-            if(that.destroy) that.destroy(element, fx);
-        }
-
-        let fx = new FX(element, this.getFrames(element), duration, {
+        let fx = new FX(element, this.frames, duration, {
             applyFrame: this.applyFrame,
             easing,
             animation: this,
@@ -617,10 +661,12 @@ export default class Animation {
             onFrame,
             onPause,
             onCancel,
-            onEnd: _onEnd,
+            onEnd,
             onComplete,
             bubbleFrameEvent: this.bubbleFrameEvent,
-            finishFrame: this.finishFrame
+            finishFrame: this.finishFrame,
+            init: this.init,
+            destroy: this.destroy
         });
 
         if(autoStart) {
@@ -663,56 +709,5 @@ export default class Animation {
 
             return this.animate(element, duration, _options);
         };
-    }
-
-    getFrames(element) {
-        let frames,
-            r = {};
-
-        if(typeof this.frames === 'function') {
-            frames = this.frames.call(this, element, this);
-        } else {
-            frames = this.frames;
-        }
-
-        for(let keyframeIndex in frames) {
-            if(!frames.hasOwnProperty(keyframeIndex)) continue;
-
-            let frame = frames[keyframeIndex];
-            r[keyframeIndex] = {};
-
-            for(let property in frame) {
-                if(!frame.hasOwnProperty(property)) continue;
-                r[keyframeIndex][property] = this._prepareValue(frame[property]);
-            }
-        }
-
-        return r;
-    }
-
-    _prepareValue(value) {
-        if(typeof value === 'string') {
-            value = value.trim();
-
-            let m = regNumberWithUnit.exec(value);
-
-            if(m) {
-                return  new NumberWithUnit(parseFloat(m[1]), m[2]);
-            }
-
-            m = regColor.exec(value);
-
-            if(m) {
-                return TYPE_FUNCTIONS.hex(m[0]);
-            }
-
-            m = regFunction.exec(value);
-
-            if(m) {
-                return TYPE_FUNCTIONS[m[1]](m[2]);
-            }
-        }
-
-        return value;
     }
 }

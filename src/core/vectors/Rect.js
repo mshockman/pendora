@@ -397,7 +397,7 @@ export default class Rect extends Vec4 {
             let parts = collision.trim().split(regWhitespace);
             collision = {
                 x: parts[0],
-                y: parts[1]
+                y: parts[1] || parts[0]
             };
         }
 
@@ -572,6 +572,15 @@ export default class Rect extends Vec4 {
 
     static getBoundingClientRect(element) {
         return new Rect(element);
+    }
+
+    static getClientRect() {
+        return new Rect(
+            0,
+            0,
+            window.innerWidth,
+            window.innerHeight
+        );
     }
 
     get left() {

@@ -11,6 +11,41 @@
         #container {
             margin-top: 200px;
             margin-left: 200px;
+            height: 20000px;
+        }
+
+        .tooltip {
+            position: absolute;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .tooltip__body {
+            padding-bottom: 5px;
+            position: relative;
+        }
+
+        .tooltip .tooltip__label {
+            padding: 5px;
+            border: 1px solid #000;
+            background-color: #000;
+            color: #fff;
+            font-weight: 700;
+            font-family: "Open Sans", Helvetica, sans-serif;
+            border-radius: 5px;
+        }
+
+        .tooltip .arrow {
+            position: absolute;
+        }
+
+        .tooltip[data-placement="top"] .arrow {
+            bottom: 0;
+            left: 50%;
+            border-top: 5px solid #000000;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            margin-left: -2.5px;
         }
     </style>
 </head>
@@ -18,10 +53,10 @@
 
 
 <div id="container">
-    <button type="button" data-tooltip="Top">Tooltip Top</button>
-    <button type="button" data-tooltip="Right">Tooltip Right</button>
-    <button type="button" data-tooltip="Bottom">Tooltip Bottom</button>
-    <button type="button" data-tooltip="Left">Tooltip Left</button>
+    <button type="button" data-tooltip="Top On Top!" data-placement="top">Tooltip Top</button>
+    <button type="button" data-tooltip="Right" data-placement="right">Tooltip Right</button>
+    <button type="button" data-tooltip="Bottom" data-placement="bottom">Tooltip Bottom</button>
+    <button type="button" data-tooltip="Left" data-placement="left">Tooltip Left</button>
 </div>
 
 

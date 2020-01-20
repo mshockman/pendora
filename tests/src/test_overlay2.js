@@ -31,7 +31,7 @@ export default class OverlayTestPage {
             my: "bottom",
             at: "top",
             of: "border-top",
-            arrow: "down"
+            arrow: "bottom",
         });
 
         this.overlay.addPlacement('right', {
@@ -45,7 +45,7 @@ export default class OverlayTestPage {
             my: "top",
             at: "bottom",
             of: "border-bottom",
-            arrow: "up"
+            arrow: "top"
         });
 
         this.overlay.addPlacement("left", {
