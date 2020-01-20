@@ -97,8 +97,7 @@ export default class Overlay extends Component {
             startingIndex = 0,
             currentPos,
             currentIntersectAmount = 0,
-            currentPlacement,
-            overlayOffset = new Rect(0, 0, 0, 0);
+            currentPlacement;
 
         // If sticky start searching from the last position instead of starting from the begining.
         if(this.sticky) {

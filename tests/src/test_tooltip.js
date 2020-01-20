@@ -7,6 +7,7 @@ export default class ToolTipTestPage {
     }
 
     load() {
+        this.initDebug();
         let tooltips = new WeakMap();
 
         for(let node of document.querySelectorAll("[data-tooltip]")) {
@@ -17,6 +18,7 @@ export default class ToolTipTestPage {
                     // noinspection JSUnresolvedVariable
                     tooltip = new Tooltip(event.target.dataset.tooltip);
                     tooltips.set(event.target, tooltip);
+                    tooltip.appendTo(document.body);
                 }
 
                 if(!tooltip.isActive) {
@@ -24,7 +26,17 @@ export default class ToolTipTestPage {
                 } else {
                     tooltip.hide();
                 }
+
+                // tooltip.show(event.target, event.target.dataset.placement);
             })
         }
+    }
+
+    initDebug() {
+        let debug = document.querySelector('#debug_output');
+
+        document.addEventListener('mousemove', event => {
+            debug.innerHTML = `(${event.clientX}, ${event.clientY})`;
+        });
     }
 }

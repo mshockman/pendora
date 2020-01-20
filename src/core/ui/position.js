@@ -173,11 +173,11 @@ export function setCssPosition(element, {left=null, top=null}) {
  * translate and translate3d position the element by setting the transform property.
  *
  * @param element {HTMLElement}
- * @param position {{x, y}|{left, top}|Array|Vec2}
+ * @param position {{x, y}|{left, top, right, bottom}|Array|Vec2}
  * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'}
  */
 export function setElementClientPosition(element, position, method='top-left') {
-    position = Vec2.fromVertex(position);
+    position = new Rect(position);
 
     if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
         let style = getComputedStyle(element);
@@ -193,25 +193,36 @@ export function setElementClientPosition(element, position, method='top-left') {
             right = parseInt(style.right, 10),
             bottom = parseInt(style.bottom, 10),
             box = Rect.getBoundingClientRect(element),
-            deltaX = position.left - box.left,
-            deltaY = position.top - box.top;
+            deltaX, deltaY;
 
         if(method === 'top-left') {
+            deltaX = position.left - box.left;
+            deltaY = position.top - box.top;
+
             element.style.left = (left + deltaX) + 'px';
             element.style.top = (top + deltaY) + 'px';
             element.style.right = '';
             element.style.bottom = '';
         } else if(method === 'top-right') {
+            deltaX = position.right - box.right;
+            deltaY = position.top - box.top;
+
             element.style.right = (right - deltaX) + 'px';
             element.style.top = (top + deltaY) + 'px';
             element.style.left = '';
             element.style.bottom = '';
         } else if(method === 'bottom-left') {
+            deltaX = position.left - box.left;
+            deltaY = position.bottom - box.bottom;
+
             element.style.left = (left + deltaX) + 'px';
             element.style.bottom = (bottom - deltaY) + 'px';
             element.style.right = '';
             element.style.top = '';
         } else { // bottom-right
+            deltaX = position.right - box.right;
+            deltaY = position.bottom - box.bottom;
+
             element.style.right = (right - deltaX) + 'px';
             element.style.bottom = (bottom - deltaY) + 'px';
             element.style.left = '';

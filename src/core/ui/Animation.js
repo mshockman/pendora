@@ -15,10 +15,10 @@ const TYPE_FUNCTIONS = {
 };
 
 
-export function defaultApplyFrame(element, frame) {
+export function defaultApplyFrame(fx, frame) {
     for(let key in frame) {
         if(frame.hasOwnProperty(key)) {
-            element.style[key] = frame[key].toString();
+            fx.element.style[key] = frame[key].toString();
         }
     }
 }
