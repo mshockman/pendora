@@ -1,7 +1,7 @@
 import Component from "../Component";
 import Arrow from "./Arrow";
 import {setElementClientPosition, Rect} from "./position";
-import {addClasses, removeClasses, selectElement} from "../utility";
+import {addClasses, removeClasses, selectElement, clamp} from "../utility";
 import Animation from "./Animation";
 
 
@@ -222,17 +222,17 @@ export class SlideInAndOutFX {
         this.#fx = null;
         this.#axis = axis;
 
-        this.#currentRenderedAxis = null;
-
-        this.#state = "visible";
-        if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
-        if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
+        this.#state = undefined;
+        this.#currentRenderedAxis = undefined;
+        this.hide(false);
     }
 
     show(fx=true) {
         // Animate elements current width and height to full width and height.
-        return new Promise(resolve=>{
-            if(fx === false && this.#state !== 'visible') {
+        return new Promise(resolve=> {
+            let axis = this.axis;
+
+            if(fx === false && (this.#state !== 'visible' || axis !== this.#currentRenderedAxis)) {
                 if(this.#fx) {
                     this.#fx.cancel();
                     this.#fx = null;
@@ -241,15 +241,14 @@ export class SlideInAndOutFX {
                 if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
                 if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
 
-                let rect = this.getBoundingClientRect();
-                this.#element.style.maxWidth = `${rect.width}px`;
-                this.#element.style.maxHeight = `${rect.height}px`;
+                let fullRect = this.getBoundingClientRect();
+                this.#element.style.maxWidth = `${fullRect.width}px`;
+                this.#element.style.maxHeight = `${fullRect.height}px`;
 
                 this.#state = 'visible';
+                this.#currentRenderedAxis = axis;
                 resolve();
-            } else if(this.#state !== 'visible' || this.#state !== 'showing') {
-                this.refreshAxis();
-
+            } else if(fx && (this.#state !== 'visible' || this.#state !== 'showing' || axis !== this.#currentRenderedAxis)) {
                 if(this.#fx) {
                     this.#fx.cancel();
                     this.#fx = null;
@@ -263,65 +262,51 @@ export class SlideInAndOutFX {
                 let fullRect = this.getBoundingClientRect(),
                     currentRect = Rect.getBoundingClientRect(this.#element),
                     animation,
-                    axis = this.axis;
+                    complete,
+                    frames = {'0%': {}, '100%': {}};
 
-                if(axis === "y") {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxHeight: currentRect.height + "px"
-                            },
-
-                            '100%': {
-                                maxHeight: fullRect.height + "px"
-                            }
-                        }
-                    });
-
-                    this.#element.style.maxWidth = `${fullRect.width}px`;
-                } else if(axis === "x") {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxWidth: currentRect.width + "px"
-                            },
-
-                            '100%': {
-                                maxWidth: fullRect.width + "px"
-                            }
-                        }
-                    });
-
-                    this.#element.style.maxHeight = `${fullRect.height}px`;
+                if(this.#currentRenderedAxis === "x" || this.#currentRenderedAxis === "xy") {
+                    complete = clamp((1-(currentRect.width / fullRect.width)), 0, 1);
                 } else {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxWidth: currentRect.width + "px",
-                                maxHeight: currentRect.height + "px"
-                            },
-
-                            '100%': {
-                                maxWidth: fullRect.width + "px",
-                                maxHeight: fullRect.height + "px"
-                            }
-                        }
-                    });
+                    complete = clamp((1-(currentRect.height / fullRect.height)), 0, 1);
                 }
 
-                this.#fx = animation.animate(this.#element, this.#duration, {
+                if(axis === "y") {
+                    frames['0%'].maxHeight = currentRect.height + "px";
+                    frames['100%'].maxHeight = fullRect.height + "px";
+                    this.#element.style.maxWidth = `${fullRect.width}px`;
+                } else if(axis === "x") {
+                    frames['0%'].maxWidth = currentRect.width + "px";
+                    frames['100%'].maxWidth = fullRect.width + "px";
+                    this.#element.style.maxHeight = `${fullRect.height}px`;
+                } else {
+                    frames['0%'].maxHeight = currentRect.height + "px";
+                    frames['100%'].maxHeight = fullRect.height + "px";
+                    frames['0%'].maxWidth = currentRect.width + "px";
+                    frames['100%'].maxWidth = fullRect.width + "px";
+                }
+
+                animation = new Animation({frames});
+
+                this.#currentRenderedAxis = axis;
+
+                this.#fx = animation.animate(this.#element, this.#duration * complete, {
                     onComplete: () => {
                         this.#state = 'visible';
                         resolve();
                     }
                 });
+            } else {
+                resolve();
             }
         });
     }
 
     hide(fx=true) {
         return new Promise(resolve => {
-            if(fx === false && this.#state !== 'hidden') {
+            let axis = this.axis;
+
+            if(fx === false && (this.#state !== 'hidden' || this.#currentRenderedAxis !== axis)) {
                 if(this.#fx) {
                     this.#fx.cancel();
                     this.#fx = null;
@@ -330,20 +315,19 @@ export class SlideInAndOutFX {
                 if(this.#visibleClassName) removeClasses(this.#element, this.#visibleClassName);
                 if(this.#hiddenClassName) addClasses(this.#element, this.#hiddenClassName);
 
-                if(this.axis === 'x') {
+                if(axis === 'x') {
                     this.#element.style.maxWidth = `0px`;
-                } else if(this.axis === 'y') {
+                } else if(axis === 'y') {
                     this.#element.style.maxHeight = `0px`;
-                } else if(this.axis === 'xy') {
+                } else if(axis === 'xy') {
                     this.#element.style.maxWidth = `0px`;
                     this.#element.style.maxHeight = `0px`;
                 }
 
+                this.#currentRenderedAxis = axis;
                 this.#state = 'hidden';
                 resolve();
             } else if(this.#state !== 'visible' || this.#state !== 'showing') {
-                this.refreshAxis();
-
                 if(this.#fx) {
                     this.#fx.cancel();
                     this.#fx = null;
@@ -353,56 +337,37 @@ export class SlideInAndOutFX {
                 if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
                 if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
 
-                let fullRect = this.getBoundingClientRect(),
-                    currentRect = Rect.getBoundingClientRect(this.#element),
+                let currentRect = Rect.getBoundingClientRect(this.#element),
+                    fullRect = this.getBoundingClientRect(),
                     animation,
-                    axis = this.axis;
+                    frames = {'0%': {}, '100%': {}},
+                    complete;
 
-                if(axis === 'x') {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxWidth: currentRect.width + "px"
-                            },
-
-                            '100%': {
-                                maxWidth: "0px",
-                            }
-                        }
-                    });
-
-                    this.#element.style.maxHeight = `${fullRect.height}px`;
-                } else if(axis === 'y') {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxHeight: currentRect.height + "px"
-                            },
-
-                            '100%': {
-                                maxHeight: "0px",
-                            }
-                        }
-                    });
-
-                    this.#element.style.maxWidth = `${fullRect.width}px`;
-                } else if(axis === 'xy') {
-                    animation = new Animation({
-                        frames: {
-                            '0%': {
-                                maxWidth: currentRect.width + "px",
-                                maxHeight: currentRect.height + "px"
-                            },
-
-                            '100%': {
-                                maxWidth: "0px",
-                                maxHeight: "0px"
-                            }
-                        }
-                    });
+                if(this.#currentRenderedAxis === 'x' || this.#currentRenderedAxis === "xy") {
+                    complete = clamp(currentRect.width / fullRect.width, 0, 1);
+                } else {
+                    complete = clamp(currentRect.height / fullRect.height, 0, 1);
                 }
 
-                this.#fx = animation.animate(this.#element, this.#duration, {
+                if(axis === 'x') {
+                    frames['0%'].maxWidth = currentRect.width + "px";
+                    frames['100%'].maxWidth = '0px';
+                    this.#element.style.maxHeight = `${fullRect.height}px`;
+                } else if(axis === 'y') {
+                    frames['0%'].maxHeight = currentRect.height + "px";
+                    frames['100%'].maxHeight = '0px';
+                    this.#element.style.maxWidth = `${fullRect.width}px`;
+                } else if(axis === 'xy') {
+                    frames['0%'].maxWidth = currentRect.width + "px";
+                    frames['100%'].maxWidth = '0px';
+                    frames['0%'].maxHeight = currentRect.height + "px";
+                    frames['100%'].maxHeight = '0px';
+                }
+
+                this.#currentRenderedAxis = axis;
+                animation = new Animation({frames});
+
+                this.#fx = animation.animate(this.#element, complete * this.#duration, {
                     onComplete: () => {
                         this.#state = 'hidden';
                         resolve();
@@ -481,188 +446,11 @@ export class SlideInAndOutFX {
 
     setAxis(axis) {
         this.#axis = axis;
-        this.refreshAxis();
-    }
 
-    refreshAxis() {
-        let axis = this.axis,
-            state = this.state;
-
-        if(axis === this.#currentRenderedAxis) return;
-
-        if(state === "hidden") {
-            if(axis === 'x') {
-                let fullRect = this.getBoundingClientRect();
-                this.element.style.maxWidth = '0px';
-                this.element.style.maxHeight = `${fullRect.height}px`;
-            } else if(axis === 'y') {
-                let fullRect = this.getBoundingClientRect();
-                this.element.style.maxWidth = `${fullRect.width}px`;
-                this.element.style.maxHeight = '0px';
-            } else {
-                this.element.style.maxWidth = '0px';
-                this.element.style.maxHeight = `0px`;
-            }
-        } else if(state === "visible") {
-            let fullRect = this.getBoundingClientRect();
-            this.element.style.maxWidth = `${fullRect.width}px`;
-            this.element.style.maxHeight = `${fullRect.height}px`;
-        } else if(state === "showing") {
-            let onComplete = this.#fx.onComplete;
-            this.#fx.cancel();
-            this.#fx = null;
-
-            let currentRect = new Rect(this.element),
-                fullRect = this.getBoundingClientRect(),
-                complete;
-
-            if(this.#currentRenderedAxis === "x" || this.#currentRenderedAxis === "y") {
-                complete = currentRect.width / fullRect.width;
-            } else {
-                complete = currentRect.height / fullRect.height;
-            }
-
-            if(axis === "x") {
-                this.element.style.maxWidth = `${fullRect.width * complete}px`;
-                this.element.style.maxHeight = `${fullRect.height}px`;
-                let duration = this.#duration * complete;
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxWidth: (fullRect.width*complete) + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: fullRect.width + "px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            } else if(axis === "y") {
-                this.element.style.maxWidth = `${fullRect.width}px`;
-                this.element.style.maxHeight = `${fullRect.height * complete}px`;
-                let duration = this.#duration * complete;
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxHeight: (fullRect.height * complete) + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: fullRect.height + "px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            } else {
-                this.element.style.maxWidth = `${currentRect.width}px`;
-                this.element.style.maxHeight = `${(fullRect.height - currentRect.height) * complete}px`;
-                let duration = this.#duration * complete;
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxWidth: currentRect.width + "px",
-                            maxHeight: currentRect.height + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: fullRect.width + "px",
-                            maxHeight: fullRect.height + "px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            }
-        } else { // hiding
-            let onComplete = this.#fx.onComplete;
-            this.#fx.cancel();
-            this.#fx = null;
-
-            let currentRect = new Rect(this.element),
-                fullRect = this.getBoundingClientRect(),
-                complete;
-
-            if(this.#currentRenderedAxis === "x" || this.#currentRenderedAxis === "y") {
-                complete = currentRect.width / fullRect.width;
-            } else {
-                complete = currentRect.height / fullRect.height;
-            }
-
-            if(axis === "x") {
-                this.element.style.maxWidth = `${fullRect.width * complete}px`;
-                this.element.style.maxHeight = `${fullRect.height}px`;
-                let duration = this.#duration * (1-complete);
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxWidth: (fullRect.width*complete) + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: "0px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            } else if(axis === "y") {
-                this.element.style.maxWidth = `${fullRect.width}px`;
-                this.element.style.maxHeight = `${fullRect.height * complete}px`;
-                let duration = this.#duration * (1-complete);
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxHeight: (fullRect.height * complete) + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: "0px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            } else {
-                this.element.style.maxWidth = `${currentRect.width}px`;
-                this.element.style.maxHeight = `${(fullRect.height - currentRect.height) * complete}px`;
-                let duration = this.#duration * (1-complete);
-
-                let animation = new Animation({
-                    frames: {
-                        '0%': {
-                            maxWidth: currentRect.width + "px",
-                            maxHeight: currentRect.height + "px"
-                        },
-
-                        '100%': {
-                            maxWidth: "0px",
-                            maxHeight: "0px"
-                        }
-                    }
-                });
-
-                this.#fx = animation.animate(this.element, duration, {
-                    onComplete
-                });
-            }
+        if(this.isVisible) {
+            this.show(this.state === 'showing');
+        } else {
+            this.hide(this.state === 'hiding');
         }
     }
 }
@@ -709,9 +497,11 @@ export default class Tooltip extends Component {
         let pos,
             rect,
             targetRect = Rect.getBoundingClientRect(target),
-            containerRect = Rect.getClientRect();
+            containerRect = Rect.getClientRect(),
+            collision;
 
         placement = PLACEMENTS[placement];
+        collision = placement.collision;
 
         this.element.dataset.placement = placement.name;
 
@@ -730,26 +520,26 @@ export default class Tooltip extends Component {
         }
 
         // Try flipping it.
-        if(placement.collision === "flip" || placement === "flipfit") {
-            let oppositePlacement = PLACEMENTS[placement.opposite];
+        if(collision === "flip" || collision === "flipfit") {
+            placement = PLACEMENTS[placement.opposite];
 
-            this.element.dataset.placement = oppositePlacement.name;
+            this.element.dataset.placement = placement.name;
             rect = this.getBoundingClientRect();
 
-            let flipPos = rect.position({
-                my: oppositePlacement.my,
-                at: oppositePlacement.at,
+            pos = rect.position({
+                my: placement.my,
+                at: placement.at,
                 of: targetRect
             });
 
-            if(containerRect.contains(flipPos)) {
-                setElementClientPosition(this.element, flipPos, oppositePlacement.method);
-                return flipPos;
+            if(containerRect.contains(pos)) {
+                setElementClientPosition(this.element, pos, placement.method);
+                return pos;
             }
         }
 
         // Try fitting it.
-        if(placement.collision === "fit" || placement.collision === "flipfit") {
+        if(collision === "fit" || collision === "flipfit") {
             pos = pos.fit(containerRect);
         }
 
