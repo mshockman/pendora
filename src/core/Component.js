@@ -168,20 +168,6 @@ export default class Component extends Publisher {
         return !!this.getTimer(name);
     }
 
-    get isVisible() {
-        return !this.classList.contains('hidden');
-    }
-
-    set isVisible(value) {
-        let isVisible = this.isVisible;
-
-        if(!isVisible && value) {
-            this.classList.remove('hidden');
-        } else if(isVisible && !value) {
-            this.classList.add('hidden');
-        }
-    }
-
     get isDisabled() {
         return this.classList.contains('disabled');
     }

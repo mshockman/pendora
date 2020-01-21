@@ -1,8 +1,12 @@
+/**
+ * @deprecated
+ */
+
 import {setElementClientPosition, getSubBoundingBox, getDistanceBetweenRects} from 'core/ui/position';
 import {Rect, Vec2} from "core/vectors";
-import Animation from "core/ui/Animation";
 import {privateCache} from "core/data";
 import {addClasses, assignAttributes} from "../core/utility/dom";
+import Animation from "../core/fx/Animation";
 
 
 // arrow controls the alignment of the arrow.

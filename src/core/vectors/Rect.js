@@ -574,6 +574,30 @@ export default class Rect extends Vec4 {
         return new Rect(element);
     }
 
+    /**
+     * Returns the elements Rect without any inline styles applied.
+     * @param element
+     * @param restore - If true inline style will be restored after measuring.
+     * @returns {Rect}
+     */
+    static getCleanBoundingClientRect(element, restore=true) {
+        let state = {};
+
+        for(let i = 0; i < element.style.length; i++) {
+            let key = element.style[i];
+            state[key] = element.style[key];
+            element.style[key] = "";
+        }
+
+        let r = Rect.getBoundingClientRect(element);
+
+        if(restore) {
+            Object.assign(element.style, state);
+        }
+
+        return r;
+    }
+
     static getClientRect() {
         return new Rect(
             0,

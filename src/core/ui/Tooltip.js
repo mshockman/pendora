@@ -1,8 +1,7 @@
 import Component from "../Component";
-import Arrow from "./Arrow";
-import {setElementClientPosition, Rect} from "./position";
-import {addClasses, removeClasses, selectElement, clamp} from "../utility";
-import Animation from "./Animation";
+import {Rect, setElementClientPosition} from "./position";
+import Animation from "../fx/Animation";
+import {SlideIn, SlideOut} from "../fx/effects";
 
 
 const slideCache = Symbol('slideInCache');
@@ -201,264 +200,17 @@ const PLACEMENTS = {
 };
 
 
-/**
- * Will display an element by sliding it into full width or height.
- */
-export class SlideInAndOutFX {
-    #element;
-    #hiddenClassName;
-    #visibleClassName;
-    #duration;
-    #fx;
-    #state;
-    #axis;
-    #currentRenderedAxis;
-
-    constructor(element, duration, axis, {hiddenClassName="hidden", visibleClassName=null}) {
-        this.#element = selectElement(element);
-        this.#hiddenClassName = hiddenClassName;
-        this.#visibleClassName = visibleClassName;
-        this.#duration = duration;
-        this.#fx = null;
-        this.#axis = axis;
-
-        this.#state = undefined;
-        this.#currentRenderedAxis = undefined;
-        this.hide(false);
-    }
-
-    show(fx=true) {
-        // Animate elements current width and height to full width and height.
-        return new Promise(resolve=> {
-            let axis = this.axis;
-
-            if(fx === false && (this.#state !== 'visible' || axis !== this.#currentRenderedAxis)) {
-                if(this.#fx) {
-                    this.#fx.cancel();
-                    this.#fx = null;
-                }
-
-                if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
-                if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
-
-                let fullRect = this.getBoundingClientRect();
-                this.#element.style.maxWidth = `${fullRect.width}px`;
-                this.#element.style.maxHeight = `${fullRect.height}px`;
-
-                this.#state = 'visible';
-                this.#currentRenderedAxis = axis;
-                resolve();
-            } else if(fx && (this.#state !== 'visible' || this.#state !== 'showing' || axis !== this.#currentRenderedAxis)) {
-                if(this.#fx) {
-                    this.#fx.cancel();
-                    this.#fx = null;
-                }
-
-                this.#state = 'showing';
-
-                if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
-                if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
-
-                let fullRect = this.getBoundingClientRect(),
-                    currentRect = Rect.getBoundingClientRect(this.#element),
-                    animation,
-                    complete,
-                    frames = {'0%': {}, '100%': {}};
-
-                if(this.#currentRenderedAxis === "x" || this.#currentRenderedAxis === "xy") {
-                    complete = clamp((1-(currentRect.width / fullRect.width)), 0, 1);
-                } else {
-                    complete = clamp((1-(currentRect.height / fullRect.height)), 0, 1);
-                }
-
-                if(axis === "y") {
-                    frames['0%'].maxHeight = currentRect.height + "px";
-                    frames['100%'].maxHeight = fullRect.height + "px";
-                    this.#element.style.maxWidth = `${fullRect.width}px`;
-                } else if(axis === "x") {
-                    frames['0%'].maxWidth = currentRect.width + "px";
-                    frames['100%'].maxWidth = fullRect.width + "px";
-                    this.#element.style.maxHeight = `${fullRect.height}px`;
-                } else {
-                    frames['0%'].maxHeight = currentRect.height + "px";
-                    frames['100%'].maxHeight = fullRect.height + "px";
-                    frames['0%'].maxWidth = currentRect.width + "px";
-                    frames['100%'].maxWidth = fullRect.width + "px";
-                }
-
-                animation = new Animation({frames});
-
-                this.#currentRenderedAxis = axis;
-
-                this.#fx = animation.animate(this.#element, this.#duration * complete, {
-                    onComplete: () => {
-                        this.#state = 'visible';
-                        resolve();
-                    }
-                });
-            } else {
-                resolve();
-            }
-        });
-    }
-
-    hide(fx=true) {
-        return new Promise(resolve => {
-            let axis = this.axis;
-
-            if(fx === false && (this.#state !== 'hidden' || this.#currentRenderedAxis !== axis)) {
-                if(this.#fx) {
-                    this.#fx.cancel();
-                    this.#fx = null;
-                }
-
-                if(this.#visibleClassName) removeClasses(this.#element, this.#visibleClassName);
-                if(this.#hiddenClassName) addClasses(this.#element, this.#hiddenClassName);
-
-                if(axis === 'x') {
-                    this.#element.style.maxWidth = `0px`;
-                } else if(axis === 'y') {
-                    this.#element.style.maxHeight = `0px`;
-                } else if(axis === 'xy') {
-                    this.#element.style.maxWidth = `0px`;
-                    this.#element.style.maxHeight = `0px`;
-                }
-
-                this.#currentRenderedAxis = axis;
-                this.#state = 'hidden';
-                resolve();
-            } else if(this.#state !== 'visible' || this.#state !== 'showing') {
-                if(this.#fx) {
-                    this.#fx.cancel();
-                    this.#fx = null;
-                }
-
-                this.#state = 'hiding';
-                if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
-                if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
-
-                let currentRect = Rect.getBoundingClientRect(this.#element),
-                    fullRect = this.getBoundingClientRect(),
-                    animation,
-                    frames = {'0%': {}, '100%': {}},
-                    complete;
-
-                if(this.#currentRenderedAxis === 'x' || this.#currentRenderedAxis === "xy") {
-                    complete = clamp(currentRect.width / fullRect.width, 0, 1);
-                } else {
-                    complete = clamp(currentRect.height / fullRect.height, 0, 1);
-                }
-
-                if(axis === 'x') {
-                    frames['0%'].maxWidth = currentRect.width + "px";
-                    frames['100%'].maxWidth = '0px';
-                    this.#element.style.maxHeight = `${fullRect.height}px`;
-                } else if(axis === 'y') {
-                    frames['0%'].maxHeight = currentRect.height + "px";
-                    frames['100%'].maxHeight = '0px';
-                    this.#element.style.maxWidth = `${fullRect.width}px`;
-                } else if(axis === 'xy') {
-                    frames['0%'].maxWidth = currentRect.width + "px";
-                    frames['100%'].maxWidth = '0px';
-                    frames['0%'].maxHeight = currentRect.height + "px";
-                    frames['100%'].maxHeight = '0px';
-                }
-
-                this.#currentRenderedAxis = axis;
-                animation = new Animation({frames});
-
-                this.#fx = animation.animate(this.#element, complete * this.#duration, {
-                    onComplete: () => {
-                        this.#state = 'hidden';
-                        resolve();
-                    }
-                });
-            }
-        });
-    }
-
-    /**
-     * Cancel any currently running fx.
-     */
-    cancel() {
-        if(this.#fx) {
-            this.#fx.cancel();
-            this.#fx = null;
-        }
-    }
-
-    destroy() {
-        if(this.#fx) {
-            this.#fx.cancel();
-            this.#fx = null;
-        }
-
-        this.#element.style.maxWidth = "";
-        this.#element.style.maxHeight = "";
-    }
-
-    getBoundingClientRect() {
-        if(this.#hiddenClassName) removeClasses(this.#element, this.#hiddenClassName);
-        if(this.#visibleClassName) addClasses(this.#element, this.#visibleClassName);
-
-        let maxWidth = this.#element.style.maxWidth,
-            maxHeight = this.#element.style.maxHeight;
-
-        this.#element.style.maxWidth = "";
-        this.#element.style.maxHeight = "";
-
-        let r = Rect.getBoundingClientRect(this.#element);
-
-        this.#element.style.maxWidth = maxWidth;
-        this.#element.style.maxHeight = maxHeight;
-
-        if(this.#state === "hidden") {
-            if(this.#hiddenClassName) addClasses(this.#element, this.#hiddenClassName);
-            if(this.#visibleClassName) removeClasses(this.#element, this.#visibleClassName);
-        }
-
-        return r;
-    }
-
-    get isVisible() {
-        return this.#state === 'visible' || this.#state === 'showing';
-    }
-
-    get isOpen() {
-        return this.#state === "visible";
-    }
-
-    get state() {
-        return this.#state;
-    }
-
-    get element() {
-        return this.#element;
-    }
-
-    get axis() {
-        if(typeof this.#axis === 'function') {
-            return this.#axis();
-        } else {
-            return this.#axis;
-        }
-    }
-
-    setAxis(axis) {
-        this.#axis = axis;
-
-        if(this.isVisible) {
-            this.show(this.state === 'showing');
-        } else {
-            this.hide(this.state === 'hiding');
-        }
-    }
-}
-
-
 export default class Tooltip extends Component {
+    static hiding = "Hiding";
+    static showing = "Showing";
+    static hidden = "Hidden";
+    static visible = "Visible";
+
     #timer;
     #fx;
+    #showFX;
+    #hideFX;
+    #state;
 
     constructor(text) {
         let element = document.createElement('div'),
@@ -478,26 +230,27 @@ export default class Tooltip extends Component {
 
         super(element);
 
+        this.#state = Tooltip.hidden;
         this.#timer = null;
 
-        this.#fx = new SlideInAndOutFX(this.element, 200, () => {
-            let placement = this.element.dataset.placement;
+        let axis = (element) => {
+            let placement = element.dataset.placement;
 
-            if(placement === "right" || placement === "left") {
-                return "x";
+            if(placement === 'top' || placement === "bottom") {
+                return 'y';
             } else {
-                return "y";
+                return 'x';
             }
-        }, {hiddenClassName: "hidden"});
+        };
 
-        this.#fx.hide(false);
+        this.#showFX = new SlideIn(20000, axis);
+        this.#hideFX = new SlideOut(20000, axis);
     }
 
-    position(placement, target) {
+    position(placement, target, containerRect) {
         let pos,
             rect,
             targetRect = Rect.getBoundingClientRect(target),
-            containerRect = Rect.getClientRect(),
             collision;
 
         placement = PLACEMENTS[placement];
@@ -514,7 +267,7 @@ export default class Tooltip extends Component {
         });
 
         // Check if position is inside container.
-        if(containerRect.contains(pos)) {
+        if(!containerRect || containerRect.contains(pos)) {
             setElementClientPosition(this.element, pos, placement.method);
             return pos;
         }
@@ -547,51 +300,95 @@ export default class Tooltip extends Component {
         return pos;
     }
 
-    async show(target, placement, timeout=null) {
-        if(this.#fx.state === "showing" || this.#fx.state === "visible") {
-            return;
-        }
-
+    async show(target, placement, timeout=null, immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
             this.#timer = null;
         }
 
-        this.position(placement, target);
+        if(this.#state === Tooltip.showing) {
+            await this.#fx;
 
-        let promise = this.#fx.show();
+            if(this.#timer) {
+                clearTimeout(this.#timer);
+                this.#timer = null;
+            }
+        } else if(this.#state !== Tooltip.visible) {
+            if(this.#fx) {
+                this.#fx.cancel();
+                this.#fx = null;
+            }
 
-        if(typeof timeout === 'number' && timeout >= 0) {
-            await promise;
+            let containerRect = Rect.getClientRect(),
+                state = this.state;
 
+            this.#state = Tooltip.showing;
+            this.element.classList.remove("hidden");
+            this.position(placement, target, containerRect);
+
+            if(this.#showFX) {
+                if(!immediate) {
+                    if(state === 'hidden') {
+                        this.hide(true);
+                    }
+
+                    this.#fx = this.#showFX.animate(this.element);
+                    await this.#fx;
+                    this.#fx = null;
+                } else {
+                    this.#showFX.animate(this.element, {autoPlay: false, position: 1});
+                }
+            }
+
+            this.#state = Tooltip.visible;
+        }
+
+        if(typeof timeout === "number" && timeout >= 0) {
             this.#timer = setTimeout(() => {
                 this.hide();
             }, timeout);
         }
     }
 
-    hide() {
+    async hide(immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
             this.#timer = null;
         }
 
-        if(this.#fx.state === "hiding" || this.#fx.state === "hidden") {
-            return;
+        if(this.#state === Tooltip.hiding) {
+            await this.#fx;
+        } else {
+            if(this.#fx) {
+                this.#fx.cancel();
+                this.#fx = null;
+            }
+
+            this.#state = Tooltip.hiding;
+
+            if(this.#hideFX) {
+                if(!immediate) {
+                    this.#fx = this.#hideFX.animate(this.element);
+                    await this.#fx;
+                    this.#fx = null;
+                } else {
+                    this.#hideFX.animate(this.element, {autoPlay: false, position: 1});
+                }
+            }
+
+            this.element.classList.add("hidden");
+            this.#state = Tooltip.hidden;
         }
-
-        return this.#fx.hide();
     }
 
-    get isActive() {
-        return this.#fx.state === "visible" || this.#fx.state === "showing";
-    }
-
+    /**
+     * @returns {String}
+     */
     get state() {
-        return this.#fx.state;
+        return this.#state;
     }
 
-    getBoundingClientRect() {
-        return this.#fx.getBoundingClientRect();
+    get isVisible() {
+        return this.#state !== Tooltip.hidden;
     }
 }

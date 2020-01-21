@@ -1,4 +1,3 @@
-import Animation from "core/ui/Animation";
 import Publisher from "../Publisher";
 
 import {privateCache} from "core/data";
@@ -10,6 +9,7 @@ import {
     snapToGrid
 } from "core/ui/position";
 import {clamp} from "../utility/math";
+import Animation from "../fx/Animation";
 
 
 /**
@@ -670,7 +670,9 @@ export default class Draggable extends Publisher {
                     }
                 });
 
-                this._revertFX = animation.animate(target, this.revert, {
+                this._revertFX = animation.animate(target, {
+                    duration: this.revert,
+
                     onEnd() {
                         if(target !== element && target.parentElement) {
                             target.parentElement.removeChild(target);

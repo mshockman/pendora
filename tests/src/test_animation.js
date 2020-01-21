@@ -1,5 +1,5 @@
-import Animation from 'core/ui/Animation';
 import {Vec3} from 'core/vectors';
+import Animation from "../../src/core/fx/Animation";
 
 
 window.Animation = Animation;
@@ -43,12 +43,12 @@ window.testAnimation = new Animation({
         }
     },
 
-    applyFrame(element, frame) {
+    applyFrame(fx, frame) {
         // console.log(frame);
-        element.style.transform = `translate(${frame.left}, ${frame.top}) rotate(${frame.rotation}deg) scale(${frame.scale})`;
-        element.style.display = frame.display;
-        element.style.background = frame.backgroundColor.toHex();
-        if(frame.opacity) element.style.opacity = frame.opacity;
+        fx.element.style.transform = `translate(${frame.left}, ${frame.top}) rotate(${frame.rotation}deg) scale(${frame.scale})`;
+        fx.element.style.display = frame.display;
+        fx.element.style.background = frame.backgroundColor.toHex();
+        if(frame.opacity) fx.element.style.opacity = frame.opacity;
     }
 });
 
@@ -75,8 +75,8 @@ export default class TestAnimationPage {
         let box1 = document.querySelector('#test_box1');
         let box2 = document.querySelector('#test_box2');
 
-        window.fx1 = testAnimation.animate(box1, 10000);
-        window.fx2 = testAnimation.animate(box2, 5000);
+        window.fx1 = testAnimation.animate(box1, {duration: 10000});
+        window.fx2 = testAnimation.animate(box2, {duration: 5000});
 
         window.fx1.then(() => {
             console.log("Animation Complete");

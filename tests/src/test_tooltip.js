@@ -12,6 +12,9 @@ export default class ToolTipTestPage {
 
         for(let node of document.querySelectorAll("[data-tooltip]")) {
             node.addEventListener('click', (event) => {
+                /**
+                 * @type {Tooltip}
+                 */
                 let tooltip = tooltips.get(event.target);
 
                 if(!tooltip) {
@@ -21,11 +24,13 @@ export default class ToolTipTestPage {
                     tooltip.appendTo(document.body);
                 }
 
-                if(!tooltip.isActive) {
+                if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
                     tooltip.show(event.target, node.dataset.placement);
                 } else {
                     tooltip.hide();
                 }
+
+                console.log(tooltip.state);
 
                 // tooltip.show(event.target, event.target.dataset.placement);
             })
