@@ -445,7 +445,9 @@ export default class FX {
             detail: this
         }));
 
+        console.log("Running animation chained events.");
         for (let {onResolve} of this.#chained) {
+            console.log(onResolve);
             if (onResolve) onResolve(this.#internalValue);
         }
         this.#chained = [];

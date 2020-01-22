@@ -6,6 +6,13 @@ import {defaultApplyFrame} from "./frame";
 export default class Animation {
     static defaultApplyFrame = defaultApplyFrame;
 
+    static complete = FX.complete;
+    static canceled = FX.canceled;
+    static paused = FX.paused;
+    static pending = FX.pending;
+    static error = FX.error;
+    static playing = FX.playing;
+
     /**
      *
      * @param duration

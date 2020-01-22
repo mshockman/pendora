@@ -42,7 +42,7 @@ export class SlideIn extends Animation {
         this.#axis = axis;
     }
 
-    init({element, duration, frames, ...options}) {
+    init({element, duration, frames, onComplete=null, ...options}) {
         let axis = this.getAxis(element),
             rect = Rect.getBoundingClientRect(element),
             fullRect = Rect.getCleanBoundingClientRect(element),
@@ -60,6 +60,17 @@ export class SlideIn extends Animation {
             element,
             frames,
             duration: duration,
+
+            onComplete: (fx) => {
+                  // Shouldn't be needed at this point.
+                  fx.element.style.maxWidth = "";
+                  fx.element.style.maxHeight = "";
+
+                  if(onComplete) {
+                      onComplete(fx);
+                  }
+            },
+
             ...options
         });
 
@@ -72,9 +83,7 @@ export class SlideIn extends Animation {
     }
 
     destroy(fx) {
-        // Shouldn't be needed at this point.
-        fx.element.style.maxWidth = "";
-        fx.element.style.maxHeight = "";
+
     }
 
     getAxis(element) {
