@@ -607,6 +607,15 @@ export default class Rect extends Vec4 {
         );
     }
 
+    static getRootContainingClientRect() {
+        return new Rect(
+            -window.scrollX,
+            -window.scrollY,
+            document.documentElement.clientWidth - window.scrollX,
+            document.documentElement.clientHeight - window.scrollY
+        );
+    }
+
     get left() {
         return this[0];
     }

@@ -29,6 +29,24 @@ export default class Animation {
         this.duration = duration;
     }
 
+    /**
+     * Creates an fx object.
+     *
+     * @param element
+     * @param frames
+     * @param duration
+     * @param applyFrame
+     * @param easing
+     * @param onStart
+     * @param onFrame
+     * @param onPause
+     * @param onCancel
+     * @param onEnd
+     * @param onComplete
+     * @param bubbleFrameEvent
+     * @param finishFrame
+     * @returns {FX}
+     */
     init({element, frames, duration, applyFrame, easing, onStart, onFrame, onPause, onCancel, onEnd, onComplete, bubbleFrameEvent, finishFrame}) {
         return new FX(element, frames, duration, {
             applyFrame,
@@ -45,6 +63,10 @@ export default class Animation {
         });
     }
 
+    /**
+     * Ran after the fx completes.
+     * @param fx
+     */
     destroy(fx) {
 
     }

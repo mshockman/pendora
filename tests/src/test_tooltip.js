@@ -25,23 +25,14 @@ export default class ToolTipTestPage {
                     tooltip.appendTo(document.body);
                 }
 
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++");
                 let before = tooltip.state;
-                console.log("Counter: " + counter);
                 counter++;
 
                 if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
-                    console.log("Showing from " + tooltip.state);
                     tooltip.show(event.target, node.dataset.placement);
                 } else if(tooltip.state === Tooltip.showing || tooltip.state === Tooltip.visible) {
-                    console.log("Hiding from " + tooltip.state);
                     tooltip.hide();
                 }
-
-                console.log({
-                    before,
-                    after: tooltip.state
-                });
 
                 // tooltip.show(event.target, event.target.dataset.placement);
             })

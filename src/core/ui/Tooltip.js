@@ -245,10 +245,8 @@ export default class Tooltip extends Component {
             }
         };
 
-        this.#showFX = new SlideIn(20000, axis);
-        this.#hideFX = new SlideOut(20000, axis);
-
-        this.hide(true);
+        this.#showFX = new SlideIn(200, axis);
+        this.#hideFX = new SlideOut(200, axis);
     }
 
     position(placement, target, containerRect) {
@@ -262,7 +260,7 @@ export default class Tooltip extends Component {
 
         this.element.dataset.placement = placement.name;
 
-        if(!rect) rect = this.getBoundingClientRect();
+        if(!rect) rect = Rect.getCleanBoundingClientRect(this.element);
 
         pos = rect.position({
             my: placement.my,
@@ -310,59 +308,79 @@ export default class Tooltip extends Component {
             this.#timer = null;
         }
 
-        if(this.state === Tooltip.hidden || this.state === Tooltip.hiding) {
+        let result;
+
+        if(immediate) {
             if(this.#fx) {
-                console.log("Canceling hide animation.");
-                this.#fx.cancel();
-                this.#fx = null;
+                await this.#fx.cancel();
             }
 
-            console.log("Start Showing");
-
-            this.element.classList.remove('hidden');
-            this.#state = Tooltip.showing;
-
-            this.position(placement, target);
+            this.element.classList.remove("hidden");
 
             if(typeof this.#showFX === 'function') {
-                this.#fx = this.#showFX(this.element);
-                let result = await this.#fx;
-                this.#fx = null;
-
-                if(result === Animation.complete) {
-                    this.#state = Tooltip.visible;
-                }
-
-                console.log("Show animation was " + result);
-
-                return result;
+                this.#showFX(this.element, {position: 1, autoPlay: false});
             } else if(this.#showFX) {
-                this.#fx = this.#showFX.animate(this.element);
-                let result = await this.#fx;
-                this.#fx = null;
-
-                if(result === Animation.complete) {
-                    this.#state = Tooltip.visible;
-                }
-
-                console.log("Show animation was " + result);
-
-                return result;
-            } else {
-                return Animation.complete;
+                this.#showFX.animate(this.element, {position: 1, autoPlay: false});
             }
-        } else if(this.state === Tooltip.showing) {
-            let result = this.#fx;
-            this.#fx = null;
+
+            this.position(placement, target, Rect.getClientRect());
+
+            result = Animation.complete;
+        } else if(this.state === Tooltip.hidden || this.state === Tooltip.hiding) {
+            if(this.#fx) {
+                await this.#fx.cancel();
+            }
+
+            let startingState = this.state,
+                fx;
+
+            this.element.classList.remove('hidden');
+            this.position(placement, target, Rect.getClientRect());
+
+            if(startingState === Tooltip.hidden) {
+                this.hide(true);
+                this.element.classList.remove("hidden");
+            }
+
+            this.#state = Tooltip.showing;
+
+            if(typeof this.#showFX === 'function') {
+                fx = this.#showFX(this.element);
+            } else if(this.#showFX) {
+                fx = this.#showFX.animate(this.element);
+            }
+
+            if(fx) {
+                this.#fx = fx;
+                result = await fx;
+                this.#fx = null;
+            } else {
+                result = Animation.complete;
+            }
 
             if(result === Animation.complete) {
                 this.#state = Tooltip.visible;
             }
-
-            return result;
+        } else if(this.state === Tooltip.showing) {
+            result = await this.#fx;
         } else if(this.state === Tooltip.visible) {
-            return Animation.complete;
+            result = Animation.complete;
         }
+
+        if(result === Animation.complete) {
+            if (this.#timer) {
+                clearTimeout(this.#timer);
+                this.#timer = null;
+            }
+
+            if (typeof timeout === 'number' && timeout >= 0) {
+                this.#timer = setTimeout(() => {
+                    this.hide();
+                }, timeout);
+            }
+        }
+
+        return result;
     }
 
     async hide(immediate=false) {
@@ -371,24 +389,28 @@ export default class Tooltip extends Component {
             this.#timer = null;
         }
 
-        if(this.state === Tooltip.hiding) {
-            let result = await this.#fx;
-            this.#fx = null;
+        let result;
 
-            if(result === Animation.complete) {
-                this.element.classList.add('hidden');
-                this.#state = Tooltip.hidden;
+        if(immediate) {
+            if(this.#fx) {
+                await this.#fx.cancel();
             }
 
-            return result;
+            if(typeof this.#hideFX === 'function') {
+                this.#hideFX(this.element, {position: 1, autoPlay: false});
+            } else if(this.#hideFX) {
+                this.#hideFX.animate(this.element, {position: 1, autoPlay: false});
+            }
+
+            this.element.classList.add('hidden');
+            this.#state = Tooltip.hidden;
+            result = Animation.complete;
+        } else if(this.state === Tooltip.hiding) {
+            result = await this.#fx;
         } else if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
             if(this.#fx) {
-                console.log("Canceling show animation.");
-                this.#fx.cancel();
-                this.#fx = null;
+                await this.#fx.cancel();
             }
-
-            console.log("Start hiding");
 
             if(typeof this.#hideFX === 'function') {
                 this.#fx = this.#hideFX(this.element);
@@ -399,24 +421,21 @@ export default class Tooltip extends Component {
             this.#state = Tooltip.hiding;
 
             if(this.#fx) {
-                let result = await this.#fx;
-
-                if(result === Animation.complete) {
-                    this.element.classList.add('hidden');
-                    this.#state = Tooltip.hidden;
-                }
-
-                console.log("Hide animation was " + result);
-
-                return result;
+                result = await this.#fx;
+                this.#fx = null;
             } else {
+                result = Animation.complete;
+            }
+
+            if(result === Animation.complete) {
                 this.element.classList.add('hidden');
                 this.#state = Tooltip.hidden;
-                return Animation.complete;
             }
         } else {
-            return Animation.complete;
+            result = Animation.complete;
         }
+
+        return result;
     }
 
     /**

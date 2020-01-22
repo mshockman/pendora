@@ -40,18 +40,28 @@ export function getClientRect() {
  * @returns {{top: number, left: number, bottom: number, width: number, right: number, height: number}}
  */
 export function getBoundingOffsetRect(element, offsetParent=null) {
+    let offsetRect, rect;
+
     if(!offsetParent) offsetParent = getOffsetElement(element);
 
-    let offsetRect = offsetParent.getBoundingClientRect(),
-        rect = element.getBoundingClientRect();
+    // no offset parent.  Position relative to the client.
+    if(!offsetParent) {
+        offsetRect = Rect.getRootContainingClientRect();
+    } else {
+        offsetRect = Rect.getBoundingClientRect(offsetParent);
+    }
+
+    rect = element.getBoundingClientRect();
 
     return new Rect(
         rect.left - offsetRect.left,
         rect.top - offsetRect.top,
-        rect.right - offsetRect.right,
-        rect.bottom - offsetRect.bottom
+        offsetRect.right - rect.right,
+        offsetRect.bottom - rect.bottom
     );
 }
+
+window.getBoundingOffsetRect = getBoundingOffsetRect;
 
 
 /**
@@ -182,49 +192,63 @@ export function setElementClientPosition(element, position, method='top-left') {
     if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
         let style = getComputedStyle(element);
 
+        let positionType = style.position, box, deltaX, deltaY, current;
+
         // position can't be static for this operation.  Switch to relative.
-        if(style.position === 'static') {
+        if(positionType === 'static') {
             element.style.position = 'relative';
-            style = getComputedStyle(element);
+            positionType = "relative";
         }
 
-        let left = parseInt(style.left, 10),
-            top = parseInt(style.top, 10),
-            right = parseInt(style.right, 10),
-            bottom = parseInt(style.bottom, 10),
-            box = Rect.getBoundingClientRect(element),
-            deltaX, deltaY;
+        if(positionType === "relative") {
+            style = getComputedStyle(element);
+
+            current = {
+                left: parseInt(style.left, 10) || 0,
+                right: parseInt(style.right, 10) || 0,
+                top: parseInt(style.top, 10) || 0,
+                bottom: parseInt(style.bottom, 10) || 0
+            }
+        } else {
+            box = Rect.getBoundingClientRect(element);
+            current = getBoundingOffsetRect(element);
+        }
 
         if(method === 'top-left') {
             deltaX = position.left - box.left;
             deltaY = position.top - box.top;
 
-            element.style.left = (left + deltaX) + 'px';
-            element.style.top = (top + deltaY) + 'px';
+            element.style.left = (current.left + deltaX) + 'px';
+            element.style.top = (current.top + deltaY) + 'px';
             element.style.right = '';
             element.style.bottom = '';
         } else if(method === 'top-right') {
             deltaX = position.right - box.right;
             deltaY = position.top - box.top;
 
-            element.style.right = (right - deltaX) + 'px';
-            element.style.top = (top + deltaY) + 'px';
+            element.style.right = (current.right - deltaX) + 'px';
+            element.style.top = (current.top + deltaY) + 'px';
             element.style.left = '';
             element.style.bottom = '';
         } else if(method === 'bottom-left') {
             deltaX = position.left - box.left;
             deltaY = position.bottom - box.bottom;
 
-            element.style.left = (left + deltaX) + 'px';
-            element.style.bottom = (bottom - deltaY) + 'px';
+            console.log({
+                right: (current.left + deltaX) + 'px',
+                bottom: (current.bottom - deltaY) + 'px'
+            });
+
+            element.style.left = (current.left + deltaX) + 'px';
+            element.style.bottom = (current.bottom - deltaY) + 'px';
             element.style.right = '';
             element.style.top = '';
         } else { // bottom-right
             deltaX = position.right - box.right;
             deltaY = position.bottom - box.bottom;
 
-            element.style.right = (right - deltaX) + 'px';
-            element.style.bottom = (bottom - deltaY) + 'px';
+            element.style.right = (current.right - deltaX) + 'px';
+            element.style.bottom = (current.bottom - deltaY) + 'px';
             element.style.left = '';
             element.style.top = '';
         }

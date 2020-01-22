@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 
 import Application from 'app';
 import AutoLoader from 'autoloader';
