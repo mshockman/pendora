@@ -255,7 +255,7 @@ export default class Tooltip extends Component {
         this.#hideFX = new SlideOut(200, axis);
     }
 
-    position(rect, placement, target, containerRect, element=null) {
+    _position(rect, placement, target, containerRect, element=null) {
         let pos,
             targetRect = Rect.getBoundingClientRect(target),
             collision;
@@ -329,7 +329,7 @@ export default class Tooltip extends Component {
                 this.#showFX.animate(this.element, {position: 1, autoPlay: false});
             }
 
-            this.position(null, this.#placement, this.#target, Rect.getClientRect());
+            this._position(null, this.#placement, this.#target, Rect.getClientRect());
 
             result = Animation.complete;
         } else if(this.state === Tooltip.hidden || this.state === Tooltip.hiding) {
@@ -342,7 +342,7 @@ export default class Tooltip extends Component {
                 fx;
 
             this.element.classList.remove('hidden');
-            this.position(null, this.#placement, this.#target, clientRect);
+            this._position(null, this.#placement, this.#target, clientRect);
 
             if(startingState === Tooltip.hidden) {
                 this.hide(true);
@@ -352,7 +352,7 @@ export default class Tooltip extends Component {
             this.#state = Tooltip.showing;
 
             let onFrame = () => {
-                this.position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+                this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
             };
 
             if(typeof this.#showFX === 'function') {
@@ -426,7 +426,7 @@ export default class Tooltip extends Component {
             let clientRect = Rect.getClientRect();
 
             let onFrame = () => {
-                this.position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+                this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
             };
 
             if(typeof this.#hideFX === 'function') {
