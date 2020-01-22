@@ -4,7 +4,8 @@ import {clamp} from "../utility";
 
 
 const fullRectSymbol = Symbol('FullRect'),
-    startingRectSymbol = Symbol("StartingRect");
+    startingRectSymbol = Symbol("StartingRect"),
+    fxSymbol = Symbol('fx');
 
 
 export class SlideIn extends Animation {
@@ -168,5 +169,157 @@ export class SlideOut extends Animation {
         } else {
             return this.#axis;
         }
+    }
+}
+
+
+export class IOAnimationBase {
+    #showFX;
+    #hideFX;
+
+    constructor(showFX, hideFX) {
+        this.#showFX = showFX;
+        this.#hideFX = hideFX;
+    }
+
+    async show(element, immediate=false, options={}) {
+        if(this.hasFX(element)) {
+            await this.cancel(element);
+        }
+
+        options = {...options};
+
+        if(immediate) {
+            options.autoPlay = false;
+            options.position = 1;
+        }
+
+        let fx = this.#showFX.animate(element, options),
+            result;
+
+        element[fxSymbol] = fx;
+        result = await fx;
+        delete element[fxSymbol];
+        return result;
+    }
+
+    async hide(element, immediate=false, options={}) {
+        if(this.hasFX(element)) {
+            await this.cancel(element);
+        }
+
+        if(immediate) {
+            options.autoPlay = false;
+            options.position = 1;
+        }
+
+        let fx = this.#hideFX.animate(element, options),
+            result;
+
+        element[fxSymbol] = fx;
+        result = await fx;
+        delete element[fxSymbol];
+
+        return result;
+    }
+
+    cancel(element) {
+        if(element[fxSymbol]) {
+            element[fxSymbol].cancel();
+            delete element[fxSymbol];
+        }
+    }
+
+    hasFX(element) {
+        return !!element[fxSymbol];
+    }
+}
+
+
+/**
+ * Will slide an element in and out by the given axis.
+ */
+export class SlideInAndOut extends IOAnimationBase {
+    constructor(duration, axis) {
+        let showFX = new SlideIn(duration, axis),
+            hideFX = new SlideOut(duration, axis);
+
+        super(showFX, hideFX);
+    }
+}
+
+
+export class FadeIn extends Animation {
+    constructor(duration) {
+        super({
+            duration,
+
+            frames: {
+                '0%': {opacity: 0},
+                '100%': {opacity: 1}
+            }
+        });
+    }
+
+    init({element, ...options}) {
+        let style = getComputedStyle(element),
+            complete = parseFloat(style.opacity);
+
+        let fx = super.init({
+            element,
+            ...options
+        });
+
+        fx.goto(complete);
+
+        return fx;
+    }
+
+    destroy(fx) {
+
+    }
+}
+
+
+export class FadeOut extends Animation {
+    constructor(duration) {
+        super({
+            duration,
+
+            frames: {
+                '0%': {opacity: 1},
+                '100%': {opacity: 0}
+            }
+        });
+    }
+
+    init({element, ...options}) {
+        let style = getComputedStyle(element),
+            complete = parseFloat(style.opacity);
+
+        let fx = super.init({
+            element,
+            ...options
+        });
+
+        complete = 1 - complete;
+
+        fx.goto(complete);
+
+        return fx;
+    }
+
+    destroy(fx) {
+
+    }
+}
+
+
+export class FadeInAndOut extends IOAnimationBase {
+    constructor(duration) {
+        super(
+            new FadeIn(duration),
+            new FadeOut(duration)
+        );
     }
 }

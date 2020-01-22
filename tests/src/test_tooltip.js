@@ -19,7 +19,7 @@ export default class ToolTipTestPage {
 
                 if(!tooltip) {
                     // noinspection JSUnresolvedVariable
-                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, event.target);
+                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, event.target, {animation: 'fade', animationDuration: 200});
                     tooltips.set(event.target, tooltip);
                     tooltip.appendTo(document.body);
                 }

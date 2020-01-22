@@ -1,164 +1,34 @@
 import Component from "../Component";
 import {Rect, setElementClientPosition} from "./position";
 import Animation from "../fx/Animation";
-import {SlideIn, SlideOut} from "../fx/effects";
+import {SlideInAndOut, FadeInAndOut} from "../fx/effects";
 
 
-const slideCache = Symbol('slideInCache');
+/**
+ * A specific slide in and out animation controller for tooltips.  The axis is determined by the placement of the
+ * tooltip.
+ */
+export class SlideInAndOutTooltip extends SlideInAndOut {
+    constructor(duration) {
+        let axis = (element) => {
+            let placement = element.dataset.placement;
 
-
-export const SLIDE_IN_TOOLTIP_FX = new Animation({
-    frames(element) {
-        // noinspection JSUnresolvedVariable
-        let cache = element[slideCache],
-            placement = cache.placement;
-
-        if(placement === 'top' || placement === 'bottom') {
-            return {
-                '0%': {height: cache.fxHeight},
-                '100%': {height: cache.rect.height}
-            };
-        } else if(placement === "left" || placement === "right") {
-            return {
-                '0%': {width: cache.fxWidth},
-                '100%': {width: cache.rect.width}
-            };
-        }
-    },
-
-    init(fx) {
-        let cache = fx.element[slideCache];
-
-        if(!cache) {
-            let maxWidth = fx.element.style.maxWidth,
-                maxHeight = fx.element.style.maxHeight,
-                rect,
-                placement = fx.element.dataset.placement;
-
-            fx.element.style.maxWidth = "";
-            fx.element.style.maxHeight = "";
-
-            // Find full width and height of element.
-            rect = Rect.getBoundingClientRect(fx.element);
-
-            if(placement === "left" || placement === "right") fx.element.style.maxWidth = maxWidth;
-            if(placement === "top" || placement === "bottom") fx.element.style.maxHeight = maxHeight;
-
-            fx.element[slideCache] = {
-                rect,
-                fxWidth: 0,
-                fxHeight: 0,
-                placement,
-                fx
-            };
-        } else {
-            if(cache.fx) {
-                cache.fx.cancel();
-                cache.fx = null;
+            if(placement === 'top' || placement === 'bottom') {
+                return 'y';
+            } else {
+                return 'x';
             }
+        };
 
-            cache = fx.element[slideCache] = {
-                ...cache,
-                fx: fx
-            };
-        }
-
-        fx.element[slideCache].fx = fx;
-    },
-
-    destroy(fx) {
-        delete fx.element[slideCache];
-    },
-
-    applyFrame(fx, frame) {
-        let cache = fx.element[slideCache],
-            placement = cache.placement;
-
-        if(placement === 'top' || placement === 'bottom') {
-            fx.element.style.maxHeight = `${frame.height}px`;
-            cache.fxHeight = frame.height;
-        } else {
-            fx.element.style.maxWidth = `${frame.width}px`;
-            cache.fxWidth = frame.width;
-        }
+        super(duration, axis);
     }
-});
+}
 
 
-export const SLIDE_OUT_TOOLTIP_FX = new Animation({
-    init(fx) {
-        let cache = fx.element[slideCache];
-
-        if(!cache) {
-            let maxWidth = fx.element.style.maxWidth,
-                maxHeight = fx.element.style.maxHeight,
-                rect,
-                placement = fx.element.dataset.placement;
-
-            fx.element.style.maxWidth = "";
-            fx.element.style.maxHeight = "";
-
-            // Find full width and height of element.
-            rect = Rect.getBoundingClientRect(fx.element);
-
-            if(placement === "left" || placement === "right") fx.element.style.maxWidth = maxWidth;
-            if(placement === "top" || placement === "bottom") fx.element.style.maxHeight = maxHeight;
-
-            cache = fx.element[slideCache] = {
-                rect,
-                fxWidth: rect.width,
-                fxHeight: rect.height,
-                placement,
-                fx: fx
-            };
-        } else {
-            if(cache.fx) {
-                cache.fx.cancel();
-                cache.fx = null;
-            }
-
-            cache = fx.element[slideCache] = {
-                ...cache,
-                fx: fx
-            };
-        }
-    },
-
-    destroy(fx) {
-        delete fx.element[slideCache];
-    },
-
-    frames(element) {
-        // noinspection JSUnresolvedVariable
-        let cache = element[slideCache],
-            placement = cache.placement;
-
-        if(placement === 'top' || placement === 'bottom') {
-            return {
-                '0%': {height: cache.fxHeight},
-                '100%': {height: 0}
-            };
-        } else if(placement === "left" || placement === "right") {
-            return {
-                '0%': {width: cache.fxWidth},
-                '100%': {width: 0}
-            };
-        }
-    },
-
-    applyFrame(fx, frame) {
-        let cache = fx.element[slideCache],
-            placement = cache.placement;
-
-        if(placement === 'top' || placement === 'bottom') {
-            fx.element.style.maxHeight = `${frame.height}px`;
-            cache.fxHeight = frame.height;
-        } else {
-            fx.element.style.maxWidth = `${frame.width}px`;
-            cache.fxWidth = frame.width;
-        }
-    }
-});
+const ANIMATIONS = {
+    slide: SlideInAndOutTooltip,
+    fade: FadeInAndOut
+};
 
 
 const PLACEMENTS = {
@@ -207,16 +77,14 @@ export default class Tooltip extends Component {
     static visible = "Visible";
 
     #timer;
-    #fx;
-    #showFX;
-    #hideFX;
+    #animation;
     #state;
     #promise;
     #placement;
     #target;
     #timeout;
 
-    constructor(text, placement, target, timeout=null) {
+    constructor(text, placement, target, {timeout=null, animation=null, animationDuration=null}={}) {
         let element = document.createElement('div'),
             body = document.createElement('div'),
             label = document.createElement('div'),
@@ -241,18 +109,17 @@ export default class Tooltip extends Component {
         this.#target = target;
         this.#timeout = timeout;
 
-        let axis = (element) => {
-            let placement = element.dataset.placement;
+        if(typeof animation === 'string') {
+            animation = ANIMATIONS[animation];
+        }
 
-            if(placement === 'top' || placement === 'bottom') {
-                return 'y';
-            } else {
-                return 'x';
-            }
-        };
-
-        this.#showFX = new SlideIn(200, axis);
-        this.#hideFX = new SlideOut(200, axis);
+        if(typeof animation === 'function') {
+            this.#animation = new animation(animationDuration);
+        } else if(animation) {
+            this.#animation = animation;
+        } else {
+            this.#animation = null;
+        }
     }
 
     _position(rect, placement, target, containerRect, element=null) {
@@ -317,24 +184,22 @@ export default class Tooltip extends Component {
         let result;
 
         if(immediate) {
-            if(this.#fx) {
-                await this.#fx.cancel();
+            if(this.#animation) {
+                await this.#animation.cancel(this.element);
             }
 
             this.element.classList.remove("hidden");
 
-            if(typeof this.#showFX === 'function') {
-                this.#showFX(this.element, {position: 1, autoPlay: false});
-            } else if(this.#showFX) {
-                this.#showFX.animate(this.element, {position: 1, autoPlay: false});
+            if(this.#animation) {
+                this.#animation.show(this.element, true);
             }
 
             this._position(null, this.#placement, this.#target, Rect.getClientRect());
 
             result = Animation.complete;
-        } else if(this.state === Tooltip.hidden || this.state === Tooltip.hiding) {
-            if(this.#fx) {
-                await this.#fx.cancel();
+        } else if(this.state !== Tooltip.visible) {
+            if(this.#animation) {
+                await this.#animation.cancel(this.element);
             }
 
             let startingState = this.state,
@@ -345,7 +210,7 @@ export default class Tooltip extends Component {
             this._position(null, this.#placement, this.#target, clientRect);
 
             if(startingState === Tooltip.hidden) {
-                this.hide(true);
+                await this.hide(true);
                 this.element.classList.remove("hidden");
             }
 
@@ -355,16 +220,12 @@ export default class Tooltip extends Component {
                 this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
             };
 
-            if(typeof this.#showFX === 'function') {
-                fx = this.#showFX(this.element, {onFrame});
-            } else if(this.#showFX) {
-                fx = this.#showFX.animate(this.element, {onFrame});
+            if(this.#animation) {
+                fx = this.#animation.show(this.element, false, {onFrame});
             }
 
             if(fx) {
-                this.#fx = fx;
                 result = await fx;
-                this.#fx = null;
             } else {
                 result = Animation.complete;
             }
@@ -372,9 +233,7 @@ export default class Tooltip extends Component {
             if(result === Animation.complete) {
                 this.#state = Tooltip.visible;
             }
-        } else if(this.state === Tooltip.showing) {
-            result = await this.#fx;
-        } else if(this.state === Tooltip.visible) {
+        } else {
             result = Animation.complete;
         }
 
@@ -400,46 +259,35 @@ export default class Tooltip extends Component {
             this.#timer = null;
         }
 
-        let result;
-
         if(immediate) {
-            if(this.#fx) {
-                await this.#fx.cancel();
-            }
-
-            if(typeof this.#hideFX === 'function') {
-                this.#hideFX(this.element, {position: 1, autoPlay: false});
-            } else if(this.#hideFX) {
-                this.#hideFX.animate(this.element, {position: 1, autoPlay: false});
+            if(this.#animation) {
+                await this.#animation.cancel(this.element);
+                this.#animation.hide(this.element, true);
             }
 
             this.element.classList.add('hidden');
             this.#state = Tooltip.hidden;
-            result = Animation.complete;
-        } else if(this.state === Tooltip.hiding) {
-            result = await this.#fx;
-        } else if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
-            if(this.#fx) {
-                await this.#fx.cancel();
+            return Animation.complete;
+        } if(this.state !== Tooltip.hidden) {
+            if(this.#animation) {
+                await this.#animation.cancel(this.element);
             }
 
-            let clientRect = Rect.getClientRect();
+            let clientRect = Rect.getClientRect(),
+                fx, result;
 
             let onFrame = () => {
                 this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
             };
 
-            if(typeof this.#hideFX === 'function') {
-                this.#fx = this.#hideFX(this.element, {onFrame});
-            } else if(this.#hideFX) {
-                this.#fx = this.#hideFX.animate(this.element, {onFrame});
+            if(this.#animation) {
+                fx = this.#animation.hide(this.element, false, {onFrame});
             }
 
             this.#state = Tooltip.hiding;
 
-            if(this.#fx) {
-                result = await this.#fx;
-                this.#fx = null;
+            if(fx) {
+                result = await fx;
             } else {
                 result = Animation.complete;
             }
@@ -448,11 +296,11 @@ export default class Tooltip extends Component {
                 this.element.classList.add('hidden');
                 this.#state = Tooltip.hidden;
             }
-        } else {
-            result = Animation.complete;
-        }
 
-        return result;
+            return result;
+        } else {
+            return Animation.complete;
+        }
     }
 
     /**
@@ -464,9 +312,5 @@ export default class Tooltip extends Component {
 
     get isVisible() {
         return this.#state !== Tooltip.hidden;
-    }
-
-    get fx() {
-        return this.#fx;
     }
 }
