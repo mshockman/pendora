@@ -9,7 +9,6 @@ export default class ToolTipTestPage {
     load() {
         this.initDebug();
         let tooltips = new WeakMap();
-        let counter = 1;
 
         for(let node of document.querySelectorAll("[data-tooltip]")) {
             node.addEventListener('click', (event) => {
@@ -20,22 +19,17 @@ export default class ToolTipTestPage {
 
                 if(!tooltip) {
                     // noinspection JSUnresolvedVariable
-                    tooltip = new Tooltip(event.target.dataset.tooltip);
+                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, event.target);
                     tooltips.set(event.target, tooltip);
                     tooltip.appendTo(document.body);
                 }
 
-                let before = tooltip.state;
-                counter++;
-
                 if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
-                    tooltip.show(event.target, node.dataset.placement);
+                    tooltip.show();
                 } else if(tooltip.state === Tooltip.showing || tooltip.state === Tooltip.visible) {
                     tooltip.hide();
                 }
-
-                // tooltip.show(event.target, event.target.dataset.placement);
-            })
+            });
         }
     }
 

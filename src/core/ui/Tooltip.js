@@ -168,7 +168,7 @@ const PLACEMENTS = {
         collision: "flip",
         name: "top",
         opposite: "bottom",
-        method: "bottom-left"
+        method: "top-left"
     },
 
     right: {
@@ -195,7 +195,7 @@ const PLACEMENTS = {
         collision: "flip",
         name: "left",
         opposite: "right",
-        method: "top-right"
+        method: "top-left"
     }
 };
 
@@ -212,8 +212,11 @@ export default class Tooltip extends Component {
     #hideFX;
     #state;
     #promise;
+    #placement;
+    #target;
+    #timeout;
 
-    constructor(text) {
+    constructor(text, placement, target, timeout=null) {
         let element = document.createElement('div'),
             body = document.createElement('div'),
             label = document.createElement('div'),
@@ -234,11 +237,14 @@ export default class Tooltip extends Component {
         this.#state = Tooltip.hidden;
         this.#timer = null;
         this.#promise = null;
+        this.#placement = placement;
+        this.#target = target;
+        this.#timeout = timeout;
 
         let axis = (element) => {
             let placement = element.dataset.placement;
 
-            if(placement === 'top' || placement === "bottom") {
+            if(placement === 'top' || placement === 'bottom') {
                 return 'y';
             } else {
                 return 'x';
@@ -249,9 +255,8 @@ export default class Tooltip extends Component {
         this.#hideFX = new SlideOut(200, axis);
     }
 
-    position(placement, target, containerRect) {
+    position(rect, placement, target, containerRect, element=null) {
         let pos,
-            rect,
             targetRect = Rect.getBoundingClientRect(target),
             collision;
 
@@ -261,6 +266,7 @@ export default class Tooltip extends Component {
         this.element.dataset.placement = placement.name;
 
         if(!rect) rect = Rect.getCleanBoundingClientRect(this.element);
+        if(!element) element = this.element;
 
         pos = rect.position({
             my: placement.my,
@@ -270,7 +276,7 @@ export default class Tooltip extends Component {
 
         // Check if position is inside container.
         if(!containerRect || containerRect.contains(pos)) {
-            setElementClientPosition(this.element, pos, placement.method);
+            setElementClientPosition(element, pos, placement.method);
             return pos;
         }
 
@@ -278,7 +284,7 @@ export default class Tooltip extends Component {
         if(collision === "flip" || collision === "flipfit") {
             placement = PLACEMENTS[placement.opposite];
 
-            this.element.dataset.placement = placement.name;
+            element.dataset.placement = placement.name;
             rect = this.getBoundingClientRect();
 
             pos = rect.position({
@@ -288,7 +294,7 @@ export default class Tooltip extends Component {
             });
 
             if(containerRect.contains(pos)) {
-                setElementClientPosition(this.element, pos, placement.method);
+                setElementClientPosition(element, pos, placement.method);
                 return pos;
             }
         }
@@ -298,11 +304,11 @@ export default class Tooltip extends Component {
             pos = pos.fit(containerRect);
         }
 
-        setElementClientPosition(this.element, pos, placement.method);
+        setElementClientPosition(element, pos, placement.method);
         return pos;
     }
 
-    async show(target, placement, timeout=null, immediate=false) {
+    async show(immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
             this.#timer = null;
@@ -323,7 +329,7 @@ export default class Tooltip extends Component {
                 this.#showFX.animate(this.element, {position: 1, autoPlay: false});
             }
 
-            this.position(placement, target, Rect.getClientRect());
+            this.position(null, this.#placement, this.#target, Rect.getClientRect());
 
             result = Animation.complete;
         } else if(this.state === Tooltip.hidden || this.state === Tooltip.hiding) {
@@ -332,10 +338,11 @@ export default class Tooltip extends Component {
             }
 
             let startingState = this.state,
+                clientRect = Rect.getClientRect(),
                 fx;
 
             this.element.classList.remove('hidden');
-            this.position(placement, target, Rect.getClientRect());
+            this.position(null, this.#placement, this.#target, clientRect);
 
             if(startingState === Tooltip.hidden) {
                 this.hide(true);
@@ -344,10 +351,14 @@ export default class Tooltip extends Component {
 
             this.#state = Tooltip.showing;
 
+            let onFrame = () => {
+                this.position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+            };
+
             if(typeof this.#showFX === 'function') {
-                fx = this.#showFX(this.element);
+                fx = this.#showFX(this.element, {onFrame});
             } else if(this.#showFX) {
-                fx = this.#showFX.animate(this.element);
+                fx = this.#showFX.animate(this.element, {onFrame});
             }
 
             if(fx) {
@@ -373,10 +384,10 @@ export default class Tooltip extends Component {
                 this.#timer = null;
             }
 
-            if (typeof timeout === 'number' && timeout >= 0) {
+            if (typeof this.#timeout === 'number' && this.#timeout >= 0) {
                 this.#timer = setTimeout(() => {
                     this.hide();
-                }, timeout);
+                }, this.#timeout);
             }
         }
 
@@ -412,10 +423,16 @@ export default class Tooltip extends Component {
                 await this.#fx.cancel();
             }
 
+            let clientRect = Rect.getClientRect();
+
+            let onFrame = () => {
+                this.position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+            };
+
             if(typeof this.#hideFX === 'function') {
-                this.#fx = this.#hideFX(this.element);
+                this.#fx = this.#hideFX(this.element, {onFrame});
             } else if(this.#hideFX) {
-                this.#fx = this.#hideFX.animate(this.element);
+                this.#fx = this.#hideFX.animate(this.element, {onFrame});
             }
 
             this.#state = Tooltip.hiding;

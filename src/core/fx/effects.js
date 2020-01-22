@@ -1,11 +1,9 @@
 import Animation from "./Animation";
 import Rect from "../vectors/Rect";
-import FX from "./FX";
 import {clamp} from "../utility";
 
 
-const axisSymbol = Symbol("Axis"),
-    fullRectSymbol = Symbol('FullRect'),
+const fullRectSymbol = Symbol('FullRect'),
     startingRectSymbol = Symbol("StartingRect");
 
 
