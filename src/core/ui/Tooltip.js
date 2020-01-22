@@ -2,6 +2,7 @@ import Component from "../Component";
 import {Rect, setElementClientPosition} from "./position";
 import Animation from "../fx/Animation";
 import {SlideInAndOut, FadeInAndOut} from "../fx/effects";
+import {addClasses} from "../utility";
 
 
 /**
@@ -81,10 +82,14 @@ export default class Tooltip extends Component {
     #state;
     #promise;
     #placement;
+    #label;
     #target;
     #timeout;
+    #removeOnHide;
 
-    constructor(text, placement, target, {timeout=null, animation=null, animationDuration=null}={}) {
+    #destroy;
+
+    constructor(text, placement, {timeout=null, animation=null, animationDuration=null, classes=null, removeOnHide=true}={}) {
         let element = document.createElement('div'),
             body = document.createElement('div'),
             label = document.createElement('div'),
@@ -100,14 +105,20 @@ export default class Tooltip extends Component {
         label.className = "tooltip__label";
         arrow.className = "arrow";
 
+        if(classes) {
+            addClasses(element, classes);
+        }
+
         super(element);
 
         this.#state = Tooltip.hidden;
         this.#timer = null;
         this.#promise = null;
         this.#placement = placement;
-        this.#target = target;
+        this.#target = null;
         this.#timeout = timeout;
+        this.#removeOnHide = removeOnHide;
+        this.#label = label;
 
         if(typeof animation === 'string') {
             animation = ANIMATIONS[animation];
@@ -122,17 +133,121 @@ export default class Tooltip extends Component {
         }
     }
 
-    _position(rect, placement, target, containerRect, element=null) {
+    destroy() {
+        if(this.#destroy) {
+            this.#destroy();
+            this.#destroy = null;
+        }
+    }
+
+    init(target, event, refreshPositionOnMouseMove=false) {
+        // noinspection JSUnusedLocalSymbols
+        let positionTarget = event => target;
+
+        if(this.#destroy) {
+            this.destroy();
+        }
+
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        if(event === 'hover') {
+            let onMouseOver = (event) => {
+                if(this.state === Tooltip.hiding || this.state === Tooltip.hidden) {
+                    this.show(positionTarget(event));
+                }
+            };
+
+            let onMouseOut = (event) => {
+                if(!target.contains(event.relatedTarget) && (this.state === Tooltip.visible || this.state === Tooltip.showing)) {
+                    this.hide(positionTarget(event));
+                }
+            };
+
+            let onMouseMove;
+
+            target.addEventListener('mouseover', onMouseOver);
+
+            target.addEventListener('mouseover', onMouseOut);
+
+            if(refreshPositionOnMouseMove) {
+                onMouseMove = (event) => {
+                    if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
+                        this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
+                    }
+                };
+            }
+
+            if(onMouseMove) {
+                target.addEventListener('mousemove', onMouseMove);
+            }
+
+            this.#destroy = () => {
+                if(onMouseMove) this.element.removeEventListener('mousemove', onMouseMove);
+                target.removeEventListener('mouseout', onMouseOut);
+                target.removeEventListener('mouseover', onMouseOver);
+            };
+        } else if(event === 'toggle') {
+            let onMouseMove,
+                onClick,
+                onMouseMoveTarget,
+                target = this.element;
+
+            if(refreshPositionOnMouseMove) {
+                onMouseMove = () => {
+                    if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
+                        this.position(null, this.#placement, this.#target, Rect.getClientRect());
+                    }
+                };
+
+                onMouseMoveTarget = document;
+            }
+
+            onClick = () => {
+                if(this.state === 'showing' || this.state === 'visible') {
+                    this.hide();
+                } else {
+                    this.show();
+                }
+            };
+
+            target.addEventListener('click', onClick);
+            if(onMouseMoveTarget) onMouseMoveTarget.addEventListener('mousemove', onMouseMove);
+
+            this.#destroy = () => {
+                if(onMouseMove) onMouseMoveTarget.removeEventListener('mousemove', onMouseMove);
+                target.removeEventListener('click', onClick);
+            };
+        }
+    }
+
+    setText(text) {
+        this.#label.innerHTML = text;
+    }
+
+    position(rect, placement, target, containerRect, element=null) {
         let pos,
-            targetRect = Rect.getBoundingClientRect(target),
+            targetRect,
             collision;
+
+        if(typeof target === 'function') {
+            targetRect = Rect.getBoundingClientRect(target)
+        } else {
+            targetRect = new Rect(target);
+        }
 
         placement = PLACEMENTS[placement];
         collision = placement.collision;
 
         this.element.dataset.placement = placement.name;
 
-        if(!rect) rect = Rect.getCleanBoundingClientRect(this.element);
+        if(rect === "full") {
+            rect = Rect.getCleanBoundingClientRect(this.element);
+        } else if(!rect || rect === "current") {
+            rect = new Rect(this.element);
+        }
+
         if(!element) element = this.element;
 
         pos = rect.position({
@@ -175,10 +290,14 @@ export default class Tooltip extends Component {
         return pos;
     }
 
-    async show(immediate=false) {
+    async show(target, immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
             this.#timer = null;
+        }
+
+        if(this.element.parentElement) {
+            document.body.appendChild(this.element);
         }
 
         let result;
@@ -189,14 +308,17 @@ export default class Tooltip extends Component {
             }
 
             this.element.classList.remove("hidden");
+            this.#target = target;
 
             if(this.#animation) {
                 this.#animation.show(this.element, true);
             }
 
-            this._position(null, this.#placement, this.#target, Rect.getClientRect());
+            this.position("full", this.#placement, this.#target, Rect.getClientRect());
 
             result = Animation.complete;
+            this.#state = Tooltip.visible;
+            this.publish("tooltip.visible", this);
         } else if(this.state !== Tooltip.visible) {
             if(this.#animation) {
                 await this.#animation.cancel(this.element);
@@ -206,8 +328,9 @@ export default class Tooltip extends Component {
                 clientRect = Rect.getClientRect(),
                 fx;
 
+            this.#target = target;
             this.element.classList.remove('hidden');
-            this._position(null, this.#placement, this.#target, clientRect);
+            this.position("full", this.#placement, this.#target, clientRect);
 
             if(startingState === Tooltip.hidden) {
                 await this.hide(true);
@@ -215,9 +338,10 @@ export default class Tooltip extends Component {
             }
 
             this.#state = Tooltip.showing;
+            this.publish("tooltip.showing", this);
 
             let onFrame = () => {
-                this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+                this.position("current", this.#placement, this.#target, clientRect)
             };
 
             if(this.#animation) {
@@ -232,6 +356,7 @@ export default class Tooltip extends Component {
 
             if(result === Animation.complete) {
                 this.#state = Tooltip.visible;
+                this.publish("tooltip.visible", this);
             }
         } else {
             result = Animation.complete;
@@ -246,6 +371,7 @@ export default class Tooltip extends Component {
             if (typeof this.#timeout === 'number' && this.#timeout >= 0) {
                 this.#timer = setTimeout(() => {
                     this.hide();
+                    this.publish("tooltip.timeout", this);
                 }, this.#timeout);
             }
         }
@@ -267,6 +393,13 @@ export default class Tooltip extends Component {
 
             this.element.classList.add('hidden');
             this.#state = Tooltip.hidden;
+            this.publish("tooltip.hidden", this);
+
+            if(this.#removeOnHide) {
+                this.removeFrom();
+            }
+
+            this.#target = null;
             return Animation.complete;
         } if(this.state !== Tooltip.hidden) {
             if(this.#animation) {
@@ -277,7 +410,7 @@ export default class Tooltip extends Component {
                 fx, result;
 
             let onFrame = () => {
-                this._position(Rect.getBoundingClientRect(this.element), this.#placement, this.#target, clientRect)
+                this.position("current", this.#placement, this.#target, clientRect)
             };
 
             if(this.#animation) {
@@ -285,6 +418,7 @@ export default class Tooltip extends Component {
             }
 
             this.#state = Tooltip.hiding;
+            this.publish("tooltip.hiding", this);
 
             if(fx) {
                 result = await fx;
@@ -294,12 +428,35 @@ export default class Tooltip extends Component {
 
             if(result === Animation.complete) {
                 this.element.classList.add('hidden');
+                this.#target = null;
                 this.#state = Tooltip.hidden;
+
+                if(this.#removeOnHide) {
+                    this.removeFrom();
+                }
+
+                this.publish("tooltip.hidden", this);
             }
 
             return result;
         } else {
             return Animation.complete;
+        }
+    }
+
+    async open() {
+        let show = await this.show();
+
+        if(show === Animation.complete) {
+            this.publish('tooltip.open', this);
+        }
+    }
+
+    async close() {
+        let hide = await this.hide();
+
+        if(hide === Animation.complete) {
+            this.publish('tooltip.close', this);
         }
     }
 
@@ -312,5 +469,19 @@ export default class Tooltip extends Component {
 
     get isVisible() {
         return this.#state !== Tooltip.hidden;
+    }
+
+    static tooltip(target, text, {action="hover", animation=null, animationDuration, placement="top", timeout=null, classes=null, id=null}) {
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+    }
+
+    static getToolTip(target) {
+
+    }
+
+    static removeToolTip(target) {
+
     }
 }
