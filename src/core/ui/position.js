@@ -61,8 +61,6 @@ export function getBoundingOffsetRect(element, offsetParent=null) {
     );
 }
 
-window.getBoundingOffsetRect = getBoundingOffsetRect;
-
 
 /**
  * Returns a bounding rect who's positions are relative to the document.

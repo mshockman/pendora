@@ -704,6 +704,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var TOPICS = Symbol('topics');
 function STOP() {
   throw STOP;
 }
@@ -714,16 +715,14 @@ function () {
   function Publisher() {
     _classCallCheck(this, Publisher);
 
-    this._topics = {};
+    this[TOPICS] = {};
   }
 
   _createClass(Publisher, [{
     key: "on",
     value: function on(topic, callback) {
-      if (!this._topics[topic]) this._topics[topic] = [];
-
-      this._topics[topic].push(callback);
-
+      if (!this[TOPICS][topic]) this[TOPICS][topic] = [];
+      this[TOPICS][topic].push(callback);
       return this;
     }
   }, {
@@ -750,20 +749,20 @@ function () {
     value: function off(topic, callback) {
       if (arguments.length === 0) {
         // CLear all topics.
-        this._topics = {};
+        this[TOPICS] = {};
         return this;
       } else if (arguments.length === 1) {
         // Clear single topic.
-        this._topics[topic] = [];
+        this[TOPICS][topic] = [];
         return this;
       }
 
-      if (!this._topics || !this._topics[topic] || !this._topics[topic].length) {
+      if (!this[TOPICS] || !this[TOPICS][topic] || !this[TOPICS][topic].length) {
         // Topic list was either empty or didn't exist.  No need to remove anything.  Return;
         return this;
       }
 
-      var callbacks = this._topics[topic];
+      var callbacks = this[TOPICS][topic];
 
       for (var i = 0; i < callback.length; i++) {
         var cb = callbacks[i];
@@ -775,7 +774,7 @@ function () {
       }
 
       if (callbacks.length === 0) {
-        delete this._topics[topic];
+        delete this[TOPICS][topic];
       }
 
       return this;
@@ -784,9 +783,9 @@ function () {
     key: "hasEvent",
     value: function hasEvent(topic, callback) {
       if (arguments.length === 1) {
-        return !!this._topics[topic];
+        return !!this[TOPICS][topic];
       } else {
-        var callbacks = this._topics[topic];
+        var callbacks = this[TOPICS][topic];
 
         for (var i = 0; i < callbacks.length; i++) {
           var cb = callbacks[i];
@@ -802,8 +801,8 @@ function () {
   }, {
     key: "publish",
     value: function publish(topic) {
-      if (this._topics[topic]) {
-        var callbacks = this._topics[topic].slice(0);
+      if (this[TOPICS][topic]) {
+        var callbacks = this[TOPICS][topic].slice(0);
 
         for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
           args[_key2 - 1] = arguments[_key2];
@@ -865,7 +864,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Data", function() { return Data; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "privateCache", function() { return privateCache; });
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utility */ "./src/core/utility/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1018,7 +1017,7 @@ var privateCache = new Data();
 /*!****************************!*\
   !*** ./src/core/errors.js ***!
   \****************************/
-/*! exports provided: ExtendableError, IndexError, KeyError, ValueError, NotImplemented, ValidationError, AssertionError */
+/*! exports provided: ExtendableError, IndexError, KeyError, ValueError, NotImplemented, ValidationError, AssertionError, UnitError, assert */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1030,6 +1029,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NotImplemented", function() { return NotImplemented; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ValidationError", function() { return ValidationError; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AssertionError", function() { return AssertionError; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnitError", function() { return UnitError; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assert", function() { return assert; });
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1161,14 +1162,771 @@ function (_ExtendableError6) {
 
   return AssertionError;
 }(ExtendableError);
+var UnitError =
+/*#__PURE__*/
+function (_ExtendableError7) {
+  _inherits(UnitError, _ExtendableError7);
+
+  function UnitError() {
+    _classCallCheck(this, UnitError);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(UnitError).apply(this, arguments));
+  }
+
+  return UnitError;
+}(ExtendableError);
+/**
+ * Asserts that a condition is true or raises an AssertionError.
+ * @param condition - condition to check.
+ * @param message - message on fail.
+ * @throws AssertionError
+ */
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new AssertionError(message);
+  }
+}
 
 /***/ }),
 
-/***/ "./src/core/position.js":
-/*!******************************!*\
-  !*** ./src/core/position.js ***!
-  \******************************/
-/*! exports provided: getOffsetElement, getClientRect, getBoundingOffsetRect, getBoundingDocumentRect, getTranslation, setTranslation, getCssPosition, setCssPosition, setElementClientPosition, clientRectToDocumentSpace, documentRectToClientSpace, snapToGrid, convertDomRectToObject, getPointOnElement, getSubBoundingBox, getDistanceBetweenRects, Vec2, Vec3, Rect */
+/***/ "./src/core/serialize/Attribute.js":
+/*!*****************************************!*\
+  !*** ./src/core/serialize/Attribute.js ***!
+  \*****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Attribute; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helper */ "./src/core/serialize/helper.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+var Attribute =
+/*#__PURE__*/
+function () {
+  function Attribute(type) {
+    var missing = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _helper__WEBPACK_IMPORTED_MODULE_1__["DROP"];
+    var nullable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var validator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+    _classCallCheck(this, Attribute);
+
+    this.type = typeof type === 'function' ? new type() : type;
+    this.missing = missing;
+    this.nullable = nullable;
+    this.validator = validator;
+  }
+
+  _createClass(Attribute, [{
+    key: "deserialize",
+    value: function deserialize(data, key) {
+      var value = data[key];
+
+      if (value === undefined) {
+        if (this.missing === _helper__WEBPACK_IMPORTED_MODULE_1__["REQUIRED"]) {
+          throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Attribute ".concat(key, " is required"));
+        } else if (this.missing === _helper__WEBPACK_IMPORTED_MODULE_1__["DROP"]) {
+          throw _helper__WEBPACK_IMPORTED_MODULE_1__["DROP"];
+        } else {
+          return this.missing;
+        }
+      } else if (value === null) {
+        if (this.nullable === _helper__WEBPACK_IMPORTED_MODULE_1__["FALSE"] || this.nullable === _helper__WEBPACK_IMPORTED_MODULE_1__["REQUIRED"]) {
+          throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Attribute ".concat(key, " cannot be null."));
+        }
+
+        if (this.nullable === null || this.nullable === _helper__WEBPACK_IMPORTED_MODULE_1__["TRUE"] || this.nullable === _helper__WEBPACK_IMPORTED_MODULE_1__["NULL"]) {
+          return null;
+        } else {
+          return this.nullable;
+        }
+      }
+
+      if (this.type) {
+        value = this.type.deserialize(value);
+      }
+
+      if (this.validator) {
+        value = this.validator(value);
+      }
+
+      return value;
+    }
+  }]);
+
+  return Attribute;
+}();
+
+_defineProperty(Attribute, "DROP", _helper__WEBPACK_IMPORTED_MODULE_1__["DROP"]);
+
+_defineProperty(Attribute, "TRUE", _helper__WEBPACK_IMPORTED_MODULE_1__["TRUE"]);
+
+_defineProperty(Attribute, "FALSE", _helper__WEBPACK_IMPORTED_MODULE_1__["FALSE"]);
+
+_defineProperty(Attribute, "REQUIRED", _helper__WEBPACK_IMPORTED_MODULE_1__["REQUIRED"]);
+
+
+
+/***/ }),
+
+/***/ "./src/core/serialize/AttributeSchema.js":
+/*!***********************************************!*\
+  !*** ./src/core/serialize/AttributeSchema.js ***!
+  \***********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return AttributeSchema; });
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper */ "./src/core/serialize/helper.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var AttributeSchema =
+/*#__PURE__*/
+function () {
+  function AttributeSchema(attributes) {
+    _classCallCheck(this, AttributeSchema);
+
+    this.attributes = attributes;
+  }
+
+  _createClass(AttributeSchema, [{
+    key: "deserialize",
+    value: function deserialize(data) {
+      var r = {};
+
+      for (var key in this.attributes) {
+        if (this.attributes.hasOwnProperty(key)) {
+          try {
+            r[key] = this.attributes[key].deserialize(data, key);
+          } catch (e) {
+            if (e !== _helper__WEBPACK_IMPORTED_MODULE_0__["DROP"]) {
+              throw e;
+            }
+          }
+        }
+      }
+
+      return r;
+    }
+  }]);
+
+  return AttributeSchema;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/core/serialize/helper.js":
+/*!**************************************!*\
+  !*** ./src/core/serialize/helper.js ***!
+  \**************************************/
+/*! exports provided: NULL, TRUE, FALSE, REQUIRED, DROP */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NULL", function() { return NULL; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TRUE", function() { return TRUE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FALSE", function() { return FALSE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "REQUIRED", function() { return REQUIRED; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROP", function() { return DROP; });
+var NULL = {},
+    TRUE = {},
+    FALSE = {},
+    REQUIRED = {},
+    DROP = {};
+
+/***/ }),
+
+/***/ "./src/core/serialize/index.js":
+/*!*************************************!*\
+  !*** ./src/core/serialize/index.js ***!
+  \*************************************/
+/*! exports provided: Attribute, AttributeSchema, Str, Integer, Bool, CompoundType, CSV, FALSE, Float, NULL, DROP, TRUE, REQUIRED, regex, range, length, choice, all, any, Type */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Attribute__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Attribute */ "./src/core/serialize/Attribute.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Attribute", function() { return _Attribute__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _AttributeSchema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AttributeSchema */ "./src/core/serialize/AttributeSchema.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AttributeSchema", function() { return _AttributeSchema__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./types */ "./src/core/serialize/types.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Str", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["Str"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Integer", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["Integer"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["Bool"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CompoundType", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["CompoundType"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "CSV", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["CSV"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["Float"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return _types__WEBPACK_IMPORTED_MODULE_2__["Type"]; });
+
+/* harmony import */ var _validators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./validators */ "./src/core/serialize/validators.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "regex", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["regex"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "range", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["range"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "length", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["length"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "choice", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["choice"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "all", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["all"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "any", function() { return _validators__WEBPACK_IMPORTED_MODULE_3__["any"]; });
+
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper */ "./src/core/serialize/helper.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FALSE", function() { return _helper__WEBPACK_IMPORTED_MODULE_4__["FALSE"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "NULL", function() { return _helper__WEBPACK_IMPORTED_MODULE_4__["NULL"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "DROP", function() { return _helper__WEBPACK_IMPORTED_MODULE_4__["DROP"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "TRUE", function() { return _helper__WEBPACK_IMPORTED_MODULE_4__["TRUE"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "REQUIRED", function() { return _helper__WEBPACK_IMPORTED_MODULE_4__["REQUIRED"]; });
+
+/**
+ * A module for creating schema that can be used to create objects that can serialize and deserialize data structures
+ * into different formats.
+ */
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./src/core/serialize/types.js":
+/*!*************************************!*\
+  !*** ./src/core/serialize/types.js ***!
+  \*************************************/
+/*! exports provided: Type, Integer, Float, Bool, Str, CSV, CompoundType */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return Type; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Integer", function() { return Integer; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return Float; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return Bool; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Str", function() { return Str; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CSV", function() { return CSV; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CompoundType", function() { return CompoundType; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+var REG_COMMA = /\s*,\s*/;
+var Type =
+/*#__PURE__*/
+function () {
+  function Type() {
+    _classCallCheck(this, Type);
+  }
+
+  _createClass(Type, [{
+    key: "deserialize",
+
+    /**
+     * @abstract
+     * @param value
+     */
+    value: function deserialize(value) {}
+    /**
+     * @param value
+     */
+
+  }, {
+    key: "serialize",
+    value: function serialize(value) {
+      return value;
+    }
+  }]);
+
+  return Type;
+}();
+var Integer =
+/*#__PURE__*/
+function (_Type) {
+  _inherits(Integer, _Type);
+
+  function Integer() {
+    var _this;
+
+    var radix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
+    var allowInfinity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+    _classCallCheck(this, Integer);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Integer).call(this));
+    _this.radix = radix;
+    _this.allowInfinity = allowInfinity;
+    return _this;
+  }
+
+  _createClass(Integer, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      if (this.allowInfinity) {
+        if (typeof value === 'string') {
+          value = value.trim();
+        }
+
+        if (value === 'Infinity') {
+          return Infinity;
+        } else if (value === '-Infinity') {
+          return -Infinity;
+        }
+      }
+
+      value = parseInt(value, this.radix);
+
+      if (Number.isNaN(value)) {
+        throw Object(_errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])("Could not parse integer.");
+      }
+
+      return value;
+    }
+  }]);
+
+  return Integer;
+}(Type);
+var Float =
+/*#__PURE__*/
+function (_Type2) {
+  _inherits(Float, _Type2);
+
+  function Float() {
+    var _this2;
+
+    var fixed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var allowInfinity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+    _classCallCheck(this, Float);
+
+    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Float).call(this));
+    _this2.fixed = fixed;
+    _this2.allowInfinity = allowInfinity;
+    return _this2;
+  }
+
+  _createClass(Float, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      if (this.allowInfinity) {
+        if (typeof value === 'string') {
+          value = value.trim();
+        }
+
+        if (value === 'Infinity') {
+          return Infinity;
+        } else if (value === '-Infinity') {
+          return -Infinity;
+        }
+      }
+
+      if (this.fixed !== null) {
+        value = (value + '').toFixed(this.fixed);
+      }
+
+      value = parseFloat(value);
+
+      if (Number.isNaN(value)) {
+        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not parse float");
+      }
+
+      return value;
+    }
+  }]);
+
+  return Float;
+}(Type);
+var Bool =
+/*#__PURE__*/
+function (_Type3) {
+  _inherits(Bool, _Type3);
+
+  function Bool() {
+    _classCallCheck(this, Bool);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Bool).apply(this, arguments));
+  }
+
+  _createClass(Bool, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      if (value === true || value === false) {
+        return value;
+      }
+
+      if (typeof value === 'string') {
+        value = value.toLowerCase().trim();
+
+        if (value === 'true') {
+          return true;
+        } else if (value === 'false') {
+          return false;
+        }
+      }
+
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not parse boolean from value.");
+    }
+  }]);
+
+  return Bool;
+}(Type);
+var Str =
+/*#__PURE__*/
+function (_Type4) {
+  _inherits(Str, _Type4);
+
+  function Str() {
+    var _this3;
+
+    var allow_empty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    var trim = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var transform = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+    _classCallCheck(this, Str);
+
+    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Str).call(this));
+    _this3.allow_empty = allow_empty;
+    _this3.trim = trim;
+    _this3.transform = transform;
+    return _this3;
+  }
+
+  _createClass(Str, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      value = value + '';
+
+      if (this.trim) {
+        value = value.trim();
+      }
+
+      if (this.transform) {
+        value = value.transform();
+      }
+
+      if (value === '' && !this.allow_empty) {
+        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("String cannot be empty");
+      }
+
+      return value;
+    }
+  }]);
+
+  return Str;
+}(Type);
+var CSV =
+/*#__PURE__*/
+function (_Type5) {
+  _inherits(CSV, _Type5);
+
+  function CSV() {
+    var _this4;
+
+    var separator = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : REG_COMMA;
+
+    _classCallCheck(this, CSV);
+
+    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(CSV).call(this));
+    _this4.separator = separator;
+    return _this4;
+  }
+
+  _createClass(CSV, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      var type = _typeof(value);
+
+      if (type !== 'string') {
+        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not deserialize ".concat(type));
+      }
+
+      value = value.trim().split(this.separator);
+      return value;
+    }
+  }, {
+    key: "serialize",
+    value: function serialize(value) {
+      return value.join(', ');
+    }
+  }]);
+
+  return CSV;
+}(Type);
+var CompoundType =
+/*#__PURE__*/
+function (_Type6) {
+  _inherits(CompoundType, _Type6);
+
+  function CompoundType() {
+    var _this5;
+
+    _classCallCheck(this, CompoundType);
+
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(CompoundType).call(this));
+    _this5.types = [];
+
+    for (var _len = arguments.length, types = new Array(_len), _key = 0; _key < _len; _key++) {
+      types[_key] = arguments[_key];
+    }
+
+    for (var _i = 0, _types = types; _i < _types.length; _i++) {
+      var type = _types[_i];
+
+      _this5.types.push(typeof type === 'function' ? new type() : type);
+    }
+
+    return _this5;
+  }
+
+  _createClass(CompoundType, [{
+    key: "deserialize",
+    value: function deserialize(value) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.types[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var t = _step.value;
+
+          try {
+            return t(value);
+          } catch (e) {
+            if (!(e instanceof _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])) {
+              throw e;
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not match any type.");
+    }
+  }]);
+
+  return CompoundType;
+}(Type);
+
+/***/ }),
+
+/***/ "./src/core/serialize/validators.js":
+/*!******************************************!*\
+  !*** ./src/core/serialize/validators.js ***!
+  \******************************************/
+/*! exports provided: choice, length, range, regex, all, any */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "choice", function() { return choice; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "length", function() { return length; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "range", function() { return range; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "regex", function() { return regex; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "all", function() { return all; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "any", function() { return any; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+
+function choice() {
+  for (var _len = arguments.length, choices = new Array(_len), _key = 0; _key < _len; _key++) {
+    choices[_key] = arguments[_key];
+  }
+
+  return function (value) {
+    if (choices.indexOf(value) === -1) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Invalid choice");
+    }
+
+    return value;
+  };
+}
+function length() {
+  var minLength = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var maxLength = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return function (value) {
+    var l = value.length;
+
+    if (minLength !== null && l < minLength) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Array length is to small");
+    }
+
+    if (maxLength !== null && l > maxLength) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Array length is to big");
+    }
+
+    return value;
+  };
+}
+function range() {
+  var min = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return function (value) {
+    if (min !== null && value < min) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value is to small.");
+    }
+
+    if (max !== null && value > max) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value is to big.");
+    }
+
+    return value;
+  };
+}
+function regex(pattern) {
+  var flags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var reg = flags ? new RegExp(pattern, flags) : new RegExp(pattern);
+  return function (value) {
+    if (!reg.test(value)) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not match pattern.");
+    }
+
+    return value;
+  };
+}
+function all() {
+  for (var _len2 = arguments.length, validators = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    validators[_key2] = arguments[_key2];
+  }
+
+  return function (value) {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = validators[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var validator = _step.value;
+        value = validator(value);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+          _iterator["return"]();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return value;
+  };
+}
+function any() {
+  for (var _len3 = arguments.length, validators = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    validators[_key3] = arguments[_key3];
+  }
+
+  return function (value) {
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = validators[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var validator = _step2.value;
+
+        try {
+          value = validator(value);
+          return value;
+        } catch (e) {
+          if (!(e instanceof _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])) {
+            throw e;
+          }
+        }
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+          _iterator2["return"]();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+
+    throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not pass any validator.");
+  };
+}
+
+/***/ }),
+
+/***/ "./src/core/ui/position.js":
+/*!*********************************!*\
+  !*** ./src/core/ui/position.js ***!
+  \*********************************/
+/*! exports provided: getOffsetElement, getClientRect, getBoundingOffsetRect, getBoundingDocumentRect, getTranslation, setTranslation, getCssPosition, setCssPosition, setElementClientPosition, clientRectToDocumentSpace, documentRectToClientSpace, snapToGrid, convertDomRectToObject, getPointOnElement, getSubBoundingBox, getDistanceBetweenRects, getElementOffset, setElementOffset, Vec2, Vec3, Rect */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1189,14 +1947,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPointOnElement", function() { return getPointOnElement; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSubBoundingBox", function() { return getSubBoundingBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDistanceBetweenRects", function() { return getDistanceBetweenRects; });
-/* harmony import */ var _vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./vectors */ "./src/core/vectors.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getElementOffset", function() { return getElementOffset; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setElementOffset", function() { return setElementOffset; });
+/* harmony import */ var _vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vectors */ "./src/core/vectors/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec2", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec3", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec3"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Rect", function() { return _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"]; });
 
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
 
 
 var regMatrix = /matrix(3d)?\(([^)]+)\)/;
@@ -1223,7 +1983,7 @@ function getOffsetElement(element) {
  */
 
 function getClientRect() {
-  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](0, 0, window.innerWidth, window.innerHeight);
+  return _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getClientRect();
 }
 /**
  * Returns a bounding rect who's positions are relative to the provided offsetParent.
@@ -1235,10 +1995,17 @@ function getClientRect() {
 
 function getBoundingOffsetRect(element) {
   var offsetParent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  if (!offsetParent) offsetParent = getOffsetElement(element);
-  var offsetRect = offsetParent.getBoundingClientRect(),
-      rect = element.getBoundingClientRect();
-  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](rect.left - offsetRect.left, rect.top - offsetRect.top, rect.right - offsetRect.right, rect.bottom - offsetRect.bottom);
+  var offsetRect, rect;
+  if (!offsetParent) offsetParent = getOffsetElement(element); // no offset parent.  Position relative to the client.
+
+  if (!offsetParent) {
+    offsetRect = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getRootContainingClientRect();
+  } else {
+    offsetRect = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(offsetParent);
+  }
+
+  rect = element.getBoundingClientRect();
+  return new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](rect.left - offsetRect.left, rect.top - offsetRect.top, offsetRect.right - rect.right, offsetRect.bottom - rect.bottom);
 }
 /**
  * Returns a bounding rect who's positions are relative to the document.
@@ -1341,49 +2108,71 @@ function setCssPosition(element, _ref2) {
  * translate and translate3d position the element by setting the transform property.
  *
  * @param element {HTMLElement}
- * @param position {{x, y}|{left, top}|Array|Vec2}
+ * @param position {{x, y}|{left, top, right, bottom}|Array|Vec2}
  * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'}
  */
 
 function setElementClientPosition(element, position) {
   var method = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'top-left';
-  position = _vectors__WEBPACK_IMPORTED_MODULE_0__["Vec2"].fromVertex(position);
+  position = new _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](position);
 
   if (method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
-    var style = getComputedStyle(element); // position can't be static for this operation.  Switch to relative.
+    var style = getComputedStyle(element);
+    var positionType = style.position,
+        box,
+        deltaX,
+        deltaY,
+        current; // position can't be static for this operation.  Switch to relative.
 
-    if (style.position === 'static') {
+    if (positionType === 'static') {
       element.style.position = 'relative';
-      style = getComputedStyle(element);
+      positionType = "relative";
     }
 
-    var left = parseInt(style.left, 10),
-        top = parseInt(style.top, 10),
-        right = parseInt(style.right, 10),
-        bottom = parseInt(style.bottom, 10),
-        box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element),
-        deltaX = position.left - box.left,
-        deltaY = position.top - box.top;
+    if (positionType === "relative") {
+      style = getComputedStyle(element);
+      current = {
+        left: parseInt(style.left, 10) || 0,
+        right: parseInt(style.right, 10) || 0,
+        top: parseInt(style.top, 10) || 0,
+        bottom: parseInt(style.bottom, 10) || 0
+      };
+    } else {
+      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
+      current = getBoundingOffsetRect(element);
+    }
 
     if (method === 'top-left') {
-      element.style.left = left + deltaX + 'px';
-      element.style.top = top + deltaY + 'px';
+      deltaX = position.left - box.left;
+      deltaY = position.top - box.top;
+      element.style.left = current.left + deltaX + 'px';
+      element.style.top = current.top + deltaY + 'px';
       element.style.right = '';
       element.style.bottom = '';
     } else if (method === 'top-right') {
-      element.style.right = right - deltaX + 'px';
-      element.style.top = top + deltaY + 'px';
+      deltaX = position.right - box.right;
+      deltaY = position.top - box.top;
+      element.style.right = current.right - deltaX + 'px';
+      element.style.top = current.top + deltaY + 'px';
       element.style.left = '';
       element.style.bottom = '';
     } else if (method === 'bottom-left') {
-      element.style.left = left + deltaX + 'px';
-      element.style.bottom = bottom - deltaY + 'px';
+      deltaX = position.left - box.left;
+      deltaY = position.bottom - box.bottom;
+      console.log({
+        right: current.left + deltaX + 'px',
+        bottom: current.bottom - deltaY + 'px'
+      });
+      element.style.left = current.left + deltaX + 'px';
+      element.style.bottom = current.bottom - deltaY + 'px';
       element.style.right = '';
       element.style.top = '';
     } else {
       // bottom-right
-      element.style.right = right - deltaX + 'px';
-      element.style.bottom = bottom - deltaY + 'px';
+      deltaX = position.right - box.right;
+      deltaY = position.bottom - box.bottom;
+      element.style.right = current.right - deltaX + 'px';
+      element.style.bottom = current.bottom - deltaY + 'px';
       element.style.left = '';
       element.style.top = '';
     }
@@ -1790,647 +2579,125 @@ function getDistanceBetweenRects(rect1, rect2) {
     return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
   }
 }
-
-
-/***/ }),
-
-/***/ "./src/core/serialize.js":
-/*!*******************************!*\
-  !*** ./src/core/serialize.js ***!
-  \*******************************/
-/*! exports provided: NULL, TRUE, FALSE, REQUIRED, DROP, Type, Integer, Float, Bool, Str, CSV, CompoundType, choice, length, range, regex, all, any, Attribute, AttributeSchema */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NULL", function() { return NULL; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TRUE", function() { return TRUE; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FALSE", function() { return FALSE; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "REQUIRED", function() { return REQUIRED; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROP", function() { return DROP; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Type", function() { return Type; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Integer", function() { return Integer; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Float", function() { return Float; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Bool", function() { return Bool; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Str", function() { return Str; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CSV", function() { return CSV; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CompoundType", function() { return CompoundType; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "choice", function() { return choice; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "length", function() { return length; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "range", function() { return range; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "regex", function() { return regex; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "all", function() { return all; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "any", function() { return any; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Attribute", function() { return Attribute; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AttributeSchema", function() { return AttributeSchema; });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 /**
- * A module for creating schema that can be used to create objects that can serialize and deserialize data structures
- * into different formats.
+ * Returns the top and left position of an element relative to the document.
+ *
+ * @param element
+ * @return {{top: number, left: number}}
  */
 
-var REG_COMMA = /\s*,\s*/;
-var NULL = {},
-    TRUE = {},
-    FALSE = {},
-    REQUIRED = {},
-    DROP = {};
-var Type =
-/*#__PURE__*/
-function () {
-  function Type() {
-    _classCallCheck(this, Type);
-  }
-
-  _createClass(Type, [{
-    key: "deserialize",
-
-    /**
-     * @abstract
-     * @param value
-     */
-    value: function deserialize(value) {}
-    /**
-     * @param value
-     */
-
-  }, {
-    key: "serialize",
-    value: function serialize(value) {
-      return value;
-    }
-  }]);
-
-  return Type;
-}();
-var Integer =
-/*#__PURE__*/
-function (_Type) {
-  _inherits(Integer, _Type);
-
-  function Integer() {
-    var _this;
-
-    var radix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 10;
-    var allowInfinity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-    _classCallCheck(this, Integer);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Integer).call(this));
-    _this.radix = radix;
-    _this.allowInfinity = allowInfinity;
-    return _this;
-  }
-
-  _createClass(Integer, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      if (this.allowInfinity) {
-        if (typeof value === 'string') {
-          value = value.trim();
-        }
-
-        if (value === 'Infinity') {
-          return Infinity;
-        } else if (value === '-Infinity') {
-          return -Infinity;
-        }
-      }
-
-      value = parseInt(value, this.radix);
-
-      if (Number.isNaN(value)) {
-        throw Object(_errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])("Could not parse integer.");
-      }
-
-      return value;
-    }
-  }]);
-
-  return Integer;
-}(Type);
-var Float =
-/*#__PURE__*/
-function (_Type2) {
-  _inherits(Float, _Type2);
-
-  function Float() {
-    var _this2;
-
-    var fixed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-    var allowInfinity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-    _classCallCheck(this, Float);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Float).call(this));
-    _this2.fixed = fixed;
-    _this2.allowInfinity = allowInfinity;
-    return _this2;
-  }
-
-  _createClass(Float, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      if (this.allowInfinity) {
-        if (typeof value === 'string') {
-          value = value.trim();
-        }
-
-        if (value === 'Infinity') {
-          return Infinity;
-        } else if (value === '-Infinity') {
-          return -Infinity;
-        }
-      }
-
-      if (this.fixed !== null) {
-        value = (value + '').toFixed(this.fixed);
-      }
-
-      value = parseFloat(value);
-
-      if (Number.isNaN(value)) {
-        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not parse float");
-      }
-
-      return value;
-    }
-  }]);
-
-  return Float;
-}(Type);
-var Bool =
-/*#__PURE__*/
-function (_Type3) {
-  _inherits(Bool, _Type3);
-
-  function Bool() {
-    _classCallCheck(this, Bool);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(Bool).apply(this, arguments));
-  }
-
-  _createClass(Bool, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      if (value === true || value === false) {
-        return value;
-      }
-
-      if (typeof value === 'string') {
-        value = value.toLowerCase().trim();
-
-        if (value === 'true') {
-          return true;
-        } else if (value === 'false') {
-          return false;
-        }
-      }
-
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not parse boolean from value.");
-    }
-  }]);
-
-  return Bool;
-}(Type);
-var Str =
-/*#__PURE__*/
-function (_Type4) {
-  _inherits(Str, _Type4);
-
-  function Str() {
-    var _this3;
-
-    var allow_empty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-    var trim = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var transform = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-    _classCallCheck(this, Str);
-
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(Str).call(this));
-    _this3.allow_empty = allow_empty;
-    _this3.trim = trim;
-    _this3.transform = transform;
-    return _this3;
-  }
-
-  _createClass(Str, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      value = value + '';
-
-      if (this.trim) {
-        value = value.trim();
-      }
-
-      if (this.transform) {
-        value = value.transform();
-      }
-
-      if (value === '' && !this.allow_empty) {
-        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("String cannot be empty");
-      }
-
-      return value;
-    }
-  }]);
-
-  return Str;
-}(Type);
-var CSV =
-/*#__PURE__*/
-function (_Type5) {
-  _inherits(CSV, _Type5);
-
-  function CSV() {
-    var _this4;
-
-    var separator = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : REG_COMMA;
-
-    _classCallCheck(this, CSV);
-
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(CSV).call(this));
-    _this4.separator = separator;
-    return _this4;
-  }
-
-  _createClass(CSV, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      var type = _typeof(value);
-
-      if (type !== 'string') {
-        throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Could not deserialize ".concat(type));
-      }
-
-      value = value.trim().split(this.separator);
-      return value;
-    }
-  }, {
-    key: "serialize",
-    value: function serialize(value) {
-      return value.join(', ');
-    }
-  }]);
-
-  return CSV;
-}(Type);
-var CompoundType =
-/*#__PURE__*/
-function (_Type6) {
-  _inherits(CompoundType, _Type6);
-
-  function CompoundType() {
-    var _this5;
-
-    _classCallCheck(this, CompoundType);
-
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(CompoundType).call(this));
-    _this5.types = [];
-
-    for (var _len = arguments.length, types = new Array(_len), _key = 0; _key < _len; _key++) {
-      types[_key] = arguments[_key];
-    }
-
-    for (var _i = 0, _types = types; _i < _types.length; _i++) {
-      var type = _types[_i];
-
-      _this5.types.push(typeof type === 'function' ? new type() : type);
-    }
-
-    return _this5;
-  }
-
-  _createClass(CompoundType, [{
-    key: "deserialize",
-    value: function deserialize(value) {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.types[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var t = _step.value;
-
-          try {
-            return t(value);
-          } catch (e) {
-            if (!(e instanceof _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])) {
-              throw e;
-            }
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not match any type.");
-    }
-  }]);
-
-  return CompoundType;
-}(Type);
-function choice() {
-  for (var _len2 = arguments.length, choices = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    choices[_key2] = arguments[_key2];
-  }
-
-  return function (value) {
-    if (choices.indexOf(value) === -1) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Invalid choice");
-    }
-
-    return value;
+function getElementOffset(element) {
+  var box = element.getBoundingClientRect();
+  return {
+    left: box.left + window.pageXOffset,
+    top: box.top + window.pageYOffset
   };
 }
-function length() {
-  var minLength = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var maxLength = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return function (value) {
-    var l = value.length;
+/**
+ * Sets an elements position relative to the document.
+ *
+ * @param element
+ * @param coords
+ */
 
-    if (minLength !== null && l < minLength) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Array length is to small");
-    }
-
-    if (maxLength !== null && l > maxLength) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Array length is to big");
-    }
-
-    return value;
-  };
-}
-function range() {
-  var min = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return function (value) {
-    if (min !== null && value < min) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value is to small.");
-    }
-
-    if (max !== null && value > max) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value is to big.");
-    }
-
-    return value;
-  };
-}
-function regex(pattern) {
-  var flags = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var reg = flags ? new RegExp(pattern, flags) : new RegExp(pattern);
-  return function (value) {
-    if (!reg.test(value)) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not match pattern.");
-    }
-
-    return value;
-  };
-}
-function all() {
-  for (var _len3 = arguments.length, validators = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    validators[_key3] = arguments[_key3];
+function setElementOffset(element, coords) {
+  if (coords.nodeType) {
+    coords = getElementOffset(element);
+  } else if (Array.isArray(coords)) {
+    coords = {
+      left: coords.left,
+      top: coords.top
+    };
   }
 
-  return function (value) {
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
-
-    try {
-      for (var _iterator2 = validators[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-        var validator = _step2.value;
-        value = validator(value);
-      }
-    } catch (err) {
-      _didIteratorError2 = true;
-      _iteratorError2 = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-          _iterator2["return"]();
-        }
-      } finally {
-        if (_didIteratorError2) {
-          throw _iteratorError2;
-        }
-      }
-    }
-
-    return value;
-  };
+  var offset = element.getBoundingClientRect();
+  var style = getComputedStyle(element),
+      left = parseInt(style.left, 10) || 0,
+      top = parseInt(style.top, 10) || 0;
+  element.style.left = left + (coords.left - offset.left) + 'px';
+  element.style.top = top + (coords.top - offset.top) + 'px';
 }
-function any() {
-  for (var _len4 = arguments.length, validators = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    validators[_key4] = arguments[_key4];
-  }
 
-  return function (value) {
-    var _iteratorNormalCompletion3 = true;
-    var _didIteratorError3 = false;
-    var _iteratorError3 = undefined;
-
-    try {
-      for (var _iterator3 = validators[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-        var validator = _step3.value;
-
-        try {
-          value = validator(value);
-          return value;
-        } catch (e) {
-          if (!(e instanceof _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"])) {
-            throw e;
-          }
-        }
-      }
-    } catch (err) {
-      _didIteratorError3 = true;
-      _iteratorError3 = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-          _iterator3["return"]();
-        }
-      } finally {
-        if (_didIteratorError3) {
-          throw _iteratorError3;
-        }
-      }
-    }
-
-    throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Value did not pass any validator.");
-  };
-}
-var Attribute =
-/*#__PURE__*/
-function () {
-  function Attribute(type) {
-    var missing = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : DROP;
-    var nullable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var validator = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-    _classCallCheck(this, Attribute);
-
-    this.type = typeof type === 'function' ? new type() : type;
-    this.missing = missing;
-    this.nullable = nullable;
-    this.validator = validator;
-  }
-
-  _createClass(Attribute, [{
-    key: "deserialize",
-    value: function deserialize(data, key) {
-      var value = data[key];
-
-      if (value === undefined) {
-        if (this.missing === REQUIRED) {
-          throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Attribute ".concat(key, " is required"));
-        } else if (this.missing === DROP) {
-          throw DROP;
-        } else {
-          return this.missing;
-        }
-      } else if (value === null) {
-        if (this.nullable === FALSE || this.nullable === REQUIRED) {
-          throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValidationError"]("Attribute ".concat(key, " cannot be null."));
-        }
-
-        if (this.nullable === null || this.nullable === TRUE || this.nullable === NULL) {
-          return null;
-        } else {
-          return this.nullable;
-        }
-      }
-
-      if (this.type) {
-        value = this.type.deserialize(value);
-      }
-
-      if (this.validator) {
-        value = this.validator(value);
-      }
-
-      return value;
-    }
-  }]);
-
-  return Attribute;
-}();
-
-_defineProperty(Attribute, "DROP", DROP);
-
-_defineProperty(Attribute, "TRUE", TRUE);
-
-_defineProperty(Attribute, "FALSE", FALSE);
-
-_defineProperty(Attribute, "REQUIRED", REQUIRED);
-
-var AttributeSchema =
-/*#__PURE__*/
-function () {
-  function AttributeSchema(attributes) {
-    _classCallCheck(this, AttributeSchema);
-
-    this.attributes = attributes;
-  }
-
-  _createClass(AttributeSchema, [{
-    key: "deserialize",
-    value: function deserialize(data) {
-      var r = {};
-
-      for (var key in this.attributes) {
-        if (this.attributes.hasOwnProperty(key)) {
-          try {
-            r[key] = this.attributes[key].deserialize(data, key);
-          } catch (e) {
-            if (e !== DROP) {
-              throw e;
-            }
-          }
-        }
-      }
-
-      return r;
-    }
-  }]);
-
-  return AttributeSchema;
-}();
 
 /***/ }),
 
-/***/ "./src/core/utility.js":
-/*!*****************************!*\
-  !*** ./src/core/utility.js ***!
-  \*****************************/
-/*! exports provided: clamp, modulo, proto, randomChoice, arraysEqual, parseHTML, createFragment, isEmptyObject, emptyElement, addClasses, removeClasses, assignAttributes, setElementOffset, getElementOffset, getScroll, isWindow, setScroll, selectElement, assert, parseBooleanOrInt, parseBooleanOrFloat, parseBoolean, parseIntValue, parseFloatValue, parseAny, validateChoice, choice, findChild, filterChildren, getOwnProperty, getPropertyByPath */
+/***/ "./src/core/utility/debounce.js":
+/*!**************************************!*\
+  !*** ./src/core/utility/debounce.js ***!
+  \**************************************/
+/*! exports provided: debounce */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clamp", function() { return clamp; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "modulo", function() { return modulo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
+/**
+ * Throttles a function to only be executed after a given wait period.  If multiple calls to the debounced function
+ * are made within that period the waiting period is set.
+ * @param fn
+ * @param wait
+ * @returns {Function}
+ */
+function debounce(fn, wait) {
+  var timeout;
+  return function () {
+    var _this = this;
+
+    var args = arguments;
+
+    var later = function later() {
+      timeout = null;
+      fn.apply(_this, args);
+    };
+
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/***/ }),
+
+/***/ "./src/core/utility/decorators.js":
+/*!****************************************!*\
+  !*** ./src/core/utility/decorators.js ***!
+  \****************************************/
+/*! exports provided: proto */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "proto", function() { return proto; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomChoice", function() { return randomChoice; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return arraysEqual; });
+function proto(descriptor) {
+  descriptor.placement = "prototype";
+  return descriptor;
+}
+
+/***/ }),
+
+/***/ "./src/core/utility/dom.js":
+/*!*********************************!*\
+  !*** ./src/core/utility/dom.js ***!
+  \*********************************/
+/*! exports provided: parseHTML, createFragment, addClasses, removeClasses, assignAttributes, selectElement, emptyElement, getScroll, setScroll, findChild, filterChildren, isWindow */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseHTML", function() { return parseHTML; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createFragment", function() { return createFragment; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return isEmptyObject; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "emptyElement", function() { return emptyElement; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addClasses", function() { return addClasses; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeClasses", function() { return removeClasses; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assignAttributes", function() { return assignAttributes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setElementOffset", function() { return setElementOffset; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getElementOffset", function() { return getElementOffset; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getScroll", function() { return getScroll; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isWindow", function() { return isWindow; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setScroll", function() { return setScroll; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectElement", function() { return selectElement; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assert", function() { return assert; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseBooleanOrInt", function() { return parseBooleanOrInt; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseBooleanOrFloat", function() { return parseBooleanOrFloat; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseBoolean", function() { return parseBoolean; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseIntValue", function() { return parseIntValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseFloatValue", function() { return parseFloatValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseAny", function() { return parseAny; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validateChoice", function() { return validateChoice; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "choice", function() { return choice; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "emptyElement", function() { return emptyElement; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getScroll", function() { return getScroll; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setScroll", function() { return setScroll; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "findChild", function() { return findChild; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filterChildren", function() { return filterChildren; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOwnProperty", function() { return getOwnProperty; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return getPropertyByPath; });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isWindow", function() { return isWindow; });
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -2441,64 +2708,7 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-
 var REG_WHITESPACE = /\s+/;
-/**
- * Clamps a value between a minimum and maximum values.
- * @param value
- * @param minValue
- * @param maxValue
- * @returns {*}
- */
-
-function clamp(value) {
-  var minValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var maxValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-  if (minValue !== null) {
-    value = Math.max(value, minValue);
-  }
-
-  if (maxValue !== null) {
-    value = Math.min(value, maxValue);
-  }
-
-  return value;
-}
-function modulo(value, mod) {
-  return (value % mod + mod) % mod;
-}
-function proto(descriptor) {
-  descriptor.placement = "prototype";
-  return descriptor;
-}
-/**
- * Returns a random value from an array.
- * @param array
- * @returns {*}
- */
-
-function randomChoice(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-/**
- * Checks to see if 2 arrays are "equal".
- * @param array1
- * @param array2
- */
-
-function arraysEqual(array1, array2) {
-  if (array1 === array2) return true; // The same object.
-
-  if (array1 == null || array2 == null) return false;
-  if (array1.length !== array2.length) return false;
-
-  for (var i = 0, l = array1.length; i < l; i++) {
-    if (array1[i] !== array2[i]) return false;
-  }
-
-  return true;
-}
 /**
  * Parses an html string into a document fragment.
  *
@@ -2527,32 +2737,6 @@ function parseHTML(html) {
 function createFragment(html) {
   // noinspection JSDeprecatedSymbols
   return parseHTML(html);
-}
-/**
- * Tests to see if the object is empty.
- *
- * @param object
- * @return {boolean}
- */
-
-function isEmptyObject(object) {
-  // noinspection LoopStatementThatDoesntLoopJS
-  for (var key in object) {
-    return false;
-  }
-
-  return true;
-}
-/**
- * Empties a dom element.
- *
- * @param element
- */
-
-function emptyElement(element) {
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
 }
 /**
  * Adds classes to an element.  Can take a space separated list of classes.
@@ -2600,91 +2784,6 @@ function assignAttributes(element, attributes) {
   }
 }
 /**
- * Sets an elements position relative to the document.
- *
- * @param element
- * @param coords
- */
-
-function setElementOffset(element, coords) {
-  if (coords.nodeType) {
-    coords = getElementOffset(element);
-  } else if (Array.isArray(coords)) {
-    coords = {
-      left: coords.left,
-      top: coords.top
-    };
-  }
-
-  var offset = element.getBoundingClientRect();
-  var style = getComputedStyle(element),
-      left = parseInt(style.left, 10) || 0,
-      top = parseInt(style.top, 10) || 0;
-  element.style.left = left + (coords.left - offset.left) + 'px';
-  element.style.top = top + (coords.top - offset.top) + 'px';
-}
-/**
- * Returns the top and left position of an element relative to the document.
- *
- * @param element
- * @return {{top: number, left: number}}
- */
-
-function getElementOffset(element) {
-  var box = element.getBoundingClientRect();
-  return {
-    left: box.left + window.pageXOffset,
-    top: box.top + window.pageYOffset
-  };
-}
-/**
- * Normalizing accessing scroll position for an element.
- *
- * Windows and elements have different ways of accessing their scroll left and scroll top values on IE.
- * This function normalizes this behavior so getScroll(variable).scrollLeft always works.
- * @param element
- * @returns {{left, top}}
- */
-
-function getScroll(element) {
-  if (isWindow(element)) {
-    return {
-      scrollLeft: element.pageXOffset,
-      scrollTop: element.pageYOffset
-    };
-  } else {
-    return {
-      scrollLeft: element.scrollLeft,
-      scrollTop: element.scrollTop
-    };
-  }
-}
-/**
- * Test to see if the variable is a window.
- * @param variable
- * @returns {boolean}
- */
-
-function isWindow(variable) {
-  return variable && _typeof(variable) === 'object' && setInterval in variable;
-}
-/**
- * Normalizes setting a scroll position for an element.
- * Windows on ie and elements with overflow scroll have different ways of setting the scroll position.
- * This methods normalizes them.
- * @param element - The element to scroll
- * @param scroll - An object with a left or a top property or both.
- */
-
-function setScroll(element, scroll) {
-  if (element.scrollTo) {
-    element.scrollTo(scroll);
-  } else {
-    element.scrollLeft = scroll.left;
-    element.scrollTop = scroll.top;
-  }
-}
-/**
  * Matches a single dom element based on the given selector.
  * Can take a css selector string, a jquery object, a dom element, a document element or a document fragment.
  * If a css selector is passed it will query for the element.
@@ -2717,221 +2816,53 @@ function selectElement(selector) {
   }
 }
 /**
- * Asserts that a condition is true or raises an AssertionError.
- * @param condition - condition to check.
- * @param message - message on fail.
- * @throws AssertionError
+ * Empties a dom element.
+ *
+ * @param element
  */
 
-function assert(condition, message) {
-  if (!condition) {
-    throw new _errors__WEBPACK_IMPORTED_MODULE_0__["AssertionError"](message);
+function emptyElement(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
   }
 }
 /**
- * Attempts to parse the value into a boolean value or a integer.  Returns the default value on failure if provided.
- * Otherwise throws a TypeError.
- * @param value
- * @param radix
- * @param defaultValue
- * @returns {boolean|number|*}
+ * Normalizing accessing scroll position for an element.
+ *
+ * Windows and elements have different ways of accessing their scroll left and scroll top values on IE.
+ * This function normalizes this behavior so getScroll(variable).scrollLeft always works.
+ * @param element
+ * @returns {{left, top}}
  */
 
-function parseBooleanOrInt(value) {
-  var radix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
-  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : TypeError;
-
-  var type = _typeof(value);
-
-  if (type === 'boolean' || type === 'number') {
-    return value;
-  }
-
-  if (value === 'true') {
-    return true;
-  } else if (value === 'false') {
-    return false;
-  }
-
-  value = parseInt(value, radix);
-
-  if (Number.isNaN(value)) {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Could not parse value into boolean or int.");
-    } else {
-      return defaultValue;
-    }
-  }
-
-  return value;
-}
-/**
- * Attempts to parse the value into a boolean value or a float.  Returns the default value on failure if provided.
- * Otherwise throws a TypeError.
- * @param value
- * @param defaultValue
- * @returns {boolean|number|*}
- */
-
-function parseBooleanOrFloat(value) {
-  var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TypeError;
-
-  var type = _typeof(value);
-
-  if (type === 'boolean' || type === 'number') {
-    return value;
-  }
-
-  if (value === 'true') {
-    return true;
-  } else if (value === 'false') {
-    return false;
-  }
-
-  value = parseFloat(value);
-
-  if (Number.isNaN(value)) {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Could not parse value into boolean or int.");
-    } else {
-      return defaultValue;
-    }
-  }
-
-  return value;
-}
-/**
- * Attempts for parse a boolean value from a string.  Returns the defaultValue on failure if provided.  Otherwise throws
- * a TypeError.
- * @param value
- * @param defaultValue
- * @returns {boolean|*}
- */
-
-function parseBoolean(value) {
-  var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TypeError;
-
-  if (typeof value === 'boolean') {
-    return value;
-  } else if (value === 'true') {
-    return true;
-  } else if (value === 'false') {
-    return false;
+function getScroll(element) {
+  if (isWindow(element)) {
+    return {
+      scrollLeft: element.pageXOffset,
+      scrollTop: element.pageYOffset
+    };
   } else {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Could not parse value into boolean.");
-    } else {
-      return defaultValue;
-    }
+    return {
+      scrollLeft: element.scrollLeft,
+      scrollTop: element.scrollTop
+    };
   }
 }
 /**
- * Attempts to parse a string into an integer.  Returns the default value on failure if set.  Otherwise throws a
- * TypeError.
- * @param value
- * @param radix
- * @param defaultValue
- * @returns {number}
+ * Normalizes setting a scroll position for an element.
+ * Windows on ie and elements with overflow scroll have different ways of setting the scroll position.
+ * This methods normalizes them.
+ * @param element - The element to scroll
+ * @param scroll - An object with a left or a top property or both.
  */
 
-function parseIntValue(value) {
-  var radix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
-  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : TypeError;
-  value = parseInt(value, radix);
-
-  if (Number.isNaN(value)) {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Could not parse value into integer.");
-    } else {
-      // noinspection JSValidateTypes
-      return defaultValue;
-    }
+function setScroll(element, scroll) {
+  if (element.scrollTo) {
+    element.scrollTo(scroll);
+  } else {
+    element.scrollLeft = scroll.left;
+    element.scrollTop = scroll.top;
   }
-
-  return value;
-}
-/**
- * Attempts to parse a string into an integer.  Returns the default value on failure if set.  Otherwise throws a
- * TypeError.
- * @param value
- * @param defaultValue
- * @returns {number}
- */
-
-function parseFloatValue(value) {
-  var defaultValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TypeError;
-  value = parseFloat(value);
-
-  if (Number.isNaN(value)) {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Could not parse value into float.");
-    } else {
-      // noinspection JSValidateTypes
-      return defaultValue;
-    }
-  }
-
-  return value;
-}
-/**
- * Runs multiple parsers and returns the first one that doesn't throw a TypeError.
- * @param value
- * @param parsers
- * @returns {*}
- */
-
-function parseAny(value) {
-  for (var _len = arguments.length, parsers = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-    parsers[_key - 1] = arguments[_key];
-  }
-
-  for (var _i = 0, _parsers = parsers; _i < _parsers.length; _i++) {
-    var parser = _parsers[_i];
-
-    try {
-      return parser(value);
-    } catch (e) {
-      if (!(e instanceof TypeError)) {
-        throw e;
-      }
-    }
-  }
-
-  throw new TypeError("Could not parse value.");
-}
-/**
- * Validates that the value is one of the given choices.
- * @param value
- * @param choices
- * @param defaultValue
- * @returns {TypeErrorConstructor|*}
- */
-
-function validateChoice(value, choices) {
-  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : TypeError;
-
-  if (choices.indexOf(value) === -1) {
-    if (defaultValue === TypeError) {
-      throw new TypeError("Invalid choice.");
-    } else {
-      return defaultValue;
-    }
-  }
-
-  return value;
-}
-function choice() {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
-  }
-
-  return function (value) {
-    if (args.indexOf(value) === -1) {
-      throw new TypeError("Invalid Choice");
-    }
-
-    return value;
-  };
 }
 /**
  * Returns first child element that matches the test function.
@@ -2978,6 +2909,608 @@ function filterChildren(element, fn) {
   }
 
   return r;
+}
+/**
+ * Test to see if the variable is a window.
+ * @param variable
+ * @returns {boolean}
+ */
+
+function isWindow(variable) {
+  return variable && _typeof(variable) === 'object' && setInterval in variable;
+}
+
+/***/ }),
+
+/***/ "./src/core/utility/index.js":
+/*!***********************************!*\
+  !*** ./src/core/utility/index.js ***!
+  \***********************************/
+/*! exports provided: debounce, proto, createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values, clamp, modulo, calcDistance, arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _debounce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./debounce */ "./src/core/utility/debounce.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return _debounce__WEBPACK_IMPORTED_MODULE_0__["debounce"]; });
+
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./decorators */ "./src/core/utility/decorators.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "proto", function() { return _decorators__WEBPACK_IMPORTED_MODULE_1__["proto"]; });
+
+/* harmony import */ var _dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dom */ "./src/core/utility/dom.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "createFragment", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["createFragment"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "findChild", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["findChild"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "filterChildren", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["filterChildren"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "emptyElement", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["emptyElement"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "addClasses", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["addClasses"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeClasses", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["removeClasses"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "selectElement", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["selectElement"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "assignAttributes", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["assignAttributes"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getScroll", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["getScroll"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isWindow", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["isWindow"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "setScroll", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["setScroll"]; });
+
+/* harmony import */ var _iter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./iter */ "./src/core/utility/iter.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "all", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["all"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "any", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["any"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "chain", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["chain"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "enumerate", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["enumerate"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "firstValue", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["firstValue"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "items", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["items"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "keys", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["keys"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "values", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["values"]; });
+
+/* harmony import */ var _math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./math */ "./src/core/utility/math.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "clamp", function() { return _math__WEBPACK_IMPORTED_MODULE_4__["clamp"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "modulo", function() { return _math__WEBPACK_IMPORTED_MODULE_4__["modulo"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "calcDistance", function() { return _math__WEBPACK_IMPORTED_MODULE_4__["calcDistance"]; });
+
+/* harmony import */ var _object__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./object */ "./src/core/utility/object.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["arraysEqual"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["getPropertyByPath"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getOwnProperty", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["getOwnProperty"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["isEmptyObject"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "randomChoice", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["randomChoice"]; });
+
+
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./src/core/utility/iter.js":
+/*!**********************************!*\
+  !*** ./src/core/utility/iter.js ***!
+  \**********************************/
+/*! exports provided: items, keys, values, enumerate, chain, firstValue, all, any */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "items", function() { return items; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "keys", function() { return keys; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "values", function() { return values; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "enumerate", function() { return enumerate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chain", function() { return chain; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "firstValue", function() { return firstValue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "all", function() { return all; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "any", function() { return any; });
+var _marked =
+/*#__PURE__*/
+regeneratorRuntime.mark(items),
+    _marked2 =
+/*#__PURE__*/
+regeneratorRuntime.mark(keys),
+    _marked3 =
+/*#__PURE__*/
+regeneratorRuntime.mark(values),
+    _marked4 =
+/*#__PURE__*/
+regeneratorRuntime.mark(enumerate),
+    _marked5 =
+/*#__PURE__*/
+regeneratorRuntime.mark(chain);
+
+function items(object) {
+  var key;
+  return regeneratorRuntime.wrap(function items$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          _context.t0 = regeneratorRuntime.keys(object);
+
+        case 1:
+          if ((_context.t1 = _context.t0()).done) {
+            _context.next = 8;
+            break;
+          }
+
+          key = _context.t1.value;
+
+          if (!object.hasOwnProperty(key)) {
+            _context.next = 6;
+            break;
+          }
+
+          _context.next = 6;
+          return [key, object[key]];
+
+        case 6:
+          _context.next = 1;
+          break;
+
+        case 8:
+        case "end":
+          return _context.stop();
+      }
+    }
+  }, _marked);
+}
+function keys(object) {
+  var key;
+  return regeneratorRuntime.wrap(function keys$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.t0 = regeneratorRuntime.keys(object);
+
+        case 1:
+          if ((_context2.t1 = _context2.t0()).done) {
+            _context2.next = 8;
+            break;
+          }
+
+          key = _context2.t1.value;
+
+          if (!object.hasOwnProperty(key)) {
+            _context2.next = 6;
+            break;
+          }
+
+          _context2.next = 6;
+          return key;
+
+        case 6:
+          _context2.next = 1;
+          break;
+
+        case 8:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, _marked2);
+}
+function values(object) {
+  var key;
+  return regeneratorRuntime.wrap(function values$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.t0 = regeneratorRuntime.keys(object);
+
+        case 1:
+          if ((_context3.t1 = _context3.t0()).done) {
+            _context3.next = 8;
+            break;
+          }
+
+          key = _context3.t1.value;
+
+          if (!object.hasOwnProperty(key)) {
+            _context3.next = 6;
+            break;
+          }
+
+          _context3.next = 6;
+          return object[key];
+
+        case 6:
+          _context3.next = 1;
+          break;
+
+        case 8:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, _marked3);
+}
+function enumerate(iterable) {
+  var i, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, value;
+
+  return regeneratorRuntime.wrap(function enumerate$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          i = 0;
+          _iteratorNormalCompletion = true;
+          _didIteratorError = false;
+          _iteratorError = undefined;
+          _context4.prev = 4;
+          _iterator = iterable[Symbol.iterator]();
+
+        case 6:
+          if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+            _context4.next = 13;
+            break;
+          }
+
+          value = _step.value;
+          _context4.next = 10;
+          return [i, value];
+
+        case 10:
+          _iteratorNormalCompletion = true;
+          _context4.next = 6;
+          break;
+
+        case 13:
+          _context4.next = 19;
+          break;
+
+        case 15:
+          _context4.prev = 15;
+          _context4.t0 = _context4["catch"](4);
+          _didIteratorError = true;
+          _iteratorError = _context4.t0;
+
+        case 19:
+          _context4.prev = 19;
+          _context4.prev = 20;
+
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+
+        case 22:
+          _context4.prev = 22;
+
+          if (!_didIteratorError) {
+            _context4.next = 25;
+            break;
+          }
+
+          throw _iteratorError;
+
+        case 25:
+          return _context4.finish(22);
+
+        case 26:
+          return _context4.finish(19);
+
+        case 27:
+        case "end":
+          return _context4.stop();
+      }
+    }
+  }, _marked4, null, [[4, 15, 19, 27], [20,, 22, 26]]);
+}
+function chain() {
+  var _len,
+      iterables,
+      _key,
+      _i,
+      _iterables,
+      iter,
+      _iteratorNormalCompletion2,
+      _didIteratorError2,
+      _iteratorError2,
+      _iterator2,
+      _step2,
+      value,
+      _args5 = arguments;
+
+  return regeneratorRuntime.wrap(function chain$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          for (_len = _args5.length, iterables = new Array(_len), _key = 0; _key < _len; _key++) {
+            iterables[_key] = _args5[_key];
+          }
+
+          _i = 0, _iterables = iterables;
+
+        case 2:
+          if (!(_i < _iterables.length)) {
+            _context5.next = 33;
+            break;
+          }
+
+          iter = _iterables[_i];
+          _iteratorNormalCompletion2 = true;
+          _didIteratorError2 = false;
+          _iteratorError2 = undefined;
+          _context5.prev = 7;
+          _iterator2 = iter[Symbol.iterator]();
+
+        case 9:
+          if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
+            _context5.next = 16;
+            break;
+          }
+
+          value = _step2.value;
+          _context5.next = 13;
+          return value;
+
+        case 13:
+          _iteratorNormalCompletion2 = true;
+          _context5.next = 9;
+          break;
+
+        case 16:
+          _context5.next = 22;
+          break;
+
+        case 18:
+          _context5.prev = 18;
+          _context5.t0 = _context5["catch"](7);
+          _didIteratorError2 = true;
+          _iteratorError2 = _context5.t0;
+
+        case 22:
+          _context5.prev = 22;
+          _context5.prev = 23;
+
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+
+        case 25:
+          _context5.prev = 25;
+
+          if (!_didIteratorError2) {
+            _context5.next = 28;
+            break;
+          }
+
+          throw _iteratorError2;
+
+        case 28:
+          return _context5.finish(25);
+
+        case 29:
+          return _context5.finish(22);
+
+        case 30:
+          _i++;
+          _context5.next = 2;
+          break;
+
+        case 33:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  }, _marked5, null, [[7, 18, 22, 30], [23,, 25, 29]]);
+}
+/**
+ * Takes an iterable and returns the first none null or undefined value.
+ * @param args
+ */
+
+function firstValue(args) {
+  var _iteratorNormalCompletion3 = true;
+  var _didIteratorError3 = false;
+  var _iteratorError3 = undefined;
+
+  try {
+    for (var _iterator3 = args[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      var item = _step3.value;
+
+      if (item !== null && item !== undefined) {
+        return item;
+      }
+    }
+  } catch (err) {
+    _didIteratorError3 = true;
+    _iteratorError3 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+        _iterator3["return"]();
+      }
+    } finally {
+      if (_didIteratorError3) {
+        throw _iteratorError3;
+      }
+    }
+  }
+}
+/**
+ * Takes an iterable and returns true if all of the values are trueish.
+ * @param iterable
+ */
+
+function all(iterable) {
+  var _iteratorNormalCompletion4 = true;
+  var _didIteratorError4 = false;
+  var _iteratorError4 = undefined;
+
+  try {
+    for (var _iterator4 = iterable[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+      var item = _step4.value;
+
+      if (!item) {
+        return false;
+      }
+    }
+  } catch (err) {
+    _didIteratorError4 = true;
+    _iteratorError4 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+        _iterator4["return"]();
+      }
+    } finally {
+      if (_didIteratorError4) {
+        throw _iteratorError4;
+      }
+    }
+  }
+
+  return true;
+}
+/**
+ * Takes an iterable and returns true if any of the values are trueish.
+ * @param iterable
+ */
+
+function any(iterable) {
+  var _iteratorNormalCompletion5 = true;
+  var _didIteratorError5 = false;
+  var _iteratorError5 = undefined;
+
+  try {
+    for (var _iterator5 = iterable[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+      var item = _step5.value;
+      if (item) return true;
+    }
+  } catch (err) {
+    _didIteratorError5 = true;
+    _iteratorError5 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+        _iterator5["return"]();
+      }
+    } finally {
+      if (_didIteratorError5) {
+        throw _iteratorError5;
+      }
+    }
+  }
+
+  return false;
+}
+
+/***/ }),
+
+/***/ "./src/core/utility/math.js":
+/*!**********************************!*\
+  !*** ./src/core/utility/math.js ***!
+  \**********************************/
+/*! exports provided: clamp, modulo, calcDistance */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clamp", function() { return clamp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "modulo", function() { return modulo; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "calcDistance", function() { return calcDistance; });
+/**
+ * Clamps a value between a minimum and maximum values.
+ * @param value
+ * @param minValue
+ * @param maxValue
+ * @returns {*}
+ */
+function clamp(value) {
+  var minValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var maxValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+  if (minValue !== null) {
+    value = Math.max(value, minValue);
+  }
+
+  if (maxValue !== null) {
+    value = Math.min(value, maxValue);
+  }
+
+  return value;
+}
+function modulo(value, mod) {
+  return (value % mod + mod) % mod;
+}
+function calcDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y2, 2));
+}
+
+/***/ }),
+
+/***/ "./src/core/utility/object.js":
+/*!************************************!*\
+  !*** ./src/core/utility/object.js ***!
+  \************************************/
+/*! exports provided: randomChoice, arraysEqual, isEmptyObject, getOwnProperty, getPropertyByPath */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "randomChoice", function() { return randomChoice; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return arraysEqual; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return isEmptyObject; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOwnProperty", function() { return getOwnProperty; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return getPropertyByPath; });
+/**
+ * Returns a random value from an array.
+ * @param array
+ * @returns {*}
+ */
+function randomChoice(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+/**
+ * Checks to see if 2 arrays are "equal".
+ * @param array1
+ * @param array2
+ */
+
+function arraysEqual(array1, array2) {
+  if (array1 === array2) return true; // The same object.
+
+  if (array1 == null || array2 == null) return false;
+  if (array1.length !== array2.length) return false;
+
+  for (var i = 0, l = array1.length; i < l; i++) {
+    if (array1[i] !== array2[i]) return false;
+  }
+
+  return true;
+}
+/**
+ * Tests to see if the object is empty.
+ *
+ * @param object
+ * @return {boolean}
+ */
+
+function isEmptyObject(object) {
+  // noinspection LoopStatementThatDoesntLoopJS
+  for (var key in object) {
+    return false;
+  }
+
+  return true;
 }
 /**
  * Returns the object own property or the default value if it does not have that property.
@@ -3036,30 +3569,24 @@ function getPropertyByPath(obj, path) {
 
 /***/ }),
 
-/***/ "./src/core/vectors.js":
-/*!*****************************!*\
-  !*** ./src/core/vectors.js ***!
-  \*****************************/
-/*! exports provided: UnitError, Vec2, Vec3, Vec4, Rect, RGBA */
+/***/ "./src/core/vectors/RGBA.js":
+/*!**********************************!*\
+  !*** ./src/core/vectors/RGBA.js ***!
+  \**********************************/
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "UnitError", function() { return UnitError; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec2", function() { return Vec2; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec3", function() { return Vec3; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Vec4", function() { return Vec4; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Rect", function() { return Rect; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RGBA", function() { return RGBA; });
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utility */ "./src/core/utility.js");
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./errors */ "./src/core/errors.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return RGBA; });
+/* harmony import */ var _Vec4__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vec4 */ "./src/core/vectors/Vec4.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -3072,1012 +3599,25 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 
+var regPercentage = /^(\d+\.?\d*)%$/;
 
-var regPercentage = /^(\d+\.?\d*)%$/,
-    regWhitespace = /\s+/,
-    regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/,
-    // Parses string like "left+10px" into ["left", "+10px"]
-regTypedNumber = /^([+-]?\d+\.?\d*)([a-z%]*)$/; // parses strings like "+10px" into ["+10", "px"].  AKA, parses the unit out of a number string.
-
-var UnitError =
-/*#__PURE__*/
-function (_ExtendableError) {
-  _inherits(UnitError, _ExtendableError);
-
-  function UnitError() {
-    _classCallCheck(this, UnitError);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(UnitError).apply(this, arguments));
-  }
-
-  return UnitError;
-}(_errors__WEBPACK_IMPORTED_MODULE_1__["ExtendableError"]);
-var positionShortHandValues = {
-  top: 'center top',
-  right: 'right middle',
-  bottom: 'center bottom',
-  left: 'left middle',
-  topleft: 'left top',
-  topright: 'right top',
-  bottomleft: 'left bottom',
-  bottomright: 'right bottom'
-};
-/**
- * Stores a 2 value Vector.
- */
-
-var Vec2 =
-/*#__PURE__*/
-function () {
-  function Vec2() {
-    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-    _classCallCheck(this, Vec2);
-
-    this[0] = x;
-    this[1] = y;
-  }
-
-  _createClass(Vec2, [{
-    key: "add",
-    value: function add(vec2) {
-      if (typeof vec2 === 'number') {
-        return new Vec2(this[0] + vec2, this[1] + vec2);
-      } else {
-        return new Vec2(this[0] + vec2[0], this[1] + vec2[1]);
-      }
-    }
-  }, {
-    key: "subtract",
-    value: function subtract(vec2) {
-      if (typeof vec2 === 'number') {
-        return new Vec2(this[0] - vec2, this[1] - vec2);
-      } else {
-        return new Vec2(this[0] - vec2[0], this[1] - vec2[1]);
-      }
-    }
-  }, {
-    key: "scalar",
-    value: function scalar(value) {
-      return new Vec2(this[0] * value, this[1] * value);
-    }
-  }, {
-    key: "mod",
-    value: function mod(vec2) {
-      if (typeof vec2 === 'number') {
-        return new Vec2(this[0] % vec2, this[1] % vec2);
-      } else {
-        return new Vec2(this[0] % vec2[0], this[1] % vec2[1]);
-      }
-    }
-  }, {
-    key: "equals",
-    value: function equals(vec2) {
-      return this === vec2 || this[0] === vec2[0] && this[1] === vec2[1];
-    }
-  }, {
-    key: "set",
-    value: function set(value) {
-      if (_typeof(value) !== 'object') {
-        this[0] = value;
-        this[1] = value;
-      } else {
-        this[0] = value[0];
-        this[1] = value[1];
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return Vec2(this[0], this[1]);
-    }
-  }, {
-    key: "toTranslate",
-    value: function toTranslate() {
-      return "translate(".concat(this.x, "px, ").concat(this.y, "px)");
-    }
-  }, {
-    key: "toTranslate3d",
-    value: function toTranslate3d() {
-      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, 0)");
-    }
-  }, {
-    key: "clamp",
-    value: function clamp(vec4) {
-      return new Vec2(Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, vec4.left, vec4.right), Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, vec4.top, vec4.bottom));
-    }
-  }, {
-    key: "x",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "y",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "left",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "top",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }], [{
-    key: "fromVertex",
-    value: function fromVertex(vertex) {
-      if (Array.isArray(vertex)) {
-        return new Vec2(vertex[0], vertex[1]);
-      } else if (vertex.hasOwnProperty('left')) {
-        return new Vec2(vertex.left, vertex.top);
-      } else {
-        return new Vec2(vertex.x, vertex.y);
-      }
-    }
-  }]);
-
-  return Vec2;
-}();
-/**
- * Stores a 3 value vector.
- */
-
-var Vec3 =
-/*#__PURE__*/
-function () {
-  function Vec3() {
-    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-    _classCallCheck(this, Vec3);
-
-    this[0] = x;
-    this[1] = y;
-    this[2] = z;
-  }
-
-  _createClass(Vec3, [{
-    key: "set",
-    value: function set(value) {
-      if (_typeof(value) !== 'object') {
-        this[0] = value;
-        this[1] = value;
-        this[2] = value;
-      } else {
-        this[0] = value[0];
-        this[1] = value[1];
-        this[2] = value[2];
-      }
-    }
-  }, {
-    key: "add",
-    value: function add(vec3) {
-      if (typeof vec3 === 'number') {
-        return new Vec3(this[0] + vec3, this[1] + vec3, this[2] + vec3);
-      } else {
-        return new Vec3(this[0] + vec3[0], this[1] + vec3[1], this[2] + vec3[2]);
-      }
-    }
-  }, {
-    key: "subtract",
-    value: function subtract(vec3) {
-      if (typeof vec3 === 'number') {
-        return new Vec3(this[0] - vec3, this[1] - vec3, this[2] - vec3);
-      } else {
-        return new Vec3(this[0] - vec3[0], this[1] - vec3[1], this[2] - vec3[2]);
-      }
-    }
-  }, {
-    key: "scalar",
-    value: function scalar(value) {
-      return new Vec3(this[0] * value, this[1] * value, this[2] * value);
-    }
-  }, {
-    key: "equals",
-    value: function equals(vec3) {
-      return vec3 === this || vec3[0] === this[0] && vec3[1] === this[1] && vec3[2] === this[2];
-    }
-  }, {
-    key: "mod",
-    value: function mod(vec3) {
-      if (typeof vec3 === 'number') {
-        return new Vec3(this[0] % vec3, this[1] % vec3, this[2] % vec3);
-      } else {
-        return new Vec3(this[0] % vec3[0], this[1] % vec3[1], this[2] % vec3[2]);
-      }
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Vec3(this[0], this[1], this[2]);
-    }
-  }, {
-    key: "toHex",
-    value: function toHex() {
-      var r = Math.round(this.r).toString(16),
-          g = Math.round(this.g).toString(16),
-          b = Math.round(this.b).toString(16);
-
-      if (r.length === 1) {
-        r = '0' + r;
-      }
-
-      if (g.length === 1) {
-        g = '0' + g;
-      }
-
-      if (b.length === 1) {
-        b = '0' + b;
-      }
-
-      return "#".concat(r).concat(g).concat(b);
-    }
-  }, {
-    key: "toRGB",
-    value: function toRGB() {
-      return "rgb(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ")");
-    }
-  }, {
-    key: "toTranslate3d",
-    value: function toTranslate3d() {
-      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, ").concat(this.z, "px)");
-    }
-  }, {
-    key: "x",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "y",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "z",
-    get: function get() {
-      return this[2];
-    },
-    set: function set(value) {
-      this[2] = value;
-    }
-  }, {
-    key: "r",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "g",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "b",
-    get: function get() {
-      return this[2];
-    },
-    set: function set(value) {
-      this[2] = value;
-    }
-  }], [{
-    key: "fromHex",
-    value: function fromHex(hex) {
-      var m = /^#?([0-9a-f]{3})$/i.exec(hex);
-
-      if (m) {
-        hex = m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2];
-      } else {
-        m = /^#?([0-9a-f]{6})$/i.exec(hex);
-
-        if (m) {
-          hex = m[1];
-        } else {
-          throw new Error("Could not parse value ".concat(hex));
-        }
-      }
-
-      hex = parseInt(hex, 16); // r, g, b
-
-      return new Vec3(hex & 0xff0000 >> 16, hex & 0x00ff00 >> 8, hex & 0x0000ff);
-    }
-  }, {
-    key: "fromRGB",
-    value: function fromRGB(value) {
-      var m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(value);
-
-      if (!m) {
-        throw new Error("Could not parse rgb value ".concat(value));
-      }
-
-      return new Vec3(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
-    }
-  }]);
-
-  return Vec3;
-}();
-/**
- * Class to store a 4 value vector.
- * Provides DOMRect interface.
- */
-
-var Vec4 =
-/*#__PURE__*/
-function () {
-  /**
-   * r, g, b, a
-   * left, top, right, bottom
-   *
-   * @param left
-   * @param top
-   * @param right
-   * @param bottom
-   */
-  function Vec4(left, top, right, bottom) {
-    _classCallCheck(this, Vec4);
-
-    this[0] = left;
-    this[1] = top;
-    this[2] = right;
-    this[3] = bottom;
-  }
-
-  _createClass(Vec4, [{
-    key: "set",
-    value: function set(valueOrVec4) {
-      if (_typeof(valueOrVec4) !== 'object') {
-        this[0] = valueOrVec4;
-        this[1] = valueOrVec4;
-        this[2] = valueOrVec4;
-        this[3] = valueOrVec4;
-      } else {
-        this[0] = valueOrVec4[0];
-        this[1] = valueOrVec4[1];
-        this[2] = valueOrVec4[2];
-        this[3] = valueOrVec4[3];
-      }
-    }
-  }, {
-    key: "add",
-    value: function add(valueOrVec4) {
-      if (typeof valueOrVec4 === 'number') {
-        return this._new(this[0] + valueOrVec4, this[1] + valueOrVec4, this[2] + valueOrVec4, this[3] + valueOrVec4);
-      } else {
-        return this._new(this[0] + valueOrVec4[0], this[1] + valueOrVec4[1], this[2] + valueOrVec4[2], this[3] + valueOrVec4[3]);
-      }
-    }
-  }, {
-    key: "subtract",
-    value: function subtract(valueOrVec4) {
-      if (typeof valueOrVec4 === 'number') {
-        return this._new(this[0] - valueOrVec4, this[1] - valueOrVec4, this[2] - valueOrVec4, this[3] - valueOrVec4);
-      } else {
-        return this._new(this[0] - valueOrVec4[0], this[1] - valueOrVec4[1], this[2] - valueOrVec4[2], this[3] - valueOrVec4[3]);
-      }
-    }
-  }, {
-    key: "scalar",
-    value: function scalar(value) {
-      return this._new(this[0] * value, this[1] * value, this[2] * value, this[3] * value);
-    }
-  }, {
-    key: "equals",
-    value: function equals(vec4) {
-      return vec4 === this || vec4[0] === this[0] && vec4[1] === this[1] && vec4[2] === this[2] && vec4[3] === this[3];
-    }
-  }, {
-    key: "mod",
-    value: function mod(valueOrVec4) {
-      if (typeof valueOrVec4 === 'number') {
-        return this._new(this[0] % valueOrVec4, this[1] % valueOrVec4, this[2] % valueOrVec4, this[3] % valueOrVec4);
-      } else {
-        return this._new(this[0] % valueOrVec4[0], this[1] % valueOrVec4[1], this[2] % valueOrVec4[2], this[3] % valueOrVec4[3]);
-      }
-    }
-  }, {
-    key: "toRGBA",
-    value: function toRGBA() {
-      return "rgba(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ", ").concat(this.a, ")");
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new this.constructor(this[0], this[1], this[2], this[3]);
-    }
-  }, {
-    key: "_new",
-    value: function _new(left, top, right, bottom) {
-      return new this.constructor(left, top, right, bottom);
-    }
-  }, {
-    key: "r",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "g",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "b",
-    get: function get() {
-      return this[2];
-    },
-    set: function set(value) {
-      this[2] = value;
-    }
-  }, {
-    key: "a",
-    get: function get() {
-      return this[3];
-    },
-    set: function set(value) {
-      this[3] = value;
-    }
-  }], [{
-    key: "fromRGBAObject",
-    value: function fromRGBAObject(_ref) {
-      var r = _ref.r,
-          g = _ref.g,
-          b = _ref.b,
-          a = _ref.a;
-      return new Vec4(r, g, b, a);
-    }
-  }, {
-    key: "fromRGBA",
-    value: function fromRGBA(value) {
-      var m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
-
-      if (!m) {
-        throw new Error("Could not parse rgba value ".concat(value));
-      }
-
-      return new Vec4(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10), parseFloat(m[4]));
-    }
-  }]);
-
-  return Vec4;
-}();
-var Rect =
-/*#__PURE__*/
-function (_Vec) {
-  _inherits(Rect, _Vec);
-
-  function Rect(left, top, right, bottom) {
-    var _this;
-
-    var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
-
-    _classCallCheck(this, Rect);
-
-    if (_typeof(left) === 'object' && left.getBoundingClientRect) {
-      if (left.getBoundingClientRect) {
-        domElement = left;
-        var bb = domElement.getBoundingClientRect();
-        left = bb.left;
-        top = bb.top;
-        right = bb.right;
-        bottom = bb.bottom;
-      } else {
-        top = left.top;
-        right = left.right;
-        bottom = left.bottom;
-        left = left.left;
-      }
-    }
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, left, top, right, bottom));
-    _this.domElement = domElement;
-    return _this;
-  }
-
-  _createClass(Rect, [{
-    key: "bind",
-    value: function bind(element) {
-      return this._new(this.left, this.top, this.right, this.bottom, element);
-    }
-  }, {
-    key: "_new",
-    value: function _new(left, top, right, bottom) {
-      var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
-      return new this.constructor(left, top, right, bottom, domElement === undefined ? this.domElement : domElement);
-    }
-  }, {
-    key: "toPoint",
-    value: function toPoint() {
-      return new Vec2(this[0], this[1]);
-    }
-  }, {
-    key: "getArea",
-    value: function getArea() {
-      return this.width * this.height;
-    }
-  }, {
-    key: "translate",
-    value: function translate(x, y) {
-      if (_typeof(x) === 'object') {
-        y = x.y;
-        x = x.x;
-      }
-
-      return this._new(this[0] + x, this[1] + y, this[2] + x, this[3] + y);
-    }
-  }, {
-    key: "addMargins",
-    value: function addMargins(_ref2) {
-      var left = _ref2.left,
-          top = _ref2.top,
-          right = _ref2.right,
-          bottom = _ref2.bottom;
-      return this._new(this.left - left, this.top - top, this.right + right, this.bottom + bottom);
-    }
-  }, {
-    key: "addPaddings",
-    value: function addPaddings(_ref3) {
-      var left = _ref3.left,
-          top = _ref3.top,
-          right = _ref3.right,
-          bottom = _ref3.bottom;
-      return this._new(this.left + left, this.top + top, this.right - right, this.bottom - bottom);
-    }
-  }, {
-    key: "moveTo",
-    value: function moveTo(_ref4) {
-      var left = _ref4.left,
-          top = _ref4.top;
-      var deltaX = left - this.left,
-          deltaY = top - this.top;
-      return this._new(this.left + deltaX, this.top + deltaY, this.right + deltaX, this.bottom + deltaY);
-    }
-  }, {
-    key: "intersection",
-    value: function intersection(_ref5) {
-      var left = _ref5.left,
-          top = _ref5.top,
-          right = _ref5.right,
-          bottom = _ref5.bottom;
-      left = Math.max(this.left, left);
-      right = Math.min(this.right, right);
-      bottom = Math.min(this.bottom, bottom);
-      top = Math.max(this.top, top);
-
-      if (left > right || top > bottom) {
-        return null;
-      }
-
-      return this._new(left, top, right, bottom);
-    }
-  }, {
-    key: "contains",
-    value: function contains(rect) {
-      return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
-    }
-  }, {
-    key: "containsX",
-    value: function containsX(rect) {
-      return this.left <= rect.left && this.right >= rect.right;
-    }
-  }, {
-    key: "containsY",
-    value: function containsY(rect) {
-      return this.top <= rect.top && this.bottom >= rect.bottom;
-    }
-  }, {
-    key: "isXOverlapping",
-    value: function isXOverlapping(rect) {
-      return rect.left <= this.right && rect.right >= this.left;
-    }
-  }, {
-    key: "isYOverlapping",
-    value: function isYOverlapping(rect) {
-      return rect.top <= this.bottom && rect.bottom >= this.top;
-    }
-  }, {
-    key: "clampXY",
-    value: function clampXY(rect) {
-      var width = this.right - this.left,
-          height = this.bottom - this.top,
-          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right),
-          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
-
-      return this._new(left, top, left + width, top + height);
-    }
-  }, {
-    key: "clamp",
-    value: function clamp(rect) {
-      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
-
-      var width = this.width,
-          height = this.height,
-          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right),
-          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
-
-      return this._new(left, top, left + width, top + height);
-    }
-  }, {
-    key: "clampX",
-    value: function clampX(rect) {
-      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
-
-      var width = this.width,
-          left = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, rect.left, rect.right);
-
-      return this._new(left, this.top, left + width, this.bottom);
-    }
-  }, {
-    key: "clampY",
-    value: function clampY(rect) {
-      rect = rect.subtract(new Rect(0, 0, this.width, this.height));
-
-      var height = this.height,
-          top = Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, rect.top, rect.bottom);
-
-      return this._new(this.left, top, this.right, top + height);
-    }
-  }, {
-    key: "getDistanceBetween",
-    value: function getDistanceBetween(rect) {
-      rect = Rect.fromRect(rect);
-      var isXOverlapping = this.isXOverlapping(rect),
-          isYOverlapping = this.isYOverlapping(rect);
-
-      if (isXOverlapping && isYOverlapping) {
-        // Items are overlapping
-        return 0;
-      } else if (isXOverlapping) {
-        return Math.min(Math.abs(this.bottom - rect.top), Math.abs(this.top - rect.bottom));
-      } else if (isYOverlapping) {
-        return Math.min(Math.abs(this.right - rect.left), Math.abs(this.left - rect.right));
-      } else {
-        var x1, y1, x2, y2;
-
-        if (this.right <= rect.left) {
-          x1 = this.right;
-          x2 = rect.left;
-        } else {
-          x1 = this.left;
-          x2 = rect.right;
-        }
-
-        if (this.bottom <= rect.top) {
-          y1 = this.bottom;
-          y2 = rect.top;
-        } else {
-          y1 = this.top;
-          y2 = rect.bottom;
-        } // Use distance formula to calculate distance.
-
-
-        return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
-      }
-    }
-  }, {
-    key: "position",
-    value: function position(_ref6) {
-      var my = _ref6.my,
-          at = _ref6.at,
-          of = _ref6.of,
-          _ref6$inside = _ref6.inside,
-          inside = _ref6$inside === void 0 ? null : _ref6$inside,
-          _ref6$collision = _ref6.collision,
-          collision = _ref6$collision === void 0 ? null : _ref6$collision;
-
-      if (of.getBoundingClientRect) {
-        of = new Rect(of);
-      }
-
-      if (inside && inside.getBoundingClientRect) {
-        inside = new Rect(inside);
-      } // collision can be string with a space separating the x and y values.
-      // for example "fit flipfit"
-      // normalize it to an {x, y} object.
-
-
-      if (collision && typeof collision === 'string') {
-        var parts = collision.trim().split(regWhitespace);
-        collision = {
-          x: parts[0],
-          y: parts[1]
-        };
-      }
-
-      var anchor = this.evaluatePositionString(my),
-          reference = of.evaluatePositionString(at),
-          deltaX = reference.x - anchor.x,
-          deltaY = reference.y - anchor.y;
-      var rect = this.translate(deltaX, deltaY);
-
-      if (!collision || !inside || inside.contains(rect)) {
-        return rect;
-      }
-
-      var flip = false,
-          collisionX = 'none',
-          collisionY = 'none';
-
-      if (!inside.containsX(rect)) {
-        if (collision.x === 'flip' || collision.x === 'flipfit') {
-          var center = this.left + this.width / 2;
-          anchor.x = (anchor.x - center) * -1 + center;
-          center = of.left + of.width / 2;
-          reference.x = (reference.x - center) * -1 + center;
-          flip = true;
-          collisionX = 'flip';
-        }
-      }
-
-      if (!inside.containsY(rect)) {
-        if (collision.y === 'flip' || collision.y === 'flipfit') {
-          var middle = this.top + this.height / 2;
-          anchor.y = (anchor.y - middle) * -1 + middle;
-          middle = of.top + of.height / 2;
-          reference.y = (reference.y - middle) * -1 + middle;
-          flip = true;
-          collisionY = 'flip';
-        }
-      }
-
-      if (flip) {
-        deltaX = reference.x - anchor.x;
-        deltaY = reference.y - anchor.y;
-        rect = this.translate(deltaX, deltaY);
-
-        if (inside.contains(rect)) {
-          rect.collsionX = collisionX;
-          rect.collsionY = collisionY;
-          return rect;
-        }
-      }
-
-      if (collision.x === 'fit' || collision.x === 'flipfit') {
-        rect = rect.clampX(inside);
-        collisionX = collisionX === 'flip' ? 'flipfit' : 'fit';
-      }
-
-      if (collision.y === 'fit' || collision.y === 'flipfit') {
-        rect = rect.clampY(inside);
-        collisionY = collisionY === 'flip' ? 'flipfit' : 'fit';
-      }
-
-      rect.collsionX = collisionX;
-      rect.collsionY = collisionY;
-      return rect;
-    }
-  }, {
-    key: "evaluatePositionString",
-    value: function evaluatePositionString(string) {
-      if (positionShortHandValues[string]) {
-        string = positionShortHandValues[string];
-      }
-
-      var pos = string.trim().split(regWhitespace),
-          x = pos[0],
-          y = pos[1],
-          rx = null,
-          ry = null;
-
-      if (x) {
-        rx = this._evaluatePositionStringComponent(x, 'x');
-      }
-
-      if (y) {
-        ry = this._evaluatePositionStringComponent(y, 'y');
-      }
-
-      return new Vec2(rx, ry);
-    }
-    /**
-     * Evaluates a position string value such as "left+10px" into it final position on the rect.
-     * @param value - The value to evaluate.
-     * @param direction - The direction type.  Should be either "x" or "y".
-     * @returns {number}
-     * @private
-     */
-
-  }, {
-    key: "_evaluatePositionStringComponent",
-    value: function _evaluatePositionStringComponent(value, direction) {
-      var parts = regPositionPart.exec(value),
-          r = 0;
-
-      if (parts[1]) {
-        var p = parts[1];
-
-        if (direction === 'x') {
-          if (p === 'left') {
-            r = this.left;
-          } else if (p === 'center' || p === 'middle') {
-            r = this.left + this.width / 2;
-          } else if (p === 'right') {
-            r = this.left + this.width;
-          } else {
-            throw new _errors__WEBPACK_IMPORTED_MODULE_1__["ValueError"]("Invalid Option: ".concat(p));
-          }
-        } else {
-          if (p === 'top') {
-            r = this.top;
-          } else if (p === 'middle' || p === 'center') {
-            r = this.top + this.height / 2;
-          } else if (p === 'bottom') {
-            r = this.top + this.height;
-          } else {
-            throw new _errors__WEBPACK_IMPORTED_MODULE_1__["ValueError"]("Invalid Option: ".concat(p));
-          }
-        }
-      } else if (direction === 'x') {
-        r = this.left;
-      } else {
-        r = this.top;
-      }
-
-      if (parts[2]) {
-        var _value = parseFloat(parts[2]),
-            type = parts[3] || 'px';
-
-        if (type === 'px') {
-          r += _value;
-        } else if (type === '%') {
-          if (direction === 'x') {
-            r += _value / 100 * this.width;
-          } else {
-            r += _value / 100 * this.height;
-          }
-        } else {
-          throw new UnitError("Invalid unit: Must be either % or px.");
-        }
-      }
-
-      return r;
-    }
-  }, {
-    key: "left",
-    get: function get() {
-      return this[0];
-    },
-    set: function set(value) {
-      this[0] = value;
-    }
-  }, {
-    key: "top",
-    get: function get() {
-      return this[1];
-    },
-    set: function set(value) {
-      this[1] = value;
-    }
-  }, {
-    key: "right",
-    get: function get() {
-      return this[2];
-    },
-    set: function set(value) {
-      this[2] = value;
-    }
-  }, {
-    key: "bottom",
-    get: function get() {
-      return this[3];
-    },
-    set: function set(value) {
-      this[3] = value;
-    }
-  }, {
-    key: "width",
-    get: function get() {
-      return this.right - this.left;
-    },
-    set: function set(value) {
-      this.right = this.left + value;
-    }
-  }, {
-    key: "height",
-    get: function get() {
-      return this.bottom - this.top;
-    },
-    set: function set(value) {
-      this.bottom = this.top + value;
-    }
-  }, {
-    key: "x",
-    get: function get() {
-      return this.left;
-    },
-    set: function set(value) {
-      this.left = value;
-    }
-  }, {
-    key: "y",
-    get: function get() {
-      return this.top;
-    },
-    set: function set(value) {
-      this.top = value;
-    }
-  }], [{
-    key: "fromRect",
-    value: function fromRect(_ref7) {
-      var left = _ref7.left,
-          top = _ref7.top,
-          right = _ref7.right,
-          bottom = _ref7.bottom;
-      return new Rect(left, top, right, bottom);
-    }
-  }, {
-    key: "getBoundingClientRect",
-    value: function getBoundingClientRect(element) {
-      return new Rect(element);
-    }
-  }]);
-
-  return Rect;
-}(Vec4);
 var RGBA =
 /*#__PURE__*/
-function (_Vec2) {
-  _inherits(RGBA, _Vec2);
+function (_Vec) {
+  _inherits(RGBA, _Vec);
 
   function RGBA(r, g, b, a) {
-    var _this2;
+    var _this;
 
     _classCallCheck(this, RGBA);
 
     if (_typeof(r) === 'object') {
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r));
     } else {
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r, g, b, a));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(RGBA).call(this, r, g, b, a));
     }
 
-    return _possibleConstructorReturn(_this2);
+    return _possibleConstructorReturn(_this);
   }
 
   _createClass(RGBA, [{
@@ -4168,7 +3708,1415 @@ function (_Vec2) {
   }]);
 
   return RGBA;
-}(Vec4);
+}(_Vec4__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/core/vectors/Rect.js":
+/*!**********************************!*\
+  !*** ./src/core/vectors/Rect.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Rect; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+/* harmony import */ var _Vec2__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vec2 */ "./src/core/vectors/Vec2.js");
+/* harmony import */ var _Vec4__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Vec4 */ "./src/core/vectors/Vec4.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+var regWhitespace = /\s+/,
+    regPositionPart = /^([a-zA-Z]*)([+-]?\d*\.?\d*)([a-z%]*)$/; // Parses string like "left+10px" into ["left", "+10px"]
+
+var positionShortHandValues = {
+  top: 'center top',
+  right: 'right middle',
+  bottom: 'center bottom',
+  left: 'left middle',
+  topleft: 'left top',
+  topright: 'right top',
+  bottomleft: 'left bottom',
+  bottomright: 'right bottom'
+};
+
+var Rect =
+/*#__PURE__*/
+function (_Vec) {
+  _inherits(Rect, _Vec);
+
+  function Rect(left, top, right, bottom) {
+    var _this;
+
+    var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+
+    _classCallCheck(this, Rect);
+
+    if (typeof left === 'function') {
+      left = left();
+    }
+
+    if (_typeof(left) === 'object') {
+      if (left.getBoundingClientRect) {
+        domElement = left;
+        var bb = domElement.getBoundingClientRect();
+        left = bb.left;
+        top = bb.top;
+        right = bb.right;
+        bottom = bb.bottom;
+      } else {
+        top = left.top;
+        right = left.right;
+        bottom = left.bottom;
+        left = left.left;
+      }
+    }
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, left, top, right, bottom)); // noinspection JSUnusedGlobalSymbols
+
+    _this.domElement = domElement;
+
+    if (arguments.length === 1 && left instanceof Rect) {
+      Object.assign(_assertThisInitialized(_this), left);
+    }
+
+    return _this;
+  }
+
+  _createClass(Rect, [{
+    key: "bind",
+    value: function bind(element) {
+      return this._new(this.left, this.top, this.right, this.bottom, element);
+    }
+  }, {
+    key: "_new",
+    value: function _new(left, top, right, bottom) {
+      var domElement = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : undefined;
+      var r = new this.constructor(this);
+      r.left = left;
+      r.top = top;
+      r.right = right;
+      r.bottom = bottom;
+      if (domElement !== undefined) r.domElement = domElement;
+      return r;
+    }
+  }, {
+    key: "toPoint",
+    value: function toPoint() {
+      return new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](this[0], this[1]);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "getArea",
+    value: function getArea() {
+      return this.width * this.height;
+    }
+  }, {
+    key: "translate",
+    value: function translate(x, y) {
+      if (_typeof(x) === 'object') {
+        y = x.y;
+        x = x.x;
+      }
+
+      return this._new(this[0] + x, this[1] + y, this[2] + x, this[3] + y);
+    }
+  }, {
+    key: "addMargins",
+    value: function addMargins(_ref) {
+      var left = _ref.left,
+          top = _ref.top,
+          right = _ref.right,
+          bottom = _ref.bottom;
+      return this._new(this.left - left, this.top - top, this.right + right, this.bottom + bottom);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "addPadding",
+    value: function addPadding(_ref2) {
+      var left = _ref2.left,
+          top = _ref2.top,
+          right = _ref2.right,
+          bottom = _ref2.bottom;
+      return this._new(this.left + left, this.top + top, this.right - right, this.bottom - bottom);
+    }
+  }, {
+    key: "moveTo",
+    value: function moveTo(_ref3) {
+      var left = _ref3.left,
+          top = _ref3.top;
+      var deltaX = left - this.left,
+          deltaY = top - this.top;
+      return this._new(this.left + deltaX, this.top + deltaY, this.right + deltaX, this.bottom + deltaY);
+    }
+  }, {
+    key: "intersection",
+    value: function intersection(_ref4) {
+      var left = _ref4.left,
+          top = _ref4.top,
+          right = _ref4.right,
+          bottom = _ref4.bottom;
+      left = Math.max(this.left, left);
+      right = Math.min(this.right, right);
+      bottom = Math.min(this.bottom, bottom);
+      top = Math.max(this.top, top);
+
+      if (left > right || top > bottom) {
+        return null;
+      }
+
+      return this._new(left, top, right, bottom);
+    }
+    /**
+     * Creates a new rectangle exactly big enough to hold the current rectangle and the provided rectangle.
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @returns {null|Rect}
+     */
+
+  }, {
+    key: "union",
+    value: function union(_ref5) {
+      var left = _ref5.left,
+          top = _ref5.top,
+          right = _ref5.right,
+          bottom = _ref5.bottom;
+      left = Math.min(left, this.left);
+      right = Math.max(right, this.right);
+      bottom = Math.max(bottom, this.bottom);
+      top = Math.min(top, this.top);
+
+      if (left > right || top > bottom) {
+        return null;
+      }
+
+      return this._new(left, top, right, bottom);
+    }
+  }, {
+    key: "contains",
+    value: function contains(rect) {
+      return this.left <= rect.left && this.right >= rect.right && this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+  }, {
+    key: "containsX",
+    value: function containsX(rect) {
+      return this.left <= rect.left && this.right >= rect.right;
+    }
+  }, {
+    key: "containsY",
+    value: function containsY(rect) {
+      return this.top <= rect.top && this.bottom >= rect.bottom;
+    }
+  }, {
+    key: "isXOverlapping",
+    value: function isXOverlapping(rect) {
+      return rect.left <= this.right && rect.right >= this.left;
+    }
+  }, {
+    key: "isYOverlapping",
+    value: function isYOverlapping(rect) {
+      return rect.top <= this.bottom && rect.bottom >= this.top;
+    }
+  }, {
+    key: "isAbove",
+    value: function isAbove(rect) {
+      rect = new Rect(rect);
+      return rect.top > this.bottom;
+    }
+  }, {
+    key: "isBelow",
+    value: function isBelow(rect) {
+      rect = new Rect(rect);
+      return rect.bottom < this.top;
+    }
+  }, {
+    key: "isLeftOf",
+    value: function isLeftOf(rect) {
+      rect = new Rect(rect);
+      return rect.left > this.right;
+    }
+  }, {
+    key: "isRightOf",
+    value: function isRightOf(rect) {
+      rect = new Rect(rect);
+      return rect.right < this.left;
+    }
+  }, {
+    key: "isOverlapping",
+    value: function isOverlapping(rect) {
+      rect = new Rect(rect);
+      return this.isXOverlapping(rect) && this.isYOverlapping(rect);
+    }
+    /**
+     * Attempts to fit the rect inside of the container anchoring from the anchor point.  The anchor point defaults
+     * to the top left corner or (0, 0).
+     *
+     * If possible entire rect should be clamped to the closest position inside of the container.
+     * Else position anchor point the closest possible point inside container.
+     *
+     * @param container
+     * @param anchor
+     */
+
+  }, {
+    key: "fit",
+    value: function fit(container) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      anchor = anchor ? this.getAnchor(anchor) : new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](0, 0);
+      container = new Rect(container);
+      var starting = container;
+      container = container.add(new Rect(anchor.left, anchor.top, -this.width + anchor.left, -this.height + anchor.top));
+      container = new Rect(Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(container.left, starting.left, starting.right), Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(container.top, starting.top, starting.bottom), Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(container.right, starting.left, starting.right), Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(container.bottom, starting.top, starting.bottom));
+      var left = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(this.left, container.left, container.right) - anchor.left,
+          top = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(this.top, container.top, container.bottom) - anchor.top,
+          width = this.width,
+          height = this.height;
+      return this._new(left, top, left + width, top + height);
+    }
+  }, {
+    key: "fitX",
+    value: function fitX(container) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var pos = this.fit(container, anchor);
+      return this._new(pos.left, this.top, pos.right, this.bottom);
+    }
+  }, {
+    key: "fitY",
+    value: function fitY(container) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var pos = this.fit(container, anchor);
+      return this._new(this.left, pos.top, this.right, pos.bottom);
+    }
+    /**
+     * Clamps the anchor point inside the rect.  Anchor point defaults to top left or (0, 0).
+     *
+     * @param rect
+     * @param anchor
+     * @returns {Rect}
+     */
+
+  }, {
+    key: "clamp",
+    value: function clamp(rect) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      anchor = anchor ? this.getAnchor(anchor) : new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](0, 0);
+      rect = new Rect(rect);
+      var width = this.width,
+          height = this.height,
+          left = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(this.left + anchor.left, rect.left, rect.right) - anchor.left,
+          top = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["clamp"])(this.top + anchor.top, rect.top, rect.bottom) - anchor.top;
+      return this._new(left, top, left + width, top + height);
+    }
+  }, {
+    key: "clampX",
+    value: function clampX(rect) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var pos = this.clamp(rect, anchor);
+      return this._new(pos.left, this.top, pos.right, this.bottom);
+    }
+  }, {
+    key: "clampY",
+    value: function clampY(rect) {
+      var anchor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var pos = this.clamp(rect, anchor);
+      return this._new(this.left, pos.top, this.right, pos.bottom);
+    } // noinspection JSUnusedGlobalSymbols
+
+    /**
+     * Returns the distance between two rects.
+     * @param rect
+     * @returns {number}
+     */
+
+  }, {
+    key: "getDistanceBetween",
+    value: function getDistanceBetween(rect) {
+      rect = Rect.fromRect(rect);
+      var isXOverlapping = this.isXOverlapping(rect),
+          isYOverlapping = this.isYOverlapping(rect);
+
+      if (isXOverlapping && isYOverlapping) {
+        // Items are overlapping
+        return 0;
+      } else if (isXOverlapping) {
+        return Math.min(Math.abs(this.bottom - rect.top), Math.abs(this.top - rect.bottom));
+      } else if (isYOverlapping) {
+        return Math.min(Math.abs(this.right - rect.left), Math.abs(this.left - rect.right));
+      } else {
+        var x1, y1, x2, y2;
+
+        if (this.right <= rect.left) {
+          x1 = this.right;
+          x2 = rect.left;
+        } else {
+          x1 = this.left;
+          x2 = rect.right;
+        }
+
+        if (this.bottom <= rect.top) {
+          y1 = this.bottom;
+          y2 = rect.top;
+        } else {
+          y1 = this.top;
+          y2 = rect.bottom;
+        } // Use distance formula to calculate distance.
+
+
+        return Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "getDistanceFromPoint",
+    value: function getDistanceFromPoint(point) {
+      point = new Rect(point.left, point.top, point.left, point.top);
+      var closestX = Math.abs(this.left - point.left) < Math.abs(this.right - point.left) ? this.left : this.right,
+          closestY = Math.abs(this.top - point.top) < Math.abs(this.bottom - point.top) ? this.top : this.bottom,
+          distance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["calcDistance"])(closestX, closestY, point.left, point.top);
+      return this.contains(point) ? -distance : distance;
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "getCenterPoint",
+    value: function getCenterPoint() {
+      return new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](this.left + this.width / 2, this.top + this.height / 2);
+    }
+  }, {
+    key: "reflect",
+    value: function reflect() {
+      var point = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var axis = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'xy';
+      // Reflect around the given point or origin
+      point = point ? new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](point) : new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](0, 0);
+      var x = this.left + this.width / 2 - point.x,
+          y = this.top + this.height / 2 - point.y;
+
+      if (axis === 'x' || axis === 'xy') {
+        x *= -1;
+      }
+
+      if (axis === 'y' || axis === 'xy') {
+        y *= -1;
+      }
+
+      x = x - this.width / 2 + point.x;
+      y = y - this.height / 2 + point.y;
+      return this._new(x, y, x + this.width, y + this.height);
+    }
+  }, {
+    key: "position",
+    value: function position(_ref6) {
+      var my = _ref6.my,
+          at = _ref6.at,
+          of = _ref6.of,
+          _ref6$inside = _ref6.inside,
+          inside = _ref6$inside === void 0 ? null : _ref6$inside,
+          _ref6$collision = _ref6.collision,
+          collision = _ref6$collision === void 0 ? null : _ref6$collision;
+
+      // Of should be a Rect object.
+      if (of.getBoundingClientRect) {
+        of = new Rect(of);
+      } // inside should be a Rect object.
+
+
+      if (inside && inside.getBoundingClientRect) {
+        inside = new Rect(inside);
+      } // collision can be string with a space separating the x and y values.
+      // for example "fit flipfit"
+      // normalize it to an {x, y} object.
+
+
+      if (collision && typeof collision === 'string') {
+        var parts = collision.trim().split(regWhitespace);
+        collision = {
+          x: parts[0],
+          y: parts[1] || parts[0]
+        };
+      }
+
+      var anchor = this.evaluatePositionString(my),
+          reference = of.evaluatePositionString(at),
+          deltaX = reference.x - anchor.x,
+          deltaY = reference.y - anchor.y;
+      var rect = this.translate(deltaX, deltaY); // If the rect is already inside the container or if not container or collision function where given
+      // return immediately, there is not more work to be done.
+
+      if (!collision || !inside || inside.contains(rect)) {
+        return rect;
+      }
+
+      if (!inside.containsX(rect) && (collision.x === 'flip' || collision.x === 'flipfit')) {
+        rect = rect.reflect(of.getCenterPoint(), 'x');
+      }
+
+      if (!inside.containsY(rect) && (collision.y === 'flip' || collision.y === 'flipfit')) {
+        rect = rect.reflect(of.getCenterPoint(), 'y');
+      }
+
+      if (collision.x === 'fit' || collision.x === 'flipfit') {
+        rect = rect.fitX(inside);
+      }
+
+      if (collision.y === 'fit' || collision.y === 'flipfit') {
+        rect = rect.fitY(inside);
+      }
+
+      return rect;
+    }
+  }, {
+    key: "evaluatePositionString",
+    value: function evaluatePositionString(string) {
+      if (positionShortHandValues[string]) {
+        string = positionShortHandValues[string];
+      }
+
+      var pos = string.trim().split(regWhitespace),
+          x = pos[0],
+          y = pos[1],
+          rx = null,
+          ry = null;
+
+      if (x) {
+        rx = this._evaluatePositionStringComponent(x, 'x');
+      }
+
+      if (y) {
+        ry = this._evaluatePositionStringComponent(y, 'y');
+      }
+
+      return new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](rx, ry);
+    }
+    /**
+     * Gets the anchor position relative to the element.  The anchor can be any of the following:
+     *
+     * A position string.
+     * A [x, y, offsetX=0, offsetY=0] array.
+     * An object of {left, top, offsetX=0, offsetY=0} properties.
+     *
+     * @param anchor
+     * @returns {Vec2}
+     */
+
+  }, {
+    key: "getAnchor",
+    value: function getAnchor(anchor) {
+      if (positionShortHandValues[anchor]) {
+        anchor = positionShortHandValues[anchor];
+      }
+
+      var x,
+          y,
+          offsetX = 0,
+          offsetY = 0;
+
+      if (typeof anchor === 'string') {
+        var _anchor$trim$split = anchor.trim().split(regWhitespace);
+
+        var _anchor$trim$split2 = _slicedToArray(_anchor$trim$split, 2);
+
+        x = _anchor$trim$split2[0];
+        y = _anchor$trim$split2[1];
+      } else if (Array.isArray(anchor)) {
+        var _anchor = anchor;
+
+        var _anchor2 = _slicedToArray(_anchor, 4);
+
+        x = _anchor2[0];
+        y = _anchor2[1];
+        var _anchor2$ = _anchor2[2];
+        offsetX = _anchor2$ === void 0 ? 0 : _anchor2$;
+        var _anchor2$2 = _anchor2[3];
+        offsetY = _anchor2$2 === void 0 ? 0 : _anchor2$2;
+      } else {
+        x = anchor.left;
+        y = anchor.top;
+        offsetX = anchor.offsetX || 0;
+        offsetY = anchor.offsetY || 0;
+      }
+
+      if (typeof x === 'string') {
+        x = this._evaluatePositionStringComponent(x, 'x') - this.left;
+      }
+
+      if (typeof y === 'string') {
+        y = this._evaluatePositionStringComponent(y, 'y') - this.top;
+      }
+
+      return new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](x + offsetX, y + offsetY);
+    } // noinspection JSUnusedGlobalSymbols
+
+    /**
+     * Takes a anchor point coordient relative the the rect and returns the true coordients.
+     * @param anchor
+     * @returns {Vec2}
+     */
+
+  }, {
+    key: "getPoint",
+    value: function getPoint(anchor) {
+      var point = this.getAnchor(anchor);
+      return new _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"](point.left + this.left, point.top + this.top);
+    }
+    /**
+     * Evaluates a position string value such as "left+10px" into it final position on the rect.
+     * @param value - The value to evaluate.
+     * @param direction - The direction type.  Should be either "x" or "y".
+     * @returns {number}
+     * @private
+     */
+
+  }, {
+    key: "_evaluatePositionStringComponent",
+    value: function _evaluatePositionStringComponent(value, direction) {
+      var parts = regPositionPart.exec(value),
+          r = 0;
+
+      if (parts[1]) {
+        var p = parts[1];
+
+        if (direction === 'x') {
+          if (p === 'left') {
+            r = this.left;
+          } else if (p === 'center' || p === 'middle') {
+            r = this.left + this.width / 2;
+          } else if (p === 'right') {
+            r = this.left + this.width;
+          } else {
+            throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValueError"]("Invalid Option: ".concat(p));
+          }
+        } else {
+          if (p === 'top') {
+            r = this.top;
+          } else if (p === 'middle' || p === 'center') {
+            r = this.top + this.height / 2;
+          } else if (p === 'bottom') {
+            r = this.top + this.height;
+          } else {
+            throw new _errors__WEBPACK_IMPORTED_MODULE_0__["ValueError"]("Invalid Option: ".concat(p));
+          }
+        }
+      } else if (direction === 'x') {
+        r = this.left;
+      } else {
+        r = this.top;
+      }
+
+      if (parts[2]) {
+        var _value = parseFloat(parts[2]),
+            type = parts[3] || 'px';
+
+        if (type === 'px') {
+          r += _value;
+        } else if (type === '%') {
+          if (direction === 'x') {
+            r += _value / 100 * this.width;
+          } else {
+            r += _value / 100 * this.height;
+          }
+        } else {
+          throw new _errors__WEBPACK_IMPORTED_MODULE_0__["UnitError"]("Invalid unit: Must be either % or px.");
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this[3];
+    },
+    set: function set(value) {
+      this[3] = value;
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this.right - this.left;
+    },
+    set: function set(value) {
+      this.right = this.left + value;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this.bottom - this.top;
+    },
+    set: function set(value) {
+      this.bottom = this.top + value;
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this.left;
+    },
+    set: function set(value) {
+      this.left = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this.top;
+    },
+    set: function set(value) {
+      this.top = value;
+    }
+  }], [{
+    key: "fromRect",
+    value: function fromRect(_ref7) {
+      var left = _ref7.left,
+          top = _ref7.top,
+          right = _ref7.right,
+          bottom = _ref7.bottom;
+      return new Rect(left, top, right, bottom);
+    }
+  }, {
+    key: "getBoundingClientRect",
+    value: function getBoundingClientRect(element) {
+      return new Rect(element);
+    }
+    /**
+     * Returns the elements Rect without any inline styles applied.
+     * @param element
+     * @param restore - If true inline style will be restored after measuring.
+     * @returns {Rect}
+     */
+
+  }, {
+    key: "getCleanBoundingClientRect",
+    value: function getCleanBoundingClientRect(element) {
+      var restore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var state = {};
+
+      for (var i = 0; i < element.style.length; i++) {
+        var key = element.style[i];
+        state[key] = element.style[key];
+        element.style[key] = "";
+      }
+
+      var r = Rect.getBoundingClientRect(element);
+
+      if (restore) {
+        Object.assign(element.style, state);
+      }
+
+      return r;
+    }
+  }, {
+    key: "getClientRect",
+    value: function getClientRect() {
+      return new Rect(0, 0, window.innerWidth, window.innerHeight);
+    }
+  }, {
+    key: "getRootContainingClientRect",
+    value: function getRootContainingClientRect() {
+      return new Rect(-window.scrollX, -window.scrollY, document.documentElement.clientWidth - window.scrollX, document.documentElement.clientHeight - window.scrollY);
+    }
+  }]);
+
+  return Rect;
+}(_Vec4__WEBPACK_IMPORTED_MODULE_2__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./src/core/vectors/Vec2.js":
+/*!**********************************!*\
+  !*** ./src/core/vectors/Vec2.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Vec2; });
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+/**
+ * Stores a 2 value Vector.
+ */
+
+var Vec2 =
+/*#__PURE__*/
+function () {
+  function Vec2() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+    _classCallCheck(this, Vec2);
+
+    if (x instanceof Vec2) {
+      this[0] = x.x;
+      this[1] = x.y;
+    } else if (Array.isArray(x)) {
+      this[0] = x[0];
+      this[1] = x[1];
+    } else if (_typeof(x) === 'object') {
+      if (x.left !== undefined) {
+        this[0] = x.left;
+        this[0] = x.top;
+      } else {
+        this[0] = x.x;
+        this[1] = x.y;
+      }
+    } else {
+      this[0] = x;
+      this[1] = y;
+    }
+  }
+
+  _createClass(Vec2, [{
+    key: "add",
+    value: function add(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] + vec2, this[1] + vec2);
+      } else {
+        return new Vec2(this[0] + vec2[0], this[1] + vec2[1]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] - vec2, this[1] - vec2);
+      } else {
+        return new Vec2(this[0] - vec2[0], this[1] - vec2[1]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return new Vec2(this[0] * value, this[1] * value);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "mod",
+    value: function mod(vec2) {
+      if (typeof vec2 === 'number') {
+        return new Vec2(this[0] % vec2, this[1] % vec2);
+      } else {
+        return new Vec2(this[0] % vec2[0], this[1] % vec2[1]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "equals",
+    value: function equals(vec2) {
+      return this === vec2 || this[0] === vec2[0] && this[1] === vec2[1];
+    }
+  }, {
+    key: "set",
+    value: function set(value) {
+      if (_typeof(value) !== 'object') {
+        this[0] = value;
+        this[1] = value;
+      } else {
+        this[0] = value[0];
+        this[1] = value[1];
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "clone",
+    value: function clone() {
+      return Vec2(this[0], this[1]);
+    }
+  }, {
+    key: "toTranslate",
+    // noinspection JSUnusedGlobalSymbols
+    value: function toTranslate() {
+      return "translate(".concat(this.x, "px, ").concat(this.y, "px)");
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "toTranslate3d",
+    value: function toTranslate3d() {
+      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, 0)");
+    }
+  }, {
+    key: "clamp",
+    value: function clamp(vec4) {
+      return new Vec2(Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.left, vec4.left, vec4.right), Object(_utility__WEBPACK_IMPORTED_MODULE_0__["clamp"])(this.top, vec4.top, vec4.bottom));
+    }
+  }, {
+    key: "x",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "left",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "right",
+    get: function get() {
+      return this[0];
+    }
+  }, {
+    key: "top",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "bottom",
+    get: function get() {
+      return this[1];
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "height",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }], [{
+    key: "fromVertex",
+    value: function fromVertex(vertex) {
+      if (Array.isArray(vertex)) {
+        return new Vec2(vertex[0], vertex[1]);
+      } else if (vertex.hasOwnProperty('left')) {
+        return new Vec2(vertex.left, vertex.top);
+      } else {
+        return new Vec2(vertex.x, vertex.y);
+      }
+    }
+  }]);
+
+  return Vec2;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/core/vectors/Vec3.js":
+/*!**********************************!*\
+  !*** ./src/core/vectors/Vec3.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Vec3; });
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * Stores a 3 value vector.
+ */
+var Vec3 =
+/*#__PURE__*/
+function () {
+  function Vec3() {
+    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, Vec3);
+
+    this[0] = x;
+    this[1] = y;
+    this[2] = z;
+  }
+
+  _createClass(Vec3, [{
+    key: "set",
+    value: function set(value) {
+      if (_typeof(value) !== 'object') {
+        this[0] = value;
+        this[1] = value;
+        this[2] = value;
+      } else {
+        this[0] = value[0];
+        this[1] = value[1];
+        this[2] = value[2];
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] + vec3, this[1] + vec3, this[2] + vec3);
+      } else {
+        return new Vec3(this[0] + vec3[0], this[1] + vec3[1], this[2] + vec3[2]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] - vec3, this[1] - vec3, this[2] - vec3);
+      } else {
+        return new Vec3(this[0] - vec3[0], this[1] - vec3[1], this[2] - vec3[2]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return new Vec3(this[0] * value, this[1] * value, this[2] * value);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "equals",
+    value: function equals(vec3) {
+      return vec3 === this || vec3[0] === this[0] && vec3[1] === this[1] && vec3[2] === this[2];
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "mod",
+    value: function mod(vec3) {
+      if (typeof vec3 === 'number') {
+        return new Vec3(this[0] % vec3, this[1] % vec3, this[2] % vec3);
+      } else {
+        return new Vec3(this[0] % vec3[0], this[1] % vec3[1], this[2] % vec3[2]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Vec3(this[0], this[1], this[2]);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "toHex",
+    value: function toHex() {
+      var r = Math.round(this.r).toString(16),
+          g = Math.round(this.g).toString(16),
+          b = Math.round(this.b).toString(16);
+
+      if (r.length === 1) {
+        r = '0' + r;
+      }
+
+      if (g.length === 1) {
+        g = '0' + g;
+      }
+
+      if (b.length === 1) {
+        b = '0' + b;
+      }
+
+      return "#".concat(r).concat(g).concat(b);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "toRGB",
+    value: function toRGB() {
+      return "rgb(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ")");
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "toTranslate3d",
+    value: function toTranslate3d() {
+      return "translate3d(".concat(this.x, "px, ").concat(this.y, "px, ").concat(this.z, "px)");
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "x",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "y",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "z",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "r",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "g",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "b",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }], [{
+    key: "fromHex",
+    value: function fromHex(hex) {
+      var m = /^#?([0-9a-f]{3})$/i.exec(hex);
+
+      if (m) {
+        hex = m[1][0] + m[1][0] + m[1][1] + m[1][1] + m[1][2] + m[1][2];
+      } else {
+        m = /^#?([0-9a-f]{6})$/i.exec(hex);
+
+        if (m) {
+          hex = m[1];
+        } else {
+          throw new Error("Could not parse value ".concat(hex));
+        }
+      }
+
+      hex = parseInt(hex, 16); // r, g, b
+
+      return new Vec3(hex & 0xff0000 >> 16, hex & 0x00ff00 >> 8, hex & 0x0000ff);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "fromRGB",
+    value: function fromRGB(value) {
+      var m = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/.exec(value);
+
+      if (!m) {
+        throw new Error("Could not parse rgb value ".concat(value));
+      }
+
+      return new Vec3(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10));
+    }
+  }]);
+
+  return Vec3;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/core/vectors/Vec4.js":
+/*!**********************************!*\
+  !*** ./src/core/vectors/Vec4.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Vec4; });
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/**
+ * Class to store a 4 value vector.
+ * Provides DOMRect interface.
+ */
+var Vec4 =
+/*#__PURE__*/
+function () {
+  /**
+   * r, g, b, a
+   * left, top, right, bottom
+   *
+   * @param left
+   * @param top
+   * @param right
+   * @param bottom
+   */
+  function Vec4(left, top, right, bottom) {
+    _classCallCheck(this, Vec4);
+
+    this[0] = left;
+    this[1] = top;
+    this[2] = right;
+    this[3] = bottom;
+  }
+
+  _createClass(Vec4, [{
+    key: "set",
+    value: function set(valueOrVec4) {
+      if (_typeof(valueOrVec4) !== 'object') {
+        this[0] = valueOrVec4;
+        this[1] = valueOrVec4;
+        this[2] = valueOrVec4;
+        this[3] = valueOrVec4;
+      } else {
+        this[0] = valueOrVec4[0];
+        this[1] = valueOrVec4[1];
+        this[2] = valueOrVec4[2];
+        this[3] = valueOrVec4[3];
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] + valueOrVec4, this[1] + valueOrVec4, this[2] + valueOrVec4, this[3] + valueOrVec4);
+      } else {
+        return this._new(this[0] + valueOrVec4[0], this[1] + valueOrVec4[1], this[2] + valueOrVec4[2], this[3] + valueOrVec4[3]);
+      }
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] - valueOrVec4, this[1] - valueOrVec4, this[2] - valueOrVec4, this[3] - valueOrVec4);
+      } else {
+        return this._new(this[0] - valueOrVec4[0], this[1] - valueOrVec4[1], this[2] - valueOrVec4[2], this[3] - valueOrVec4[3]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      return this._new(this[0] * value, this[1] * value, this[2] * value, this[3] * value);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "equals",
+    value: function equals(vec4) {
+      return vec4 === this || vec4[0] === this[0] && vec4[1] === this[1] && vec4[2] === this[2] && vec4[3] === this[3];
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "mod",
+    value: function mod(valueOrVec4) {
+      if (typeof valueOrVec4 === 'number') {
+        return this._new(this[0] % valueOrVec4, this[1] % valueOrVec4, this[2] % valueOrVec4, this[3] % valueOrVec4);
+      } else {
+        return this._new(this[0] % valueOrVec4[0], this[1] % valueOrVec4[1], this[2] % valueOrVec4[2], this[3] % valueOrVec4[3]);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "toRGBA",
+    value: function toRGBA() {
+      return "rgba(".concat(Math.round(this.r), ", ").concat(Math.round(this.g), ", ").concat(Math.round(this.b), ", ").concat(this.a, ")");
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new this.constructor(this[0], this[1], this[2], this[3]);
+    }
+  }, {
+    key: "_new",
+    value: function _new(left, top, right, bottom) {
+      return new this.constructor(left, top, right, bottom);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "r",
+    get: function get() {
+      return this[0];
+    },
+    set: function set(value) {
+      this[0] = value;
+    }
+  }, {
+    key: "g",
+    get: function get() {
+      return this[1];
+    },
+    set: function set(value) {
+      this[1] = value;
+    }
+  }, {
+    key: "b",
+    get: function get() {
+      return this[2];
+    },
+    set: function set(value) {
+      this[2] = value;
+    }
+  }, {
+    key: "a",
+    get: function get() {
+      return this[3];
+    },
+    set: function set(value) {
+      this[3] = value;
+    }
+  }], [{
+    key: "fromRGBAObject",
+    value: function fromRGBAObject(_ref) {
+      var r = _ref.r,
+          g = _ref.g,
+          b = _ref.b,
+          a = _ref.a;
+      return new Vec4(r, g, b, a);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "fromRGBA",
+    value: function fromRGBA(value) {
+      var m = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*(\d+\.?\d*)\)$/.exec(value);
+
+      if (!m) {
+        throw new Error("Could not parse rgba value ".concat(value));
+      }
+
+      return new Vec4(parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10), parseFloat(m[4]));
+    }
+  }]);
+
+  return Vec4;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/core/vectors/index.js":
+/*!***********************************!*\
+  !*** ./src/core/vectors/index.js ***!
+  \***********************************/
+/*! exports provided: Rect, Vec2, Vec3, Vec4, RGBA, UnitError */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Rect__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Rect */ "./src/core/vectors/Rect.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Rect", function() { return _Rect__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+
+/* harmony import */ var _Vec2__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vec2 */ "./src/core/vectors/Vec2.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec2", function() { return _Vec2__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+/* harmony import */ var _Vec3__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Vec3 */ "./src/core/vectors/Vec3.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec3", function() { return _Vec3__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
+/* harmony import */ var _Vec4__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Vec4 */ "./src/core/vectors/Vec4.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Vec4", function() { return _Vec4__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+
+/* harmony import */ var _RGBA__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./RGBA */ "./src/core/vectors/RGBA.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "RGBA", function() { return _RGBA__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnitError", function() { return _errors__WEBPACK_IMPORTED_MODULE_5__["UnitError"]; });
+
+
+
+
+
+
+
+
 
 /***/ }),
 
@@ -4320,7 +5268,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MultiHiddenInputWidget", function() { return MultiHiddenInputWidget; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return HiddenInputWidget; });
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
 /* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
 /* harmony import */ var _InputWidget__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./InputWidget */ "./src/forms/InputWidget.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4499,7 +5447,7 @@ function (_InputWidget) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return InputWidget; });
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
 /* harmony import */ var _FormWidgetBase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FormWidgetBase */ "./src/forms/FormWidgetBase.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -4918,8 +5866,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
-/* harmony import */ var _core_position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/position */ "./src/core/position.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
+/* harmony import */ var _core_ui_position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/ui/position */ "./src/core/ui/position.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -5025,8 +5973,8 @@ function (_AbstractMenu) {
 
       _this.show();
 
-      var rect = _core_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(_this.element),
-          space = _core_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(event.target),
+      var rect = _core_ui_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(_this.element),
+          space = _core_ui_position__WEBPACK_IMPORTED_MODULE_4__["Rect"].getBoundingClientRect(event.target),
           deltaX = event.clientX - space.left,
           deltaY = event.clientY - space.top;
       rect = rect.position({
@@ -5036,7 +5984,7 @@ function (_AbstractMenu) {
         inside: space,
         collision: 'fit fit'
       });
-      Object(_core_position__WEBPACK_IMPORTED_MODULE_4__["setElementClientPosition"])(_this.element, rect);
+      Object(_core_ui_position__WEBPACK_IMPORTED_MODULE_4__["setElementClientPosition"])(_this.element, rect);
     };
 
     return _this;
@@ -5224,9 +6172,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu/MenuNode.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
-/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
+/* harmony import */ var _core_utility_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility/math */ "./src/core/utility/math.js");
+/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -5288,9 +6237,10 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 
 
 
-var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP),
-    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP);
-var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["AttributeSchema"]({
+
+var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP),
+    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP);
+var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["AttributeSchema"]({
   closeOnBlur: INT_OR_BOOL_TYPE,
   timeout: INT_OR_BOOL_TYPE,
   autoActivate: INT_OR_BOOL_TYPE,
@@ -5389,12 +6339,12 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
     F: AbstractMenu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
       key: "positioner",
       value: void 0
     }, {
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
       key: "delay",
       value: function value() {
         return false;
@@ -5964,7 +6914,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
               // When their is no active item, activate the last item.
               this._navigateToItem(children[children.length - 1], this.isRoot);
             } else {
-              this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index - 1, children.length)], this.isRoot);
+              this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_4__["modulo"])(index - 1, children.length)], this.isRoot);
             }
 
             event.preventDefault();
@@ -5973,7 +6923,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
             if (index === -1) {
               this._navigateToItem(children[0], this.isRoot);
             } else {
-              this._navigateToItem(children[Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["modulo"])(index + 1, children.length)], this.isRoot);
+              this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_4__["modulo"])(index + 1, children.length)], this.isRoot);
             }
 
             event.preventDefault();
@@ -6250,7 +7200,7 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
     F: Menu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_3__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
       key: "delay",
       value: function value() {
         return 0;
@@ -6269,7 +7219,7 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
         if (target) {
           this.element = target;
         } else {
-          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])(TEMPLATE);
+          this.element = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE);
         }
       }
     }, {
@@ -6307,7 +7257,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -6545,8 +7495,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu/MenuNode.js");
 /* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -7429,8 +8379,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuNode; });
 /* harmony import */ var core_Publisher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/Publisher */ "./src/core/Publisher.js");
 /* harmony import */ var core_errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/errors */ "./src/core/errors.js");
-/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
+/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -7634,7 +8584,7 @@ function (_Publisher) {
     key: "contains",
     value: function contains(node) {
       if (node.nodeType) {
-        node = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuNodeByElement"])(node);
+        node = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getClosestMenuNodeByElement"])(node);
         return node ? this.contains(node) : false;
       }
 
@@ -7842,7 +8792,7 @@ function (_Publisher) {
       var o = target;
 
       while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(o);
 
         if (instance) {
           return instance;
@@ -7871,7 +8821,7 @@ function (_Publisher) {
       var o = target;
 
       while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(o);
 
         if (instance && instance.isMenuItem()) {
           return instance;
@@ -7900,7 +8850,7 @@ function (_Publisher) {
       var o = target;
 
       while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(o);
 
         if (instance && instance.isMenu()) {
           return instance;
@@ -7977,13 +8927,13 @@ function (_Publisher) {
     key: "addClass",
     // noinspection JSUnusedGlobalSymbols
     value: function addClass(classes) {
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["addClasses"])(this.element, classes);
+      return Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_3__["addClasses"])(this.element, classes);
     } // noinspection JSUnusedGlobalSymbols
 
   }, {
     key: "removeClass",
     value: function removeClass(classes) {
-      return Object(core_utility__WEBPACK_IMPORTED_MODULE_2__["removeClasses"])(this.element, classes);
+      return Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_3__["removeClasses"])(this.element, classes);
     } //------------------------------------------------------------------------------------------------------------------
     // Menu state functions
 
@@ -8151,7 +9101,7 @@ function (_Publisher) {
       var o = this.element;
 
       while (o) {
-        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(o);
+        var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(o);
 
         if (instance && instance.isController) {
           return instance;
@@ -8393,8 +9343,8 @@ function (_Publisher) {
           for (var _iterator7 = node.children[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
             var child = _step7.value;
 
-            if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(child)) {
-              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(child);
+            if (Object(_utility__WEBPACK_IMPORTED_MODULE_2__["hasMenuInstance"])(child)) {
+              var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(child);
               instance.setParent(_this5);
             } else {
               var hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
@@ -8742,17 +9692,17 @@ function (_Publisher) {
 
       if (this._element === element) return;
 
-      if (Object(_utility__WEBPACK_IMPORTED_MODULE_3__["hasMenuInstance"])(element)) {
+      if (Object(_utility__WEBPACK_IMPORTED_MODULE_2__["hasMenuInstance"])(element)) {
         throw new Error("Element is already bound to menu controller");
       }
 
       if (this._element) {
         this.clearAllRegisteredEvents();
-        Object(_utility__WEBPACK_IMPORTED_MODULE_3__["detachMenuInstance"])(this._element);
+        Object(_utility__WEBPACK_IMPORTED_MODULE_2__["detachMenuInstance"])(this._element);
         this._element = undefined;
       }
 
-      Object(_utility__WEBPACK_IMPORTED_MODULE_3__["attachMenuInstance"])(element, this);
+      Object(_utility__WEBPACK_IMPORTED_MODULE_2__["attachMenuInstance"])(element, this);
       this._element = element;
 
       this._registerAllEvents();
@@ -8827,7 +9777,7 @@ function (_Publisher) {
   }], [{
     key: "getInstance",
     value: function getInstance(element) {
-      return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getMenuInstance"])(element);
+      return Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(element);
     } // noinspection JSUnusedLocalSymbols
 
   }, {
@@ -8886,10 +9836,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
-/* harmony import */ var core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core/utility */ "./src/core/utility.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize.js");
+/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
+/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
+/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -9135,7 +10085,7 @@ function (_MenuItem) {
         this.element.classList.add('select-option');
       }
 
-      var fragment = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+      var fragment = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
       this.element.appendChild(fragment);
       this.element.classList.add('select-option');
       this.textContainer = this.element.querySelector('[data-text]');
@@ -9425,7 +10375,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     F: SelectMenu,
     d: [{
       kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_5__["inherit"]],
+      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_4__["inherit"]],
       key: "multiSelect",
       value: void 0
     }, {
@@ -9446,12 +10396,12 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
           this.element = target;
         } else {
-          this.element = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE).children[0];
+          this.element = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE).children[0];
         }
 
-        this.header = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-header]');
-        this.body = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-body]');
-        this.footer = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-footer]');
+        this.header = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-header]');
+        this.body = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-body]');
+        this.footer = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-footer]');
         this.filterInput = null;
         this.element.classList.add('select-menu');
       }
@@ -10160,11 +11110,11 @@ function (_AbstractMenuItem) {
 
   return AbstractSelect;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["AttributeSchema"]({
-  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
-  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
-  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP),
-  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_7__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_7__["Attribute"].DROP)
+var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["AttributeSchema"]({
+  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
+  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
+  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
+  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP)
 });
 var RichSelect =
 /*#__PURE__*/
@@ -10192,7 +11142,7 @@ function (_AbstractSelect) {
 
     _classCallCheck(this, RichSelect);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_6__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
     _this8 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
       toggle: true,
       autoActivate: false,
@@ -10242,15 +11192,15 @@ function (_AbstractSelect) {
         if (this.element.nodeName === 'INPUT') {
           this.textbox = this.element;
         } else {
-          var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
+          var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-button]');
 
           if (!button) {
-            this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
+            this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
           }
         }
       } else {
         this.element = document.createElement('div');
-        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
+        this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
       }
 
       if (!this.textbox) {
@@ -10389,7 +11339,7 @@ function (_AbstractSelect2) {
 
     _classCallCheck(this, MultiComboBox);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_6__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
     _this9 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
       toggle: true,
       autoActivate: false,
@@ -10498,14 +11448,14 @@ function (_AbstractSelect2) {
 
       if (target) {
         this.element = target;
-        var button = Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["findChild"])(this.element, '[data-button]');
+        var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-button]');
 
         if (!button) {
-          this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
+          this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
         }
       } else {
         this.element = document.createElement('div');
-        this.element.appendChild(Object(core_utility__WEBPACK_IMPORTED_MODULE_4__["createFragment"])(TEMPLATE));
+        this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
       }
 
       this.textbox = this.element.querySelector('[data-text]');
@@ -11183,8 +12133,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DROPDOWN", function() { return DROPDOWN; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SIDE_MENU", function() { return SIDE_MENU; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CONTEXT_MENU", function() { return CONTEXT_MENU; });
-/* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors.js");
-/* harmony import */ var core_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/position */ "./src/core/position.js");
+/* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors/index.js");
+/* harmony import */ var core_ui_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/ui/position */ "./src/core/ui/position.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -11287,7 +12237,7 @@ function _applyPosition(target, overlay, container) {
 
   methodX = methodX || 'left';
   methodY = methodY || 'top';
-  Object(core_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(overlay, pos, "".concat(methodY, "-").concat(methodX));
+  Object(core_ui_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(overlay, pos, "".concat(methodY, "-").concat(methodX));
 }
 /**
  * Positions first level of menus statically
@@ -11309,7 +12259,7 @@ function dropdown() {
   var defaultPosition = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "left top; right top; left top;";
 
   if (!container) {
-    container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
+    container = core_ui_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
   } else if (typeof container === 'string') {
     var target = document.querySelector(container);
 
@@ -11353,7 +12303,7 @@ function contextMenuPosition() {
   var position = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "left top; right top;";
 
   if (!container) {
-    container = core_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
+    container = core_ui_position__WEBPACK_IMPORTED_MODULE_1__["getClientRect"];
   } else if (typeof container === 'string') {
     var target = document.querySelector(container);
 
