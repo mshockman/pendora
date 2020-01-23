@@ -19,13 +19,13 @@ export default class ToolTipTestPage {
 
                 if(!tooltip) {
                     // noinspection JSUnresolvedVariable
-                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, event.target, {animation: 'fade', animationDuration: 200});
+                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
                     tooltips.set(event.target, tooltip);
                     tooltip.appendTo(document.body);
                 }
 
                 if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
-                    tooltip.show();
+                    tooltip.show(event.target);
                 } else if(tooltip.state === Tooltip.showing || tooltip.state === Tooltip.visible) {
                     tooltip.hide();
                 }

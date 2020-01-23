@@ -190,17 +190,24 @@ export class IOAnimationBase {
         options = {...options};
 
         if(immediate) {
-            options.autoPlay = false;
-            options.position = 1;
+            this.#showFX.animate(element, {
+                ...options,
+                autoPlay: false,
+                position: 1
+            });
+
+            return Animation.complete;
+        } else {
+            let fx = this.#showFX.animate(element, {
+                ...options,
+                autoPlay: true
+            }), result;
+
+            element[fxSymbol] = fx;
+            result = await fx;
+            delete element[fxSymbol];
+            return result;
         }
-
-        let fx = this.#showFX.animate(element, options),
-            result;
-
-        element[fxSymbol] = fx;
-        result = await fx;
-        delete element[fxSymbol];
-        return result;
     }
 
     async hide(element, immediate=false, options={}) {
@@ -209,18 +216,25 @@ export class IOAnimationBase {
         }
 
         if(immediate) {
-            options.autoPlay = false;
-            options.position = 1;
+            this.#hideFX.animate(element, {
+                ...options,
+                autoPlay: false,
+                position: 1
+            });
+
+            return Animation.complete;
+        } else {
+            let fx = this.#hideFX.animate(element, {
+                ...options,
+                autoPlay: true
+            }), result;
+
+            element[fxSymbol] = fx;
+            result = await fx;
+            delete element[fxSymbol];
+
+            return result;
         }
-
-        let fx = this.#hideFX.animate(element, options),
-            result;
-
-        element[fxSymbol] = fx;
-        result = await fx;
-        delete element[fxSymbol];
-
-        return result;
     }
 
     cancel(element) {

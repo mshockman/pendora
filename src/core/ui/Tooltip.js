@@ -296,7 +296,7 @@ export default class Tooltip extends Component {
             this.#timer = null;
         }
 
-        if(this.element.parentElement) {
+        if(!this.element.parentElement) {
             document.body.appendChild(this.element);
         }
 
@@ -330,18 +330,17 @@ export default class Tooltip extends Component {
 
             this.#target = target;
             this.element.classList.remove('hidden');
-            this.position("full", this.#placement, this.#target, clientRect);
+            this.position("full", this.#placement, target, clientRect);
 
-            if(startingState === Tooltip.hidden) {
-                await this.hide(true);
-                this.element.classList.remove("hidden");
+            if(startingState === Tooltip.hidden && this.#animation) {
+                await this.#animation.hide(this.element, true);
             }
 
             this.#state = Tooltip.showing;
             this.publish("tooltip.showing", this);
 
             let onFrame = () => {
-                this.position("current", this.#placement, this.#target, clientRect)
+                this.position("current", this.#placement, target, clientRect)
             };
 
             if(this.#animation) {
