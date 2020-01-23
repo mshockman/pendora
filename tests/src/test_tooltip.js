@@ -19,7 +19,7 @@ export default class ToolTipTestPage {
                 animation: 'fade',
                 animationDuration: 200,
                 type: 'toggle',
-                refreshPositionOnMouseMove: true
+                refreshPositionOnMouseMove: false
             });
 
             // node.addEventListener('click', (event) => {

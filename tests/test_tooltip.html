@@ -19,6 +19,7 @@
             overflow: hidden;
             z-index: 1000;
             white-space: nowrap;
+            pointer-events: none;
         }
 
         .tooltip.hidden {
@@ -41,6 +42,22 @@
 
         .tooltip .arrow {
             position: absolute;
+        }
+
+        .tooltip[data-placement="top"] {
+            transform: translateY(-10px);
+        }
+
+        .tooltip[data-placement="right"] {
+            transform: translateX(20px);
+        }
+
+        .tooltip[data-placement="bottom"] {
+            transform: translateY(20px);
+        }
+
+        .tooltip[data-placement="left"] {
+            transform: translateX(-10px);
         }
 
         .tooltip[data-placement="top"] .arrow {

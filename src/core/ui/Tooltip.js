@@ -29,12 +29,22 @@ export class SlideInAndOutTooltip extends SlideInAndOut {
 }
 
 
+/**
+ * Common animation that can be used by tooltip.  Can be accessed by passing their key to the animation property.
+ *
+ * @type {{fade: FadeInAndOut, slide: SlideInAndOutTooltip}}
+ */
 const ANIMATIONS = {
     slide: SlideInAndOutTooltip,
     fade: FadeInAndOut
 };
 
 
+/**
+ * A map of placement configuration objects that can be referenced by their name.
+ *
+ * @type {{top: {collision: string, at: string, method: string, name: string, opposite: string, my: string}, left: {collision: string, at: string, method: string, name: string, opposite: string, my: string}, bottom: {collision: string, at: string, method: string, name: string, opposite: string, my: string}, right: {collision: string, at: string, method: string, name: string, opposite: string, my: string}}}
+ */
 const PLACEMENTS = {
     top: {
         my: "bottom",
@@ -74,6 +84,9 @@ const PLACEMENTS = {
 };
 
 
+/**
+ * Creates a tooltip that either targets an object or the mouse cursor.
+ */
 export default class Tooltip extends Component {
     static hiding = "Hiding";
     static showing = "Showing";
@@ -92,7 +105,18 @@ export default class Tooltip extends Component {
 
     #destroy;
 
-    constructor(text, placement, {timeout=null, animation=null, animationDuration=null, classes=null, removeOnHide=true}={}) {
+    /**
+     *
+     * @param text - The text of the tooltip.
+     * @param placement - The placement configuration object.  Must be either a string the reference a placement name or a placement configuration object.
+     * @param timeout - The amount of time in milliseconds after the tooltip opens that it will automatically close.
+     * @param animation - The animation to use to hide/show the tooltip.  Can be a string that reference a value in the animations map.
+     * @param animationDuration - The amount of time the animation should run.  Unused if animation is not provided.
+     * @param classes - A space separated list of css class to add to the tooltip.
+     * @param id - The id of the tooltip.
+     * @param removeOnHide - If true the tooltip will be removed from the dom when hidden.
+     */
+    constructor(text, placement, {timeout=null, animation=null, animationDuration=null, classes=null, id=null, removeOnHide=true}={}) {
         let element = document.createElement('div'),
             body = document.createElement('div'),
             label = document.createElement('div'),
@@ -110,6 +134,10 @@ export default class Tooltip extends Component {
 
         if(classes) {
             addClasses(element, classes);
+        }
+
+        if(id !== null) {
+            element.id = id;
         }
 
         super(element);
@@ -136,6 +164,9 @@ export default class Tooltip extends Component {
         }
     }
 
+    /**
+     * Completely destroys the tooltip.  Cleaning up any registered events, timers and removing the tooltip from the dom.
+     */
     destroy() {
         if(this.#timer) {
             clearTimeout(this.#timer);
@@ -156,9 +187,22 @@ export default class Tooltip extends Component {
         }
     }
 
-    init(target, event, refreshPositionOnMouseMove=false) {
+    /**
+     * Initializes the tooltip on the target.
+     *
+     * The tooltip can either be of type toggle or hover.  If toggle the tooltip will display/hide when the user clicks
+     * the target.  If hover the tooltip will display when the user hover over the target.
+     *
+     * If lockToMouse is true the tooltip's position will be locked to the mouses coordanents.
+     * @param target
+     * @param type
+     * @param lockToMouse
+     */
+    init(target, type, lockToMouse=false) {
         // noinspection JSUnusedLocalSymbols
-        let positionTarget = event => target;
+        let positionTarget = event => target,
+            mouseX = 0,
+            mouseY = 0;
 
         if(this.#destroy) {
             this.destroy();
@@ -168,9 +212,9 @@ export default class Tooltip extends Component {
             target = document.querySelector(target);
         }
 
-        if(event === 'hover') {
+        if(type === 'hover') {
             let onMouseOver = (event) => {
-                if(this.state === Tooltip.hiding || this.state === Tooltip.hidden) {
+                if((this.state === Tooltip.hiding || this.state === Tooltip.hidden) && !target.contains(event.relatedTarget)) {
                     this.show(positionTarget(event));
                 }
             };
@@ -187,20 +231,25 @@ export default class Tooltip extends Component {
 
             target.addEventListener('mouseout', onMouseOut);
 
-            if(refreshPositionOnMouseMove) {
+            if(lockToMouse) {
                 onMouseMove = (event) => {
                     if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
-                        this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
+                        this.position("current", this.#placement, positionTarget(event), Rect.getClientRect());
                     }
                 };
 
                 positionTarget = (event) => {
-                    return new Rect(
-                        event.clientX,
-                        event.clientY,
-                        event.clientX,
-                        event.clientY
-                    );
+                    mouseX = event.clientX;
+                    mouseY = event.clientY;
+
+                    return () => {
+                        return new Rect(
+                            mouseX,
+                            mouseY,
+                            mouseX,
+                            mouseY
+                        );
+                    }
                 };
             }
 
@@ -209,17 +258,18 @@ export default class Tooltip extends Component {
             }
 
             this.#destroy = () => {
-                console.log("destroy hover");
-                if(onMouseMove) this.element.removeEventListener('mousemove', onMouseMove);
+                if(onMouseMove) {
+                    this.element.removeEventListener('mousemove', onMouseMove);
+                }
                 target.removeEventListener('mouseout', onMouseOut);
                 target.removeEventListener('mouseover', onMouseOver);
             };
-        } else if(event === 'toggle') {
+        } else if(type === 'toggle') {
             let onMouseMove,
                 onClick,
                 onMouseMoveTarget;
 
-            if(refreshPositionOnMouseMove) {
+            if(lockToMouse) {
                 positionTarget = (event) => {
                     return new Rect(
                         event.clientX,
@@ -231,7 +281,7 @@ export default class Tooltip extends Component {
 
                 onMouseMove = (event) => {
                     if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
-                        this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
+                        this.position("current", this.#placement, positionTarget(event), Rect.getClientRect());
                     }
                 };
 
@@ -256,17 +306,31 @@ export default class Tooltip extends Component {
         }
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * The the tooltips text.
+     * @param text
+     */
     setText(text) {
         this.#label.innerHTML = text;
     }
 
-    position(rect, placement, target, containerRect, element=null) {
+    /**
+     * Function that sets the position of the tooltip using the provided placement.
+     * @param rect - The rectangle to position by.
+     * @param placement - Configuration objects that contains placement options.
+     * @param target - The element to position relative to.
+     * @param containerRect - The container rectangle.
+     * @returns {*}
+     */
+    position(rect, placement, target, containerRect) {
         let pos,
             targetRect,
-            collision;
+            collision,
+            element;
 
         if(typeof target === 'function') {
-            targetRect = Rect.getBoundingClientRect(target)
+            targetRect = Rect.getBoundingClientRect(target());
         } else {
             targetRect = new Rect(target);
         }
@@ -282,7 +346,7 @@ export default class Tooltip extends Component {
             rect = new Rect(this.element);
         }
 
-        if(!element) element = this.element;
+        element = this.element;
 
         pos = rect.position({
             my: placement.my,
@@ -324,6 +388,12 @@ export default class Tooltip extends Component {
         return pos;
     }
 
+    /**
+     * Shows the tooltip.
+     * @param target
+     * @param immediate
+     * @returns {Promise<string>}
+     */
     async show(target, immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
@@ -412,6 +482,11 @@ export default class Tooltip extends Component {
         return result;
     }
 
+    /**
+     * Hides the tooltip.
+     * @param immediate
+     * @returns {Promise<string>}
+     */
     async hide(immediate=false) {
         if(this.#timer) {
             clearTimeout(this.#timer);
@@ -477,21 +552,22 @@ export default class Tooltip extends Component {
         }
     }
 
-    async open() {
-        let show = await this.show();
-
-        if(show === Animation.complete) {
-            this.publish('tooltip.open', this);
-        }
-    }
-
-    async close() {
-        let hide = await this.hide();
-
-        if(hide === Animation.complete) {
-            this.publish('tooltip.close', this);
-        }
-    }
+    // async open() {
+    //     let show = await this.show();
+    //
+    //     if(show === Animation.complete) {
+    //         this.publish('tooltip.open', this);
+    //     }
+    // }
+    //
+    // // noinspection JSUnusedGlobalSymbols
+    // async close() {
+    //     let hide = await this.hide();
+    //
+    //     if(hide === Animation.complete) {
+    //         this.publish('tooltip.close', this);
+    //     }
+    // }
 
     /**
      * @returns {String}
@@ -504,6 +580,21 @@ export default class Tooltip extends Component {
         return this.#state !== Tooltip.hidden;
     }
 
+    /**
+     * Creates a tooltip for the target. A target can only have one tooltip created by this method.
+     *
+     * @param target
+     * @param text
+     * @param type
+     * @param animation
+     * @param animationDuration
+     * @param placement
+     * @param timeout
+     * @param classes
+     * @param id
+     * @param refreshPositionOnMouseMove
+     * @returns {Tooltip}
+     */
     static tooltip(target, text, {type="hover", animation=null, animationDuration, placement="top", timeout=null, classes=null, id=null, refreshPositionOnMouseMove=false}={}) {
         if(typeof target === 'string') {
             target = document.querySelector(target);
@@ -530,6 +621,12 @@ export default class Tooltip extends Component {
         return tooltip;
     }
 
+    // noinspection JSUnusedGlobalSymbols
+    /**
+     * Returns the bound tooltip for the target element create by calling the Tooltip.tooltip function.
+     * @param target
+     * @returns {*|null}
+     */
     static getToolTip(target) {
         if(typeof target === 'string') {
             target = document.querySelector(target);
@@ -538,6 +635,11 @@ export default class Tooltip extends Component {
         return target[tooltipSymbol] || null;
     }
 
+    /**
+     * Removes any tooltip created by the Tooltip.tooltip function from the target.
+     * @param target
+     * @returns {null|any}
+     */
     static removeToolTip(target) {
         if(typeof target === 'string') {
             target = document.querySelector(target);

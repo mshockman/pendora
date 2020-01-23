@@ -116,7 +116,9 @@ export default class Animation {
             fx.goto(position);
         }
 
-        if(autoPlay) fx.play();
+        if(autoPlay) {
+            fx.play();
+        }
         return fx;
     }
 

@@ -77,7 +77,9 @@ export default class Rect extends Vec4 {
     }
 
     translate(x, y) {
-        if(typeof x === 'object') {
+        if(Array.isArray(x)) {
+            [x, y] = x;
+        } else if(typeof x === 'object') {
             y = x.y;
             x = x.x;
         }
@@ -379,7 +381,7 @@ export default class Rect extends Vec4 {
         return this._new(x, y, x + this.width, y + this.height);
     }
 
-    position({my, at, of, inside=null, collision=null}) {
+    position({my, at, of, offset=null, inside=null, collision=null}) {
         // Of should be a Rect object.
         if(of.getBoundingClientRect) {
             of = new Rect(of);
@@ -407,6 +409,10 @@ export default class Rect extends Vec4 {
             deltaY = reference.y - anchor.y;
 
         let rect = this.translate(deltaX, deltaY);
+
+        if(offset) {
+            rect = this.translate(offset);
+        }
 
         // If the rect is already inside the container or if not container or collision function where given
         // return immediately, there is not more work to be done.

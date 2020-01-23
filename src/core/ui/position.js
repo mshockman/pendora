@@ -71,10 +71,10 @@ export function getBoundingDocumentRect(element) {
     let rect = element.getBoundingClientRect();
 
     return new Rect(
-        rect.left + window.scrollX,
-        rect.top + window.scrollY,
-        rect.right + window.scrollX,
-        rect.bottom + window.scrollY
+        rect.left + window.pageXOffset,
+        rect.top + window.pageYOffset,
+        rect.right + window.pageXOffset,
+        rect.bottom + window.pageYOffset
     );
 }
 
@@ -282,10 +282,10 @@ export function setElementClientPosition(element, position, method='top-left') {
 export function clientRectToDocumentSpace(rect) {
     let r = Rect.fromRect(rect);
 
-    r.left += window.scrollX;
-    r.right += window.scrollX;
-    if(typeof r.top === 'number') r.top += window.scrollY;
-    if(typeof r.bottom === 'number') r.bottom += window.scrollY;
+    r.left += window.pageXOffset;
+    r.right += window.pageXOffset;
+    if(typeof r.top === 'number') r.top += window.pageYOffset;
+    if(typeof r.bottom === 'number') r.bottom += window.pageYOffset;
 
     return r;
 }
@@ -298,10 +298,10 @@ export function clientRectToDocumentSpace(rect) {
 export function documentRectToClientSpace(rect) {
     let r = Rect.fromRect(rect);
 
-    r.left -= window.scrollX;
-    r.right -= window.scrollX;
-    if(typeof r.top === 'number') r.top -= window.scrollY;
-    if(typeof r.bottom === 'number') r.bottom -= window.scrollY;
+    r.left -= window.pageXOffset;
+    r.right -= window.pageXOffset;
+    if(typeof r.top === 'number') r.top -= window.pageYOffset;
+    if(typeof r.bottom === 'number') r.bottom -= window.pageYOffset;
 
     return r;
 }
