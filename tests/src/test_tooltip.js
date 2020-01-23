@@ -11,25 +11,28 @@ export default class ToolTipTestPage {
         let tooltips = new WeakMap();
 
         for(let node of document.querySelectorAll("[data-tooltip]")) {
-            node.addEventListener('click', (event) => {
-                /**
-                 * @type {Tooltip}
-                 */
-                let tooltip = tooltips.get(event.target);
+            let tooltip = new Tooltip(node.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
+            tooltip.init(node, 'toggle', false);
 
-                if(!tooltip) {
-                    // noinspection JSUnresolvedVariable
-                    tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
-                    tooltips.set(event.target, tooltip);
-                    tooltip.appendTo(document.body);
-                }
-
-                if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
-                    tooltip.show(event.target);
-                } else if(tooltip.state === Tooltip.showing || tooltip.state === Tooltip.visible) {
-                    tooltip.hide();
-                }
-            });
+            // node.addEventListener('click', (event) => {
+            //     /**
+            //      * @type {Tooltip}
+            //      */
+            //     let tooltip = tooltips.get(event.target);
+            //
+            //     if(!tooltip) {
+            //         // noinspection JSUnresolvedVariable
+            //         tooltip = new Tooltip(event.target.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
+            //         tooltips.set(event.target, tooltip);
+            //         tooltip.appendTo(document.body);
+            //     }
+            //
+            //     if(tooltip.state === Tooltip.hidden || tooltip.state === Tooltip.hiding) {
+            //         tooltip.show(event.target);
+            //     } else if(tooltip.state === Tooltip.showing || tooltip.state === Tooltip.visible) {
+            //         tooltip.hide();
+            //     }
+            // });
         }
     }
 

@@ -134,9 +134,22 @@ export default class Tooltip extends Component {
     }
 
     destroy() {
+        if(this.#timer) {
+            clearTimeout(this.#timer);
+            this.#timer = null;
+        }
+
+        if(this.#animation) {
+            this.#animation.cancel(this.element);
+        }
+
         if(this.#destroy) {
             this.#destroy();
             this.#destroy = null;
+        }
+
+        if(this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
         }
     }
 
@@ -161,7 +174,7 @@ export default class Tooltip extends Component {
 
             let onMouseOut = (event) => {
                 if(!target.contains(event.relatedTarget) && (this.state === Tooltip.visible || this.state === Tooltip.showing)) {
-                    this.hide(positionTarget(event));
+                    this.hide();
                 }
             };
 
@@ -191,24 +204,23 @@ export default class Tooltip extends Component {
         } else if(event === 'toggle') {
             let onMouseMove,
                 onClick,
-                onMouseMoveTarget,
-                target = this.element;
+                onMouseMoveTarget;
 
             if(refreshPositionOnMouseMove) {
-                onMouseMove = () => {
+                onMouseMove = (event) => {
                     if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
-                        this.position(null, this.#placement, this.#target, Rect.getClientRect());
+                        this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
                     }
                 };
 
                 onMouseMoveTarget = document;
             }
 
-            onClick = () => {
-                if(this.state === 'showing' || this.state === 'visible') {
+            onClick = (event) => {
+                if(this.state === Tooltip.showing || this.state === Tooltip.visible) {
                     this.hide();
                 } else {
-                    this.show();
+                    this.show(positionTarget(event));
                 }
             };
 
