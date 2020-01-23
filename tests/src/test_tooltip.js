@@ -11,8 +11,16 @@ export default class ToolTipTestPage {
         let tooltips = new WeakMap();
 
         for(let node of document.querySelectorAll("[data-tooltip]")) {
-            let tooltip = new Tooltip(node.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
-            tooltip.init(node, 'toggle', false);
+            // let tooltip = new Tooltip(node.dataset.tooltip, node.dataset.placement, {animation: 'fade', animationDuration: 200});
+            // tooltip.init(node, 'toggle', false);
+
+            Tooltip.tooltip(node, node.dataset.tooltip, {
+                placement: node.dataset.placement,
+                animation: 'fade',
+                animationDuration: 200,
+                type: 'toggle',
+                refreshPositionOnMouseMove: true
+            });
 
             // node.addEventListener('click', (event) => {
             //     /**

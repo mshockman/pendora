@@ -5,6 +5,9 @@ import {SlideInAndOut, FadeInAndOut} from "../fx/effects";
 import {addClasses} from "../utility";
 
 
+const tooltipSymbol = Symbol('tooltip');
+
+
 /**
  * A specific slide in and out animation controller for tooltips.  The axis is determined by the placement of the
  * tooltip.
@@ -182,13 +185,22 @@ export default class Tooltip extends Component {
 
             target.addEventListener('mouseover', onMouseOver);
 
-            target.addEventListener('mouseover', onMouseOut);
+            target.addEventListener('mouseout', onMouseOut);
 
             if(refreshPositionOnMouseMove) {
                 onMouseMove = (event) => {
                     if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
                         this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
                     }
+                };
+
+                positionTarget = (event) => {
+                    return new Rect(
+                        event.clientX,
+                        event.clientY,
+                        event.clientX,
+                        event.clientY
+                    );
                 };
             }
 
@@ -197,6 +209,7 @@ export default class Tooltip extends Component {
             }
 
             this.#destroy = () => {
+                console.log("destroy hover");
                 if(onMouseMove) this.element.removeEventListener('mousemove', onMouseMove);
                 target.removeEventListener('mouseout', onMouseOut);
                 target.removeEventListener('mouseover', onMouseOver);
@@ -207,6 +220,15 @@ export default class Tooltip extends Component {
                 onMouseMoveTarget;
 
             if(refreshPositionOnMouseMove) {
+                positionTarget = (event) => {
+                    return new Rect(
+                        event.clientX,
+                        event.clientY,
+                        event.clientX,
+                        event.clientY
+                    );
+                };
+
                 onMouseMove = (event) => {
                     if(this.state === Tooltip.visible || this.state === Tooltip.showing) {
                         this.position(positionTarget(event), this.#placement, this.#target, Rect.getClientRect());
@@ -482,17 +504,53 @@ export default class Tooltip extends Component {
         return this.#state !== Tooltip.hidden;
     }
 
-    static tooltip(target, text, {action="hover", animation=null, animationDuration, placement="top", timeout=null, classes=null, id=null}) {
+    static tooltip(target, text, {type="hover", animation=null, animationDuration, placement="top", timeout=null, classes=null, id=null, refreshPositionOnMouseMove=false}={}) {
         if(typeof target === 'string') {
             target = document.querySelector(target);
         }
+
+        this.removeToolTip(target);
+
+        let tooltip = new Tooltip(text, placement || 'top', {
+            timeout,
+            animation,
+            animationDuration,
+        });
+
+        if(classes) {
+            tooltip.addClass(classes);
+        }
+
+        if(id) {
+            tooltip.id = id;
+        }
+
+        tooltip.init(target, type, refreshPositionOnMouseMove);
+
+        return tooltip;
     }
 
     static getToolTip(target) {
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
 
+        return target[tooltipSymbol] || null;
     }
 
     static removeToolTip(target) {
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
 
+        let tooltip = target[tooltipSymbol];
+
+        if(tooltip) {
+            tooltip.destroy();
+            delete target[tooltipSymbol];
+            return tooltip;
+        }
+
+        return null;
     }
 }
