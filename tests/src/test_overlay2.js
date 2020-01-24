@@ -14,14 +14,15 @@ export default class OverlayTestPage {
     load() {
         this.draggable = new Draggable('#draggable');
         this.overlay = new Overlay('#overlay1');
-        this.overlay.setContainer('#container');
-        this.overlay.setTarget('#draggable');
         this.arrow = new Arrow();
         // this.overlay.fit = 'xy';
 
         this.arrow.parent = this.overlay.element.querySelector('.overlay-body');
         this.arrow.target = this.draggable.element;
+
         this.overlay.setArrow(this.arrow);
+        this.overlay.target = document.querySelector('#draggable');
+        this.overlay.container = document.querySelector('#container');
 
         this.overlay.addPlacement('top', {
             my: "bottom",
@@ -52,9 +53,9 @@ export default class OverlayTestPage {
         });
 
         this.draggable.on('draggable.move', (data) => {
-            this.overlay.render();
+            this.overlay.position();
         });
 
-        this.overlay.render();
+        this.overlay.position();
     }
 }

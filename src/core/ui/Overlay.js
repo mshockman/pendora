@@ -2,6 +2,11 @@ import Rect from "../vectors/Rect";
 import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} from "core/ui/position";
 import {selectElement} from "../utility";
 import Component from "../Component";
+import Animation from "../fx/Animation";
+
+
+export const symbolOnShow = Symbol("onShow"),
+    symbolOnHide = Symbol("onHide");
 
 
 function getXIntersectAmount(rect1, rect2) {
@@ -53,28 +58,65 @@ const DEFAULT_PLACEMENTS = {
 
 export default class Overlay extends Component {
     #currentIndex;
+    #placements;
+    #container;
+    #target;
+    #arrow;
 
-    constructor(element) {
+    #showFX;
+    #showDuration;
+    #hideFX;
+    #hideDuration;
+    #fx;
+
+    #timer;
+
+    constructor(element, {target=null, container=null, sticky=true, fit=null, showFX=null, showDuration=null, hideFX=null, hideDuration=null, timeout=null}={}) {
         super(element);
 
-        this.placements = [];
-        this.sticky = true;
-        this.fit = false;
-        this.container = null;
-        this.referenceTarget = null;
-        this.arrow = null;
+        if(typeof target === 'string') {
+            target = document.querySelector(target);
+        }
+
+        if(typeof container === 'string') {
+            container = document.querySelector(container);
+        }
+
+        this.sticky = sticky;
+        this.fit = fit;
+        this.timeout = timeout;
 
         this.#currentIndex = 0; // The index of the current placement.
+        this.#placements = [];
+        this.#arrow = container;
+        this.#timer = null;
+
+        this.#fx = null;
+        this.#showFX = showFX;
+        this.#showDuration = showDuration;
+        this.#hideFX = hideFX;
+        this.#hideDuration= hideDuration;
+
+        this.target = target;
+        this.container = container;
+    }
+
+    [symbolOnHide](element) {
+        element.classList.add('hidden');
+    }
+
+    [symbolOnShow](element) {
+        element.classList.remove('hidden');
     }
 
     setArrow(arrow) {
-        if(this.arrow) {
-            this.arrow.removeFrom();
-            this.arrow = null;
+        if(this.#arrow) {
+            this.#arrow.removeFrom();
+            this.#arrow = null;
         }
 
-        this.arrow = arrow;
-        this.arrow.appendTo(this.element);
+        this.#arrow = arrow;
+        this.#arrow.appendTo(this.element);
     }
 
     addPlacement(name, options=undefined) {
@@ -82,22 +124,55 @@ export default class Overlay extends Component {
             options = DEFAULT_PLACEMENTS[name];
         }
 
-        this.placements.push({
-            name,
-            my: options.my,
-            at: options.at,
-            of: options.of,
-            arrow: options.arrow
-        });
+        let placement = {name};
+
+        for(let key of ['my', 'at', 'of', 'arrow', 'offset', 'collision', 'method']) {
+            if(options[key] !== undefined) {
+                placement[key] = options[key];
+            }
+        }
+
+        placement.method = placement.method || 'top-left';
+
+        this.#placements.push(Object.freeze(placement));
     }
 
-    render() {
-        let targetRect = this.getTargetRect(),
-            containerRect = this.getContainerRect(),
+    setPlacement(name, options=undefined) {
+        if(!options) {
+            options = DEFAULT_PLACEMENTS[name];
+        }
+
+        this.#placements = [];
+        this.addPlacement(name, options);
+    }
+
+    position(mode="current") {
+        if(!this.#placements.length) {
+            return;
+        }
+
+        let targetRect,
+            containerRect,
             startingIndex = 0,
-            currentPos,
+            currentPos = null,
             currentIntersectAmount = 0,
             currentPlacement;
+
+        if(typeof this.target === 'function') {
+            targetRect = this.target();
+        } else if(this.target) {
+            targetRect = Rect.getBoundingClientRect(this.target);
+        } else {
+            targetRect = Rect.getRootContainingClientRect();
+        }
+
+        if(typeof this.container === 'function') {
+            containerRect = this.container();
+        } else if(this.container) {
+            containerRect = Rect.getBoundingClientRect(this.container);
+        } else {
+            containerRect = null;
+        }
 
         // If sticky start searching from the last position instead of starting from the begining.
         if(this.sticky) {
@@ -105,8 +180,8 @@ export default class Overlay extends Component {
         }
 
         // Find the best position.
-        for(let i = 0; i < this.placements.length; i++) {
-            let index = (startingIndex + i) % this.placements.length,
+        for(let i = 0; i < this.#placements.length; i++) {
+            let index = (startingIndex + i) % this.#placements.length,
                 position = this.getPlacement(index),
                 clampSpace = targetRect,
                 pos,
@@ -117,11 +192,15 @@ export default class Overlay extends Component {
 
             this.element.dataset.placement = position.name;
 
-            pos = this.getBoundingClientRect();
+            if(mode === "current") {
+                pos = Rect.getBoundingClientRect(this.element);
+            } else {
+                pos = Rect.getCleanBoundingClientRect(this.element);
+            }
 
-            if(this.arrow && position.arrow) {
-                this.arrow.setPlacement(position.arrow);
-                arrowRect = this.arrow.getBoundingClientRect();
+            if(this.#arrow && position.arrow) {
+                this.#arrow.setPlacement(position.arrow);
+                arrowRect = this.#arrow.getBoundingClientRect();
                 let unionBox = pos.union(arrowRect);
                 arrowOffset = pos.subtract(unionBox);
                 pos = unionBox;
@@ -135,7 +214,7 @@ export default class Overlay extends Component {
             ));
 
             if(arrowRect) {
-                if(this.arrow.placement === "top" || this.arrow.placement === "bottom") {
+                if(this.#arrow.placement === "top" || this.#arrow.placement === "bottom") {
                     clampSpace = clampSpace.add(new Rect(
                         arrowRect.width,
                         0,
@@ -171,7 +250,7 @@ export default class Overlay extends Component {
             newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
 
             // noinspection JSCheckFunctionSignatures
-            if(!currentPos || containerRect.contains(pos) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
+            if(!currentPos || (containerRect && containerRect.contains(pos)) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
                 if(containerRect) {
                     if(this.fit === true || this.fit === "xy") {
                         pos = pos.fit(containerRect);
@@ -198,8 +277,8 @@ export default class Overlay extends Component {
         setElementClientPosition(this.element, currentPos, currentPlacement.method || "top-left");
         this.element.dataset.placement = currentPlacement.name;
 
-        if(this.arrow) {
-            this.arrow.setPlacement(currentPlacement.arrow);
+        if(this.#arrow) {
+            this.#arrow.setPlacement(currentPlacement.arrow);
         }
 
         // Publish topics.
@@ -213,34 +292,126 @@ export default class Overlay extends Component {
     }
 
     getPlacement(index) {
-        return this.placements[index];
+        return this.#placements[index];
     }
 
-    getTargetRect() {
-        return Rect.getBoundingClientRect(this.referenceTarget);
-    }
-
-    getContainerRect() {
-        if(this.container) {
-            return Rect.getBoundingClientRect(this.container);
+    async show(immediate=false) {
+        if(this.#timer) {
+            clearTimeout(this.#timer);
+            this.#timer = null;
         }
 
-        return null;
+        if(!this.element.parentElement) {
+            document.body.appendChild(this.element);
+        }
+
+        let result;
+
+        if(immediate) {
+            if(this.#fx) {
+                await this.#fx.cancel();
+            }
+
+            this.element.classList.remove("hidden");
+
+            if(this.#showFX) {
+                this.#animation.show(this.element, true);
+            }
+
+            this.position("full", this.#placement, this.#target, Rect.getClientRect());
+
+            result = Animation.complete;
+            this.#state = Tooltip.visible;
+            this.publish("tooltip.visible", this);
+        } else if(this.state !== Tooltip.visible) {
+            if(this.#animation) {
+                await this.#animation.cancel(this.element);
+            }
+
+            let startingState = this.state,
+                clientRect = Rect.getClientRect(),
+                fx;
+
+            this.#target = target;
+            this.element.classList.remove('hidden');
+            this.position("full", this.#placement, target, clientRect);
+
+            if(startingState === Tooltip.hidden && this.#animation) {
+                await this.#animation.hide(this.element, true);
+            }
+
+            this.#state = Tooltip.showing;
+            this.publish("tooltip.showing", this);
+
+            let onFrame = () => {
+                this.position("current", this.#placement, target, clientRect)
+            };
+
+            if(this.#animation) {
+                fx = this.#animation.show(this.element, false, {onFrame});
+            }
+
+            if(fx) {
+                result = await fx;
+            } else {
+                result = Animation.complete;
+            }
+
+            if(result === Animation.complete) {
+                this.#state = Tooltip.visible;
+                this.publish("tooltip.visible", this);
+            }
+        } else {
+            result = Animation.complete;
+        }
+
+        if(result === Animation.complete) {
+            if (this.#timer) {
+                clearTimeout(this.#timer);
+                this.#timer = null;
+            }
+
+            if (typeof this.#timeout === 'number' && this.#timeout >= 0) {
+                this.#timer = setTimeout(() => {
+                    this.hide();
+                    this.publish("tooltip.timeout", this);
+                }, this.#timeout);
+            }
+        }
+
+        return result;
     }
 
-    setContainer(container) {
-        if(container) {
-            this.container = selectElement(container);
+    async hide(immediate=false) {
+
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    get placements() {
+        return this.#placements.slice(0);
+    }
+
+    get target() {
+        return this.#target;
+    }
+
+    get container() {
+        return this.#container;
+    }
+
+    set target(target) {
+        if(typeof value === 'string') {
+            this.#target = document.querySelector(target);
         } else {
-            this.container = null;
+            this.#target = target || null;
         }
     }
 
-    setTarget(target) {
-        if(target) {
-            this.referenceTarget = selectElement(target);
+    set container(container) {
+        if(typeof container === 'string') {
+            this.#container = document.querySelector(container);
         } else {
-            this.referenceTarget = null;
+            this.#container = container || null;
         }
     }
 }
