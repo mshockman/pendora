@@ -1,12 +1,11 @@
 import Rect from "../vectors/Rect";
 import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} from "core/ui/position";
-import {selectElement} from "../utility";
 import Component from "../Component";
 import Animation from "../fx/Animation";
 
 
-export const symbolOnShow = Symbol("onShow"),
-    symbolOnHide = Symbol("onHide");
+export const symbolShow = Symbol("show"),
+    symbolHide = Symbol("hide");
 
 
 function getXIntersectAmount(rect1, rect2) {
@@ -57,11 +56,17 @@ const DEFAULT_PLACEMENTS = {
 
 
 export default class Overlay extends Component {
+    static hiding = "Hiding";
+    static showing = "Showing";
+    static hidden = "Hidden";
+    static visible = "Visible";
+
     #currentIndex;
     #placements;
     #container;
     #target;
     #arrow;
+    #state;
 
     #showFX;
     #showDuration;
@@ -71,7 +76,7 @@ export default class Overlay extends Component {
 
     #timer;
 
-    constructor(element, {target=null, container=null, sticky=true, fit=null, showFX=null, showDuration=null, hideFX=null, hideDuration=null, timeout=null}={}) {
+    constructor(element, {target=null, container=null, sticky=true, fit=null, showFX=null, showDuration=null, hideFX=null, hideDuration=null, timeout=null, removeOnHide=false}={}) {
         super(element);
 
         if(typeof target === 'string') {
@@ -85,11 +90,21 @@ export default class Overlay extends Component {
         this.sticky = sticky;
         this.fit = fit;
         this.timeout = timeout;
+        this.removeOnHide = removeOnHide;
 
         this.#currentIndex = 0; // The index of the current placement.
         this.#placements = [];
         this.#arrow = container;
         this.#timer = null;
+
+        this.#state = undefined;
+
+        if(typeof showFX === 'function') {
+            showFX = new showFX();
+        }
+        if(typeof hideFX === 'function') {
+            hideFX = new hideFX();
+        }
 
         this.#fx = null;
         this.#showFX = showFX;
@@ -101,11 +116,11 @@ export default class Overlay extends Component {
         this.container = container;
     }
 
-    [symbolOnHide](element) {
+    [symbolHide](element) {
         element.classList.add('hidden');
     }
 
-    [symbolOnShow](element) {
+    [symbolShow](element) {
         element.classList.remove('hidden');
     }
 
@@ -159,7 +174,7 @@ export default class Overlay extends Component {
             currentPlacement;
 
         if(typeof this.target === 'function') {
-            targetRect = this.target();
+            targetRect = new Rect(this.target());
         } else if(this.target) {
             targetRect = Rect.getBoundingClientRect(this.target);
         } else {
@@ -274,8 +289,9 @@ export default class Overlay extends Component {
         }
 
         // Apply the best position.
-        setElementClientPosition(this.element, currentPos, currentPlacement.method || "top-left");
         this.element.dataset.placement = currentPlacement.name;
+
+        setElementClientPosition(this.element, currentPos, currentPlacement.method || "top-left");
 
         if(this.#arrow) {
             this.#arrow.setPlacement(currentPlacement.arrow);
@@ -289,6 +305,8 @@ export default class Overlay extends Component {
             placement: currentPlacement,
             index: this.#currentIndex
         });
+
+        return currentPos;
     }
 
     getPlacement(index) {
@@ -296,10 +314,7 @@ export default class Overlay extends Component {
     }
 
     async show(immediate=false) {
-        if(this.#timer) {
-            clearTimeout(this.#timer);
-            this.#timer = null;
-        }
+        this.clearTimeOut();
 
         if(!this.element.parentElement) {
             document.body.appendChild(this.element);
@@ -312,54 +327,56 @@ export default class Overlay extends Component {
                 await this.#fx.cancel();
             }
 
-            this.element.classList.remove("hidden");
+            this[symbolShow](this.element);
 
             if(this.#showFX) {
-                this.#animation.show(this.element, true);
+                this.#showFX.goto(this.element, 1);
             }
 
-            this.position("full", this.#placement, this.#target, Rect.getClientRect());
+            this.position("current");
 
             result = Animation.complete;
-            this.#state = Tooltip.visible;
-            this.publish("tooltip.visible", this);
-        } else if(this.state !== Tooltip.visible) {
-            if(this.#animation) {
-                await this.#animation.cancel(this.element);
+            this.#state = Overlay.visible;
+            this.publish("overlay.visible", this);
+        } else if(this.state !== Overlay.visible) {
+            if(this.#fx) {
+                await this.#fx.cancel();
             }
 
-            let startingState = this.state,
-                clientRect = Rect.getClientRect(),
-                fx;
+            let startingState = this.state;
 
-            this.#target = target;
-            this.element.classList.remove('hidden');
-            this.position("full", this.#placement, target, clientRect);
+            this[symbolShow](this.element);
+            this.position("current");
 
-            if(startingState === Tooltip.hidden && this.#animation) {
-                await this.#animation.hide(this.element, true);
+            if(startingState === Overlay.hidden && this.#hideFX) {
+                await this.#hideFX.goto(this.element, 1);
             }
 
-            this.#state = Tooltip.showing;
-            this.publish("tooltip.showing", this);
+            this.position("current");
+
+            this.#state = Overlay.showing;
+            this.publish("overlay.showing", this);
 
             let onFrame = () => {
-                this.position("current", this.#placement, target, clientRect)
+                this.position("current");
             };
 
-            if(this.#animation) {
-                fx = this.#animation.show(this.element, false, {onFrame});
+            if(this.#showFX) {
+                this.#fx = this.#showFX.animate(this.element, {duration: this.#showDuration, onFrame});
             }
 
-            if(fx) {
-                result = await fx;
+            this.position("current");
+
+            if(this.#fx) {
+                result = await this.#fx;
+                this.#fx = null;
             } else {
                 result = Animation.complete;
             }
 
             if(result === Animation.complete) {
-                this.#state = Tooltip.visible;
-                this.publish("tooltip.visible", this);
+                this.#state = Overlay.visible;
+                this.publish("overlay.visible", this);
             }
         } else {
             result = Animation.complete;
@@ -371,11 +388,8 @@ export default class Overlay extends Component {
                 this.#timer = null;
             }
 
-            if (typeof this.#timeout === 'number' && this.#timeout >= 0) {
-                this.#timer = setTimeout(() => {
-                    this.hide();
-                    this.publish("tooltip.timeout", this);
-                }, this.#timeout);
+            if (typeof this.timeout === 'number' && this.timeout >= 0) {
+                this.startTimeoutTimer(this.timeout);
             }
         }
 
@@ -383,7 +397,102 @@ export default class Overlay extends Component {
     }
 
     async hide(immediate=false) {
+        this.clearTimeOut();
 
+        if(immediate) {
+            if(this.#fx) {
+                await this.#fx.cancel();
+            }
+
+            if(this.#hideFX) {
+                this.#hideFX.goto(this.element, 1);
+            }
+
+            this[symbolHide](this.element);
+            this.#state = Overlay.hidden;
+            this.publish("overlay.hidden", this);
+
+            if(this.removeOnHide) {
+                this.removeFrom();
+            }
+
+            return Animation.complete;
+        } if(this.state !== Overlay.hidden) {
+            if(this.#fx) {
+                await this.#fx.cancel();
+            }
+
+            let result;
+
+            let onFrame = () => {
+                this.position("current");
+            };
+
+            if(this.#hideFX) {
+                this.#fx = this.#hideFX.animate(this.element, {duration: this.#hideDuration, onFrame});
+            }
+
+            this.#state = Overlay.hiding;
+            this.publish("overlay.hiding", this);
+
+            if(this.#fx) {
+                result = await this.#fx;
+            } else {
+                result = Animation.complete;
+            }
+
+            if(result === Animation.complete) {
+                this[symbolHide](this.element);
+                this.#state = Overlay.hidden;
+
+                if(this.removeOnHide) {
+                    this.removeFrom();
+                }
+
+                this.publish("overlay.hidden", this);
+            }
+
+            return result;
+        } else {
+            return Animation.complete;
+        }
+    }
+
+    startTimeoutTimer(timeout=null) {
+        if(timeout === null) {
+            timeout = this.timeout;
+        }
+
+        if(typeof timeout !== "number" || timeout < 0) {
+            throw new TypeError("Timeout must be a positive integer.");
+        }
+
+        this.clearTimeOut();
+
+        this.#timer = setTimeout(() => {
+            this.hide();
+            this.publish("overlay.timeout", this);
+        }, this.timeout);
+    }
+
+    clearTimeOut() {
+        if(this.isTimingOut()) {
+            clearTimeout(this.#timer);
+            this.#timer = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    isTimingOut() {
+        return !!this.#timer;
+    }
+
+    async clearFX() {
+        if(this.#fx) {
+            await this.#fx.cancel();
+        }
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -413,5 +522,18 @@ export default class Overlay extends Component {
         } else {
             this.#container = container || null;
         }
+    }
+
+    get fx() {
+        return this.#fx;
+    }
+
+    get state() {
+        return this.#state;
+    }
+
+    get showFX() {
+        // todo remove debug only.
+        return this.#showFX;
     }
 }

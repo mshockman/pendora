@@ -190,7 +190,7 @@ export class IOAnimationBase {
         options = {...options};
 
         if(immediate) {
-            this.#showFX.animate(element, {
+            await this.#showFX.animate(element, {
                 ...options,
                 autoPlay: false,
                 position: 1
@@ -216,7 +216,7 @@ export class IOAnimationBase {
         }
 
         if(immediate) {
-            this.#hideFX.animate(element, {
+            await this.#hideFX.animate(element, {
                 ...options,
                 autoPlay: false,
                 position: 1

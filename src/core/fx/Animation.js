@@ -122,6 +122,11 @@ export default class Animation {
         return fx;
     }
 
+    goto(element, position) {
+        this.animate(element, {autoPlay: false, position: position});
+        return Animation.complete;
+    }
+
     /**
      * Creates a function that calls the animate method with the bound parameters.
      * Parameters can be overridden in the created function when called.

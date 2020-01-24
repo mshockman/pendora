@@ -587,10 +587,14 @@ export default class Rect extends Vec4 {
      * @returns {Rect}
      */
     static getCleanBoundingClientRect(element, restore=true) {
-        let state = {};
+        let state = {},
+            keys = [];
 
         for(let i = 0; i < element.style.length; i++) {
-            let key = element.style[i];
+            keys.push(element.style[i]);
+        }
+
+        for(let key of keys) {
             state[key] = element.style[key];
             element.style[key] = "";
         }
