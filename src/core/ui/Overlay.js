@@ -531,9 +531,4 @@ export default class Overlay extends Component {
     get state() {
         return this.#state;
     }
-
-    get showFX() {
-        // todo remove debug only.
-        return this.#showFX;
-    }
 }
