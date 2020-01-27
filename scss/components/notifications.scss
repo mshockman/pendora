@@ -2,15 +2,24 @@
 
 .notification {
   border: 1px solid rgba(0, 0, 0, 0.3);
-  padding: 0.25rem;
   border-radius: 0.25rem;
   background-color: #f3f3f3;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  margin: 0.5rem;
+  font-weight: 700;
+}
+
+
+.notification__inner {
+  padding: 0.25rem;
 }
 
 
 .notification.success {
-
+  color: #468847;
+  background-color: #DFF0D8;
+  border-color: #D6E9C6;
 }
 
 

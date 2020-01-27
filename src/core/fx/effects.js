@@ -173,6 +173,34 @@ export class SlideOut extends Animation {
 }
 
 
+export class SlideInY extends SlideIn {
+    constructor(duration) {
+        super(duration, 'y');
+    }
+}
+
+
+export class SlideOutY extends SlideOut {
+    constructor(duration) {
+        super(duration, 'y');
+    }
+}
+
+
+export class SlideInX extends SlideIn {
+    constructor(duration) {
+        super(duration, 'x');
+    }
+}
+
+
+export class SlideOutX extends SlideOut {
+    constructor(duration) {
+        super(duration, 'x');
+    }
+}
+
+
 export class IOAnimationBase {
     #showFX;
     #hideFX;

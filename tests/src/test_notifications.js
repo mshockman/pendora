@@ -7,9 +7,9 @@ export default class NotificationTestPage {
     }
 
     load() {
-        let notification = new BasicNotificationMessage("Hello World!");
-        notification.appendTo(document.body);
-        notification.id = "test-notification-1";
+        // let notification = new BasicNotificationMessage("Hello World!");
+        // notification.appendTo(document.body);
+        // notification.id = "test-notification-1";
 
         let testButtons = document.querySelector('#test-buttons');
 
@@ -21,7 +21,7 @@ export default class NotificationTestPage {
             let text = button.innerText,
                 placement = text.toLowerCase().replace(" ", "-");
 
-            BasicNotificationMessage.notify("Hello World!", "success", placement);
+            BasicNotificationMessage.notify("Hello World This is A long Message!", "success", {placement, closeOnClick: true});
         });
     }
 }
