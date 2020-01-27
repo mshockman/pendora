@@ -1,4 +1,4 @@
-import {BasicNotificationMessage} from "../../src/core/ui/Notification";
+import Notification from "../../src/core/ui/Notification";
 
 
 export default class NotificationTestPage {
@@ -21,7 +21,7 @@ export default class NotificationTestPage {
             let text = button.innerText,
                 placement = text.toLowerCase().replace(" ", "-");
 
-            BasicNotificationMessage.notify("Hello World This is A long Message!", "success", {placement, closeOnClick: true});
+            Notification.notify("Hello World This is A long Message!", "success", {placement, closeOnClick: true});
         });
     }
 }

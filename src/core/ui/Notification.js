@@ -1,5 +1,6 @@
 import Component from "../Component";
 import Overlay from "./Overlay";
+import {addClasses} from "../utility";
 import {FadeIn, FadeOut, SlideInX, SlideOutX, SlideInY, SlideOutY} from "../fx/effects";
 
 
@@ -13,10 +14,111 @@ const ANIMATIONS = {
 };
 
 
-export class Notification extends Component {
+const PLACEMENTS = {};
+for(let placement of ['top-left', 'top-right', 'left', 'right', 'bottom-left', 'bottom-right']) {
+    let node = document.createElement('div');
+    node.className = `notification-placement-${placement} notification-placement-body`;
+    PLACEMENTS[placement] = node;
+}
+
+
+for(let placement of ['top', 'bottom']) {
+    let node = document.createElement('div'),
+        body = document.createElement('div');
+    node.className = `notification-placement-${placement}`;
+    body.className = 'notification-placement-body';
+    node.appendChild(body);
+    PLACEMENTS[placement] = node;
+}
+
+
+function basicNotificationTemplate(context) {
+    let element = document.createElement('div'),
+        inner = document.createElement('div'),
+        textContainer = document.createElement('div'),
+        iconContainer = document.createElement('div');
+
+    element.appendChild(inner);
+    element.className = "notification";
+    inner.className = "notification__inner";
+    textContainer.classname = "notification__text";
+    iconContainer.className = "notification__icon";
+    textContainer.innerHTML = context.text || "";
+
+    if(context.text) {
+        textContainer.innerHTML = context.text;
+    }
+
+    if(context.icon) {
+        iconContainer.innerHTML = context.icon;
+    }
+
+    inner.appendChild(iconContainer);
+    inner.appendChild(textContainer);
+
+    if(context.className) {
+        addClasses(element, context.className);
+    }
+
+    return element;
+}
+
+
+const BASIC_NOTIFICATIONS = {
+    success: {
+        className: "success",
+        template: basicNotificationTemplate,
+        timeout: 5000,
+        showFX: 'slideInY',
+        showDuration: 400,
+        hideFX: "slideOutY",
+        hideDuration: 200,
+        closeOnClick: true,
+        icon: `<i class="fas fa-check-square"></i>`
+    },
+
+    danger: {
+        className: "error",
+        template: basicNotificationTemplate,
+        timeout: 5000,
+        showFX: 'slideInY',
+        showDuration: 400,
+        hideFX: "slideOutY",
+        hideDuration: 200,
+        closeOnClick: true,
+        icon: `<i class="fas fa-exclamation"></i>`
+    },
+
+    warning: {
+        className: "warning",
+        template: basicNotificationTemplate,
+        timeout: 5000,
+        showFX: 'slideInY',
+        showDuration: 400,
+        hideFX: "slideOutY",
+        hideDuration: 200,
+        closeOnClick: true,
+        icon: `<i class="fas fa-exclamation-triangle"></i>`
+    },
+
+    info: {
+        className: "info",
+        template: basicNotificationTemplate,
+        timeout: 5000,
+        showFX: 'slideInY',
+        showDuration: 400,
+        hideFX: "slideOutY",
+        hideDuration: 200,
+        closeOnClick: true,
+        icon: `<i class="fas fa-info"></i>`
+    }
+};
+
+
+export default class Notification extends Component {
     #overlay;
 
-    constructor(element, {closeOnClick=false, timeout=null, showFX='slideInY', showDuration=200, hideFX='slideOutY', hideDuration=200}={}) {
+    constructor(element, {closeOnClick=false, timeout=5000, showFX='slideInY', showDuration=200, hideFX='slideOutY', hideDuration=200, className=null, id=null}={}) {
         super(element);
 
         if(typeof showFX === 'string') {
@@ -25,6 +127,14 @@ export class Notification extends Component {
 
         if(typeof hideFX === 'string') {
             hideFX = ANIMATIONS[hideFX];
+        }
+
+        if(className) {
+            addClasses(this.element, className);
+        }
+
+        if(id) {
+            this.element.id = id;
         }
 
         this.#overlay = new Overlay(this.element, {
@@ -50,10 +160,6 @@ export class Notification extends Component {
         });
     }
 
-    reposition() {
-
-    }
-
     async show(immediate) {
         return this.#overlay.show(immediate);
     }
@@ -65,45 +171,27 @@ export class Notification extends Component {
     get state() {
         return this.#overlay.state;
     }
-}
 
+    static notify(message, type, options) {
+        let config = {placement: "top-left", ...BASIC_NOTIFICATIONS.success};
 
-const PLACEMENTS = {};
-for(let placement of ['top-left', 'top', 'top-right', 'left', 'right', 'bottom-left', 'bottom', 'bottom-right']) {
-    let node = document.createElement('div');
-    node.className = `notification-placement-${placement}`;
-    PLACEMENTS[placement] = node;
-}
+        if(typeof type === 'string') {
+            config = {...config, ...BASIC_NOTIFICATIONS[type]};
+        } else if(typeof type === 'object') {
+            config = {...config, ...type};
+        }
 
+        if(typeof options === 'object') {
+            config = {...config, ...options};
+        }
 
-export class BasicNotificationMessage extends Notification {
-    constructor(text, {closeOnClick=false, timeout=5000, showFX='slideInY', showDuration=400, hideFX='slideOutY', hideDuration=200}={}) {
-        let element = document.createElement('div'),
-            inner = document.createElement('div');
+        config.text = message;
 
-        element.appendChild(inner);
-        element.className = "notification";
-        inner.className = "notification__inner";
-        inner.innerHTML = text;
+        let element = config.template(config);
 
-        super(element, {
-            closeOnClick,
-            timeout,
-            showFX,
-            hideFX,
-            showDuration,
-            hideDuration
-        });
-    }
+        let notification = new this(element, config);
 
-    static notify(message, type, {placement="top-left", ...options}={}) {
-        let notification = new this(message, {...options});
-
-        if(type) notification.addClass(type);
-
-        // top-left top top-right
-        // left, middle right
-        // bottom-left bottom bottom-right
+        let placement = config.placement;
 
         if(typeof placement === 'string') {
             placement = PLACEMENTS[placement];
@@ -114,7 +202,17 @@ export class BasicNotificationMessage extends Notification {
         }
 
         if(placement) {
-            notification.appendTo(placement);
+            let container;
+
+            if(placement.classList.contains('notification-placement-body')) {
+                container = placement;
+            } else {
+                container = document.querySelector('.notification-placement-body');
+            }
+
+            if(!container) container = placement;
+
+            notification.appendTo(container);
         }
 
         notification.show();
