@@ -21,7 +21,8 @@ let app = new Application({
     'test_animation': () => import("test_animation.js"),
     'test_positioner': () => import("test_positioner.js"),
     'test_tooltip': () => import("test_tooltip.js"),
-    'test_notifications': () => import("test_notifications.js")
+    'test_notifications': () => import("test_notifications.js"),
+    'test_modal': () => import("test_modal.js")
 });
 
 

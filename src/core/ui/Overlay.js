@@ -74,9 +74,12 @@ export default class Overlay extends Component {
     #hideDuration;
     #fx;
 
+    #visibleClassName;
+    #hiddenClassName;
+
     #timer;
 
-    constructor(element, {target=null, container=null, sticky=true, fit=null, showFX=null, showDuration=null, hideFX=null, hideDuration=null, timeout=null, removeOnHide=false}={}) {
+    constructor(element, {target=null, container=null, sticky=true, fit=null, showFX=null, showDuration=null, hideFX=null, hideDuration=null, timeout=null, removeOnHide=false, visibleClassName=null, hiddenClassName="hidden"}={}) {
         super(element);
 
         if(typeof target === 'string') {
@@ -97,6 +100,9 @@ export default class Overlay extends Component {
         this.#arrow = container;
         this.#timer = null;
 
+        this.#visibleClassName = visibleClassName;
+        this.#hiddenClassName = hiddenClassName;
+
         this.#state = undefined;
 
         if(typeof showFX === 'function') {
@@ -116,12 +122,26 @@ export default class Overlay extends Component {
         this.container = container;
     }
 
+    // noinspection JSUnusedLocalSymbols
     [symbolHide](element) {
-        element.classList.add('hidden');
+        if(this.#hiddenClassName) {
+            this.addClass(this.#hiddenClassName);
+        }
+
+        if(this.#visibleClassName) {
+            this.removeClass(this.#visibleClassName);
+        }
     }
 
+    // noinspection JSUnusedLocalSymbols
     [symbolShow](element) {
-        element.classList.remove('hidden');
+        if(this.#hiddenClassName) {
+            this.removeClass(this.#hiddenClassName);
+        }
+
+        if(this.#visibleClassName) {
+            this.addClass(this.#visibleClassName);
+        }
     }
 
     setArrow(arrow) {

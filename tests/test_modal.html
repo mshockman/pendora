@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Modal</title>
+
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="dist/pendora.css" />
+
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+
+<div id="my-modal" class="modal closed">
+    <div class="dialog modal__dialog">
+        <div class="dialog__header">
+            <div class="dialog__titlebar">
+                <div class="dialog__title mr-auto">This is the title!</div>
+                <div class="dialog__exit-button"><i class="fas fa-times"></i></div>
+            </div>
+        </div>
+        <div class="dialog__body">
+            <strong>Hello World</strong>
+        </div>
+        <div class="dialog__footer">
+            <div class="row">
+                <button type="button" class="ml-auto" data-dismiss>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="show-modal1-btn">Show Modal #1</button>
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    app.init('test_modal');
+</script>
+
+</body>
+</html>
