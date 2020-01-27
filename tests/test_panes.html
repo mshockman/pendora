@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Panes</title>
+
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="dist/pendora.css" />
+
+    <style type="text/css">
+        #pane1, #pane2 {
+            width: 200px;
+            min-width: 20px;
+            max-width: 400px;
+        }
+
+        #pane3 {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="pane-view" data-axis="x" id="test-pane">
+    <div class="pane" id="pane1" data-resize="x">
+
+    </div>
+    <div class="pane-handle"></div>
+    <div class="pane" id="pane3">
+        Main
+    </div>
+    <div class="pane-handle"></div>
+    <div class="pane" id="pane2">
+        Hello World
+    </div>
+</div>
+
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    app.init('test_panes');
+</script>
+
+</body>
+</html>

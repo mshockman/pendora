@@ -4,12 +4,6 @@ import Application from 'app';
 // noinspection ES6UnusedImports
 import AutoLoader from 'autoloader';
 
-import {privateCache} from "core/data";
-// noinspection ES6UnusedImports
-import Modal from 'ui/modal';
-// noinspection ES6UnusedImports
-import Tabs from 'ui/tabs';
-
 
 // noinspection JSUnresolvedVariable
 __webpack_public_path__ = "dist/";
@@ -22,9 +16,10 @@ let app = new Application({
     'test_positioner': () => import("test_positioner.js"),
     'test_tooltip': () => import("test_tooltip.js"),
     'test_notifications': () => import("test_notifications.js"),
-    'test_modal': () => import("test_modal.js")
+    'test_modal': () => import("test_modal.js"),
+    'test_panes': () => import("test_panes")
 });
 
 
 window.app = app;
-window.privateCache = privateCache;
+
