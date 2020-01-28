@@ -15,25 +15,27 @@
             min-width: 20px;
             max-width: 400px;
         }
-
-        #pane3 {
-            flex: 1;
-        }
     </style>
 </head>
 <body>
 
 
 <div class="pane-view" data-axis="x" id="test-pane">
-    <div class="pane" id="pane1" data-resize="x">
-
+    <div class="pane" id="pane1" data-pane="x">
+        <div class="pane-view column fluid">
+            <div class="pane" style="height: 200px;" data-pane="y">1</div>
+            <div class="pane-handle"></div>
+            <div class="pane-fill" data-pane="auto">2</div>
+            <div class="pane-handle"></div>
+            <div class="pane" style="height: 200px;" data-pane="y">3</div>
+        </div>
     </div>
-    <div class="pane-handle"></div>
-    <div class="pane" id="pane3">
+    <div class="pane-handle" data-handle></div>
+    <div class="pane-fill" id="pane3" data-pane="auto">
         Main
     </div>
-    <div class="pane-handle"></div>
-    <div class="pane" id="pane2">
+    <div class="pane-handle" data-handle></div>
+    <div class="pane" id="pane2" data-pane="x">
         Hello World
     </div>
 </div>

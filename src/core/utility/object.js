@@ -71,3 +71,44 @@ export function getPropertyByPath(obj, path) {
 
     return r;
 }
+
+
+/**
+ * rangeFindItem
+ *
+ * Searches an array starting at the starting index and heads towards the ending index and returns the first item that
+ * matches the predicate function.  If no item is found then undefined will be returned.  This function can search an
+ * array both forwards and backwards.  Just start at a greater point then the ending point and the function will
+ * handle the rest.
+ *
+ * @param array - The array to search
+ * @param predicate - The matching function.  Should return true if the item is a match.
+ * @param startingIndex - The index to start from.
+ * @param endingIndex - The index to end at.  (Will also search this index)
+ * @returns {*}
+ */
+export function rangeFindItem(array, predicate, startingIndex=0, endingIndex=null) {
+    let i;
+
+    if(endingIndex === null) {
+        endingIndex = array.length-1;
+    }
+
+    i = startingIndex;
+
+    while(true) {
+        let item = array[i];
+
+        if(predicate(item)) {
+            return item;
+        }
+
+        if(startingIndex > endingIndex) {
+            if(i <= endingIndex) return;
+            i--;
+        } else {
+            if(i >= endingIndex) return;
+            i++;
+        }
+    }
+}

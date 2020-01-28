@@ -3,7 +3,7 @@ import {proto} from "./decorators";
 import {createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll} from "./dom";
 import {all, any, chain, enumerate, firstValue, items, keys, values} from "./iter";
 import {clamp, modulo, calcDistance} from "./math";
-import {arraysEqual, getOwnProperty, getPropertyByPath, isEmptyObject, randomChoice} from "./object";
+import {arraysEqual, getOwnProperty, getPropertyByPath, isEmptyObject, randomChoice, rangeFindItem} from "./object";
 
 export {
     debounce,
@@ -11,5 +11,5 @@ export {
     createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes,
     getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values,
     clamp, modulo, calcDistance,
-    arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice
+    arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem
 };
