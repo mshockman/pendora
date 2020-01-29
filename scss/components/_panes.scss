@@ -22,7 +22,7 @@
 }
 
 
-.pane-handle {
+.pane__handle {
   background-color: #000000;
   cursor: col-resize;
   box-sizing: border-box !important;
@@ -33,9 +33,90 @@
 .pane {
   box-sizing: border-box !important;
   position: relative;
+
+  &.handle-right {
+    .pane__handle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      height: auto;
+    }
+
+    .pane__body {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 5px;
+    }
+  }
+
+  &.handle-left {
+    .pane__handle {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom:0;
+      width: 5px;
+      height: auto;
+    }
+
+    .pane__body {
+      position: absolute;
+      left: 5px;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+  }
+
+  &.handle-bottom {
+    .pane__handle {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: auto;
+      bottom:0;
+      height: 5px;
+      width: auto;
+      cursor: row-resize;
+    }
+
+    .pane__body {
+      position: absolute;
+      bottom: 5px;
+      right: 0;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  &.handle-top {
+    .pane__handle {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top:0;
+      bottom: auto;
+      width: auto;
+      height: 5px;
+      cursor: row-resize;
+    }
+
+    .pane__body {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      top: 5px;
+      left: 0;
+    }
+  }
 }
 
 
-.pane-fill {
+.pane-fluid {
+  @extend .pane;
   flex: 1;
 }

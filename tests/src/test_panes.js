@@ -1,16 +1,12 @@
-import PanesView from "../../src/core/ui/PanesView";
-
 
 export default class PanesTestPage {
+    // noinspection JSUnusedGlobalSymbols
     constructor() {
 
     }
 
+    // noinspection JSUnusedGlobalSymbols
     load() {
-        let element = document.getElementById('test-pane'),
-            vpane = document.getElementById('test-v-pane');
 
-        window.panes = new PanesView(element);
-        window.vpane = new PanesView(vpane);
     }
 }
