@@ -33,6 +33,7 @@
 .pane {
   box-sizing: border-box !important;
   position: relative;
+  overflow: hidden;
 
   &.handle-right {
     .pane__handle {
