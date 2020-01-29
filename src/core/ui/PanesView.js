@@ -3,6 +3,22 @@ import Rect from "../vectors/Rect";
 import {clamp, rangeFindItem} from "../utility";
 
 
+const symbolPane = Symbol('pane');
+
+
+function getClosestPaneController(element) {
+    while(element) {
+        if(element[symbolPane]) {
+            return element[symbolPane];
+        } else {
+            element = element.parentElement;
+        }
+    }
+
+    return null;
+}
+
+
 export default class PaneView extends Component {
     #onMouseMove;
     #onMouseMoveTarget;
@@ -12,15 +28,20 @@ export default class PaneView extends Component {
     constructor(element, axis='x') {
         super(element);
 
+        if(this.element[symbolPane]) {
+            throw new Error("Can only initialize one pane controller per element.")
+        }
+
         this.#onMouseMove = null;
         this.#onMouseMoveTarget = null;
         this.#onMouseUp = null;
         this.#axis = this.element.dataset.axis || axis;
+        this.element[symbolPane] = this;
 
         this.element.addEventListener('mousedown', event=> {
             let handle = event.target.closest('[data-handle]');
 
-            if(handle && this.element.contains(handle)) {
+            if(handle && getClosestPaneController(handle) === this) {
                 this._startResizing(event);
             }
         });
@@ -72,7 +93,9 @@ export default class PaneView extends Component {
             } else {
                 let maxUp = Math.min(previous.rect.height - previous.minHeight, next.maxHeight - next.rect.height),
                     maxDown = Math.min(previous.maxHeight - previous.rect.height, next.rect.height - next.minHeight),
-                    amount = clamp(delta.x, -maxUp, maxDown);
+                    amount = clamp(delta.y, -maxUp, maxDown);
+
+                console.log({maxUp, maxDown});
 
                 if(previous.pane !== "auto") previous.element.style.height = `${previous.rect.height + amount}px`;
                 if(next.pane !== "auto") next.element.style.height = `${next.rect.height - amount}px`;

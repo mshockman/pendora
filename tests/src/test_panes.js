@@ -7,7 +7,10 @@ export default class PanesTestPage {
     }
 
     load() {
-        let element = document.getElementById('test-pane');
+        let element = document.getElementById('test-pane'),
+            vpane = document.getElementById('test-v-pane');
+
         window.panes = new PanesView(element);
+        window.vpane = new PanesView(vpane);
     }
 }
