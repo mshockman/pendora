@@ -7,7 +7,7 @@ export default class MenuPageIndex {
     }
 
     load() {
-        // this.createSelectMenuTest(document.body);
+
     }
 
     createSelectMenuTest(container) {

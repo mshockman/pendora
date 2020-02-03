@@ -2926,7 +2926,7 @@ function isWindow(variable) {
 /*!***********************************!*\
   !*** ./src/core/utility/index.js ***!
   \***********************************/
-/*! exports provided: debounce, proto, createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values, clamp, modulo, calcDistance, arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice */
+/*! exports provided: debounce, proto, createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values, clamp, modulo, calcDistance, arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2994,6 +2994,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["isEmptyObject"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "randomChoice", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["randomChoice"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "rangeFindItem", function() { return _object__WEBPACK_IMPORTED_MODULE_5__["rangeFindItem"]; });
 
 
 
@@ -3461,7 +3463,7 @@ function calcDistance(x1, y1, x2, y2) {
 /*!************************************!*\
   !*** ./src/core/utility/object.js ***!
   \************************************/
-/*! exports provided: randomChoice, arraysEqual, isEmptyObject, getOwnProperty, getPropertyByPath */
+/*! exports provided: randomChoice, arraysEqual, isEmptyObject, getOwnProperty, getPropertyByPath, rangeFindItem */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3471,6 +3473,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmptyObject", function() { return isEmptyObject; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getOwnProperty", function() { return getOwnProperty; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPropertyByPath", function() { return getPropertyByPath; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rangeFindItem", function() { return rangeFindItem; });
 /**
  * Returns a random value from an array.
  * @param array
@@ -3565,6 +3568,48 @@ function getPropertyByPath(obj, path) {
   }
 
   return r;
+}
+/**
+ * rangeFindItem
+ *
+ * Searches an array starting at the starting index and heads towards the ending index and returns the first item that
+ * matches the predicate function.  If no item is found then undefined will be returned.  This function can search an
+ * array both forwards and backwards.  Just start at a greater point then the ending point and the function will
+ * handle the rest.
+ *
+ * @param array - The array to search
+ * @param predicate - The matching function.  Should return true if the item is a match.
+ * @param startingIndex - The index to start from.
+ * @param endingIndex - The index to end at.  (Will also search this index)
+ * @returns {*}
+ */
+
+function rangeFindItem(array, predicate) {
+  var startingIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  var endingIndex = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var i;
+
+  if (endingIndex === null) {
+    endingIndex = array.length - 1;
+  }
+
+  i = startingIndex;
+
+  while (true) {
+    var item = array[i];
+
+    if (predicate(item)) {
+      return item;
+    }
+
+    if (startingIndex > endingIndex) {
+      if (i <= endingIndex) return;
+      i--;
+    } else {
+      if (i >= endingIndex) return;
+      i++;
+    }
+  }
 }
 
 /***/ }),
@@ -4459,10 +4504,15 @@ function (_Vec) {
     key: "getCleanBoundingClientRect",
     value: function getCleanBoundingClientRect(element) {
       var restore = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      var state = {};
+      var state = {},
+          keys = [];
 
       for (var i = 0; i < element.style.length; i++) {
-        var key = element.style[i];
+        keys.push(element.style[i]);
+      }
+
+      for (var _i2 = 0, _keys = keys; _i2 < _keys.length; _i2++) {
+        var key = _keys[_i2];
         state[key] = element.style[key];
         element.style[key] = "";
       }
@@ -7792,7 +7842,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         this.isActive = true;
         this.clearTimer('activateItem');
 
-        if (this.submenu) {
+        if (this.hasSubMenu()) {
           if (show === true) {
             this.showSubMenu();
           } else if (typeof show === 'number' && show >= 0) {
@@ -8036,6 +8086,14 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       }
     }, {
       kind: "method",
+      key: "clearActiveChild",
+      value: function clearActiveChild() {
+        if (this.submenu && this.submenu.clearActiveChild) {
+          this.submenu.clearActiveChild();
+        }
+      }
+    }, {
+      kind: "method",
       key: "setParent",
       value: function setParent(parent) {
         if (this._parent === parent) return;
@@ -8132,8 +8190,9 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
         if (event.target === this) {
           // When the mouse moves on an item clear any active items in it's submenu.
-          if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearActiveChild) {
-            this.submenu.clearActiveChild();
+          if (this.hasSubMenu() && this.clearSubItemsOnHover) {
+            // this.submenu.clearActiveChild();
+            this.clearActiveChild();
           }
 
           if (this.element.contains(event.originalEvent.relatedTarget)) return;
@@ -8175,7 +8234,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if (this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
+        if (this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
           this.deactivate();
         }
 
@@ -11914,6 +11973,105 @@ function (_RichSelect) {
 
 /***/ }),
 
+/***/ "./src/menu/SideMenu.js":
+/*!******************************!*\
+  !*** ./src/menu/SideMenu.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SideMenu; });
+/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
+/* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+var SideMenu =
+/*#__PURE__*/
+function (_AbstractMenu) {
+  _inherits(SideMenu, _AbstractMenu);
+
+  function SideMenu(_ref) {
+    var _this;
+
+    var _ref$target = _ref.target,
+        target = _ref$target === void 0 ? null : _ref$target;
+
+    _classCallCheck(this, SideMenu);
+
+    if (!target) {
+      target = document.createElement('div');
+      target.className = 'side-menu';
+    }
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SideMenu).call(this, {
+      target: target,
+      closeOnBlur: true,
+      timeout: false,
+      autoActivate: false,
+      openOnHover: false,
+      toggle: false,
+      closeOnSelect: true,
+      delay: false,
+      positioner: null,
+      direction: "vertical"
+    }));
+    _this.isVisible = false;
+
+    _this.registerTopics();
+
+    _this.parseDOM();
+
+    _this.init();
+
+    return _this;
+  }
+
+  _createClass(SideMenu, [{
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new _Menu__WEBPACK_IMPORTED_MODULE_0__["default"](config);
+    }
+  }, {
+    key: "render",
+    value: function render(_ref2) {
+      var target = _ref2.target;
+      this.element = target;
+    }
+  }]);
+
+  return SideMenu;
+}(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
+
+
+
+/***/ }),
+
 /***/ "./src/menu/decorators.js":
 /*!********************************!*\
   !*** ./src/menu/decorators.js ***!
@@ -12021,7 +12179,7 @@ function publishTargetEvent(topic) {
 /*!***************************!*\
   !*** ./src/menu/index.js ***!
   \***************************/
-/*! exports provided: MenuBar, MenuItem, AbstractMenuItem, Menu, AbstractMenu, DropDown, MenuNode, SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect, ContextMenu */
+/*! exports provided: MenuBar, MenuItem, AbstractMenuItem, Menu, AbstractMenu, DropDown, MenuNode, SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect, ContextMenu, SideMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12061,7 +12219,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ContextMenu__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ContextMenu */ "./src/menu/ContextMenu.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ContextMenu", function() { return _ContextMenu__WEBPACK_IMPORTED_MODULE_6__["default"]; });
 
-/* harmony import */ var _loaders_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./loaders.js */ "./src/menu/loaders.js");
+/* harmony import */ var _SideMenu__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./SideMenu */ "./src/menu/SideMenu.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SideMenu", function() { return _SideMenu__WEBPACK_IMPORTED_MODULE_7__["default"]; });
+
+/* harmony import */ var _loaders_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./loaders.js */ "./src/menu/loaders.js");
+
+
 
 
 

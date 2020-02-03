@@ -151,7 +151,7 @@ export class AbstractMenuItem extends MenuNode {
 
         this.clearTimer('activateItem');
 
-        if(this.submenu) {
+        if(this.hasSubMenu()) {
             if(show === true) {
                 this.showSubMenu();
             } else if(typeof show === 'number' && show >= 0) {
@@ -358,6 +358,12 @@ export class AbstractMenuItem extends MenuNode {
         return this.hasSubMenu() ? this.submenu.isVisible : false;
     }
 
+    clearActiveChild() {
+        if(this.submenu && this.submenu.clearActiveChild) {
+            this.submenu.clearActiveChild();
+        }
+    }
+
     setParent(parent) {
         if(this._parent === parent) return;
 
@@ -445,8 +451,9 @@ export class AbstractMenuItem extends MenuNode {
 
         if(event.target === this) {
             // When the mouse moves on an item clear any active items in it's submenu.
-            if (this.submenu && this.clearSubItemsOnHover && this.submenu.clearActiveChild) {
-                this.submenu.clearActiveChild();
+            if (this.hasSubMenu() && this.clearSubItemsOnHover) {
+                // this.submenu.clearActiveChild();
+                this.clearActiveChild();
             }
 
             if(this.element.contains(event.originalEvent.relatedTarget)) return;
@@ -485,7 +492,7 @@ export class AbstractMenuItem extends MenuNode {
             this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if(this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.submenu.isVisible) && this.isActive) {
+        if(this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
             this.deactivate();
         }
 
