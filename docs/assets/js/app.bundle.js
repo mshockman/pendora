@@ -6364,7 +6364,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _classCallCheck(this, AbstractMenu);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this, target));
 
       _initialize(_assertThisInitialized(_this));
 
@@ -6386,10 +6386,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
       _this.positioner = positioner;
       _this.direction = direction;
-
-      _this.render(_objectSpread({
-        target: target
-      }, context));
 
       _this.parseDOM();
 
@@ -6671,11 +6667,8 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "removeItem",
       value: function removeItem(item) {
-        var index = this._children.indexOf(item);
-
-        if (index !== -1) {
-          this._children.splice(index, 1);
-
+        if (this.hasItem(item)) {
+          this.removeChildMenuNode(item);
           if (item.element.parentElement) item.element.parentElement.removeChild(item.element);
         }
       } // noinspection JSUnusedGlobalSymbols
@@ -6684,7 +6677,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "hasItem",
       value: function hasItem(item) {
-        return this._children.indexOf(item) !== -1;
+        return this.hasChild(item);
       }
     }, {
       kind: "method",
@@ -6705,9 +6698,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
         item.appendTo(body);
 
         if (item.isMenuItem && item.isMenuItem()) {
-          item._parent = this;
-
-          this._children.push(item);
+          this.appendChildMenuNode(item);
         }
 
         return this;
@@ -6860,12 +6851,6 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
       key: "isMenu",
       value: function isMenu() {
         return true;
-      }
-    }, {
-      kind: "method",
-      key: "setParent",
-      value: function setParent(parent) {
-        parent.attachSubMenu(this);
       } //------------------------------------------------------------------------------------------------------------------
       // Event Handlers
 
@@ -6883,6 +6868,7 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
 
         if (!this.element.contains(event.originalEvent.relatedTarget)) {
           if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+            // noinspection JSCheckFunctionSignatures
             this.startTimer('timeout', function () {
               _this4.deactivate();
             }, this.timeout);
@@ -7185,7 +7171,7 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
 
     /**
      *
-     * @param target {String|HTMLElement}
+     * @param target {String|HTMLElement|Element}
      * @param closeOnBlur {Boolean|Number}
      * @param timeout {Boolean|Number}
      * @param autoActivate {Boolean|Number}
@@ -7217,9 +7203,15 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
           _ref2$delay = _ref2.delay,
           delay = _ref2$delay === void 0 ? 'inherit' : _ref2$delay,
           _ref2$children = _ref2.children,
-          children = _ref2$children === void 0 ? null : _ref2$children;
+          children = _ref2$children === void 0 ? null : _ref2$children,
+          _ref2$arrow = _ref2.arrow,
+          arrow = _ref2$arrow === void 0 ? false : _ref2$arrow;
 
       _classCallCheck(this, Menu);
+
+      if (!target) {
+        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n                <div class=\"menu\">\n                    ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ")).children[0];
+      }
 
       _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
         closeOnBlur: closeOnBlur,
@@ -7668,7 +7660,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
 
       _classCallCheck(this, AbstractMenuItem);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this, target));
       /**
        * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
        * @type {null|String}
@@ -7741,32 +7733,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
        */
 
       _this.autoDeactivateItems = autoDeactivateItems;
-      _this.button = null; // this.element;
-
-      var submenu = null;
-
-      if (typeof target === 'string') {
-        target = document.querySelector(target);
-      }
-
-      if (target) {
-        submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, '[data-menu]');
-
-        if (submenu) {
-          submenu.parentElement.removeChild(submenu);
-        }
-      }
-
-      _this.render(_objectSpread({
-        target: target
-      }, context));
-
-      if (submenu) {
-        _this.attachSubMenu(_this.constructSubMenu({
-          target: submenu
-        }));
-      }
-
+      _this.button = null;
       return _this;
     }
 
@@ -8021,10 +7988,15 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "method",
       key: "attachSubMenu",
       value: function attachSubMenu(submenu) {
-        if (submenu._parent === this) return;
+        return this.appendChildMenuNode(submenu);
+      }
+    }, {
+      kind: "method",
+      key: "appendChildMenuNode",
+      value: function appendChildMenuNode(submenu) {
+        if (submenu.parent === this || this.submenu === submenu) return;
 
         if (this.submenu) {
-          if (this.submenu === submenu) return;
           throw new Error("MenuItem can only have one submenu.");
         }
 
@@ -8032,8 +8004,8 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
           submenu.parent.detachSubMenu();
         }
 
-        submenu._parent = this;
-        this._children = [submenu];
+        _get(_getPrototypeOf(AbstractMenuItem.prototype), "appendChildMenuNode", this).call(this, submenu);
+
         this.element.classList.add('has-submenu');
 
         if (!submenu.element.parentElement) {
@@ -8051,15 +8023,24 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       key: "detachSubMenu",
       value: function detachSubMenu() {
         var remove = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-        var submenu = this.submenu;
 
-        if (submenu) {
-          this._children = [];
-          submenu._parent = null;
-          if (remove) submenu.remove();
+        if (this.submenu) {
+          var submenu = this.submenu;
+          this.removeChildMenuNode(submenu);
+          if (remove) submenu.element.parentElement.removeChild(submenu.element);
+          return submenu;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "removeChildMenuNode",
+      value: function removeChildMenuNode(submenu) {
+        _get(_getPrototypeOf(AbstractMenuItem.prototype), "removeChildMenuNode", this).call(this, submenu);
+
+        if (!this.children.length) {
+          this.element.classList.remove('has-submenu');
         }
 
-        this.element.classList.remove('has-submenu');
         return submenu;
       }
       /**
@@ -8091,24 +8072,6 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
         if (this.submenu && this.submenu.clearActiveChild) {
           this.submenu.clearActiveChild();
         }
-      }
-    }, {
-      kind: "method",
-      key: "setParent",
-      value: function setParent(parent) {
-        if (this._parent === parent) return;
-
-        if (this._parent) {
-          var i = this._parent._children.indexOf(parent);
-
-          this._parent._children.splice(i, 1);
-
-          this._parent = null;
-        }
-
-        this._parent = parent;
-
-        parent._children.push(this);
       } //------------------------------------------------------------------------------------------------------------------
       // Event handlers
 
@@ -8250,22 +8213,7 @@ var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
       kind: "get",
       key: "submenu",
       value: function submenu() {
-        return this._children[0];
-      }
-      /**
-       * Property wrapper around attachSubMenu and detachSubMenu methods.
-       * @param value
-       */
-
-    }, {
-      kind: "set",
-      key: "submenu",
-      value: function submenu(value) {
-        if (!value) {
-          this.detachSubMenu();
-        } else {
-          this.attachSubMenu(value);
-        }
+        return this.children[0];
       }
     }, {
       kind: "method",
@@ -8300,7 +8248,8 @@ function (_AbstractMenuItem) {
 
     var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         target = _ref2.target,
-        text = _ref2.text,
+        _ref2$text = _ref2.text,
+        text = _ref2$text === void 0 ? null : _ref2$text,
         action = _ref2.action,
         _ref2$href = _ref2.href,
         href = _ref2$href === void 0 ? null : _ref2$href,
@@ -8325,6 +8274,33 @@ function (_AbstractMenuItem) {
 
     _classCallCheck(this, MenuItem);
 
+    var btn, content, submenu;
+
+    if (target) {
+      target = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["selectElement"])(target);
+      btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, "[data-button]");
+      submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, "[data-menu]");
+
+      if (submenu) {
+        submenu.parentElement.removeChild(submenu);
+      }
+
+      if (!btn) {
+        content = document.createDocumentFragment();
+
+        while (target.firstChild) {
+          content.appendChild(target.firstChild);
+        }
+
+        target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+        var textContainer = target.querySelector('[data-text]');
+        textContainer.appendChild(content);
+      }
+    } else {
+      target = document.createElement(nodeName);
+      target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+    }
+
     _this6 = _possibleConstructorReturn(this, _getPrototypeOf(MenuItem).call(this, {
       toggle: toggle,
       autoActivate: autoActivate,
@@ -8341,7 +8317,28 @@ function (_AbstractMenuItem) {
       href: href,
       nodeName: nodeName
     }));
+    _this6.textContainer = _this6.element.querySelector("[data-text]");
+    _this6.altTextContainer = _this6.element.querySelector("[data-alt-text]");
+    _this6.button = _this6.element.querySelector("[data-button]");
+
+    _this6.element.classList.add('menuitem');
+
+    _this6.element.tabIndex = -1;
     if (action) _this6.addAction(action);
+
+    if (submenu) {
+      _this6.attachSubMenu(_this6.constructSubMenu({
+        target: submenu
+      }));
+    }
+
+    if (text !== null) {
+      _this6.text = text;
+    }
+
+    if (href !== null) {
+      _this6.href = href;
+    }
 
     _this6.registerTopics();
 
@@ -8360,6 +8357,7 @@ function (_AbstractMenuItem) {
     }
     /**
      * Renders the domElement.
+     * @deprecated
      */
 
   }, {
@@ -8470,13 +8468,17 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
 
 
@@ -8493,28 +8495,47 @@ var MenuNode =
 function (_Publisher) {
   _inherits(MenuNode, _Publisher);
 
-  function MenuNode() {
+  function MenuNode(element) {
     var _this;
 
     _classCallCheck(this, MenuNode);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuNode).call(this));
-    _this._parent = null;
-    _this._children = [];
+
+    _parent.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _children.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _element.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _timers.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _parent, null);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _children, []);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _timers, {});
+
     _this._props = {};
     _this._eventListeners = {};
     _this._keyboardNavigationEnabled = false;
-    _this._timers = {};
-    /**
-     * @type {undefined|null|HTMLElement}
-     * @private
-     */
-
-    _this._element = undefined;
     _this.nodeType = null;
     _this.isController = false; // noinspection JSUnusedGlobalSymbols
 
     _this.closeOnSelect = false;
+    _this.element = element ? Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_3__["selectElement"])(element) : null;
     return _this;
   }
   /**
@@ -8599,6 +8620,55 @@ function (_Publisher) {
      * @returns {null|MenuNode}
      */
 
+  }, {
+    key: "appendChildMenuNode",
+    value: function appendChildMenuNode(menuNode) {
+      if (_classPrivateFieldGet(menuNode, _parent) === this) return;
+
+      if (_classPrivateFieldGet(menuNode, _parent)) {
+        _classPrivateFieldGet(menuNode, _parent).removeChildMenuNode(menuNode);
+      }
+
+      _classPrivateFieldGet(this, _children).push(menuNode);
+
+      _classPrivateFieldSet(menuNode, _parent, this);
+    }
+  }, {
+    key: "removeChildMenuNode",
+    value: function removeChildMenuNode(menuNode) {
+      if (_classPrivateFieldGet(menuNode, _parent) !== this) return;
+
+      var i = _classPrivateFieldGet(_classPrivateFieldGet(menuNode, _parent), _children).indexOf(this);
+
+      if (i !== -1) {
+        _classPrivateFieldGet(_classPrivateFieldGet(menuNode, _parent), _children).splice(i, 1);
+      }
+
+      _classPrivateFieldSet(menuNode, _parent, null);
+    }
+  }, {
+    key: "hasChildMenuNode",
+    value: function hasChildMenuNode(menuNode) {
+      return _classPrivateFieldGet(this, _children).indexOf(menuNode) !== -1;
+    }
+  }, {
+    key: "clearChildMenuNodes",
+    value: function clearChildMenuNodes() {
+      while (_classPrivateFieldGet(this, _children).length) {
+        this.removeChildMenuNode(_classPrivateFieldGet(this, _children)[0]);
+      }
+    }
+    /**
+     * Reference to the root node of the tree.
+     *
+     * @returns {MenuNode}
+     */
+
+  }, {
+    key: "hasChild",
+    value: function hasChild(child) {
+      return _classPrivateFieldGet(this, _children).indexOf(child) !== -1;
+    }
   }, {
     key: "getOffsetSibling",
 
@@ -8956,7 +9026,7 @@ function (_Publisher) {
      * @returns {boolean}
      */
     value: function hasElement() {
-      return !!this._element;
+      return !!_classPrivateFieldGet(this, _element);
     }
     /**
      * Gets the root HTMLElement of the node.
@@ -9085,13 +9155,13 @@ function (_Publisher) {
       var interval = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       var clear = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
-      if (clear && this._timers[name]) {
-        this._timers[name].cancel();
-      } else if (this._timers[name]) {
+      if (clear && _classPrivateFieldGet(this, _timers)[name]) {
+        _classPrivateFieldGet(this, _timers)[name].cancel();
+      } else if (_classPrivateFieldGet(this, _timers)[name]) {
         throw new core_errors__WEBPACK_IMPORTED_MODULE_1__["KeyError"]("Timer already exists.");
       }
 
-      var timer = this._timers[name] = {
+      var timer = _classPrivateFieldGet(this, _timers)[name] = {
         status: 'running',
         id: null,
         cancel: null,
@@ -9105,15 +9175,15 @@ function (_Publisher) {
         timer.type = 'interval';
 
         timer.cancel = function () {
-          if (_this4._timers[name] === timer) {
+          if (_classPrivateFieldGet(_this4, _timers)[name] === timer) {
             clearInterval(id);
-            delete _this4._timers[name];
+            delete _classPrivateFieldGet(_this4, _timers)[name];
             timer.status = 'canceled';
           }
         };
       } else {
         var _id = timer.id = setTimeout(function (timer) {
-          delete _this4._timers[name];
+          delete _classPrivateFieldGet(_this4, _timers)[name];
           timer.status = 'complete';
           fn.call(_this4, timer);
         }, time, timer);
@@ -9121,9 +9191,9 @@ function (_Publisher) {
         timer.type = 'timeout';
 
         timer.cancel = function () {
-          if (_this4._timers[name] === timer) {
+          if (_classPrivateFieldGet(_this4, _timers)[name] === timer) {
             clearTimeout(_id);
-            delete _this4._timers[name];
+            delete _classPrivateFieldGet(_this4, _timers)[name];
             timer.status = 'canceled';
           }
         };
@@ -9141,8 +9211,8 @@ function (_Publisher) {
   }, {
     key: "clearTimer",
     value: function clearTimer(name) {
-      if (this._timers[name]) {
-        this._timers[name].cancel();
+      if (_classPrivateFieldGet(this, _timers)[name]) {
+        _classPrivateFieldGet(this, _timers)[name].cancel();
 
         return true;
       }
@@ -9160,7 +9230,7 @@ function (_Publisher) {
   }, {
     key: "getTimer",
     value: function getTimer(name) {
-      return this._timers[name];
+      return _classPrivateFieldGet(this, _timers)[name];
     }
     /**
      * Returns the MenuNode that is responsible for delegating the events.
@@ -9402,11 +9472,6 @@ function (_Publisher) {
     value: function parseDOM() {
       var _this5 = this;
 
-      // if(this._children.length) {
-      //     for(let child of this._children) {
-      //         child.invalidateTree();
-      //     }
-      // }
       var walk = function walk(node) {
         var _iteratorNormalCompletion7 = true;
         var _didIteratorError7 = false;
@@ -9418,7 +9483,10 @@ function (_Publisher) {
 
             if (Object(_utility__WEBPACK_IMPORTED_MODULE_2__["hasMenuInstance"])(child)) {
               var instance = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["getMenuInstance"])(child);
-              instance.setParent(_this5);
+
+              if (!_this5.hasChildMenuNode(instance)) {
+                _this5.appendChildMenuNode(instance);
+              }
             } else {
               var hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
                   hasMenuAttribute = child.hasAttribute('data-menu');
@@ -9430,13 +9498,13 @@ function (_Publisher) {
                   target: child
                 });
 
-                menu.setParent(_this5);
+                _this5.appendChildMenuNode(menu);
               } else if (hasMenuItemAttribute) {
                 var item = _this5.constructMenuItem({
                   target: child
                 });
 
-                item.setParent(_this5);
+                _this5.appendChildMenuNode(item);
               } else {
                 walk(child);
               }
@@ -9484,7 +9552,8 @@ function (_Publisher) {
   }, {
     key: "invalidateTree",
     value: function invalidateTree() {
-      this._parent = null;
+      _classPrivateFieldSet(this, _parent, null);
+
       var _iteratorNormalCompletion8 = true;
       var _didIteratorError8 = false;
       var _iteratorError8 = undefined;
@@ -9509,7 +9578,7 @@ function (_Publisher) {
         }
       }
 
-      this._children = [];
+      _classPrivateFieldSet(this, _children, []);
     } //------------------------------------------------------------------------------------------------------------------
     // Static functions
     // noinspection JSUnusedGlobalSymbols
@@ -9524,14 +9593,19 @@ function (_Publisher) {
   }, {
     key: "parent",
     get: function get() {
-      return this._parent || null;
+      return _classPrivateFieldGet(this, _parent) || null;
     }
     /**
-     * Reference to the root node of the tree.
+     * A list of all children for the node.
      *
-     * @returns {MenuNode}
+     * @returns {[]}
      */
 
+  }, {
+    key: "children",
+    get: function get() {
+      return _classPrivateFieldGet(this, _children).slice(0);
+    }
   }, {
     key: "root",
     get: function get() {
@@ -9601,17 +9675,6 @@ function (_Publisher) {
     key: "previousSibling",
     get: function get() {
       return this.getOffsetSibling(-1);
-    }
-    /**
-     * A list of all children for the node.
-     *
-     * @returns {[]}
-     */
-
-  }, {
-    key: "children",
-    get: function get() {
-      return this._children.slice(0);
     }
   }, {
     key: "isRoot",
@@ -9744,11 +9807,11 @@ function (_Publisher) {
   }, {
     key: "element",
     get: function get() {
-      if (this._element === undefined) {
+      if (_classPrivateFieldGet(this, _element) === undefined) {
         this.element = this.render({});
       }
 
-      return this._element;
+      return _classPrivateFieldGet(this, _element);
     }
     /**
      * Sets the root HTMLElement of the node.
@@ -9763,20 +9826,22 @@ function (_Publisher) {
         element = element.call(this);
       }
 
-      if (this._element === element) return;
+      if (_classPrivateFieldGet(this, _element) === element) return;
 
       if (Object(_utility__WEBPACK_IMPORTED_MODULE_2__["hasMenuInstance"])(element)) {
         throw new Error("Element is already bound to menu controller");
       }
 
-      if (this._element) {
+      if (_classPrivateFieldGet(this, _element)) {
         this.clearAllRegisteredEvents();
-        Object(_utility__WEBPACK_IMPORTED_MODULE_2__["detachMenuInstance"])(this._element);
-        this._element = undefined;
+        Object(_utility__WEBPACK_IMPORTED_MODULE_2__["detachMenuInstance"])(_classPrivateFieldGet(this, _element));
+
+        _classPrivateFieldSet(this, _element, undefined);
       }
 
       Object(_utility__WEBPACK_IMPORTED_MODULE_2__["attachMenuInstance"])(element, this);
-      this._element = element;
+
+      _classPrivateFieldSet(this, _element, element);
 
       this._registerAllEvents();
     }
@@ -9884,6 +9949,14 @@ function (_Publisher) {
 
   return MenuNode;
 }(core_Publisher__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+var _parent = new WeakMap();
+
+var _children = new WeakMap();
+
+var _element = new WeakMap();
+
+var _timers = new WeakMap();
 
 
 
@@ -10052,8 +10125,8 @@ function createOptGroup(node) {
 
 var SelectOption =
 /*#__PURE__*/
-function (_MenuItem) {
-  _inherits(SelectOption, _MenuItem);
+function (_AbstractMenuItem) {
+  _inherits(SelectOption, _AbstractMenuItem);
 
   function SelectOption() {
     var _this;
@@ -10081,8 +10154,14 @@ function (_MenuItem) {
       while (target.firstChild) {
         targetChildren.appendChild(target.firstChild);
       }
+    } else {
+      target = document.createElement('div');
     }
 
+    target.classList.add('select-option');
+    var fragment = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+    target.appendChild(fragment);
+    target.setAttribute('aria-role', 'option');
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this, {
       toggle: "inherit",
       autoActivate: true,
@@ -10095,7 +10174,8 @@ function (_MenuItem) {
       autoDeactivateItems: "auto",
       targetKey: targetKey,
       target: target
-    })); // If initializing the object from a target element
+    }));
+    _this.textContainer = _this.element.querySelector('[data-text]'); // If initializing the object from a target element
     // the label text is gathered from the children of the target
 
     if (targetChildren) {
@@ -10109,6 +10189,8 @@ function (_MenuItem) {
     if (value !== null && value !== undefined) {
       _this.value = value;
     }
+
+    _this.registerTopics();
 
     return _this;
   }
@@ -10342,7 +10424,7 @@ function (_MenuItem) {
   }]);
 
   return SelectOption;
-}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["default"]); // noinspection JSUnusedGlobalSymbols
+}(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]); // noinspection JSUnusedGlobalSymbols
 
 var FILTERS = {
   startsWith: function startsWith(value) {
@@ -10401,6 +10483,12 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
       _classCallCheck(this, SelectMenu);
 
+      if (!target) {
+        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n                <div class=\"select-menu\">\n                    <div class=\"select-menu__header\" data-header></div>\n                    <div class=\"select-menu__body menu__body\" data-body></div>\n                    <div class=\"select-menu__footer\" data-footer></div>\n                </div>\n            ").children[0];
+      } else {
+        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
+      }
+
       _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, _objectSpread({
         closeOnBlur: false,
         timeout: false,
@@ -10413,6 +10501,13 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       }, context)));
 
       _initialize(_assertThisInitialized(_this3));
+
+      _this3.header = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-header]');
+      _this3.body = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-body]');
+      _this3.footer = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-footer]');
+      _this3.filterInput = null;
+
+      _this3.element.classList.add('select-menu');
 
       _this3.multiSelect = 'inherit';
       _this3.enableShiftSelect = enableShiftSelect;
@@ -10559,7 +10654,7 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
             }
           } else if (event.ctrlKey && _this4.enableCtrlToggle) {
             topic.preventDefault();
-            var changed = false;
+            var changed;
 
             if (topic.target.isSelected) {
               event.target.isSelected = false;
@@ -10872,8 +10967,8 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
 
 var AbstractSelect =
 /*#__PURE__*/
-function (_AbstractMenuItem) {
-  _inherits(AbstractSelect, _AbstractMenuItem);
+function (_AbstractMenuItem2) {
+  _inherits(AbstractSelect, _AbstractMenuItem2);
 
   function AbstractSelect(_ref5) {
     var _this6;
@@ -10886,24 +10981,6 @@ function (_AbstractMenuItem) {
 
     _classCallCheck(this, AbstractSelect);
 
-    if (typeof target === 'string') {
-      target = document.querySelector(target);
-    } // Find any child and store them and add them to the submenu after it is initialized.
-
-
-    var children = [];
-
-    if (target) {
-      for (var _i = 0, _arr = _toConsumableArray(target.children); _i < _arr.length; _i++) {
-        var child = _arr[_i];
-
-        if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
-          target.removeChild(child);
-          children.push(child);
-        }
-      }
-    }
-
     _this6 = _possibleConstructorReturn(this, _getPrototypeOf(AbstractSelect).call(this, _objectSpread({
       target: target
     }, config))); // Set the widget component control.
@@ -10912,33 +10989,23 @@ function (_AbstractMenuItem) {
 
     if (!_this6.widget.element.parentElement) {
       _this6.widget.appendTo(_this6.element);
-    } // If the submenu hasn't been initialized at this point it wasn't part of the dom.
-    // Create a default submenu instance to use.
-
-
-    if (!_this6.submenu) {
-      _this6.attachSubMenu(_this6.constructSubMenu({}));
-    } // Add any found children from above to the submenu.
-
-
-    var addedChildren = false;
-
-    for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
-      var _child2 = _children[_i2];
-
-      _this6.append(_child2);
-
-      addedChildren = true;
     }
 
-    if (addedChildren) _this6.submenu.parseDOM();
+    var submenu = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-menu]");
+
+    if (submenu) {
+      submenu.parentElement.removeChild(submenu);
+
+      _this6.attachSubMenu(_this6.constructSubMenu({
+        target: submenu
+      }));
+    } else {
+      _this6.attachSubMenu(_this6.constructSubMenu({}));
+    }
 
     if (name !== null) {
       _this6.name = name;
-    } // Register a UI refresh.
-
-
-    _this6.refreshUI();
+    }
 
     return _this6;
   }
@@ -11216,6 +11283,36 @@ function (_AbstractSelect) {
     _classCallCheck(this, RichSelect);
 
     widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
+    var TEMPLATE = "\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
+    var textbox,
+        children = [];
+
+    if (target) {
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
+
+      if (target.nodeName === 'INPUT') {
+        textbox = target;
+      } else {
+        for (var _i = 0, _arr = _toConsumableArray(target.children); _i < _arr.length; _i++) {
+          var child = _arr[_i];
+
+          if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+            target.removeChild(child);
+            children.push(child);
+          }
+        }
+
+        var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-button]");
+
+        if (!button) {
+          target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+        }
+      }
+    } else {
+      target = document.createElement('div');
+      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+    }
+
     _this8 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
       toggle: true,
       autoActivate: false,
@@ -11230,6 +11327,12 @@ function (_AbstractSelect) {
       widget: widget,
       name: name
     }));
+    _this8.textbox = textbox || _this8.element.querySelector('input, [data-text]');
+    _this8.textbox.readOnly = true;
+    _this8._label = '';
+    _this8.element.tabIndex = 0;
+
+    _this8.element.classList.add('rich-select');
 
     _this8.textbox.addEventListener('blur', function (event) {
       if (!_this8.containsElement(event.relatedTarget)) {
@@ -11246,6 +11349,20 @@ function (_AbstractSelect) {
     _this8.multiple = multiple;
     _this8.maxItems = maxItems;
     if (placeholder !== null) _this8.placeholder = placeholder;
+
+    for (var _i2 = 0, _children = children; _i2 < _children.length; _i2++) {
+      var _child2 = _children[_i2];
+
+      if (_child2.hasAttribute('data-menuitem')) {
+        _this8.append(_this8.submenu.constructMenuItem({
+          target: _child2
+        }));
+      } else {
+        _this8.append(_child2);
+      }
+    }
+
+    _this8.parseDOM();
 
     _this8.refreshUI();
 
@@ -11413,6 +11530,31 @@ function (_AbstractSelect2) {
     _classCallCheck(this, MultiComboBox);
 
     widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
+    var TEMPLATE = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
+    var children = [];
+
+    if (target) {
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
+
+      for (var _i3 = 0, _arr2 = _toConsumableArray(target.children); _i3 < _arr2.length; _i3++) {
+        var child = _arr2[_i3];
+
+        if (!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+          target.removeChild(child);
+          children.push(child);
+        }
+      }
+
+      var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-button]");
+
+      if (!button) {
+        target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+      }
+    } else {
+      target = document.createElement('div');
+      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+    }
+
     _this9 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
       toggle: true,
       autoActivate: false,
@@ -11427,6 +11569,11 @@ function (_AbstractSelect2) {
       widget: widget,
       name: name
     }));
+    _this9.textbox = _this9.element.querySelector("[data-text]");
+    _this9.body = _this9.element.querySelector("[data-body]");
+
+    _this9.element.classList.add('multi-combo-box');
+
     _this9.multiSelect = true;
     _this9.optionToPillMap = new WeakMap();
     _this9.pilltoOptionMap = new WeakMap();
@@ -11462,6 +11609,22 @@ function (_AbstractSelect2) {
         _this9._filterTimer = setTimeout(_this9._applyFilter, wait);
       }
     });
+
+    for (var _i4 = 0, _children2 = children; _i4 < _children2.length; _i4++) {
+      var _child3 = _children2[_i4];
+
+      if (_child3.hasAttribute('data-menuitem')) {
+        _this9.append(_this9.submenu.constructMenuItem({
+          target: _child3
+        }));
+      } else {
+        _this9.append(_child3);
+      }
+    }
+
+    _this9.parseDOM();
+
+    _this9.refreshUI();
 
     return _this9;
   }
@@ -11809,6 +11972,8 @@ function (_RichSelect) {
 
     _this12.wait = wait;
     _this12.filter = filter;
+
+    _this12.parseDOM();
 
     _this12.refreshUI();
 

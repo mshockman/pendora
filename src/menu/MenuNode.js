@@ -1,7 +1,7 @@
 import Publisher, {STOP} from "core/Publisher";
 import {KeyError} from "core/errors";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
-import {addClasses, removeClasses} from "../core/utility/dom";
+import {addClasses, removeClasses, selectElement} from "../core/utility/dom";
 
 
 /**
@@ -10,24 +10,28 @@ import {addClasses, removeClasses} from "../core/utility/dom";
  * @extends {Publisher}
  */
 export default class MenuNode extends Publisher {
-    constructor() {
+    #parent;
+    #children;
+    #element;
+    #timers;
+
+    constructor(element) {
         super();
-        this._parent = null;
-        this._children = [];
+
+        this.#parent = null;
+        this.#children = [];
+        this.#timers = {};
+
         this._props = {};
         this._eventListeners = {};
         this._keyboardNavigationEnabled = false;
-        this._timers = {};
-        /**
-         * @type {undefined|null|HTMLElement}
-         * @private
-         */
-        this._element = undefined;
 
         this.nodeType = null;
         this.isController = false;
         // noinspection JSUnusedGlobalSymbols
         this.closeOnSelect = false;
+
+        this.element = element ? selectElement(element): null;
     }
 
     /**
@@ -106,7 +110,49 @@ export default class MenuNode extends Publisher {
      * @returns {null|MenuNode}
      */
     get parent() {
-        return this._parent || null;
+        return this.#parent || null;
+    }
+
+    /**
+     * A list of all children for the node.
+     *
+     * @returns {[]}
+     */
+    get children() {
+        return this.#children.slice(0);
+    }
+
+    appendChildMenuNode(menuNode) {
+        if(menuNode.#parent === this) return;
+
+        if(menuNode.#parent) {
+            menuNode.#parent.removeChildMenuNode(menuNode);
+        }
+
+        this.#children.push(menuNode);
+        menuNode.#parent = this;
+    }
+
+    removeChildMenuNode(menuNode) {
+        if(menuNode.#parent !== this) return;
+
+        let i = menuNode.#parent.#children.indexOf(this);
+
+        if(i !== -1) {
+            menuNode.#parent.#children.splice(i, 1);
+        }
+
+        menuNode.#parent = null;
+    }
+
+    hasChildMenuNode(menuNode) {
+        return this.#children.indexOf(menuNode) !== -1;
+    }
+
+    clearChildMenuNodes() {
+        while(this.#children.length) {
+            this.removeChildMenuNode(this.#children[0]);
+        }
     }
 
     /**
@@ -171,13 +217,8 @@ export default class MenuNode extends Publisher {
         return this.getOffsetSibling(-1);
     }
 
-    /**
-     * A list of all children for the node.
-     *
-     * @returns {[]}
-     */
-    get children() {
-        return this._children.slice(0);
+    hasChild(child) {
+        return this.#children.indexOf(child) !== -1;
     }
 
     get isRoot() {
@@ -472,7 +513,7 @@ export default class MenuNode extends Publisher {
      * @returns {boolean}
      */
     hasElement() {
-        return !!this._element;
+        return !!this.#element;
     }
 
     /**
@@ -481,11 +522,11 @@ export default class MenuNode extends Publisher {
      * @returns {HTMLElement}
      */
     get element() {
-        if(this._element === undefined) {
+        if(this.#element === undefined) {
             this.element = this.render({});
         }
 
-        return this._element;
+        return this.#element;
     }
 
     /**
@@ -500,20 +541,20 @@ export default class MenuNode extends Publisher {
             element = element.call(this);
         }
 
-        if(this._element === element) return;
+        if(this.#element === element) return;
 
         if(hasMenuInstance(element)) {
             throw new Error("Element is already bound to menu controller");
         }
 
-        if(this._element) {
+        if(this.#element) {
             this.clearAllRegisteredEvents();
-            detachMenuInstance(this._element);
-            this._element = undefined;
+            detachMenuInstance(this.#element);
+            this.#element = undefined;
         }
 
         attachMenuInstance(element, this);
-        this._element = element;
+        this.#element = element;
         this._registerAllEvents();
     }
 
@@ -674,13 +715,13 @@ export default class MenuNode extends Publisher {
      * @returns {{status, id, cancel, type}}
      */
     startTimer(name, fn, time, interval=false, clear=true) {
-        if(clear && this._timers[name]) {
-            this._timers[name].cancel();
-        } else if(this._timers[name]) {
+        if(clear && this.#timers[name]) {
+            this.#timers[name].cancel();
+        } else if(this.#timers[name]) {
             throw new KeyError("Timer already exists.");
         }
 
-        let timer = this._timers[name] = {
+        let timer = this.#timers[name] = {
             status: 'running',
             id: null,
             cancel: null,
@@ -695,15 +736,15 @@ export default class MenuNode extends Publisher {
             timer.type = 'interval';
 
             timer.cancel = () => {
-                if(this._timers[name] === timer) {
+                if(this.#timers[name] === timer) {
                     clearInterval(id);
-                    delete this._timers[name];
+                    delete this.#timers[name];
                     timer.status = 'canceled';
                 }
             };
         } else {
             let id = timer.id = setTimeout((timer) => {
-                delete this._timers[name];
+                delete this.#timers[name];
                 timer.status = 'complete';
                 fn.call(this, timer);
             }, time, timer);
@@ -711,9 +752,9 @@ export default class MenuNode extends Publisher {
             timer.type = 'timeout';
 
             timer.cancel = () => {
-                if(this._timers[name] === timer) {
+                if(this.#timers[name] === timer) {
                     clearTimeout(id);
-                    delete this._timers[name];
+                    delete this.#timers[name];
                     timer.status = 'canceled';
                 }
             };
@@ -729,8 +770,8 @@ export default class MenuNode extends Publisher {
      * @returns {boolean} True if a timer was canceled. False if not timer exists.
      */
     clearTimer(name) {
-        if(this._timers[name]) {
-            this._timers[name].cancel();
+        if(this.#timers[name]) {
+            this.#timers[name].cancel();
             return true;
         }
 
@@ -745,7 +786,7 @@ export default class MenuNode extends Publisher {
      * @returns {*}
      */
     getTimer(name) {
-        return this._timers[name];
+        return this.#timers[name];
     }
 
     /**
@@ -893,17 +934,14 @@ export default class MenuNode extends Publisher {
      * Parses the dom and initializes any menu or menuitem elements that are found.
      */
     parseDOM() {
-        // if(this._children.length) {
-        //     for(let child of this._children) {
-        //         child.invalidateTree();
-        //     }
-        // }
-
         let walk = (node) => {
             for(let child of node.children) {
                 if(hasMenuInstance(child)) {
                     let instance = getMenuInstance(child);
-                    instance.setParent(this);
+
+                    if(!this.hasChildMenuNode(instance)) {
+                        this.appendChildMenuNode(instance);
+                    }
                 } else {
                     let hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
                         hasMenuAttribute = child.hasAttribute('data-menu');
@@ -912,10 +950,11 @@ export default class MenuNode extends Publisher {
                         throw new Error("Element cannot be both a menuitem and a menu.");
                     } else if(hasMenuAttribute) {
                         let menu = this.constructSubMenu({target: child});
-                        menu.setParent(this);
+
+                        this.appendChildMenuNode(menu);
                     } else if(hasMenuItemAttribute) {
                         let item = this.constructMenuItem({target: child});
-                        item.setParent(this);
+                        this.appendChildMenuNode(item);
                     } else {
                         walk(child);
                     }
@@ -947,13 +986,13 @@ export default class MenuNode extends Publisher {
      * Invalidates all parent and child references.
      */
     invalidateTree() {
-        this._parent = null;
+        this.#parent = null;
 
         for(let child of this.children) {
             child.invalidateTree();
         }
 
-        this._children = [];
+        this.#children = [];
     }
 
     //------------------------------------------------------------------------------------------------------------------

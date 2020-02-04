@@ -1,7 +1,7 @@
 import MenuNode from "./MenuNode";
 import {inherit} from "./decorators";
 import Menu from './Menu';
-import {findChild, createFragment} from "../core/utility";
+import {findChild, createFragment, selectElement} from "../core/utility";
 import {AttributeSchema, Attribute, CompoundType, Bool, Integer, Str} from "../core/serialize";
 
 
@@ -34,7 +34,7 @@ export class AbstractMenuItem extends MenuNode {
 
     constructor({target, targetKey, toggle, autoActivate, openOnHover, delay, closeOnSelect, closeOnBlur, timeout, positioner,
                 clearSubItemsOnHover, autoDeactivateItems, ...context}) {
-        super();
+        super(target);
 
         /**
          * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
@@ -107,27 +107,6 @@ export class AbstractMenuItem extends MenuNode {
         this.autoDeactivateItems = autoDeactivateItems;
 
         this.button = null;
-        // this.element;
-
-        let submenu = null;
-
-        if(typeof target === 'string') {
-            target = document.querySelector(target);
-        }
-
-        if(target) {
-            submenu = findChild(target, '[data-menu]');
-
-            if(submenu) {
-                submenu.parentElement.removeChild(submenu);
-            }
-        }
-
-        this.render({target, ...context});
-
-        if(submenu) {
-            this.attachSubMenu(this.constructSubMenu({target: submenu}));
-        }
     }
 
     registerTopics() {
@@ -303,10 +282,13 @@ export class AbstractMenuItem extends MenuNode {
      * @param submenu
      */
     attachSubMenu(submenu) {
-        if(submenu._parent === this) return;
+        return this.appendChildMenuNode(submenu);
+    }
+
+    appendChildMenuNode(submenu) {
+        if(submenu.parent === this || this.submenu === submenu) return;
 
         if(this.submenu) {
-            if(this.submenu === submenu) return;
             throw new Error("MenuItem can only have one submenu.");
         }
 
@@ -314,8 +296,8 @@ export class AbstractMenuItem extends MenuNode {
             submenu.parent.detachSubMenu();
         }
 
-        submenu._parent = this;
-        this._children = [submenu];
+        super.appendChildMenuNode(submenu);
+
         this.element.classList.add('has-submenu');
 
         if(!submenu.element.parentElement) {
@@ -329,15 +311,20 @@ export class AbstractMenuItem extends MenuNode {
      * @returns {*} The detached submenu.
      */
     detachSubMenu(remove=true) {
-        let submenu = this.submenu;
-
-        if(submenu) {
-            this._children = [];
-            submenu._parent = null;
-            if(remove) submenu.remove();
+        if(this.submenu) {
+            let submenu = this.submenu;
+            this.removeChildMenuNode(submenu);
+            if(remove) submenu.element.parentElement.removeChild(submenu.element);
+            return submenu;
         }
+    }
 
-        this.element.classList.remove('has-submenu');
+    removeChildMenuNode(submenu) {
+        super.removeChildMenuNode(submenu);
+
+        if(!this.children.length) {
+            this.element.classList.remove('has-submenu');
+        }
 
         return submenu;
     }
@@ -362,19 +349,6 @@ export class AbstractMenuItem extends MenuNode {
         if(this.submenu && this.submenu.clearActiveChild) {
             this.submenu.clearActiveChild();
         }
-    }
-
-    setParent(parent) {
-        if(this._parent === parent) return;
-
-        if(this._parent) {
-            let i = this._parent._children.indexOf(parent);
-            this._parent._children.splice(i, 1);
-            this._parent = null;
-        }
-
-        this._parent = parent;
-        parent._children.push(this);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -507,19 +481,7 @@ export class AbstractMenuItem extends MenuNode {
     // Getters and Setters
 
     get submenu() {
-        return this._children[0];
-    }
-
-    /**
-     * Property wrapper around attachSubMenu and detachSubMenu methods.
-     * @param value
-     */
-    set submenu(value) {
-        if(!value) {
-            this.detachSubMenu();
-        } else {
-            this.attachSubMenu(value);
-        }
+        return this.children[0];
     }
 
     _navigate(event, _depth=0) {
@@ -540,9 +502,52 @@ export class AbstractMenuItem extends MenuNode {
 
 
 export default class MenuItem extends AbstractMenuItem {
-    constructor({target, text, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
+    constructor({target, text=null, action, href=null, toggle="inherit", autoActivate="inherit", openOnHover="inherit",
                     delay='inherit', closeOnSelect=false, closeOnBlur=false, timeout=false,
                     nodeName="div", positioner="inherit"}={}) {
+        let btn, content, submenu;
+
+        if(target) {
+            target = selectElement(target);
+
+            btn = findChild(target, "[data-button]");
+            submenu = findChild(target, "[data-menu]");
+
+            if(submenu) {
+                submenu.parentElement.removeChild(submenu);
+            }
+
+            if(!btn) {
+                content = document.createDocumentFragment();
+
+                while(target.firstChild) {
+                    content.appendChild(target.firstChild);
+                }
+
+                target.appendChild(createFragment(`
+                <a class="menuitem__button" data-button>
+                    <span class="menuitem__check"></span>
+                    <span class="menuitem__text" data-text></span>
+                    <span class="menuitem__alt-text" data-alt-text></span>
+                    <span class="menuitem__caret"></span>
+                </a>`));
+
+                let textContainer = target.querySelector('[data-text]');
+
+                textContainer.appendChild(content);
+            }
+        } else {
+            target = document.createElement(nodeName);
+
+            target.appendChild(createFragment(`
+                <a class="menuitem__button" data-button>
+                    <span class="menuitem__check"></span>
+                    <span class="menuitem__text" data-text></span>
+                    <span class="menuitem__alt-text" data-alt-text></span>
+                    <span class="menuitem__caret"></span>
+                </a>`));
+        }
+
         super({
             toggle,
             autoActivate,
@@ -561,7 +566,25 @@ export default class MenuItem extends AbstractMenuItem {
             nodeName
         });
 
+        this.textContainer = this.element.querySelector("[data-text]");
+        this.altTextContainer = this.element.querySelector("[data-alt-text]");
+        this.button = this.element.querySelector("[data-button]");
+        this.element.classList.add('menuitem');
+        this.element.tabIndex = -1;
+
         if(action) this.addAction(action);
+
+        if(submenu) {
+            this.attachSubMenu(this.constructSubMenu({target: submenu}));
+        }
+
+        if(text !== null) {
+            this.text = text;
+        }
+
+        if(href !== null) {
+            this.href = href;
+        }
 
         this.registerTopics();
     }
@@ -576,6 +599,7 @@ export default class MenuItem extends AbstractMenuItem {
 
     /**
      * Renders the domElement.
+     * @deprecated
      */
     render({target, text, href, nodeName}) {
         let content = null;

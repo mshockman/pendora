@@ -47,8 +47,10 @@ export class AbstractMenu extends MenuNode {
     constructor({
             target,
             closeOnBlur=false, timeout=false, autoActivate=false, openOnHover=false, toggle=false,
-            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...context}={}) {
-        super();
+            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...context}={}
+            ) {
+
+        super(target);
 
         this.closeOnBlur = closeOnBlur; // both sub-item and menu
         this.timeout = timeout; // both sub-item and menu
@@ -63,7 +65,6 @@ export class AbstractMenu extends MenuNode {
         this.positioner = positioner;
         this.direction = direction;
 
-        this.render({target, ...context});
         this.parseDOM();
     }
 
@@ -233,16 +234,15 @@ export class AbstractMenu extends MenuNode {
     }
 
     removeItem(item) {
-        let index = this._children.indexOf(item);
-        if(index !== -1) {
-            this._children.splice(index, 1);
+        if(this.hasItem(item)) {
+            this.removeChildMenuNode(item);
             if(item.element.parentElement) item.element.parentElement.removeChild(item.element);
         }
     }
 
     // noinspection JSUnusedGlobalSymbols
     hasItem(item) {
-        return this._children.indexOf(item) !== -1;
+        return this.hasChild(item);
     }
 
     append(item) {
@@ -262,8 +262,7 @@ export class AbstractMenu extends MenuNode {
         item.appendTo(body);
 
         if(item.isMenuItem && item.isMenuItem()) {
-            item._parent = this;
-            this._children.push(item);
+            this.appendChildMenuNode(item);
         }
 
         return this;
@@ -357,10 +356,6 @@ export class AbstractMenu extends MenuNode {
         return true;
     }
 
-    setParent(parent) {
-        parent.attachSubMenu(this);
-    }
-
     //------------------------------------------------------------------------------------------------------------------
     // Event Handlers
 
@@ -371,6 +366,7 @@ export class AbstractMenu extends MenuNode {
     onMouseOut(event) {
         if(!this.element.contains(event.originalEvent.relatedTarget)) {
             if(this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+                // noinspection JSCheckFunctionSignatures
                 this.startTimer('timeout', () => {
                     this.deactivate();
                 }, this.timeout);
@@ -631,7 +627,7 @@ export default class Menu extends AbstractMenu {
 
     /**
      *
-     * @param target {String|HTMLElement}
+     * @param target {String|HTMLElement|Element}
      * @param closeOnBlur {Boolean|Number}
      * @param timeout {Boolean|Number}
      * @param autoActivate {Boolean|Number}
@@ -643,7 +639,16 @@ export default class Menu extends AbstractMenu {
      * @param children {Array}
      */
     constructor({target=null, closeOnBlur=false, timeout=false, autoActivate=true, openOnHover=true,
-                    toggle=false, closeOnSelect=true, delay='inherit', children=null}={}) {
+                    toggle=false, closeOnSelect=true, delay='inherit', children=null, arrow=false}={}) {
+        if(!target) {
+            target = createFragment(`
+                <div class="menu">
+                    ${arrow ? `<div class="menu__arrow"></div>` : ""}
+                    <div class="menu__body" data-body></div>
+                </div>
+            `).children[0];
+        }
+
         super({
             closeOnBlur, timeout, autoActivate, toggle, closeOnSelect, delay, positioner: 'inherit',
             direction: 'vertical', openOnHover, target

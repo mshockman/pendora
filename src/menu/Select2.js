@@ -5,7 +5,7 @@ import {getClosestMenuByElement} from "./utility";
 import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
-import {createFragment, findChild} from "../core/utility/dom";
+import {createFragment, findChild, selectElement} from "../core/utility/dom";
 
 
 function copyNodeData(targetNode, referenceNode) {
@@ -51,7 +51,7 @@ function createOptGroup(node) {
 /**
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
-export class SelectOption extends MenuItem {
+export class SelectOption extends AbstractMenuItem {
     constructor({target, text, value=null, targetKey=null}={}) {
         let targetChildren = null;
 
@@ -66,7 +66,20 @@ export class SelectOption extends MenuItem {
             while(target.firstChild) {
                 targetChildren.appendChild(target.firstChild);
             }
+        } else {
+            target = document.createElement('div');
         }
+
+        target.classList.add('select-option');
+        let fragment = createFragment(`
+            <a class="select-option__body">
+                <span class="select-option__check" data-check><i class="fas fa-check"></i></span>
+                <span data-text class="select-option__text"></span>
+                <span data-alt-text class="select-option__alt"></span>
+            </a>
+        `);
+        target.appendChild(fragment);
+        target.setAttribute('aria-role', 'option');
 
         super({
             toggle: "inherit",
@@ -82,6 +95,8 @@ export class SelectOption extends MenuItem {
             target
         });
 
+        this.textContainer = this.element.querySelector('[data-text]');
+
         // If initializing the object from a target element
         // the label text is gathered from the children of the target
         if(targetChildren) {
@@ -94,6 +109,8 @@ export class SelectOption extends MenuItem {
         if(value !== null && value !== undefined) {
             this.value = value;
         }
+
+        this.registerTopics();
     }
 
     registerTopics() {
@@ -340,6 +357,18 @@ export class SelectMenu extends AbstractMenu {
                 target, filter=null, placeholder="No Items Found", filterDelay=500,
                 filterPlaceholderText="Search", toggle=false, enableShiftSelect=true, enableCtrlToggle=true, clearOldSelection=false, ...context
     }={}) {
+        if(!target) {
+            target = createFragment(`
+                <div class="select-menu">
+                    <div class="select-menu__header" data-header></div>
+                    <div class="select-menu__body menu__body" data-body></div>
+                    <div class="select-menu__footer" data-footer></div>
+                </div>
+            `).children[0];
+        } else {
+            target = selectElement(target);
+        }
+
         super({
             closeOnBlur: false,
             timeout: false,
@@ -351,6 +380,12 @@ export class SelectMenu extends AbstractMenu {
             target,
             ...context
         });
+
+        this.header = findChild(this.element, '[data-header]');
+        this.body = findChild(this.element, '[data-body]');
+        this.footer = findChild(this.element, '[data-footer]');
+        this.filterInput = null;
+        this.element.classList.add('select-menu');
 
         this.multiSelect = 'inherit';
 
@@ -461,7 +496,7 @@ export class SelectMenu extends AbstractMenu {
             } else if(event.ctrlKey && this.enableCtrlToggle) {
                 topic.preventDefault();
 
-                let changed = false;
+                let changed;
 
                 if(topic.target.isSelected) {
                     event.target.isSelected = false;
@@ -631,22 +666,6 @@ export class SelectMenu extends AbstractMenu {
  */
 export class AbstractSelect extends AbstractMenuItem {
     constructor({target, widget, name=null, ...config}) {
-        if(typeof target === 'string') {
-            target = document.querySelector(target);
-        }
-
-        // Find any child and store them and add them to the submenu after it is initialized.
-        let children = [];
-
-        if(target) {
-            for(let child of [...target.children]) {
-                if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
-                    target.removeChild(child);
-                    children.push(child);
-                }
-            }
-        }
-
         super({target, ...config});
 
         // Set the widget component control.
@@ -655,27 +674,18 @@ export class AbstractSelect extends AbstractMenuItem {
             this.widget.appendTo(this.element);
         }
 
-        // If the submenu hasn't been initialized at this point it wasn't part of the dom.
-        // Create a default submenu instance to use.
-        if(!this.submenu) {
+        let submenu = findChild(target, "[data-menu]");
+
+        if(submenu) {
+            submenu.parentElement.removeChild(submenu);
+            this.attachSubMenu(this.constructSubMenu({target: submenu}));
+        } else {
             this.attachSubMenu(this.constructSubMenu({}));
         }
-
-        // Add any found children from above to the submenu.
-        let addedChildren = false;
-        for(let child of children) {
-            this.append(child);
-            addedChildren = true;
-        }
-
-        if(addedChildren) this.submenu.parseDOM();
 
         if(name !== null) {
             this.name = name;
         }
-
-        // Register a UI refresh.
-        this.refreshUI();
     }
 
     isSelect() {
@@ -873,6 +883,40 @@ export class RichSelect extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, multiple=false, maxItems=5, name=null, placeholder=null}={}) {
         widget = widget || new MultiHiddenInputWidget();
 
+        const TEMPLATE = `
+        <div class="select-button">
+            <input type="text" class="select-button__input" data-text />
+            <span class="select-button__caret"><i class="fas fa-caret-down"></i></span>
+        </div>
+        `;
+
+        let textbox,
+            children = [];
+
+        if(target) {
+            target = selectElement(target);
+
+            if(target.nodeName === 'INPUT') {
+                textbox = target;
+            } else {
+                for(let child of [...target.children]) {
+                    if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+                        target.removeChild(child);
+                        children.push(child);
+                    }
+                }
+
+                let button = findChild(target, "[data-button]");
+
+                if(!button) {
+                    target.appendChild(createFragment(TEMPLATE));
+                }
+            }
+        } else {
+            target = document.createElement('div');
+            target.appendChild(createFragment(TEMPLATE));
+        }
+
         super({
             toggle: true,
             autoActivate: false,
@@ -887,6 +931,12 @@ export class RichSelect extends AbstractSelect {
             widget,
             name
         });
+
+        this.textbox = textbox || this.element.querySelector('input, [data-text]');
+        this.textbox.readOnly = true;
+        this._label = '';
+        this.element.tabIndex = 0;
+        this.element.classList.add('rich-select');
 
         this.textbox.addEventListener('blur', event => {
             if(!this.containsElement(event.relatedTarget)) {
@@ -903,6 +953,15 @@ export class RichSelect extends AbstractSelect {
 
         if(placeholder !== null) this.placeholder = placeholder;
 
+        for(let child of children) {
+            if(child.hasAttribute('data-menuitem')) {
+                this.append(this.submenu.constructMenuItem({target: child}));
+            } else {
+                this.append(child);
+            }
+        }
+
+        this.parseDOM();
         this.refreshUI();
     }
 
@@ -1029,6 +1088,34 @@ export class MultiComboBox extends AbstractSelect {
     constructor({target=null, timeout=false, widget=null, filter=FILTERS.istartsWith, wait=500, name=null}={}) {
         widget = widget || new MultiHiddenInputWidget();
 
+        const TEMPLATE = `
+            <div class="multi-combo-box__button" data-body>
+                <div contenteditable="true" class="multi-combo-box__input" data-text />
+            </div>
+        `;
+
+        let children = [];
+
+        if(target) {
+            target = selectElement(target);
+
+            for(let child of [...target.children]) {
+                if(!child.hasAttribute('data-button') && !child.hasAttribute('data-menu')) {
+                    target.removeChild(child);
+                    children.push(child);
+                }
+            }
+
+            let button = findChild(target, "[data-button]");
+
+            if(!button) {
+                target.appendChild(createFragment(TEMPLATE));
+            }
+        } else {
+            target = document.createElement('div');
+            target.appendChild(createFragment(TEMPLATE));
+        }
+
         super({
             toggle: true,
             autoActivate: false,
@@ -1043,6 +1130,10 @@ export class MultiComboBox extends AbstractSelect {
             widget,
             name
         });
+
+        this.textbox = this.element.querySelector("[data-text]");
+        this.body = this.element.querySelector("[data-body]");
+        this.element.classList.add('multi-combo-box');
 
         this.multiSelect = true;
 
@@ -1079,6 +1170,17 @@ export class MultiComboBox extends AbstractSelect {
                 this._filterTimer = setTimeout(this._applyFilter, wait);
             }
         });
+
+        for(let child of children) {
+            if(child.hasAttribute('data-menuitem')) {
+                this.append(this.submenu.constructMenuItem({target: child}));
+            } else {
+                this.append(child);
+            }
+        }
+
+        this.parseDOM();
+        this.refreshUI();
     }
 
     getFilterValue() {
@@ -1325,6 +1427,8 @@ export class ComboBox extends RichSelect {
 
         this.wait = wait;
         this.filter = filter;
+
+        this.parseDOM();
         this.refreshUI();
     }
 
