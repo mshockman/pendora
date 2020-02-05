@@ -28,8 +28,7 @@ function () {
 
   _createClass(MenuPageIndex, [{
     key: "load",
-    value: function load() {// this.createSelectMenuTest(document.body);
-    }
+    value: function load() {}
   }, {
     key: "createSelectMenuTest",
     value: function createSelectMenuTest(container) {

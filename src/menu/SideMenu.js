@@ -35,8 +35,4 @@ export default class SideMenu extends AbstractMenu {
     constructSubMenu(config) {
         return new Menu(config);
     }
-
-    render({target}) {
-        this.element = target;
-    }
 }

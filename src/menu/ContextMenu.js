@@ -8,6 +8,14 @@ import {Rect, setElementClientPosition} from "../core/ui/position";
 export default class ContextMenu extends AbstractMenu {
     constructor({target=null, targetMenu=null, closeOnBlur=true, timeout=false, autoActivate=true, multiple=false, openOnHover=true,
                 toggle=true, closeOnSelect=true, delay=500, enableKeyboardNavigation=true, ...context}) {
+        if(!target) {
+            target = createFragment(`
+                <div class="menu">
+                    <div class="menu__body" data-body></div>
+                </div>
+            `).children[0];
+        }
+
         super({
             closeOnBlur,
             timeout,
@@ -22,6 +30,7 @@ export default class ContextMenu extends AbstractMenu {
             ...context
         });
 
+        this.element.classList.add('context-menu');
         this.isVisible = false;
         this.registerTopics();
         this.parseDOM();
@@ -81,22 +90,6 @@ export default class ContextMenu extends AbstractMenu {
                 if(this.isActive) this.deactivate();
             }
         });
-    }
-
-    render({target}) {
-        if(target) {
-            this.element = target;
-        } else {
-            const TEMPLATE = `
-                <div class="menu">
-                    <div class="menu__body" data-body></div>
-                </div>
-            `;
-
-            this.element = createFragment(TEMPLATE).children[0];
-        }
-
-        this.element.classList.add('context-menu');
     }
 
     constructMenuItem(config) {

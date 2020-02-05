@@ -6004,6 +6004,10 @@ function (_AbstractMenu) {
 
     _classCallCheck(this, ContextMenu);
 
+    if (!target) {
+      target = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <div class=\"menu\">\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ").children[0];
+    }
+
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ContextMenu).call(this, _objectSpread({
       closeOnBlur: closeOnBlur,
       timeout: timeout,
@@ -6016,6 +6020,9 @@ function (_AbstractMenu) {
       direction: 'vertical',
       target: target
     }, context)));
+
+    _this.element.classList.add('context-menu');
+
     _this.isVisible = false;
 
     _this.registerTopics();
@@ -6084,20 +6091,6 @@ function (_AbstractMenu) {
           if (_this2.isActive) _this2.deactivate();
         }
       });
-    }
-  }, {
-    key: "render",
-    value: function render(_ref2) {
-      var target = _ref2.target;
-
-      if (target) {
-        this.element = target;
-      } else {
-        var TEMPLATE = "\n                <div class=\"menu\">\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ";
-        this.element = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])(TEMPLATE).children[0];
-      }
-
-      this.element.classList.add('context-menu');
     }
   }, {
     key: "constructMenuItem",
@@ -7240,14 +7233,6 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
 
       return _this5;
     }
-    /**
-     * Renders the domElement of the widget.
-     *
-     * @param target
-     * @param arrow
-     * @returns {HTMLElement|Element}
-     */
-
 
     return Menu;
   }(_AbstractMenu);
@@ -7260,23 +7245,6 @@ var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
       key: "delay",
       value: function value() {
         return 0;
-      }
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            target = _ref3.target,
-            _ref3$arrow = _ref3.arrow,
-            arrow = _ref3$arrow === void 0 ? true : _ref3$arrow;
-
-        var TEMPLATE = "\n            <div class=\"menu\">\n                ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                <div class=\"menu__body\" data-body></div>\n            </div>\n        ");
-
-        if (target) {
-          this.element = target;
-        } else {
-          this.element = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_5__["createFragment"])(TEMPLATE);
-        }
       }
     }, {
       kind: "method",
@@ -7442,6 +7410,10 @@ function (_AbstractMenu) {
 
     _classCallCheck(this, MenuBar);
 
+    if (!target) {
+      target = document.createElement('div');
+    }
+
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MenuBar).call(this, _objectSpread({
       closeOnBlur: closeOnBlur,
       timeout: timeout,
@@ -7454,6 +7426,9 @@ function (_AbstractMenu) {
       direction: 'horizontal',
       target: target
     }, context)));
+
+    _this.element.classList.add('menubar');
+
     _this.isVisible = true;
 
     _this.parseDOM();
@@ -7468,19 +7443,6 @@ function (_AbstractMenu) {
   }
 
   _createClass(MenuBar, [{
-    key: "render",
-    value: function render(_ref3) {
-      var target = _ref3.target;
-
-      if (target) {
-        this.element = target;
-      } else {
-        this.element = document.createElement('div');
-      }
-
-      this.element.classList.add("menubar");
-    }
-  }, {
     key: "getMenuBody",
     value: function getMenuBody() {
       return [this.element];
@@ -8355,56 +8317,6 @@ function (_AbstractMenuItem) {
     value: function constructSubMenu(config) {
       return new _Menu__WEBPACK_IMPORTED_MODULE_2__["default"](config);
     }
-    /**
-     * Renders the domElement.
-     * @deprecated
-     */
-
-  }, {
-    key: "render",
-    value: function render(_ref3) {
-      var target = _ref3.target,
-          text = _ref3.text,
-          href = _ref3.href,
-          nodeName = _ref3.nodeName;
-      var content = null;
-
-      if (target) {
-        this.element = target;
-        var btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(this.element, '[data-button]');
-
-        if (!btn) {
-          content = document.createDocumentFragment();
-
-          while (this.element.firstChild) {
-            content.appendChild(this.element.firstChild);
-          }
-
-          this.element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
-        }
-      } else {
-        var element = document.createElement(nodeName);
-        element.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
-        this.element = element;
-      }
-
-      this.button = this.element.querySelector("[data-button]");
-      this.textContainer = this.element.querySelector("[data-text]") || this.button; // noinspection JSUnusedGlobalSymbols
-
-      this.altTextContainer = this.element.querySelector('[data-alt-text]');
-      this.element.classList.add('menuitem');
-
-      if (content) {
-        this.textContainer.appendChild(content);
-      }
-
-      if (text !== null && text !== undefined) {
-        this.text = text;
-      }
-
-      if (href !== null) this.href = href;
-      this.element.tabIndex = -1;
-    }
   }, {
     key: "text",
     get: function get() {
@@ -8601,17 +8513,7 @@ function (_Publisher) {
       this._keyboardNavigationEnabled = false;
       this.element = null;
       this.publish('destroy', this);
-    }
-    /**
-     * Renders the component.
-     *
-     * @param context {Object} Dictionary of values that may be used to render the component during templating.
-     * @abstract
-     */
-
-  }, {
-    key: "render",
-    value: function render(context) {} //------------------------------------------------------------------------------------------------------------------
+    } //------------------------------------------------------------------------------------------------------------------
     // Tree transversal and manipulation functions.
 
     /**
@@ -9487,6 +9389,8 @@ function (_Publisher) {
               if (!_this5.hasChildMenuNode(instance)) {
                 _this5.appendChildMenuNode(instance);
               }
+
+              instance.parseDOM();
             } else {
               var hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
                   hasMenuAttribute = child.hasAttribute('data-menu');
@@ -10223,28 +10127,6 @@ function (_AbstractMenuItem) {
           }));
         }
       });
-    }
-    /**
-     * Creates the dom elements for the SelectOption.
-     */
-
-  }, {
-    key: "render",
-    value: function render(_ref2) {
-      var target = _ref2.target;
-
-      if (target) {
-        this.element = target;
-      } else {
-        this.element = document.createElement('div');
-        this.element.classList.add('select-option');
-      }
-
-      var fragment = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
-      this.element.appendChild(fragment);
-      this.element.classList.add('select-option');
-      this.textContainer = this.element.querySelector('[data-text]');
-      this.element.setAttribute('aria-role', 'option');
     } // noinspection JSUnusedGlobalSymbols
 
     /**
@@ -10461,25 +10343,25 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
     function SelectMenu() {
       var _this3;
 
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          target = _ref3.target,
-          _ref3$filter = _ref3.filter,
-          filter = _ref3$filter === void 0 ? null : _ref3$filter,
-          _ref3$placeholder = _ref3.placeholder,
-          placeholder = _ref3$placeholder === void 0 ? "No Items Found" : _ref3$placeholder,
-          _ref3$filterDelay = _ref3.filterDelay,
-          filterDelay = _ref3$filterDelay === void 0 ? 500 : _ref3$filterDelay,
-          _ref3$filterPlacehold = _ref3.filterPlaceholderText,
-          filterPlaceholderText = _ref3$filterPlacehold === void 0 ? "Search" : _ref3$filterPlacehold,
-          _ref3$toggle = _ref3.toggle,
-          toggle = _ref3$toggle === void 0 ? false : _ref3$toggle,
-          _ref3$enableShiftSele = _ref3.enableShiftSelect,
-          enableShiftSelect = _ref3$enableShiftSele === void 0 ? true : _ref3$enableShiftSele,
-          _ref3$enableCtrlToggl = _ref3.enableCtrlToggle,
-          enableCtrlToggle = _ref3$enableCtrlToggl === void 0 ? true : _ref3$enableCtrlToggl,
-          _ref3$clearOldSelecti = _ref3.clearOldSelection,
-          clearOldSelection = _ref3$clearOldSelecti === void 0 ? false : _ref3$clearOldSelecti,
-          context = _objectWithoutProperties(_ref3, ["target", "filter", "placeholder", "filterDelay", "filterPlaceholderText", "toggle", "enableShiftSelect", "enableCtrlToggle", "clearOldSelection"]);
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          target = _ref2.target,
+          _ref2$filter = _ref2.filter,
+          filter = _ref2$filter === void 0 ? null : _ref2$filter,
+          _ref2$placeholder = _ref2.placeholder,
+          placeholder = _ref2$placeholder === void 0 ? "No Items Found" : _ref2$placeholder,
+          _ref2$filterDelay = _ref2.filterDelay,
+          filterDelay = _ref2$filterDelay === void 0 ? 500 : _ref2$filterDelay,
+          _ref2$filterPlacehold = _ref2.filterPlaceholderText,
+          filterPlaceholderText = _ref2$filterPlacehold === void 0 ? "Search" : _ref2$filterPlacehold,
+          _ref2$toggle = _ref2.toggle,
+          toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
+          _ref2$enableShiftSele = _ref2.enableShiftSelect,
+          enableShiftSelect = _ref2$enableShiftSele === void 0 ? true : _ref2$enableShiftSele,
+          _ref2$enableCtrlToggl = _ref2.enableCtrlToggle,
+          enableCtrlToggle = _ref2$enableCtrlToggl === void 0 ? true : _ref2$enableCtrlToggl,
+          _ref2$clearOldSelecti = _ref2.clearOldSelection,
+          clearOldSelection = _ref2$clearOldSelecti === void 0 ? false : _ref2$clearOldSelecti,
+          context = _objectWithoutProperties(_ref2, ["target", "filter", "placeholder", "filterDelay", "filterPlaceholderText", "toggle", "enableShiftSelect", "enableCtrlToggle", "clearOldSelection"]);
 
       _classCallCheck(this, SelectMenu);
 
@@ -10546,33 +10428,6 @@ var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
       decorators: [_decorators__WEBPACK_IMPORTED_MODULE_4__["inherit"]],
       key: "multiSelect",
       value: void 0
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            target = _ref4.target,
-            _ref4$arrow = _ref4.arrow,
-            arrow = _ref4$arrow === void 0 ? false : _ref4$arrow;
-
-        var TEMPLATE = "\n            <div class=\"select-menu\">\n                <div class=\"select-menu__header\" data-header></div>\n                <div class=\"select-menu__body menu__body\" data-body></div>\n                <div class=\"select-menu__footer\" data-footer></div>\n            </div>\n        ";
-
-        if (target) {
-          if (typeof target === 'string') {
-            target = document.querySelector(target);
-          }
-
-          this.element = target;
-        } else {
-          this.element = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE).children[0];
-        }
-
-        this.header = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-header]');
-        this.body = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-body]');
-        this.footer = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-footer]');
-        this.filterInput = null;
-        this.element.classList.add('select-menu');
-      }
     }, {
       kind: "method",
       key: "registerTopics",
@@ -10970,14 +10825,14 @@ var AbstractSelect =
 function (_AbstractMenuItem2) {
   _inherits(AbstractSelect, _AbstractMenuItem2);
 
-  function AbstractSelect(_ref5) {
+  function AbstractSelect(_ref3) {
     var _this6;
 
-    var target = _ref5.target,
-        widget = _ref5.widget,
-        _ref5$name = _ref5.name,
-        name = _ref5$name === void 0 ? null : _ref5$name,
-        config = _objectWithoutProperties(_ref5, ["target", "widget", "name"]);
+    var target = _ref3.target,
+        widget = _ref3.widget,
+        _ref3$name = _ref3.name,
+        name = _ref3$name === void 0 ? null : _ref3$name,
+        config = _objectWithoutProperties(_ref3, ["target", "widget", "name"]);
 
     _classCallCheck(this, AbstractSelect);
 
@@ -11014,16 +10869,6 @@ function (_AbstractMenuItem2) {
     key: "isSelect",
     value: function isSelect() {
       return true;
-    }
-    /**
-     * @abstract
-     * @param context
-     */
-
-  }, {
-    key: "render",
-    value: function render() {
-      var context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     }
     /**
      * Refresh ui
@@ -11264,21 +11109,21 @@ function (_AbstractSelect) {
   function RichSelect() {
     var _this8;
 
-    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref6$target = _ref6.target,
-        target = _ref6$target === void 0 ? null : _ref6$target,
-        _ref6$timeout = _ref6.timeout,
-        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
-        _ref6$widget = _ref6.widget,
-        widget = _ref6$widget === void 0 ? null : _ref6$widget,
-        _ref6$multiple = _ref6.multiple,
-        multiple = _ref6$multiple === void 0 ? false : _ref6$multiple,
-        _ref6$maxItems = _ref6.maxItems,
-        maxItems = _ref6$maxItems === void 0 ? 5 : _ref6$maxItems,
-        _ref6$name = _ref6.name,
-        name = _ref6$name === void 0 ? null : _ref6$name,
-        _ref6$placeholder = _ref6.placeholder,
-        placeholder = _ref6$placeholder === void 0 ? null : _ref6$placeholder;
+    var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref4$target = _ref4.target,
+        target = _ref4$target === void 0 ? null : _ref4$target,
+        _ref4$timeout = _ref4.timeout,
+        timeout = _ref4$timeout === void 0 ? false : _ref4$timeout,
+        _ref4$widget = _ref4.widget,
+        widget = _ref4$widget === void 0 ? null : _ref4$widget,
+        _ref4$multiple = _ref4.multiple,
+        multiple = _ref4$multiple === void 0 ? false : _ref4$multiple,
+        _ref4$maxItems = _ref4.maxItems,
+        maxItems = _ref4$maxItems === void 0 ? 5 : _ref4$maxItems,
+        _ref4$name = _ref4.name,
+        name = _ref4$name === void 0 ? null : _ref4$name,
+        _ref4$placeholder = _ref4.placeholder,
+        placeholder = _ref4$placeholder === void 0 ? null : _ref4$placeholder;
 
     _classCallCheck(this, RichSelect);
 
@@ -11370,39 +11215,6 @@ function (_AbstractSelect) {
   }
 
   _createClass(RichSelect, [{
-    key: "render",
-    value: function render(_ref7) {
-      var target = _ref7.target;
-      var TEMPLATE = "\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
-
-      if (target) {
-        if (typeof target === 'string') target = document.querySelector(target);
-        this.element = target;
-
-        if (this.element.nodeName === 'INPUT') {
-          this.textbox = this.element;
-        } else {
-          var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-button]');
-
-          if (!button) {
-            this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
-          }
-        }
-      } else {
-        this.element = document.createElement('div');
-        this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
-      }
-
-      if (!this.textbox) {
-        this.textbox = this.element.querySelector('input, [data-text]');
-      }
-
-      this.textbox.readOnly = true;
-      this._label = '';
-      this.element.tabIndex = 0;
-      this.classList.add('rich-select');
-    }
-  }, {
     key: "refreshUI",
     value: function refreshUI() {
       var options = this.selectedOptions,
@@ -11513,19 +11325,19 @@ function (_AbstractSelect2) {
   function MultiComboBox() {
     var _this9;
 
-    var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref8$target = _ref8.target,
-        target = _ref8$target === void 0 ? null : _ref8$target,
-        _ref8$timeout = _ref8.timeout,
-        timeout = _ref8$timeout === void 0 ? false : _ref8$timeout,
-        _ref8$widget = _ref8.widget,
-        widget = _ref8$widget === void 0 ? null : _ref8$widget,
-        _ref8$filter = _ref8.filter,
-        filter = _ref8$filter === void 0 ? FILTERS.istartsWith : _ref8$filter,
-        _ref8$wait = _ref8.wait,
-        wait = _ref8$wait === void 0 ? 500 : _ref8$wait,
-        _ref8$name = _ref8.name,
-        name = _ref8$name === void 0 ? null : _ref8$name;
+    var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref5$target = _ref5.target,
+        target = _ref5$target === void 0 ? null : _ref5$target,
+        _ref5$timeout = _ref5.timeout,
+        timeout = _ref5$timeout === void 0 ? false : _ref5$timeout,
+        _ref5$widget = _ref5.widget,
+        widget = _ref5$widget === void 0 ? null : _ref5$widget,
+        _ref5$filter = _ref5.filter,
+        filter = _ref5$filter === void 0 ? FILTERS.istartsWith : _ref5$filter,
+        _ref5$wait = _ref5.wait,
+        wait = _ref5$wait === void 0 ? 500 : _ref5$wait,
+        _ref5$name = _ref5.name,
+        name = _ref5$name === void 0 ? null : _ref5$name;
 
     _classCallCheck(this, MultiComboBox);
 
@@ -11675,28 +11487,6 @@ function (_AbstractSelect2) {
           _this10.submenu.clearFilter();
         }
       });
-    }
-  }, {
-    key: "render",
-    value: function render(_ref9) {
-      var target = _ref9.target;
-      var TEMPLATE = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
-
-      if (target) {
-        this.element = target;
-        var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(this.element, '[data-button]');
-
-        if (!button) {
-          this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
-        }
-      } else {
-        this.element = document.createElement('div');
-        this.element.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
-      }
-
-      this.textbox = this.element.querySelector('[data-text]');
-      this.body = this.element.querySelector('[data-body]');
-      this.element.classList.add('multi-combo-box');
     }
   }, {
     key: "_buildChoicePill",
@@ -11938,21 +11728,21 @@ function (_RichSelect) {
   function ComboBox() {
     var _this12;
 
-    var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref10$target = _ref10.target,
-        target = _ref10$target === void 0 ? null : _ref10$target,
-        _ref10$timeout = _ref10.timeout,
-        timeout = _ref10$timeout === void 0 ? false : _ref10$timeout,
-        _ref10$submenu = _ref10.submenu,
-        submenu = _ref10$submenu === void 0 ? null : _ref10$submenu,
-        _ref10$widget = _ref10.widget,
-        widget = _ref10$widget === void 0 ? null : _ref10$widget,
-        _ref10$wait = _ref10.wait,
-        wait = _ref10$wait === void 0 ? 500 : _ref10$wait,
-        _ref10$filter = _ref10.filter,
-        filter = _ref10$filter === void 0 ? FILTERS.istartsWith : _ref10$filter,
-        _ref10$name = _ref10.name,
-        name = _ref10$name === void 0 ? null : _ref10$name;
+    var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref6$target = _ref6.target,
+        target = _ref6$target === void 0 ? null : _ref6$target,
+        _ref6$timeout = _ref6.timeout,
+        timeout = _ref6$timeout === void 0 ? false : _ref6$timeout,
+        _ref6$submenu = _ref6.submenu,
+        submenu = _ref6$submenu === void 0 ? null : _ref6$submenu,
+        _ref6$widget = _ref6.widget,
+        widget = _ref6$widget === void 0 ? null : _ref6$widget,
+        _ref6$wait = _ref6.wait,
+        wait = _ref6$wait === void 0 ? 500 : _ref6$wait,
+        _ref6$filter = _ref6.filter,
+        filter = _ref6$filter === void 0 ? FILTERS.istartsWith : _ref6$filter,
+        _ref6$name = _ref6.name,
+        name = _ref6$name === void 0 ? null : _ref6$name;
 
     _classCallCheck(this, ComboBox);
 
@@ -12221,12 +12011,6 @@ function (_AbstractMenu) {
     key: "constructSubMenu",
     value: function constructSubMenu(config) {
       return new _Menu__WEBPACK_IMPORTED_MODULE_0__["default"](config);
-    }
-  }, {
-    key: "render",
-    value: function render(_ref2) {
-      var target = _ref2.target;
-      this.element = target;
     }
   }]);
 

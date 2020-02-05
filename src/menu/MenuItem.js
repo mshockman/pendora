@@ -597,63 +597,6 @@ export default class MenuItem extends AbstractMenuItem {
         return new Menu(config);
     }
 
-    /**
-     * Renders the domElement.
-     * @deprecated
-     */
-    render({target, text, href, nodeName}) {
-        let content = null;
-
-        if(target) {
-            this.element = target;
-
-            let btn = findChild(this.element, '[data-button]');
-
-            if(!btn) {
-                content = document.createDocumentFragment();
-
-                while(this.element.firstChild) {
-                    content.appendChild(this.element.firstChild);
-                }
-
-                this.element.appendChild(createFragment(`
-                <a class="menuitem__button" data-button>
-                    <span class="menuitem__check"></span>
-                    <span class="menuitem__text" data-text></span>
-                    <span class="menuitem__alt-text" data-alt-text></span>
-                    <span class="menuitem__caret"></span>
-                </a>`));
-            }
-        } else {
-            let element = document.createElement(nodeName);
-            element.appendChild(createFragment(`
-                <a class="menuitem__button" data-button>
-                    <span class="menuitem__check"></span>
-                    <span class="menuitem__text" data-text></span>
-                    <span class="menuitem__alt-text" data-alt-text></span>
-                    <span class="menuitem__caret"></span>
-                </a>`));
-            this.element = element;
-        }
-
-        this.button = this.element.querySelector("[data-button]");
-        this.textContainer = this.element.querySelector("[data-text]") || this.button;
-        // noinspection JSUnusedGlobalSymbols
-        this.altTextContainer = this.element.querySelector('[data-alt-text]');
-        this.element.classList.add('menuitem');
-
-        if(content) {
-            this.textContainer.appendChild(content);
-        }
-
-        if(text !== null && text !== undefined) {
-            this.text = text;
-        }
-
-        if(href !== null) this.href = href;
-        this.element.tabIndex = -1;
-    }
-
     get text() {
         return this.textContainer.innerText;
     }

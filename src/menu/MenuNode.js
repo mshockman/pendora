@@ -91,16 +91,6 @@ export default class MenuNode extends Publisher {
 
     }
 
-    /**
-     * Renders the component.
-     *
-     * @param context {Object} Dictionary of values that may be used to render the component during templating.
-     * @abstract
-     */
-    render(context) {
-
-    }
-
     //------------------------------------------------------------------------------------------------------------------
     // Tree transversal and manipulation functions.
 
@@ -942,6 +932,8 @@ export default class MenuNode extends Publisher {
                     if(!this.hasChildMenuNode(instance)) {
                         this.appendChildMenuNode(instance);
                     }
+
+                    instance.parseDOM();
                 } else {
                     let hasMenuItemAttribute = child.hasAttribute('data-menuitem'),
                         hasMenuAttribute = child.hasAttribute('data-menu');

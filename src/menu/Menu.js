@@ -664,28 +664,6 @@ export default class Menu extends AbstractMenu {
         }
     }
 
-    /**
-     * Renders the domElement of the widget.
-     *
-     * @param target
-     * @param arrow
-     * @returns {HTMLElement|Element}
-     */
-    render({target, arrow=true}={}) {
-        const TEMPLATE = `
-            <div class="menu">
-                ${arrow ? `<div class="menu__arrow"></div>` : ""}
-                <div class="menu__body" data-body></div>
-            </div>
-        `;
-
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = createFragment(TEMPLATE);
-        }
-    }
-
     constructSubMenu(config) {
         return new Menu(config);
     }

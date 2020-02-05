@@ -51,6 +51,10 @@ export default class MenuBar extends AbstractMenu {
     constructor({target=null, closeOnBlur=true, timeout=false, autoActivate=false, multiple=false, openOnHover=true,
                     toggle=true, closeOnSelect=true, delay=false, enableKeyboardNavigation=true, ...context}={}) {
 
+        if(!target) {
+            target = document.createElement('div');
+        }
+
         super({
             closeOnBlur, timeout, autoActivate, openOnHover, toggle, closeOnSelect, delay,
             positioner: positioners.DROPDOWN,
@@ -59,22 +63,13 @@ export default class MenuBar extends AbstractMenu {
             ...context
         });
 
+        this.element.classList.add('menubar');
         this.isVisible = true;
         this.parseDOM();
         this.registerTopics();
         this.init();
 
         this.initKeyboardNavigation();
-    }
-
-    render({target}) {
-        if(target) {
-            this.element = target;
-        } else {
-            this.element = document.createElement('div');
-        }
-
-        this.element.classList.add("menubar");
     }
 
     getMenuBody() {
