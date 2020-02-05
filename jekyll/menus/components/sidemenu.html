@@ -3,4 +3,56 @@ title: "SideMenu"
 description: A horizontally aligned navigation menu with dropdown items.
 layout: default
 pageClass: menu_page_index
+pageArg: slidemenu
 ---
+
+
+<style type="text/css">
+    .example-view .sidemenu {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 20rem;
+        background-color: #ffffff;
+    }
+
+    .example-view .sidemenu.hidden {
+        display: none;
+    }
+
+    .example-view .example-view__body {
+        height: 20rem;
+    }
+
+    .example-view .sidemenu__header {
+        padding: 0.5rem;
+        text-align: right;
+        border-bottom: 1px solid #999;
+    }
+
+    .example-view .sidemenu__body {
+        padding: 0.5rem 0;
+    }
+</style>
+
+
+<article class="example-view">
+    <header class="example-view__bar">
+        <a id="menu-button"><i class="fas fa-bars"></i></a> MenuBar
+    </header>
+    <section class="example-view__body">
+        <div class="sidemenu hidden" id="test-slide-menu">
+            <div class="sidemenu__header">
+                <a data-action="dismiss"><i class="fas fa-times"></i></a>
+            </div>
+            <div class="sidemenu__body">
+                <div class="menuitem">Item #1</div>
+                <div class="menuitem">Item #2</div>
+                <div class="menuitem">Item #3</div>
+                <div class="menuitem">Item #4</div>
+                <div class="menuitem">Item #5</div>
+            </div>
+        </div>
+    </section>
+</article>

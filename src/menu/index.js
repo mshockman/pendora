@@ -5,5 +5,5 @@ export DropDown from "./DropDown";
 export MenuNode from "./MenuNode";
 export {SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect} from "./Select2";
 export ContextMenu from "./ContextMenu";
-export SideMenu from "./SideMenu";
+export SlideMenu from "./SlideMenu";
 import "./loaders.js";

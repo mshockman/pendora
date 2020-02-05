@@ -1,4 +1,5 @@
 import {SelectMenu, SelectOption} from 'menu/Select2';
+import SlideMenu from "menu/SlideMenu";
 
 
 export default class MenuPageIndex {
@@ -7,7 +8,11 @@ export default class MenuPageIndex {
     }
 
     load() {
+        let arg = document.body.dataset.pageArg;
 
+        if(arg === 'slidemenu') {
+            this.initSlideMenu();
+        }
     }
 
     createSelectMenuTest(container) {
@@ -28,5 +33,20 @@ export default class MenuPageIndex {
         testMenu.appendTo(container);
         console.log("Debugging SelectMenu as testMenu");
         console.log(testMenu);
+    }
+
+    initSlideMenu() {
+        let menuButton = document.getElementById('menu-button'),
+            slideMenuNode = document.getElementById('test-slide-menu');
+
+        let slideMenu = new SlideMenu({target: slideMenuNode});
+
+        menuButton.addEventListener('click', event => {
+            if(!slideMenu.isActive) {
+                slideMenu.show();
+            } else {
+                slideMenu.hide();
+            }
+        });
     }
 }

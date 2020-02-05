@@ -6497,9 +6497,13 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
                   _this3.deactivate();
                 }
               }
-            };
+            }; // Add to the end of the call stack.
 
-            this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
+            setTimeout(function () {
+              if (_this3._captureDocumentClick) {
+                _this3._captureDocumentClick.target.addEventListener('click', _this3._captureDocumentClick.onDocumentClick);
+              }
+            }, 0);
           } // Notify parent that submenu activated.
 
 
@@ -11928,16 +11932,16 @@ function (_RichSelect) {
 
 /***/ }),
 
-/***/ "./src/menu/SideMenu.js":
-/*!******************************!*\
-  !*** ./src/menu/SideMenu.js ***!
-  \******************************/
+/***/ "./src/menu/SlideMenu.js":
+/*!*******************************!*\
+  !*** ./src/menu/SlideMenu.js ***!
+  \*******************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SideMenu; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SlideMenu; });
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11952,6 +11956,10 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
@@ -11961,25 +11969,35 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-var SideMenu =
+var SlideMenu =
 /*#__PURE__*/
 function (_AbstractMenu) {
-  _inherits(SideMenu, _AbstractMenu);
+  _inherits(SlideMenu, _AbstractMenu);
 
-  function SideMenu(_ref) {
+  function SlideMenu(_ref) {
     var _this;
 
     var _ref$target = _ref.target,
-        target = _ref$target === void 0 ? null : _ref$target;
+        target = _ref$target === void 0 ? null : _ref$target,
+        _ref$modal = _ref.modal,
+        modal = _ref$modal === void 0 ? false : _ref$modal;
 
-    _classCallCheck(this, SideMenu);
+    _classCallCheck(this, SlideMenu);
 
     if (!target) {
-      target = document.createElement('div');
-      target.className = 'side-menu';
+      if (modal) {
+        target = document.createElement('div');
+        var menu = document.createElement('div');
+        target.className = "modal";
+        menu.className = "side-menu";
+        target.appendChild(menu);
+      } else {
+        target = document.createElement('div');
+        target.className = 'side-menu';
+      }
     }
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(SideMenu).call(this, {
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SlideMenu).call(this, {
       target: target,
       closeOnBlur: true,
       timeout: false,
@@ -12002,7 +12020,58 @@ function (_AbstractMenu) {
     return _this;
   }
 
-  _createClass(SideMenu, [{
+  _createClass(SlideMenu, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this2 = this;
+
+      _get(_getPrototypeOf(SlideMenu.prototype), "registerTopics", this).call(this);
+
+      var _onDocumentClick;
+
+      this.on("menu.show", function (event) {
+        _this2.activate();
+
+        console.log(_this2.isActive);
+
+        if (_this2.closeOnBlur) {
+          _onDocumentClick = function onDocumentClick(event) {
+            if (!_this2.element.contains(event.target)) {
+              document.removeEventListener('click', _onDocumentClick);
+              _onDocumentClick = null;
+
+              _this2.hide();
+            }
+          };
+
+          setTimeout(function () {
+            if (_onDocumentClick) document.addEventListener('click', _onDocumentClick);
+          }, 0);
+        }
+      });
+      this.on('menu.hide', function (event) {
+        if (_onDocumentClick) {
+          document.removeEventListener('click', _onDocumentClick);
+          _onDocumentClick = null;
+        }
+
+        _this2.deactivate();
+      });
+      this.on('event.click', function (event) {
+        var dismiss = event.originalEvent.target.closest("[data-action='dismiss']");
+
+        if (_this2.isVisible && dismiss && _this2.getTargetNode(dismiss) === _this2) {
+          _this2.hide();
+        }
+      });
+      this.on('menu.deactivate', function (event) {
+        console.log('deactivate', _this2.element.className);
+      });
+      this.on('menu.activate', function (event) {
+        console.log('activate', _this2.element.className);
+      });
+    }
+  }, {
     key: "constructMenuItem",
     value: function constructMenuItem(config) {
       return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
@@ -12014,7 +12083,7 @@ function (_AbstractMenu) {
     }
   }]);
 
-  return SideMenu;
+  return SlideMenu;
 }(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
@@ -12128,7 +12197,7 @@ function publishTargetEvent(topic) {
 /*!***************************!*\
   !*** ./src/menu/index.js ***!
   \***************************/
-/*! exports provided: MenuBar, MenuItem, AbstractMenuItem, Menu, AbstractMenu, DropDown, MenuNode, SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect, ContextMenu, SideMenu */
+/*! exports provided: MenuBar, MenuItem, AbstractMenuItem, Menu, AbstractMenu, DropDown, MenuNode, SelectMenu, RichSelect, ComboBox, MultiComboBox, SelectOption, AbstractSelect, ContextMenu, SlideMenu */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12168,8 +12237,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ContextMenu__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ContextMenu */ "./src/menu/ContextMenu.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ContextMenu", function() { return _ContextMenu__WEBPACK_IMPORTED_MODULE_6__["default"]; });
 
-/* harmony import */ var _SideMenu__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./SideMenu */ "./src/menu/SideMenu.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SideMenu", function() { return _SideMenu__WEBPACK_IMPORTED_MODULE_7__["default"]; });
+/* harmony import */ var _SlideMenu__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./SlideMenu */ "./src/menu/SlideMenu.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "SlideMenu", function() { return _SlideMenu__WEBPACK_IMPORTED_MODULE_7__["default"]; });
 
 /* harmony import */ var _loaders_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./loaders.js */ "./src/menu/loaders.js");
 

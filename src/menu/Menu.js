@@ -131,7 +131,12 @@ export class AbstractMenu extends MenuNode {
                     }
                 };
 
-                this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
+                // Add to the end of the call stack.
+                setTimeout(() => {
+                    if(this._captureDocumentClick) {
+                        this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
+                    }
+                }, 0);
             }
 
             // Notify parent that submenu activated.
