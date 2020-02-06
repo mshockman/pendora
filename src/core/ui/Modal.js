@@ -1,5 +1,6 @@
 import Component from "../Component";
 import Overlay from "./Overlay";
+import Animation from "../fx/Animation";
 
 
 export default class Modal extends Component {
@@ -34,11 +35,29 @@ export default class Modal extends Component {
     }
 
     async show(immediate) {
-        return this.#overlay.show(immediate);
+        let promise = this.#overlay.show(immediate);
+        this.publish('modal.show', this);
+
+        let result = await promise;
+
+        if(result === Animation.complete) {
+            this.publish('modal.visible');
+        }
+
+        return result;
     }
 
-    hide(immediate) {
-        return this.#overlay.hide(immediate);
+    async hide(immediate) {
+        let promise = this.#overlay.hide(immediate);
+        this.publish('modal.hide', this);
+
+        let result = await promise;
+
+        if(result === Animation.complete) {
+            this.publish('modal.hidden', this);
+        }
+
+        return result;
     }
 
     get isVisible() {

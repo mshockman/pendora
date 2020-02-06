@@ -336,6 +336,8 @@ export default class Overlay extends Component {
     async show(immediate=false) {
         this.clearTimeOut();
 
+        this.publish("overlay.show", this);
+
         if(!this.element.parentElement) {
             document.body.appendChild(this.element);
         }
