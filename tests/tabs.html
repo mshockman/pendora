@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tab Bar Test</title>
+
+    <script type="text/javascript" src="dist/chunk-vendors.bundle.js"></script>
+    <script type="text/javascript" src="dist/test_pages.bundle.js"></script>
+
+    <style type="text/css">
+        .tab-bar {
+            border: 1px solid #ccc;
+            background-color: #eaeaea;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .tab-bar .tab-btn {
+            padding: 0.5rem;
+            cursor: pointer;
+        }
+
+        .tab-bar .tab-btn.active {
+            background-color: #00aaff;
+        }
+
+        .tab-pane {
+            display: none;
+            padding: 0.5rem;
+        }
+
+        .tab-pane.open {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tab-bar" data-init="tab-bar">
+    <div class="tab-btn active" data-tab="#tab1">Tab #1</div>
+    <div class="tab-btn" data-tab="#tab2">Tab #2</div>
+    <div class="tab-btn" data-tab="#tab3">Tab #3</div>
+    <div class="tab-btn" data-tab="#tab4">Tab #4</div>
+    <div class="tab-btn" data-tab="#tab5">Tab #5</div>
+</div>
+
+<div class="tab-pane open" id="tab1">Hello 1</div>
+<div class="tab-pane" id="tab2">Hello 2</div>
+<div class="tab-pane" id="tab3">Hello 3</div>
+<div class="tab-pane" id="tab4">Hello 4</div>
+<div class="tab-pane" id="tab5">Hello 5</div>
+
+<!--suppress JSDeprecatedSymbols -->
+<script type="text/javascript">
+    app.init('test_tabs');
+</script>
+
+</body>
+</html>
