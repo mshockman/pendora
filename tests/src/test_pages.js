@@ -17,7 +17,8 @@ let app = new Application({
     'test_tooltip': () => import("test_tooltip.js"),
     'test_notifications': () => import("test_notifications.js"),
     'test_modal': () => import("test_modal.js"),
-    'test_panes': () => import("test_panes")
+    'test_panes': () => import("test_panes"),
+    'test_tabs': () => import('test_tabs')
 });
 
 

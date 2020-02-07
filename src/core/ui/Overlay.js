@@ -421,6 +421,8 @@ export default class Overlay extends Component {
     async hide(immediate=false) {
         this.clearTimeOut();
 
+        this.publish("overlay.hide", this);
+
         if(immediate) {
             if(this.#fx) {
                 await this.#fx.cancel();
