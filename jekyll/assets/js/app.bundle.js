@@ -6229,10 +6229,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Menu; });
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu/MenuNode.js");
 /* harmony import */ var _MenuItem__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MenuItem */ "./src/menu/MenuItem.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
-/* harmony import */ var _core_utility_math__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility/math */ "./src/core/utility/math.js");
-/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
+/* harmony import */ var _core_utility_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility/math */ "./src/core/utility/math.js");
+/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -6247,41 +6246,13 @@ function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) r
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _decorate(decorators, factory, superClass, mixins) { var api = _getDecoratorsApi(); if (mixins) { for (var i = 0; i < mixins.length; i++) { api = mixins[i](api); } } var r = factory(function initialize(O) { api.initializeInstanceElements(O, decorated.elements); }, superClass); var decorated = api.decorateClass(_coalesceClassElements(r.d.map(_createElementDescriptor)), decorators); api.initializeClassElements(r.F, decorated.elements); return api.runClassFinishers(r.F, decorated.finishers); }
-
-function _getDecoratorsApi() { _getDecoratorsApi = function _getDecoratorsApi() { return api; }; var api = { elementsDefinitionOrder: [["method"], ["field"]], initializeInstanceElements: function initializeInstanceElements(O, elements) { ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { if (element.kind === kind && element.placement === "own") { this.defineClassElement(O, element); } }, this); }, this); }, initializeClassElements: function initializeClassElements(F, elements) { var proto = F.prototype; ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { var placement = element.placement; if (element.kind === kind && (placement === "static" || placement === "prototype")) { var receiver = placement === "static" ? F : proto; this.defineClassElement(receiver, element); } }, this); }, this); }, defineClassElement: function defineClassElement(receiver, element) { var descriptor = element.descriptor; if (element.kind === "field") { var initializer = element.initializer; descriptor = { enumerable: descriptor.enumerable, writable: descriptor.writable, configurable: descriptor.configurable, value: initializer === void 0 ? void 0 : initializer.call(receiver) }; } Object.defineProperty(receiver, element.key, descriptor); }, decorateClass: function decorateClass(elements, decorators) { var newElements = []; var finishers = []; var placements = { "static": [], prototype: [], own: [] }; elements.forEach(function (element) { this.addElementPlacement(element, placements); }, this); elements.forEach(function (element) { if (!_hasDecorators(element)) return newElements.push(element); var elementFinishersExtras = this.decorateElement(element, placements); newElements.push(elementFinishersExtras.element); newElements.push.apply(newElements, elementFinishersExtras.extras); finishers.push.apply(finishers, elementFinishersExtras.finishers); }, this); if (!decorators) { return { elements: newElements, finishers: finishers }; } var result = this.decorateConstructor(newElements, decorators); finishers.push.apply(finishers, result.finishers); result.finishers = finishers; return result; }, addElementPlacement: function addElementPlacement(element, placements, silent) { var keys = placements[element.placement]; if (!silent && keys.indexOf(element.key) !== -1) { throw new TypeError("Duplicated element (" + element.key + ")"); } keys.push(element.key); }, decorateElement: function decorateElement(element, placements) { var extras = []; var finishers = []; for (var decorators = element.decorators, i = decorators.length - 1; i >= 0; i--) { var keys = placements[element.placement]; keys.splice(keys.indexOf(element.key), 1); var elementObject = this.fromElementDescriptor(element); var elementFinisherExtras = this.toElementFinisherExtras((0, decorators[i])(elementObject) || elementObject); element = elementFinisherExtras.element; this.addElementPlacement(element, placements); if (elementFinisherExtras.finisher) { finishers.push(elementFinisherExtras.finisher); } var newExtras = elementFinisherExtras.extras; if (newExtras) { for (var j = 0; j < newExtras.length; j++) { this.addElementPlacement(newExtras[j], placements); } extras.push.apply(extras, newExtras); } } return { element: element, finishers: finishers, extras: extras }; }, decorateConstructor: function decorateConstructor(elements, decorators) { var finishers = []; for (var i = decorators.length - 1; i >= 0; i--) { var obj = this.fromClassDescriptor(elements); var elementsAndFinisher = this.toClassDescriptor((0, decorators[i])(obj) || obj); if (elementsAndFinisher.finisher !== undefined) { finishers.push(elementsAndFinisher.finisher); } if (elementsAndFinisher.elements !== undefined) { elements = elementsAndFinisher.elements; for (var j = 0; j < elements.length - 1; j++) { for (var k = j + 1; k < elements.length; k++) { if (elements[j].key === elements[k].key && elements[j].placement === elements[k].placement) { throw new TypeError("Duplicated element (" + elements[j].key + ")"); } } } } } return { elements: elements, finishers: finishers }; }, fromElementDescriptor: function fromElementDescriptor(element) { var obj = { kind: element.kind, key: element.key, placement: element.placement, descriptor: element.descriptor }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); if (element.kind === "field") obj.initializer = element.initializer; return obj; }, toElementDescriptors: function toElementDescriptors(elementObjects) { if (elementObjects === undefined) return; return _toArray(elementObjects).map(function (elementObject) { var element = this.toElementDescriptor(elementObject); this.disallowProperty(elementObject, "finisher", "An element descriptor"); this.disallowProperty(elementObject, "extras", "An element descriptor"); return element; }, this); }, toElementDescriptor: function toElementDescriptor(elementObject) { var kind = String(elementObject.kind); if (kind !== "method" && kind !== "field") { throw new TypeError('An element descriptor\'s .kind property must be either "method" or' + ' "field", but a decorator created an element descriptor with' + ' .kind "' + kind + '"'); } var key = _toPropertyKey(elementObject.key); var placement = String(elementObject.placement); if (placement !== "static" && placement !== "prototype" && placement !== "own") { throw new TypeError('An element descriptor\'s .placement property must be one of "static",' + ' "prototype" or "own", but a decorator created an element descriptor' + ' with .placement "' + placement + '"'); } var descriptor = elementObject.descriptor; this.disallowProperty(elementObject, "elements", "An element descriptor"); var element = { kind: kind, key: key, placement: placement, descriptor: Object.assign({}, descriptor) }; if (kind !== "field") { this.disallowProperty(elementObject, "initializer", "A method descriptor"); } else { this.disallowProperty(descriptor, "get", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "set", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "value", "The property descriptor of a field descriptor"); element.initializer = elementObject.initializer; } return element; }, toElementFinisherExtras: function toElementFinisherExtras(elementObject) { var element = this.toElementDescriptor(elementObject); var finisher = _optionalCallableProperty(elementObject, "finisher"); var extras = this.toElementDescriptors(elementObject.extras); return { element: element, finisher: finisher, extras: extras }; }, fromClassDescriptor: function fromClassDescriptor(elements) { var obj = { kind: "class", elements: elements.map(this.fromElementDescriptor, this) }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); return obj; }, toClassDescriptor: function toClassDescriptor(obj) { var kind = String(obj.kind); if (kind !== "class") { throw new TypeError('A class descriptor\'s .kind property must be "class", but a decorator' + ' created a class descriptor with .kind "' + kind + '"'); } this.disallowProperty(obj, "key", "A class descriptor"); this.disallowProperty(obj, "placement", "A class descriptor"); this.disallowProperty(obj, "descriptor", "A class descriptor"); this.disallowProperty(obj, "initializer", "A class descriptor"); this.disallowProperty(obj, "extras", "A class descriptor"); var finisher = _optionalCallableProperty(obj, "finisher"); var elements = this.toElementDescriptors(obj.elements); return { elements: elements, finisher: finisher }; }, runClassFinishers: function runClassFinishers(constructor, finishers) { for (var i = 0; i < finishers.length; i++) { var newConstructor = (0, finishers[i])(constructor); if (newConstructor !== undefined) { if (typeof newConstructor !== "function") { throw new TypeError("Finishers must return a constructor."); } constructor = newConstructor; } } return constructor; }, disallowProperty: function disallowProperty(obj, name, objectType) { if (obj[name] !== undefined) { throw new TypeError(objectType + " can't have a ." + name + " property."); } } }; return api; }
-
-function _createElementDescriptor(def) { var key = _toPropertyKey(def.key); var descriptor; if (def.kind === "method") { descriptor = { value: def.value, writable: true, configurable: true, enumerable: false }; } else if (def.kind === "get") { descriptor = { get: def.value, configurable: true, enumerable: false }; } else if (def.kind === "set") { descriptor = { set: def.value, configurable: true, enumerable: false }; } else if (def.kind === "field") { descriptor = { configurable: true, writable: true, enumerable: true }; } var element = { kind: def.kind === "field" ? "field" : "method", key: key, placement: def["static"] ? "static" : def.kind === "field" ? "own" : "prototype", descriptor: descriptor }; if (def.decorators) element.decorators = def.decorators; if (def.kind === "field") element.initializer = def.value; return element; }
-
-function _coalesceGetterSetter(element, other) { if (element.descriptor.get !== undefined) { other.descriptor.get = element.descriptor.get; } else { other.descriptor.set = element.descriptor.set; } }
-
-function _coalesceClassElements(elements) { var newElements = []; var isSameElement = function isSameElement(other) { return other.kind === "method" && other.key === element.key && other.placement === element.placement; }; for (var i = 0; i < elements.length; i++) { var element = elements[i]; var other; if (element.kind === "method" && (other = newElements.find(isSameElement))) { if (_isDataDescriptor(element.descriptor) || _isDataDescriptor(other.descriptor)) { if (_hasDecorators(element) || _hasDecorators(other)) { throw new ReferenceError("Duplicated methods (" + element.key + ") can't be decorated."); } other.descriptor = element.descriptor; } else { if (_hasDecorators(element)) { if (_hasDecorators(other)) { throw new ReferenceError("Decorators can't be placed on different accessors with for " + "the same property (" + element.key + ")."); } other.decorators = element.decorators; } _coalesceGetterSetter(element, other); } } else { newElements.push(element); } } return newElements; }
-
-function _hasDecorators(element) { return element.decorators && element.decorators.length; }
-
-function _isDataDescriptor(desc) { return desc !== undefined && !(desc.value === undefined && desc.writable === undefined); }
-
-function _optionalCallableProperty(obj, name) { var value = obj[name]; if (value !== undefined && typeof value !== "function") { throw new TypeError("Expected '" + name + "' to be a function"); } return value; }
-
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-
-function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
@@ -6289,15 +6260,23 @@ function _superPropBase(object, property) { while (!Object.prototype.hasOwnPrope
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+
+ // import {inherit} from './decorators';
 
 
 
 
-
-
-var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP),
-    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP);
-var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["AttributeSchema"]({
+var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_2__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_2__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"].DROP),
+    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_2__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_2__["Attribute"].DROP);
+var MENU_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_2__["AttributeSchema"]({
   closeOnBlur: INT_OR_BOOL_TYPE,
   timeout: INT_OR_BOOL_TYPE,
   autoActivate: INT_OR_BOOL_TYPE,
@@ -6324,486 +6303,693 @@ function _findAllNavigableChildren(children) {
  */
 
 
-var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
-  var AbstractMenu =
-  /*#__PURE__*/
-  function (_MenuNode2) {
-    _inherits(AbstractMenu, _MenuNode2);
+var AbstractMenu =
+/*#__PURE__*/
+function (_MenuNode) {
+  _inherits(AbstractMenu, _MenuNode);
 
-    function AbstractMenu() {
-      var _this;
+  // @inherit positioner;
+  // @inherit delay = false;
+  function AbstractMenu() {
+    var _this;
 
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          target = _ref.target,
-          _ref$closeOnBlur = _ref.closeOnBlur,
-          closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
-          _ref$timeout = _ref.timeout,
-          timeout = _ref$timeout === void 0 ? false : _ref$timeout,
-          _ref$autoActivate = _ref.autoActivate,
-          autoActivate = _ref$autoActivate === void 0 ? false : _ref$autoActivate,
-          _ref$openOnHover = _ref.openOnHover,
-          openOnHover = _ref$openOnHover === void 0 ? false : _ref$openOnHover,
-          _ref$toggle = _ref.toggle,
-          toggle = _ref$toggle === void 0 ? false : _ref$toggle,
-          _ref$closeOnSelect = _ref.closeOnSelect,
-          closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
-          _ref$delay = _ref.delay,
-          delay = _ref$delay === void 0 ? "inherit" : _ref$delay,
-          _ref$positioner = _ref.positioner,
-          positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
-          _ref$direction = _ref.direction,
-          direction = _ref$direction === void 0 ? "vertical" : _ref$direction,
-          context = _objectWithoutProperties(_ref, ["target", "closeOnBlur", "timeout", "autoActivate", "openOnHover", "toggle", "closeOnSelect", "delay", "positioner", "direction"]);
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        target = _ref.target,
+        _ref$closeOnBlur = _ref.closeOnBlur,
+        closeOnBlur = _ref$closeOnBlur === void 0 ? false : _ref$closeOnBlur,
+        _ref$timeout = _ref.timeout,
+        timeout = _ref$timeout === void 0 ? false : _ref$timeout,
+        _ref$autoActivate = _ref.autoActivate,
+        autoActivate = _ref$autoActivate === void 0 ? false : _ref$autoActivate,
+        _ref$openOnHover = _ref.openOnHover,
+        openOnHover = _ref$openOnHover === void 0 ? false : _ref$openOnHover,
+        _ref$toggle = _ref.toggle,
+        toggle = _ref$toggle === void 0 ? false : _ref$toggle,
+        _ref$closeOnSelect = _ref.closeOnSelect,
+        closeOnSelect = _ref$closeOnSelect === void 0 ? true : _ref$closeOnSelect,
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === void 0 ? "inherit" : _ref$delay,
+        _ref$positioner = _ref.positioner,
+        positioner = _ref$positioner === void 0 ? "inherit" : _ref$positioner,
+        _ref$direction = _ref.direction,
+        direction = _ref$direction === void 0 ? "vertical" : _ref$direction;
 
-      _classCallCheck(this, AbstractMenu);
+    _classCallCheck(this, AbstractMenu);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this, target));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenu).call(this, target));
 
-      _initialize(_assertThisInitialized(_this));
-
-      _this.closeOnBlur = closeOnBlur; // both sub-item and menu
-
-      _this.timeout = timeout; // both sub-item and menu
-      // noinspection JSUnusedGlobalSymbols
-
-      _this.autoActivate = autoActivate; // sub-item property
-      // noinspection JSUnusedGlobalSymbols
-
-      _this.openOnHover = openOnHover; // sub-item property
-
-      _this.toggle = toggle;
-      _this.closeOnSelect = closeOnSelect; // both sub-item and menu.
-      // noinspection JSUnusedGlobalSymbols
-
-      _this.delay = delay; // sub-item property
-
-      _this.positioner = positioner;
-      _this.direction = direction;
-
-      _this.parseDOM();
-
-      return _this;
-    }
-
-    return AbstractMenu;
-  }(_MenuNode);
-
-  return {
-    F: AbstractMenu,
-    d: [{
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
-      key: "positioner",
+    _positioner.set(_assertThisInitialized(_this), {
+      writable: true,
       value: void 0
-    }, {
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
-      key: "delay",
-      value: function value() {
-        return false;
-      }
-    }, {
-      kind: "method",
-      key: "registerTopics",
-      value: function registerTopics() {
-        var _this2 = this;
+    });
 
-        if (this._isTopicInit) return;
+    _delay.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-        _get(_getPrototypeOf(AbstractMenu.prototype), "registerTopics", this).call(this); // On child is activate
-        // deactivate siblings if multiple is false.
+    _this.closeOnBlur = closeOnBlur; // both sub-item and menu
+
+    _this.timeout = timeout; // both sub-item and menu
+    // noinspection JSUnusedGlobalSymbols
+
+    _this.autoActivate = autoActivate; // sub-item property
+    // noinspection JSUnusedGlobalSymbols
+
+    _this.openOnHover = openOnHover; // sub-item property
+
+    _this.toggle = toggle;
+    _this.closeOnSelect = closeOnSelect; // both sub-item and menu.
+    // noinspection JSUnusedGlobalSymbols
+
+    _this.delay = delay; // sub-item property
+
+    _this.positioner = positioner;
+    _this.direction = direction;
+
+    _this.parseDOM();
+
+    return _this;
+  }
+
+  _createClass(AbstractMenu, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this2 = this;
+
+      if (this._isTopicInit) return;
+
+      _get(_getPrototypeOf(AbstractMenu.prototype), "registerTopics", this).call(this); // On child is activate
+      // deactivate siblings if multiple is false.
 
 
-        this.on('menuitem.activate', function (target) {
-          if (target.parent === _this2) {
-            if (!_this2.isActive) {
-              _this2.activate();
-            }
-
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-              for (var _iterator = _this2.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var child = _step.value;
-
-                if (child !== target && child.isActive) {
-                  child.deactivate();
-                }
-              }
-            } catch (err) {
-              _didIteratorError = true;
-              _iteratorError = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                  _iterator["return"]();
-                }
-              } finally {
-                if (_didIteratorError) {
-                  throw _iteratorError;
-                }
-              }
-            }
-          }
-        });
-        var _timer = null;
-        this.on('menuitem.deactivate', function (target) {
-          if (_timer) {
-            clearTimeout(_timer);
-            _timer = null;
+      this.on('menuitem.activate', function (target) {
+        if (target.parent === _this2) {
+          if (!_this2.isActive) {
+            _this2.activate();
           }
 
-          _timer = setTimeout(function () {
-            _timer = null;
-
-            if (target.parent === _this2) {
-              if (_this2.isActive && !_this2.activeChild) {
-                _this2.deactivate();
-              }
-            }
-          }, 0);
-        });
-        this.on('event.click', function (event) {
-          return _this2.onClick(event);
-        });
-        this.on('event.mouseover', function (event) {
-          return _this2.onMouseOver(event);
-        });
-        this.on('event.mouseout', function (event) {
-          return _this2.onMouseOut(event);
-        });
-        this.on('menuitem.select', function (event) {
-          return _this2.onSelect(event);
-        });
-      }
-    }, {
-      kind: "method",
-      key: "activate",
-      value: function activate() {
-        var _this3 = this;
-
-        if (!this.isActive) {
-          var parent = this.parent; // Set isActivate flag and add active classes.
-
-          this.isActive = true; // Register document click handler
-
-          if (this.closeOnBlur && !this._captureDocumentClick) {
-            this._captureDocumentClick = {
-              target: document,
-              onDocumentClick: function onDocumentClick(event) {
-                if (!_this3.element.contains(event.target)) {
-                  _this3.deactivate();
-                }
-              }
-            }; // Add to the end of the call stack.
-
-            setTimeout(function () {
-              if (_this3._captureDocumentClick) {
-                _this3._captureDocumentClick.target.addEventListener('click', _this3._captureDocumentClick.onDocumentClick);
-              }
-            }, 0);
-          } // Notify parent that submenu activated.
-
-
-          if (parent) {
-            if (!parent.isActive) parent.activate();
-          }
-
-          this.publish('menu.activate');
-          this.dispatchTopic('menu.activate', {
-            target: this
-          }); // Dispatch dom events.
-
-          this.element.dispatchEvent(new CustomEvent('menu.activate', {
-            detail: this,
-            bubbles: true
-          }));
-        }
-      }
-    }, {
-      kind: "method",
-      key: "deactivate",
-      value: function deactivate() {
-        if (this.isActive) {
-          // Set flag and remove active classes.
-          this.isActive = false; // Clear any active child items.
-
-          this.clearActiveChild(); // Remove document click handler that tracks user clicks outside of menu tree.
-
-          if (this._captureDocumentClick) {
-            this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
-
-            this._captureDocumentClick = null;
-          } // clear timers
-
-
-          this.clearTimer('timeout');
-          var _iteratorNormalCompletion2 = true;
-          var _didIteratorError2 = false;
-          var _iteratorError2 = undefined;
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+          var _iteratorError = undefined;
 
           try {
-            for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-              var child = _step2.value;
-              child.clearTimer('activateItem');
+            for (var _iterator = _this2.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+              var child = _step.value;
+
+              if (child !== target && child.isActive) {
+                child.deactivate();
+              }
             }
           } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
+            _didIteratorError = true;
+            _iteratorError = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                _iterator2["return"]();
+              if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                _iterator["return"]();
               }
             } finally {
-              if (_didIteratorError2) {
-                throw _iteratorError2;
+              if (_didIteratorError) {
+                throw _iteratorError;
               }
             }
           }
-
-          this.dispatchTopic('menu.deactivate', {
-            target: this
-          }); // Dispatch dom events.
-
-          this.element.dispatchEvent(new CustomEvent('menu.deactivate', {
-            detail: this,
-            bubbles: true
-          }));
         }
+      });
+      var _timer = null;
+      this.on('menuitem.deactivate', function (target) {
+        if (_timer) {
+          clearTimeout(_timer);
+          _timer = null;
+        }
+
+        _timer = setTimeout(function () {
+          _timer = null;
+
+          if (target.parent === _this2) {
+            if (_this2.isActive && !_this2.activeChild) {
+              _this2.deactivate();
+            }
+          }
+        }, 0);
+      });
+      this.on('event.click', function (event) {
+        return _this2.onClick(event);
+      });
+      this.on('event.mouseover', function (event) {
+        return _this2.onMouseOver(event);
+      });
+      this.on('event.mouseout', function (event) {
+        return _this2.onMouseOut(event);
+      });
+      this.on('menuitem.select', function (event) {
+        return _this2.onSelect(event);
+      });
+    }
+  }, {
+    key: "activate",
+    value: function activate() {
+      var _this3 = this;
+
+      if (!this.isActive) {
+        var parent = this.parent; // Set isActivate flag and add active classes.
+
+        this.isActive = true; // Register document click handler
+
+        if (this.closeOnBlur && !this._captureDocumentClick) {
+          this._captureDocumentClick = {
+            target: document,
+            onDocumentClick: function onDocumentClick(event) {
+              if (!_this3.element.contains(event.target)) {
+                _this3.deactivate();
+              }
+            }
+          }; // Add to the end of the call stack.
+
+          setTimeout(function () {
+            if (_this3._captureDocumentClick) {
+              _this3._captureDocumentClick.target.addEventListener('click', _this3._captureDocumentClick.onDocumentClick);
+            }
+          }, 0);
+        } // Notify parent that submenu activated.
+
+
+        if (parent) {
+          if (!parent.isActive) parent.activate();
+        }
+
+        this.publish('menu.activate');
+        this.dispatchTopic('menu.activate', {
+          target: this
+        }); // Dispatch dom events.
+
+        this.element.dispatchEvent(new CustomEvent('menu.activate', {
+          detail: this,
+          bubbles: true
+        }));
       }
-    }, {
-      kind: "method",
-      key: "show",
-      value: function show() {
-        if (!this.isVisible) {
-          this.isVisible = true;
-          this.dispatchTopic('menu.show', {
-            target: this
-          });
-        }
-      }
-    }, {
-      kind: "method",
-      key: "hide",
-      value: function hide() {
-        if (this.isVisible) {
-          this.isVisible = false;
-          this.dispatchTopic('menu.hide', {
-            target: this
-          });
-        }
-      }
-    }, {
-      kind: "method",
-      key: "position",
-      value: function position() {
-        var positioner = this.positioner;
+    }
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      if (this.isActive) {
+        // Set flag and remove active classes.
+        this.isActive = false; // Clear any active child items.
 
-        if (positioner) {
-          positioner.call(this, this);
-        }
-      } //------------------------------------------------------------------------------------------------------------------
-      // Tree methods.
+        this.clearActiveChild(); // Remove document click handler that tracks user clicks outside of menu tree.
 
-    }, {
-      kind: "method",
-      key: "createItems",
-      value: function createItems(data) {
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
+        if (this._captureDocumentClick) {
+          this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
+
+          this._captureDocumentClick = null;
+        } // clear timers
+
+
+        this.clearTimer('timeout');
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator3 = data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var _step3$value = _step3.value,
-                submenu = _step3$value.submenu,
-                args = _objectWithoutProperties(_step3$value, ["submenu"]);
-
-            var item = this.constructMenuItem(args);
-
-            if (submenu) {
-              var _submenu = this.constructSubMenu(submenu);
-
-              item.attachSubMenu(_submenu);
-            }
-
-            this.append(item);
+          for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var child = _step2.value;
+            child.clearTimer('activateItem');
           }
         } catch (err) {
-          _didIteratorError3 = true;
-          _iteratorError3 = err;
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-              _iterator3["return"]();
+            if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+              _iterator2["return"]();
             }
           } finally {
-            if (_didIteratorError3) {
-              throw _iteratorError3;
+            if (_didIteratorError2) {
+              throw _iteratorError2;
             }
           }
         }
-      } // noinspection JSUnusedGlobalSymbols
 
-    }, {
-      kind: "method",
-      key: "addItem",
-      value: function addItem(text) {
-        var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-        var item = this.constructMenuItem({
-          text: text,
-          action: action
+        this.dispatchTopic('menu.deactivate', {
+          target: this
+        }); // Dispatch dom events.
+
+        this.element.dispatchEvent(new CustomEvent('menu.deactivate', {
+          detail: this,
+          bubbles: true
+        }));
+      }
+    }
+  }, {
+    key: "show",
+    value: function show() {
+      if (!this.isVisible) {
+        this.isVisible = true;
+        this.element.classList.add('show');
+        this.element.classList.remove('hide');
+        this.dispatchTopic('menu.show', {
+          target: this
         });
-        this.append(item);
-        return this;
       }
-    }, {
-      kind: "method",
-      key: "removeItem",
-      value: function removeItem(item) {
-        if (this.hasItem(item)) {
-          this.removeChildMenuNode(item);
-          if (item.element.parentElement) item.element.parentElement.removeChild(item.element);
-        }
-      } // noinspection JSUnusedGlobalSymbols
-
-    }, {
-      kind: "method",
-      key: "hasItem",
-      value: function hasItem(item) {
-        return this.hasChild(item);
+    }
+  }, {
+    key: "hide",
+    value: function hide() {
+      if (this.isVisible) {
+        this.isVisible = false;
+        this.element.classList.add('hide');
+        this.element.classList.remove('show');
+        this.dispatchTopic('menu.hide', {
+          target: this
+        });
       }
-    }, {
-      kind: "method",
-      key: "append",
-      value: function append(item) {
-        var body = this.getMenuBody();
-        body = body[body.length - 1];
+    }
+  }, {
+    key: "position",
+    value: function position() {
+      var positioner = this.positioner;
 
-        if (item.nodeType) {
-          body.appendChild(item);
-          return this;
-        }
-
-        if (item.parent) {
-          item.parent.removeItem(item);
-        }
-
-        item.appendTo(body);
-
-        if (item.isMenuItem && item.isMenuItem()) {
-          this.appendChildMenuNode(item);
-        }
-
-        return this;
+      if (positioner) {
+        positioner.call(this, this);
       }
-    }, {
-      kind: "get",
-      key: "activeChild",
-      value: function activeChild() {
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Tree methods.
 
+  }, {
+    key: "createItems",
+    value: function createItems(data) {
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = data[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var _step3$value = _step3.value,
+              submenu = _step3$value.submenu,
+              args = _objectWithoutProperties(_step3$value, ["submenu"]);
+
+          var item = this.constructMenuItem(args);
+
+          if (submenu) {
+            var _submenu = this.constructSubMenu(submenu);
+
+            item.attachSubMenu(_submenu);
+          }
+
+          this.append(item);
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
         try {
-          for (var _iterator4 = this.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var item = _step4.value;
-
-            if (item.isActive) {
-              return item;
-            }
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
           }
-        } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
         } finally {
-          try {
-            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-              _iterator4["return"]();
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "addItem",
+    value: function addItem(text) {
+      var action = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var item = this.constructMenuItem({
+        text: text,
+        action: action
+      });
+      this.append(item);
+      return this;
+    }
+  }, {
+    key: "removeItem",
+    value: function removeItem(item) {
+      if (this.hasItem(item)) {
+        this.removeChildMenuNode(item);
+        if (item.element.parentElement) item.element.parentElement.removeChild(item.element);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "hasItem",
+    value: function hasItem(item) {
+      return this.hasChild(item);
+    }
+  }, {
+    key: "append",
+    value: function append(item) {
+      var body = this.getMenuBody();
+      body = body[body.length - 1];
+
+      if (item.nodeType) {
+        body.appendChild(item);
+        return this;
+      }
+
+      if (item.parent) {
+        item.parent.removeItem(item);
+      }
+
+      item.appendTo(body);
+
+      if (item.isMenuItem && item.isMenuItem()) {
+        this.appendChildMenuNode(item);
+      }
+
+      return this;
+    }
+  }, {
+    key: "clearActiveChild",
+    value: function clearActiveChild() {
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = this.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var child = _step4.value;
+
+          if (child.isActive) {
+            child.deactivate();
+          }
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+            _iterator4["return"]();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+    }
+    /**
+     * Returns list of all menu bodies for the menu.
+     *
+     * Menu bodies are where item are appended when using function like addItem or append.  They will be added to the
+     * last menu body in the menu.
+     *
+     * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]> | HTMLElement[]}
+     */
+
+  }, {
+    key: "getMenuBody",
+    value: function getMenuBody() {
+      var bodies = Array.prototype.slice.call(this.element.querySelectorAll(':scope > .menu__body'));
+
+      if (!bodies.length) {
+        return [this.element];
+      } else {
+        // noinspection JSValidateTypes
+        return bodies;
+      }
+    }
+  }, {
+    key: "isMenu",
+    value: function isMenu() {
+      return true;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Event Handlers
+
+  }, {
+    key: "onMouseOver",
+    value: function onMouseOver() {
+      this.clearTimer('timeout');
+    }
+  }, {
+    key: "onMouseOut",
+    value: function onMouseOut(event) {
+      var _this4 = this;
+
+      if (!this.element.contains(event.originalEvent.relatedTarget)) {
+        if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+          // noinspection JSCheckFunctionSignatures
+          this.startTimer('timeout', function () {
+            _this4.deactivate();
+          }, this.timeout);
+        }
+      }
+    }
+  }, {
+    key: "onClick",
+    value: function onClick(event) {
+      if (event.target === this) {
+        if (this.isActive && this.toggle) {
+          this.deactivate();
+        } else if (!this.isActive) {
+          this.activate();
+        }
+
+        this.dispatchTopic('menu.click', event);
+      }
+    }
+  }, {
+    key: "onSelect",
+    value: function onSelect() {
+      if (this.closeOnSelect && this.isActive) {
+        this.deactivate();
+      }
+    }
+    /**
+     * Handles navigating the selection to an item during keyboard navigation.
+     * @param item
+     * @param showSubMenu
+     * @private
+     */
+
+  }, {
+    key: "_navigateToItem",
+    value: function _navigateToItem(item) {
+      var showSubMenu = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!item) return;
+      var parent = item.parent;
+      if (!parent.isVisible) parent.show();
+      if (!parent.isActive) parent.activate();
+      if (!item.isActive) item.activate(false);
+      if (showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
+    }
+    /**
+     * Handles keyboard navigation.
+     * @param event
+     * @param allowTargetKeys
+     * @param _depth
+     * @returns {boolean|boolean|*}
+     * @private
+     */
+
+  }, {
+    key: "_navigate",
+    value: function _navigate(event) {
+      var allowTargetKeys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+      var _depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+      var key = event.key,
+          ARROW_BACK = 'ArrowUp',
+          ARROW_FORWARD = 'ArrowDown',
+          ARROW_NEXT = 'ArrowRight',
+          ARROW_PREVIOUS = 'ArrowLeft',
+          arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
+          arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
+
+      if (this.direction === 'vertical') {
+        ARROW_BACK = 'ArrowLeft';
+        ARROW_FORWARD = 'ArrowRight';
+        ARROW_NEXT = 'ArrowDown';
+        ARROW_PREVIOUS = 'ArrowUp';
+      }
+
+      if (arrowKeyPressed) {
+        if (!this.isVisible) {
+          this.show();
+          event.preventDefault();
+          return true;
+        }
+
+        var children = _findAllNavigableChildren(this.children),
+            index = children.indexOf(this.activeChild),
+            child = children[index];
+
+        if (key === ARROW_PREVIOUS) {
+          if (index === -1) {
+            // When their is no active item, activate the last item.
+            this._navigateToItem(children[children.length - 1], this.isRoot);
+          } else {
+            this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_3__["modulo"])(index - 1, children.length)], this.isRoot);
+          }
+
+          event.preventDefault();
+          return true;
+        } else if (key === ARROW_NEXT) {
+          if (index === -1) {
+            this._navigateToItem(children[0], this.isRoot);
+          } else {
+            this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_3__["modulo"])(index + 1, children.length)], this.isRoot);
+          }
+
+          event.preventDefault();
+          return true;
+        } else if (key === ARROW_FORWARD) {
+          if (child && child.hasSubMenu() && (!child.submenu.isVisible || !child.submenu.activeChild)) {
+            var ret = false;
+
+            if (!child.submenu.isVisible) {
+              ret = true;
+              child.showSubMenu();
             }
-          } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
+
+            var firstChild = _findFirstNavigableChild(child.submenu.children);
+
+            if (firstChild) {
+              ret = true;
+
+              this._navigateToItem(firstChild, false);
+            }
+
+            if (ret) {
+              event.preventDefault();
+              return true;
+            }
+          } else if (!child) {
+            var _firstChild = _findFirstNavigableChild(this.children);
+
+            if (_firstChild) {
+              this._navigateToItem(_firstChild, this.isRoot);
+
+              if (_firstChild.hasSubMenu() && _firstChild.submenu.isVisible) {
+                var firstSubMenuChild = _findFirstNavigableChild(_firstChild.submenu.children);
+
+                if (firstSubMenuChild) {
+                  this._navigateToItem(firstSubMenuChild, false);
+                }
+              }
+
+              event.preventDefault();
+              return true;
+            }
+          } else if (!this.isRoot) {
+            return this.parent._navigate(event, allowTargetKeys, _depth + 1);
+          }
+        } else if (key === ARROW_BACK) {
+          if (!this.isRoot) {
+            if (this.activeChild && this.activeChild.hasSubMenu() && this.activeChild.submenu.isVisible) {
+              this.activeChild.hideSubMenu();
+              event.preventDefault();
+              return true;
+            } else {
+              return this.parent._navigate(event, allowTargetKeys, _depth + 1);
+            }
+          } else if (_depth === 0) {
+            if (child && child.submenu) {
+              return child._navigate(event, allowTargetKeys, 0);
+            } else if (!child) {
+              var _firstChild2 = _findFirstNavigableChild(this.children);
+
+              if (_firstChild2) {
+                return _firstChild2._navigate(event, allowTargetKeys, 0);
+              }
             }
           }
         }
+      } else if (key === "Enter") {
+        // The menu is not visible at this point make it visible and return.
+        if (!this.isVisible) {
+          this.show();
+          event.preventDefault();
 
-        return null;
-      } // noinspection JSUnusedGlobalSymbols
+          if (!this.activeChild) {
+            var childToActivate = _findFirstNavigableChild(this.children);
 
-    }, {
-      kind: "get",
-      key: "activeIndex",
-      value: function activeIndex() {
-        var children = this.children;
-
-        for (var i = 0, l = children.length; i < l; i++) {
-          if (children[i].isActive) {
-            return i;
+            if (childToActivate) this.firstEnabledChild.activate();
           }
+
+          return true;
         }
 
-        return -1;
-      }
-    }, {
-      kind: "get",
-      key: "firstChild",
-      value: function firstChild() {
-        return this.children[0];
-      } // noinspection JSUnusedGlobalSymbols
+        if (this.activeChild) {
+          if (this.activeChild.hasSubMenu()) {
+            var _ret = false;
 
-    }, {
-      kind: "get",
-      key: "lastChild",
-      value: function lastChild() {
-        return this.children[this.children.length - 1];
-      }
-    }, {
-      kind: "get",
-      key: "firstEnabledChild",
-      value: function firstEnabledChild() {
-        var children = this.children;
+            if (!this.activeChild.submenu.isVisible) {
+              this.activeChild.showSubMenu();
+              event.preventDefault();
+              _ret = true;
+            }
 
-        for (var i = 0, l = children.length; i < l; i++) {
-          if (!children[i].isDisabled) {
-            return children[i];
+            if (!this.activeChild.submenu.activeChild) {
+              var _childToActivate = _findFirstNavigableChild(this.activeChild.submenu.children);
+
+              if (_childToActivate) {
+                _childToActivate.activate(false);
+
+                event.preventDefault();
+                _ret = true;
+              }
+            }
+
+            if (_ret) return true;
+          } else {
+            this.activeChild.select();
+            event.preventDefault();
+            return true;
+          }
+        } else {
+          var _firstChild3 = _findFirstNavigableChild(this.children);
+
+          if (_firstChild3) {
+            _firstChild3.activate();
+
+            if (_firstChild3.hasSubMenu()) {
+              _firstChild3.showSubMenu();
+
+              if (!_firstChild3.submenu.activeChild) {
+                var targetChild = _findFirstNavigableChild(_firstChild3.submenu.children);
+
+                if (targetChild) targetChild.activate(false);
+              }
+            }
+
+            event.preventDefault();
+            return true;
           }
         }
+      } else if (allowTargetKeys) {
+        var _children = _findAllNavigableChildren(this.children);
 
-        return null;
-      } // noinspection JSUnusedGlobalSymbols
-
-    }, {
-      kind: "get",
-      key: "lastEnabledChild",
-      value: function lastEnabledChild() {
-        var children = this.children;
-
-        for (var i = children.length - 1, l = 0; i >= l; i--) {
-          if (!children[i].isDisabled) {
-            return children[i];
-          }
-        }
-
-        return null;
-      }
-    }, {
-      kind: "method",
-      key: "clearActiveChild",
-      value: function clearActiveChild() {
         var _iteratorNormalCompletion5 = true;
         var _didIteratorError5 = false;
         var _iteratorError5 = undefined;
 
         try {
-          for (var _iterator5 = this.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var child = _step5.value;
+          for (var _iterator5 = _children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var _child = _step5.value;
 
-            if (child.isActive) {
-              child.deactivate();
+            if (_child.targetKey === key) {
+              event.preventDefault();
+
+              if (_child.hasSubMenu()) {
+                if (!_child.isActive) {
+                  _child.activate();
+
+                  _child.showSubMenu();
+                } else if (!_child.submenu.isVisible) {
+                  _child.showSubMenu();
+                }
+              } else {
+                _child.select();
+              }
+
+              return true;
             }
           }
         } catch (err) {
@@ -6821,450 +7007,237 @@ var AbstractMenu = _decorate(null, function (_initialize, _MenuNode) {
           }
         }
       }
-      /**
-       * Returns list of all menu bodies for the menu.
-       *
-       * Menu bodies are where item are appended when using function like addItem or append.  They will be added to the
-       * last menu body in the menu.
-       *
-       * @returns {NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element> | NodeListOf<SVGElementTagNameMap[string]> | HTMLElement[]}
-       */
 
-    }, {
-      kind: "method",
-      key: "getMenuBody",
-      value: function getMenuBody() {
-        var bodies = Array.prototype.slice.call(this.element.querySelectorAll(':scope > .menu__body'));
+      return false;
+    }
+  }, {
+    key: "activeChild",
+    get: function get() {
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
 
-        if (!bodies.length) {
-          return [this.element];
-        } else {
-          // noinspection JSValidateTypes
-          return bodies;
+      try {
+        for (var _iterator6 = this.children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var item = _step6.value;
+
+          if (item.isActive) {
+            return item;
+          }
         }
-      }
-    }, {
-      kind: "method",
-      key: "isMenu",
-      value: function isMenu() {
-        return true;
-      } //------------------------------------------------------------------------------------------------------------------
-      // Event Handlers
-
-    }, {
-      kind: "method",
-      key: "onMouseOver",
-      value: function onMouseOver() {
-        this.clearTimer('timeout');
-      }
-    }, {
-      kind: "method",
-      key: "onMouseOut",
-      value: function onMouseOut(event) {
-        var _this4 = this;
-
-        if (!this.element.contains(event.originalEvent.relatedTarget)) {
-          if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
-            // noinspection JSCheckFunctionSignatures
-            this.startTimer('timeout', function () {
-              _this4.deactivate();
-            }, this.timeout);
+      } catch (err) {
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+            _iterator6["return"]();
+          }
+        } finally {
+          if (_didIteratorError6) {
+            throw _iteratorError6;
           }
         }
       }
-    }, {
-      kind: "method",
-      key: "onClick",
-      value: function onClick(event) {
-        if (event.target === this) {
-          if (this.isActive && this.toggle) {
-            this.deactivate();
-          } else if (!this.isActive) {
-            this.activate();
-          }
 
-          this.dispatchTopic('menu.click', event);
+      return null;
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "activeIndex",
+    get: function get() {
+      var children = this.children;
+
+      for (var i = 0, l = children.length; i < l; i++) {
+        if (children[i].isActive) {
+          return i;
         }
       }
-    }, {
-      kind: "method",
-      key: "onSelect",
-      value: function onSelect() {
-        if (this.closeOnSelect && this.isActive) {
-          this.deactivate();
+
+      return -1;
+    }
+  }, {
+    key: "firstChild",
+    get: function get() {
+      return this.children[0];
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "lastChild",
+    get: function get() {
+      return this.children[this.children.length - 1];
+    }
+  }, {
+    key: "firstEnabledChild",
+    get: function get() {
+      var children = this.children;
+
+      for (var i = 0, l = children.length; i < l; i++) {
+        if (!children[i].isDisabled) {
+          return children[i];
         }
       }
-      /**
-       * Handles navigating the selection to an item during keyboard navigation.
-       * @param item
-       * @param showSubMenu
-       * @private
-       */
 
-    }, {
-      kind: "method",
-      key: "_navigateToItem",
-      value: function _navigateToItem(item) {
-        var showSubMenu = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-        if (!item) return;
-        var parent = item.parent;
-        if (!parent.isVisible) parent.show();
-        if (!parent.isActive) parent.activate();
-        if (!item.isActive) item.activate(false);
-        if (showSubMenu && item.hasSubMenu() && !item.submenu.isVisible) item.showSubMenu();
-      }
-      /**
-       * Handles keyboard navigation.
-       * @param event
-       * @param allowTargetKeys
-       * @param _depth
-       * @returns {boolean|boolean|*}
-       * @private
-       */
+      return null;
+    } // noinspection JSUnusedGlobalSymbols
 
-    }, {
-      kind: "method",
-      key: "_navigate",
-      value: function _navigate(event) {
-        var allowTargetKeys = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+  }, {
+    key: "lastEnabledChild",
+    get: function get() {
+      var children = this.children;
 
-        var _depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-        var key = event.key,
-            ARROW_BACK = 'ArrowUp',
-            ARROW_FORWARD = 'ArrowDown',
-            ARROW_NEXT = 'ArrowRight',
-            ARROW_PREVIOUS = 'ArrowLeft',
-            arrowKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
-            arrowKeyPressed = arrowKeys.indexOf(key) !== -1;
-
-        if (this.direction === 'vertical') {
-          ARROW_BACK = 'ArrowLeft';
-          ARROW_FORWARD = 'ArrowRight';
-          ARROW_NEXT = 'ArrowDown';
-          ARROW_PREVIOUS = 'ArrowUp';
+      for (var i = children.length - 1, l = 0; i >= l; i--) {
+        if (!children[i].isDisabled) {
+          return children[i];
         }
+      }
 
-        if (arrowKeyPressed) {
-          if (!this.isVisible) {
-            this.show();
-            event.preventDefault();
-            return true;
-          }
+      return null;
+    }
+  }, {
+    key: "positioner",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _positioner) === 'inherit' || _classPrivateFieldGet(this, _positioner) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.positioner : undefined;
+      } else if (_classPrivateFieldGet(this, _positioner) === 'root') {
+        var root = this.root;
 
-          var children = _findAllNavigableChildren(this.children),
-              index = children.indexOf(this.activeChild),
-              child = children[index];
-
-          if (key === ARROW_PREVIOUS) {
-            if (index === -1) {
-              // When their is no active item, activate the last item.
-              this._navigateToItem(children[children.length - 1], this.isRoot);
-            } else {
-              this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_4__["modulo"])(index - 1, children.length)], this.isRoot);
-            }
-
-            event.preventDefault();
-            return true;
-          } else if (key === ARROW_NEXT) {
-            if (index === -1) {
-              this._navigateToItem(children[0], this.isRoot);
-            } else {
-              this._navigateToItem(children[Object(_core_utility_math__WEBPACK_IMPORTED_MODULE_4__["modulo"])(index + 1, children.length)], this.isRoot);
-            }
-
-            event.preventDefault();
-            return true;
-          } else if (key === ARROW_FORWARD) {
-            if (child && child.hasSubMenu() && (!child.submenu.isVisible || !child.submenu.activeChild)) {
-              var ret = false;
-
-              if (!child.submenu.isVisible) {
-                ret = true;
-                child.showSubMenu();
-              }
-
-              var firstChild = _findFirstNavigableChild(child.submenu.children);
-
-              if (firstChild) {
-                ret = true;
-
-                this._navigateToItem(firstChild, false);
-              }
-
-              if (ret) {
-                event.preventDefault();
-                return true;
-              }
-            } else if (!child) {
-              var _firstChild = _findFirstNavigableChild(this.children);
-
-              if (_firstChild) {
-                this._navigateToItem(_firstChild, this.isRoot);
-
-                if (_firstChild.hasSubMenu() && _firstChild.submenu.isVisible) {
-                  var firstSubMenuChild = _findFirstNavigableChild(_firstChild.submenu.children);
-
-                  if (firstSubMenuChild) {
-                    this._navigateToItem(firstSubMenuChild, false);
-                  }
-                }
-
-                event.preventDefault();
-                return true;
-              }
-            } else if (!this.isRoot) {
-              return this.parent._navigate(event, allowTargetKeys, _depth + 1);
-            }
-          } else if (key === ARROW_BACK) {
-            if (!this.isRoot) {
-              if (this.activeChild && this.activeChild.hasSubMenu() && this.activeChild.submenu.isVisible) {
-                this.activeChild.hideSubMenu();
-                event.preventDefault();
-                return true;
-              } else {
-                return this.parent._navigate(event, allowTargetKeys, _depth + 1);
-              }
-            } else if (_depth === 0) {
-              if (child && child.submenu) {
-                return child._navigate(event, allowTargetKeys, 0);
-              } else if (!child) {
-                var _firstChild2 = _findFirstNavigableChild(this.children);
-
-                if (_firstChild2) {
-                  return _firstChild2._navigate(event, allowTargetKeys, 0);
-                }
-              }
-            }
-          }
-        } else if (key === "Enter") {
-          // The menu is not visible at this point make it visible and return.
-          if (!this.isVisible) {
-            this.show();
-            event.preventDefault();
-
-            if (!this.activeChild) {
-              var childToActivate = _findFirstNavigableChild(this.children);
-
-              if (childToActivate) this.firstEnabledChild.activate();
-            }
-
-            return true;
-          }
-
-          if (this.activeChild) {
-            if (this.activeChild.hasSubMenu()) {
-              var _ret = false;
-
-              if (!this.activeChild.submenu.isVisible) {
-                this.activeChild.showSubMenu();
-                event.preventDefault();
-                _ret = true;
-              }
-
-              if (!this.activeChild.submenu.activeChild) {
-                var _childToActivate = _findFirstNavigableChild(this.activeChild.submenu.children);
-
-                if (_childToActivate) {
-                  _childToActivate.activate(false);
-
-                  event.preventDefault();
-                  _ret = true;
-                }
-              }
-
-              if (_ret) return true;
-            } else {
-              this.activeChild.select();
-              event.preventDefault();
-              return true;
-            }
-          } else {
-            var _firstChild3 = _findFirstNavigableChild(this.children);
-
-            if (_firstChild3) {
-              _firstChild3.activate();
-
-              if (_firstChild3.hasSubMenu()) {
-                _firstChild3.showSubMenu();
-
-                if (!_firstChild3.submenu.activeChild) {
-                  var targetChild = _findFirstNavigableChild(_firstChild3.submenu.children);
-
-                  if (targetChild) targetChild.activate(false);
-                }
-              }
-
-              event.preventDefault();
-              return true;
-            }
-          }
-        } else if (allowTargetKeys) {
-          var _children = _findAllNavigableChildren(this.children);
-
-          var _iteratorNormalCompletion6 = true;
-          var _didIteratorError6 = false;
-          var _iteratorError6 = undefined;
-
-          try {
-            for (var _iterator6 = _children[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-              var _child = _step6.value;
-
-              if (_child.targetKey === key) {
-                event.preventDefault();
-
-                if (_child.hasSubMenu()) {
-                  if (!_child.isActive) {
-                    _child.activate();
-
-                    _child.showSubMenu();
-                  } else if (!_child.submenu.isVisible) {
-                    _child.showSubMenu();
-                  }
-                } else {
-                  _child.select();
-                }
-
-                return true;
-              }
-            }
-          } catch (err) {
-            _didIteratorError6 = true;
-            _iteratorError6 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-                _iterator6["return"]();
-              }
-            } finally {
-              if (_didIteratorError6) {
-                throw _iteratorError6;
-              }
-            }
-          }
+        if (root && root !== this) {
+          return root.positioner;
         }
+      } else {
+        return _classPrivateFieldGet(this, _positioner);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _positioner, value);
+    } // noinspection JSUnusedGlobalSymbols
 
-        return false;
+  }, {
+    key: "delay",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _delay) === 'inherit' || _classPrivateFieldGet(this, _delay) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.delay : undefined;
+      } else if (_classPrivateFieldGet(this, _delay) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.delay;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _delay);
       }
-    }, {
-      kind: "method",
-      "static": true,
-      key: "getAttributes",
-      value: function getAttributes(element) {
-        return _objectSpread({}, _get(_getPrototypeOf(AbstractMenu), "getAttributes", this).call(this, element), {}, MENU_ATTRIBUTE_SCHEMA.deserialize(element.dataset));
-      }
-    }]
-  };
-}, _MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _delay, value);
+    }
+  }], [{
+    key: "getAttributes",
+    value: function getAttributes(element) {
+      return _objectSpread({}, _get(_getPrototypeOf(AbstractMenu), "getAttributes", this).call(this, element), {}, MENU_ATTRIBUTE_SCHEMA.deserialize(element.dataset));
+    }
+  }]);
+
+  return AbstractMenu;
+}(_MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
 /**
  * A component for rendering nestable list of selectable items.
  */
 
-var Menu = _decorate(null, function (_initialize2, _AbstractMenu) {
-  var Menu =
-  /*#__PURE__*/
-  function (_AbstractMenu2) {
-    _inherits(Menu, _AbstractMenu2);
+var _positioner = new WeakMap();
 
-    /**
-     *
-     * @param target {String|HTMLElement|Element}
-     * @param closeOnBlur {Boolean|Number}
-     * @param timeout {Boolean|Number}
-     * @param autoActivate {Boolean|Number}
-     * @param openOnHover {Boolean|Number}
-     * @param toggle {boolean}
-     * @param closeOnSelect {Boolean}
-     * @param delay {Boolean|Number|'inherit'}
-     * @param id {String}
-     * @param children {Array}
-     */
-    function Menu() {
-      var _this5;
+var _delay = new WeakMap();
 
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          _ref2$target = _ref2.target,
-          target = _ref2$target === void 0 ? null : _ref2$target,
-          _ref2$closeOnBlur = _ref2.closeOnBlur,
-          closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
-          _ref2$timeout = _ref2.timeout,
-          timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
-          _ref2$autoActivate = _ref2.autoActivate,
-          autoActivate = _ref2$autoActivate === void 0 ? true : _ref2$autoActivate,
-          _ref2$openOnHover = _ref2.openOnHover,
-          openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
-          _ref2$toggle = _ref2.toggle,
-          toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
-          _ref2$closeOnSelect = _ref2.closeOnSelect,
-          closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
-          _ref2$delay = _ref2.delay,
-          delay = _ref2$delay === void 0 ? 'inherit' : _ref2$delay,
-          _ref2$children = _ref2.children,
-          children = _ref2$children === void 0 ? null : _ref2$children,
-          _ref2$arrow = _ref2.arrow,
-          arrow = _ref2$arrow === void 0 ? false : _ref2$arrow;
+var Menu =
+/*#__PURE__*/
+function (_AbstractMenu) {
+  _inherits(Menu, _AbstractMenu);
 
-      _classCallCheck(this, Menu);
+  /**
+   *
+   * @param target {String|HTMLElement|Element}
+   * @param closeOnBlur {Boolean|Number}
+   * @param timeout {Boolean|Number}
+   * @param autoActivate {Boolean|Number}
+   * @param openOnHover {Boolean|Number}
+   * @param toggle {boolean}
+   * @param closeOnSelect {Boolean}
+   * @param delay {Boolean|Number|'inherit'}
+   * @param id {String}
+   * @param children {Array}
+   */
+  function Menu() {
+    var _this5;
 
-      if (!target) {
-        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_5__["createFragment"])("\n                <div class=\"menu\">\n                    ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ")).children[0];
-      }
+    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref2$target = _ref2.target,
+        target = _ref2$target === void 0 ? null : _ref2$target,
+        _ref2$closeOnBlur = _ref2.closeOnBlur,
+        closeOnBlur = _ref2$closeOnBlur === void 0 ? false : _ref2$closeOnBlur,
+        _ref2$timeout = _ref2.timeout,
+        timeout = _ref2$timeout === void 0 ? false : _ref2$timeout,
+        _ref2$autoActivate = _ref2.autoActivate,
+        autoActivate = _ref2$autoActivate === void 0 ? true : _ref2$autoActivate,
+        _ref2$openOnHover = _ref2.openOnHover,
+        openOnHover = _ref2$openOnHover === void 0 ? true : _ref2$openOnHover,
+        _ref2$toggle = _ref2.toggle,
+        toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
+        _ref2$closeOnSelect = _ref2.closeOnSelect,
+        closeOnSelect = _ref2$closeOnSelect === void 0 ? true : _ref2$closeOnSelect,
+        _ref2$delay = _ref2.delay,
+        delay = _ref2$delay === void 0 ? 'inherit' : _ref2$delay,
+        _ref2$children = _ref2.children,
+        children = _ref2$children === void 0 ? null : _ref2$children,
+        _ref2$arrow = _ref2.arrow,
+        arrow = _ref2$arrow === void 0 ? false : _ref2$arrow;
 
-      _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
-        closeOnBlur: closeOnBlur,
-        timeout: timeout,
-        autoActivate: autoActivate,
-        toggle: toggle,
-        closeOnSelect: closeOnSelect,
-        delay: delay,
-        positioner: 'inherit',
-        direction: 'vertical',
-        openOnHover: openOnHover,
-        target: target
-      }));
+    _classCallCheck(this, Menu);
 
-      _initialize2(_assertThisInitialized(_this5));
-
-      _this5.events = null;
-
-      _this5.registerTopics();
-
-      _this5.init();
-
-      if (children) {
-        _this5.createItems(children);
-      }
-
-      return _this5;
+    if (!target) {
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_4__["createFragment"])("\n                <div class=\"menu\">\n                    ".concat(arrow ? "<div class=\"menu__arrow\"></div>" : "", "\n                    <div class=\"menu__body\" data-body></div>\n                </div>\n            ")).children[0];
     }
 
-    return Menu;
-  }(_AbstractMenu);
+    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(Menu).call(this, {
+      closeOnBlur: closeOnBlur,
+      timeout: timeout,
+      autoActivate: autoActivate,
+      toggle: toggle,
+      closeOnSelect: closeOnSelect,
+      delay: delay,
+      positioner: 'inherit',
+      direction: 'vertical',
+      openOnHover: openOnHover,
+      target: target
+    }));
+    _this5.events = null;
 
-  return {
-    F: Menu,
-    d: [{
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_2__["inherit"]],
-      key: "delay",
-      value: function value() {
-        return 0;
-      }
-    }, {
-      kind: "method",
-      key: "constructSubMenu",
-      value: function constructSubMenu(config) {
-        return new Menu(config);
-      }
-    }, {
-      kind: "method",
-      key: "constructMenuItem",
-      value: function constructMenuItem(config) {
-        return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
-      }
-    }]
-  };
-}, AbstractMenu);
+    _this5.registerTopics();
+
+    _this5.init();
+
+    if (children) {
+      _this5.createItems(children);
+    }
+
+    return _this5;
+  }
+
+  _createClass(Menu, [{
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new Menu(config);
+    }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new _MenuItem__WEBPACK_IMPORTED_MODULE_1__["default"](config);
+    }
+  }]);
+
+  return Menu;
+}(AbstractMenu);
 
 
 
@@ -7515,15 +7488,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractMenuItem", function() { return AbstractMenuItem; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuItem; });
 /* harmony import */ var _MenuNode__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MenuNode */ "./src/menu/MenuNode.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
-/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
+/* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -7531,47 +7499,15 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _decorate(decorators, factory, superClass, mixins) { var api = _getDecoratorsApi(); if (mixins) { for (var i = 0; i < mixins.length; i++) { api = mixins[i](api); } } var r = factory(function initialize(O) { api.initializeInstanceElements(O, decorated.elements); }, superClass); var decorated = api.decorateClass(_coalesceClassElements(r.d.map(_createElementDescriptor)), decorators); api.initializeClassElements(r.F, decorated.elements); return api.runClassFinishers(r.F, decorated.finishers); }
-
-function _getDecoratorsApi() { _getDecoratorsApi = function _getDecoratorsApi() { return api; }; var api = { elementsDefinitionOrder: [["method"], ["field"]], initializeInstanceElements: function initializeInstanceElements(O, elements) { ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { if (element.kind === kind && element.placement === "own") { this.defineClassElement(O, element); } }, this); }, this); }, initializeClassElements: function initializeClassElements(F, elements) { var proto = F.prototype; ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { var placement = element.placement; if (element.kind === kind && (placement === "static" || placement === "prototype")) { var receiver = placement === "static" ? F : proto; this.defineClassElement(receiver, element); } }, this); }, this); }, defineClassElement: function defineClassElement(receiver, element) { var descriptor = element.descriptor; if (element.kind === "field") { var initializer = element.initializer; descriptor = { enumerable: descriptor.enumerable, writable: descriptor.writable, configurable: descriptor.configurable, value: initializer === void 0 ? void 0 : initializer.call(receiver) }; } Object.defineProperty(receiver, element.key, descriptor); }, decorateClass: function decorateClass(elements, decorators) { var newElements = []; var finishers = []; var placements = { "static": [], prototype: [], own: [] }; elements.forEach(function (element) { this.addElementPlacement(element, placements); }, this); elements.forEach(function (element) { if (!_hasDecorators(element)) return newElements.push(element); var elementFinishersExtras = this.decorateElement(element, placements); newElements.push(elementFinishersExtras.element); newElements.push.apply(newElements, elementFinishersExtras.extras); finishers.push.apply(finishers, elementFinishersExtras.finishers); }, this); if (!decorators) { return { elements: newElements, finishers: finishers }; } var result = this.decorateConstructor(newElements, decorators); finishers.push.apply(finishers, result.finishers); result.finishers = finishers; return result; }, addElementPlacement: function addElementPlacement(element, placements, silent) { var keys = placements[element.placement]; if (!silent && keys.indexOf(element.key) !== -1) { throw new TypeError("Duplicated element (" + element.key + ")"); } keys.push(element.key); }, decorateElement: function decorateElement(element, placements) { var extras = []; var finishers = []; for (var decorators = element.decorators, i = decorators.length - 1; i >= 0; i--) { var keys = placements[element.placement]; keys.splice(keys.indexOf(element.key), 1); var elementObject = this.fromElementDescriptor(element); var elementFinisherExtras = this.toElementFinisherExtras((0, decorators[i])(elementObject) || elementObject); element = elementFinisherExtras.element; this.addElementPlacement(element, placements); if (elementFinisherExtras.finisher) { finishers.push(elementFinisherExtras.finisher); } var newExtras = elementFinisherExtras.extras; if (newExtras) { for (var j = 0; j < newExtras.length; j++) { this.addElementPlacement(newExtras[j], placements); } extras.push.apply(extras, newExtras); } } return { element: element, finishers: finishers, extras: extras }; }, decorateConstructor: function decorateConstructor(elements, decorators) { var finishers = []; for (var i = decorators.length - 1; i >= 0; i--) { var obj = this.fromClassDescriptor(elements); var elementsAndFinisher = this.toClassDescriptor((0, decorators[i])(obj) || obj); if (elementsAndFinisher.finisher !== undefined) { finishers.push(elementsAndFinisher.finisher); } if (elementsAndFinisher.elements !== undefined) { elements = elementsAndFinisher.elements; for (var j = 0; j < elements.length - 1; j++) { for (var k = j + 1; k < elements.length; k++) { if (elements[j].key === elements[k].key && elements[j].placement === elements[k].placement) { throw new TypeError("Duplicated element (" + elements[j].key + ")"); } } } } } return { elements: elements, finishers: finishers }; }, fromElementDescriptor: function fromElementDescriptor(element) { var obj = { kind: element.kind, key: element.key, placement: element.placement, descriptor: element.descriptor }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); if (element.kind === "field") obj.initializer = element.initializer; return obj; }, toElementDescriptors: function toElementDescriptors(elementObjects) { if (elementObjects === undefined) return; return _toArray(elementObjects).map(function (elementObject) { var element = this.toElementDescriptor(elementObject); this.disallowProperty(elementObject, "finisher", "An element descriptor"); this.disallowProperty(elementObject, "extras", "An element descriptor"); return element; }, this); }, toElementDescriptor: function toElementDescriptor(elementObject) { var kind = String(elementObject.kind); if (kind !== "method" && kind !== "field") { throw new TypeError('An element descriptor\'s .kind property must be either "method" or' + ' "field", but a decorator created an element descriptor with' + ' .kind "' + kind + '"'); } var key = _toPropertyKey(elementObject.key); var placement = String(elementObject.placement); if (placement !== "static" && placement !== "prototype" && placement !== "own") { throw new TypeError('An element descriptor\'s .placement property must be one of "static",' + ' "prototype" or "own", but a decorator created an element descriptor' + ' with .placement "' + placement + '"'); } var descriptor = elementObject.descriptor; this.disallowProperty(elementObject, "elements", "An element descriptor"); var element = { kind: kind, key: key, placement: placement, descriptor: Object.assign({}, descriptor) }; if (kind !== "field") { this.disallowProperty(elementObject, "initializer", "A method descriptor"); } else { this.disallowProperty(descriptor, "get", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "set", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "value", "The property descriptor of a field descriptor"); element.initializer = elementObject.initializer; } return element; }, toElementFinisherExtras: function toElementFinisherExtras(elementObject) { var element = this.toElementDescriptor(elementObject); var finisher = _optionalCallableProperty(elementObject, "finisher"); var extras = this.toElementDescriptors(elementObject.extras); return { element: element, finisher: finisher, extras: extras }; }, fromClassDescriptor: function fromClassDescriptor(elements) { var obj = { kind: "class", elements: elements.map(this.fromElementDescriptor, this) }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); return obj; }, toClassDescriptor: function toClassDescriptor(obj) { var kind = String(obj.kind); if (kind !== "class") { throw new TypeError('A class descriptor\'s .kind property must be "class", but a decorator' + ' created a class descriptor with .kind "' + kind + '"'); } this.disallowProperty(obj, "key", "A class descriptor"); this.disallowProperty(obj, "placement", "A class descriptor"); this.disallowProperty(obj, "descriptor", "A class descriptor"); this.disallowProperty(obj, "initializer", "A class descriptor"); this.disallowProperty(obj, "extras", "A class descriptor"); var finisher = _optionalCallableProperty(obj, "finisher"); var elements = this.toElementDescriptors(obj.elements); return { elements: elements, finisher: finisher }; }, runClassFinishers: function runClassFinishers(constructor, finishers) { for (var i = 0; i < finishers.length; i++) { var newConstructor = (0, finishers[i])(constructor); if (newConstructor !== undefined) { if (typeof newConstructor !== "function") { throw new TypeError("Finishers must return a constructor."); } constructor = newConstructor; } } return constructor; }, disallowProperty: function disallowProperty(obj, name, objectType) { if (obj[name] !== undefined) { throw new TypeError(objectType + " can't have a ." + name + " property."); } } }; return api; }
-
-function _createElementDescriptor(def) { var key = _toPropertyKey(def.key); var descriptor; if (def.kind === "method") { descriptor = { value: def.value, writable: true, configurable: true, enumerable: false }; } else if (def.kind === "get") { descriptor = { get: def.value, configurable: true, enumerable: false }; } else if (def.kind === "set") { descriptor = { set: def.value, configurable: true, enumerable: false }; } else if (def.kind === "field") { descriptor = { configurable: true, writable: true, enumerable: true }; } var element = { kind: def.kind === "field" ? "field" : "method", key: key, placement: def["static"] ? "static" : def.kind === "field" ? "own" : "prototype", descriptor: descriptor }; if (def.decorators) element.decorators = def.decorators; if (def.kind === "field") element.initializer = def.value; return element; }
-
-function _coalesceGetterSetter(element, other) { if (element.descriptor.get !== undefined) { other.descriptor.get = element.descriptor.get; } else { other.descriptor.set = element.descriptor.set; } }
-
-function _coalesceClassElements(elements) { var newElements = []; var isSameElement = function isSameElement(other) { return other.kind === "method" && other.key === element.key && other.placement === element.placement; }; for (var i = 0; i < elements.length; i++) { var element = elements[i]; var other; if (element.kind === "method" && (other = newElements.find(isSameElement))) { if (_isDataDescriptor(element.descriptor) || _isDataDescriptor(other.descriptor)) { if (_hasDecorators(element) || _hasDecorators(other)) { throw new ReferenceError("Duplicated methods (" + element.key + ") can't be decorated."); } other.descriptor = element.descriptor; } else { if (_hasDecorators(element)) { if (_hasDecorators(other)) { throw new ReferenceError("Decorators can't be placed on different accessors with for " + "the same property (" + element.key + ")."); } other.decorators = element.decorators; } _coalesceGetterSetter(element, other); } } else { newElements.push(element); } } return newElements; }
-
-function _hasDecorators(element) { return element.decorators && element.decorators.length; }
-
-function _isDataDescriptor(desc) { return desc !== undefined && !(desc.value === undefined && desc.writable === undefined); }
-
-function _optionalCallableProperty(obj, name) { var value = obj[name]; if (value !== undefined && typeof value !== "function") { throw new TypeError("Expected '" + name + "' to be a function"); } return value; }
-
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-
-function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
@@ -7579,15 +7515,23 @@ function _superPropBase(object, property) { while (!Object.prototype.hasOwnPrope
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+ // import {inherit} from "./decorators";
 
 
 
 
-
-var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP),
-    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP),
-    STRING_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_4__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_4__["Attribute"].DROP);
-var MENU_ITEM_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_4__["AttributeSchema"]({
+var INT_OR_BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["CompoundType"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Integer"]), _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP),
+    BOOL_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP),
+    STRING_TYPE = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_3__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_3__["Attribute"].DROP);
+var MENU_ITEM_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_3__["AttributeSchema"]({
   closeOnBlur: INT_OR_BOOL_TYPE,
   timeout: INT_OR_BOOL_TYPE,
   autoActivate: INT_OR_BOOL_TYPE,
@@ -7601,608 +7545,683 @@ var MENU_ITEM_ATTRIBUTE_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_4_
  * @abstract
  */
 
-var AbstractMenuItem = _decorate(null, function (_initialize, _MenuNode) {
-  var AbstractMenuItem =
-  /*#__PURE__*/
-  function (_MenuNode2) {
-    _inherits(AbstractMenuItem, _MenuNode2);
+var AbstractMenuItem =
+/*#__PURE__*/
+function (_MenuNode) {
+  _inherits(AbstractMenuItem, _MenuNode);
 
-    function AbstractMenuItem(_ref) {
-      var _this;
+  // @inherit toggle;
+  // @inherit autoActivate;
+  // @inherit openOnHover;
+  // @inherit delay = false;
+  // @inherit positioner;
+  function AbstractMenuItem(_ref) {
+    var _this;
 
-      var target = _ref.target,
-          targetKey = _ref.targetKey,
-          toggle = _ref.toggle,
-          autoActivate = _ref.autoActivate,
-          openOnHover = _ref.openOnHover,
-          delay = _ref.delay,
-          closeOnSelect = _ref.closeOnSelect,
-          closeOnBlur = _ref.closeOnBlur,
-          timeout = _ref.timeout,
-          positioner = _ref.positioner,
-          clearSubItemsOnHover = _ref.clearSubItemsOnHover,
-          autoDeactivateItems = _ref.autoDeactivateItems,
-          context = _objectWithoutProperties(_ref, ["target", "targetKey", "toggle", "autoActivate", "openOnHover", "delay", "closeOnSelect", "closeOnBlur", "timeout", "positioner", "clearSubItemsOnHover", "autoDeactivateItems"]);
+    var target = _ref.target,
+        targetKey = _ref.targetKey,
+        toggle = _ref.toggle,
+        autoActivate = _ref.autoActivate,
+        openOnHover = _ref.openOnHover,
+        delay = _ref.delay,
+        closeOnSelect = _ref.closeOnSelect,
+        closeOnBlur = _ref.closeOnBlur,
+        timeout = _ref.timeout,
+        positioner = _ref.positioner,
+        clearSubItemsOnHover = _ref.clearSubItemsOnHover,
+        autoDeactivateItems = _ref.autoDeactivateItems;
 
-      _classCallCheck(this, AbstractMenuItem);
+    _classCallCheck(this, AbstractMenuItem);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this, target));
-      /**
-       * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
-       * @type {null|String}
-       */
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(AbstractMenuItem).call(this, target));
+    /**
+     * During keyboard navigation, specifies the key that the user the click to target the menuitem directly.
+     * @type {null|String}
+     */
 
-      _initialize(_assertThisInitialized(_this));
+    _positioner.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-      _this.targetKey = targetKey;
-      /**
-       * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
-       * will toggle both on and off and none will cause the item to not be toggleable.
-       * @type {string}
-       */
+    _delay.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-      _this.toggle = toggle;
-      /**
-       * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
-       * When the parent is active, openOnHover is used instead.
-       * @type {string|Number|Boolean}
-       */
+    _toggle.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-      _this.autoActivate = autoActivate;
-      /**
-       * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
-       * See autoActivate for more details.
-       * @type {string}
-       */
+    _autoActivate.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-      _this.openOnHover = openOnHover;
-      /**
-       * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
-       * @type {string|Number|Boolean}
-       */
+    _openOnHover.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
 
-      _this.delay = delay;
-      /**
-       * If true the item will close when a descendent menuitem is selected.
-       * @type {boolean}
-       */
+    _this.targetKey = targetKey;
+    /**
+     * Controls how click behavior works.  on is for toggle on only when clicked, off is for toggle off only, both
+     * will toggle both on and off and none will cause the item to not be toggleable.
+     * @type {string}
+     */
 
-      _this.closeOnSelect = closeOnSelect;
-      /**
-       * If true the menuitem will close when the user clicks the page outside of the item.
-       * @type {boolean}
-       */
+    _this.toggle = toggle;
+    /**
+     * Controls if the menuitem will activating when the user mouses over it when it's parent is unactive or if the menuitem has no parent.
+     * When the parent is active, openOnHover is used instead.
+     * @type {string|Number|Boolean}
+     */
 
-      _this.closeOnBlur = closeOnBlur;
-      /**
-       * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
-       * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
-       * @type {boolean|Number}
-       */
+    _this.autoActivate = autoActivate;
+    /**
+     * Overrides autoActivate when the items parent menu is active.  If null autoActivate is still used.
+     * See autoActivate for more details.
+     * @type {string}
+     */
 
-      _this.timeout = timeout;
-      /**
-       * A function that is used to position the menuitem's submenu.
-       * @type {null|Function}
-       */
+    _this.openOnHover = openOnHover;
+    /**
+     * Adds adds a delay between a menuitem activating and the menuitem displaying it's submenu.
+     * @type {string|Number|Boolean}
+     */
 
-      _this.positioner = positioner;
-      /**
-       * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
-       * @type {boolean}
-       */
+    _this.delay = delay;
+    /**
+     * If true the item will close when a descendent menuitem is selected.
+     * @type {boolean}
+     */
 
-      _this.clearSubItemsOnHover = clearSubItemsOnHover;
-      /**
-       * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
-       * @type {boolean}
-       */
+    _this.closeOnSelect = closeOnSelect;
+    /**
+     * If true the menuitem will close when the user clicks the page outside of the item.
+     * @type {boolean}
+     */
 
-      _this.autoDeactivateItems = autoDeactivateItems;
-      _this.button = null;
-      return _this;
+    _this.closeOnBlur = closeOnBlur;
+    /**
+     * Controls the amount of time after the user leaves the menuitem that it will remain open.  Time is given in milliseconds.
+     * Negative values or false will cause the menuitem to never timeout.  True is interpreted as 0 milliseconds.
+     * @type {boolean|Number}
+     */
+
+    _this.timeout = timeout;
+    /**
+     * A function that is used to position the menuitem's submenu.
+     * @type {null|Function}
+     */
+
+    _this.positioner = positioner;
+    /**
+     * If true the menuitem will attempt to deactivate any descending menu-items when the user hover over the direct item.
+     * @type {boolean}
+     */
+
+    _this.clearSubItemsOnHover = clearSubItemsOnHover;
+    /**
+     * If true the menuitem will deactivate when the user leaves it if it doesn't have a submenu that it needs to keep open.
+     * @type {boolean}
+     */
+
+    _this.autoDeactivateItems = autoDeactivateItems;
+    _this.button = null;
+    return _this;
+  }
+
+  _createClass(AbstractMenuItem, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this2 = this;
+
+      if (!this._isTopicInit) {
+        _get(_getPrototypeOf(AbstractMenuItem.prototype), "registerTopics", this).call(this);
+
+        this.on('event.click', function (event) {
+          return _this2.onClick(event);
+        });
+        this.on('event.mouseover', function (event) {
+          return _this2.onMouseOver(event);
+        });
+        this.on('event.mouseout', function (event) {
+          return _this2.onMouseOut(event);
+        });
+        this.on('menuitem.select', function (event) {
+          return _this2.onSelect(event);
+        });
+      }
     }
+    /**
+     * Activates the item.
+     *
+     * @param show {boolean|number} - The number of milliseconds after the item activates that the submenu will display.
+     */
 
-    return AbstractMenuItem;
-  }(_MenuNode);
+  }, {
+    key: "activate",
+    value: function activate() {
+      var _this3 = this;
 
-  return {
-    F: AbstractMenuItem,
-    d: [{
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "toggle",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "autoActivate",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "openOnHover",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "delay",
-      value: function value() {
-        return false;
-      }
-    }, {
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_1__["inherit"]],
-      key: "positioner",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "registerTopics",
-      value: function registerTopics() {
-        var _this2 = this;
+      var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      if (this.isActive) return;
+      this.isActive = true;
+      this.clearTimer('activateItem');
 
-        if (!this._isTopicInit) {
-          _get(_getPrototypeOf(AbstractMenuItem.prototype), "registerTopics", this).call(this);
-
-          this.on('event.click', function (event) {
-            return _this2.onClick(event);
-          });
-          this.on('event.mouseover', function (event) {
-            return _this2.onMouseOver(event);
-          });
-          this.on('event.mouseout', function (event) {
-            return _this2.onMouseOut(event);
-          });
-          this.on('menuitem.select', function (event) {
-            return _this2.onSelect(event);
-          });
+      if (this.hasSubMenu()) {
+        if (show === true) {
+          this.showSubMenu();
+        } else if (typeof show === 'number' && show >= 0) {
+          this.startTimer('showTimer', function () {
+            _this3.showSubMenu();
+          }, show);
         }
-      }
-      /**
-       * Activates the item.
-       *
-       * @param show {boolean|number} - The number of milliseconds after the item activates that the submenu will display.
-       */
-
-    }, {
-      kind: "method",
-      key: "activate",
-      value: function activate() {
-        var _this3 = this;
-
-        var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-        if (this.isActive) return;
-        this.isActive = true;
-        this.clearTimer('activateItem');
-
-        if (this.hasSubMenu()) {
-          if (show === true) {
-            this.showSubMenu();
-          } else if (typeof show === 'number' && show >= 0) {
-            this.startTimer('showTimer', function () {
-              _this3.showSubMenu();
-            }, show);
-          }
-        } // Register document click handler
+      } // Register document click handler
 
 
-        if (this.closeOnBlur && !this._captureDocumentClick) {
-          this._captureDocumentClick = {
-            target: document,
-            onDocumentClick: function onDocumentClick(event) {
-              if (!_this3.contains(event.target)) {
-                _this3.deactivate();
-              }
+      if (this.closeOnBlur && !this._captureDocumentClick) {
+        this._captureDocumentClick = {
+          target: document,
+          onDocumentClick: function onDocumentClick(event) {
+            if (!_this3.contains(event.target)) {
+              _this3.deactivate();
             }
-          };
+          }
+        };
 
-          this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
-        }
-
-        var parent = this.parent;
-
-        if (parent && !parent.isActive) {
-          parent.activate();
-        }
-
-        this.dispatchTopic('menuitem.activate', this);
+        this._captureDocumentClick.target.addEventListener('click', this._captureDocumentClick.onDocumentClick);
       }
-      /**
-       * Deactivates the item.
-       */
 
-    }, {
-      kind: "method",
-      key: "deactivate",
-      value: function deactivate() {
-        if (!this.isActive) return;
-        this.isActive = false;
-        this.clearTimer('showTimer');
-        this.hideSubMenu(); // Remove document click handler that tracks user clicks outside of menu tree.
+      var parent = this.parent;
 
-        if (this._captureDocumentClick) {
-          this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
-
-          this._captureDocumentClick = null;
-        }
-
-        this.dispatchTopic('menuitem.deactivate', this);
+      if (parent && !parent.isActive) {
+        parent.activate();
       }
-      /**
-       * Triggers a select item event.
-       */
 
-    }, {
-      kind: "method",
-      key: "select",
-      value: function select() {
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      this.dispatchTopic('menuitem.activate', this);
+    }
+    /**
+     * Deactivates the item.
+     */
 
-        var topic = _objectSpread({
-          target: this
-        }, data);
+  }, {
+    key: "deactivate",
+    value: function deactivate() {
+      if (!this.isActive) return;
+      this.isActive = false;
+      this.clearTimer('showTimer');
+      this.hideSubMenu(); // Remove document click handler that tracks user clicks outside of menu tree.
 
-        this.publish('select', topic);
-        this.dispatchTopic('menuitem.select', topic);
-        this.element.dispatchEvent(new CustomEvent('menuitem.select', {
-          detail: topic,
-          bubbles: true
-        }));
+      if (this._captureDocumentClick) {
+        this._captureDocumentClick.target.removeEventListener('click', this._captureDocumentClick.onDocumentClick);
+
+        this._captureDocumentClick = null;
       }
-      /**
-       * Returns true if the menu node is a menu item.
-       *
-       * @returns {boolean}
-       */
 
-    }, {
-      kind: "method",
-      key: "isMenuItem",
-      value: function isMenuItem() {
-        return true;
-      } //------------------------------------------------------------------------------------------------------------------
-      // Action management
+      this.dispatchTopic('menuitem.deactivate', this);
+    }
+    /**
+     * Triggers a select item event.
+     */
 
-      /**
-       * Adds an action that will be called when the user selects the item.
-       *
-       * @param action {Function|String} - A callback to call when the action occurs.
-       * @returns {Function}
-       */
+  }, {
+    key: "select",
+    value: function select() {
+      var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    }, {
-      kind: "method",
-      key: "addAction",
-      value: function addAction(action) {
-        if (typeof action === 'string') {
-          var fn = function fn() {
-            window.location = action;
-          };
+      var topic = _objectSpread({
+        target: this
+      }, data);
 
-          this.on('select', fn);
-          return fn;
-        } else {
-          this.on('select', action);
-          return action;
-        }
-      } // noinspection JSUnusedGlobalSymbols
+      this.publish('select', topic);
+      this.dispatchTopic('menuitem.select', topic);
+      this.element.dispatchEvent(new CustomEvent('menuitem.select', {
+        detail: topic,
+        bubbles: true
+      }));
+    }
+    /**
+     * Returns true if the menu node is a menu item.
+     *
+     * @returns {boolean}
+     */
 
-      /**
-       * Removes an action.
-       * @param action
-       */
+  }, {
+    key: "isMenuItem",
+    value: function isMenuItem() {
+      return true;
+    } //------------------------------------------------------------------------------------------------------------------
+    // Action management
 
-    }, {
-      kind: "method",
-      key: "removeAction",
-      value: function removeAction(action) {
-        this.off('select', action);
-      } // noinspection JSUnusedGlobalSymbols
+    /**
+     * Adds an action that will be called when the user selects the item.
+     *
+     * @param action {Function|String} - A callback to call when the action occurs.
+     * @returns {Function}
+     */
 
-      /**
-       * Tests to see if the item has an action.
-       * @param action
-       * @returns {boolean}
-       */
+  }, {
+    key: "addAction",
+    value: function addAction(action) {
+      if (typeof action === 'string') {
+        var fn = function fn() {
+          window.location = action;
+        };
 
-    }, {
-      kind: "method",
-      key: "hasAction",
-      value: function hasAction(action) {
-        return this.hasEvent('select', action);
-      } // noinspection JSUnusedGlobalSymbols
+        this.on('select', fn);
+        return fn;
+      } else {
+        this.on('select', action);
+        return action;
+      }
+    } // noinspection JSUnusedGlobalSymbols
 
-      /**
-       * Removes all actions from the item.
-       */
+    /**
+     * Removes an action.
+     * @param action
+     */
 
-    }, {
-      kind: "method",
-      key: "clearActions",
-      value: function clearActions() {
-        this.off('select');
-      } //------------------------------------------------------------------------------------------------------------------
-      // Manage submenu
+  }, {
+    key: "removeAction",
+    value: function removeAction(action) {
+      this.off('select', action);
+    } // noinspection JSUnusedGlobalSymbols
 
-    }, {
-      kind: "method",
-      key: "showSubMenu",
-      value: function showSubMenu() {
+    /**
+     * Tests to see if the item has an action.
+     * @param action
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "hasAction",
+    value: function hasAction(action) {
+      return this.hasEvent('select', action);
+    } // noinspection JSUnusedGlobalSymbols
+
+    /**
+     * Removes all actions from the item.
+     */
+
+  }, {
+    key: "clearActions",
+    value: function clearActions() {
+      this.off('select');
+    } //------------------------------------------------------------------------------------------------------------------
+    // Manage submenu
+
+  }, {
+    key: "showSubMenu",
+    value: function showSubMenu() {
+      var submenu = this.submenu;
+
+      if (submenu) {
+        submenu.show();
+        submenu.position();
+      }
+    }
+  }, {
+    key: "hideSubMenu",
+    value: function hideSubMenu() {
+      if (this.submenu) {
+        this.submenu.deactivate();
+        this.submenu.hide();
+      }
+    }
+    /**
+     * Attaches a submenu to the menuitem.
+     *
+     * @param submenu
+     */
+
+  }, {
+    key: "attachSubMenu",
+    value: function attachSubMenu(submenu) {
+      return this.appendChildMenuNode(submenu);
+    }
+  }, {
+    key: "appendChildMenuNode",
+    value: function appendChildMenuNode(submenu) {
+      if (submenu.parent === this || this.submenu === submenu) return;
+
+      if (this.submenu) {
+        throw new Error("MenuItem can only have one submenu.");
+      }
+
+      if (submenu.parent) {
+        submenu.parent.detachSubMenu();
+      }
+
+      _get(_getPrototypeOf(AbstractMenuItem.prototype), "appendChildMenuNode", this).call(this, submenu);
+
+      this.element.classList.add('has-submenu');
+
+      if (!submenu.element.parentElement) {
+        submenu.appendTo(this.element);
+      }
+    }
+    /**
+     * Detaches the submenu from the item.
+     * @param remove {Boolean} If true the submenu will be removed from the dom.
+     * @returns {*} The detached submenu.
+     */
+
+  }, {
+    key: "detachSubMenu",
+    value: function detachSubMenu() {
+      var remove = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+      if (this.submenu) {
         var submenu = this.submenu;
-
-        if (submenu) {
-          submenu.show();
-          submenu.position();
-        }
-      }
-    }, {
-      kind: "method",
-      key: "hideSubMenu",
-      value: function hideSubMenu() {
-        if (this.submenu) {
-          this.submenu.deactivate();
-          this.submenu.hide();
-        }
-      }
-      /**
-       * Attaches a submenu to the menuitem.
-       *
-       * @param submenu
-       */
-
-    }, {
-      kind: "method",
-      key: "attachSubMenu",
-      value: function attachSubMenu(submenu) {
-        return this.appendChildMenuNode(submenu);
-      }
-    }, {
-      kind: "method",
-      key: "appendChildMenuNode",
-      value: function appendChildMenuNode(submenu) {
-        if (submenu.parent === this || this.submenu === submenu) return;
-
-        if (this.submenu) {
-          throw new Error("MenuItem can only have one submenu.");
-        }
-
-        if (submenu.parent) {
-          submenu.parent.detachSubMenu();
-        }
-
-        _get(_getPrototypeOf(AbstractMenuItem.prototype), "appendChildMenuNode", this).call(this, submenu);
-
-        this.element.classList.add('has-submenu');
-
-        if (!submenu.element.parentElement) {
-          submenu.appendTo(this.element);
-        }
-      }
-      /**
-       * Detaches the submenu from the item.
-       * @param remove {Boolean} If true the submenu will be removed from the dom.
-       * @returns {*} The detached submenu.
-       */
-
-    }, {
-      kind: "method",
-      key: "detachSubMenu",
-      value: function detachSubMenu() {
-        var remove = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-
-        if (this.submenu) {
-          var submenu = this.submenu;
-          this.removeChildMenuNode(submenu);
-          if (remove) submenu.element.parentElement.removeChild(submenu.element);
-          return submenu;
-        }
-      }
-    }, {
-      kind: "method",
-      key: "removeChildMenuNode",
-      value: function removeChildMenuNode(submenu) {
-        _get(_getPrototypeOf(AbstractMenuItem.prototype), "removeChildMenuNode", this).call(this, submenu);
-
-        if (!this.children.length) {
-          this.element.classList.remove('has-submenu');
-        }
-
+        this.removeChildMenuNode(submenu);
+        if (remove) submenu.element.parentElement.removeChild(submenu.element);
         return submenu;
       }
-      /**
-       * Returns true if the menu item has a submenu.
-       * @returns {boolean}
-       */
+    }
+  }, {
+    key: "removeChildMenuNode",
+    value: function removeChildMenuNode(submenu) {
+      _get(_getPrototypeOf(AbstractMenuItem.prototype), "removeChildMenuNode", this).call(this, submenu);
 
-    }, {
-      kind: "method",
-      key: "hasSubMenu",
-      value: function hasSubMenu() {
-        return !!this.submenu;
+      if (!this.children.length) {
+        this.element.classList.remove('has-submenu');
       }
-      /**
-       * Returns true if the item has a submenu and that submenu is visible.
-       * @returns {boolean}
-       */
 
-    }, {
-      kind: "method",
-      key: "isSubMenuVisible",
-      value: function isSubMenuVisible() {
-        return this.hasSubMenu() ? this.submenu.isVisible : false;
+      return submenu;
+    }
+    /**
+     * Returns true if the menu item has a submenu.
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "hasSubMenu",
+    value: function hasSubMenu() {
+      return !!this.submenu;
+    }
+    /**
+     * Returns true if the item has a submenu and that submenu is visible.
+     * @returns {boolean}
+     */
+
+  }, {
+    key: "isSubMenuVisible",
+    value: function isSubMenuVisible() {
+      return this.hasSubMenu() ? this.submenu.isVisible : false;
+    }
+  }, {
+    key: "clearActiveChild",
+    value: function clearActiveChild() {
+      if (this.submenu && this.submenu.clearActiveChild) {
+        this.submenu.clearActiveChild();
       }
-    }, {
-      kind: "method",
-      key: "clearActiveChild",
-      value: function clearActiveChild() {
-        if (this.submenu && this.submenu.clearActiveChild) {
-          this.submenu.clearActiveChild();
+    } //------------------------------------------------------------------------------------------------------------------
+    // Event handlers
+
+    /**
+     * Handles select events.
+     */
+
+  }, {
+    key: "onSelect",
+    value: function onSelect() {
+      if (this.closeOnSelect && this.isActive) {
+        this.deactivate();
+      }
+    }
+    /**
+     * Handles click events.
+     * @param event
+     */
+
+  }, {
+    key: "onClick",
+    value: function onClick(event) {
+      var isDisabled = this.getDisabled();
+
+      if (isDisabled) {
+        event.originalEvent.preventDefault();
+      }
+
+      if (event.target !== this) return;
+      var _isDefaultPrevented = false; // noinspection JSUnusedGlobalSymbols
+
+      this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
+        relatedTarget: event.target,
+        target: this,
+        preventDefault: function preventDefault() {
+          _isDefaultPrevented = true;
+        },
+        isDefaultPrevented: function isDefaultPrevented() {
+          return _isDefaultPrevented;
         }
-      } //------------------------------------------------------------------------------------------------------------------
-      // Event handlers
+      }));
+      var isActive = this.isActive,
+          hasSubMenu = this.hasSubMenu(),
+          isSubMenuVisible = this.isSubMenuVisible(),
+          toggle = this.toggle; // Recheck in case it was updated by an event.
 
-      /**
-       * Handles select events.
-       */
+      isDisabled = this.getDisabled();
 
-    }, {
-      kind: "method",
-      key: "onSelect",
-      value: function onSelect() {
-        if (this.closeOnSelect && this.isActive) {
+      if (!isDisabled && !_isDefaultPrevented) {
+        if (isActive && hasSubMenu && !isSubMenuVisible) {
+          this.showSubMenu();
+        } else if (!isActive) {
+          this.activate();
+        } else if (isActive && toggle && hasSubMenu) {
           this.deactivate();
         }
-      }
-      /**
-       * Handles click events.
-       * @param event
-       */
 
-    }, {
-      kind: "method",
-      key: "onClick",
-      value: function onClick(event) {
-        var isDisabled = this.getDisabled();
-
-        if (isDisabled) {
-          event.originalEvent.preventDefault();
-        }
-
-        if (event.target !== this) return;
-        var _isDefaultPrevented = false; // noinspection JSUnusedGlobalSymbols
-
-        this.dispatchTopic('menuitem.click', _objectSpread({}, event, {
-          relatedTarget: event.target,
-          target: this,
-          preventDefault: function preventDefault() {
-            _isDefaultPrevented = true;
-          },
-          isDefaultPrevented: function isDefaultPrevented() {
-            return _isDefaultPrevented;
-          }
-        }));
-        var isActive = this.isActive,
-            hasSubMenu = this.hasSubMenu(),
-            isSubMenuVisible = this.isSubMenuVisible(),
-            toggle = this.toggle; // Recheck in case it was updated by an event.
-
-        isDisabled = this.getDisabled();
-
-        if (!isDisabled && !_isDefaultPrevented) {
-          if (isActive && hasSubMenu && !isSubMenuVisible) {
-            this.showSubMenu();
-          } else if (!isActive) {
-            this.activate();
-          } else if (isActive && toggle && hasSubMenu) {
-            this.deactivate();
-          }
-
-          if (isActive && !hasSubMenu) {
-            this.select({
-              trigger: event
-            });
-          }
+        if (isActive && !hasSubMenu) {
+          this.select({
+            trigger: event
+          });
         }
       }
-      /**
-       * Handles on mouse over events.
-       * @param event
-       */
+    }
+    /**
+     * Handles on mouse over events.
+     * @param event
+     */
 
-    }, {
-      kind: "method",
-      key: "onMouseOver",
-      value: function onMouseOver(event) {
-        var _this4 = this;
+  }, {
+    key: "onMouseOver",
+    value: function onMouseOver(event) {
+      var _this4 = this;
 
-        this.clearTimer('timeout');
+      this.clearTimer('timeout');
 
-        if (event.target === this) {
-          // When the mouse moves on an item clear any active items in it's submenu.
-          if (this.hasSubMenu() && this.clearSubItemsOnHover) {
-            // this.submenu.clearActiveChild();
-            this.clearActiveChild();
-          }
-
-          if (this.element.contains(event.originalEvent.relatedTarget)) return;
-          var activate = this.parent && this.parent.isActive && this.openOnHover !== null ? this.openOnHover : this.autoActivate;
-
-          if (this.parent) {
-            this.parent.publish('mouse-enter-item', this, event);
-          }
-
-          if (!this.isActive && !this.isDisabled) {
-            if (activate === true) {
-              this.activate(typeof this.delay === 'boolean' ? !this.delay : this.delay);
-            } else if (typeof activate === 'number' && activate >= 0) {
-              this.startTimer('activateItem', function () {
-                if (!_this4.isDisabled) {
-                  _this4.activate(typeof _this4.delay === 'boolean' ? !_this4.delay : _this4.delay);
-                }
-              }, activate);
-            }
-          }
+      if (event.target === this) {
+        // When the mouse moves on an item clear any active items in it's submenu.
+        if (this.hasSubMenu() && this.clearSubItemsOnHover) {
+          // this.submenu.clearActiveChild();
+          this.clearActiveChild();
         }
-      }
-      /**
-       * Handles on mouse out events.
-       *
-       * @param event
-       */
-
-    }, {
-      kind: "method",
-      key: "onMouseOut",
-      value: function onMouseOut(event) {
-        var _this5 = this;
 
         if (this.element.contains(event.originalEvent.relatedTarget)) return;
-        this.clearTimer('activateItem');
+        var activate = this.parent && this.parent.isActive && this.openOnHover !== null ? this.openOnHover : this.autoActivate;
 
         if (this.parent) {
-          this.parent.publish('mouse-leave-item', this, event);
+          this.parent.publish('mouse-enter-item', this, event);
         }
 
-        if (this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
-          this.deactivate();
-        }
-
-        if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
-          this.startTimer('timeout', function () {
-            _this5.deactivate();
-          }, this.timeout);
-        }
-      } //------------------------------------------------------------------------------------------------------------------
-      // Getters and Setters
-
-    }, {
-      kind: "get",
-      key: "submenu",
-      value: function submenu() {
-        return this.children[0];
-      }
-    }, {
-      kind: "method",
-      key: "_navigate",
-      value: function _navigate(event) {
-        var _depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-        if (_depth === 0 && this.hasSubMenu()) {
-          return this.submenu._navigate(event, 0);
-        } else if (this.parent) {
-          return this.parent._navigate(event, _depth);
+        if (!this.isActive && !this.isDisabled) {
+          if (activate === true) {
+            this.activate(typeof this.delay === 'boolean' ? !this.delay : this.delay);
+          } else if (typeof activate === 'number' && activate >= 0) {
+            this.startTimer('activateItem', function () {
+              if (!_this4.isDisabled) {
+                _this4.activate(typeof _this4.delay === 'boolean' ? !_this4.delay : _this4.delay);
+              }
+            }, activate);
+          }
         }
       }
-    }, {
-      kind: "method",
-      "static": true,
-      key: "getAttributes",
-      value: function getAttributes(element) {
-        return _objectSpread({}, _get(_getPrototypeOf(AbstractMenuItem), "getAttributes", this).call(this, element), {}, MENU_ITEM_ATTRIBUTE_SCHEMA.deserialize(element.dataset));
+    }
+    /**
+     * Handles on mouse out events.
+     *
+     * @param event
+     */
+
+  }, {
+    key: "onMouseOut",
+    value: function onMouseOut(event) {
+      var _this5 = this;
+
+      if (this.element.contains(event.originalEvent.relatedTarget)) return;
+      this.clearTimer('activateItem');
+
+      if (this.parent) {
+        this.parent.publish('mouse-leave-item', this, event);
       }
-    }]
-  };
-}, _MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+      if (this.autoDeactivateItems === true && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
+        this.deactivate();
+      }
+
+      if (this.isActive && typeof this.timeout === 'number' && this.timeout >= 0) {
+        this.startTimer('timeout', function () {
+          _this5.deactivate();
+        }, this.timeout);
+      }
+    } //------------------------------------------------------------------------------------------------------------------
+    // Getters and Setters
+
+  }, {
+    key: "_navigate",
+    value: function _navigate(event) {
+      var _depth = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      if (_depth === 0 && this.hasSubMenu()) {
+        return this.submenu._navigate(event, 0);
+      } else if (this.parent) {
+        return this.parent._navigate(event, _depth);
+      }
+    }
+  }, {
+    key: "submenu",
+    get: function get() {
+      return this.children[0];
+    }
+  }, {
+    key: "positioner",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _positioner) === 'inherit' || _classPrivateFieldGet(this, _positioner) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.positioner : undefined;
+      } else if (_classPrivateFieldGet(this, _positioner) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.positioner;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _positioner);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _positioner, value);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "delay",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _delay) === 'inherit' || _classPrivateFieldGet(this, _delay) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.delay : undefined;
+      } else if (_classPrivateFieldGet(this, _delay) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.delay;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _delay);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _delay, value);
+    }
+  }, {
+    key: "openOnHover",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _openOnHover) === 'inherit' || _classPrivateFieldGet(this, _openOnHover) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.openOnHover : undefined;
+      } else if (_classPrivateFieldGet(this, _openOnHover) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.openOnHover;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _openOnHover);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _openOnHover, value);
+    }
+  }, {
+    key: "autoActivate",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _autoActivate) === 'inherit' || _classPrivateFieldGet(this, _autoActivate) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.autoActivate : undefined;
+      } else if (_classPrivateFieldGet(this, _autoActivate) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.autoActivate;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _autoActivate);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _autoActivate, value);
+    }
+  }, {
+    key: "toggle",
+    get: function get() {
+      if (_classPrivateFieldGet(this, _toggle) === 'inherit' || _classPrivateFieldGet(this, _toggle) === undefined) {
+        var parent = this.parent;
+        return parent ? parent.toggle : undefined;
+      } else if (_classPrivateFieldGet(this, _toggle) === 'root') {
+        var root = this.root;
+
+        if (root && root !== this) {
+          return root.toggle;
+        }
+      } else {
+        return _classPrivateFieldGet(this, _toggle);
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _toggle, value);
+    }
+  }], [{
+    key: "getAttributes",
+    value: function getAttributes(element) {
+      return _objectSpread({}, _get(_getPrototypeOf(AbstractMenuItem), "getAttributes", this).call(this, element), {}, MENU_ITEM_ATTRIBUTE_SCHEMA.deserialize(element.dataset));
+    }
+  }]);
+
+  return AbstractMenuItem;
+}(_MenuNode__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+var _positioner = new WeakMap();
+
+var _delay = new WeakMap();
+
+var _toggle = new WeakMap();
+
+var _autoActivate = new WeakMap();
+
+var _openOnHover = new WeakMap();
 
 var MenuItem =
 /*#__PURE__*/
@@ -8243,9 +8262,9 @@ function (_AbstractMenuItem) {
     var btn, content, submenu;
 
     if (target) {
-      target = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["selectElement"])(target);
-      btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, "[data-button]");
-      submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["findChild"])(target, "[data-menu]");
+      target = Object(_core_utility__WEBPACK_IMPORTED_MODULE_2__["selectElement"])(target);
+      btn = Object(_core_utility__WEBPACK_IMPORTED_MODULE_2__["findChild"])(target, "[data-button]");
+      submenu = Object(_core_utility__WEBPACK_IMPORTED_MODULE_2__["findChild"])(target, "[data-menu]");
 
       if (submenu) {
         submenu.parentElement.removeChild(submenu);
@@ -8258,13 +8277,13 @@ function (_AbstractMenuItem) {
           content.appendChild(target.firstChild);
         }
 
-        target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+        target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
         var textContainer = target.querySelector('[data-text]');
         textContainer.appendChild(content);
       }
     } else {
       target = document.createElement(nodeName);
-      target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_3__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
+      target.appendChild(Object(_core_utility__WEBPACK_IMPORTED_MODULE_2__["createFragment"])("\n                <a class=\"menuitem__button\" data-button>\n                    <span class=\"menuitem__check\"></span>\n                    <span class=\"menuitem__text\" data-text></span>\n                    <span class=\"menuitem__alt-text\" data-alt-text></span>\n                    <span class=\"menuitem__caret\"></span>\n                </a>"));
     }
 
     _this6 = _possibleConstructorReturn(this, _getPrototypeOf(MenuItem).call(this, {
@@ -8283,7 +8302,8 @@ function (_AbstractMenuItem) {
       href: href,
       nodeName: nodeName
     }));
-    _this6.textContainer = _this6.element.querySelector("[data-text]");
+    _this6.textContainer = _this6.element.querySelector("[data-text]"); // noinspection JSUnusedGlobalSymbols
+
     _this6.altTextContainer = _this6.element.querySelector("[data-alt-text]");
     _this6.button = _this6.element.querySelector("[data-button]");
 
@@ -8319,7 +8339,7 @@ function (_AbstractMenuItem) {
   }, {
     key: "constructSubMenu",
     value: function constructSubMenu(config) {
-      return new _Menu__WEBPACK_IMPORTED_MODULE_2__["default"](config);
+      return new _Menu__WEBPACK_IMPORTED_MODULE_1__["default"](config);
     }
   }, {
     key: "text",
@@ -8444,7 +8464,6 @@ function (_Publisher) {
 
     _classPrivateFieldSet(_assertThisInitialized(_this), _timers, {});
 
-    _this._props = {};
     _this._eventListeners = {};
     _this._keyboardNavigationEnabled = false;
     _this.nodeType = null;
@@ -9661,8 +9680,10 @@ function (_Publisher) {
       if (value !== this.isVisible) {
         if (value) {
           this.element.classList.remove('hidden');
+          this.element.classList.add('visible');
         } else {
           this.element.classList.add('hidden');
+          this.element.classList.remove('visible');
         }
       }
     }
@@ -9890,15 +9911,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Menu */ "./src/menu/Menu.js");
 /* harmony import */ var _positioners__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./positioners */ "./src/menu/positioners.js");
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utility */ "./src/menu/utility.js");
-/* harmony import */ var _decorators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./decorators */ "./src/menu/decorators.js");
-/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
-/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
-/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
+/* harmony import */ var _forms___WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../forms/ */ "./src/forms/index.js");
+/* harmony import */ var _core_serialize__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../core/serialize */ "./src/core/serialize/index.js");
+/* harmony import */ var _core_utility_dom__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../core/utility/dom */ "./src/core/utility/dom.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
@@ -9906,33 +9928,9 @@ function _objectWithoutProperties(source, excluded) { if (source == null) return
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
-function _decorate(decorators, factory, superClass, mixins) { var api = _getDecoratorsApi(); if (mixins) { for (var i = 0; i < mixins.length; i++) { api = mixins[i](api); } } var r = factory(function initialize(O) { api.initializeInstanceElements(O, decorated.elements); }, superClass); var decorated = api.decorateClass(_coalesceClassElements(r.d.map(_createElementDescriptor)), decorators); api.initializeClassElements(r.F, decorated.elements); return api.runClassFinishers(r.F, decorated.finishers); }
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-function _getDecoratorsApi() { _getDecoratorsApi = function _getDecoratorsApi() { return api; }; var api = { elementsDefinitionOrder: [["method"], ["field"]], initializeInstanceElements: function initializeInstanceElements(O, elements) { ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { if (element.kind === kind && element.placement === "own") { this.defineClassElement(O, element); } }, this); }, this); }, initializeClassElements: function initializeClassElements(F, elements) { var proto = F.prototype; ["method", "field"].forEach(function (kind) { elements.forEach(function (element) { var placement = element.placement; if (element.kind === kind && (placement === "static" || placement === "prototype")) { var receiver = placement === "static" ? F : proto; this.defineClassElement(receiver, element); } }, this); }, this); }, defineClassElement: function defineClassElement(receiver, element) { var descriptor = element.descriptor; if (element.kind === "field") { var initializer = element.initializer; descriptor = { enumerable: descriptor.enumerable, writable: descriptor.writable, configurable: descriptor.configurable, value: initializer === void 0 ? void 0 : initializer.call(receiver) }; } Object.defineProperty(receiver, element.key, descriptor); }, decorateClass: function decorateClass(elements, decorators) { var newElements = []; var finishers = []; var placements = { "static": [], prototype: [], own: [] }; elements.forEach(function (element) { this.addElementPlacement(element, placements); }, this); elements.forEach(function (element) { if (!_hasDecorators(element)) return newElements.push(element); var elementFinishersExtras = this.decorateElement(element, placements); newElements.push(elementFinishersExtras.element); newElements.push.apply(newElements, elementFinishersExtras.extras); finishers.push.apply(finishers, elementFinishersExtras.finishers); }, this); if (!decorators) { return { elements: newElements, finishers: finishers }; } var result = this.decorateConstructor(newElements, decorators); finishers.push.apply(finishers, result.finishers); result.finishers = finishers; return result; }, addElementPlacement: function addElementPlacement(element, placements, silent) { var keys = placements[element.placement]; if (!silent && keys.indexOf(element.key) !== -1) { throw new TypeError("Duplicated element (" + element.key + ")"); } keys.push(element.key); }, decorateElement: function decorateElement(element, placements) { var extras = []; var finishers = []; for (var decorators = element.decorators, i = decorators.length - 1; i >= 0; i--) { var keys = placements[element.placement]; keys.splice(keys.indexOf(element.key), 1); var elementObject = this.fromElementDescriptor(element); var elementFinisherExtras = this.toElementFinisherExtras((0, decorators[i])(elementObject) || elementObject); element = elementFinisherExtras.element; this.addElementPlacement(element, placements); if (elementFinisherExtras.finisher) { finishers.push(elementFinisherExtras.finisher); } var newExtras = elementFinisherExtras.extras; if (newExtras) { for (var j = 0; j < newExtras.length; j++) { this.addElementPlacement(newExtras[j], placements); } extras.push.apply(extras, newExtras); } } return { element: element, finishers: finishers, extras: extras }; }, decorateConstructor: function decorateConstructor(elements, decorators) { var finishers = []; for (var i = decorators.length - 1; i >= 0; i--) { var obj = this.fromClassDescriptor(elements); var elementsAndFinisher = this.toClassDescriptor((0, decorators[i])(obj) || obj); if (elementsAndFinisher.finisher !== undefined) { finishers.push(elementsAndFinisher.finisher); } if (elementsAndFinisher.elements !== undefined) { elements = elementsAndFinisher.elements; for (var j = 0; j < elements.length - 1; j++) { for (var k = j + 1; k < elements.length; k++) { if (elements[j].key === elements[k].key && elements[j].placement === elements[k].placement) { throw new TypeError("Duplicated element (" + elements[j].key + ")"); } } } } } return { elements: elements, finishers: finishers }; }, fromElementDescriptor: function fromElementDescriptor(element) { var obj = { kind: element.kind, key: element.key, placement: element.placement, descriptor: element.descriptor }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); if (element.kind === "field") obj.initializer = element.initializer; return obj; }, toElementDescriptors: function toElementDescriptors(elementObjects) { if (elementObjects === undefined) return; return _toArray(elementObjects).map(function (elementObject) { var element = this.toElementDescriptor(elementObject); this.disallowProperty(elementObject, "finisher", "An element descriptor"); this.disallowProperty(elementObject, "extras", "An element descriptor"); return element; }, this); }, toElementDescriptor: function toElementDescriptor(elementObject) { var kind = String(elementObject.kind); if (kind !== "method" && kind !== "field") { throw new TypeError('An element descriptor\'s .kind property must be either "method" or' + ' "field", but a decorator created an element descriptor with' + ' .kind "' + kind + '"'); } var key = _toPropertyKey(elementObject.key); var placement = String(elementObject.placement); if (placement !== "static" && placement !== "prototype" && placement !== "own") { throw new TypeError('An element descriptor\'s .placement property must be one of "static",' + ' "prototype" or "own", but a decorator created an element descriptor' + ' with .placement "' + placement + '"'); } var descriptor = elementObject.descriptor; this.disallowProperty(elementObject, "elements", "An element descriptor"); var element = { kind: kind, key: key, placement: placement, descriptor: Object.assign({}, descriptor) }; if (kind !== "field") { this.disallowProperty(elementObject, "initializer", "A method descriptor"); } else { this.disallowProperty(descriptor, "get", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "set", "The property descriptor of a field descriptor"); this.disallowProperty(descriptor, "value", "The property descriptor of a field descriptor"); element.initializer = elementObject.initializer; } return element; }, toElementFinisherExtras: function toElementFinisherExtras(elementObject) { var element = this.toElementDescriptor(elementObject); var finisher = _optionalCallableProperty(elementObject, "finisher"); var extras = this.toElementDescriptors(elementObject.extras); return { element: element, finisher: finisher, extras: extras }; }, fromClassDescriptor: function fromClassDescriptor(elements) { var obj = { kind: "class", elements: elements.map(this.fromElementDescriptor, this) }; var desc = { value: "Descriptor", configurable: true }; Object.defineProperty(obj, Symbol.toStringTag, desc); return obj; }, toClassDescriptor: function toClassDescriptor(obj) { var kind = String(obj.kind); if (kind !== "class") { throw new TypeError('A class descriptor\'s .kind property must be "class", but a decorator' + ' created a class descriptor with .kind "' + kind + '"'); } this.disallowProperty(obj, "key", "A class descriptor"); this.disallowProperty(obj, "placement", "A class descriptor"); this.disallowProperty(obj, "descriptor", "A class descriptor"); this.disallowProperty(obj, "initializer", "A class descriptor"); this.disallowProperty(obj, "extras", "A class descriptor"); var finisher = _optionalCallableProperty(obj, "finisher"); var elements = this.toElementDescriptors(obj.elements); return { elements: elements, finisher: finisher }; }, runClassFinishers: function runClassFinishers(constructor, finishers) { for (var i = 0; i < finishers.length; i++) { var newConstructor = (0, finishers[i])(constructor); if (newConstructor !== undefined) { if (typeof newConstructor !== "function") { throw new TypeError("Finishers must return a constructor."); } constructor = newConstructor; } } return constructor; }, disallowProperty: function disallowProperty(obj, name, objectType) { if (obj[name] !== undefined) { throw new TypeError(objectType + " can't have a ." + name + " property."); } } }; return api; }
-
-function _createElementDescriptor(def) { var key = _toPropertyKey(def.key); var descriptor; if (def.kind === "method") { descriptor = { value: def.value, writable: true, configurable: true, enumerable: false }; } else if (def.kind === "get") { descriptor = { get: def.value, configurable: true, enumerable: false }; } else if (def.kind === "set") { descriptor = { set: def.value, configurable: true, enumerable: false }; } else if (def.kind === "field") { descriptor = { configurable: true, writable: true, enumerable: true }; } var element = { kind: def.kind === "field" ? "field" : "method", key: key, placement: def["static"] ? "static" : def.kind === "field" ? "own" : "prototype", descriptor: descriptor }; if (def.decorators) element.decorators = def.decorators; if (def.kind === "field") element.initializer = def.value; return element; }
-
-function _coalesceGetterSetter(element, other) { if (element.descriptor.get !== undefined) { other.descriptor.get = element.descriptor.get; } else { other.descriptor.set = element.descriptor.set; } }
-
-function _coalesceClassElements(elements) { var newElements = []; var isSameElement = function isSameElement(other) { return other.kind === "method" && other.key === element.key && other.placement === element.placement; }; for (var i = 0; i < elements.length; i++) { var element = elements[i]; var other; if (element.kind === "method" && (other = newElements.find(isSameElement))) { if (_isDataDescriptor(element.descriptor) || _isDataDescriptor(other.descriptor)) { if (_hasDecorators(element) || _hasDecorators(other)) { throw new ReferenceError("Duplicated methods (" + element.key + ") can't be decorated."); } other.descriptor = element.descriptor; } else { if (_hasDecorators(element)) { if (_hasDecorators(other)) { throw new ReferenceError("Decorators can't be placed on different accessors with for " + "the same property (" + element.key + ")."); } other.decorators = element.decorators; } _coalesceGetterSetter(element, other); } } else { newElements.push(element); } } return newElements; }
-
-function _hasDecorators(element) { return element.decorators && element.decorators.length; }
-
-function _isDataDescriptor(desc) { return desc !== undefined && !(desc.value === undefined && desc.writable === undefined); }
-
-function _optionalCallableProperty(obj, name) { var value = obj[name]; if (value !== undefined && typeof value !== "function") { throw new TypeError("Expected '" + name + "' to be a function"); } return value; }
-
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
-
-function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-
-function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -9963,7 +9961,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
+ // import {inherit} from "./decorators";
 
 
 
@@ -10067,7 +10065,7 @@ function (_AbstractMenuItem) {
     }
 
     target.classList.add('select-option');
-    var fragment = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
+    var fragment = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])("\n            <a class=\"select-option__body\">\n                <span class=\"select-option__check\" data-check><i class=\"fas fa-check\"></i></span>\n                <span data-text class=\"select-option__text\"></span>\n                <span data-alt-text class=\"select-option__alt\"></span>\n            </a>\n        ");
     target.appendChild(fragment);
     target.setAttribute('aria-role', 'option');
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SelectOption).call(this, {
@@ -10174,6 +10172,33 @@ function (_AbstractMenuItem) {
         target: this,
         menu: this
       }, topicData));
+    }
+    /**
+     * Handles on mouse out events.
+     *
+     * @param event
+     */
+
+  }, {
+    key: "onMouseOut",
+    value: function onMouseOut(event) {
+      if (this.element.contains(event.originalEvent.relatedTarget)) return; // Do default action.
+
+      var r = _get(_getPrototypeOf(SelectOption.prototype), "onMouseOut", this).call(this, event); // If autoDeactiveItems is auto determine if the SelectOption should deactivate
+      // by checking parent allows multiSelect.
+      // noinspection JSIncompatibleTypesComparison
+
+
+      if (this.isActive && event.target === this && this.autoDeactivateItems === 'auto') {
+        var parent = this.parent;
+        var autoDeactivateItems = !!(parent && parent.multiSelect);
+
+        if (autoDeactivateItems && (!this.hasSubMenu() || !this.isSubMenuVisible())) {
+          this.deactivate();
+        }
+      }
+
+      return r;
     } // noinspection JSUnusedGlobalSymbols
 
   }, {
@@ -10268,7 +10293,8 @@ function (_AbstractMenuItem) {
     ,
     set: function set(value) {
       this.textContainer.innerText = (value + "").trim();
-    }
+    } // noinspection JSUnusedGlobalSymbols
+
     /**
      * Returns the options parent select-menu or null.
      * @returns {null|{isSelect}|MenuNode}
@@ -10288,19 +10314,6 @@ function (_AbstractMenuItem) {
       }
 
       return null;
-    }
-  }, {
-    key: "autoDeactivateItems",
-    get: function get() {
-      if (this._props.autoDeactivateItems === 'auto') {
-        var parent = this.parentSelect;
-        return !!(parent && parent.multiSelect);
-      } else {
-        return this._props.autoDeactivateItems;
-      }
-    },
-    set: function set(value) {
-      this._props.autoDeactivateItems = value;
     }
   }, {
     key: "isNavigable",
@@ -10338,491 +10351,497 @@ var FILTERS = {
  * Creates a menu that contains SelectOptions.
  */
 
-var SelectMenu = _decorate(null, function (_initialize, _AbstractMenu) {
-  var SelectMenu =
-  /*#__PURE__*/
-  function (_AbstractMenu2) {
-    _inherits(SelectMenu, _AbstractMenu2);
+var SelectMenu =
+/*#__PURE__*/
+function (_AbstractMenu) {
+  _inherits(SelectMenu, _AbstractMenu);
 
-    function SelectMenu() {
-      var _this3;
+  // @inherit multiSelect;
+  function SelectMenu() {
+    var _this3;
 
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-          target = _ref2.target,
-          _ref2$filter = _ref2.filter,
-          filter = _ref2$filter === void 0 ? null : _ref2$filter,
-          _ref2$placeholder = _ref2.placeholder,
-          placeholder = _ref2$placeholder === void 0 ? "No Items Found" : _ref2$placeholder,
-          _ref2$filterDelay = _ref2.filterDelay,
-          filterDelay = _ref2$filterDelay === void 0 ? 500 : _ref2$filterDelay,
-          _ref2$filterPlacehold = _ref2.filterPlaceholderText,
-          filterPlaceholderText = _ref2$filterPlacehold === void 0 ? "Search" : _ref2$filterPlacehold,
-          _ref2$toggle = _ref2.toggle,
-          toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
-          _ref2$enableShiftSele = _ref2.enableShiftSelect,
-          enableShiftSelect = _ref2$enableShiftSele === void 0 ? true : _ref2$enableShiftSele,
-          _ref2$enableCtrlToggl = _ref2.enableCtrlToggle,
-          enableCtrlToggle = _ref2$enableCtrlToggl === void 0 ? true : _ref2$enableCtrlToggl,
-          _ref2$clearOldSelecti = _ref2.clearOldSelection,
-          clearOldSelection = _ref2$clearOldSelecti === void 0 ? false : _ref2$clearOldSelecti,
-          context = _objectWithoutProperties(_ref2, ["target", "filter", "placeholder", "filterDelay", "filterPlaceholderText", "toggle", "enableShiftSelect", "enableCtrlToggle", "clearOldSelection"]);
+    var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        target = _ref2.target,
+        _ref2$filter = _ref2.filter,
+        filter = _ref2$filter === void 0 ? null : _ref2$filter,
+        _ref2$placeholder = _ref2.placeholder,
+        placeholder = _ref2$placeholder === void 0 ? "No Items Found" : _ref2$placeholder,
+        _ref2$filterDelay = _ref2.filterDelay,
+        filterDelay = _ref2$filterDelay === void 0 ? 500 : _ref2$filterDelay,
+        _ref2$filterPlacehold = _ref2.filterPlaceholderText,
+        filterPlaceholderText = _ref2$filterPlacehold === void 0 ? "Search" : _ref2$filterPlacehold,
+        _ref2$toggle = _ref2.toggle,
+        toggle = _ref2$toggle === void 0 ? false : _ref2$toggle,
+        _ref2$enableShiftSele = _ref2.enableShiftSelect,
+        enableShiftSelect = _ref2$enableShiftSele === void 0 ? true : _ref2$enableShiftSele,
+        _ref2$enableCtrlToggl = _ref2.enableCtrlToggle,
+        enableCtrlToggle = _ref2$enableCtrlToggl === void 0 ? true : _ref2$enableCtrlToggl,
+        _ref2$clearOldSelecti = _ref2.clearOldSelection,
+        clearOldSelection = _ref2$clearOldSelecti === void 0 ? false : _ref2$clearOldSelecti,
+        context = _objectWithoutProperties(_ref2, ["target", "filter", "placeholder", "filterDelay", "filterPlaceholderText", "toggle", "enableShiftSelect", "enableCtrlToggle", "clearOldSelection"]);
 
-      _classCallCheck(this, SelectMenu);
+    _classCallCheck(this, SelectMenu);
 
-      if (!target) {
-        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])("\n                <div class=\"select-menu\">\n                    <div class=\"select-menu__header\" data-header></div>\n                    <div class=\"select-menu__body menu__body\" data-body></div>\n                    <div class=\"select-menu__footer\" data-footer></div>\n                </div>\n            ").children[0];
-      } else {
-        target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
-      }
-
-      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, _objectSpread({
-        closeOnBlur: false,
-        timeout: false,
-        autoActivate: true,
-        openOnHover: false,
-        closeOnSelect: false,
-        delay: 0,
-        positioner: "inherit",
-        target: target
-      }, context)));
-
-      _initialize(_assertThisInitialized(_this3));
-
-      _this3.header = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-header]');
-      _this3.body = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-body]');
-      _this3.footer = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(_this3.element, '[data-footer]');
-      _this3.filterInput = null;
-
-      _this3.element.classList.add('select-menu');
-
-      _this3.multiSelect = 'inherit';
-      _this3.enableShiftSelect = enableShiftSelect;
-      _this3.enableCtrlToggle = enableCtrlToggle;
-      _this3.clearOldSelection = clearOldSelection;
-      _this3.placeholder = document.createElement('div');
-
-      _this3.placeholder.classList.add('placeholder');
-
-      _this3.placeholder.innerHTML = placeholder;
-      _this3.isVisible = false;
-
-      _this3.registerTopics();
-
-      _this3.parseDOM();
-
-      _this3.init();
-
-      if (filter) {
-        _this3.filterDelay = filterDelay;
-        _this3.placeholder = placeholder;
-
-        _this3._initFilter(filter, filterPlaceholderText);
-      }
-
-      return _this3;
+    if (!target) {
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])("\n                <div class=\"select-menu\">\n                    <div class=\"select-menu__header\" data-header></div>\n                    <div class=\"select-menu__body menu__body\" data-body></div>\n                    <div class=\"select-menu__footer\" data-footer></div>\n                </div>\n            ").children[0];
+    } else {
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["selectElement"])(target);
     }
 
-    return SelectMenu;
-  }(_AbstractMenu);
+    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(SelectMenu).call(this, _objectSpread({
+      closeOnBlur: false,
+      timeout: false,
+      autoActivate: true,
+      openOnHover: false,
+      closeOnSelect: false,
+      delay: 0,
+      positioner: "inherit",
+      target: target
+    }, context)));
 
-  return {
-    F: SelectMenu,
-    d: [{
-      kind: "field",
-      decorators: [_decorators__WEBPACK_IMPORTED_MODULE_4__["inherit"]],
-      key: "multiSelect",
+    _multiSelect.set(_assertThisInitialized(_this3), {
+      writable: true,
       value: void 0
-    }, {
-      kind: "method",
-      key: "registerTopics",
-      value: function registerTopics() {
-        var _this4 = this;
+    });
 
-        _get(_getPrototypeOf(SelectMenu.prototype), "registerTopics", this).call(this);
+    _this3.header = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(_this3.element, '[data-header]');
+    _this3.body = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(_this3.element, '[data-body]');
+    _this3.footer = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(_this3.element, '[data-footer]');
+    _this3.filterInput = null;
 
-        this.on('option.select', function (topic) {
-          if (!_this4.multiSelect) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+    _this3.element.classList.add('select-menu');
 
-            try {
-              for (var _iterator2 = _this4.selection[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var item = _step2.value;
+    _this3.multiSelect = 'inherit';
+    _this3.enableShiftSelect = enableShiftSelect;
+    _this3.enableCtrlToggle = enableCtrlToggle;
+    _this3.clearOldSelection = clearOldSelection;
+    _this3.placeholder = document.createElement('div');
 
-                if (item !== topic.target) {
-                  item.isSelected = false;
-                }
+    _this3.placeholder.classList.add('placeholder');
+
+    _this3.placeholder.innerHTML = placeholder;
+    _this3.isVisible = false;
+
+    _this3.registerTopics();
+
+    _this3.parseDOM();
+
+    _this3.init();
+
+    if (filter) {
+      _this3.filterDelay = filterDelay;
+      _this3.placeholder = placeholder;
+
+      _this3._initFilter(filter, filterPlaceholderText);
+    }
+
+    return _this3;
+  }
+
+  _createClass(SelectMenu, [{
+    key: "registerTopics",
+    value: function registerTopics() {
+      var _this4 = this;
+
+      _get(_getPrototypeOf(SelectMenu.prototype), "registerTopics", this).call(this);
+
+      this.on('option.select', function (topic) {
+        if (!_this4.multiSelect) {
+          var _iteratorNormalCompletion2 = true;
+          var _didIteratorError2 = false;
+          var _iteratorError2 = undefined;
+
+          try {
+            for (var _iterator2 = _this4.selection[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+              var item = _step2.value;
+
+              if (item !== topic.target) {
+                item.isSelected = false;
               }
-            } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
+            }
+          } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                _iterator2["return"]();
+              }
             } finally {
-              try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
-                }
-              } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
-                }
+              if (_didIteratorError2) {
+                throw _iteratorError2;
               }
             }
           }
+        }
 
-          _this4.dispatchTopic('selection.change', _this4);
+        _this4.dispatchTopic('selection.change', _this4);
+      });
+      this.on('option.deselect', function (topic) {
+        _this4.dispatchTopic('selection.change', {
+          target: _this4,
+          trigger: topic
         });
-        this.on('option.deselect', function (topic) {
-          _this4.dispatchTopic('selection.change', {
-            target: _this4,
-            trigger: topic
-          });
-        });
-        this.on('menuitem.click', function (topic) {
-          if (topic.target.parent !== _this4) return;
-          var event = topic.originalEvent;
+      });
+      this.on('menuitem.click', function (topic) {
+        if (topic.target.parent !== _this4) return;
+        var event = topic.originalEvent;
 
-          if (_this4._lastClick && event.shiftKey && _this4.enableShiftSelect) {
-            topic.preventDefault();
-            var children = _this4.children,
-                targetIndex = children.indexOf(topic.target),
-                lastIndex = children.indexOf(_this4._lastClick);
+        if (_this4._lastClick && event.shiftKey && _this4.enableShiftSelect) {
+          topic.preventDefault();
+          var children = _this4.children,
+              targetIndex = children.indexOf(topic.target),
+              lastIndex = children.indexOf(_this4._lastClick);
 
-            if (targetIndex !== -1 && lastIndex !== -1) {
-              var startIndex = Math.min(targetIndex, lastIndex),
-                  endingIndex = Math.max(targetIndex, lastIndex),
-                  change = false;
+          if (targetIndex !== -1 && lastIndex !== -1) {
+            var startIndex = Math.min(targetIndex, lastIndex),
+                endingIndex = Math.max(targetIndex, lastIndex),
+                change = false;
 
-              for (var i = 0, l = children.length; i < l; i++) {
-                var child = children[i];
+            for (var i = 0, l = children.length; i < l; i++) {
+              var child = children[i];
 
-                if (i >= startIndex && i <= endingIndex && !child.isDisabled) {
-                  if (!child.isSelected) {
-                    child.isSelected = true;
-                    change = true;
-                  }
-                } else if (child.isSelected) {
-                  child.isSelected = false;
+              if (i >= startIndex && i <= endingIndex && !child.isDisabled) {
+                if (!child.isSelected) {
+                  child.isSelected = true;
                   change = true;
                 }
-              }
-
-              if (change) {
-                _this4.dispatchTopic('selection.change', _this4);
+              } else if (child.isSelected) {
+                child.isSelected = false;
+                change = true;
               }
             }
-          } else if (event.ctrlKey && _this4.enableCtrlToggle) {
-            topic.preventDefault();
-            var changed;
 
-            if (topic.target.isSelected) {
-              event.target.isSelected = false;
-              changed = true;
-            } else {
-              event.target.isSelected = true;
-              changed = true;
-            }
-
-            _this4._lastClick = topic.target;
-
-            if (changed) {
+            if (change) {
               _this4.dispatchTopic('selection.change', _this4);
             }
-          } else if (_this4.clearOldSelection) {
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
+          }
+        } else if (event.ctrlKey && _this4.enableCtrlToggle) {
+          topic.preventDefault();
+          var changed;
 
-            try {
-              for (var _iterator3 = _this4.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var _child = _step3.value;
-
-                if (_child !== topic.target && _child.isSelected) {
-                  _child.isSelected = false;
-                }
-              }
-            } catch (err) {
-              _didIteratorError3 = true;
-              _iteratorError3 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-                  _iterator3["return"]();
-                }
-              } finally {
-                if (_didIteratorError3) {
-                  throw _iteratorError3;
-                }
-              }
-            }
-
-            _this4._lastClick = topic.target;
+          if (topic.target.isSelected) {
+            event.target.isSelected = false;
+            changed = true;
           } else {
-            _this4._lastClick = topic.target;
+            event.target.isSelected = true;
+            changed = true;
           }
-        });
-        this.on('menu.show', function () {
-          _this4.clearFilter();
 
-          if (!_this4.multiSelect && !_this4.activeChild) {
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
+          _this4._lastClick = topic.target;
 
+          if (changed) {
+            _this4.dispatchTopic('selection.change', _this4);
+          }
+        } else if (_this4.clearOldSelection) {
+          var _iteratorNormalCompletion3 = true;
+          var _didIteratorError3 = false;
+          var _iteratorError3 = undefined;
+
+          try {
+            for (var _iterator3 = _this4.children[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              var _child = _step3.value;
+
+              if (_child !== topic.target && _child.isSelected) {
+                _child.isSelected = false;
+              }
+            }
+          } catch (err) {
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
+          } finally {
             try {
-              for (var _iterator4 = _this4.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                var child = _step4.value;
-
-                if (child.isSelected && !child.isActive) {
-                  child.activate();
-                }
+              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+                _iterator3["return"]();
               }
-            } catch (err) {
-              _didIteratorError4 = true;
-              _iteratorError4 = err;
             } finally {
-              try {
-                if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-                  _iterator4["return"]();
-                }
-              } finally {
-                if (_didIteratorError4) {
-                  throw _iteratorError4;
-                }
+              if (_didIteratorError3) {
+                throw _iteratorError3;
               }
             }
           }
-        });
-      } // noinspection JSUnusedGlobalSymbols
 
-    }, {
-      kind: "method",
-      key: "isSelectMenu",
-      value: function isSelectMenu() {
-        return true;
-      }
-    }, {
-      kind: "get",
-      key: "selection",
-      value: function selection() {
-        var r = [];
-        var _iteratorNormalCompletion5 = true;
-        var _didIteratorError5 = false;
-        var _iteratorError5 = undefined;
-
-        try {
-          for (var _iterator5 = this.children[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var item = _step5.value;
-
-            if (item.isSelected) {
-              r.push(item);
-            }
-          }
-        } catch (err) {
-          _didIteratorError5 = true;
-          _iteratorError5 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-              _iterator5["return"]();
-            }
-          } finally {
-            if (_didIteratorError5) {
-              throw _iteratorError5;
-            }
-          }
-        }
-
-        return r;
-      }
-    }, {
-      kind: "get",
-      key: "selectedOptions",
-      value: function selectedOptions() {
-        return this.selection;
-      }
-    }, {
-      kind: "get",
-      key: "options",
-      value: function options() {
-        return this.children;
-      }
-    }, {
-      kind: "method",
-      key: "filter",
-      value: function filter(fn) {
-        if (fn === null) {
-          return this.clearFilter();
-        }
-
-        this.element.classList.add('items-filtered');
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
-
-        try {
-          for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var option = _step6.value;
-            option.isFiltered = fn(option);
-          }
-        } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-              _iterator6["return"]();
-            }
-          } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
-            }
-          }
-        }
-
-        if (this.placeholder) {
-          if (this.getFilteredItems().length < this.options.length) {
-            if (this.placeholder.parentElement) {
-              this.placeholder.parentElement.removeChild(this.placeholder);
-            }
-          } else {
-            var container = this.element.querySelector('.select-menu__body') || this.element;
-            container.appendChild(this.placeholder);
-          }
-        }
-      }
-    }, {
-      kind: "method",
-      key: "clearFilter",
-      value: function clearFilter() {
-        var _iteratorNormalCompletion7 = true;
-        var _didIteratorError7 = false;
-        var _iteratorError7 = undefined;
-
-        try {
-          for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var option = _step7.value;
-            option.isFiltered = false;
-          }
-        } catch (err) {
-          _didIteratorError7 = true;
-          _iteratorError7 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
-              _iterator7["return"]();
-            }
-          } finally {
-            if (_didIteratorError7) {
-              throw _iteratorError7;
-            }
-          }
-        }
-
-        if (this.placeholder && this.placeholder.parentElement && this.getFilteredItems().length < this.options.length) {
-          this.placeholder.parentElement.removeChild(this.placeholder);
-        }
-
-        if (this.filterInput) {
-          this.filterInput.value = "";
-        }
-
-        this.element.classList.remove('items-filtered');
-      }
-    }, {
-      kind: "method",
-      key: "getFilteredItems",
-      value: function getFilteredItems() {
-        var r = [];
-        var _iteratorNormalCompletion8 = true;
-        var _didIteratorError8 = false;
-        var _iteratorError8 = undefined;
-
-        try {
-          for (var _iterator8 = this.options[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-            var option = _step8.value;
-
-            if (option.isFiltered) {
-              r.push(option);
-            }
-          }
-        } catch (err) {
-          _didIteratorError8 = true;
-          _iteratorError8 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
-              _iterator8["return"]();
-            }
-          } finally {
-            if (_didIteratorError8) {
-              throw _iteratorError8;
-            }
-          }
-        }
-
-        return r;
-      }
-    }, {
-      kind: "method",
-      key: "_initFilter",
-      value: function _initFilter(fn, filterPlaceholderText) {
-        var _this5 = this;
-
-        // let filterInput = this.element.querySelectorAll('[data-filter]');
-        var filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(function (node) {
-          return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(node) === _this5;
-        });
-
-        if (!filterInput) {
-          this.filterInput = document.createElement('input');
-          this.filterInput.type = 'text';
-          this.filterInput.placeholder = filterPlaceholderText || "";
-          this.filterInput.setAttribute('data-filter', "");
-          var filterContainer = document.createElement('div');
-          filterContainer.className = "select-menu__filter";
-          filterContainer.appendChild(this.filterInput);
-          var container = this.header || this.element;
-          container.insertBefore(filterContainer, container.firstChild);
+          _this4._lastClick = topic.target;
         } else {
-          this.filterInput = filterInput;
+          _this4._lastClick = topic.target;
         }
+      });
+      this.on('menu.show', function () {
+        _this4.clearFilter();
 
-        var _timer = null;
-        this.element.addEventListener('input', function (event) {
-          if (event.target.hasAttribute('data-filter') && Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(event.target) === _this5) {
-            if (_timer) {
-              clearTimeout(_timer);
-              _timer = null;
+        if (!_this4.multiSelect && !_this4.activeChild) {
+          var _iteratorNormalCompletion4 = true;
+          var _didIteratorError4 = false;
+          var _iteratorError4 = undefined;
+
+          try {
+            for (var _iterator4 = _this4.children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+              var child = _step4.value;
+
+              if (child.isSelected && !child.isActive) {
+                child.activate();
+              }
             }
-
-            _timer = setTimeout(function () {
-              _timer = null;
-
-              _this5.filter(fn(_this5.filterInput.value));
-            }, _this5.filterDelay);
+          } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+                _iterator4["return"]();
+              }
+            } finally {
+              if (_didIteratorError4) {
+                throw _iteratorError4;
+              }
+            }
           }
-        });
+        }
+      });
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "isSelectMenu",
+    value: function isSelectMenu() {
+      return true;
+    }
+  }, {
+    key: "filter",
+    value: function filter(fn) {
+      if (fn === null) {
+        return this.clearFilter();
       }
-    }, {
-      kind: "method",
-      key: "constructMenuItem",
-      value: function constructMenuItem(config) {
-        return new SelectOption(config);
+
+      this.element.classList.add('items-filtered');
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
+
+      try {
+        for (var _iterator5 = this.options[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var option = _step5.value;
+          option.isFiltered = fn(option);
+        }
+      } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+            _iterator5["return"]();
+          }
+        } finally {
+          if (_didIteratorError5) {
+            throw _iteratorError5;
+          }
+        }
       }
-    }, {
-      kind: "method",
-      key: "constructSubMenu",
-      value: function constructSubMenu(config) {
-        return new SelectMenu(config);
+
+      if (this.placeholder) {
+        if (this.getFilteredItems().length < this.options.length) {
+          if (this.placeholder.parentElement) {
+            this.placeholder.parentElement.removeChild(this.placeholder);
+          }
+        } else {
+          var container = this.element.querySelector('.select-menu__body') || this.element;
+          container.appendChild(this.placeholder);
+        }
       }
-    }]
-  };
-}, _Menu__WEBPACK_IMPORTED_MODULE_1__["AbstractMenu"]);
+    }
+  }, {
+    key: "clearFilter",
+    value: function clearFilter() {
+      var _iteratorNormalCompletion6 = true;
+      var _didIteratorError6 = false;
+      var _iteratorError6 = undefined;
+
+      try {
+        for (var _iterator6 = this.options[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+          var option = _step6.value;
+          option.isFiltered = false;
+        }
+      } catch (err) {
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
+            _iterator6["return"]();
+          }
+        } finally {
+          if (_didIteratorError6) {
+            throw _iteratorError6;
+          }
+        }
+      }
+
+      if (this.placeholder && this.placeholder.parentElement && this.getFilteredItems().length < this.options.length) {
+        this.placeholder.parentElement.removeChild(this.placeholder);
+      }
+
+      if (this.filterInput) {
+        this.filterInput.value = "";
+      }
+
+      this.element.classList.remove('items-filtered');
+    }
+  }, {
+    key: "getFilteredItems",
+    value: function getFilteredItems() {
+      var r = [];
+      var _iteratorNormalCompletion7 = true;
+      var _didIteratorError7 = false;
+      var _iteratorError7 = undefined;
+
+      try {
+        for (var _iterator7 = this.options[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+          var option = _step7.value;
+
+          if (option.isFiltered) {
+            r.push(option);
+          }
+        }
+      } catch (err) {
+        _didIteratorError7 = true;
+        _iteratorError7 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion7 && _iterator7["return"] != null) {
+            _iterator7["return"]();
+          }
+        } finally {
+          if (_didIteratorError7) {
+            throw _iteratorError7;
+          }
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "_initFilter",
+    value: function _initFilter(fn, filterPlaceholderText) {
+      var _this5 = this;
+
+      // let filterInput = this.element.querySelectorAll('[data-filter]');
+      var filterInput = Array.prototype.slice.call(document.querySelectorAll('[data-filter]')).find(function (node) {
+        return Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(node) === _this5;
+      });
+
+      if (!filterInput) {
+        this.filterInput = document.createElement('input');
+        this.filterInput.type = 'text';
+        this.filterInput.placeholder = filterPlaceholderText || "";
+        this.filterInput.setAttribute('data-filter', "");
+        var filterContainer = document.createElement('div');
+        filterContainer.className = "select-menu__filter";
+        filterContainer.appendChild(this.filterInput);
+        var container = this.header || this.element;
+        container.insertBefore(filterContainer, container.firstChild);
+      } else {
+        this.filterInput = filterInput;
+      }
+
+      var _timer = null;
+      this.element.addEventListener('input', function (event) {
+        if (event.target.hasAttribute('data-filter') && Object(_utility__WEBPACK_IMPORTED_MODULE_3__["getClosestMenuByElement"])(event.target) === _this5) {
+          if (_timer) {
+            clearTimeout(_timer);
+            _timer = null;
+          }
+
+          _timer = setTimeout(function () {
+            _timer = null;
+
+            _this5.filter(fn(_this5.filterInput.value));
+          }, _this5.filterDelay);
+        }
+      });
+    }
+  }, {
+    key: "constructMenuItem",
+    value: function constructMenuItem(config) {
+      return new SelectOption(config);
+    }
+  }, {
+    key: "constructSubMenu",
+    value: function constructSubMenu(config) {
+      return new SelectMenu(config);
+    }
+  }, {
+    key: "selection",
+    get: function get() {
+      var r = [];
+      var _iteratorNormalCompletion8 = true;
+      var _didIteratorError8 = false;
+      var _iteratorError8 = undefined;
+
+      try {
+        for (var _iterator8 = this.children[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+          var item = _step8.value;
+
+          if (item.isSelected) {
+            r.push(item);
+          }
+        }
+      } catch (err) {
+        _didIteratorError8 = true;
+        _iteratorError8 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion8 && _iterator8["return"] != null) {
+            _iterator8["return"]();
+          }
+        } finally {
+          if (_didIteratorError8) {
+            throw _iteratorError8;
+          }
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "selectedOptions",
+    get: function get() {
+      return this.selection;
+    }
+  }, {
+    key: "options",
+    get: function get() {
+      return this.children;
+    }
+  }, {
+    key: "multiSelect",
+    get: function get() {
+      var value = _classPrivateFieldGet(this, _multiSelect);
+
+      if (value === 'inherit' || value === undefined) {
+        var parent = this.parent;
+        return parent ? parent.multiSelect : undefined;
+      } else if (value === 'root') {
+        var root = this.root;
+
+        if (this !== root) {
+          return root.multiSelect;
+        }
+      } else {
+        return value;
+      }
+    },
+    set: function set(value) {
+      _classPrivateFieldSet(this, _multiSelect, value);
+    }
+  }]);
+
+  return SelectMenu;
+}(_Menu__WEBPACK_IMPORTED_MODULE_1__["AbstractMenu"]);
 /**
  * @implements FormWidgetBase
  * @abstract
  */
+
+var _multiSelect = new WeakMap();
 
 var AbstractSelect =
 /*#__PURE__*/
@@ -10850,7 +10869,7 @@ function (_AbstractMenuItem2) {
       _this6.widget.appendTo(_this6.element);
     }
 
-    var submenu = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-menu]");
+    var submenu = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(target, "[data-menu]");
 
     if (submenu) {
       submenu.parentElement.removeChild(submenu);
@@ -11099,11 +11118,11 @@ function (_AbstractMenuItem2) {
 
   return AbstractSelect;
 }(_MenuItem__WEBPACK_IMPORTED_MODULE_0__["AbstractMenuItem"]);
-var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["AttributeSchema"]({
-  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
-  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
-  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP),
-  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_6__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_6__["Attribute"].DROP)
+var RICH_SELECT_SCHEMA = new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["AttributeSchema"]({
+  multiple: new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Bool"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP),
+  maxItems: new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Integer"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP),
+  name: new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP),
+  placeholder: new _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"](_core_serialize__WEBPACK_IMPORTED_MODULE_5__["Str"], _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP, _core_serialize__WEBPACK_IMPORTED_MODULE_5__["Attribute"].DROP)
 });
 var RichSelect =
 /*#__PURE__*/
@@ -11131,13 +11150,13 @@ function (_AbstractSelect) {
 
     _classCallCheck(this, RichSelect);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_4__["MultiHiddenInputWidget"]();
     var TEMPLATE = "\n        <div class=\"select-button\">\n            <input type=\"text\" class=\"select-button__input\" data-text />\n            <span class=\"select-button__caret\"><i class=\"fas fa-caret-down\"></i></span>\n        </div>\n        ";
     var textbox,
         children = [];
 
     if (target) {
-      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["selectElement"])(target);
 
       if (target.nodeName === 'INPUT') {
         textbox = target;
@@ -11151,15 +11170,15 @@ function (_AbstractSelect) {
           }
         }
 
-        var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-button]");
+        var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(target, "[data-button]");
 
         if (!button) {
-          target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+          target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])(TEMPLATE));
         }
       }
     } else {
       target = document.createElement('div');
-      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])(TEMPLATE));
     }
 
     _this8 = _possibleConstructorReturn(this, _getPrototypeOf(RichSelect).call(this, {
@@ -11345,12 +11364,12 @@ function (_AbstractSelect2) {
 
     _classCallCheck(this, MultiComboBox);
 
-    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_5__["MultiHiddenInputWidget"]();
+    widget = widget || new _forms___WEBPACK_IMPORTED_MODULE_4__["MultiHiddenInputWidget"]();
     var TEMPLATE = "\n            <div class=\"multi-combo-box__button\" data-body>\n                <div contenteditable=\"true\" class=\"multi-combo-box__input\" data-text />\n            </div>\n        ";
     var children = [];
 
     if (target) {
-      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["selectElement"])(target);
+      target = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["selectElement"])(target);
 
       for (var _i3 = 0, _arr2 = _toConsumableArray(target.children); _i3 < _arr2.length; _i3++) {
         var child = _arr2[_i3];
@@ -11361,14 +11380,14 @@ function (_AbstractSelect2) {
         }
       }
 
-      var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["findChild"])(target, "[data-button]");
+      var button = Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["findChild"])(target, "[data-button]");
 
       if (!button) {
-        target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+        target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])(TEMPLATE));
       }
     } else {
       target = document.createElement('div');
-      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_7__["createFragment"])(TEMPLATE));
+      target.appendChild(Object(_core_utility_dom__WEBPACK_IMPORTED_MODULE_6__["createFragment"])(TEMPLATE));
     }
 
     _this9 = _possibleConstructorReturn(this, _getPrototypeOf(MultiComboBox).call(this, {
@@ -11388,9 +11407,9 @@ function (_AbstractSelect2) {
     _this9.textbox = _this9.element.querySelector("[data-text]");
     _this9.body = _this9.element.querySelector("[data-body]");
 
-    _this9.element.classList.add('multi-combo-box');
+    _this9.element.classList.add('multi-combo-box'); // this.multiSelect = true;
 
-    _this9.multiSelect = true;
+
     _this9.optionToPillMap = new WeakMap();
     _this9.pilltoOptionMap = new WeakMap();
     _this9.submenu.multiSelect = true;
@@ -11812,7 +11831,7 @@ function (_RichSelect) {
 
         var f = false; // Activate the selected items.
 
-        if (!_this13.multiSelect) {
+        if (!_this13.submenu.multiSelect) {
           var _iteratorNormalCompletion15 = true;
           var _didIteratorError15 = false;
           var _iteratorError15 = undefined;
@@ -12087,109 +12106,6 @@ function (_AbstractMenu) {
 }(_Menu__WEBPACK_IMPORTED_MODULE_0__["AbstractMenu"]);
 
 
-
-/***/ }),
-
-/***/ "./src/menu/decorators.js":
-/*!********************************!*\
-  !*** ./src/menu/decorators.js ***!
-  \********************************/
-/*! exports provided: inherit, publishTargetEvent */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "inherit", function() { return inherit; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "publishTargetEvent", function() { return publishTargetEvent; });
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-/**
- * Decorates a property so that it can take special keywords to inherit it's value up the parent tree.
- *
- * If it's value is "inherit" or "root" special actions are taken.
- *
- * On "inherit" the getter will use this.parent[key] as it's value or return undefined.
- * On "root" the getter will use this.root[key] as it's value or return undefined.
- *
- * If the value is anything else is behaves like normal.
- *
- * Usage:
- *  @inherit myField = <default value>;
- *
- * @param target
- * @returns {{kind: string, placement: string, descriptor: {set(*): void, enumerable: boolean, get(): (*|*), configurable: boolean}, key: *}|undefined|*}
- */
-function inherit(target) {
-  var key = target.key,
-      initializer = target.initializer || function () {
-    return undefined;
-  };
-
-  return {
-    kind: 'method',
-    placement: 'prototype',
-    key: target.key,
-    descriptor: {
-      configurable: true,
-      enumerable: false,
-      get: function get() {
-        var value = this._props[key];
-
-        if (value === 'inherit' || value === undefined) {
-          value = this.parent ? this.parent[key] : undefined;
-        } else if (value === 'root') {
-          var root = this.root;
-          value = root ? root[key] : undefined;
-        } else {
-          return value;
-        }
-
-        if (value === undefined) value = initializer ? initializer() : undefined;
-        return value;
-      },
-      set: function set(value) {
-        this._props[key] = value;
-      }
-    }
-  };
-}
-function publishTargetEvent(topic) {
-  var bubble = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  return function (descriptor) {
-    var _descriptor$descripto = descriptor.descriptor,
-        value = _descriptor$descripto.value,
-        desc = _objectWithoutProperties(_descriptor$descripto, ["value"]);
-
-    function wrapper(event) {
-      if (this.getTargetNode(event.target) === this) {
-        if (bubble) {
-          this.dispatchTopic(topic, this, event);
-        } else {
-          this.publish(topic, this, event);
-        }
-
-        return value.call(this, event);
-      }
-    }
-
-    return {
-      placement: descriptor.placement,
-      key: descriptor.key,
-      kind: descriptor.kind,
-      descriptor: _objectSpread({
-        value: wrapper
-      }, desc)
-    };
-  };
-}
 
 /***/ }),
 

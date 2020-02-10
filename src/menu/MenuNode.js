@@ -447,8 +447,10 @@ export default class MenuNode extends Publisher {
         if(value !== this.isVisible) {
             if(value) {
                 this.element.classList.remove('hidden');
+                this.element.classList.add('visible');
             } else {
                 this.element.classList.add('hidden');
+                this.element.classList.remove('visible');
             }
         }
     }

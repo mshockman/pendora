@@ -197,6 +197,8 @@ export class AbstractMenu extends MenuNode {
     show() {
         if(!this.isVisible) {
             this.isVisible = true;
+            this.element.classList.add('show');
+            this.element.classList.remove('hide');
 
             this.dispatchTopic('menu.show', {target: this});
         }
@@ -205,6 +207,8 @@ export class AbstractMenu extends MenuNode {
     hide() {
         if(this.isVisible) {
             this.isVisible = false;
+            this.element.classList.add('hide');
+            this.element.classList.remove('show');
 
             this.dispatchTopic('menu.hide', {target: this});
         }
