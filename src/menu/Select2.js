@@ -2,7 +2,7 @@ import MenuItem, {AbstractMenuItem} from "./MenuItem";
 import Menu, {AbstractMenu} from "./Menu";
 import * as positioners from "./positioners";
 import {getClosestMenuByElement} from "./utility";
-import {inherit} from "./decorators";
+// import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
 import {createFragment, findChild, selectElement} from "../core/utility/dom";
@@ -172,6 +172,32 @@ export class SelectOption extends AbstractMenuItem {
         this.dispatchTopic('option.deselect', {target: this, menu: this, ...topicData});
     }
 
+    /**
+     * Handles on mouse out events.
+     *
+     * @param event
+     */
+    onMouseOut(event) {
+        if(this.element.contains(event.originalEvent.relatedTarget)) return;
+
+        // Do default action.
+        let r = super.onMouseOut(event);
+
+        // If autoDeactiveItems is auto determine if the SelectOption should deactivate
+        // by checking parent allows multiSelect.
+        // noinspection JSIncompatibleTypesComparison
+        if(this.isActive && event.target === this && this.autoDeactivateItems === 'auto') {
+            let parent = this.parent;
+            let autoDeactivateItems = !!(parent && parent.multiSelect);
+
+            if(autoDeactivateItems && (!this.hasSubMenu() || !this.isSubMenuVisible())) {
+                this.deactivate();
+            }
+        }
+
+        return r;
+    }
+
     // noinspection JSUnusedGlobalSymbols
     isSelectMenu() {
         return true;
@@ -249,6 +275,7 @@ export class SelectOption extends AbstractMenuItem {
         this.textContainer.innerText = (value+"").trim();
     }
 
+    // noinspection JSUnusedGlobalSymbols
     /**
      * Returns the options parent select-menu or null.
      * @returns {null|{isSelect}|MenuNode}
@@ -265,19 +292,6 @@ export class SelectOption extends AbstractMenuItem {
         }
 
         return null;
-    }
-
-    get autoDeactivateItems() {
-        if(this._props.autoDeactivateItems === 'auto') {
-            let parent = this.parentSelect;
-            return !!(parent && parent.multiSelect);
-        } else {
-            return this._props.autoDeactivateItems;
-        }
-    }
-
-    set autoDeactivateItems(value) {
-        this._props.autoDeactivateItems = value;
     }
 
     get isNavigable() {
@@ -326,7 +340,8 @@ export const FILTERS = {
  * Creates a menu that contains SelectOptions.
  */
 export class SelectMenu extends AbstractMenu {
-    @inherit multiSelect;
+    // @inherit multiSelect;
+    #multiSelect;
 
     constructor({
                 target, filter=null, placeholder="No Items Found", filterDelay=500,
@@ -605,6 +620,27 @@ export class SelectMenu extends AbstractMenu {
 
     constructSubMenu(config) {
         return new SelectMenu(config);
+    }
+
+    get multiSelect() {
+        let value = this.#multiSelect;
+
+        if(value === 'inherit' || value === undefined) {
+            let parent = this.parent;
+            return parent ? parent.multiSelect : undefined;
+        } else if(value === 'root') {
+            let root = this.root;
+
+            if(this !== root) {
+                return root.multiSelect;
+            }
+        } else {
+            return value;
+        }
+    }
+
+    set multiSelect(value) {
+        this.#multiSelect = value;
     }
 }
 
@@ -1037,7 +1073,7 @@ export class MultiComboBox extends AbstractSelect {
         this.body = this.element.querySelector("[data-body]");
         this.element.classList.add('multi-combo-box');
 
-        this.multiSelect = true;
+        // this.multiSelect = true;
 
         this.optionToPillMap = new WeakMap();
         this.pilltoOptionMap = new WeakMap();
@@ -1344,7 +1380,7 @@ export class ComboBox extends RichSelect {
             let f = false;
 
             // Activate the selected items.
-            if (!this.multiSelect) {
+            if (!this.submenu.multiSelect) {
                 for (let option of this.submenu.options) {
                     if (!option.isDisabled && !option.isFiltered && option.isSelected) {
                         option.activate();

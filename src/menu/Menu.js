@@ -1,6 +1,6 @@
 import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
-import {inherit} from './decorators';
+// import {inherit} from './decorators';
 import {Attribute, AttributeSchema, Integer, Bool, CompoundType} from "../core/serialize";
 import {modulo} from "../core/utility/math";
 import {createFragment} from "../core/utility/dom";
@@ -41,13 +41,16 @@ function _findAllNavigableChildren(children) {
  * @abstract
  */
 export class AbstractMenu extends MenuNode {
-    @inherit positioner;
-    @inherit delay = false;
+    // @inherit positioner;
+    // @inherit delay = false;
+
+    #positioner;
+    #delay;
 
     constructor({
             target,
             closeOnBlur=false, timeout=false, autoActivate=false, openOnHover=false, toggle=false,
-            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical", ...context}={}
+            closeOnSelect=true, delay="inherit", positioner="inherit", direction="vertical"}={}
             ) {
 
         super(target);
@@ -328,6 +331,45 @@ export class AbstractMenu extends MenuNode {
         }
 
         return null;
+    }
+
+    get positioner() {
+        if(this.#positioner === 'inherit' || this.#positioner === undefined) {
+            let parent = this.parent;
+            return parent ? parent.positioner : undefined;
+        } else if(this.#positioner === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.positioner;
+            }
+        } else {
+            return this.#positioner;
+        }
+    }
+
+    set positioner(value) {
+        this.#positioner = value;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    get delay() {
+        if(this.#delay === 'inherit' || this.#delay === undefined) {
+            let parent = this.parent;
+            return parent ? parent.delay : undefined;
+        } else if(this.#delay === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.delay;
+            }
+        } else {
+            return this.#delay;
+        }
+    }
+
+    set delay(value) {
+        this.#delay = value;
     }
 
     clearActiveChild() {
@@ -628,8 +670,6 @@ export class AbstractMenu extends MenuNode {
  * A component for rendering nestable list of selectable items.
  */
 export default class Menu extends AbstractMenu {
-    @inherit delay = 0;
-
     /**
      *
      * @param target {String|HTMLElement|Element}

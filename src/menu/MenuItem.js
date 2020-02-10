@@ -1,5 +1,5 @@
 import MenuNode from "./MenuNode";
-import {inherit} from "./decorators";
+// import {inherit} from "./decorators";
 import Menu from './Menu';
 import {findChild, createFragment, selectElement} from "../core/utility";
 import {AttributeSchema, Attribute, CompoundType, Bool, Integer, Str} from "../core/serialize";
@@ -26,14 +26,20 @@ export const MENU_ITEM_ATTRIBUTE_SCHEMA = new AttributeSchema({
  * @abstract
  */
 export class AbstractMenuItem extends MenuNode {
-    @inherit toggle;
-    @inherit autoActivate;
-    @inherit openOnHover;
-    @inherit delay = false;
-    @inherit positioner;
+    // @inherit toggle;
+    // @inherit autoActivate;
+    // @inherit openOnHover;
+    // @inherit delay = false;
+    // @inherit positioner;
+
+    #positioner;
+    #delay;
+    #toggle;
+    #autoActivate;
+    #openOnHover;
 
     constructor({target, targetKey, toggle, autoActivate, openOnHover, delay, closeOnSelect, closeOnBlur, timeout, positioner,
-                clearSubItemsOnHover, autoDeactivateItems, ...context}) {
+                clearSubItemsOnHover, autoDeactivateItems}) {
         super(target);
 
         /**
@@ -466,7 +472,7 @@ export class AbstractMenuItem extends MenuNode {
             this.parent.publish('mouse-leave-item', this, event);
         }
 
-        if(this.autoDeactivateItems && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
+        if(this.autoDeactivateItems === true && event.target === this && (!this.hasSubMenu() || !this.isSubMenuVisible()) && this.isActive) {
             this.deactivate();
         }
 
@@ -482,6 +488,102 @@ export class AbstractMenuItem extends MenuNode {
 
     get submenu() {
         return this.children[0];
+    }
+
+    get positioner() {
+        if(this.#positioner === 'inherit' || this.#positioner === undefined) {
+            let parent = this.parent;
+            return parent ? parent.positioner : undefined;
+        } else if(this.#positioner === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.positioner;
+            }
+        } else {
+            return this.#positioner;
+        }
+    }
+
+    set positioner(value) {
+        this.#positioner = value;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    get delay() {
+        if(this.#delay === 'inherit' || this.#delay === undefined) {
+            let parent = this.parent;
+            return parent ? parent.delay : undefined;
+        } else if(this.#delay === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.delay;
+            }
+        } else {
+            return this.#delay;
+        }
+    }
+
+    set delay(value) {
+        this.#delay = value;
+    }
+
+    get openOnHover() {
+        if(this.#openOnHover === 'inherit' || this.#openOnHover === undefined) {
+            let parent = this.parent;
+            return parent ? parent.openOnHover : undefined;
+        } else if(this.#openOnHover === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.openOnHover;
+            }
+        } else {
+            return this.#openOnHover;
+        }
+    }
+
+    set openOnHover(value) {
+        this.#openOnHover = value;
+    }
+
+    get autoActivate() {
+        if(this.#autoActivate === 'inherit' || this.#autoActivate === undefined) {
+            let parent = this.parent;
+            return parent ? parent.autoActivate : undefined;
+        } else if(this.#autoActivate === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.autoActivate;
+            }
+        } else {
+            return this.#autoActivate;
+        }
+    }
+
+    set autoActivate(value) {
+        this.#autoActivate = value;
+    }
+
+    get toggle() {
+        if(this.#toggle === 'inherit' || this.#toggle === undefined) {
+            let parent = this.parent;
+            return parent ? parent.toggle : undefined;
+        } else if(this.#toggle === 'root') {
+            let root = this.root;
+
+            if(root && root !== this) {
+                return root.toggle;
+            }
+        } else {
+            return this.#toggle;
+        }
+    }
+
+    set toggle(value) {
+        this.#toggle = value;
     }
 
     _navigate(event, _depth=0) {
@@ -567,6 +669,7 @@ export default class MenuItem extends AbstractMenuItem {
         });
 
         this.textContainer = this.element.querySelector("[data-text]");
+        // noinspection JSUnusedGlobalSymbols
         this.altTextContainer = this.element.querySelector("[data-alt-text]");
         this.button = this.element.querySelector("[data-button]");
         this.element.classList.add('menuitem');

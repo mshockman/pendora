@@ -22,7 +22,6 @@ export default class MenuNode extends Publisher {
         this.#children = [];
         this.#timers = {};
 
-        this._props = {};
         this._eventListeners = {};
         this._keyboardNavigationEnabled = false;
 
