@@ -47,8 +47,6 @@ export default class SlideMenu extends AbstractMenu {
         this.on("menu.show", event => {
             this.activate();
 
-            console.log(this.isActive);
-
             if(this.closeOnBlur) {
                 onDocumentClick = event => {
                     if(!this.element.contains(event.target)) {
@@ -79,14 +77,6 @@ export default class SlideMenu extends AbstractMenu {
             if(this.isVisible && dismiss && this.getTargetNode(dismiss) === this) {
                 this.hide();
             }
-        });
-
-        this.on('menu.deactivate', event => {
-            console.log('deactivate', this.element.className);
-        });
-
-        this.on('menu.activate', event => {
-            console.log('activate', this.element.className);
         });
     }
 
