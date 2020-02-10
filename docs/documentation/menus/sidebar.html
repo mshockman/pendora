@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SideBar</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles2.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body>
+
+<header class="navbar">
+    <a href="/" class="navbar__brand">Pendora</a>
+    <ul class="navbar-nav">
+        <li class="navbar__item"><a href="/documentation/">Documentation</a></li>
+        <li class="navbar__item"><a href="/examples/">Examples</a></li>
+        <li class="navbar__item">Github</li>
+        <li class="navbar__item">Download</li>
+    </ul>
+</header>
+
+<section class="sidebar main-sidebar">
+    <h3>UI Interactions</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/ui/draggable.html">Draggable</a></li>
+        <li><a href="#">Sortable</a></li>
+        <li><a href="#">Resizeable</a></li>
+        <li><a href="#">Animation</a></li>
+        <li><a href="#">Positioning</a></li>
+    </ul>
+
+    <h3>Overlays</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Overlay</a></li>
+        <li><a href="#">Modal</a></li>
+        <li><a href="#">Notification</a></li>
+        <li><a href="#">Tooltip</a></li>
+    </ul>
+
+    <h3>Layout</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Panes</a></li>
+        <li><a href="#">Tabs</a></li>
+    </ul>
+
+    <h3>Menus</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/menus/dropdown.html">Dropdown</a></li>
+        <li><a href="/documentation/menus/menubar.html">MenuBar</a></li>
+        <li><a href="/documentation/menus/sidebar.html">SideBar</a></li>
+        <li><a href="/documentation/menus/ContextMenu.html">ContextMenu</a></li>
+        <li><a href="/documentation/menus/slidemenu.html">SlideMenu</a></li>
+        <li><a href="/documentation/menus/multicombobox.html">MultiComboBox</a></li>
+        <li><a href="/documentation/menus/combobox.html">ComboBox</a></li>
+        <li><a href="/documentation/menus/richselect.html">RichSelect</a></li>
+    </ul>
+
+    <h3>Planned</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">List</a></li>
+        <li><a href="#">QueryBuilder</a></li>
+        <li><a href="#">DataGrid</a></li>
+        <li><a href="#">DataTable</a></li>
+        <li><a href="#">Paginator</a></li>
+        <li><a href="#">Hint</a></li>
+        <li><a href="#">Carousel</a></li>
+        <li><a href="#">GridView</a></li>
+        <li><a href="#">Accordian</a></li>
+        <li><a href="#">ScrollView</a></li>
+        <li><a href="#">FileMenu</a></li>
+        <li><a href="#">Windows</a></li>
+        <li><a href="#">Dialog</a></li>
+        <li><a href="#">Slider</a></li>
+        <li><a href="#">Progressbar</a></li>
+        <li><a href="#">ColorPicker</a></li>
+        <li><a href="#">DatePicker</a></li>
+        <li><a href="#">Selectable</a></li>
+        <li><a href="#">Loader</a></li>
+        <li><a href="#">CustomAttributeComponent</a></li>
+        <li><a href="#">ImageManager</a></li>
+        <li><a href="#">NotificationMenu</a></li>
+    </ul>
+</section>
+
+
+<style type="text/css">
+    .example-viewport {
+        background-color: #ffffff;
+        border: 1px solid #ccc;
+    }
+
+    #example-sidebar {
+        width: 20rem;
+        height: 20rem;
+    }
+</style>
+
+<article class="content-area">
+    <header>
+        <h1>SideBar</h1>
+        <p class="meta">Creates a vertically aligned list of menu-items.  Menu-items can contain submenus and can be nested.</p>
+    </header>
+
+    <h2>Overview</h2>
+
+    <p>
+        Creates a vertically aligned list of menu-items.  The most common way to initialize the sidebar is from the dom by using
+        the data-init="side-menubar" attribute.  A SideBar can contains submenu that can be nested to whatever depth is needed.
+        By default submenus are positioned to the right of their parent menuitem and flip direction one they reach the edge of the
+        defined container.
+    </p>
+    <h2>Example</h2>
+
+    <div class="example-viewport">
+        <ul class="side-menubar" id="example-sidebar" data-init="side-menubar" data-window-bind="testSideMenuBar">
+            <li class="menuitem" data-menuitem>
+                <a data-button>Root Item #1</a>
+                <ul class="menu hidden" data-menu>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #1</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="http://google.com">Google</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #2</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #3</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #4</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #5</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="menuitem" data-menuitem>
+                <a data-button>Root Item #2</a>
+                <ul class="menu hidden" data-menu>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #1</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #2</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #3</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #4</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #5</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="menuitem" data-menuitem>
+                <a data-button>Root Item #3</a>
+                <ul class="menu hidden" data-menu>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #1</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #2</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #3</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #4</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #5</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="menuitem" data-menuitem>
+                <a data-button>Root Item #4</a>
+                <ul class="menu hidden" data-menu>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #1</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #2</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #3</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #4</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #5</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="menuitem" data-menuitem>
+                <a data-button>Root Item #5</a>
+                <ul class="menu hidden" data-menu>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #1</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #2</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #3</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #4</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                    <li class="menuitem" data-menuitem>
+                        <a>Item #5</a>
+                        <ul class="menu hidden" data-menu>
+                            <li class="menuitem" data-menuitem><a href="#">Link #1</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #2</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #3</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #4</a></li>
+                            <li class="menuitem" data-menuitem><a href="#">Link #5</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+</pre></td><td class="code"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"side-menubar"</span> <span class="na">data-init=</span><span class="s">"side-menubar"</span> <span class="na">data-window-bind=</span><span class="s">"testSideMenuBar"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;a</span> <span class="na">data-button</span><span class="nt">&gt;</span>Root Item #1<span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #1<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"http://google.com"</span><span class="nt">&gt;</span>Google<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #2<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #3<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #4<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #5<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;a</span> <span class="na">data-button</span><span class="nt">&gt;</span>Root Item #2<span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #1<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #2<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #3<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #4<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #5<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;a</span> <span class="na">data-button</span><span class="nt">&gt;</span>Root Item #3<span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #1<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #2<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #3<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #4<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #5<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;a</span> <span class="na">data-button</span><span class="nt">&gt;</span>Root Item #4<span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #1<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #2<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #3<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #4<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #5<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;a</span> <span class="na">data-button</span><span class="nt">&gt;</span>Root Item #5<span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #1<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #2<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #3<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #4<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+            <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;a&gt;</span>Item #5<span class="nt">&lt;/a&gt;</span>
+                <span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #1<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #2<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #3<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #4<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                    <span class="nt">&lt;li</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"#"</span><span class="nt">&gt;</span>Link #5<span class="nt">&lt;/a&gt;&lt;/li&gt;</span>
+                <span class="nt">&lt;/ul&gt;</span>
+            <span class="nt">&lt;/li&gt;</span>
+        <span class="nt">&lt;/ul&gt;</span>
+    <span class="nt">&lt;/li&gt;</span>
+<span class="nt">&lt;/ul&gt;</span>
+</pre></td></tr></tbody></table></code></pre></figure>
+
+    <h2>Positioning</h2>
+
+    <h2>CSS3 Animations</h2>
+
+    <p>As the submenu is show / hidden it will add and remove several state classes.</p>
+    <p>The first state class is the <strong>visible</strong> css class.  This class is added to the submenu when it is visible.</p>
+    <p>The second state class is the <strong>hidden</strong> css class.  This class is added to the submenu when it is hidden.</p>
+    <p>The third state class is the <strong>show</strong> css class.  This class is added when the menu is displayed using the show() method.</p>
+    <p>The final state class is the <strong>hide</strong> css class.  This class is added when the menu is hidden using the hide() method.</p>
+    <p>
+        show and hide and intended to be targeted for css3 animations.  When an element only have the visible or hidden classes it should display without any animation.
+        So at the start of the page all dropdown menus should have the hidden class and not animations should run.  After the user interacts with them the first time
+        the show and hide classes will also be added when the state changes.  You should target .visible.show and .hidden.hide to apply css3 animations.
+    </p>
+
+    <h2>Usage</h2>
+    <h2>Via Data Attributes</h2>
+
+    <h2>Via JavasScript</h2>
+
+    <h2>Options</h2>
+    <h2>Styling</h2>
+    <h2>Events</h2>
+    <h2>Methods</h2>
+</article>
+
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+
+</body>
+</html>

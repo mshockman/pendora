@@ -10,6 +10,8 @@ let app = new Application({
     // 'menubar': () =>  import("./pages/menubar_example.js"),
     // 'menu_examples': () =>  import("./pages/menu_examples.js"),
     'menu_page_index': () =>  import("./pages/menus/page_index"),
+    'documentation_dropdown': () => import("./pages/documentation/dropdown"),
+    'test_draggable': () => import("./pages/documentation/test_draggable"),
 });
 
 

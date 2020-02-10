@@ -1,0 +1,51 @@
+
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  background-color: #fff;
+  box-shadow: 0 0 5px 0 #ccc;
+  font-size: 1.2rem;
+  line-height: 3rem;
+  padding: 0 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3rem;
+  z-index: 1000;
+
+  .navbar__brand {
+    padding: 0 0.5rem;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+
+.navbar-nav {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .navbar__item {
+    margin: 0;
+    padding: 0 0.5rem;
+  }
+}
+
+
+.sidebar {
+  box-shadow: 0 0 5px 0 #ccc;
+  width: 18rem;
+  background-color: #fff;
+  position: fixed;
+  left: 0;
+  top: 3rem;
+  bottom: 0;
+  overflow-y: auto;
+}

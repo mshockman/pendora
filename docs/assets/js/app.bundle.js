@@ -262,6 +262,12 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
   // 'menu_examples': () =>  import("./pages/menu_examples.js"),
   'menu_page_index': function menu_page_index() {
     return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./pages/menus/page_index */ "./jekyll/js/pages/menus/page_index.js"));
+  },
+  'documentation_dropdown': function documentation_dropdown() {
+    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./pages/documentation/dropdown */ "./jekyll/js/pages/documentation/dropdown.js"));
+  },
+  'test_draggable': function test_draggable() {
+    return __webpack_require__.e(/*! import() */ 2).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./jekyll/js/pages/documentation/test_draggable.js"));
   }
 });
 window.addEventListener('load',
@@ -12051,8 +12057,6 @@ function (_AbstractMenu) {
       this.on("menu.show", function (event) {
         _this2.activate();
 
-        console.log(_this2.isActive);
-
         if (_this2.closeOnBlur) {
           _onDocumentClick = function onDocumentClick(event) {
             if (!_this2.element.contains(event.target)) {
@@ -12082,12 +12086,6 @@ function (_AbstractMenu) {
         if (_this2.isVisible && dismiss && _this2.getTargetNode(dismiss) === _this2) {
           _this2.hide();
         }
-      });
-      this.on('menu.deactivate', function (event) {
-        console.log('deactivate', _this2.element.className);
-      });
-      this.on('menu.activate', function (event) {
-        console.log('activate', _this2.element.className);
       });
     }
   }, {

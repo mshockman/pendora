@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SideMenu</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body data-page="menu_page_index" data-page-arg="slidemenu">
+    <header id="header">
+        <nav>
+            <ul>
+                <li>Pendora</li>
+                <li>Examples</li>
+                <li>Download</li>
+                <li>Documentation</li>
+                <li class="mr-auto">Changelog</li>
+                <li><i class="fab fa-github"></i> Github</li>
+            </ul>
+        </nav>
+    </header>
+    <article id="splash">
+        <header>
+            <h2>SideMenu</h2>
+            <p>A horizontally aligned navigation menu with dropdown items.</p>
+        </header>
+    </article>
+    <main id="main">
+        <article id="content">
+            <style type="text/css">
+    .example-view .sidemenu {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 20rem;
+        background-color: #ffffff;
+    }
+
+    .example-view .sidemenu.hidden {
+        display: none;
+    }
+
+    .example-view .example-view__body {
+        height: 20rem;
+    }
+
+    .example-view .sidemenu__header {
+        padding: 0.5rem;
+        text-align: right;
+        border-bottom: 1px solid #999;
+    }
+
+    .example-view .sidemenu__body {
+        padding: 0.5rem 0;
+    }
+</style>
+
+
+<article class="example-view">
+    <header class="example-view__bar">
+        <a id="menu-button"><i class="fas fa-bars"></i></a> MenuBar
+    </header>
+    <section class="example-view__body">
+        <div class="sidemenu hidden" id="test-slide-menu">
+            <div class="sidemenu__header">
+                <a data-action="dismiss"><i class="fas fa-times"></i></a>
+            </div>
+            <div class="sidemenu__body">
+                <div class="menuitem">Item #1</div>
+                <div class="menuitem">Item #2</div>
+                <div class="menuitem">Item #3</div>
+                <div class="menuitem">Item #4</div>
+                <div class="menuitem">Item #5</div>
+            </div>
+        </div>
+    </section>
+</article>
+
+        </article>
+    </main>
+    <footer id="footer">
+
+    </footer>
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+</body>
+</html>

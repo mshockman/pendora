@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RichSelect</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles2.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body>
+
+<header class="navbar">
+    <a href="/" class="navbar__brand">Pendora</a>
+    <ul class="navbar-nav">
+        <li class="navbar__item"><a href="/documentation/">Documentation</a></li>
+        <li class="navbar__item"><a href="/examples/">Examples</a></li>
+        <li class="navbar__item">Github</li>
+        <li class="navbar__item">Download</li>
+    </ul>
+</header>
+
+<section class="sidebar main-sidebar">
+    <h3>UI Interactions</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/ui/draggable.html">Draggable</a></li>
+        <li><a href="#">Sortable</a></li>
+        <li><a href="#">Resizeable</a></li>
+        <li><a href="#">Animation</a></li>
+        <li><a href="#">Positioning</a></li>
+    </ul>
+
+    <h3>Overlays</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Overlay</a></li>
+        <li><a href="#">Modal</a></li>
+        <li><a href="#">Notification</a></li>
+        <li><a href="#">Tooltip</a></li>
+    </ul>
+
+    <h3>Layout</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Panes</a></li>
+        <li><a href="#">Tabs</a></li>
+    </ul>
+
+    <h3>Menus</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/menus/dropdown.html">Dropdown</a></li>
+        <li><a href="/documentation/menus/menubar.html">MenuBar</a></li>
+        <li><a href="/documentation/menus/sidebar.html">SideBar</a></li>
+        <li><a href="/documentation/menus/ContextMenu.html">ContextMenu</a></li>
+        <li><a href="/documentation/menus/slidemenu.html">SlideMenu</a></li>
+        <li><a href="/documentation/menus/multicombobox.html">MultiComboBox</a></li>
+        <li><a href="/documentation/menus/combobox.html">ComboBox</a></li>
+        <li><a href="/documentation/menus/richselect.html">RichSelect</a></li>
+    </ul>
+
+    <h3>Planned</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">List</a></li>
+        <li><a href="#">QueryBuilder</a></li>
+        <li><a href="#">DataGrid</a></li>
+        <li><a href="#">DataTable</a></li>
+        <li><a href="#">Paginator</a></li>
+        <li><a href="#">Hint</a></li>
+        <li><a href="#">Carousel</a></li>
+        <li><a href="#">GridView</a></li>
+        <li><a href="#">Accordian</a></li>
+        <li><a href="#">ScrollView</a></li>
+        <li><a href="#">FileMenu</a></li>
+        <li><a href="#">Windows</a></li>
+        <li><a href="#">Dialog</a></li>
+        <li><a href="#">Slider</a></li>
+        <li><a href="#">Progressbar</a></li>
+        <li><a href="#">ColorPicker</a></li>
+        <li><a href="#">DatePicker</a></li>
+        <li><a href="#">Selectable</a></li>
+        <li><a href="#">Loader</a></li>
+        <li><a href="#">CustomAttributeComponent</a></li>
+        <li><a href="#">ImageManager</a></li>
+        <li><a href="#">NotificationMenu</a></li>
+    </ul>
+</section>
+
+
+<article class="content-area">
+    <header>
+        <h1>RichSelect</h1>
+        <p class="meta">An replacement for the default select element that allows for more control over the style of the menu and layout of the items.</p>
+    </header>
+
+    <h2>Examples</h2>
+
+    <article class="example">
+        <h2>Select</h2>
+
+        <p>
+            An replacement for the default select element that allows for more control over the style of the menu and layout
+            of the items.
+        </p>
+
+        <div class="test" data-init="select" data-window-bind="testselect1" data-name="test4" id="test2" data-multiple="false">
+            <div data-menuitem data-value="1" class="selected">Apple</div>
+            <div data-menuitem data-value="2">Orange</div>
+            <div data-menuitem data-value="3">Cherry</div>
+            <div data-menuitem data-value="4">Blueberry</div>
+            <div data-menuitem data-value="5">Pineapple</div>
+            <hr class="separator" />
+            <div data-menuitem data-value="6">Grape</div>
+            <div data-menuitem data-value="7">Avacado</div>
+            <div data-menuitem data-value="8">Peach</div>
+            <div data-menuitem data-value="9">Pear</div>
+            <div data-menuitem data-value="10">Watermelon</div>
+        </div>
+
+        <br><br>
+
+        <strong>Multiple</strong><br>
+        <select title="Example 2" data-init="select" data-window-bind="testselect2" name="test5" class="test" multiple data-placeholder="Please Select An Item">
+            <option value="1">Apple</option>
+            <option value="2">Apple2</option>
+            <option value="3" selected>Apple3</option>
+            <option value="4">Apple4</option>
+            <option value="5">Apple5</option>
+        </select>
+    </article>
+
+    <figure class="highlight"><pre><code class="language-html" data-lang="html"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="code"><pre>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"test"</span> <span class="na">data-init=</span><span class="s">"select"</span> <span class="na">data-window-bind=</span><span class="s">"testselect1"</span> <span class="na">data-name=</span><span class="s">"test4"</span> <span class="na">data-multiple=</span><span class="s">"false"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"1"</span> <span class="na">class=</span><span class="s">"selected"</span><span class="nt">&gt;</span>Apple<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"2"</span><span class="nt">&gt;</span>Orange<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"3"</span><span class="nt">&gt;</span>Cherry<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"4"</span><span class="nt">&gt;</span>Blueberry<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"5"</span><span class="nt">&gt;</span>Pineapple<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;hr</span> <span class="na">class=</span><span class="s">"separator"</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"6"</span><span class="nt">&gt;</span>Grape<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"7"</span><span class="nt">&gt;</span>Avacado<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"8"</span><span class="nt">&gt;</span>Peach<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"9"</span><span class="nt">&gt;</span>Pear<span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">data-menuitem</span> <span class="na">data-value=</span><span class="s">"10"</span><span class="nt">&gt;</span>Watermelon<span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+
+    <span class="nt">&lt;br&gt;&lt;br&gt;</span>
+
+    <span class="nt">&lt;select</span> <span class="na">data-init=</span><span class="s">"select"</span> <span class="na">data-window-bind=</span><span class="s">"testselect2"</span> <span class="na">name=</span><span class="s">"test5"</span> <span class="na">class=</span><span class="s">"test"</span> <span class="na">multiple</span> <span class="na">data-placeholder=</span><span class="s">"Please Select An Item"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"1"</span><span class="nt">&gt;</span>Apple<span class="nt">&lt;/option&gt;</span>
+        <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"2"</span><span class="nt">&gt;</span>Apple2<span class="nt">&lt;/option&gt;</span>
+        <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"3"</span> <span class="na">selected</span><span class="nt">&gt;</span>Apple3<span class="nt">&lt;/option&gt;</span>
+        <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"4"</span><span class="nt">&gt;</span>Apple4<span class="nt">&lt;/option&gt;</span>
+        <span class="nt">&lt;option</span> <span class="na">value=</span><span class="s">"5"</span><span class="nt">&gt;</span>Apple5<span class="nt">&lt;/option&gt;</span>
+    <span class="nt">&lt;/select&gt;</span>
+    
+</pre></td></tr></tbody></table></code></pre></figure>
+
+
+    <h2>Positioning</h2>
+
+    <h2>CSS3 Animations</h2>
+
+    <p>As the submenu is show / hidden it will add and remove several state classes.</p>
+    <p>The first state class is the <strong>visible</strong> css class.  This class is added to the submenu when it is visible.</p>
+    <p>The second state class is the <strong>hidden</strong> css class.  This class is added to the submenu when it is hidden.</p>
+    <p>The third state class is the <strong>show</strong> css class.  This class is added when the menu is displayed using the show() method.</p>
+    <p>The final state class is the <strong>hide</strong> css class.  This class is added when the menu is hidden using the hide() method.</p>
+    <p>
+        show and hide and intended to be targeted for css3 animations.  When an element only have the visible or hidden classes it should display without any animation.
+        So at the start of the page all dropdown menus should have the hidden class and not animations should run.  After the user interacts with them the first time
+        the show and hide classes will also be added when the state changes.  You should target .visible.show and .hidden.hide to apply css3 animations.
+    </p>
+
+    <h2>Usage</h2>
+    <h2>Via Data Attributes</h2>
+
+    <h2>Via JavasScript</h2>
+
+    <h2>Options</h2>
+    <h2>Styling</h2>
+    <h2>Events</h2>
+    <h2>Methods</h2>
+</article>
+
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+
+</body>
+</html>
