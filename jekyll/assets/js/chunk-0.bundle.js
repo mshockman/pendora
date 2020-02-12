@@ -33,13 +33,60 @@ function () {
         resistance: 0,
         delay: 0,
         scrollSpeed: 1000,
-        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('.example-zone')
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez1')
       });
       this.drag2 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example2", {
         resistance: 0,
         delay: 0,
         container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez2'),
-        helper: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5)
+        helper: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5),
+        revert: true,
+        revertDuration: 1000
+      });
+      this.drag3 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example3", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez3'),
+        revert: true,
+        revertDuration: 1000
+      });
+      this.drag4 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example4", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez4')
+      });
+      this.drag5 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example5", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez5'),
+        axis: 'x'
+      });
+      this.drag6 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example6", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez6'),
+        axis: 'y'
+      });
+      this.drag7 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example7", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez7'),
+        grid: 50
+      });
+      this.drag8 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example8", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez8')
+      });
+      var dz1 = document.querySelector('#dz1');
+      this.drag4.connect(dz1);
+      dz1.addEventListener('drag.enter', function (event) {
+        console.log(event);
+        dz1.classList.add('active');
+      });
+      dz1.addEventListener('drag.leave', function (event) {
+        console.log(event);
+        dz1.classList.remove('active');
       });
     }
   }]);
@@ -51,16 +98,1202 @@ function () {
 
 /***/ }),
 
+/***/ "./src/core/fx/Animation.js":
+/*!**********************************!*\
+  !*** ./src/core/fx/Animation.js ***!
+  \**********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Animation; });
+/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./easing */ "./src/core/fx/easing.js");
+/* harmony import */ var _FX__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FX */ "./src/core/fx/FX.js");
+/* harmony import */ var _frame__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./frame */ "./src/core/fx/frame.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+
+var Animation =
+/*#__PURE__*/
+function () {
+  /**
+   *
+   * @param duration
+   * @param frames {{}|function(Element element, Animation animation):{}}
+   * @param applyFrame - The function that takes a frame and applies it to the element.
+   * @param bubbleFrameEvent
+   * @param finishFrame
+   */
+  function Animation(_ref) {
+    var _ref$duration = _ref.duration,
+        duration = _ref$duration === void 0 ? null : _ref$duration,
+        frames = _ref.frames,
+        _ref$applyFrame = _ref.applyFrame,
+        applyFrame = _ref$applyFrame === void 0 ? _frame__WEBPACK_IMPORTED_MODULE_2__["defaultApplyFrame"] : _ref$applyFrame,
+        _ref$bubbleFrameEvent = _ref.bubbleFrameEvent,
+        bubbleFrameEvent = _ref$bubbleFrameEvent === void 0 ? false : _ref$bubbleFrameEvent,
+        _ref$finishFrame = _ref.finishFrame,
+        finishFrame = _ref$finishFrame === void 0 ? null : _ref$finishFrame;
+
+    _classCallCheck(this, Animation);
+
+    this.frames = frames;
+    this.applyFrame = applyFrame || Animation.defaultApplyFrame;
+    this.bubbleFrameEvent = bubbleFrameEvent;
+    this.finishFrame = finishFrame;
+    this.duration = duration;
+  }
+  /**
+   * Creates an fx object.
+   *
+   * @param element
+   * @param frames
+   * @param duration
+   * @param applyFrame
+   * @param easing
+   * @param onStart
+   * @param onFrame
+   * @param onPause
+   * @param onCancel
+   * @param onEnd
+   * @param onComplete
+   * @param bubbleFrameEvent
+   * @param finishFrame
+   * @returns {FX}
+   */
+
+
+  _createClass(Animation, [{
+    key: "init",
+    value: function init(_ref2) {
+      var element = _ref2.element,
+          frames = _ref2.frames,
+          duration = _ref2.duration,
+          applyFrame = _ref2.applyFrame,
+          easing = _ref2.easing,
+          onStart = _ref2.onStart,
+          onFrame = _ref2.onFrame,
+          onPause = _ref2.onPause,
+          onCancel = _ref2.onCancel,
+          onEnd = _ref2.onEnd,
+          onComplete = _ref2.onComplete,
+          bubbleFrameEvent = _ref2.bubbleFrameEvent,
+          finishFrame = _ref2.finishFrame;
+      return new _FX__WEBPACK_IMPORTED_MODULE_1__["default"](element, frames, duration, {
+        applyFrame: applyFrame,
+        easing: easing,
+        animation: this,
+        onStart: onStart,
+        onFrame: onFrame,
+        onPause: onPause,
+        onCancel: onCancel,
+        onEnd: onEnd,
+        onComplete: onComplete,
+        bubbleFrameEvent: bubbleFrameEvent,
+        finishFrame: finishFrame
+      });
+    }
+    /**
+     * Ran after the fx completes.
+     * @param fx
+     */
+
+  }, {
+    key: "destroy",
+    value: function destroy(fx) {}
+    /**
+     * Animates the given element.  Returns the FX object that can be used to control the animation.
+     *
+     * @param element {HTMLElement|Element} The element to animate.
+     * @param duration {Number} The duration of the animation in milliseconds.
+     * @param easing {function(Number)} An easing function that controls the rate of change for the animation.  If null linear animation is used.
+     * @param onStart {function(FX)} A callback function that is called right before the animation starts playing.
+     * @param onFrame {function(FX, frame)} A callback that is called per frame.
+     * @param onPause {function(FX)} A callback that is called when the FX pauses.
+     * @param onCancel {function(FX)} A callback that is called when the FX cancels.
+     * @param onEnd {function(FX)} A callback that is called when the animation ends.  Whether by completing, pausing, or canceling.  See Fx.status to determine what happened.
+     * @param onComplete {function(FX)} A callback that is called when the animation complete successfully.
+     * @param position
+     * @param autoPlay
+     * @returns {FX}
+     */
+
+  }, {
+    key: "animate",
+    value: function animate(element) {
+      var _this = this;
+
+      var _ref3 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref3$duration = _ref3.duration,
+          duration = _ref3$duration === void 0 ? null : _ref3$duration,
+          _ref3$easing = _ref3.easing,
+          easing = _ref3$easing === void 0 ? _easing__WEBPACK_IMPORTED_MODULE_0__["EASING"].linear : _ref3$easing,
+          _ref3$onStart = _ref3.onStart,
+          onStart = _ref3$onStart === void 0 ? null : _ref3$onStart,
+          _ref3$onFrame = _ref3.onFrame,
+          onFrame = _ref3$onFrame === void 0 ? null : _ref3$onFrame,
+          _ref3$onPause = _ref3.onPause,
+          onPause = _ref3$onPause === void 0 ? null : _ref3$onPause,
+          _ref3$onCancel = _ref3.onCancel,
+          onCancel = _ref3$onCancel === void 0 ? null : _ref3$onCancel,
+          _ref3$onEnd = _ref3.onEnd,
+          _onEnd = _ref3$onEnd === void 0 ? null : _ref3$onEnd,
+          _ref3$onComplete = _ref3.onComplete,
+          onComplete = _ref3$onComplete === void 0 ? null : _ref3$onComplete,
+          _ref3$position = _ref3.position,
+          position = _ref3$position === void 0 ? 0 : _ref3$position,
+          _ref3$autoPlay = _ref3.autoPlay,
+          autoPlay = _ref3$autoPlay === void 0 ? true : _ref3$autoPlay;
+
+      if (duration === null) {
+        duration = this.duration;
+      }
+
+      var fx = this.init({
+        element: element,
+        frames: this.frames,
+        duration: duration,
+        applyFrame: this.applyFrame,
+        easing: easing,
+        animation: this,
+        onStart: onStart,
+        onFrame: onFrame,
+        onPause: onPause,
+        onCancel: onCancel,
+        onEnd: function onEnd(fx) {
+          if (_onEnd) _onEnd.call(fx, fx);
+
+          _this.destroy(fx);
+        },
+        onComplete: onComplete,
+        bubbleFrameEvent: this.bubbleFrameEvent,
+        finishFrame: this.finishFrame
+      });
+
+      if (position) {
+        fx["goto"](position);
+      }
+
+      if (autoPlay) {
+        fx.play();
+      }
+
+      return fx;
+    }
+  }, {
+    key: "goto",
+    value: function goto(element, position) {
+      this.animate(element, {
+        autoPlay: false,
+        position: position
+      });
+      return Animation.complete;
+    }
+    /**
+     * Creates a function that calls the animate method with the bound parameters.
+     * Parameters can be overridden in the created function when called.
+     * Method has the same signature as the animate method.
+     *
+     * Usage:
+     * let animation = new Animation(...),
+     *     fx = animation.bind(null, 2000);
+     *
+     * fx(element) // Animation the element over 2000 milliseconds.
+     *
+     * @param element
+     * @param config
+     * @returns {function(HTMLElement element, Number duration, Object config): FX}
+     */
+
+  }, {
+    key: "bind",
+    value: function bind() {
+      var _this2 = this;
+
+      var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var defaults = {
+        element: element,
+        config: config
+      };
+      return function () {
+        var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaults;
+        var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+        element = element === defaults ? element.defaults : element;
+        var _options = {};
+        if (defaults.config) Object.assign(_options, defaults.config);
+        if (config) Object.assign(_options, config);
+        return _this2.animate(element, _options);
+      };
+    }
+  }]);
+
+  return Animation;
+}();
+
+_defineProperty(Animation, "defaultApplyFrame", _frame__WEBPACK_IMPORTED_MODULE_2__["defaultApplyFrame"]);
+
+_defineProperty(Animation, "complete", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].complete);
+
+_defineProperty(Animation, "canceled", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].canceled);
+
+_defineProperty(Animation, "paused", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].paused);
+
+_defineProperty(Animation, "pending", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].pending);
+
+_defineProperty(Animation, "error", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].error);
+
+_defineProperty(Animation, "playing", _FX__WEBPACK_IMPORTED_MODULE_1__["default"].playing);
+
+
+
+/***/ }),
+
+/***/ "./src/core/fx/FX.js":
+/*!***************************!*\
+  !*** ./src/core/fx/FX.js ***!
+  \***************************/
+/*! exports provided: DeadFXError, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DeadFXError", function() { return DeadFXError; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FX; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../errors */ "./src/core/errors.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
+/* harmony import */ var _vectors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors */ "./src/core/vectors/index.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./src/core/fx/types.js");
+/* harmony import */ var _easing__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./easing */ "./src/core/fx/easing.js");
+/* harmony import */ var _frame__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./frame */ "./src/core/fx/frame.js");
+var _Symbol$toStringTag;
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+
+var regNumberWithUnit = /^(\d+\.?\d*)([a-z]+|%)$/i,
+    regColor = /^(?:#([a-f0-9]{3})|#([a-f0-9]{6})|#([a-f0-9]{8}))$/i,
+    regFunction = /^([a-z_][a-z_0-9]*)\((.+?)\)$/i;
+var TYPE_FUNCTIONS = {
+  hex: _vectors__WEBPACK_IMPORTED_MODULE_2__["RGBA"].parseHexColorStringArg,
+  rgb: _vectors__WEBPACK_IMPORTED_MODULE_2__["RGBA"].parseRGBAColorStringArgs,
+  rgba: _vectors__WEBPACK_IMPORTED_MODULE_2__["RGBA"].parseRGBAColorStringArgs
+};
+var DeadFXError =
+/*#__PURE__*/
+function (_ExtendableError) {
+  _inherits(DeadFXError, _ExtendableError);
+
+  function DeadFXError() {
+    _classCallCheck(this, DeadFXError);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(DeadFXError).apply(this, arguments));
+  }
+
+  return DeadFXError;
+}(_errors__WEBPACK_IMPORTED_MODULE_0__["ExtendableError"]);
+
+function assertFXAlive(fx) {
+  if (fx.status === FX.complete || fx.status === FX.error || fx.status === FX.complete) {
+    throw new DeadFXError("FX object is dead.");
+  }
+}
+
+function doPromiseAction(onAction, value, resolveOrReject) {
+  if (typeof onAction === 'function') {
+    value = onAction(value);
+  }
+
+  resolveOrReject(value);
+}
+
+function _prepareValue(value) {
+  if (typeof value === 'string') {
+    value = value.trim();
+    var m = regNumberWithUnit.exec(value);
+
+    if (m) {
+      return new _types__WEBPACK_IMPORTED_MODULE_3__["NumberWithUnit"](parseFloat(m[1]), m[2]);
+    }
+
+    m = regColor.exec(value);
+
+    if (m) {
+      return TYPE_FUNCTIONS.hex(m[0]);
+    }
+
+    m = regFunction.exec(value);
+
+    if (m) {
+      return TYPE_FUNCTIONS[m[1]](m[2]);
+    }
+  }
+
+  return value;
+}
+
+function _getFrames(fx, element, frames) {
+  var r = {};
+
+  if (typeof frames === 'function') {
+    frames = frames.call(fx, element, fx);
+  }
+
+  for (var keyframeIndex in frames) {
+    if (!frames.hasOwnProperty(keyframeIndex)) continue;
+    var frame = frames[keyframeIndex];
+    r[keyframeIndex] = {};
+
+    for (var property in frame) {
+      if (!frame.hasOwnProperty(property)) continue;
+      r[keyframeIndex][property] = _prepareValue(frame[property]);
+    }
+  }
+
+  return r;
+}
+/**
+ * @implements Promise
+ */
+
+
+_Symbol$toStringTag = Symbol.toStringTag;
+
+var FX =
+/*#__PURE__*/
+function () {
+  function FX(element, frames, duration) {
+    var _ref = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
+        _ref$applyFrame = _ref.applyFrame,
+        applyFrame = _ref$applyFrame === void 0 ? _frame__WEBPACK_IMPORTED_MODULE_5__["defaultApplyFrame"] : _ref$applyFrame,
+        _ref$animation = _ref.animation,
+        animation = _ref$animation === void 0 ? null : _ref$animation,
+        _ref$easing = _ref.easing,
+        easing = _ref$easing === void 0 ? _easing__WEBPACK_IMPORTED_MODULE_4__["EASING"].linear : _ref$easing,
+        _ref$onComplete = _ref.onComplete,
+        onComplete = _ref$onComplete === void 0 ? null : _ref$onComplete,
+        _ref$onCancel = _ref.onCancel,
+        onCancel = _ref$onCancel === void 0 ? null : _ref$onCancel,
+        _ref$onFrame = _ref.onFrame,
+        onFrame = _ref$onFrame === void 0 ? null : _ref$onFrame,
+        _ref$onStart = _ref.onStart,
+        onStart = _ref$onStart === void 0 ? null : _ref$onStart,
+        _ref$onEnd = _ref.onEnd,
+        onEnd = _ref$onEnd === void 0 ? null : _ref$onEnd,
+        _ref$bubbleFrameEvent = _ref.bubbleFrameEvent,
+        bubbleFrameEvent = _ref$bubbleFrameEvent === void 0 ? false : _ref$bubbleFrameEvent,
+        _ref$finishFrame = _ref.finishFrame,
+        finishFrame = _ref$finishFrame === void 0 ? null : _ref$finishFrame,
+        _ref$init = _ref.init,
+        init = _ref$init === void 0 ? null : _ref$init;
+
+    _classCallCheck(this, FX);
+
+    _element.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _chained.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _frames.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _internalValue.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _animation.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _frameId.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _status.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _position.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _finishFrame.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _applyFrame.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _easing.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _duration.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _defineProperty(this, _Symbol$toStringTag, "[Object FX]");
+
+    _classPrivateFieldSet(this, _frames, []);
+
+    _classPrivateFieldSet(this, _chained, []);
+
+    _classPrivateFieldSet(this, _element, Object(_utility__WEBPACK_IMPORTED_MODULE_1__["selectElement"])(element));
+
+    _classPrivateFieldSet(this, _internalValue, undefined);
+
+    this.onComplete = onComplete;
+    this.onCancel = onCancel;
+    this.onFrame = onFrame;
+    this.onStart = onStart;
+    this.onEnd = onEnd;
+    this.bubbleFrameEvent = bubbleFrameEvent;
+
+    _classPrivateFieldSet(this, _animation, animation);
+
+    _classPrivateFieldSet(this, _finishFrame, finishFrame);
+
+    _classPrivateFieldSet(this, _applyFrame, applyFrame);
+
+    _classPrivateFieldSet(this, _easing, easing);
+
+    _classPrivateFieldSet(this, _frameId, null);
+
+    _classPrivateFieldSet(this, _status, FX.pending);
+
+    _classPrivateFieldSet(this, _duration, duration);
+
+    _classPrivateFieldSet(this, _position, 0);
+
+    if (init) {
+      init.call(this, this);
+    } // Prepare frames
+
+
+    frames = _getFrames(this, _classPrivateFieldGet(this, _element), frames);
+
+    for (var key in frames) {
+      if (frames.hasOwnProperty(key)) {
+        var frame = frames[key],
+            pos = parseFloat(key) / 100;
+
+        if (typeof frame === 'function') {
+          frame = frame.call(this, _classPrivateFieldGet(this, _element));
+        }
+
+        frame = Object.freeze(Object.assign({}, frame));
+
+        _classPrivateFieldGet(this, _frames).push(Object.freeze({
+          position: pos,
+          properties: frame
+        }));
+      }
+    }
+
+    _classPrivateFieldGet(this, _frames).sort(function (a, b) {
+      return a.position - b.pos;
+    });
+  }
+
+  _createClass(FX, [{
+    key: "getFrameFX",
+
+    /**
+     * Returns the frame options at the given position.
+     * @param position
+     */
+    value: function getFrameFX(position) {
+      // position can either be a percentage string (aka 50%) or the time in milliseconds into the animation
+      // which will be converted into a percentage.
+      if (typeof position === 'string') {
+        position = parseFloat(position) / 100;
+      } // At this point position should be a value between 0.0 and 1.0.
+      // Easing functions specify that rate of change in the properties.
+      // It takes the position and maps it to another value between 0.0f and 1.0f.
+      // By default linear easing is used.
+
+
+      if (_classPrivateFieldGet(this, _easing)) {
+        position = _classPrivateFieldGet(this, _easing).call(this, position);
+      }
+
+      var r = {};
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = _classPrivateFieldGet(this, _frames)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var frame = _step.value;
+
+          for (var key in frame.properties) {
+            if (frame.properties.hasOwnProperty(key)) {
+              var value = frame.properties[key];
+
+              if (!r[key]) {
+                r[key] = {
+                  startPosition: null,
+                  startValue: null,
+                  endPosition: null,
+                  endValue: null
+                };
+              }
+
+              if (frame.position <= position) {
+                r[key].startPosition = frame.position;
+                r[key].startValue = value;
+              } else if (frame.position > position && r[key].endPosition === null) {
+                r[key].endPosition = frame.position;
+                r[key].endValue = value;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return r;
+    }
+    /**
+     * Returns the final frame at the given position.  All options at this point should be parsed and there final values
+     * should be available.
+     *
+     * @param position
+     */
+
+  }, {
+    key: "getFrame",
+    value: function getFrame(position) {
+      var frame = this.getFrameFX(position),
+          r = {};
+
+      if (typeof position === 'string') {
+        position = parseFloat(position) / 100;
+      } // Takes the frame config options and calculates the final values.
+
+
+      for (var property in frame) {
+        if (frame.hasOwnProperty(property)) {
+          var options = frame[property];
+
+          if ((options.endPosition === null || options.endPosition <= position) && options.startValue !== null) {
+            r[property] = options.startValue;
+          } else if (options.startValue !== null) {
+            if (_typeof(options.startValue) === 'object') {
+              var p = (position - options.startPosition) / (options.endPosition - options.startPosition),
+                  delta = options.endValue.subtract(options.startValue);
+              r[property] = options.startValue.add(delta.scalar(p));
+            } else if (typeof options.startValue === 'number') {
+              var duration = options.endPosition - options.startPosition,
+                  _p = (position - options.startPosition) / duration,
+                  _delta = options.endValue - options.startValue;
+
+              r[property] = options.startValue + _delta * _p;
+            } else {
+              r[property] = options.startValue;
+            }
+          }
+        }
+      } // User provided hook that can perform the final touch ups on the frame.
+
+
+      if (_classPrivateFieldGet(this, _finishFrame)) {
+        r = _classPrivateFieldGet(this, _finishFrame).call(this, this, frame);
+      }
+
+      return r;
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      var _this = this;
+
+      assertFXAlive(this);
+
+      if (_classPrivateFieldGet(this, _frameId) === null) {
+        this["goto"](_classPrivateFieldGet(this, _position));
+        var tick = performance.now();
+
+        var frameFN = function frameFN() {
+          var timestamp = performance.now(),
+              delta = timestamp - tick,
+              position = _classPrivateFieldGet(_this, _position) + delta / _this.duration;
+
+          tick = timestamp;
+
+          var frame = _this["goto"](position);
+
+          _classPrivateFieldSet(_this, _status, FX.playing);
+
+          if (_this.onFrame) _this.onFrame.call(_this, _this, frame);
+
+          _classPrivateFieldGet(_this, _element).dispatchEvent(new CustomEvent('animation.frame', {
+            bubbles: _this.bubbleFrameEvent,
+            detail: _this
+          }));
+
+          if (_classPrivateFieldGet(_this, _position) < 1) {
+            _classPrivateFieldSet(_this, _frameId, window.requestAnimationFrame(frameFN));
+          } else {
+            _this._complete(FX.complete, FX.complete);
+
+            _classPrivateFieldSet(_this, _frameId, null);
+          }
+        };
+
+        if (this.onStart) {
+          this.onStart.call(this, this);
+        }
+
+        _classPrivateFieldGet(this, _element).dispatchEvent(new CustomEvent('animation.start', {
+          bubbles: true,
+          detail: this
+        }));
+
+        _classPrivateFieldSet(this, _frameId, window.requestAnimationFrame(frameFN));
+      }
+
+      return this;
+    } // noinspection JSUnusedGlobalSymbols
+
+    /**
+     * Pauses the animation.  Does not resolve it.
+     * @returns {FX}
+     */
+
+  }, {
+    key: "pause",
+    value: function pause() {
+      if (_classPrivateFieldGet(this, _frameId)) {
+        window.cancelAnimationFrame(_classPrivateFieldGet(this, _frameId));
+
+        _classPrivateFieldSet(this, _frameId, null);
+
+        _classPrivateFieldSet(this, _status, FX.paused);
+
+        _classPrivateFieldGet(this, _element).dispatchEvent(new CustomEvent('animation.paused', {
+          bubbles: true,
+          detail: this
+        }));
+      }
+
+      return this;
+    }
+  }, {
+    key: "_cancel",
+    value: function _cancel() {
+      var complete = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : FX.canceled;
+
+      if (_classPrivateFieldGet(this, _frameId)) {
+        window.cancelAnimationFrame(_classPrivateFieldGet(this, _frameId));
+
+        _classPrivateFieldSet(this, _frameId, null);
+
+        if (complete) {
+          this["goto"](1);
+
+          this._complete(status, status);
+        } else {
+          _classPrivateFieldSet(this, _status, status);
+
+          _classPrivateFieldSet(this, _internalValue, status);
+        }
+
+        if (this.onCancel) this.onCancel.call(this, this);
+
+        _classPrivateFieldGet(this, _element).dispatchEvent(new CustomEvent('animation.canceled', {
+          bubbles: true,
+          detail: this
+        }));
+
+        this._triggerEndEvent();
+      }
+
+      return this;
+    }
+    /**
+     * Cancel the animation with the canceled state.   optionally sets the animation to it's final frame if
+     * completeAnimation is true.
+     *
+     * @param completeAnimation
+     * @returns {FX}
+     */
+
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      var completeAnimation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      return this._cancel(completeAnimation, FX.canceled);
+    }
+    /**
+     * Completes the animation immediately and sets is status to complete.
+     * @returns {FX}
+     */
+
+  }, {
+    key: "complete",
+    value: function complete() {
+      return this._cancel(true, FX.complete);
+    }
+  }, {
+    key: "goto",
+    value: function goto(position) {
+      assertFXAlive(this);
+
+      if (typeof position === 'string') {
+        position = parseFloat(position) / 100;
+      }
+
+      _classPrivateFieldSet(this, _position, position);
+
+      return this.applyFrame(this.position);
+    }
+  }, {
+    key: "applyFrame",
+    value: function applyFrame(position) {
+      var frame = this.getFrame(position);
+
+      _classPrivateFieldGet(this, _applyFrame).call(this, this, frame);
+
+      return frame;
+    }
+  }, {
+    key: "_triggerEndEvent",
+    value: function _triggerEndEvent() {
+      if (this.onEnd) this.onEnd.call(this, this);
+
+      _classPrivateFieldGet(this, _element).dispatchEvent(new CustomEvent('animation.end', {
+        bubbles: true,
+        detail: this
+      }));
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = _classPrivateFieldGet(this, _chained)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var onResolve = _step2.value.onResolve;
+          if (onResolve) onResolve(_classPrivateFieldGet(this, _internalValue));
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      _classPrivateFieldSet(this, _chained, []);
+    }
+  }, {
+    key: "_complete",
+    value: function _complete(value) {
+      var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : FX.complete;
+
+      if (this.state !== "Pending") {
+        return;
+      }
+
+      _classPrivateFieldSet(this, _status, status);
+
+      _classPrivateFieldSet(this, _internalValue, value);
+
+      if (this.onComplete) this.onComplete.call(this, this);
+
+      _classPrivateFieldGet(this, _element).dispatchEvent(new CustomEvent('animation.complete', {
+        bubbles: true,
+        detail: this
+      }));
+
+      this._triggerEndEvent();
+    }
+  }, {
+    key: "then",
+    value: function then(_onResolve, _onReject) {
+      var _this2 = this;
+
+      if (this.state === "Pending") {
+        return new Promise(function (resolve, reject) {
+          // noinspection JSUnusedGlobalSymbols
+          _classPrivateFieldGet(_this2, _chained).push({
+            onResolve: function onResolve(value) {
+              doPromiseAction(_onResolve, value, resolve);
+            },
+            onReject: function onReject(value) {
+              doPromiseAction(_onReject, value, reject);
+            }
+          });
+        });
+      } else if (this.state === 'Fulfilled' && typeof _onResolve === 'function') {
+        return new Promise(function (resolve) {
+          doPromiseAction(_onResolve, _classPrivateFieldGet(_this2, _internalValue), resolve);
+        });
+      } else if (this.state === 'Rejected' && typeof _onReject === 'function') {
+        return new Promise(function (resolve, reject) {
+          doPromiseAction(_onReject, _classPrivateFieldGet(_this2, _internalValue), reject);
+        });
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "finally",
+    value: function _finally(_onFinally) {
+      _onFinally = function onFinally(value) {
+        if (typeof _onFinally === 'function') {
+          _onFinally();
+        }
+
+        return value;
+      };
+
+      return this.then(_onFinally, _onFinally);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "catch",
+    value: function _catch(onReject) {
+      return this.then(undefined, onReject);
+    }
+  }, {
+    key: "animation",
+    get: function get() {
+      return _classPrivateFieldGet(this, _animation);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "easing",
+    get: function get() {
+      return _classPrivateFieldGet(this, _easing);
+    }
+  }, {
+    key: "status",
+    get: function get() {
+      return _classPrivateFieldGet(this, _status);
+    }
+  }, {
+    key: "position",
+    get: function get() {
+      return _classPrivateFieldGet(this, _position);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "duration",
+    get: function get() {
+      return _classPrivateFieldGet(this, _duration);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "frames",
+    get: function get() {
+      return _classPrivateFieldGet(this, _frames).slice();
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return _classPrivateFieldGet(this, _element);
+    } // set position(value) {
+    //     if (typeof value === 'string') {
+    //         value = (parseFloat(value) / 100) * this.#duration;
+    //     }
+    //
+    //     this.#position = Math.max(0.0, Math.min(this.#duration, value));
+    // }
+
+  }, {
+    key: "state",
+    get: function get() {
+      if (this.status === FX.complete || this.status === FX.canceled) {
+        return "Fulfilled";
+      } else if (this.status === FX.error) {
+        return "Rejected";
+      } else {
+        return "Pending";
+      }
+    }
+  }]);
+
+  return FX;
+}();
+
+var _element = new WeakMap();
+
+var _chained = new WeakMap();
+
+var _frames = new WeakMap();
+
+var _internalValue = new WeakMap();
+
+var _animation = new WeakMap();
+
+var _frameId = new WeakMap();
+
+var _status = new WeakMap();
+
+var _position = new WeakMap();
+
+var _finishFrame = new WeakMap();
+
+var _applyFrame = new WeakMap();
+
+var _easing = new WeakMap();
+
+var _duration = new WeakMap();
+
+_defineProperty(FX, "pending", "Pending");
+
+_defineProperty(FX, "complete", "Complete");
+
+_defineProperty(FX, "error", "Error");
+
+_defineProperty(FX, "paused", "Paused");
+
+_defineProperty(FX, "canceled", "Canceled");
+
+_defineProperty(FX, "playing", "Playing");
+
+
+
+/***/ }),
+
+/***/ "./src/core/fx/easing.js":
+/*!*******************************!*\
+  !*** ./src/core/fx/easing.js ***!
+  \*******************************/
+/*! exports provided: linear, EASING */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "linear", function() { return linear; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EASING", function() { return EASING; });
+/**
+ *
+ * @param p
+ * @returns {*}
+ */
+function linear(p) {
+  return p;
+} // noinspection JSUnusedGlobalSymbols
+
+var EASING = {
+  linear: linear
+};
+
+/***/ }),
+
+/***/ "./src/core/fx/frame.js":
+/*!******************************!*\
+  !*** ./src/core/fx/frame.js ***!
+  \******************************/
+/*! exports provided: defaultApplyFrame */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "defaultApplyFrame", function() { return defaultApplyFrame; });
+function defaultApplyFrame(fx, frame) {
+  for (var key in frame) {
+    if (frame.hasOwnProperty(key)) {
+      fx.element.style[key] = frame[key].toString();
+    }
+  }
+}
+
+/***/ }),
+
+/***/ "./src/core/fx/types.js":
+/*!******************************!*\
+  !*** ./src/core/fx/types.js ***!
+  \******************************/
+/*! exports provided: NumberWithUnit */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NumberWithUnit", function() { return NumberWithUnit; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var NumberWithUnit =
+/*#__PURE__*/
+function () {
+  function NumberWithUnit(value, unit) {
+    _classCallCheck(this, NumberWithUnit);
+
+    this.value = value;
+    this.unit = unit;
+  }
+
+  _createClass(NumberWithUnit, [{
+    key: "add",
+    value: function add(value) {
+      if (typeof value !== "number") {
+        if (!(value instanceof NumberWithUnit)) {
+          throw new TypeError("Cannot perform action on invalid type.");
+        }
+
+        if (this.unit !== value.unit) {
+          throw new Error("Mismatched units");
+        }
+
+        value = value.value;
+      }
+
+      return new NumberWithUnit(this.value + value, this.unit);
+    }
+  }, {
+    key: "subtract",
+    value: function subtract(value) {
+      if (typeof value !== "number") {
+        if (!(value instanceof NumberWithUnit)) {
+          throw new TypeError("Cannot perform action on invalid type.");
+        }
+
+        if (this.unit !== value.unit) {
+          throw new Error("Mismatched units");
+        }
+
+        value = value.value;
+      }
+
+      return new NumberWithUnit(this.value - value, this.unit);
+    }
+  }, {
+    key: "scalar",
+    value: function scalar(value) {
+      if (typeof value !== "number") {
+        if (!(value instanceof NumberWithUnit)) {
+          throw new TypeError("Cannot perform action on invalid type.");
+        }
+
+        if (this.unit !== value.unit) {
+          throw new Error("Mismatched units");
+        }
+
+        value = value.value;
+      }
+
+      return new NumberWithUnit(this.value * value, this.unit);
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "divide",
+    value: function divide(value) {
+      if (typeof value !== "number") {
+        if (!(value instanceof NumberWithUnit)) {
+          throw new TypeError("Cannot perform action on invalid type.");
+        }
+
+        if (this.unit !== value.unit) {
+          throw new Error("Mismatched units");
+        }
+
+        value = value.value;
+      }
+
+      return new NumberWithUnit(this.value / value, this.unit);
+    }
+  }, {
+    key: "toString",
+    value: function toString() {
+      return "".concat(this.value).concat(this.unit);
+    }
+  }]);
+
+  return NumberWithUnit;
+}();
+
+/***/ }),
+
 /***/ "./src/core/ui/Draggable2.js":
 /*!***********************************!*\
   !*** ./src/core/ui/Draggable2.js ***!
   \***********************************/
-/*! exports provided: cursor, default, ScrollArea, clone */
+/*! exports provided: cursor, TOLERANCE, default, ScrollArea, clone */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cursor", function() { return cursor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TOLERANCE", function() { return TOLERANCE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Draggable2; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollArea", function() { return ScrollArea; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clone", function() { return clone; });
@@ -68,6 +1301,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
 /* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
 /* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
+/* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -107,6 +1347,8 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
+
+var startingPosMap = new WeakMap();
 function cursor(target, event) {
   var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
   return {
@@ -114,6 +1356,12 @@ function cursor(target, event) {
     y: event.clientY - rect.top
   };
 }
+var TOLERANCE = {
+  intersect: function intersect(element, rect) {
+    var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+    return targetRect.isOverlapping(rect);
+  }
+};
 
 var Draggable2 =
 /*#__PURE__*/
@@ -143,7 +1391,7 @@ function (_Publisher) {
         _ref$revert = _ref.revert,
         revert = _ref$revert === void 0 ? false : _ref$revert,
         _ref$revertDuration = _ref.revertDuration,
-        revertDuration = _ref$revertDuration === void 0 ? 1000 : _ref$revertDuration,
+        revertDuration = _ref$revertDuration === void 0 ? 0 : _ref$revertDuration,
         _ref$scrollSpeed = _ref.scrollSpeed,
         scrollSpeed = _ref$scrollSpeed === void 0 ? 0 : _ref$scrollSpeed,
         _ref$selector = _ref.selector,
@@ -409,8 +1657,8 @@ function (_Publisher) {
                     offsetX: offset.x,
                     offsetY: offset.y,
                     // Make relative to client.
-                    startingX: currentPosition.x - window.pageXOffset,
-                    startingY: currentPosition.y - window.pageYOffset
+                    startingX: currentPosition.x,
+                    startingY: currentPosition.y
                   });
                 }
 
@@ -445,11 +1693,16 @@ function (_Publisher) {
         _classPrivateFieldSet(this, _revertFX, null);
       }
 
-      console.log("Start Dragging");
       var target = element,
           container = this.container,
           scroller = null,
-          dropTargets = [];
+          dropTargets = [],
+          startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+      startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
+
+      if (!startingPosMap.get(element)) {
+        startingPosMap.set(element, startPosition);
+      }
 
       if (typeof container === 'string') {
         container = document.querySelector(container);
@@ -461,6 +1714,13 @@ function (_Publisher) {
         } else {
           target = this.helper;
         }
+
+        if (this.setHelperSize) {
+          target.style.width = startPosition.width + "px";
+          target.style.height = startPosition.height + "px";
+        }
+
+        target.style.pointerEvents = 'none';
       }
 
       if (target !== element && !target.parentElement && element.parentElement) {
@@ -470,7 +1730,7 @@ function (_Publisher) {
       var onMouseMove = function onMouseMove(event) {
         event.preventDefault();
 
-        var rect = _moveElementToPosition(target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+        var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
 
         if (_this3.scrollSpeed > 0) {
           if (scroller) {
@@ -482,7 +1742,10 @@ function (_Publisher) {
         } // drag-enter
 
 
-        var currentDropTargets = _this3.getDropTargets();
+        var currentDropTargets = _this3.getDropTargets(rect, {
+          mouseX: event.clientX,
+          mouseY: event.clientY
+        });
 
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
@@ -495,7 +1758,7 @@ function (_Publisher) {
             if (dropTargets.indexOf(dropTarget) === -1) {
               _dispatchDropEvent(_this3, dropTarget, 'drag.enter', {
                 bubbles: true,
-                details: {
+                detail: {
                   clientX: event.clientX,
                   clientY: event.clientY,
                   target: target,
@@ -504,8 +1767,7 @@ function (_Publisher) {
                 }
               });
             }
-          } // drag-move
-
+          }
         } catch (err) {
           _didIteratorError = true;
           _iteratorError = err;
@@ -526,20 +1788,23 @@ function (_Publisher) {
         var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator2 = currentDropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
             var _dropTarget = _step2.value;
 
-            _dispatchDropEvent(_this3, _dropTarget, 'drag.move', {
-              bubbles: false,
-              details: {
-                clientX: event.clientX,
-                clientY: event.clientY,
-                target: target,
-                element: element,
-                originalEvent: event
-              }
-            });
-          }
+            if (currentDropTargets.indexOf(_dropTarget) === -1) {
+              _dispatchDropEvent(_this3, _dropTarget, 'drag.leave', {
+                bubbles: false,
+                detail: {
+                  clientX: event.clientX,
+                  clientY: event.clientY,
+                  target: target,
+                  element: element,
+                  originalEvent: event
+                }
+              });
+            }
+          } // drag-leave
+
         } catch (err) {
           _didIteratorError2 = true;
           _iteratorError2 = err;
@@ -555,28 +1820,179 @@ function (_Publisher) {
           }
         }
 
+        dropTargets = currentDropTargets;
+
+        _this3.publish('drag.move', {
+          draggable: _this3,
+          name: 'drag.enter',
+          target: target,
+          element: element,
+          originalEvent: event,
+          clientX: event.clientX,
+          clientY: event.clientY
+        });
+      };
+
+      var onMouseUp =
+      /*#__PURE__*/
+      function () {
+        var _ref4 = _asyncToGenerator(
+        /*#__PURE__*/
+        regeneratorRuntime.mark(function _callee2(event) {
+          var accepted, _isDefaultPrevented, reverted, _pos, _pos2;
+
+          return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  event.preventDefault();
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+
+                  if (scroller) {
+                    scroller.cancel();
+                    scroller = null;
+                  }
+
+                  dropTargets = _this3.getDropTargets();
+                  accepted = false, _isDefaultPrevented = false, reverted = false;
+
+                  _this3.publish('drag.drop', {
+                    name: 'drag.drop',
+                    draggable: _this3,
+                    target: target,
+                    element: element,
+                    originalEvent: event,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    isDefaultPrevented: function isDefaultPrevented() {
+                      return _isDefaultPrevented;
+                    },
+                    isAccepted: function isAccepted() {
+                      return accepted;
+                    },
+                    accept: function accept() {
+                      accepted = true;
+                    },
+                    preventDefault: function preventDefault() {
+                      _isDefaultPrevented = true;
+                    }
+                  });
+
+                  if (!(_this3.revert && !accepted)) {
+                    _context2.next = 26;
+                    break;
+                  }
+
+                  if (_this3.revertDuration) {
+                    _context2.next = 13;
+                    break;
+                  }
+
+                  if (target !== element) {
+                    target.parentElement.removeChild(target);
+                  } else {
+                    _pos = startPosition.translate(-window.pageXOffset, -window.pageYOffset);
+                    Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
+                  }
+
+                  startingPosMap["delete"](element);
+                  _context2.next = 23;
+                  break;
+
+                case 13:
+                  _pos2 = startingPosMap.get(element);
+
+                  _classPrivateFieldSet(_this3, _revertFX, _revert(target, _pos2, _this3.revertDuration));
+
+                  _context2.next = 17;
+                  return _classPrivateFieldGet(_this3, _revertFX);
+
+                case 17:
+                  _context2.t0 = _context2.sent;
+                  _context2.t1 = _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"].complete;
+
+                  if (!(_context2.t0 === _context2.t1)) {
+                    _context2.next = 21;
+                    break;
+                  }
+
+                  startingPosMap["delete"](element);
+
+                case 21:
+                  _classPrivateFieldSet(_this3, _revertFX, null);
+
+                  if (target !== element) {
+                    target.parentElement.removeChild(target);
+                    startingPosMap["delete"](element); // don't need to save.
+                  }
+
+                case 23:
+                  reverted = true;
+                  _context2.next = 29;
+                  break;
+
+                case 26:
+                  if (target !== element) {
+                    target.parentElement.removeChild(target);
+                  }
+
+                  if (_isDefaultPrevented) _moveElementToPosition(_this3, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+                  startingPosMap["delete"](element);
+
+                case 29:
+                  _this3.publish('drag.end', {
+                    draggable: _this3,
+                    name: 'drag.end',
+                    target: target,
+                    element: element,
+                    originalEvent: event,
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    accepted: accepted,
+                    reverted: reverted
+                  });
+
+                case 30:
+                case "end":
+                  return _context2.stop();
+              }
+            }
+          }, _callee2);
+        }));
+
+        return function onMouseUp(_x2) {
+          return _ref4.apply(this, arguments);
+        };
+      }(); // Set target to starting position.
+
+
+      if (pos.startingX !== undefined && pos.startingY !== undefined) {
+        var rect = _moveElementToPosition(this, target, pos.startingX - window.pageXOffset, pos.startingY - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+
+        dropTargets = this.getDropTargets(rect, {
+          mouseX: pos.startingX - window.pageXOffset,
+          mouseY: pos.startingY - window.pageYOffset
+        });
         var _iteratorNormalCompletion3 = true;
         var _didIteratorError3 = false;
         var _iteratorError3 = undefined;
 
         try {
           for (var _iterator3 = dropTargets[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var _dropTarget2 = _step3.value;
+            var dropTarget = _step3.value;
 
-            if (currentDropTargets.indexOf(_dropTarget2) === -1) {
-              _dispatchDropEvent(_this3, _dropTarget2, 'drag.leave', {
-                bubbles: false,
-                details: {
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  target: target,
-                  element: element,
-                  originalEvent: event
-                }
-              });
-            }
-          } // drag-leave
-
+            _dispatchDropEvent(this, dropTarget, 'drag.enter', {
+              bubbles: true,
+              detail: {
+                initial: true,
+                clientX: pos.startingX - window.pageXOffset,
+                clientY: pos.startingY - window.pageYOffset,
+                target: target,
+                element: element
+              }
+            });
+          }
         } catch (err) {
           _didIteratorError3 = true;
           _iteratorError3 = err;
@@ -591,172 +2007,96 @@ function (_Publisher) {
             }
           }
         }
-
-        dropTargets = currentDropTargets;
-      };
-
-      var onMouseUp = function onMouseUp(event) {
-        event.preventDefault();
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-
-        if (scroller) {
-          scroller.cancel();
-          scroller = null;
-        }
-
-        dropTargets = _this3.getDropTargets();
-        var accepted = false;
-        var _iteratorNormalCompletion4 = true;
-        var _didIteratorError4 = false;
-        var _iteratorError4 = undefined;
-
-        try {
-          for (var _iterator4 = dropTargets[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var _dropTarget3 = _step4.value;
-
-            _dispatchDropEvent(_this3, _dropTarget3, 'drag.dropping', {
-              bubbles: true,
-              details: {
-                clientX: event.clientX,
-                clientY: event.clientY,
-                originalEvent: event,
-                target: target,
-                element: element,
-                accept: function accept() {
-                  accepted = true;
-                }
-              }
-            });
-          }
-        } catch (err) {
-          _didIteratorError4 = true;
-          _iteratorError4 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-              _iterator4["return"]();
-            }
-          } finally {
-            if (_didIteratorError4) {
-              throw _iteratorError4;
-            }
-          }
-        }
-
-        if (!accepted) {
-          if (_this3.revert) {
-            _revert(element, target, _this3.revertDuration);
-          } else {
-            if (target !== element) {
-              target.parentElement.removeChild(target);
-            }
-          }
-        } else {
-          if (target !== element) {
-            target.parentElement.removeChild(target);
-          }
-
-          _moveElementToPosition(element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
-
-          var _iteratorNormalCompletion5 = true;
-          var _didIteratorError5 = false;
-          var _iteratorError5 = undefined;
-
-          try {
-            for (var _iterator5 = dropTargets[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-              var dropTarget = _step5.value;
-
-              _dispatchDropEvent(_this3, dropTarget, 'drag.drop', {
-                bubbles: true,
-                details: {
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  originalEvent: event,
-                  target: target,
-                  element: element
-                }
-              });
-            }
-          } catch (err) {
-            _didIteratorError5 = true;
-            _iteratorError5 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-                _iterator5["return"]();
-              }
-            } finally {
-              if (_didIteratorError5) {
-                throw _iteratorError5;
-              }
-            }
-          }
-        }
-      }; // Set target to starting position.
-
-
-      if (pos.startingX !== undefined && pos.startingY !== undefined) {
-        var rect = _moveElementToPosition(target, pos.startingX, pos.startingY, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-
-        dropTargets = this.getDropTargets(rect, {
-          mouseX: pos.startingX,
-          mouseY: pos.startingY
-        });
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
-
-        try {
-          for (var _iterator6 = dropTargets[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var dropTarget = _step6.value;
-
-            _dispatchDropEvent(this, dropTarget, 'drag.enter', {
-              bubbles: true,
-              details: {
-                initial: true,
-                clientX: pos.startingX,
-                clientY: pos.startingY,
-                target: target,
-                element: element
-              }
-            });
-          }
-        } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-              _iterator6["return"]();
-            }
-          } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
-            }
-          }
-        }
       }
 
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
 
       _classPrivateFieldSet(this, _isDragging, false);
+
+      this.publish('drag.start', {
+        draggable: this,
+        element: element,
+        target: target,
+        clientX: pos.startingX - window.pageXOffset,
+        clientY: pos.startingY - window.pageYOffset,
+        name: 'drag.start',
+        originalEvent: null
+      });
     }
   }, {
     key: "getDropTargets",
-    value: function getDropTargets() {
-      return [];
+    value: function getDropTargets(rect, mousePos) {
+      var r = [];
+      var testFunction = this.tolerance;
+
+      if (typeof testFunction === 'string') {
+        testFunction = TOLERANCE[testFunction];
+      }
+
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var droppable = _step4.value;
+
+          if (testFunction(droppable, rect, mousePos, this)) {
+            r.push(droppable);
+          }
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+            _iterator4["return"]();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+
+      return r;
     }
   }, {
     key: "connect",
-    value: function connect(droppable) {}
+    value: function connect(droppable) {
+      if (typeof droppable === 'string') {
+        droppable = document.querySelector(droppable);
+      }
+
+      _classPrivateFieldGet(this, _droppables).push(droppable);
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "disconnect",
-    value: function disconnect(droppable) {}
+    value: function disconnect(droppable) {
+      if (typeof droppable === 'string') {
+        droppable = document.querySelector(droppable);
+      }
+
+      var i = _classPrivateFieldGet(this, _droppables).indexOf(droppable);
+
+      if (i !== -1) {
+        _classPrivateFieldGet(this, _droppables).splice(i, 1);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "hasDroppable",
-    value: function hasDroppable(droppable) {}
+    value: function hasDroppable(droppable) {
+      if (typeof droppable === 'string') {
+        droppable = document.querySelector(droppable);
+      }
+
+      return _classPrivateFieldGet(this, _droppables).indexOf(droppable) !== -1;
+    } // noinspection JSUnusedGlobalSymbols
+
   }, {
     key: "droppables",
     get: function get() {
@@ -784,12 +2124,46 @@ var _isDragging = new WeakMap();
 
 
 
-function _dispatchDropEvent(self, target, name, options) {}
+function _dispatchDropEvent(self, target, name, options) {
+  var customEvent = new CustomEvent(name, {
+    bubbles: options.bubble,
+    detail: _objectSpread({
+      name: name,
+      target: target,
+      draggable: self
+    }, options.detail)
+  });
+  target.dispatchEvent(customEvent);
+}
 
-function _revert(element, target, revertDuration) {}
+function _revert(target, position, revertDuration) {
+  var starting = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
+  var animation = new _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"]({
+    frames: {
+      '0%': {
+        left: starting.left + window.pageXOffset,
+        top: starting.top + window.pageYOffset
+      },
+      '100%': {
+        left: position.left,
+        top: position.top
+      }
+    },
+    applyFrame: function applyFrame(fx, frame) {
+      Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(fx.element, {
+        left: frame.left - window.pageXOffset,
+        top: frame.top - window.pageYOffset
+      }, 'translate3d');
+    }
+  });
+  return animation.animate(target, {
+    duration: revertDuration
+  });
+}
 /**
  * Takes a client (x, y) position and some offset coords and move the element to the given position.
  *
+ * @param self
  * @param element
  * @param x
  * @param y
@@ -801,8 +2175,9 @@ function _revert(element, target, revertDuration) {}
  */
 
 
-function _moveElementToPosition(element, x, y, offsetX, offsetY, container) {
-  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container) {
+  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
+      startingRect = rect;
   rect = rect.moveTo({
     left: x,
     top: y
@@ -810,6 +2185,18 @@ function _moveElementToPosition(element, x, y, offsetX, offsetY, container) {
   offsetX = offsetX || 0;
   offsetY = offsetY || 0;
   rect = rect.translate(-offsetX, -offsetY);
+
+  if (self.axis === 'y') {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](startingRect.left, rect.top, startingRect.right, rect.bottom);
+  } else if (self.axis === 'x') {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect.left, startingRect.top, rect.right, startingRect.bottom);
+  }
+
+  if (typeof self.grid === 'number' && self.grid) {
+    var left = Math.floor(rect.left / self.grid) * self.grid,
+        top = Math.floor(rect.top / self.grid) * self.grid;
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](left, top, left + startingRect.width, top + startingRect.height);
+  }
 
   if (container) {
     container = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](container);
@@ -894,15 +2281,7 @@ function () {
     this.timestamp = performance.now();
 
     var frame = function frame(timestamp) {
-      var delta = (timestamp - _this4.timestamp) / 1000; // todo remove debug
-      // console.log({
-      //     delta,
-      //     scrollXSpeed: this.scrollXSpeed,
-      //     scrollYSpeed: this.scrollYSpeed,
-      //     timestamp,
-      //     lastTimestamp: this.timestamp
-      // });
-
+      var delta = (timestamp - _this4.timestamp) / 1000;
       _this4.timestamp = timestamp;
       _this4.element.scrollLeft += delta * _this4.scrollXSpeed;
       _this4.element.scrollTop += delta * _this4.scrollYSpeed;
@@ -950,6 +2329,8 @@ function () {
   }, {
     key: "buildScrollHelper",
     value: function buildScrollHelper(element, target, rect, pos, dragInstance, event, scrollSpeed, container) {
+      var _this5 = this;
+
       var scrollParent = _getScrollParent(element);
 
       if (scrollParent) {
@@ -958,7 +2339,7 @@ function () {
 
         if (speed.x || speed.y) {
           return new ScrollHelper(scrollParent, speed.x * scrollSpeed, speed.y * scrollSpeed, function (scroller) {
-            var rect = _moveElementToPosition(target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, dragInstance, target, element));
+            var rect = _moveElementToPosition(_this5, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, dragInstance, target, element));
 
             var scrollRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](scroller.element);
             Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, rect, 'translate3d');

@@ -113,17 +113,70 @@
         z-index: 10;
         padding: 0.5rem;
     }
+
+    #dz1 {
+        position: absolute;
+        left: 400px;
+        top: 10px;
+        border: 1px solid #ccc;
+        background-color: #eee;
+        width: 500px;
+        height: 300px;
+    }
+
+    #dz1.active {
+        background-color: darkseagreen;
+    }
 </style>
 
 
-<div class="content-area" id="ez1">
-<div class="example-zone">
-    <div id="spacer1"></div>
-    <div id="drag-example1">Hello World!</div>
-</div>
+<div class="content-area">
 
+    <h1>Default</h1>
+    <div class="example-zone" id="ez8">
+        <div id="drag-example8" class="example-n1">Drag Me!</div>
+    </div>
+
+    <h1>Draggable that scrolls panes.</h1>
+    <div class="example-zone" id="ez1">
+        <div id="spacer1"></div>
+        <div id="drag-example1">Hello World!</div>
+    </div>
+
+    <h1>Draggable with clone helper that reverts over a second.</h1>
     <div class="example-zone" id="ez2">
         <div id="drag-example2" class="example-n1">Hello World!</div>
+    </div>
+
+    <h1>Draggable that reverts over 1 second</h1>
+    <div class="example-zone" id="ez3">
+        <div id="drag-example3" class="example-n1">Hello World!</div>
+    </div>
+
+
+    <h1>Drop Zones</h1>
+    <div class="example-zone" id="ez4">
+        <div id="drag-example4" class="example-n1">Hello World!</div>
+
+        <div id="dz1" class="dz"></div>
+    </div>
+
+
+    <h1>X Axis Only</h1>
+    <div class="example-zone" id="ez5">
+        <div id="drag-example5" class="example-n1">Hello World!</div>
+    </div>
+
+
+    <h1>Y Axis Only</h1>
+    <div class="example-zone" id="ez6">
+        <div id="drag-example6" class="example-n1">Hello World!</div>
+    </div>
+
+
+    <h1>50px Grid</h1>
+    <div class="example-zone" id="ez7">
+        <div id="drag-example7" class="example-n1">Hello World!</div>
     </div>
 </div>
 
