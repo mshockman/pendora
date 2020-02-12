@@ -511,22 +511,6 @@ export default class Draggable2 extends Publisher {
 }
 
 
-function _dispatchDropEvent(self, target, name, options) {
-    let customEvent = new CustomEvent(name, {
-        bubbles: options.bubble,
-
-        detail: {
-            name,
-            target,
-            draggable: self,
-            ...options.detail
-        }
-    });
-
-    target.dispatchEvent(customEvent);
-}
-
-
 function _revert(target, position, revertDuration, onFrame=null) {
     let starting = new Rect(target);
 
