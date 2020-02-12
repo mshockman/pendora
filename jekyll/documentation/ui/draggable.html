@@ -48,6 +48,39 @@ pageClass: test_draggable
     #dz1.active {
         background-color: darkseagreen;
     }
+
+    #drag-example9 {
+        border: 1px solid #ccc;
+        background-color: #eee;
+        padding: 8px;
+        margin: 16px;
+        width: 220px;
+        box-sizing: content-box;
+    }
+
+    #drag-example9 .drag-item {
+        width: 50px;
+        height: 50px;
+        display: inline-block;
+        border: 1px solid #ccc;
+        background-color: palevioletred;
+        font-weight: bold;
+        text-align: center;
+        margin: 10px;
+        cursor: move;
+        user-select: none;
+        z-index: 1000;
+        position: relative;
+    }
+
+
+    #drag-example9 .drag-item.ui-dragging {
+        z-index: 20000;
+    }
+
+    .ui-dragging {
+        z-index: 20000;
+    }
 </style>
 
 
@@ -99,4 +132,22 @@ pageClass: test_draggable
     <div class="example-zone" id="ez7">
         <div id="drag-example7" class="example-n1">Hello World!</div>
     </div>
+
+
+    <h1>Draggable Items</h1>
+
+    <div class="example-zone" id="ez9">
+        <div id="drag-example9">
+            <div class="drag-item">1</div>
+            <div class="drag-item">2</div>
+            <div class="drag-item">3</div>
+            <div class="drag-item">4</div>
+            <div class="drag-item">5</div>
+            <div class="drag-item">6</div>
+            <div class="drag-item">7</div>
+            <div class="drag-item">8</div>
+            <div class="drag-item">9</div>
+        </div>
+    </div>
+
 </div>

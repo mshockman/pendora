@@ -1,37 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="be0641ea-3d42-4cae-8604-06d7c4974d10" name="Default Changelist" comment="Removed dead code.">
+    <list default="true" id="be0641ea-3d42-4cae-8604-06d7c4974d10" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/css/styles.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/css/styles.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/css/styles2.css" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/css/styles2.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/css/styles2.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/css/styles2.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/js/app.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/app.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-1.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-1.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-2.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-2.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/assets/main.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/main.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/ContextMenu.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/ContextMenu.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/combobox.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/combobox.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/dropdown.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/dropdown.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/menubar.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/menubar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/multicombobox.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/multicombobox.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/richselect.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/richselect.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/sidebar.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/slidemenu.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/slidemenu.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/documentation/ui/draggable.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/ui/draggable.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/feed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/feed.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/menus/components/dropdown.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/menus/components/dropdown.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/menus/components/sidemenu.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/menus/components/sidemenu.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jekyll/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/fd/aa4200cef2544ec568b25970b3a49cf9b4f3d7015485506ccda914caf9c5b9" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/.jekyll-cache/Jekyll/Cache/Jekyll--Converters--Markdown/fd/aa4200cef2544ec568b25970b3a49cf9b4f3d7015485506ccda914caf9c5b9" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-1.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-1.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-2.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-2.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/documentation/ui/draggable.html" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/documentation/ui/draggable.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/js/pages/documentation/test_draggable.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/js/pages/documentation/test_draggable.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/ui/Draggable2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ui/Draggable2.js" afterDir="false" />
@@ -466,9 +444,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="npm.jekyll" />
         <item itemvalue="npm.sc:docs" />
         <item itemvalue="npm.jsc:docs" />
-        <item itemvalue="npm.jekyll" />
         <item itemvalue="npm.jsc:tests" />
         <item itemvalue="npm.sc:tests" />
       </list>
@@ -1041,28 +1019,28 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="739" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1579807208839" />
-    <state width="3419" height="401" key="GridCell.Tab.0.bottom" timestamp="1581471521992">
-      <screen x="0" y="0" width="3440" height="1400" />
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom" timestamp="1581525957452">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581459098599" />
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957452" />
     <state width="1899" height="223" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.bottom/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="3419" height="401" key="GridCell.Tab.0.center" timestamp="1581471521992">
-      <screen x="0" y="0" width="3440" height="1400" />
+    <state width="1899" height="240" key="GridCell.Tab.0.center" timestamp="1581525957451">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581459098599" />
+    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
     <state width="1899" height="223" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.center/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="3419" height="401" key="GridCell.Tab.0.left" timestamp="1581471521992">
-      <screen x="0" y="0" width="3440" height="1400" />
+    <state width="1899" height="240" key="GridCell.Tab.0.left" timestamp="1581525957451">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581459098599" />
+    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
     <state width="1899" height="223" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.left/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="3419" height="401" key="GridCell.Tab.0.right" timestamp="1581471521992">
-      <screen x="0" y="0" width="3440" height="1400" />
+    <state width="1899" height="240" key="GridCell.Tab.0.right" timestamp="1581525957451">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581459098599" />
+    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
     <state width="1899" height="223" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.right/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
     <state x="706" y="231" key="RollbackChangesDialog" timestamp="1580767832359">
@@ -1074,10 +1052,10 @@
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581432304312" />
     <state x="2472" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1580936527849" />
-    <state x="3444" y="568" width="1936" height="1125" maximized="true" key="dock-window-1" timestamp="1581484950869">
-      <screen x="3440" y="578" width="1920" height="1040" />
+    <state x="2236" y="-14" width="1613" height="757" maximized="true" key="dock-window-1" timestamp="1581526248423">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="1574" y="-23" width="1698" height="733" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581459120263" />
+    <state x="2236" y="-14" width="1613" height="757" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581526248423" />
     <state x="3444" y="568" width="1936" height="1125" maximized="true" key="dock-window-1/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581484950869" />
     <state x="688" y="312" key="git4idea.merge.GitPullDialog" timestamp="1581344972238">
       <screen x="0" y="0" width="1920" height="1040" />

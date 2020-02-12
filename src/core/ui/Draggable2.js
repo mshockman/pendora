@@ -6,9 +6,13 @@ import {setElementClientPosition} from "./position";
 import Animation from "../fx/Animation";
 
 
-const startingPosMap = new WeakMap();
-
-
+/**
+ * Returns the offset position of the mouse relative to the target.
+ *
+ * @param target
+ * @param event
+ * @returns {{x: number, y: number}}
+ */
 export function cursor(target, event) {
     let rect = new Rect(target);
 
@@ -19,6 +23,9 @@ export function cursor(target, event) {
 }
 
 
+/**
+ * Functions that are used to test if an element is overlapping.
+ */
 export const TOLERANCE = {
     intersect(element, rect) {
         let targetRect = new Rect(element);
@@ -32,8 +39,7 @@ export default class Draggable2 extends Publisher {
     #element;
     #droppables;
     #boundOnMouseDown;
-    #revertFX;
-    #isDragging;
+    #itemCache;
 
     constructor(element, {container=null, axis='xy', exclude='', delay=0, offset=cursor,
         resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
@@ -47,8 +53,7 @@ export default class Draggable2 extends Publisher {
         }
 
         this.#droppables = [];
-        this.#revertFX = null;
-        this.#isDragging = false;
+        this.#itemCache = new WeakMap();
 
         this.container = container;
         this.axis = axis;
@@ -234,16 +239,23 @@ export default class Draggable2 extends Publisher {
         }
     }
 
-    startDragging(element, pos) {
-        if(this.#isDragging) {
+    async startDragging(element, pos) {
+        let cache = this.#itemCache.get(element);
+
+        if(!cache) {
+            cache = {isDragging: false, fx: null, rect: null, helper: null, element: element};
+            this.#itemCache.set(element, cache);
+        }
+
+        if(cache.isDragging) {
             return;
         }
 
-        this.#isDragging = true;
+        cache.isDragging = true;
 
-        if(this.#revertFX) {
-            this.#revertFX.cancel();
-            this.#revertFX = null;
+        if(cache.fx) {
+            await cache.fx.cancel();
+            cache.fx = null;
         }
 
         let target = element,
@@ -257,8 +269,8 @@ export default class Draggable2 extends Publisher {
             window.pageYOffset
         );
 
-        if(!startingPosMap.get(element)) {
-            startingPosMap.set(element, startPosition);
+        if(!cache.rect) {
+            cache.rect = startPosition;
         }
 
         if(typeof container === 'string') {
@@ -278,10 +290,14 @@ export default class Draggable2 extends Publisher {
             }
 
             target.style.pointerEvents = 'none';
-        }
 
-        if(target !== element && !target.parentElement && element.parentElement) {
-            element.parentElement.appendChild(target);
+            if(!target.parentElement && element.parentElement) {
+                element.parentElement.appendChild(target);
+            }
+
+            target.classList.add('ui-drag-helper');
+
+            cache.helper = target;
         }
 
         let onMouseMove = event => {
@@ -330,6 +346,8 @@ export default class Draggable2 extends Publisher {
             event.preventDefault();
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
+            cache.isDragging = false;
+            element.classList.remove('ui-dragging');
 
             if(scroller) {
                 scroller.cancel();
@@ -379,22 +397,12 @@ export default class Draggable2 extends Publisher {
 
                         setElementClientPosition(target, pos, 'translate3d');
                     }
-
-                    startingPosMap.delete(element);
                 } else {
-                    let pos = startingPosMap.get(element);
-
-                    this.#revertFX = _revert(target, pos, this.revertDuration);
-
-                    if(await this.#revertFX === Animation.complete) {
-                        startingPosMap.delete(element);
-                    }
-
-                    this.#revertFX = null;
+                    cache.fx = _revert(target, cache.rect, this.revertDuration);
+                    await cache.fx;
 
                     if(target !== element) {
                         target.parentElement.removeChild(target);
-                        startingPosMap.delete(element); // don't need to save.
                     }
                 }
 
@@ -405,8 +413,10 @@ export default class Draggable2 extends Publisher {
                 }
 
                 if(isDefaultPrevented) _moveElementToPosition(this, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-                startingPosMap.delete(element);
+
             }
+
+            this.#itemCache.delete(element);
 
             this.publish('drag.end', {
                 draggable: this,
@@ -433,7 +443,7 @@ export default class Draggable2 extends Publisher {
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
-        this.#isDragging = false;
+        element.classList.add('ui-dragging');
 
         this.publish('drag.start', {
             draggable: this,

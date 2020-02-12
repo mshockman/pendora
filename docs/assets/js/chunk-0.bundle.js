@@ -78,6 +78,12 @@ function () {
         delay: 0,
         container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez8')
       });
+      this.drag8 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example9", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez9'),
+        selector: '.drag-item'
+      });
       var dz1 = document.querySelector('#dz1');
       this.drag4.connect(dz1);
       dz1.addEventListener('drag.enter', function (event) {
@@ -1348,7 +1354,14 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
-var startingPosMap = new WeakMap();
+/**
+ * Returns the offset position of the mouse relative to the target.
+ *
+ * @param target
+ * @param event
+ * @returns {{x: number, y: number}}
+ */
+
 function cursor(target, event) {
   var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
   return {
@@ -1356,6 +1369,10 @@ function cursor(target, event) {
     y: event.clientY - rect.top
   };
 }
+/**
+ * Functions that are used to test if an element is overlapping.
+ */
+
 var TOLERANCE = {
   intersect: function intersect(element, rect) {
     var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
@@ -1422,12 +1439,7 @@ function (_Publisher) {
       value: void 0
     });
 
-    _revertFX.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _isDragging.set(_assertThisInitialized(_this), {
+    _itemCache.set(_assertThisInitialized(_this), {
       writable: true,
       value: void 0
     });
@@ -1440,9 +1452,7 @@ function (_Publisher) {
 
     _classPrivateFieldSet(_assertThisInitialized(_this), _droppables, []);
 
-    _classPrivateFieldSet(_assertThisInitialized(_this), _revertFX, null);
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _isDragging, false);
+    _classPrivateFieldSet(_assertThisInitialized(_this), _itemCache, new WeakMap());
 
     _this.container = container;
     _this.axis = axis;
@@ -1678,352 +1688,403 @@ function (_Publisher) {
     }()
   }, {
     key: "startDragging",
-    value: function startDragging(element, pos) {
-      var _this3 = this;
-
-      if (_classPrivateFieldGet(this, _isDragging)) {
-        return;
-      }
-
-      _classPrivateFieldSet(this, _isDragging, true);
-
-      if (_classPrivateFieldGet(this, _revertFX)) {
-        _classPrivateFieldGet(this, _revertFX).cancel();
-
-        _classPrivateFieldSet(this, _revertFX, null);
-      }
-
-      var target = element,
-          container = this.container,
-          scroller = null,
-          dropTargets = [],
-          startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
-      startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
-
-      if (!startingPosMap.get(element)) {
-        startingPosMap.set(element, startPosition);
-      }
-
-      if (typeof container === 'string') {
-        container = document.querySelector(container);
-      }
-
-      if (this.helper) {
-        if (typeof this.helper === 'function') {
-          target = this.helper(element);
-        } else {
-          target = this.helper;
-        }
-
-        if (this.setHelperSize) {
-          target.style.width = startPosition.width + "px";
-          target.style.height = startPosition.height + "px";
-        }
-
-        target.style.pointerEvents = 'none';
-      }
-
-      if (target !== element && !target.parentElement && element.parentElement) {
-        element.parentElement.appendChild(target);
-      }
-
-      var onMouseMove = function onMouseMove(event) {
-        event.preventDefault();
-
-        var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
-
-        if (_this3.scrollSpeed > 0) {
-          if (scroller) {
-            scroller.cancel();
-            scroller = null;
-          }
-
-          scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
-        } // drag-enter
-
-
-        var currentDropTargets = _this3.getDropTargets(rect, {
-          mouseX: event.clientX,
-          mouseY: event.clientY
-        });
-
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = currentDropTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var dropTarget = _step.value;
-
-            if (dropTargets.indexOf(dropTarget) === -1) {
-              _dispatchDropEvent(_this3, dropTarget, 'drag.enter', {
-                bubbles: true,
-                detail: {
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  target: target,
-                  element: element,
-                  originalEvent: event
-                }
-              });
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var _dropTarget = _step2.value;
-
-            if (currentDropTargets.indexOf(_dropTarget) === -1) {
-              _dispatchDropEvent(_this3, _dropTarget, 'drag.leave', {
-                bubbles: false,
-                detail: {
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  target: target,
-                  element: element,
-                  originalEvent: event
-                }
-              });
-            }
-          } // drag-leave
-
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-              _iterator2["return"]();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-
-        dropTargets = currentDropTargets;
-
-        _this3.publish('drag.move', {
-          draggable: _this3,
-          name: 'drag.enter',
-          target: target,
-          element: element,
-          originalEvent: event,
-          clientX: event.clientX,
-          clientY: event.clientY
-        });
-      };
-
-      var onMouseUp =
+    value: function () {
+      var _startDragging = _asyncToGenerator(
       /*#__PURE__*/
-      function () {
-        var _ref4 = _asyncToGenerator(
-        /*#__PURE__*/
-        regeneratorRuntime.mark(function _callee2(event) {
-          var accepted, _isDefaultPrevented, reverted, _pos, _pos2;
+      regeneratorRuntime.mark(function _callee3(element, pos) {
+        var _this3 = this;
 
-          return regeneratorRuntime.wrap(function _callee2$(_context2) {
-            while (1) {
-              switch (_context2.prev = _context2.next) {
-                case 0:
-                  event.preventDefault();
-                  document.removeEventListener('mousemove', onMouseMove);
-                  document.removeEventListener('mouseup', onMouseUp);
+        var cache, target, container, scroller, dropTargets, startPosition, onMouseMove, onMouseUp, rect, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, dropTarget;
 
-                  if (scroller) {
-                    scroller.cancel();
-                    scroller = null;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                cache = _classPrivateFieldGet(this, _itemCache).get(element);
+
+                if (!cache) {
+                  cache = {
+                    isDragging: false,
+                    fx: null,
+                    rect: null,
+                    helper: null,
+                    element: element
+                  };
+
+                  _classPrivateFieldGet(this, _itemCache).set(element, cache);
+                }
+
+                if (!cache.isDragging) {
+                  _context3.next = 4;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 4:
+                cache.isDragging = true;
+
+                if (!cache.fx) {
+                  _context3.next = 9;
+                  break;
+                }
+
+                _context3.next = 8;
+                return cache.fx.cancel();
+
+              case 8:
+                cache.fx = null;
+
+              case 9:
+                target = element, container = this.container, scroller = null, dropTargets = [], startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+                startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
+
+                if (!cache.rect) {
+                  cache.rect = startPosition;
+                }
+
+                if (typeof container === 'string') {
+                  container = document.querySelector(container);
+                }
+
+                if (this.helper) {
+                  if (typeof this.helper === 'function') {
+                    target = this.helper(element);
+                  } else {
+                    target = this.helper;
                   }
 
-                  dropTargets = _this3.getDropTargets();
-                  accepted = false, _isDefaultPrevented = false, reverted = false;
+                  if (this.setHelperSize) {
+                    target.style.width = startPosition.width + "px";
+                    target.style.height = startPosition.height + "px";
+                  }
 
-                  _this3.publish('drag.drop', {
-                    name: 'drag.drop',
+                  target.style.pointerEvents = 'none';
+
+                  if (!target.parentElement && element.parentElement) {
+                    element.parentElement.appendChild(target);
+                  }
+
+                  target.classList.add('ui-drag-helper');
+                  cache.helper = target;
+                }
+
+                onMouseMove = function onMouseMove(event) {
+                  event.preventDefault();
+
+                  var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+
+                  if (_this3.scrollSpeed > 0) {
+                    if (scroller) {
+                      scroller.cancel();
+                      scroller = null;
+                    }
+
+                    scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
+                  } // drag-enter
+
+
+                  var currentDropTargets = _this3.getDropTargets(rect, {
+                    mouseX: event.clientX,
+                    mouseY: event.clientY
+                  });
+
+                  var _iteratorNormalCompletion = true;
+                  var _didIteratorError = false;
+                  var _iteratorError = undefined;
+
+                  try {
+                    for (var _iterator = currentDropTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                      var dropTarget = _step.value;
+
+                      if (dropTargets.indexOf(dropTarget) === -1) {
+                        _dispatchDropEvent(_this3, dropTarget, 'drag.enter', {
+                          bubbles: true,
+                          detail: {
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            target: target,
+                            element: element,
+                            originalEvent: event
+                          }
+                        });
+                      }
+                    }
+                  } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                  } finally {
+                    try {
+                      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                        _iterator["return"]();
+                      }
+                    } finally {
+                      if (_didIteratorError) {
+                        throw _iteratorError;
+                      }
+                    }
+                  }
+
+                  var _iteratorNormalCompletion2 = true;
+                  var _didIteratorError2 = false;
+                  var _iteratorError2 = undefined;
+
+                  try {
+                    for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                      var _dropTarget = _step2.value;
+
+                      if (currentDropTargets.indexOf(_dropTarget) === -1) {
+                        _dispatchDropEvent(_this3, _dropTarget, 'drag.leave', {
+                          bubbles: false,
+                          detail: {
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            target: target,
+                            element: element,
+                            originalEvent: event
+                          }
+                        });
+                      }
+                    } // drag-leave
+
+                  } catch (err) {
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
+                  } finally {
+                    try {
+                      if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                        _iterator2["return"]();
+                      }
+                    } finally {
+                      if (_didIteratorError2) {
+                        throw _iteratorError2;
+                      }
+                    }
+                  }
+
+                  dropTargets = currentDropTargets;
+
+                  _this3.publish('drag.move', {
                     draggable: _this3,
+                    name: 'drag.enter',
                     target: target,
                     element: element,
                     originalEvent: event,
                     clientX: event.clientX,
-                    clientY: event.clientY,
-                    isDefaultPrevented: function isDefaultPrevented() {
-                      return _isDefaultPrevented;
-                    },
-                    isAccepted: function isAccepted() {
-                      return accepted;
-                    },
-                    accept: function accept() {
-                      accepted = true;
-                    },
-                    preventDefault: function preventDefault() {
-                      _isDefaultPrevented = true;
+                    clientY: event.clientY
+                  });
+                };
+
+                onMouseUp =
+                /*#__PURE__*/
+                function () {
+                  var _ref4 = _asyncToGenerator(
+                  /*#__PURE__*/
+                  regeneratorRuntime.mark(function _callee2(event) {
+                    var accepted, _isDefaultPrevented, reverted, _pos;
+
+                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            event.preventDefault();
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                            cache.isDragging = false;
+                            element.classList.remove('ui-dragging');
+
+                            if (scroller) {
+                              scroller.cancel();
+                              scroller = null;
+                            }
+
+                            dropTargets = _this3.getDropTargets();
+                            accepted = false, _isDefaultPrevented = false, reverted = false;
+
+                            _this3.publish('drag.drop', {
+                              name: 'drag.drop',
+                              draggable: _this3,
+                              target: target,
+                              element: element,
+                              originalEvent: event,
+                              clientX: event.clientX,
+                              clientY: event.clientY,
+                              isDefaultPrevented: function isDefaultPrevented() {
+                                return _isDefaultPrevented;
+                              },
+                              isAccepted: function isAccepted() {
+                                return accepted;
+                              },
+                              accept: function accept() {
+                                accepted = true;
+                              },
+                              preventDefault: function preventDefault() {
+                                _isDefaultPrevented = true;
+                              }
+                            });
+
+                            if (!(_this3.revert && !accepted)) {
+                              _context2.next = 21;
+                              break;
+                            }
+
+                            if (_this3.revertDuration) {
+                              _context2.next = 14;
+                              break;
+                            }
+
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                            } else {
+                              _pos = startPosition.translate(-window.pageXOffset, -window.pageYOffset);
+                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
+                            }
+
+                            _context2.next = 18;
+                            break;
+
+                          case 14:
+                            cache.fx = _revert(target, cache.rect, _this3.revertDuration);
+                            _context2.next = 17;
+                            return cache.fx;
+
+                          case 17:
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                            }
+
+                          case 18:
+                            reverted = true;
+                            _context2.next = 23;
+                            break;
+
+                          case 21:
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                            }
+
+                            if (_isDefaultPrevented) _moveElementToPosition(_this3, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+
+                          case 23:
+                            _classPrivateFieldGet(_this3, _itemCache)["delete"](element);
+
+                            _this3.publish('drag.end', {
+                              draggable: _this3,
+                              name: 'drag.end',
+                              target: target,
+                              element: element,
+                              originalEvent: event,
+                              clientX: event.clientX,
+                              clientY: event.clientY,
+                              accepted: accepted,
+                              reverted: reverted
+                            });
+
+                          case 25:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2);
+                  }));
+
+                  return function onMouseUp(_x4) {
+                    return _ref4.apply(this, arguments);
+                  };
+                }(); // Set target to starting position.
+
+
+                if (!(pos.startingX !== undefined && pos.startingY !== undefined)) {
+                  _context3.next = 38;
+                  break;
+                }
+
+                rect = _moveElementToPosition(this, target, pos.startingX - window.pageXOffset, pos.startingY - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+                dropTargets = this.getDropTargets(rect, {
+                  mouseX: pos.startingX - window.pageXOffset,
+                  mouseY: pos.startingY - window.pageYOffset
+                });
+                _iteratorNormalCompletion3 = true;
+                _didIteratorError3 = false;
+                _iteratorError3 = undefined;
+                _context3.prev = 22;
+
+                for (_iterator3 = dropTargets[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                  dropTarget = _step3.value;
+
+                  _dispatchDropEvent(this, dropTarget, 'drag.enter', {
+                    bubbles: true,
+                    detail: {
+                      initial: true,
+                      clientX: pos.startingX - window.pageXOffset,
+                      clientY: pos.startingY - window.pageYOffset,
+                      target: target,
+                      element: element
                     }
                   });
+                }
 
-                  if (!(_this3.revert && !accepted)) {
-                    _context2.next = 26;
-                    break;
-                  }
+                _context3.next = 30;
+                break;
 
-                  if (_this3.revertDuration) {
-                    _context2.next = 13;
-                    break;
-                  }
+              case 26:
+                _context3.prev = 26;
+                _context3.t0 = _context3["catch"](22);
+                _didIteratorError3 = true;
+                _iteratorError3 = _context3.t0;
 
-                  if (target !== element) {
-                    target.parentElement.removeChild(target);
-                  } else {
-                    _pos = startPosition.translate(-window.pageXOffset, -window.pageYOffset);
-                    Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
-                  }
+              case 30:
+                _context3.prev = 30;
+                _context3.prev = 31;
 
-                  startingPosMap["delete"](element);
-                  _context2.next = 23;
+                if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+                  _iterator3["return"]();
+                }
+
+              case 33:
+                _context3.prev = 33;
+
+                if (!_didIteratorError3) {
+                  _context3.next = 36;
                   break;
+                }
 
-                case 13:
-                  _pos2 = startingPosMap.get(element);
+                throw _iteratorError3;
 
-                  _classPrivateFieldSet(_this3, _revertFX, _revert(target, _pos2, _this3.revertDuration));
+              case 36:
+                return _context3.finish(33);
 
-                  _context2.next = 17;
-                  return _classPrivateFieldGet(_this3, _revertFX);
+              case 37:
+                return _context3.finish(30);
 
-                case 17:
-                  _context2.t0 = _context2.sent;
-                  _context2.t1 = _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"].complete;
+              case 38:
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                element.classList.add('ui-dragging');
+                this.publish('drag.start', {
+                  draggable: this,
+                  element: element,
+                  target: target,
+                  clientX: pos.startingX - window.pageXOffset,
+                  clientY: pos.startingY - window.pageYOffset,
+                  name: 'drag.start',
+                  originalEvent: null
+                });
 
-                  if (!(_context2.t0 === _context2.t1)) {
-                    _context2.next = 21;
-                    break;
-                  }
-
-                  startingPosMap["delete"](element);
-
-                case 21:
-                  _classPrivateFieldSet(_this3, _revertFX, null);
-
-                  if (target !== element) {
-                    target.parentElement.removeChild(target);
-                    startingPosMap["delete"](element); // don't need to save.
-                  }
-
-                case 23:
-                  reverted = true;
-                  _context2.next = 29;
-                  break;
-
-                case 26:
-                  if (target !== element) {
-                    target.parentElement.removeChild(target);
-                  }
-
-                  if (_isDefaultPrevented) _moveElementToPosition(_this3, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
-                  startingPosMap["delete"](element);
-
-                case 29:
-                  _this3.publish('drag.end', {
-                    draggable: _this3,
-                    name: 'drag.end',
-                    target: target,
-                    element: element,
-                    originalEvent: event,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    accepted: accepted,
-                    reverted: reverted
-                  });
-
-                case 30:
-                case "end":
-                  return _context2.stop();
-              }
-            }
-          }, _callee2);
-        }));
-
-        return function onMouseUp(_x2) {
-          return _ref4.apply(this, arguments);
-        };
-      }(); // Set target to starting position.
-
-
-      if (pos.startingX !== undefined && pos.startingY !== undefined) {
-        var rect = _moveElementToPosition(this, target, pos.startingX - window.pageXOffset, pos.startingY - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-
-        dropTargets = this.getDropTargets(rect, {
-          mouseX: pos.startingX - window.pageXOffset,
-          mouseY: pos.startingY - window.pageYOffset
-        });
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
-
-        try {
-          for (var _iterator3 = dropTargets[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var dropTarget = _step3.value;
-
-            _dispatchDropEvent(this, dropTarget, 'drag.enter', {
-              bubbles: true,
-              detail: {
-                initial: true,
-                clientX: pos.startingX - window.pageXOffset,
-                clientY: pos.startingY - window.pageYOffset,
-                target: target,
-                element: element
-              }
-            });
-          }
-        } catch (err) {
-          _didIteratorError3 = true;
-          _iteratorError3 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-              _iterator3["return"]();
-            }
-          } finally {
-            if (_didIteratorError3) {
-              throw _iteratorError3;
+              case 42:
+              case "end":
+                return _context3.stop();
             }
           }
-        }
+        }, _callee3, this, [[22, 26, 30, 38], [31,, 33, 37]]);
+      }));
+
+      function startDragging(_x2, _x3) {
+        return _startDragging.apply(this, arguments);
       }
 
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-
-      _classPrivateFieldSet(this, _isDragging, false);
-
-      this.publish('drag.start', {
-        draggable: this,
-        element: element,
-        target: target,
-        clientX: pos.startingX - window.pageXOffset,
-        clientY: pos.startingY - window.pageYOffset,
-        name: 'drag.start',
-        originalEvent: null
-      });
-    }
+      return startDragging;
+    }()
   }, {
     key: "getDropTargets",
     value: function getDropTargets(rect, mousePos) {
@@ -2118,9 +2179,7 @@ var _droppables = new WeakMap();
 
 var _boundOnMouseDown = new WeakMap();
 
-var _revertFX = new WeakMap();
-
-var _isDragging = new WeakMap();
+var _itemCache = new WeakMap();
 
 
 

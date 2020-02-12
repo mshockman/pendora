@@ -11,6 +11,7 @@ export default class TestDraggablePage {
         this.drag6 = new Draggable2("#drag-example6", {resistance: 0, delay: 0, container: ScrollArea('#ez6'), axis: 'y'});
         this.drag7 = new Draggable2("#drag-example7", {resistance: 0, delay: 0, container: ScrollArea('#ez7'), grid: 50});
         this.drag8 = new Draggable2("#drag-example8", {resistance: 0, delay: 0, container: ScrollArea('#ez8')});
+        this.drag8 = new Draggable2("#drag-example9", {resistance: 0, delay: 0, container: ScrollArea('#ez9'), selector: '.drag-item'});
 
         let dz1 = document.querySelector('#dz1');
 
