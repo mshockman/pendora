@@ -1,0 +1,247 @@
+---
+title: "Sortable"
+layout: layout2/documentation
+pageClass: test_sortable
+---
+
+
+<style type="text/css">
+    body {
+        width: 9000px;
+        height: 9000px;
+    }
+
+    .test-box {
+        background-color: #333;
+        width: 200px;
+        height: 200px;
+        box-sizing: border-box;
+        position: absolute;
+        color: #fff;
+        cursor: move;
+        user-select: none;
+
+        left: 50px;
+        top: 400px;
+    }
+
+    .test-box__content-wrapper {
+        border: 4px dashed #aaa;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+    }
+
+    .test-box__content {
+        border: 2px solid #555;
+        background-color: #777;
+        padding: 5px;
+        width: 100px;
+        height: 100px;
+        vertical-align: middle;
+        margin: auto auto;
+    }
+
+    #mouse-outputs {
+        position: fixed;
+        right: 5px;
+        top: 5px;
+    }
+
+    .test-window {
+        position: absolute;
+        border: 1px solid #000;
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+    }
+
+    .test-window .toolbar {
+        background-color: #333;
+        color: #fff;
+        user-select: none;
+        font-weight: bold;
+        font-size: 1.25rem;
+        line-height: 1.25;
+        padding: 0.3rem;
+        cursor: move;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .test-window .content {
+        flex: 1;
+        padding: 0.3rem;
+    }
+
+    #test-window1 {
+        width: 400px;
+        height: 330px;
+        z-index: 2;
+        left: 1000px;
+        top: 300px;
+    }
+
+    #drag-list-test {
+        width: 200px;
+    }
+
+    .dlt .drag-list-item {
+        background-color: #fafafa;
+        border: 1px solid #ccc;
+        padding: 5px;
+        margin: 5px;
+        cursor: move;
+        user-select: none;
+    }
+
+    #sortable-grid {
+        width: 382px;
+        box-sizing: border-box;
+    }
+
+    #sortable-grid .ui-sorting {
+        z-index: 2;
+    }
+
+    .grid-item {
+        width: 75px;
+        height: 75px;
+        margin: 10px;
+        font-size: 4rem;
+        border: 1px solid #333;
+        background-color: #ccc;
+        float: left;
+        box-sizing: border-box;
+        text-align: center;
+        user-select: none;
+        cursor: move;
+    }
+
+    .dlt .ui-sorting {
+        position: absolute;
+        width: 180px;
+        z-index: 2;
+    }
+
+    .dlt .ui-placeholder {
+        background-color: #d8d128;
+        border: 1px solid #665f16;
+        margin: 5px;
+        height: 1.5rem;
+    }
+
+    #drag-list-test > div {
+
+    }
+
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .mr-4 {
+        margin-right: 2rem;
+    }
+
+    .drop-list {
+        min-width: 190px;
+        min-height: 50px;
+        border: 1px solid #ccc;
+    }
+
+    #test-scroll {
+        width: 800px;
+        height: 800px;
+        overflow: scroll;
+        border: 1px solid #ccc;
+        position: absolute;
+        background-color: #fff;
+        left: 100px;
+        top: 1200px;
+    }
+
+    #test-scroll .spacer {
+        position: absolute;
+        width: 16000px;
+        height: 16000px;
+    }
+
+    #drop-test-zone {
+        position: absolute;
+        left: 0;
+        top: 2200px;
+    }
+
+    #drop-zone-test1 {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        left: 600px;
+        top: 0;
+        background-color: #f00;
+    }
+
+    #drop-test1-droppable {
+        left: 0;
+        top: 0;
+        position: absolute;
+    }
+
+    .example-zone {
+        border: 1px solid #ccc;
+        background-color: #fff;
+        min-height: 400px;
+        margin: 1rem;
+        position: relative;
+    }
+</style>
+
+
+<div class="content-area">
+
+    <h2>Connected Sortable Lists</h2>
+    <div class="example-zone">
+        <div class="row">
+            <div id="drag-list-test" class="mr-4 drop-list dlt">
+                <div class="drag-list-item ui-sort-item">Item #1</div>
+                <div class="drag-list-item ui-sort-item">Item #2</div>
+                <div class="drag-list-item ui-sort-item">Item #3</div>
+                <div class="drag-list-item ui-sort-item">Item #4</div>
+                <div class="drag-list-item ui-sort-item">Item #5</div>
+                <div class="drag-list-item ui-sort-item">Item #5</div>
+                <div class="drag-list-item ui-sort-item">Item #6</div>
+                <div class="drag-list-item ui-sort-item">Item #7</div>
+                <div class="drag-list-item ui-sort-item">Item #8</div>
+                <div class="drag-list-item ui-sort-item">Item #9</div>
+                <div class="drag-list-item ui-sort-item">Item #10</div>
+            </div>
+
+            <div id="drag-list-test2" class="drop-list dlt">
+
+            </div>
+        </div>
+    </div>
+
+    <h2>Sortable Grid</h2>
+    <div class="example-zone">
+        <div id="sortable-grid">
+            <div class="grid-item ui-sort-item">1</div>
+            <div class="grid-item ui-sort-item">2</div>
+            <div class="grid-item ui-sort-item">3</div>
+            <div class="grid-item ui-sort-item">4</div>
+            <div class="grid-item ui-sort-item">5</div>
+            <div class="grid-item ui-sort-item">6</div>
+            <div class="grid-item ui-sort-item">7</div>
+            <div class="grid-item ui-sort-item">8</div>
+            <div class="grid-item ui-sort-item">9</div>
+            <div class="grid-item ui-sort-item">10</div>
+            <div class="grid-item ui-sort-item">11</div>
+            <div class="grid-item ui-sort-item">12</div>
+        </div>
+    </div>
+
+</div>

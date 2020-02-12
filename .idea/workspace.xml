@@ -2,35 +2,35 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="be0641ea-3d42-4cae-8604-06d7c4974d10" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/documentation/ui/sortable.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jekyll/documentation/ui/sortable.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jekyll/js/pages/documentation/test_sortable.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/app.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/app.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/app.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/app.bundle.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-3.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-3.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-3.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-3.bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/ContextMenu.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/ContextMenu.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/combobox.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/combobox.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/dropdown.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/dropdown.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/menubar.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/menubar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/multicombobox.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/multicombobox.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/richselect.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/richselect.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/sidebar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/menus/slidemenu.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/menus/slidemenu.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/documentation/ui/draggable.html" beforeDir="false" afterPath="$PROJECT_DIR$/docs/documentation/ui/draggable.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/feed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/feed.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/_includes/layout2/main-sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/_includes/layout2/main-sidebar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/app.bundle.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ui/Draggable2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ui/Draggable2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/ui/Sortable.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ui/Sortable.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-0.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-1.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-1.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-10.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-10.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-11.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-11.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-12.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-12.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-13.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-13.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-14.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-14.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-15.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-15.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-2.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-2.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-3.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-3.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-4.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-4.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-5.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-5.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-6.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-6.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-7.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-7.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-8.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-8.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-9.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-9.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-vendors.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-vendors.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/test_pages.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_pages.bundle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/dist/test_resizeable.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_resizeable.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-3.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-3.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-3.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-3.bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/js/app.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -462,8 +462,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.jsc:tests" />
         <item itemvalue="npm.jekyll" />
+        <item itemvalue="npm.jsc:tests" />
         <item itemvalue="npm.sc:docs" />
         <item itemvalue="npm.jsc:docs" />
         <item itemvalue="npm.sc:tests" />
@@ -614,13 +614,6 @@
       <workItem from="1581086270391" duration="1199000" />
       <workItem from="1581344312148" duration="22984000" />
       <workItem from="1581432295621" duration="24358000" />
-    </task>
-    <task id="LOCAL-00167" summary="Fixed bug where menu position wouldn't be inherited.">
-      <created>1577733536512</created>
-      <option name="number" value="00167" />
-      <option name="presentableId" value="LOCAL-00167" />
-      <option name="project" value="LOCAL" />
-      <updated>1577733536512</updated>
     </task>
     <task id="LOCAL-00168" summary="Fixed close on select not closing root context menu.">
       <created>1577733917950</created>
@@ -958,7 +951,14 @@
       <option name="project" value="LOCAL" />
       <updated>1581539903025</updated>
     </task>
-    <option name="localTasksCounter" value="216" />
+    <task id="LOCAL-00216" summary="Refactored sortable to work with draggable 2.">
+      <created>1581542518768</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
+      <option name="project" value="LOCAL" />
+      <updated>1581542518769</updated>
+    </task>
+    <option name="localTasksCounter" value="217" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -992,7 +992,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed positioning issue on edge." />
     <MESSAGE value="Removed debug code." />
     <MESSAGE value="Animation now reposition on every frame." />
     <MESSAGE value="position was refactored to be a &quot;protected&quot; method." />
@@ -1017,17 +1016,18 @@
     <MESSAGE value="Added refresh drop targets on revert." />
     <MESSAGE value="Refactored dragable events." />
     <MESSAGE value="removed dead code." />
-    <option name="LAST_COMMIT_MESSAGE" value="removed dead code." />
+    <MESSAGE value="Refactored sortable to work with draggable 2." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactored sortable to work with draggable 2." />
   </component>
   <component name="WindowStateProjectService">
     <state x="714" y="323" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1580755555453">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="714" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1580755555453" />
-    <state x="583" y="115" key="CommitChangelistDialog2" timestamp="1581539899587">
+    <state x="583" y="115" key="CommitChangelistDialog2" timestamp="1581542513496">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="583" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581539899587" />
+    <state x="583" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542513496" />
     <state x="2503" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1580936524896" />
     <state x="182" y="92" width="1536" height="859" key="DiffContextDialog" timestamp="1581349473921">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -1037,28 +1037,28 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="739" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1579807208839" />
-    <state width="1899" height="240" key="GridCell.Tab.0.bottom" timestamp="1581540635445">
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom" timestamp="1581542683685">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542683685" />
     <state width="1899" height="223" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.bottom/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.center" timestamp="1581540635445">
+    <state width="1899" height="240" key="GridCell.Tab.0.center" timestamp="1581542683685">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
+    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542683685" />
     <state width="1899" height="223" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.center/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.left" timestamp="1581540635445">
+    <state width="1899" height="240" key="GridCell.Tab.0.left" timestamp="1581542683684">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
+    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542683684" />
     <state width="1899" height="223" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.left/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.right" timestamp="1581540635445">
+    <state width="1899" height="240" key="GridCell.Tab.0.right" timestamp="1581542683685">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
+    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542683685" />
     <state width="1899" height="223" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.right/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
     <state x="706" y="231" key="RollbackChangesDialog" timestamp="1580767832359">

@@ -12,6 +12,7 @@ let app = new Application({
     'menu_page_index': () =>  import("./pages/menus/page_index"),
     'documentation_dropdown': () => import("./pages/documentation/dropdown"),
     'test_draggable': () => import("./pages/documentation/test_draggable"),
+    'test_sortable': () => import("./pages/documentation/test_sortable"),
 });
 
 
