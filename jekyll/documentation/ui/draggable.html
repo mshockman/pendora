@@ -1,5 +1,5 @@
 ---
-title: "SlideMenu"
+title: "Draggable"
 layout: layout2/documentation
 pageClass: test_draggable
 ---
@@ -35,7 +35,7 @@ pageClass: test_draggable
         padding: 0.5rem;
     }
 
-    #dz1 {
+    #dz1, .dz {
         position: absolute;
         left: 400px;
         top: 10px;
@@ -45,11 +45,11 @@ pageClass: test_draggable
         height: 300px;
     }
 
-    #dz1.active {
+    #dz1.active, .dz.active {
         background-color: darkseagreen;
     }
 
-    #drag-example9 {
+    #drag-example9, .drag-items-container {
         border: 1px solid #ccc;
         background-color: #eee;
         padding: 8px;
@@ -58,7 +58,7 @@ pageClass: test_draggable
         box-sizing: content-box;
     }
 
-    #drag-example9 .drag-item {
+    #drag-example9 .drag-item, .drag-items-container .drag-item {
         width: 50px;
         height: 50px;
         display: inline-block;
@@ -74,7 +74,7 @@ pageClass: test_draggable
     }
 
 
-    #drag-example9 .drag-item.ui-dragging {
+    #drag-example9 .drag-item.ui-dragging, .drag-items-container .drag-item.ui-dragging {
         z-index: 20000;
     }
 
@@ -91,6 +91,16 @@ pageClass: test_draggable
         <div id="drag-example8" class="example-n1">Drag Me!</div>
     </div>
 
+    <h1>Delay</h1>
+    <div class="example-zone" id="ez12">
+        <div id="drag-example12" class="example-n1">Drag Me!</div>
+    </div>
+
+    <h1>Resistance</h1>
+    <div class="example-zone" id="ez13">
+        <div id="drag-example13" class="example-n1">Drag Me!</div>
+    </div>
+
     <h1>Draggable that scrolls panes.</h1>
     <div class="example-zone" id="ez1">
         <div id="spacer1"></div>
@@ -100,6 +110,11 @@ pageClass: test_draggable
     <h1>Draggable with clone helper that reverts over a second.</h1>
     <div class="example-zone" id="ez2">
         <div id="drag-example2" class="example-n1">Hello World!</div>
+    </div>
+
+    <h1>Draggable with helper no revert.</h1>
+    <div class="example-zone" id="ez10">
+        <div id="drag-example10" class="example-n1">Hello World!</div>
     </div>
 
     <h1>Draggable that reverts over 1 second</h1>
@@ -113,6 +128,14 @@ pageClass: test_draggable
         <div id="drag-example4" class="example-n1">Hello World!</div>
 
         <div id="dz1" class="dz"></div>
+    </div>
+
+
+    <h1>Drop Zones with helpers</h1>
+    <div class="example-zone" id="ez14">
+        <div id="drag-example14" class="example-n1">Hello World!</div>
+
+        <div id="dz14" class="dz"></div>
     </div>
 
 
@@ -138,6 +161,21 @@ pageClass: test_draggable
 
     <div class="example-zone" id="ez9">
         <div id="drag-example9">
+            <div class="drag-item">1</div>
+            <div class="drag-item">2</div>
+            <div class="drag-item">3</div>
+            <div class="drag-item">4</div>
+            <div class="drag-item">5</div>
+            <div class="drag-item">6</div>
+            <div class="drag-item">7</div>
+            <div class="drag-item">8</div>
+            <div class="drag-item">9</div>
+        </div>
+    </div>
+
+    <h1>Dragging Items with helper and revert</h1>
+    <div class="example-zone" id="ez11">
+        <div id="drag-example11" class="drag-items-container">
             <div class="drag-item">1</div>
             <div class="drag-item">2</div>
             <div class="drag-item">3</div>

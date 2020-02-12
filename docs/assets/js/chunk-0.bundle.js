@@ -53,7 +53,8 @@ function () {
       this.drag4 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example4", {
         resistance: 0,
         delay: 0,
-        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez4')
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez4'),
+        tolerance: 1
       });
       this.drag5 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example5", {
         resistance: 0,
@@ -78,20 +79,60 @@ function () {
         delay: 0,
         container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez8')
       });
-      this.drag8 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example9", {
+      this.drag9 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example9", {
         resistance: 0,
         delay: 0,
         container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez9'),
         selector: '.drag-item'
       });
-      var dz1 = document.querySelector('#dz1');
-      this.drag4.connect(dz1);
+      this.drag10 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example10", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez10'),
+        helper: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5)
+      });
+      this.drag11 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example11", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez11'),
+        selector: '.drag-item',
+        revert: true,
+        revertDuration: 1000,
+        helper: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5)
+      });
+      this.drag12 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example12", {
+        resistance: 0,
+        delay: 500,
+        scrollSpeed: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez12')
+      });
+      this.drag13 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example13", {
+        resistance: 200,
+        delay: 0,
+        scrollSpeed: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez13')
+      });
+      this.drag14 = new core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example14", {
+        resistance: 0,
+        delay: 0,
+        container: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez14'),
+        tolerance: 1,
+        helper: Object(core_ui_Draggable2__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5),
+        revertDuration: 1000,
+        revert: true
+      });
+      this.connectDZ(this.drag4, '#dz1');
+      this.connectDZ(this.drag14, '#dz14');
+    }
+  }, {
+    key: "connectDZ",
+    value: function connectDZ(drag, dz) {
+      var dz1 = document.querySelector(dz);
+      drag.connect(dz1);
       dz1.addEventListener('drag.enter', function (event) {
-        console.log(event);
         dz1.classList.add('active');
       });
       dz1.addEventListener('drag.leave', function (event) {
-        console.log(event);
         dz1.classList.remove('active');
       });
     }
@@ -1293,13 +1334,12 @@ function () {
 /*!***********************************!*\
   !*** ./src/core/ui/Draggable2.js ***!
   \***********************************/
-/*! exports provided: cursor, TOLERANCE, default, ScrollArea, clone */
+/*! exports provided: cursor, default, ScrollArea, clone */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cursor", function() { return cursor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TOLERANCE", function() { return TOLERANCE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Draggable2; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollArea", function() { return ScrollArea; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clone", function() { return clone; });
@@ -1354,6 +1394,7 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
+var reg_percentage_test = /\s*\d+\.?\d*%\s*/;
 /**
  * Returns the offset position of the mouse relative to the target.
  *
@@ -1369,16 +1410,16 @@ function cursor(target, event) {
     y: event.clientY - rect.top
   };
 }
-/**
- * Functions that are used to test if an element is overlapping.
- */
 
-var TOLERANCE = {
-  intersect: function intersect(element, rect) {
-    var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
-    return targetRect.isOverlapping(rect);
-  }
-};
+function buildTestIntersectionFunction(amount) {
+  return function (element, rect) {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect);
+    var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
+        intersection = targetRect.intersection(rect),
+        p = intersection ? intersection.getArea() / rect.getArea() : 0;
+    return p >= amount;
+  };
+}
 
 var Draggable2 =
 /*#__PURE__*/
@@ -1414,7 +1455,7 @@ function (_Publisher) {
         _ref$selector = _ref.selector,
         selector = _ref$selector === void 0 ? null : _ref$selector,
         _ref$tolerance = _ref.tolerance,
-        tolerance = _ref$tolerance === void 0 ? 'intersect' : _ref$tolerance,
+        tolerance = _ref$tolerance === void 0 ? 1 : _ref$tolerance,
         _ref$setHelperSize = _ref.setHelperSize,
         setHelperSize = _ref$setHelperSize === void 0 ? false : _ref$setHelperSize,
         _ref$grid = _ref.grid,
@@ -1694,13 +1735,16 @@ function (_Publisher) {
       regeneratorRuntime.mark(function _callee3(element, pos) {
         var _this3 = this;
 
-        var cache, target, container, scroller, dropTargets, startPosition, onMouseMove, onMouseUp, rect, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, dropTarget;
+        var cache, mousePosition, target, container, scroller, dropTargets, startPosition, refreshDropTargets, onMouseMove, onMouseUp, rect, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, dropTarget;
 
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                cache = _classPrivateFieldGet(this, _itemCache).get(element);
+                cache = _classPrivateFieldGet(this, _itemCache).get(element), mousePosition = {
+                  x: pos.startingX,
+                  y: pos.startingY
+                };
 
                 if (!cache) {
                   cache = {
@@ -1769,26 +1813,22 @@ function (_Publisher) {
                   cache.helper = target;
                 }
 
-                onMouseMove = function onMouseMove(event) {
-                  event.preventDefault();
+                refreshDropTargets = function refreshDropTargets(rect) {
+                  // drag-enter
+                  var mouseX = mousePosition.x - window.pageXOffset,
+                      mouseY = mousePosition.y - window.pageYOffset,
+                      currentDropTargets;
 
-                  var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+                  if (rect !== null) {
+                    currentDropTargets = _this3.getDropTargets(rect, {
+                      mouseX: mouseX,
+                      mouseY: mouseY
+                    });
+                  } else {
+                    currentDropTargets = [];
+                  }
 
-                  if (_this3.scrollSpeed > 0) {
-                    if (scroller) {
-                      scroller.cancel();
-                      scroller = null;
-                    }
-
-                    scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
-                  } // drag-enter
-
-
-                  var currentDropTargets = _this3.getDropTargets(rect, {
-                    mouseX: event.clientX,
-                    mouseY: event.clientY
-                  });
-
+                  console.log(currentDropTargets, dropTargets);
                   var _iteratorNormalCompletion = true;
                   var _didIteratorError = false;
                   var _iteratorError = undefined;
@@ -1801,11 +1841,10 @@ function (_Publisher) {
                         _dispatchDropEvent(_this3, dropTarget, 'drag.enter', {
                           bubbles: true,
                           detail: {
-                            clientX: event.clientX,
-                            clientY: event.clientY,
+                            clientX: mouseX,
+                            clientY: mouseY,
                             target: target,
-                            element: element,
-                            originalEvent: event
+                            element: element
                           }
                         });
                       }
@@ -1837,11 +1876,10 @@ function (_Publisher) {
                         _dispatchDropEvent(_this3, _dropTarget, 'drag.leave', {
                           bubbles: false,
                           detail: {
-                            clientX: event.clientX,
-                            clientY: event.clientY,
+                            clientX: mouseX,
+                            clientY: mouseY,
                             target: target,
-                            element: element,
-                            originalEvent: event
+                            element: element
                           }
                         });
                       }
@@ -1863,6 +1901,26 @@ function (_Publisher) {
                   }
 
                   dropTargets = currentDropTargets;
+                };
+
+                onMouseMove = function onMouseMove(event) {
+                  event.preventDefault();
+
+                  var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+
+                  mousePosition.x = event.clientX + window.pageXOffset;
+                  mousePosition.y = event.clientY + window.pageYOffset;
+
+                  if (_this3.scrollSpeed > 0) {
+                    if (scroller) {
+                      scroller.cancel();
+                      scroller = null;
+                    }
+
+                    scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
+                  }
+
+                  refreshDropTargets(rect);
 
                   _this3.publish('drag.move', {
                     draggable: _this3,
@@ -1871,7 +1929,8 @@ function (_Publisher) {
                     element: element,
                     originalEvent: event,
                     clientX: event.clientX,
-                    clientY: event.clientY
+                    clientY: event.clientY,
+                    rect: rect
                   });
                 };
 
@@ -1881,7 +1940,7 @@ function (_Publisher) {
                   var _ref4 = _asyncToGenerator(
                   /*#__PURE__*/
                   regeneratorRuntime.mark(function _callee2(event) {
-                    var accepted, _isDefaultPrevented, reverted, _pos;
+                    var accepted, _isDefaultPrevented, reverted, rect, _pos;
 
                     return regeneratorRuntime.wrap(function _callee2$(_context2) {
                       while (1) {
@@ -1898,8 +1957,7 @@ function (_Publisher) {
                               scroller = null;
                             }
 
-                            dropTargets = _this3.getDropTargets();
-                            accepted = false, _isDefaultPrevented = false, reverted = false;
+                            accepted = false, _isDefaultPrevented = false, reverted = false, rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
 
                             _this3.publish('drag.drop', {
                               name: 'drag.drop',
@@ -1909,6 +1967,7 @@ function (_Publisher) {
                               originalEvent: event,
                               clientX: event.clientX,
                               clientY: event.clientY,
+                              rect: rect,
                               isDefaultPrevented: function isDefaultPrevented() {
                                 return _isDefaultPrevented;
                               },
@@ -1924,12 +1983,15 @@ function (_Publisher) {
                             });
 
                             if (!(_this3.revert && !accepted)) {
-                              _context2.next = 21;
+                              _context2.next = 22;
                               break;
                             }
 
+                            refreshDropTargets(cache.rect);
+                            rect = cache.rect;
+
                             if (_this3.revertDuration) {
-                              _context2.next = 14;
+                              _context2.next = 15;
                               break;
                             }
 
@@ -1940,30 +2002,29 @@ function (_Publisher) {
                               Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
                             }
 
-                            _context2.next = 18;
+                            _context2.next = 19;
                             break;
 
-                          case 14:
+                          case 15:
                             cache.fx = _revert(target, cache.rect, _this3.revertDuration);
-                            _context2.next = 17;
+                            _context2.next = 18;
                             return cache.fx;
 
-                          case 17:
+                          case 18:
                             if (target !== element) {
                               target.parentElement.removeChild(target);
                             }
 
-                          case 18:
+                          case 19:
                             reverted = true;
                             _context2.next = 23;
                             break;
 
-                          case 21:
+                          case 22:
                             if (target !== element) {
                               target.parentElement.removeChild(target);
+                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(element, rect, 'translate3d');
                             }
-
-                            if (_isDefaultPrevented) _moveElementToPosition(_this3, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
 
                           case 23:
                             _classPrivateFieldGet(_this3, _itemCache)["delete"](element);
@@ -1977,7 +2038,8 @@ function (_Publisher) {
                               clientX: event.clientX,
                               clientY: event.clientY,
                               accepted: accepted,
-                              reverted: reverted
+                              reverted: reverted,
+                              rect: rect
                             });
 
                           case 25:
@@ -1995,7 +2057,7 @@ function (_Publisher) {
 
 
                 if (!(pos.startingX !== undefined && pos.startingY !== undefined)) {
-                  _context3.next = 38;
+                  _context3.next = 39;
                   break;
                 }
 
@@ -2007,7 +2069,7 @@ function (_Publisher) {
                 _iteratorNormalCompletion3 = true;
                 _didIteratorError3 = false;
                 _iteratorError3 = undefined;
-                _context3.prev = 22;
+                _context3.prev = 23;
 
                 for (_iterator3 = dropTargets[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                   dropTarget = _step3.value;
@@ -2024,40 +2086,40 @@ function (_Publisher) {
                   });
                 }
 
-                _context3.next = 30;
+                _context3.next = 31;
                 break;
 
-              case 26:
-                _context3.prev = 26;
-                _context3.t0 = _context3["catch"](22);
+              case 27:
+                _context3.prev = 27;
+                _context3.t0 = _context3["catch"](23);
                 _didIteratorError3 = true;
                 _iteratorError3 = _context3.t0;
 
-              case 30:
-                _context3.prev = 30;
+              case 31:
                 _context3.prev = 31;
+                _context3.prev = 32;
 
                 if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
                   _iterator3["return"]();
                 }
 
-              case 33:
-                _context3.prev = 33;
+              case 34:
+                _context3.prev = 34;
 
                 if (!_didIteratorError3) {
-                  _context3.next = 36;
+                  _context3.next = 37;
                   break;
                 }
 
                 throw _iteratorError3;
 
-              case 36:
-                return _context3.finish(33);
-
               case 37:
-                return _context3.finish(30);
+                return _context3.finish(34);
 
               case 38:
+                return _context3.finish(31);
+
+              case 39:
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
                 element.classList.add('ui-dragging');
@@ -2071,12 +2133,12 @@ function (_Publisher) {
                   originalEvent: null
                 });
 
-              case 42:
+              case 43:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[22, 26, 30, 38], [31,, 33, 37]]);
+        }, _callee3, this, [[23, 27, 31, 39], [32,, 34, 38]]);
       }));
 
       function startDragging(_x2, _x3) {
@@ -2089,10 +2151,21 @@ function (_Publisher) {
     key: "getDropTargets",
     value: function getDropTargets(rect, mousePos) {
       var r = [];
-      var testFunction = this.tolerance;
+      /**
+       * @type {number|String|Function|string}
+       */
 
-      if (typeof testFunction === 'string') {
-        testFunction = TOLERANCE[testFunction];
+      var testFunction = this.tolerance,
+          type = _typeof(testFunction);
+
+      if (type === 'string') {
+        // noinspection JSCheckFunctionSignatures
+        if (reg_percentage_test.test(testFunction)) {
+          // noinspection JSCheckFunctionSignatures
+          testFunction = buildTestIntersectionFunction(parseFloat(testFunction) / 100);
+        }
+      } else if (type === 'number') {
+        testFunction = buildTestIntersectionFunction(testFunction);
       }
 
       var _iteratorNormalCompletion4 = true;
@@ -2196,6 +2269,7 @@ function _dispatchDropEvent(self, target, name, options) {
 }
 
 function _revert(target, position, revertDuration) {
+  var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   var starting = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
   var animation = new _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"]({
     frames: {
@@ -2213,6 +2287,7 @@ function _revert(target, position, revertDuration) {
         left: frame.left - window.pageXOffset,
         top: frame.top - window.pageYOffset
       }, 'translate3d');
+      if (onFrame) onFrame(fx);
     }
   });
   return animation.animate(target, {
@@ -2315,6 +2390,14 @@ function _getScrollParent(element) {
 
   return null;
 }
+
+function _getScrollRect(element) {
+  if (element === window || element.nodeName === "HTML") {
+    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](0, 0, window.innerWidth, window.innerHeight);
+  } else {
+    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+  }
+}
 /**
  * Helper class that is used to control scrolling when the element is dragged outside of bounds.
  */
@@ -2393,7 +2476,7 @@ function () {
       var scrollParent = _getScrollParent(element);
 
       if (scrollParent) {
-        var scrollParentRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](scrollParent),
+        var scrollParentRect = _getScrollRect(scrollParent),
             speed = ScrollHelper.getScrollSpeed(rect, scrollParentRect);
 
         if (speed.x || speed.y) {

@@ -6,6 +6,9 @@ import {setElementClientPosition} from "./position";
 import Animation from "../fx/Animation";
 
 
+const reg_percentage_test = /\s*\d+\.?\d*%\s*/;
+
+
 /**
  * Returns the offset position of the mouse relative to the target.
  *
@@ -23,16 +26,17 @@ export function cursor(target, event) {
 }
 
 
-/**
- * Functions that are used to test if an element is overlapping.
- */
-export const TOLERANCE = {
-    intersect(element, rect) {
-        let targetRect = new Rect(element);
+function buildTestIntersectionFunction(amount) {
+    return function(element, rect) {
+        rect = new Rect(rect);
 
-        return targetRect.isOverlapping(rect);
+        let targetRect = new Rect(element),
+            intersection = targetRect.intersection(rect),
+            p = intersection ? intersection.getArea() / rect.getArea() : 0;
+
+        return p >= amount;
     }
-};
+}
 
 
 export default class Draggable2 extends Publisher {
@@ -43,7 +47,7 @@ export default class Draggable2 extends Publisher {
 
     constructor(element, {container=null, axis='xy', exclude='', delay=0, offset=cursor,
         resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
-        scrollSpeed=0, selector=null, tolerance='intersect', setHelperSize=false, grid=null}={}) {
+        scrollSpeed=0, selector=null, tolerance=1, setHelperSize=false, grid=null}={}) {
         super();
 
         if(typeof element === 'string') {
@@ -240,7 +244,8 @@ export default class Draggable2 extends Publisher {
     }
 
     async startDragging(element, pos) {
-        let cache = this.#itemCache.get(element);
+        let cache = this.#itemCache.get(element),
+            mousePosition = {x: pos.startingX, y: pos.startingY};
 
         if(!cache) {
             cache = {isDragging: false, fx: null, rect: null, helper: null, element: element};
@@ -300,9 +305,42 @@ export default class Draggable2 extends Publisher {
             cache.helper = target;
         }
 
+        let refreshDropTargets = (rect) => {
+            // drag-enter
+            let mouseX = mousePosition.x - window.pageXOffset,
+                mouseY = mousePosition.y - window.pageYOffset,
+                currentDropTargets;
+
+            if(rect !== null) {
+                currentDropTargets = this.getDropTargets(rect, {mouseX, mouseY});
+            } else {
+                currentDropTargets = [];
+            }
+
+            console.log(currentDropTargets, dropTargets);
+
+            for(let dropTarget of currentDropTargets) {
+                if(dropTargets.indexOf(dropTarget) === -1) {
+                    _dispatchDropEvent(this, dropTarget, 'drag.enter', {bubbles: true, detail: {clientX: mouseX, clientY: mouseY, target, element}});
+                }
+            }
+
+            for(let dropTarget of dropTargets) {
+                if(currentDropTargets.indexOf(dropTarget) === -1) {
+                    _dispatchDropEvent(this, dropTarget, 'drag.leave', {bubbles: false, detail: {clientX: mouseX, clientY: mouseY, target, element}});
+                }
+            }
+
+            // drag-leave
+            dropTargets = currentDropTargets;
+        };
+
         let onMouseMove = event => {
             event.preventDefault();
             let rect = _moveElementToPosition(this, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+
+            mousePosition.x = event.clientX + window.pageXOffset;
+            mousePosition.y = event.clientY + window.pageYOffset;
 
             if(this.scrollSpeed > 0) {
                 if(scroller) {
@@ -313,23 +351,7 @@ export default class Draggable2 extends Publisher {
                 scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, this, event, this.scrollSpeed, container);
             }
 
-            // drag-enter
-            let currentDropTargets = this.getDropTargets(rect, {mouseX: event.clientX, mouseY: event.clientY});
-
-            for(let dropTarget of currentDropTargets) {
-                if(dropTargets.indexOf(dropTarget) === -1) {
-                    _dispatchDropEvent(this, dropTarget, 'drag.enter', {bubbles: true, detail: {clientX: event.clientX, clientY: event.clientY, target, element, originalEvent: event}});
-                }
-            }
-
-            for(let dropTarget of dropTargets) {
-                if(currentDropTargets.indexOf(dropTarget) === -1) {
-                    _dispatchDropEvent(this, dropTarget, 'drag.leave', {bubbles: false, detail: {clientX: event.clientX, clientY: event.clientY, target, element, originalEvent: event}});
-                }
-            }
-
-            // drag-leave
-            dropTargets = currentDropTargets;
+            refreshDropTargets(rect);
 
             this.publish('drag.move', {
                 draggable: this,
@@ -338,7 +360,8 @@ export default class Draggable2 extends Publisher {
                 element: element,
                 originalEvent: event,
                 clientX: event.clientX,
-                clientY: event.clientY
+                clientY: event.clientY,
+                rect
             });
         };
 
@@ -354,10 +377,10 @@ export default class Draggable2 extends Publisher {
                 scroller = null;
             }
 
-            dropTargets = this.getDropTargets();
             let accepted = false,
                 isDefaultPrevented = false,
-                reverted = false;
+                reverted = false,
+                rect = new Rect(target);
 
             this.publish('drag.drop', {
                 name: 'drag.drop',
@@ -367,6 +390,7 @@ export default class Draggable2 extends Publisher {
                 originalEvent: event,
                 clientX: event.clientX,
                 clientY: event.clientY,
+                rect,
 
                 isDefaultPrevented() {
                     return isDefaultPrevented;
@@ -386,6 +410,9 @@ export default class Draggable2 extends Publisher {
             });
 
             if(this.revert && !accepted) {
+                refreshDropTargets(cache.rect);
+                rect = cache.rect;
+
                 if(!this.revertDuration) {
                     if(target !== element) {
                         target.parentElement.removeChild(target);
@@ -399,6 +426,7 @@ export default class Draggable2 extends Publisher {
                     }
                 } else {
                     cache.fx = _revert(target, cache.rect, this.revertDuration);
+
                     await cache.fx;
 
                     if(target !== element) {
@@ -410,10 +438,8 @@ export default class Draggable2 extends Publisher {
             } else {
                 if(target !== element) {
                     target.parentElement.removeChild(target);
+                    setElementClientPosition(element, rect, 'translate3d');
                 }
-
-                if(isDefaultPrevented) _moveElementToPosition(this, element, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-
             }
 
             this.#itemCache.delete(element);
@@ -427,7 +453,8 @@ export default class Draggable2 extends Publisher {
                 clientX: event.clientX,
                 clientY: event.clientY,
                 accepted: accepted,
-                reverted: reverted
+                reverted: reverted,
+                rect
             });
         };
 
@@ -459,10 +486,20 @@ export default class Draggable2 extends Publisher {
     getDropTargets(rect, mousePos) {
         let r = [];
 
-        let testFunction = this.tolerance;
+        /**
+         * @type {number|String|Function|string}
+         */
+        let testFunction = this.tolerance,
+            type = typeof testFunction;
 
-        if(typeof testFunction === 'string') {
-            testFunction = TOLERANCE[testFunction];
+        if(type === 'string') {
+            // noinspection JSCheckFunctionSignatures
+            if(reg_percentage_test.test(testFunction)) {
+                // noinspection JSCheckFunctionSignatures
+                testFunction = buildTestIntersectionFunction(parseFloat(testFunction) / 100);
+            }
+        } else if(type === 'number') {
+            testFunction = buildTestIntersectionFunction(testFunction);
         }
 
         for(let droppable of this.#droppables) {
@@ -531,7 +568,7 @@ function _dispatchDropEvent(self, target, name, options) {
 }
 
 
-function _revert(target, position, revertDuration) {
+function _revert(target, position, revertDuration, onFrame=null) {
     let starting = new Rect(target);
 
     let animation = new Animation({
@@ -552,6 +589,8 @@ function _revert(target, position, revertDuration) {
                 left: frame.left - window.pageXOffset,
                 top: frame.top - window.pageYOffset
             }, 'translate3d');
+
+            if(onFrame) onFrame(fx);
         }
     });
 
@@ -666,6 +705,15 @@ function _getScrollParent(element) {
 }
 
 
+function _getScrollRect(element) {
+    if(element === window || element.nodeName === "HTML") {
+        return new Rect(0, 0, window.innerWidth, window.innerHeight);
+    } else {
+        return new Rect(element);
+    }
+}
+
+
 /**
  * Helper class that is used to control scrolling when the element is dragged outside of bounds.
  */
@@ -725,7 +773,7 @@ class ScrollHelper {
         let scrollParent = _getScrollParent(element);
 
         if(scrollParent) {
-            let scrollParentRect = new Rect(scrollParent),
+            let scrollParentRect = _getScrollRect(scrollParent),
                 speed = ScrollHelper.getScrollSpeed(rect, scrollParentRect);
 
             if(speed.x || speed.y) {
