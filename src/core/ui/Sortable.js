@@ -1,5 +1,5 @@
 import {getTranslation, setElementClientPosition} from "core/ui/position";
-import Draggable, {cursor} from './Draggable';
+import Draggable2, {cursor} from './Draggable2';
 
 
 export function placeholder(className, nodeName=null) {
@@ -22,10 +22,12 @@ export function placeholder(className, nodeName=null) {
  * Creates a sortable list of items.
  */
 export default class Sortable {
+    #draggable;
+
     constructor(element, {items=".ui-sort-item", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false,
-        container=null, axis='xy', exclude=null, delay=null, offset=cursor, disabled=false,
-        distance=null, handle=null, helper=null, revert=null, scroll=null, droppables=null, tolerance='intersect',
-        setHelperSize=false, grid=null}={}) {
+        container=null, axis='xy', exclude=null, delay=null, offset=cursor,
+        resistance=null, handle=null, helper=null, revert=null, revertDuration, scrollSpeed=null, tolerance=0.5,
+        setHelperSize=false, grid=null, droppables=null}={}) {
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -33,7 +35,11 @@ export default class Sortable {
             this.element = element;
         }
 
-        this.draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, disabled, distance, handle, helper, revert, scroll, selector: items, droppables, tolerance, setHelperSize, grid});
+        this.#draggable = new Draggable2(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid});
+
+        if(droppables) {
+            this.connect(droppables);
+        }
 
         this.items = items;
         this.layout = layout;
@@ -43,6 +49,22 @@ export default class Sortable {
         this.setPlaceholderSize = setPlaceholderSize;
 
         this.initEvents();
+    }
+
+    connect(droppables) {
+        this.#draggable.connect(droppables);
+    }
+
+    disconnect(droppables) {
+        this.#draggable.disconnect(droppables);
+    }
+
+    hasDroppable(droppable) {
+        return this.#draggable.hasDroppable(droppable);
+    }
+
+    get droppables() {
+        return this.#draggable.droppables;
     }
 
     /**
@@ -58,8 +80,8 @@ export default class Sortable {
         let initialize = (event) => {
             init = true;
             target = event.detail.item;
-            target.addEventListener('drag-move', onDragMove);
-            target.addEventListener('drag-complete', onDragComplete);
+            target.addEventListener('drag.move', onDragMove);
+            target.addEventListener('drag.end', onDragComplete);
             target.addEventListener('sort-append', onSortAppend);
             let startBB = target.getBoundingClientRect();
             target.classList.add('ui-sorting');
@@ -103,8 +125,8 @@ export default class Sortable {
         // Cleanup after sorting finishes.
         let destroy = () => {
             if(target) {
-                target.removeEventListener('drag-move', onDragMove);
-                target.removeEventListener('drag-complete', onDragComplete);
+                target.removeEventListener('drag.move', onDragMove);
+                target.removeEventListener('drag.end', onDragComplete);
                 target.removeEventListener('sort-append', onSortAppend);
                 init = false;
                 isOver = false;
@@ -168,7 +190,7 @@ export default class Sortable {
         };
 
         // Initialize sorting.
-        this.element.addEventListener('drag-enter', event => {
+        this.element.addEventListener('drag.enter', event => {
             if(this.accepts && !event.detail.item.matches(this.accepts)) {
                 return;
             }
@@ -181,12 +203,12 @@ export default class Sortable {
         });
 
         // Mark isOver state false.
-        this.element.addEventListener('drag-leave', () => {
+        this.element.addEventListener('drag.leave', () => {
             isOver = false;
         });
 
         // Initialize sorting that started on another sortable.
-        this.element.addEventListener('drag-start', (event) => {
+        this.element.addEventListener('drag.start', (event) => {
             if(!init) {
                 initialize(event);
             }

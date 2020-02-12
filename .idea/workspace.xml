@@ -3,7 +3,34 @@
   <component name="ChangeListManager">
     <list default="true" id="be0641ea-3d42-4cae-8604-06d7c4974d10" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/docs/assets/js/chunk-0.bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/feed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/feed.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/jekyll/assets/js/chunk-0.bundle.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/core/ui/Draggable2.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ui/Draggable2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/ui/Sortable.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/ui/Sortable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-0.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-0.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-1.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-1.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-10.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-10.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-11.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-11.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-12.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-12.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-13.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-13.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-14.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-14.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-15.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-15.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-2.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-2.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-3.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-3.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-4.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-4.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-5.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-5.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-6.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-6.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-7.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-7.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-8.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-8.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-9.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-9.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/chunk-vendors.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/chunk-vendors.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_draggable.bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/test_pages.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_pages.bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/dist/test_resizeable.bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/dist/test_resizeable.bundle.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -362,10 +389,12 @@
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\js\pages\documentation" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\js" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\documentation\menus" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\_layouts\layout2" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\utility" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\ui" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\vectors" />
     </key>
     <key name="es6.move.members.recent.items">
       <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\fx\SlideInAndOutFX.js" />
@@ -374,12 +403,10 @@
       <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\fx\easing.js" />
       <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\fx\types.js" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\documentation\menus" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\_layouts\layout2" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\utility" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\ui" />
-      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\src\core\vectors" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\js\pages\documentation" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora\jekyll\js" />
+      <recent name="C:\Users\MatthewShockman\WebstormProjects\pendora" />
     </key>
   </component>
   <component name="RunManager" selected="npm.jekyll">
@@ -435,10 +462,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="npm.jsc:tests" />
         <item itemvalue="npm.jekyll" />
         <item itemvalue="npm.sc:docs" />
         <item itemvalue="npm.jsc:docs" />
-        <item itemvalue="npm.jsc:tests" />
         <item itemvalue="npm.sc:tests" />
       </list>
     </recent_temporary>
@@ -587,13 +614,6 @@
       <workItem from="1581086270391" duration="1199000" />
       <workItem from="1581344312148" duration="22984000" />
       <workItem from="1581432295621" duration="24358000" />
-    </task>
-    <task id="LOCAL-00166" summary="added context menu.">
-      <created>1577483479513</created>
-      <option name="number" value="00166" />
-      <option name="presentableId" value="LOCAL-00166" />
-      <option name="project" value="LOCAL" />
-      <updated>1577483479513</updated>
     </task>
     <task id="LOCAL-00167" summary="Fixed bug where menu position wouldn't be inherited.">
       <created>1577733536512</created>
@@ -931,7 +951,14 @@
       <option name="project" value="LOCAL" />
       <updated>1581539875760</updated>
     </task>
-    <option name="localTasksCounter" value="215" />
+    <task id="LOCAL-00215" summary="removed dead code.">
+      <created>1581539903025</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
+      <option name="project" value="LOCAL" />
+      <updated>1581539903025</updated>
+    </task>
+    <option name="localTasksCounter" value="216" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -965,7 +992,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="WIP: SlideIn and SlideOut." />
     <MESSAGE value="Fixed positioning issue on edge." />
     <MESSAGE value="Removed debug code." />
     <MESSAGE value="Animation now reposition on every frame." />
@@ -990,17 +1016,18 @@
     <MESSAGE value="Added test for delegating drag to child items." />
     <MESSAGE value="Added refresh drop targets on revert." />
     <MESSAGE value="Refactored dragable events." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored dragable events." />
+    <MESSAGE value="removed dead code." />
+    <option name="LAST_COMMIT_MESSAGE" value="removed dead code." />
   </component>
   <component name="WindowStateProjectService">
     <state x="714" y="323" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1580755555453">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="714" y="323" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1580755555453" />
-    <state x="583" y="115" key="CommitChangelistDialog2" timestamp="1581539872094">
+    <state x="583" y="115" key="CommitChangelistDialog2" timestamp="1581539899587">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="583" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581539872094" />
+    <state x="583" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581539899587" />
     <state x="2503" y="115" key="CommitChangelistDialog2/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1580936524896" />
     <state x="182" y="92" width="1536" height="859" key="DiffContextDialog" timestamp="1581349473921">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -1010,28 +1037,28 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="739" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1579807208839" />
-    <state width="1899" height="240" key="GridCell.Tab.0.bottom" timestamp="1581525957452">
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom" timestamp="1581540635445">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957452" />
+    <state width="1899" height="240" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
     <state width="1899" height="223" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.bottom/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.center" timestamp="1581525957451">
+    <state width="1899" height="240" key="GridCell.Tab.0.center" timestamp="1581540635445">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
+    <state width="1899" height="240" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
     <state width="1899" height="223" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.center/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.left" timestamp="1581525957451">
+    <state width="1899" height="240" key="GridCell.Tab.0.left" timestamp="1581540635445">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
+    <state width="1899" height="240" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
     <state width="1899" height="223" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.left/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
-    <state width="1899" height="240" key="GridCell.Tab.0.right" timestamp="1581525957451">
+    <state width="1899" height="240" key="GridCell.Tab.0.right" timestamp="1581540635445">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581525957451" />
+    <state width="1899" height="240" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581540635445" />
     <state width="1899" height="223" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1579728459378" />
     <state width="3419" height="401" key="GridCell.Tab.0.right/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581471521992" />
     <state x="706" y="231" key="RollbackChangesDialog" timestamp="1580767832359">
@@ -1043,10 +1070,10 @@
     </state>
     <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581432304312" />
     <state x="2472" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1580936527849" />
-    <state x="1654" y="-14" width="1613" height="757" maximized="true" key="dock-window-1" timestamp="1581537833447">
+    <state x="1655" y="-10" width="1613" height="757" maximized="true" key="dock-window-1" timestamp="1581542257288">
       <screen x="1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="1654" y="-14" width="1613" height="757" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581537833447" />
+    <state x="1655" y="-10" width="1613" height="757" maximized="true" key="dock-window-1/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1581542257288" />
     <state x="3444" y="568" width="1936" height="1125" maximized="true" key="dock-window-1/0.0.3440.1400/3440.578.1920.1040@0.0.3440.1400" timestamp="1581484950869" />
     <state x="688" y="312" key="git4idea.merge.GitPullDialog" timestamp="1581344972238">
       <screen x="0" y="0" width="1920" height="1040" />

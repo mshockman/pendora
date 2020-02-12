@@ -34,7 +34,7 @@ function buildTestIntersectionFunction(amount) {
             intersection = targetRect.intersection(rect),
             p = intersection ? intersection.getArea() / rect.getArea() : 0;
 
-        return p >= amount;
+        return p > amount;
     }
 }
 
@@ -47,7 +47,7 @@ export default class Draggable2 extends Publisher {
 
     constructor(element, {container=null, axis='xy', exclude='', delay=0, offset=cursor,
         resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
-        scrollSpeed=0, selector=null, tolerance=1, setHelperSize=false, grid=null}={}) {
+        scrollSpeed=0, selector=null, tolerance=0.5, setHelperSize=false, grid=null}={}) {
         super();
 
         if(typeof element === 'string') {
@@ -470,12 +470,20 @@ export default class Draggable2 extends Publisher {
         return r;
     }
 
-    connect(droppable) {
-        if(typeof droppable === 'string') {
-            droppable = document.querySelector(droppable);
+    connect(droppables) {
+        if(typeof droppables === 'string') {
+            droppables = document.querySelectorAll(droppables);
+        } else if(typeof droppables.length !== 'number') {
+            droppables = [droppables];
         }
 
-        this.#droppables.push(droppable);
+        for(let i = 0; i < droppables.length; i++) {
+            let item = droppables[i];
+
+            if(this.#droppables.indexOf(item) === -1) {
+                this.#droppables.push(item);
+            }
+        }
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -799,6 +807,8 @@ function dispatchDropEvent(self, name, element, helper, originalEvent, currentRe
         draggable: self,
         target: helper,
         element,
+        item: element, // alias for element
+        helper: helper,
         originalEvent: null,
         rect: currentRect
     };
@@ -824,7 +834,7 @@ function dispatchDropEvent(self, name, element, helper, originalEvent, currentRe
     if(dispatch) {
         let customEvent = new CustomEvent(name, {
             bubbles,
-            detail: detail
+            detail: eventPackage
         });
 
         target.dispatchEvent(customEvent);

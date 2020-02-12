@@ -1348,12 +1348,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
 /* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
 /* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -1417,7 +1411,7 @@ function buildTestIntersectionFunction(amount) {
     var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
         intersection = targetRect.intersection(rect),
         p = intersection ? intersection.getArea() / rect.getArea() : 0;
-    return p >= amount;
+    return p > amount;
   };
 }
 
@@ -1455,7 +1449,7 @@ function (_Publisher) {
         _ref$selector = _ref.selector,
         selector = _ref$selector === void 0 ? null : _ref$selector,
         _ref$tolerance = _ref.tolerance,
-        tolerance = _ref$tolerance === void 0 ? 1 : _ref$tolerance,
+        tolerance = _ref$tolerance === void 0 ? 0.5 : _ref$tolerance,
         _ref$setHelperSize = _ref.setHelperSize,
         setHelperSize = _ref$setHelperSize === void 0 ? false : _ref$setHelperSize,
         _ref$grid = _ref.grid,
@@ -2091,12 +2085,20 @@ function (_Publisher) {
     }
   }, {
     key: "connect",
-    value: function connect(droppable) {
-      if (typeof droppable === 'string') {
-        droppable = document.querySelector(droppable);
+    value: function connect(droppables) {
+      if (typeof droppables === 'string') {
+        droppables = document.querySelectorAll(droppables);
+      } else if (typeof droppables.length !== 'number') {
+        droppables = [droppables];
       }
 
-      _classPrivateFieldGet(this, _droppables).push(droppable);
+      for (var i = 0; i < droppables.length; i++) {
+        var item = droppables[i];
+
+        if (_classPrivateFieldGet(this, _droppables).indexOf(item) === -1) {
+          _classPrivateFieldGet(this, _droppables).push(item);
+        }
+      }
     } // noinspection JSUnusedGlobalSymbols
 
   }, {
@@ -2147,18 +2149,6 @@ var _boundOnMouseDown = new WeakMap();
 var _itemCache = new WeakMap();
 
 
-
-function _dispatchDropEvent(self, target, name, options) {
-  var customEvent = new CustomEvent(name, {
-    bubbles: options.bubble,
-    detail: _objectSpread({
-      name: name,
-      target: target,
-      draggable: self
-    }, options.detail)
-  });
-  target.dispatchEvent(customEvent);
-}
 
 function _revert(target, position, revertDuration) {
   var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
@@ -2457,6 +2447,9 @@ function dispatchDropEvent(self, name, element, helper, originalEvent, currentRe
     draggable: self,
     target: helper,
     element: element,
+    item: element,
+    // alias for element
+    helper: helper,
     originalEvent: null,
     rect: currentRect
   };
@@ -2482,7 +2475,7 @@ function dispatchDropEvent(self, name, element, helper, originalEvent, currentRe
   if (dispatch) {
     var customEvent = new CustomEvent(name, {
       bubbles: bubbles,
-      detail: detail
+      detail: eventPackage
     });
     target.dispatchEvent(customEvent);
   }
