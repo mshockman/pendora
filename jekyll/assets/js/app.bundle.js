@@ -267,10 +267,10 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
     return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./pages/documentation/dropdown */ "./jekyll/js/pages/documentation/dropdown.js"));
   },
   'test_draggable': function test_draggable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(5)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./jekyll/js/pages/documentation/test_draggable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(3), __webpack_require__.e(5)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./jekyll/js/pages/documentation/test_draggable.js"));
   },
   'test_sortable': function test_sortable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(4)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./jekyll/js/pages/documentation/test_sortable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(3), __webpack_require__.e(4)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./jekyll/js/pages/documentation/test_sortable.js"));
   }
 });
 window.addEventListener('load',

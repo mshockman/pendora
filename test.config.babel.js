@@ -15,7 +15,6 @@ export default {
 
     entry: {
         'test_pages': ['core/polyfills', './tests/src/test_pages.js'],
-        'test_draggable': ["@babel/polyfill", './tests/src/test_draggable.js'],
         'test_resizeable': ['./tests/src/test_resizeable.js']
     },
 

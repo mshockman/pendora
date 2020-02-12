@@ -4,25 +4,33 @@
 /*!**********************************!*\
   !*** ./src/core/ui/Draggable.js ***!
   \**********************************/
-/*! exports provided: cursor, clone, CONTAINERS, default */
+/*! exports provided: cursor, default, ScrollArea, clone */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cursor", function() { return cursor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clone", function() { return clone; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CONTAINERS", function() { return CONTAINERS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Draggable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollArea", function() { return ScrollArea; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clone", function() { return clone; });
 /* harmony import */ var _Publisher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Publisher */ "./src/core/Publisher.js");
-/* harmony import */ var core_data__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/data */ "./src/core/data.js");
-/* harmony import */ var core_ui_position__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/ui/position */ "./src/core/ui/position.js");
-/* harmony import */ var _utility_math__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utility/math */ "./src/core/utility/math.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
+/* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
+/* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
 /* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -40,53 +48,882 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
 
 
 
 
 
+
+var reg_percentage_test = /\s*\d+\.?\d*%\s*/;
 /**
- * Draggable option for offset that offsets the position by the cursor.
+ * Returns the offset position of the mouse relative to the target.
  *
- * @param clientX
- * @param clientY
- * @param boundingRect
- * @returns {{x, y}}
+ * @param target
+ * @param event
+ * @returns {{x: number, y: number}}
  */
 
-function cursor(_ref) {
-  var clientX = _ref.clientX,
-      clientY = _ref.clientY,
-      boundingRect = _ref.boundingRect;
+function cursor(target, event) {
+  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
   return {
-    x: boundingRect.left - clientX,
-    y: boundingRect.top - clientY
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
   };
 }
-/**
- * Draggable option that clones the draggable element for the helper element.
- *
- * @param opacity
- * @returns {function(*): (ActiveX.IXMLDOMNode | Node)}
- */
 
-function clone() {
-  var opacity = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  return function (draggable) {
-    var helper = draggable.element.cloneNode(true);
+function buildTestIntersectionFunction(amount) {
+  return function (element, rect) {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect);
+    var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
+        intersection = targetRect.intersection(rect),
+        p = intersection ? intersection.getArea() / rect.getArea() : 0;
 
-    if (opacity !== null) {
-      helper.style.opacity = opacity;
+    if (amount === 0) {
+      return p > 0;
+    } else {
+      return p >= amount;
+    }
+  };
+}
+
+var Draggable =
+/*#__PURE__*/
+function (_Publisher) {
+  _inherits(Draggable, _Publisher);
+
+  function Draggable(element) {
+    var _this;
+
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref$container = _ref.container,
+        container = _ref$container === void 0 ? null : _ref$container,
+        _ref$axis = _ref.axis,
+        axis = _ref$axis === void 0 ? 'xy' : _ref$axis,
+        _ref$exclude = _ref.exclude,
+        exclude = _ref$exclude === void 0 ? '' : _ref$exclude,
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === void 0 ? 0 : _ref$delay,
+        _ref$offset = _ref.offset,
+        offset = _ref$offset === void 0 ? cursor : _ref$offset,
+        _ref$resistance = _ref.resistance,
+        resistance = _ref$resistance === void 0 ? 0 : _ref$resistance,
+        _ref$handle = _ref.handle,
+        handle = _ref$handle === void 0 ? null : _ref$handle,
+        _ref$helper = _ref.helper,
+        helper = _ref$helper === void 0 ? null : _ref$helper,
+        _ref$revert = _ref.revert,
+        revert = _ref$revert === void 0 ? false : _ref$revert,
+        _ref$revertDuration = _ref.revertDuration,
+        revertDuration = _ref$revertDuration === void 0 ? 0 : _ref$revertDuration,
+        _ref$scrollSpeed = _ref.scrollSpeed,
+        scrollSpeed = _ref$scrollSpeed === void 0 ? 0 : _ref$scrollSpeed,
+        _ref$selector = _ref.selector,
+        selector = _ref$selector === void 0 ? null : _ref$selector,
+        _ref$tolerance = _ref.tolerance,
+        tolerance = _ref$tolerance === void 0 ? 0.5 : _ref$tolerance,
+        _ref$setHelperSize = _ref.setHelperSize,
+        setHelperSize = _ref$setHelperSize === void 0 ? false : _ref$setHelperSize,
+        _ref$grid = _ref.grid,
+        grid = _ref$grid === void 0 ? null : _ref$grid;
+
+    _classCallCheck(this, Draggable);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Draggable).call(this));
+
+    _element.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _droppables.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _boundOnMouseDown.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _itemCache.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    if (typeof element === 'string') {
+      _classPrivateFieldSet(_assertThisInitialized(_this), _element, document.querySelector(element));
+    } else {
+      _classPrivateFieldSet(_assertThisInitialized(_this), _element, element);
     }
 
-    return helper;
-  };
+    _classPrivateFieldSet(_assertThisInitialized(_this), _droppables, []);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _itemCache, new WeakMap());
+
+    _this.container = container;
+    _this.axis = axis;
+    _this.exclude = exclude;
+    _this.delay = delay;
+    _this.offset = offset;
+    _this.resistance = resistance;
+    _this.handle = handle;
+    _this.helper = helper;
+    _this.revert = revert;
+    _this.revertDuration = revertDuration;
+    _this.scrollSpeed = scrollSpeed;
+    _this.selector = selector;
+    _this.tolerance = tolerance;
+    _this.setHelperSize = setHelperSize;
+    _this.grid = grid;
+
+    if (typeof _this.container === 'string') {
+      _this.container = document.querySelector(_this.container);
+    }
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _boundOnMouseDown, function (event) {
+      return _this.onMouseDown(event);
+    });
+
+    _this.element.addEventListener('mousedown', _classPrivateFieldGet(_assertThisInitialized(_this), _boundOnMouseDown));
+
+    return _this;
+  }
+  /**
+   * Starts dragging if the correct elements have been targeted and delay and resistance have been meet.
+   *
+   * @param event
+   * @returns {Promise<void>}
+   */
+
+
+  _createClass(Draggable, [{
+    key: "onMouseDown",
+    value: function () {
+      var _onMouseDown = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(event) {
+        var _this2 = this;
+
+        var startPosition, currentPosition, target, cancelMouseTracking, cancelTimer, distanceBrokenPromise, timerPromise, offset, handle, exclude, onMouseUp, _ref2, _ref3, timerStatus, distanceStatus;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                startPosition = {
+                  x: event.clientX + window.pageXOffset,
+                  y: event.clientY + window.pageYOffset
+                }, currentPosition = {
+                  x: startPosition.x,
+                  y: startPosition.y
+                }, target = _classPrivateFieldGet(this, _element), cancelMouseTracking = null, cancelTimer = null; // Only start dragging if a draggable child of the element is targeted.
+                // If selector is null then the entire element is draggable and should be the target.
+
+                if (!this.selector) {
+                  _context.next = 5;
+                  break;
+                }
+
+                target = event.target.closest(this.selector);
+
+                if (!(!target || !_classPrivateFieldGet(this, _element).contains(target))) {
+                  _context.next = 5;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 5:
+                if (!this.handle) {
+                  _context.next = 9;
+                  break;
+                }
+
+                handle = event.target.closest(this.handle);
+
+                if (!(!handle || !target.contains(handle))) {
+                  _context.next = 9;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 9:
+                if (!this.exclude) {
+                  _context.next = 13;
+                  break;
+                }
+
+                exclude = event.target.closest(this.exclude);
+
+                if (!(exclude && target.contains(exclude))) {
+                  _context.next = 13;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 13:
+                // Find the offset of the event.
+                if (typeof this.offset === 'function') {
+                  offset = this.offset(target, event);
+                } else if (Array.isArray(this.offset)) {
+                  offset = {
+                    x: this.offset[0],
+                    y: this.offset[1]
+                  };
+                } else if (_typeof(this.offset) === 'object') {
+                  offset = {
+                    x: this.offset.x,
+                    y: this.offset.y
+                  };
+                } else {
+                  offset = {
+                    x: 0,
+                    y: 0
+                  };
+                } // Prevent default browser actions.
+
+
+                event.preventDefault(); // At this point we can be sure that a draggable item was
+                // targeted by it's handle and no excluded items where clicked.
+                // Creates a promise that both tracks the current mouse coords and resolve
+                // when the user passes the given resistance.
+
+                distanceBrokenPromise = new Promise(function (resolve) {
+                  var isDistanceBroken = _this2.resistance <= 0;
+
+                  if (isDistanceBroken) {
+                    resolve('complete');
+                  }
+
+                  var onMouseMove = function onMouseMove(event) {
+                    currentPosition.x = event.clientX + window.pageXOffset;
+                    currentPosition.y = event.clientY + window.pageYOffset;
+                    event.preventDefault();
+
+                    if (!isDistanceBroken && Object(_utility__WEBPACK_IMPORTED_MODULE_1__["calcDistance"])(currentPosition.x, currentPosition.y, startPosition.x, startPosition.y) > _this2.resistance) {
+                      resolve('complete');
+                      isDistanceBroken = true;
+                    }
+                  }; // Cancel mouse tracking and resolve the promise to canceled if hasn't already been resolve.
+                  // This function must be called or their will be a memory leak before onMouseDown completes.
+
+
+                  cancelMouseTracking = function cancelMouseTracking() {
+                    if (onMouseMove) {
+                      document.removeEventListener('mousemove', onMouseMove);
+
+                      if (!isDistanceBroken) {
+                        resolve('canceled');
+                      }
+
+                      onMouseMove = null;
+                    }
+                  };
+
+                  document.addEventListener('mousemove', onMouseMove);
+                }); // Creates a promise that resolve when after the delay time passes or the user cancels the drag by
+                // releasing the mouse button.
+
+                timerPromise = new Promise(function (resolve) {
+                  var timer = null;
+
+                  if (_this2.delay >= 0) {
+                    timer = setTimeout(function () {
+                      resolve("complete");
+                      timer = null;
+                    }, _this2.delay);
+                  } else {
+                    resolve('complete');
+                  } // cancel the timer and resolve it to canceled if it is still active.
+
+
+                  cancelTimer = function cancelTimer() {
+                    if (timer) {
+                      clearTimeout(timer);
+                      resolve('canceled');
+                    }
+                  };
+                }); // cancel the timer and mouse tracking if they are still active.
+
+                onMouseUp = function onMouseUp(event) {
+                  event.preventDefault();
+                  cancelTimer();
+                  cancelMouseTracking();
+                  document.removeEventListener('mouseup', onMouseUp);
+                };
+
+                document.addEventListener('mouseup', onMouseUp); // Wait until the delay time and distance have passed or failed.
+
+                _context.next = 21;
+                return Promise.all([timerPromise, distanceBrokenPromise]);
+
+              case 21:
+                _ref2 = _context.sent;
+                _ref3 = _slicedToArray(_ref2, 2);
+                timerStatus = _ref3[0];
+                distanceStatus = _ref3[1];
+                // Ensure that mouse tracking has been canceled.
+                if (cancelMouseTracking) cancelMouseTracking(); // At this point both the timer and distance status should have passed or failed.
+                // If either failed do nothing.
+
+                if (timerStatus === 'complete' && distanceStatus === 'complete') {
+                  this.startDragging(target, {
+                    offsetX: offset.x,
+                    offsetY: offset.y,
+                    // Make relative to client.
+                    startingX: currentPosition.x,
+                    startingY: currentPosition.y
+                  });
+                }
+
+              case 27:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function onMouseDown(_x) {
+        return _onMouseDown.apply(this, arguments);
+      }
+
+      return onMouseDown;
+    }()
+  }, {
+    key: "startDragging",
+    value: function () {
+      var _startDragging = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(element, pos) {
+        var _this3 = this;
+
+        var cache, mousePosition, target, container, scroller, dropTargets, startPosition, startingClientRect, refreshDropTargets, onMouseMove, onMouseUp, rect;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                cache = _classPrivateFieldGet(this, _itemCache).get(element), mousePosition = {
+                  x: pos.startingX,
+                  y: pos.startingY
+                };
+
+                if (!cache) {
+                  cache = {
+                    isDragging: false,
+                    fx: null,
+                    rect: null,
+                    helper: null,
+                    element: element
+                  };
+
+                  _classPrivateFieldGet(this, _itemCache).set(element, cache);
+                }
+
+                if (!cache.isDragging) {
+                  _context3.next = 4;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 4:
+                cache.isDragging = true;
+
+                if (!cache.fx) {
+                  _context3.next = 9;
+                  break;
+                }
+
+                _context3.next = 8;
+                return cache.fx.cancel();
+
+              case 8:
+                cache.fx = null;
+
+              case 9:
+                target = element, container = this.container, scroller = null, dropTargets = [], startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element), startingClientRect = startPosition;
+                startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
+
+                if (!cache.rect) {
+                  cache.rect = startPosition;
+                }
+
+                if (typeof container === 'string') {
+                  container = document.querySelector(container);
+                }
+
+                if (this.helper) {
+                  if (typeof this.helper === 'function') {
+                    target = this.helper(element);
+                  } else {
+                    target = this.helper;
+                  }
+
+                  if (this.setHelperSize) {
+                    target.style.width = startPosition.width + "px";
+                    target.style.height = startPosition.height + "px";
+                  }
+
+                  target.style.pointerEvents = 'none';
+
+                  if (!target.parentElement && element.parentElement) {
+                    element.parentElement.appendChild(target);
+                  }
+
+                  target.classList.add('ui-drag-helper');
+                  cache.helper = target;
+                }
+
+                refreshDropTargets = function refreshDropTargets(rect) {
+                  // drag-enter
+                  var mouseX = mousePosition.x - window.pageXOffset,
+                      mouseY = mousePosition.y - window.pageYOffset,
+                      currentDropTargets,
+                      detail = {
+                    clientX: mouseX,
+                    clientY: mouseY
+                  };
+
+                  if (rect !== null) {
+                    currentDropTargets = _this3.getDropTargets(rect, {
+                      mouseX: mouseX,
+                      mouseY: mouseY
+                    });
+                  } else {
+                    currentDropTargets = [];
+                  }
+
+                  var _iteratorNormalCompletion = true;
+                  var _didIteratorError = false;
+                  var _iteratorError = undefined;
+
+                  try {
+                    for (var _iterator = currentDropTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                      var dropTarget = _step.value;
+
+                      if (dropTargets.indexOf(dropTarget) === -1) {
+                        dispatchDropEvent(_this3, 'drag.enter', element, target, null, rect, true, true, false, detail, dropTarget);
+                      }
+                    }
+                  } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                  } finally {
+                    try {
+                      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                        _iterator["return"]();
+                      }
+                    } finally {
+                      if (_didIteratorError) {
+                        throw _iteratorError;
+                      }
+                    }
+                  }
+
+                  var _iteratorNormalCompletion2 = true;
+                  var _didIteratorError2 = false;
+                  var _iteratorError2 = undefined;
+
+                  try {
+                    for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                      var _dropTarget = _step2.value;
+
+                      if (currentDropTargets.indexOf(_dropTarget) === -1) {
+                        dispatchDropEvent(_this3, 'drag.leave', element, target, null, rect, true, true, false, detail, _dropTarget);
+                      }
+                    } // drag-leave
+
+                  } catch (err) {
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
+                  } finally {
+                    try {
+                      if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                        _iterator2["return"]();
+                      }
+                    } finally {
+                      if (_didIteratorError2) {
+                        throw _iteratorError2;
+                      }
+                    }
+                  }
+
+                  dropTargets = currentDropTargets;
+                };
+
+                onMouseMove = function onMouseMove(event) {
+                  event.preventDefault();
+
+                  var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
+
+                  mousePosition.x = event.clientX + window.pageXOffset;
+                  mousePosition.y = event.clientY + window.pageYOffset;
+
+                  if (_this3.scrollSpeed > 0) {
+                    if (scroller) {
+                      scroller.cancel();
+                      scroller = null;
+                    }
+
+                    scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
+                  }
+
+                  refreshDropTargets(rect);
+                  publishDragMoveEvent(_this3, element, target, event, rect);
+                };
+
+                onMouseUp =
+                /*#__PURE__*/
+                function () {
+                  var _ref4 = _asyncToGenerator(
+                  /*#__PURE__*/
+                  regeneratorRuntime.mark(function _callee2(event) {
+                    var accepted, _isDefaultPrevented, reverted, rect, _pos;
+
+                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                      while (1) {
+                        switch (_context2.prev = _context2.next) {
+                          case 0:
+                            event.preventDefault();
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                            cache.isDragging = false;
+                            element.classList.remove('ui-dragging');
+
+                            if (scroller) {
+                              scroller.cancel();
+                              scroller = null;
+                            }
+
+                            accepted = false, _isDefaultPrevented = false, reverted = false, rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
+                            publishDragDropEvent(_this3, element, target, event, rect, false, {
+                              isDefaultPrevented: function isDefaultPrevented() {
+                                return _isDefaultPrevented;
+                              },
+                              isAccepted: function isAccepted() {
+                                return accepted;
+                              },
+                              accept: function accept() {
+                                accepted = true;
+                              },
+                              preventDefault: function preventDefault() {
+                                _isDefaultPrevented = true;
+                              }
+                            });
+
+                            if (!(_this3.revert && !accepted)) {
+                              _context2.next = 22;
+                              break;
+                            }
+
+                            refreshDropTargets(cache.rect);
+                            rect = cache.rect;
+
+                            if (_this3.revertDuration) {
+                              _context2.next = 15;
+                              break;
+                            }
+
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                            } else {
+                              _pos = startPosition.translate(-window.pageXOffset, -window.pageYOffset);
+                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
+                            }
+
+                            _context2.next = 19;
+                            break;
+
+                          case 15:
+                            cache.fx = _revert(target, cache.rect, _this3.revertDuration);
+                            _context2.next = 18;
+                            return cache.fx;
+
+                          case 18:
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                            }
+
+                          case 19:
+                            reverted = true;
+                            _context2.next = 23;
+                            break;
+
+                          case 22:
+                            if (target !== element) {
+                              target.parentElement.removeChild(target);
+                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(element, rect, 'translate3d');
+                            }
+
+                          case 23:
+                            _classPrivateFieldGet(_this3, _itemCache)["delete"](element);
+
+                            dispatchDropEvent(_this3, 'drag.end', element, target, event, rect, true, true, true, {
+                              accepted: accepted,
+                              reverted: reverted
+                            }, element);
+
+                          case 25:
+                          case "end":
+                            return _context2.stop();
+                        }
+                      }
+                    }, _callee2);
+                  }));
+
+                  return function onMouseUp(_x4) {
+                    return _ref4.apply(this, arguments);
+                  };
+                }(); // Set target to starting position.
+
+
+                if (mousePosition.x !== undefined && mousePosition.y !== undefined) {
+                  rect = _moveElementToPosition(this, target, mousePosition.x - window.pageXOffset, mousePosition.y - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+                  refreshDropTargets(rect);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                element.classList.add('ui-dragging');
+                dispatchDropEvent(this, 'drag.start', element, target, null, startingClientRect, true, true, true, null);
+
+              case 22:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function startDragging(_x2, _x3) {
+        return _startDragging.apply(this, arguments);
+      }
+
+      return startDragging;
+    }()
+  }, {
+    key: "getDropTargets",
+    value: function getDropTargets(rect, mousePos) {
+      var r = [];
+      /**
+       * @type {number|String|Function|string}
+       */
+
+      var testFunction = this.tolerance,
+          type = _typeof(testFunction);
+
+      if (type === 'string') {
+        // noinspection JSCheckFunctionSignatures
+        if (reg_percentage_test.test(testFunction)) {
+          // noinspection JSCheckFunctionSignatures
+          testFunction = buildTestIntersectionFunction(parseFloat(testFunction) / 100);
+        }
+      } else if (type === 'number') {
+        testFunction = buildTestIntersectionFunction(testFunction);
+      }
+
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var droppable = _step3.value;
+
+          if (testFunction(droppable, rect, mousePos, this)) {
+            r.push(droppable);
+          }
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      return r;
+    }
+  }, {
+    key: "connect",
+    value: function connect(droppables) {
+      if (typeof droppables === 'string') {
+        droppables = document.querySelectorAll(droppables);
+      } else if (typeof droppables.length !== 'number') {
+        droppables = [droppables];
+      }
+
+      for (var i = 0; i < droppables.length; i++) {
+        var item = droppables[i];
+
+        if (_classPrivateFieldGet(this, _droppables).indexOf(item) === -1) {
+          _classPrivateFieldGet(this, _droppables).push(item);
+        }
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "disconnect",
+    value: function disconnect(droppable) {
+      if (typeof droppable === 'string') {
+        droppable = document.querySelector(droppable);
+      }
+
+      var i = _classPrivateFieldGet(this, _droppables).indexOf(droppable);
+
+      if (i !== -1) {
+        _classPrivateFieldGet(this, _droppables).splice(i, 1);
+      }
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "hasDroppable",
+    value: function hasDroppable(droppable) {
+      if (typeof droppable === 'string') {
+        droppable = document.querySelector(droppable);
+      }
+
+      return _classPrivateFieldGet(this, _droppables).indexOf(droppable) !== -1;
+    } // noinspection JSUnusedGlobalSymbols
+
+  }, {
+    key: "droppables",
+    get: function get() {
+      return _classPrivateFieldGet(this, _droppables).slice(0);
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return _classPrivateFieldGet(this, _element);
+    }
+  }]);
+
+  return Draggable;
+}(_Publisher__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+var _element = new WeakMap();
+
+var _droppables = new WeakMap();
+
+var _boundOnMouseDown = new WeakMap();
+
+var _itemCache = new WeakMap();
+
+
+
+function _revert(target, position, revertDuration) {
+  var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var starting = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
+  var animation = new _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"]({
+    frames: {
+      '0%': {
+        left: starting.left + window.pageXOffset,
+        top: starting.top + window.pageYOffset
+      },
+      '100%': {
+        left: position.left,
+        top: position.top
+      }
+    },
+    applyFrame: function applyFrame(fx, frame) {
+      Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(fx.element, {
+        left: frame.left - window.pageXOffset,
+        top: frame.top - window.pageYOffset
+      }, 'translate3d');
+      if (onFrame) onFrame(fx);
+    }
+  });
+  return animation.animate(target, {
+    duration: revertDuration
+  });
+}
+/**
+ * Takes a client (x, y) position and some offset coords and move the element to the given position.
+ *
+ * @param self
+ * @param element
+ * @param x
+ * @param y
+ * @param offsetX
+ * @param offsetY
+ * @param container
+ * @private
+ * @returns {*|Rect}
+ */
+
+
+function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container) {
+  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
+      startingRect = rect;
+  rect = rect.moveTo({
+    left: x,
+    top: y
+  });
+  offsetX = offsetX || 0;
+  offsetY = offsetY || 0;
+  rect = rect.translate(-offsetX, -offsetY);
+
+  if (self.axis === 'y') {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](startingRect.left, rect.top, startingRect.right, rect.bottom);
+  } else if (self.axis === 'x') {
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect.left, startingRect.top, rect.right, startingRect.bottom);
+  }
+
+  if (typeof self.grid === 'number' && self.grid) {
+    var left = Math.floor(rect.left / self.grid) * self.grid,
+        top = Math.floor(rect.top / self.grid) * self.grid;
+    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](left, top, left + startingRect.width, top + startingRect.height);
+  }
+
+  if (container) {
+    container = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](container);
+    rect = rect.fit(container);
+  }
+
+  Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(element, rect, 'translate3d');
+  return rect;
+} // noinspection JSCommentMatchesSignature
+
+/**
+ * For module use only.  Selects the element either by css selector, if it's a string, or resolve a function.
+ * If the element is already element is is returned direction.  Returns null if not element is provided.
+ *
+ * @param element
+ * @param dragInstance
+ * @param target
+ * @returns {null|*}
+ * @private
+ */
+
+
+function _selectElementRect(element, dragInstance, target, originalTarget) {
+  if (element) {
+    var type = _typeof(element);
+
+    if (type === 'function') {
+      return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element.call(dragInstance, target, originalTarget, dragInstance));
+    } else if (type === 'string') {
+      return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](document.querySelector(element));
+    }
+
+    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+  }
+
+  return null;
 }
 /**
  * Returns the first scrollable parent.
@@ -95,6 +932,7 @@ function clone() {
  * @returns {HTMLElement|null}
  * @private
  */
+
 
 function _getScrollParent(element) {
   var o = element.parentElement;
@@ -109,1028 +947,214 @@ function _getScrollParent(element) {
 
   return null;
 }
+
+function _getScrollRect(element) {
+  if (element === window || element.nodeName === "HTML") {
+    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](0, 0, window.innerWidth, window.innerHeight);
+  } else {
+    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+  }
+}
 /**
- * Sets the target elements x and y position by setting the translate3d translation matrix.
- *
- * @param target
- * @param x
- * @param y
- * @private
+ * Helper class that is used to control scrolling when the element is dragged outside of bounds.
  */
 
 
-function _translate(target, x, y) {
-  target.style.transform = "translate3d(".concat(x, "px, ").concat(y, "px, 0)");
-} // Group of function that can be passed to Draggables container property that will contain a dragged element to within
-// the given parameters.  Function should return a rect with {left, top, width, and height} properties relative to the
-// client.  Similiar to Element.getBoundingClientRect().
-
-
-var CONTAINERS = {
-  /**
-   * Constrains to client area.
-   * @returns {{top: number, left: number, width: number, height: number}}
-   */
-  client: function client() {
-    return {
-      left: 0,
-      top: 0,
-      height: window.innerHeight,
-      width: window.innerWidth,
-      right: window.innerWidth,
-      bottom: window.innerHeight
-    };
-  },
-
-  /**
-   * Constrains to viewport.
-   * @param element
-   * @returns {{top: number, left: number, width: number, height: number}}
-   */
-  viewport: function viewport(element) {
-    var parent = _getScrollParent(element),
-        bb = parent.getBoundingClientRect();
-
-    return {
-      left: bb.left - parent.scrollLeft,
-      top: bb.top - parent.scrollTop,
-      width: parent.scrollWidth,
-      height: parent.scrollHeight
-    };
-  }
-};
-/**
- * Takes a bounding client rect and constrains the left and top position to within the container.  Returns a new rect.
- *
- * @param rect
- * @param container
- * @param element
- * @param helper
- * @returns {{top: *, left: *}}
- * @private
- */
-
-function _clampPositionToContainer(rect, container, element, helper) {
-  var bb = helper.getBoundingClientRect();
-  var x = rect.left,
-      y = rect.top;
-
-  if (container) {
-    if (typeof container === 'function') {
-      container = container(element, helper);
-    } else if (container.getBoundingClientRect) {
-      container = container.getBoundingClientRect();
-    } else {
-      container = element.closest(container);
-      container = container.getBoundingClientRect();
-    }
-
-    if (container) {
-      x = Object(_utility_math__WEBPACK_IMPORTED_MODULE_3__["clamp"])(x, container.left, container.left + container.width - bb.width);
-      y = Object(_utility_math__WEBPACK_IMPORTED_MODULE_3__["clamp"])(y, container.top, container.top + container.height - bb.height);
-    }
-  }
-
-  return _objectSpread({}, rect, {
-    left: x,
-    top: y
-  });
-} // Group of function that can be passed to the tolerance property of Draggable to control when an item is considered
-// intersecting another for drop events.
-
-
-var TOLERANCE_FUNCTIONS = {
-  intersect: function intersect(droppable, item) {
-    var origin = {
-      x: item.left + item.width / 2,
-      y: item.top + item.height / 2
-    };
-    return origin.x >= droppable.left && origin.x <= droppable.right && origin.y >= droppable.top && origin.y <= droppable.bottom;
-  }
-};
-/**
- * Behavior class to add the draggable behavior to an element for group of elements.
- */
-
-var Draggable =
+var ScrollHelper =
 /*#__PURE__*/
-function (_Publisher) {
-  _inherits(Draggable, _Publisher);
+function () {
+  function ScrollHelper(element) {
+    var _this4 = this;
 
-  // noinspection JSUnusedGlobalSymbols
+    var scrollXSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var scrollYSpeed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-  /**
-   * @param element {Element|String} The element to attach the draggable behavior to.
-   * @param container {string|CONTAINERS.client|CONTAINERS.viewport|function}
-   *  Constrains the draggable into the given area.
-   *  `container` can either be a css selector to match a parent element, a Function(element, helper)
-   *  that should return a bounding box.  Or an element who's bounding box will be used.
-   * @param axis {'x'|'y'|'xy'}
-   *  Controls what axis the item is draggable.  x can be dragged horizontally, y vertically, and xy can be freely dragged.
-   * @param exclude {String}
-   *  Prevents dragging from starting on matching elements.
-   * @param delay {Number}
-   *  The time in milliseconds after the mouse down event occurs that dragging will begin.
-   * @param offset {{x, y}|[x, y]|Function}
-   *  By default when an item is dragged is position will be set relative to the drop left corner of the item.
-   *  Offset is used to offset the element from the cursor.  You can pass an {x, y} object, an array with [x, y] pair,
-   *  or a Function({target, draggable, clientX, clientY, boundingRect}) that will be called that return an {x, y} object.
-   * @param disabled {Boolean}
-   *  Disables dragging.
-   * @param distance {Number}
-   *  Adds resistance to drag starting.  The users must move at least `distance` amount of pixels away from the
-   *  starting position for drag to start.
-   * @param handle {String}
-   *  If dragging will only start if the user clicks an element that matches the css selectors.
-   * @param helper {Function|Element}
-   *  An element to use as a helper for dragging.  Can be a Element or a Function that returns an element.
-   * @param revert {Number|Boolean}
-   *  Controls if the draggable reverts back to the starting position if no droppable accepts the target.
-   * @param scroll {Number}
-   *  Controls the speed that the draggable will scroll the scrollParent when the draggable leaves the viewable area.
-   * @param selector {String}
-   *  Used to delegate dragging to sub items.
-   * @param droppables
-   *  An array of css selectors or elements that will be used as drop targets for the draggable.
-   * @param tolerance {String}
-   *  Controls the function that determines if an item intersects a drop target.
-   * @param setHelperSize {Boolean}
-   *  If true the helpers width and height will be set by javascript to match the original element.
-   * @param grid {{x, y} | [x, y] | Number}
-   *  Snaps draggable movement to a grid with the given x, y dimensions.
-   */
-  function Draggable(element) {
-    var _this;
+    _classCallCheck(this, ScrollHelper);
 
-    var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-        _ref2$container = _ref2.container,
-        container = _ref2$container === void 0 ? null : _ref2$container,
-        _ref2$axis = _ref2.axis,
-        axis = _ref2$axis === void 0 ? 'xy' : _ref2$axis,
-        _ref2$exclude = _ref2.exclude,
-        exclude = _ref2$exclude === void 0 ? "input, button, select, .js-no-drag, textarea" : _ref2$exclude,
-        _ref2$delay = _ref2.delay,
-        delay = _ref2$delay === void 0 ? null : _ref2$delay,
-        _ref2$offset = _ref2.offset,
-        offset = _ref2$offset === void 0 ? cursor : _ref2$offset,
-        _ref2$disabled = _ref2.disabled,
-        disabled = _ref2$disabled === void 0 ? false : _ref2$disabled,
-        _ref2$distance = _ref2.distance,
-        distance = _ref2$distance === void 0 ? null : _ref2$distance,
-        _ref2$handle = _ref2.handle,
-        handle = _ref2$handle === void 0 ? null : _ref2$handle,
-        _ref2$helper = _ref2.helper,
-        helper = _ref2$helper === void 0 ? null : _ref2$helper,
-        _ref2$revert = _ref2.revert,
-        revert = _ref2$revert === void 0 ? null : _ref2$revert,
-        _ref2$scroll = _ref2.scroll,
-        scroll = _ref2$scroll === void 0 ? null : _ref2$scroll,
-        _ref2$selector = _ref2.selector,
-        selector = _ref2$selector === void 0 ? null : _ref2$selector,
-        _ref2$droppables = _ref2.droppables,
-        droppables = _ref2$droppables === void 0 ? null : _ref2$droppables,
-        _ref2$tolerance = _ref2.tolerance,
-        tolerance = _ref2$tolerance === void 0 ? 'intersect' : _ref2$tolerance,
-        _ref2$setHelperSize = _ref2.setHelperSize,
-        setHelperSize = _ref2$setHelperSize === void 0 ? false : _ref2$setHelperSize,
-        _ref2$grid = _ref2.grid,
-        grid = _ref2$grid === void 0 ? null : _ref2$grid;
+    this.frameID = null;
+    this.element = element;
+    this.scrollXSpeed = scrollXSpeed;
+    this.scrollYSpeed = scrollYSpeed;
+    this.onFrame = onFrame;
+    this.timestamp = performance.now();
 
-    _classCallCheck(this, Draggable);
+    var frame = function frame(timestamp) {
+      var delta = (timestamp - _this4.timestamp) / 1000;
+      _this4.timestamp = timestamp;
+      _this4.element.scrollLeft += delta * _this4.scrollXSpeed;
+      _this4.element.scrollTop += delta * _this4.scrollYSpeed;
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Draggable).call(this));
+      if (_this4.onFrame) {
+        _this4.onFrame(_this4);
+      }
 
-    if (typeof element === 'string') {
-      _this.element = document.querySelector(element);
-    } else {
-      _this.element = element;
-    }
+      _this4.frameID = window.requestAnimationFrame(frame);
+    };
 
-    _this._onMouseDown = _this.onMouseDown.bind(_assertThisInitialized(_this));
-    _this.disabled = disabled;
-    _this.helper = helper;
-    _this.offset = offset;
-    _this.axis = axis;
-    _this.delay = delay;
-    _this.distance = distance;
-    _this.container = container;
-    _this.handle = handle;
-    _this.exclude = exclude;
-    _this.revert = revert;
-    _this.selector = selector;
-    _this.droppables = [];
-    _this.tolerance = tolerance;
-    _this.setHelperSize = setHelperSize;
-    _this.scroll = scroll;
-
-    if (typeof grid === 'number') {
-      _this.grid = {
-        x: grid,
-        y: grid
-      };
-    } else if (Array.isArray(grid)) {
-      _this.grid = {
-        x: grid[0],
-        y: grid[1]
-      };
-    } else {
-      _this.grid = grid;
-    }
-
-    if (droppables) {
-      _this.addDroppables(droppables);
-    }
-
-    _this.element.addEventListener('mousedown', _this._onMouseDown);
-
-    _this.isDragging = false;
-    _this._revertFX = null;
-    return _this;
+    this.frameID = window.requestAnimationFrame(frame);
   }
-  /**
-   * Adds a drop target item.  A `droppable` can be an element, a css selector or an array of those.
-   * @param droppables
-   */
 
-
-  _createClass(Draggable, [{
-    key: "addDroppables",
-    value: function addDroppables(droppables) {
-      if (Array.isArray(droppables)) {
-        this.droppables = this.droppables.concat(droppables);
-      } else {
-        this.droppables.push(droppables);
+  _createClass(ScrollHelper, [{
+    key: "cancel",
+    value: function cancel() {
+      if (this.frameID) {
+        window.cancelAnimationFrame(this.frameID);
+        this.frameID = null;
       }
     }
-    /**
-     * Responsible for detecting dragging and starting the drag depending on delay and distance.
-     * @param event
-     */
-
-  }, {
-    key: "onMouseDown",
-    value: function onMouseDown(event) {
-      var _this2 = this;
-
-      var element = this.element;
-
-      if (this.selector) {
-        element = event.target.closest(this.selector);
-
-        if (!this.element.contains(element)) {
-          element = null;
-        }
-      }
-
-      if (!element) return;
-      var data = core_data__WEBPACK_IMPORTED_MODULE_1__["privateCache"].cache(element);
-
-      if (data.isDragging || this.disabled) {
-        return;
-      }
-
-      if (this.handle) {
-        var handle = event.target.closest(this.handle);
-
-        if (!handle || !element.contains(handle)) {
-          return;
-        }
-      }
-
-      if (this.exclude) {
-        var excluded = event.target.closest(this.exclude);
-
-        if (excluded && element.contains(excluded)) {
-          return;
-        }
-      }
-
-      event.preventDefault();
-      var distance = this.distance || 0,
-          delay = typeof this.delay === 'number' ? this.delay : -1,
-          doc = document,
-          startMouseDocumentX = event.clientX + window.scrollX,
-          startMouseDocumentY = event.clientY + window.scrollY,
-          mouseDocumentX = startMouseDocumentX,
-          mouseDocumentY = startMouseDocumentY; // Tests to see that delay and distance was met before dragging.
-
-      var startDragging = function startDragging() {
-        if (distance === 0 && delay < 0) {
-          _this2.startDrag(element, startMouseDocumentX, startMouseDocumentY, mouseDocumentX, mouseDocumentY);
-        }
-      }; // Delay dragging.
-
-
-      if (delay >= 0) {
-        var timer;
-
-        var onTimeout = function onTimeout() {
-          delay = -1;
-          doc.removeEventListener('mouseup', onMouseUp);
-          startDragging();
-        };
-
-        var onMouseUp = function onMouseUp() {
-          doc.removeEventListener('mouseup', onMouseUp);
-          clearTimeout(timer);
-        };
-
-        doc.addEventListener('mouseup', onMouseUp);
-        timer = setTimeout(onTimeout, delay);
-      } // Delay by distance.
-
-
-      if (distance > 0) {
-        var _onMouseUp = function _onMouseUp() {
-          doc.removeEventListener('mouseup', _onMouseUp);
-          doc.removeEventListener('mousemove', onMouseMove);
-        };
-
-        var onMouseMove = function onMouseMove(event) {
-          mouseDocumentX = event.clientX + window.scrollX;
-          mouseDocumentY = event.clientY + window.scrollY;
-          var delta = Math.sqrt(Math.pow(mouseDocumentX - startMouseDocumentX, 2) + Math.pow(mouseDocumentY - startMouseDocumentY, 2));
-
-          if (delta > distance) {
-            distance = 0;
-            doc.removeEventListener('mouseup', _onMouseUp);
-            doc.removeEventListener('mousemove', onMouseMove);
-            startDragging();
-          }
-        };
-
-        doc.addEventListener('mouseup', _onMouseUp);
-        doc.addEventListener('mousemove', onMouseMove);
-      }
-
-      startDragging();
-    }
-    /**
-     * Starts the drag animation at the given x, y origin.
-     *
-     * @param element
-     * @param startMouseX
-     * @param startMouseY
-     * @param posX
-     * @param posY
-     */
-
-  }, {
-    key: "startDrag",
-    value: function startDrag(element, startMouseX, startMouseY, posX, posY) {
-      var _this3 = this;
-
-      if (this.isDragging) {
-        return;
-      }
-
-      this.isDragging = true; // Cancel any animation that are running.
-
-      if (this._revertFX) {
-        this._revertFX.cancel();
-
-        this._revertFX = null;
-      }
-
-      var doc = document,
-          target,
-          droppables = this.getDropTargets(),
-          startBoundingBox = element.getBoundingClientRect(),
-          startBBDocument = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["clientRectToDocumentSpace"])(startBoundingBox),
-          helper,
-          _scrollTick;
-
-      if (!this.helper || this.helper === 'self') {
-        target = element;
-      } else if (typeof this.helper === 'function') {
-        target = this.helper(this);
-        helper = target;
-      } else if (this.helper) {
-        target = this.helper;
-        helper = target;
-      }
-
-      if (helper) {
-        if (this.setHelperSize) {
-          if (this.setHelperSize === true) {
-            helper.style.width = "".concat(startBoundingBox.width, "px");
-            helper.style.height = "".concat(startBoundingBox.height, "px");
-            helper.style.boxSizing = 'border-box';
-          } else if (Array.isArray(this.setHelperSize)) {
-            helper.style.width = "".concat(this.setHelperSize[0], "px");
-            helper.style.height = "".concat(this.setHelperSize[1], "px");
-          } else {
-            helper.style.width = "".concat(this.setHelperSize.width, "px");
-            helper.style.height = "".concat(this.setHelperSize.height, "px");
-          }
-        }
-      } // If the target doesn't have a parentElement it needs to be added to the page.
-
-
-      if (!target.parentElement) {
-        element.parentElement.appendChild(target);
-      } // mouseOffsetX and mouseOffsetY is the mouses offset relative to the top left corner of the element
-      // being dragged.
-      // offsetX and offsetY is how much the dragged element is offset from the cursor.
-      // By default it is at the top left of the element.
-
-
-      var startingTranslation = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["getTranslation"])(target),
-          offset = {
+  }], [{
+    key: "getScrollSpeed",
+    value: function getScrollSpeed(rect, scrollParentRect) {
+      var r = {
         x: 0,
         y: 0
-      }; // The offset property controls how much the dragged element is offset from top left corner of the element.
-      // By default it is [0, 0] but a function can be or array can be passed to control this behavior.
+      };
 
-      if (this.offset) {
-        var _offset = this.offset;
-
-        if (typeof _offset === 'function') {
-          offset = this.offset({
-            target: target,
-            draggable: this,
-            clientX: startMouseX - window.scrollX,
-            clientY: startMouseY - window.scrollY,
-            boundingRect: startBoundingBox
-          });
-        }
-      } // Offset should be {x, y} not an array.
-
-
-      if (Array.isArray(offset)) {
-        offset = {
-          x: offset[0],
-          y: offset[1]
-        };
+      if (rect.right > scrollParentRect.right) {
+        r.x = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.right - scrollParentRect.right) / rect.width, -1, 1);
+      } else if (rect.left < scrollParentRect.left) {
+        r.x = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.left - scrollParentRect.left) / rect.width, -1, 1);
       }
 
-      var onMouseMove = function onMouseMove(event) {
-        event.preventDefault();
-
-        var startingRect = target.getBoundingClientRect(),
-            position = _this3._getPosition(element, target, event.clientX, event.clientY, offset, _this3.container),
-            dropData;
-
-        Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["setElementClientPosition"])(target, position, 'translate3d');
-        dropData = _this3._getDropData(droppables, startingRect, position);
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = dropData[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var droppable = _step.value;
-
-            if (!droppable.intersectsBefore && droppable.intersectsAfter) {
-              _this3._dispatchDroppableEvent(droppable.target, 'drag-enter', {
-                bubbles: true,
-                detail: {
-                  item: target
-                }
-              });
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        _this3._triggerEvent(element, 'drag-move', {
-          bubbles: false,
-          details: {
-            mouseX: event.clientX + window.scrollX,
-            mouseY: event.clientY + window.scrollY,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            startMouseX: startMouseX,
-            startMouseY: startMouseY,
-            offset: offset,
-            helper: target,
-            originalEvent: event
-          },
-          topic: 'draggable.move'
-        }); // Refresh dropData incase something moved.
-
-
-        dropData = _this3._getDropData(droppables, startingRect, position);
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = dropData[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var _droppable = _step2.value;
-
-            if (_droppable.intersectsBefore && !_droppable.intersectsAfter) {
-              _this3._dispatchDroppableEvent(_droppable.target, 'drag-leave', {
-                bubbles: true,
-                detail: {
-                  item: target
-                }
-              });
-            }
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-              _iterator2["return"]();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-
-        if (_this3.scroll && !_scrollTick) {
-          var parent = _getScrollParent(element);
-
-          if (parent) {
-            var lastTick = performance.now(),
-                scrollX = parent.scrollLeft,
-                scrollY = parent.scrollTop;
-
-            _scrollTick = function scrollTick(timestamp) {
-              var parentBB = parent.getBoundingClientRect(),
-                  helperBB = target.getBoundingClientRect(),
-                  x,
-                  y,
-                  delta = timestamp - lastTick,
-                  isOOB = false;
-              lastTick = timestamp;
-
-              if (helperBB.right > parentBB.right) {
-                x = (helperBB.right - parentBB.right) / helperBB.width;
-                isOOB = true;
-                scrollX += delta * x * _this3.scroll;
-                parent.scrollLeft = scrollX;
-              } else if (helperBB.left < parentBB.left) {
-                x = (parentBB.left - helperBB.left) / helperBB.width;
-                isOOB = true;
-                scrollX -= delta * x * _this3.scroll;
-                parent.scrollLeft = scrollX;
-              }
-
-              if (helperBB.bottom > parentBB.bottom) {
-                y = (helperBB.bottom - parentBB.bottom) / helperBB.height;
-                isOOB = true;
-                scrollY += delta * y * _this3.scroll;
-                parent.scrollTop = scrollY;
-              } else if (helperBB.top < parentBB.top) {
-                y = (parentBB.top - helperBB.top) / helperBB.height;
-                isOOB = true;
-                scrollY -= delta * y * _this3.scroll;
-                parent.scrollTop = scrollY;
-              }
-
-              helperBB = _clampPositionToContainer(helperBB, _this3.container, element, target);
-              Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["setElementClientPosition"])(target, helperBB, 'translate3d');
-
-              if (isOOB && _this3.isDragging) {
-                window.requestAnimationFrame(_scrollTick);
-              } else {
-                _scrollTick = null;
-              }
-            };
-
-            window.requestAnimationFrame(_scrollTick);
-          }
-        }
-      };
-
-      var onMouseUp = function onMouseUp(event) {
-        event.preventDefault();
-        doc.removeEventListener('mousemove', onMouseMove);
-        doc.removeEventListener('mouseup', onMouseUp);
-        doc = null;
-        _this3.isDragging = false;
-        element.classList.remove('ui-dragging');
-
-        var startingRect = target.getBoundingClientRect(),
-            position = _this3._getPosition(element, target, event.clientX, event.clientY, offset, _this3.container),
-            translation = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["getTranslation"])(target),
-            accepted = null;
-
-        function accept(element) {
-          if (!accepted) {
-            accepted = element;
-          } else {
-            throw new Error("Draggable has already been accepted.");
-          }
-        }
-
-        function isAccepted() {
-          return !!accepted;
-        }
-
-        _this3._triggerEvent(element, 'drag-end', {
-          bubbles: true,
-          details: {
-            startX: startMouseX - window.scrollX,
-            startMouseY: startMouseY,
-            offset: offset,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            originalEvent: event,
-            helper: target,
-            accept: accept,
-            isAccepted: isAccepted
-          },
-          topic: 'draggable.end',
-          accept: accept,
-          isAccepted: isAccepted
-        });
-
-        if (!accepted && _this3.revert === true) {
-          _translate(target, startingTranslation.x, startingTranslation.y);
-
-          if (target !== element && target.parentElement) {
-            target.parentElement.removeChild(target);
-          }
-
-          _this3._triggerEvent(element, 'drag-complete', {
-            bubbles: true,
-            topic: 'draggable.complete'
-          });
-        } else if (!accepted && typeof _this3.revert === 'number') {
-          var animation = new _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"]({
-            applyFrame: function applyFrame(element, frame) {
-              _translate(element, frame.left, frame.top);
-            },
-            frames: {
-              '0%': {
-                left: translation.x + (position.left - startingRect.left),
-                top: translation.y + (position.top - startingRect.top)
-              },
-              '100%': {
-                left: startingTranslation.x,
-                top: startingTranslation.y
-              }
-            }
-          });
-          _this3._revertFX = animation.animate(target, {
-            duration: _this3.revert,
-            onEnd: function onEnd() {
-              if (target !== element && target.parentElement) {
-                target.parentElement.removeChild(target);
-              }
-            },
-            onComplete: function onComplete() {
-              _this3._triggerEvent(element, 'drag-complete', {
-                bubbles: true,
-                topic: 'draggable.complete'
-              });
-            }
-          });
-        } else {
-          if (target !== element && target.parentElement) {
-            target.parentElement.removeChild(target);
-          }
-
-          Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["setElementClientPosition"])(element, position, 'translate3d');
-
-          var _startingRect = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["documentRectToClientSpace"])(startBBDocument),
-              dropped = [];
-
-          var _iteratorNormalCompletion3 = true;
-          var _didIteratorError3 = false;
-          var _iteratorError3 = undefined;
-
-          try {
-            for (var _iterator3 = droppables[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-              var droppable = _step3.value;
-
-              if (_this3._intersects(element.dataset.tolerance, droppable.getBoundingClientRect(), position)) {
-                _this3._dispatchDroppableEvent(droppable, 'drop', {
-                  bubbles: true,
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                  relatedTarget: element,
-                  detail: {
-                    originalEvent: event,
-                    startingBoundingClientRect: _startingRect,
-                    droppable: droppable
-                  }
-                });
-              }
-            }
-          } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-                _iterator3["return"]();
-              }
-            } finally {
-              if (_didIteratorError3) {
-                throw _iteratorError3;
-              }
-            }
-          }
-
-          _this3._triggerEvent(element, 'drag-complete', {
-            topic: 'draggable.complete',
-            details: {
-              dropped: dropped
-            },
-            bubbles: true,
-            dropped: dropped
-          });
-        }
-      };
-
-      doc.addEventListener('mousemove', onMouseMove);
-      doc.addEventListener('mouseup', onMouseUp);
-      element.classList.add('ui-dragging');
-
-      this._triggerEvent(element, 'drag-start', {
-        bubbles: true,
-        details: {
-          startMouseY: startMouseY,
-          startMouseX: startMouseX,
-          offset: offset,
-          mouseX: posX,
-          mouseY: posY,
-          clientX: posX - window.scrollX,
-          clientY: posY - window.scrollY,
-          helper: target
-        },
-        topic: 'draggable.start'
-      });
-    }
-    /**
-     * Gets an array of elements of all the drop targets.
-     * If the drop target is a string, it queries for those elements.
-     *
-     * @returns {Array}
-     */
-
-  }, {
-    key: "getDropTargets",
-    value: function getDropTargets() {
-      var r = [];
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
-
-      try {
-        for (var _iterator4 = this.droppables[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var droppable = _step4.value;
-
-          var type = _typeof(droppable);
-
-          if (type === 'string') {
-            var _iteratorNormalCompletion5 = true;
-            var _didIteratorError5 = false;
-            var _iteratorError5 = undefined;
-
-            try {
-              for (var _iterator5 = document.querySelectorAll(droppable)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                var target = _step5.value;
-                if (r.indexOf(target) !== -1) continue;
-                r.push(target);
-              }
-            } catch (err) {
-              _didIteratorError5 = true;
-              _iteratorError5 = err;
-            } finally {
-              try {
-                if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
-                  _iterator5["return"]();
-                }
-              } finally {
-                if (_didIteratorError5) {
-                  throw _iteratorError5;
-                }
-              }
-            }
-          } else if (type === 'function') {
-            droppable = droppable.call(this, this);
-            if (r.indexOf(droppable) !== -1) continue;
-            r.push(droppable);
-          } else {
-            if (r.indexOf(droppable) !== -1) continue;
-            r.push(droppable);
-          }
-        }
-      } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-            _iterator4["return"]();
-          }
-        } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
-          }
-        }
+      if (rect.bottom > scrollParentRect.bottom) {
+        r.y = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.bottom - scrollParentRect.bottom) / rect.width, -1, 1);
+      } else if (rect.top < scrollParentRect.top) {
+        r.y = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.top - scrollParentRect.top) / rect.width, -1, 1);
       }
 
       return r;
     }
-    /**
-     * Takes an array of drop targets and tests to see if the target intersects the start and ending rectangles.
-     *
-     * Rects are objects that have the left, right, top, bottom, width and height properties defined.
-     * Similar to the results received from Element.getBoundingClientRect().
-     *
-     * @param droppables - Array of elements to tests.
-     * @param startingRect - Starting rect.
-     * @param endingRect - Ending rect.
-     * @returns {Array}
-     * @private
-     */
-
   }, {
-    key: "_getDropData",
-    value: function _getDropData(droppables, startingRect, endingRect) {
-      var dropData = [];
-      var _iteratorNormalCompletion6 = true;
-      var _didIteratorError6 = false;
-      var _iteratorError6 = undefined;
+    key: "buildScrollHelper",
+    value: function buildScrollHelper(element, target, rect, pos, dragInstance, event, scrollSpeed, container) {
+      var _this5 = this;
 
-      try {
-        for (var _iterator6 = droppables[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-          var droppable = _step6.value;
-          // Convert to client space.
-          var dropBox = droppable.getBoundingClientRect();
+      var scrollParent = _getScrollParent(element);
 
-          var intersectsBefore = this._intersects(droppable.dataset.tolerance, dropBox, startingRect),
-              intersectsAfter = this._intersects(droppable.dataset.tolerance, dropBox, endingRect);
+      if (scrollParent) {
+        var scrollParentRect = _getScrollRect(scrollParent),
+            speed = ScrollHelper.getScrollSpeed(rect, scrollParentRect);
 
-          dropData.push(_objectSpread({
-            intersectsBefore: intersectsBefore,
-            intersectsAfter: intersectsAfter,
-            target: droppable
-          }, dropBox));
-        }
-      } catch (err) {
-        _didIteratorError6 = true;
-        _iteratorError6 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion6 && _iterator6["return"] != null) {
-            _iterator6["return"]();
-          }
-        } finally {
-          if (_didIteratorError6) {
-            throw _iteratorError6;
-          }
+        if (speed.x || speed.y) {
+          return new ScrollHelper(scrollParent, speed.x * scrollSpeed, speed.y * scrollSpeed, function (scroller) {
+            var rect = _moveElementToPosition(_this5, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, dragInstance, target, element));
+
+            var scrollRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](scroller.element);
+            Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, rect, 'translate3d');
+
+            if (scrollRect.contains(rect)) {
+              scroller.cancel();
+              scroller = null;
+            }
+          });
         }
       }
-
-      return dropData;
-    }
-    /**
-     * Triggers an event on the current item.
-     *
-     * @param item
-     * @param eventName
-     * @param details
-     * @param bubbles
-     * @param topic
-     * @param properties
-     * @private
-     */
-
-  }, {
-    key: "_triggerEvent",
-    value: function _triggerEvent(item, eventName, _ref3) {
-      var bubbles = _ref3.bubbles,
-          details = _ref3.details,
-          topic = _ref3.topic,
-          properties = _objectWithoutProperties(_ref3, ["bubbles", "details", "topic"]);
-
-      details = _objectSpread({
-        draggable: this,
-        item: item
-      }, details);
-      var event = new CustomEvent(eventName, {
-        bubbles: bubbles,
-        detail: details
-      });
-
-      if (properties) {
-        Object.assign(event, properties);
-      }
-
-      item.dispatchEvent(event);
-
-      if (topic !== false) {
-        topic = topic || eventName;
-        this.publish(topic, _objectSpread({
-          draggable: this,
-          item: this
-        }, details));
-      }
-    }
-  }, {
-    key: "_dispatchDroppableEvent",
-    value: function _dispatchDroppableEvent(dropElement, name) {
-      var _ref4 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-          _ref4$bubbles = _ref4.bubbles,
-          bubbles = _ref4$bubbles === void 0 ? true : _ref4$bubbles,
-          _ref4$detail = _ref4.detail,
-          detail = _ref4$detail === void 0 ? {} : _ref4$detail,
-          properties = _objectWithoutProperties(_ref4, ["bubbles", "detail"]);
-
-      var customEvent = new CustomEvent(name, {
-        bubbles: bubbles,
-        detail: _objectSpread({
-          dropElement: dropElement,
-          draggable: this
-        }, detail)
-      }); // if(topic !== false && droppable.publish) {
-      //     topic = topic || name;
-      //
-      //     droppable.publish(topic, {
-      //         target: droppable,
-      //         draggable: this,
-      //         name: topic,
-      //         ...detail
-      //     });
-      // }
-
-      Object.assign(customEvent, properties);
-      dropElement.dispatchEvent(customEvent);
-    }
-    /**
-     * Tests to see if the item intersects the droppable with the given tolerance function.
-     *
-     * @param tolerance
-     * @param droppable
-     * @param item
-     * @returns {*}
-     * @private
-     */
-
-  }, {
-    key: "_intersects",
-    value: function _intersects(tolerance, droppable, item) {
-      tolerance = tolerance || this.tolerance;
-      return TOLERANCE_FUNCTIONS[tolerance](droppable, item);
-    }
-    /**
-     * Retrieves the expected bound box of the helper element at the given mouse coordinates.
-     *
-     * @param element
-     * @param helper
-     * @param clientX
-     * @param clientY
-     * @param offset
-     * @param container
-     * @returns {{top: *, left: *, bottom: *, width: number, right: *, height: number, target: *}}
-     */
-
-  }, {
-    key: "_getPosition",
-    value: function _getPosition(element, helper, clientX, clientY, offset, container) {
-      var bb = helper.getBoundingClientRect();
-      var left = clientX + offset.x,
-          top = clientY + offset.y;
-
-      if (this.grid) {
-        left = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["snapToGrid"])(left, this.grid.x);
-        top = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_2__["snapToGrid"])(top, this.grid.y);
-      }
-
-      var r = {
-        left: left,
-        top: top,
-        width: bb.width,
-        height: bb.height,
-        right: left + bb.width,
-        bottom: top + bb.height,
-        target: helper
-      };
-      return _objectSpread({}, r, {}, _clampPositionToContainer(r, container, element, helper));
     }
   }]);
 
-  return Draggable;
-}(_Publisher__WEBPACK_IMPORTED_MODULE_0__["default"]);
+  return ScrollHelper;
+}();
 
-_defineProperty(Draggable, "CLONE", clone);
+function ScrollArea(selector) {
+  return function () {
+    var element = selector;
 
-_defineProperty(Draggable, "OFFSET_CURSOR", cursor);
+    if (typeof element === 'string') {
+      element = document.querySelector(element);
+    }
 
+    var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
+        scroll = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["getScroll"])(element);
+    rect.left -= scroll.scrollLeft;
+    rect.top -= scroll.scrollTop;
+    rect.right = rect.left + element.scrollWidth;
+    rect.bottom = rect.top + element.scrollHeight;
+    return rect;
+  };
+}
+function clone() {
+  var opacity = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var className = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var zIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
+  if (_typeof(opacity) === 'object' && opacity.nodeType) {
+    return opacity.cloneNode(true);
+  }
+
+  return function (element) {
+    var r = element.cloneNode(true);
+
+    if (opacity !== null) {
+      r.style.opacity = opacity;
+    }
+
+    if (className) {
+      r.className = className;
+    }
+
+    r.style.position = "absolute";
+    if (zIndex !== null) r.style.zIndex = zIndex;
+    return r;
+  };
+}
+
+function publishDragMoveEvent(self, element, helper, event, rect) {
+  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+  return dispatchDropEvent(self, 'drag.move', element, helper, event, rect, bubbles, true, true, options);
+}
+
+function publishDragDropEvent(self, element, helper, event, rect) {
+  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
+  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+  return dispatchDropEvent(self, 'drag.drop', element, helper, event, rect, bubbles, true, true, options);
+}
+
+function dispatchDropEvent(self, name, element, helper, originalEvent, currentRect) {
+  var bubbles = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+  var dispatch = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
+  var publish = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
+  var detail = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
+  var target = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
+  var eventPackage = {
+    name: name,
+    draggable: self,
+    target: helper,
+    element: element,
+    item: element,
+    // alias for element
+    helper: helper,
+    originalEvent: null,
+    rect: currentRect
+  };
+
+  if (originalEvent) {
+    eventPackage.originalEvent = originalEvent;
+    eventPackage.clientX = originalEvent.clientX;
+    eventPackage.clientY = originalEvent.clientY;
+  }
+
+  if (!target) {
+    target = element;
+  }
+
+  if (detail) {
+    Object.assign(eventPackage, detail);
+  }
+
+  if (publish) {
+    self.publish(name, eventPackage);
+  }
+
+  if (dispatch) {
+    var customEvent = new CustomEvent(name, {
+      bubbles: bubbles,
+      detail: eventPackage
+    });
+    target.dispatchEvent(customEvent);
+  }
+}
 
 /***/ })
 

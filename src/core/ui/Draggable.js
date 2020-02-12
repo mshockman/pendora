@@ -1,49 +1,640 @@
 import Publisher from "../Publisher";
-
-import {privateCache} from "core/data";
-import {
-    getTranslation,
-    setElementClientPosition,
-    documentRectToClientSpace,
-    clientRectToDocumentSpace,
-    snapToGrid
-} from "core/ui/position";
-import {clamp} from "../utility/math";
+import {calcDistance, clamp} from "../utility";
+import Rect from "../vectors/Rect";
+import {getScroll} from "../utility";
+import {setElementClientPosition} from "./position";
 import Animation from "../fx/Animation";
 
 
+const reg_percentage_test = /\s*\d+\.?\d*%\s*/;
+
+
 /**
- * Draggable option for offset that offsets the position by the cursor.
+ * Returns the offset position of the mouse relative to the target.
  *
- * @param clientX
- * @param clientY
- * @param boundingRect
- * @returns {{x, y}}
+ * @param target
+ * @param event
+ * @returns {{x: number, y: number}}
  */
-export function cursor({clientX, clientY, boundingRect}) {
+export function cursor(target, event) {
+    let rect = new Rect(target);
+
     return {
-        x: boundingRect.left - clientX,
-        y: boundingRect.top - clientY
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+
+
+function buildTestIntersectionFunction(amount) {
+    return function(element, rect) {
+        rect = new Rect(rect);
+
+        let targetRect = new Rect(element),
+            intersection = targetRect.intersection(rect),
+            p = intersection ? intersection.getArea() / rect.getArea() : 0;
+
+        if(amount === 0) {
+            return p > 0;
+        } else {
+            return p >= amount;
+        }
     }
 }
 
 
-/**
- * Draggable option that clones the draggable element for the helper element.
- *
- * @param opacity
- * @returns {function(*): (ActiveX.IXMLDOMNode | Node)}
- */
-export function clone(opacity=null) {
-    return function(draggable) {
-        let helper = draggable.element.cloneNode(true);
+export default class Draggable extends Publisher {
+    #element;
+    #droppables;
+    #boundOnMouseDown;
+    #itemCache;
 
-        if(opacity !== null) {
-            helper.style.opacity = opacity;
+    constructor(element, {container=null, axis='xy', exclude='', delay=0, offset=cursor,
+        resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
+        scrollSpeed=0, selector=null, tolerance=0.5, setHelperSize=false, grid=null}={}) {
+        super();
+
+        if(typeof element === 'string') {
+            this.#element = document.querySelector(element);
+        } else {
+            this.#element = element;
         }
 
-        return helper;
+        this.#droppables = [];
+        this.#itemCache = new WeakMap();
+
+        this.container = container;
+        this.axis = axis;
+        this.exclude = exclude;
+        this.delay = delay;
+        this.offset = offset;
+        this.resistance = resistance;
+        this.handle = handle;
+        this.helper = helper;
+        this.revert = revert;
+        this.revertDuration = revertDuration;
+        this.scrollSpeed = scrollSpeed;
+        this.selector = selector;
+        this.tolerance = tolerance;
+        this.setHelperSize = setHelperSize;
+        this.grid = grid;
+
+        if(typeof this.container === 'string') {
+            this.container = document.querySelector(this.container);
+        }
+
+        this.#boundOnMouseDown = event => {
+            return this.onMouseDown(event);
+        };
+
+        this.element.addEventListener('mousedown', this.#boundOnMouseDown);
     }
+
+    /**
+     * Starts dragging if the correct elements have been targeted and delay and resistance have been meet.
+     *
+     * @param event
+     * @returns {Promise<void>}
+     */
+    async onMouseDown(event) {
+        let startPosition = {x: event.clientX + window.pageXOffset, y: event.clientY + window.pageYOffset},
+            currentPosition = {x: startPosition.x, y: startPosition.y},
+            target = this.#element,
+            cancelMouseTracking = null,
+            cancelTimer = null,
+            distanceBrokenPromise,
+            timerPromise,
+            offset;
+
+        // Only start dragging if a draggable child of the element is targeted.
+        // If selector is null then the entire element is draggable and should be the target.
+        if(this.selector) {
+            target = event.target.closest(this.selector);
+
+            if(!target || !this.#element.contains(target)) {
+                return;
+            }
+        }
+
+        // Only start dragging if the handle was targeted.
+        // If handle is null then the entire target is the handle.
+        if(this.handle) {
+            let handle = event.target.closest(this.handle);
+
+            if(!handle || !target.contains(handle)) {
+                return;
+            }
+        }
+
+        // If any excluded elements are targeted ignore the event.
+        if(this.exclude) {
+            let exclude = event.target.closest(this.exclude);
+
+            if(exclude && target.contains(exclude)) {
+                return;
+            }
+        }
+
+        // Find the offset of the event.
+        if(typeof this.offset === 'function') {
+            offset = this.offset(target, event);
+        } else if(Array.isArray(this.offset)) {
+            offset = {
+                x: this.offset[0],
+                y: this.offset[1]
+            };
+        } else if(typeof this.offset === 'object') {
+            offset = {
+                x: this.offset.x,
+                y: this.offset.y
+            };
+        } else {
+            offset = {x: 0, y: 0};
+        }
+
+        // Prevent default browser actions.
+        event.preventDefault();
+
+        // At this point we can be sure that a draggable item was
+        // targeted by it's handle and no excluded items where clicked.
+
+        // Creates a promise that both tracks the current mouse coords and resolve
+        // when the user passes the given resistance.
+        distanceBrokenPromise = new Promise(resolve => {
+            let isDistanceBroken = this.resistance <= 0;
+
+            if(isDistanceBroken) {
+                resolve('complete');
+            }
+
+            let onMouseMove = event => {
+                currentPosition.x = event.clientX + window.pageXOffset;
+                currentPosition.y = event.clientY + window.pageYOffset;
+                event.preventDefault();
+
+                if(!isDistanceBroken && calcDistance(currentPosition.x, currentPosition.y, startPosition.x, startPosition.y) > this.resistance) {
+                    resolve('complete');
+                    isDistanceBroken = true;
+                }
+            };
+
+            // Cancel mouse tracking and resolve the promise to canceled if hasn't already been resolve.
+            // This function must be called or their will be a memory leak before onMouseDown completes.
+            cancelMouseTracking = () => {
+                if(onMouseMove) {
+                    document.removeEventListener('mousemove', onMouseMove);
+
+                    if(!isDistanceBroken) {
+                        resolve('canceled');
+                    }
+
+                    onMouseMove = null;
+                }
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+        });
+
+        // Creates a promise that resolve when after the delay time passes or the user cancels the drag by
+        // releasing the mouse button.
+        timerPromise = new Promise(resolve => {
+            let timer = null;
+
+            if(this.delay >= 0) {
+                timer = setTimeout(() => {
+                    resolve("complete");
+                    timer = null;
+                }, this.delay);
+            } else {
+                resolve('complete');
+            }
+
+            // cancel the timer and resolve it to canceled if it is still active.
+            cancelTimer = () => {
+                if(timer) {
+                    clearTimeout(timer);
+                    resolve('canceled');
+                }
+            };
+        });
+
+        // cancel the timer and mouse tracking if they are still active.
+        let onMouseUp = event => {
+            event.preventDefault();
+            cancelTimer();
+            cancelMouseTracking();
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mouseup', onMouseUp);
+
+        // Wait until the delay time and distance have passed or failed.
+        let [timerStatus, distanceStatus] = await Promise.all([timerPromise, distanceBrokenPromise]);
+
+        // Ensure that mouse tracking has been canceled.
+        if(cancelMouseTracking) cancelMouseTracking();
+
+        // At this point both the timer and distance status should have passed or failed.
+        // If either failed do nothing.
+        if(timerStatus === 'complete' && distanceStatus === 'complete') {
+            this.startDragging(target, {
+                offsetX: offset.x,
+                offsetY: offset.y,
+                // Make relative to client.
+                startingX: currentPosition.x,
+                startingY: currentPosition.y
+            });
+        }
+    }
+
+    async startDragging(element, pos) {
+        let cache = this.#itemCache.get(element),
+            mousePosition = {x: pos.startingX, y: pos.startingY};
+
+        if(!cache) {
+            cache = {isDragging: false, fx: null, rect: null, helper: null, element: element};
+            this.#itemCache.set(element, cache);
+        }
+
+        if(cache.isDragging) {
+            return;
+        }
+
+        cache.isDragging = true;
+
+        if(cache.fx) {
+            await cache.fx.cancel();
+            cache.fx = null;
+        }
+
+        let target = element,
+            container = this.container,
+            scroller = null,
+            dropTargets = [],
+            startPosition = new Rect(element),
+            startingClientRect = startPosition;
+
+        startPosition = startPosition.translate(
+            window.pageXOffset,
+            window.pageYOffset
+        );
+
+        if(!cache.rect) {
+            cache.rect = startPosition;
+        }
+
+        if(typeof container === 'string') {
+            container = document.querySelector(container);
+        }
+
+        if(this.helper) {
+            if(typeof this.helper === 'function') {
+                target = this.helper(element);
+            } else {
+                target = this.helper;
+            }
+
+            if(this.setHelperSize) {
+                target.style.width = startPosition.width + "px";
+                target.style.height = startPosition.height + "px";
+            }
+
+            target.style.pointerEvents = 'none';
+
+            if(!target.parentElement && element.parentElement) {
+                element.parentElement.appendChild(target);
+            }
+
+            target.classList.add('ui-drag-helper');
+
+            cache.helper = target;
+        }
+
+        let refreshDropTargets = (rect) => {
+            // drag-enter
+            let mouseX = mousePosition.x - window.pageXOffset,
+                mouseY = mousePosition.y - window.pageYOffset,
+                currentDropTargets,
+                detail = {clientX: mouseX, clientY: mouseY};
+
+            if(rect !== null) {
+                currentDropTargets = this.getDropTargets(rect, {mouseX, mouseY});
+            } else {
+                currentDropTargets = [];
+            }
+
+            for(let dropTarget of currentDropTargets) {
+                if(dropTargets.indexOf(dropTarget) === -1) {
+                    dispatchDropEvent(this, 'drag.enter', element, target, null, rect, true, true, false, detail, dropTarget);
+                }
+            }
+
+            for(let dropTarget of dropTargets) {
+                if(currentDropTargets.indexOf(dropTarget) === -1) {
+                    dispatchDropEvent(this, 'drag.leave', element, target, null, rect, true, true, false, detail, dropTarget);
+                }
+            }
+
+            // drag-leave
+            dropTargets = currentDropTargets;
+        };
+
+        let onMouseMove = event => {
+            event.preventDefault();
+            let rect = _moveElementToPosition(this, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+
+            mousePosition.x = event.clientX + window.pageXOffset;
+            mousePosition.y = event.clientY + window.pageYOffset;
+
+            if(this.scrollSpeed > 0) {
+                if(scroller) {
+                    scroller.cancel();
+                    scroller = null;
+                }
+
+                scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, this, event, this.scrollSpeed, container);
+            }
+
+            refreshDropTargets(rect);
+
+            publishDragMoveEvent(this, element, target, event, rect);
+        };
+
+        let onMouseUp = async event => {
+            event.preventDefault();
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            cache.isDragging = false;
+            element.classList.remove('ui-dragging');
+
+            if(scroller) {
+                scroller.cancel();
+                scroller = null;
+            }
+
+            let accepted = false,
+                isDefaultPrevented = false,
+                reverted = false,
+                rect = new Rect(target);
+
+            publishDragDropEvent(this, element, target, event, rect, false, {
+                isDefaultPrevented() {
+                    return isDefaultPrevented;
+                },
+
+                isAccepted() {
+                    return accepted;
+                },
+
+                accept() {
+                    accepted = true;
+                },
+
+                preventDefault() {
+                    isDefaultPrevented = true;
+                }
+            });
+
+            if(this.revert && !accepted) {
+                refreshDropTargets(cache.rect);
+                rect = cache.rect;
+
+                if(!this.revertDuration) {
+                    if(target !== element) {
+                        target.parentElement.removeChild(target);
+                    } else {
+                        let pos = startPosition.translate(
+                            -window.pageXOffset,
+                            -window.pageYOffset
+                        );
+
+                        setElementClientPosition(target, pos, 'translate3d');
+                    }
+                } else {
+                    cache.fx = _revert(target, cache.rect, this.revertDuration);
+
+                    await cache.fx;
+
+                    if(target !== element) {
+                        target.parentElement.removeChild(target);
+                    }
+                }
+
+                reverted = true;
+            } else {
+                if(target !== element) {
+                    target.parentElement.removeChild(target);
+                    setElementClientPosition(element, rect, 'translate3d');
+                }
+            }
+
+            this.#itemCache.delete(element);
+
+            dispatchDropEvent(this, 'drag.end', element, target, event, rect, true, true, true, {accepted, reverted}, element);
+        };
+
+        // Set target to starting position.
+        if(mousePosition.x !== undefined && mousePosition.y !== undefined) {
+            let rect = _moveElementToPosition(this, target, mousePosition.x - window.pageXOffset, mousePosition.y - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+            refreshDropTargets(rect);
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        element.classList.add('ui-dragging');
+
+        dispatchDropEvent(this, 'drag.start', element, target, null, startingClientRect, true, true, true, null);
+    }
+
+    getDropTargets(rect, mousePos) {
+        let r = [];
+
+        /**
+         * @type {number|String|Function|string}
+         */
+        let testFunction = this.tolerance,
+            type = typeof testFunction;
+
+        if(type === 'string') {
+            // noinspection JSCheckFunctionSignatures
+            if(reg_percentage_test.test(testFunction)) {
+                // noinspection JSCheckFunctionSignatures
+                testFunction = buildTestIntersectionFunction(parseFloat(testFunction) / 100);
+            }
+        } else if(type === 'number') {
+            testFunction = buildTestIntersectionFunction(testFunction);
+        }
+
+        for(let droppable of this.#droppables) {
+            if(testFunction(droppable, rect, mousePos, this)) {
+                r.push(droppable);
+            }
+        }
+
+        return r;
+    }
+
+    connect(droppables) {
+        if(typeof droppables === 'string') {
+            droppables = document.querySelectorAll(droppables);
+        } else if(typeof droppables.length !== 'number') {
+            droppables = [droppables];
+        }
+
+        for(let i = 0; i < droppables.length; i++) {
+            let item = droppables[i];
+
+            if(this.#droppables.indexOf(item) === -1) {
+                this.#droppables.push(item);
+            }
+        }
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    disconnect(droppable) {
+        if(typeof droppable === 'string') {
+            droppable = document.querySelector(droppable);
+        }
+
+        let i = this.#droppables.indexOf(droppable);
+
+        if(i !== -1) {
+            this.#droppables.splice(i, 1);
+        }
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    hasDroppable(droppable) {
+        if(typeof droppable === 'string') {
+            droppable = document.querySelector(droppable);
+        }
+
+        return this.#droppables.indexOf(droppable) !== -1;
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    get droppables() {
+        return this.#droppables.slice(0);
+    }
+
+    get element() {
+        return this.#element;
+    }
+}
+
+
+function _revert(target, position, revertDuration, onFrame=null) {
+    let starting = new Rect(target);
+
+    let animation = new Animation({
+        frames: {
+            '0%': {
+                left: starting.left + window.pageXOffset,
+                top: starting.top + window.pageYOffset
+            },
+
+            '100%': {
+                left: position.left,
+                top: position.top
+            }
+        },
+
+        applyFrame(fx, frame) {
+            setElementClientPosition(fx.element, {
+                left: frame.left - window.pageXOffset,
+                top: frame.top - window.pageYOffset
+            }, 'translate3d');
+
+            if(onFrame) onFrame(fx);
+        }
+    });
+
+    return animation.animate(target, {duration: revertDuration});
+}
+
+
+/**
+ * Takes a client (x, y) position and some offset coords and move the element to the given position.
+ *
+ * @param self
+ * @param element
+ * @param x
+ * @param y
+ * @param offsetX
+ * @param offsetY
+ * @param container
+ * @private
+ * @returns {*|Rect}
+ */
+function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container) {
+    let rect = new Rect(element),
+        startingRect = rect;
+
+    rect = rect.moveTo({left: x, top: y});
+
+    offsetX = offsetX || 0;
+    offsetY = offsetY || 0;
+
+    rect = rect.translate(-offsetX, -offsetY);
+
+    if(self.axis === 'y') {
+        rect = new Rect(
+            startingRect.left,
+            rect.top,
+            startingRect.right,
+            rect.bottom
+        );
+    } else if(self.axis === 'x') {
+        rect = new Rect(
+            rect.left,
+            startingRect.top,
+            rect.right,
+            startingRect.bottom
+        );
+    }
+
+    if(typeof self.grid === 'number' && self.grid) {
+        let left = Math.floor(rect.left / self.grid) * self.grid,
+            top = Math.floor(rect.top / self.grid) * self.grid;
+
+        rect = new Rect(left, top, left + startingRect.width, top + startingRect.height);
+    }
+
+    if(container) {
+        container = new Rect(container);
+        rect = rect.fit(container);
+    }
+
+    setElementClientPosition(element, rect, 'translate3d');
+    return rect;
+}
+
+
+// noinspection JSCommentMatchesSignature
+/**
+ * For module use only.  Selects the element either by css selector, if it's a string, or resolve a function.
+ * If the element is already element is is returned direction.  Returns null if not element is provided.
+ *
+ * @param element
+ * @param dragInstance
+ * @param target
+ * @returns {null|*}
+ * @private
+ */
+function _selectElementRect(element, dragInstance, target, originalTarget) {
+    if(element) {
+        let type = typeof element;
+
+        if(type === 'function') {
+            return new Rect(element.call(dragInstance, target, originalTarget, dragInstance));
+        } else if(type === 'string') {
+            return new Rect(document.querySelector(element));
+        }
+
+        return new Rect(element);
+    }
+
+    return null;
 }
 
 
@@ -69,854 +660,187 @@ function _getScrollParent(element) {
 }
 
 
-/**
- * Sets the target elements x and y position by setting the translate3d translation matrix.
- *
- * @param target
- * @param x
- * @param y
- * @private
- */
-function _translate(target, x, y) {
-    target.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+function _getScrollRect(element) {
+    if(element === window || element.nodeName === "HTML") {
+        return new Rect(0, 0, window.innerWidth, window.innerHeight);
+    } else {
+        return new Rect(element);
+    }
 }
 
 
-// Group of function that can be passed to Draggables container property that will contain a dragged element to within
-// the given parameters.  Function should return a rect with {left, top, width, and height} properties relative to the
-// client.  Similiar to Element.getBoundingClientRect().
-export const CONTAINERS = {
-    /**
-     * Constrains to client area.
-     * @returns {{top: number, left: number, width: number, height: number}}
-     */
-    client: function() {
-        return {
-            left: 0,
-            top: 0,
-            height: window.innerHeight,
-            width: window.innerWidth,
-            right: window.innerWidth,
-            bottom: window.innerHeight
-        };
-    },
-
-    /**
-     * Constrains to viewport.
-     * @param element
-     * @returns {{top: number, left: number, width: number, height: number}}
-     */
-    viewport: function(element) {
-        let parent = _getScrollParent(element),
-            bb = parent.getBoundingClientRect();
-
-        return {
-            left: bb.left - parent.scrollLeft,
-            top: bb.top - parent.scrollTop,
-            width: parent.scrollWidth,
-            height: parent.scrollHeight
-        };
-    }
-};
-
-
 /**
- * Takes a bounding client rect and constrains the left and top position to within the container.  Returns a new rect.
- *
- * @param rect
- * @param container
- * @param element
- * @param helper
- * @returns {{top: *, left: *}}
- * @private
+ * Helper class that is used to control scrolling when the element is dragged outside of bounds.
  */
-function _clampPositionToContainer(rect, container, element, helper) {
-    let bb = helper.getBoundingClientRect();
+class ScrollHelper {
+    constructor(element, scrollXSpeed=0, scrollYSpeed=0, onFrame=null) {
+        this.frameID = null;
+        this.element = element;
+        this.scrollXSpeed = scrollXSpeed;
+        this.scrollYSpeed = scrollYSpeed;
+        this.onFrame = onFrame;
+        this.timestamp = performance.now();
 
-    let x = rect.left,
-        y = rect.top;
+        let frame = timestamp => {
+            let delta = (timestamp - this.timestamp) / 1000;
 
-    if(container) {
-        if(typeof container === 'function') {
-            container = container(element, helper);
-        } else if(container.getBoundingClientRect) {
-            container = container.getBoundingClientRect();
-        } else {
-            container = element.closest(container);
-            container = container.getBoundingClientRect();
-        }
+            this.timestamp = timestamp;
 
-        if(container) {
-            x = clamp(x, container.left, container.left + container.width - bb.width);
-            y = clamp(y, container.top, container.top + container.height - bb.height);
-        }
-    }
+            this.element.scrollLeft += delta * this.scrollXSpeed;
+            this.element.scrollTop += delta * this.scrollYSpeed;
 
-    return {
-        ...rect,
-        left: x,
-        top: y
-    };
-}
+            if(this.onFrame) {
+                this.onFrame(this);
+            }
 
-
-// Group of function that can be passed to the tolerance property of Draggable to control when an item is considered
-// intersecting another for drop events.
-const TOLERANCE_FUNCTIONS = {
-    intersect: function(droppable, item) {
-        let origin = {
-            x: item.left + (item.width / 2),
-            y: item.top + (item.height / 2)
+            this.frameID = window.requestAnimationFrame(frame);
         };
 
-        return origin.x >= droppable.left
-            && origin.x <= droppable.right
-            && origin.y >= droppable.top
-            && origin.y <= droppable.bottom;
-    }
-};
-
-
-/**
- * Behavior class to add the draggable behavior to an element for group of elements.
- */
-export default class Draggable extends Publisher {
-    static CLONE = clone;
-    // noinspection JSUnusedGlobalSymbols
-    static OFFSET_CURSOR = cursor;
-
-    /**
-     * @param element {Element|String} The element to attach the draggable behavior to.
-     * @param container {string|CONTAINERS.client|CONTAINERS.viewport|function}
-     *  Constrains the draggable into the given area.
-     *  `container` can either be a css selector to match a parent element, a Function(element, helper)
-     *  that should return a bounding box.  Or an element who's bounding box will be used.
-     * @param axis {'x'|'y'|'xy'}
-     *  Controls what axis the item is draggable.  x can be dragged horizontally, y vertically, and xy can be freely dragged.
-     * @param exclude {String}
-     *  Prevents dragging from starting on matching elements.
-     * @param delay {Number}
-     *  The time in milliseconds after the mouse down event occurs that dragging will begin.
-     * @param offset {{x, y}|[x, y]|Function}
-     *  By default when an item is dragged is position will be set relative to the drop left corner of the item.
-     *  Offset is used to offset the element from the cursor.  You can pass an {x, y} object, an array with [x, y] pair,
-     *  or a Function({target, draggable, clientX, clientY, boundingRect}) that will be called that return an {x, y} object.
-     * @param disabled {Boolean}
-     *  Disables dragging.
-     * @param distance {Number}
-     *  Adds resistance to drag starting.  The users must move at least `distance` amount of pixels away from the
-     *  starting position for drag to start.
-     * @param handle {String}
-     *  If dragging will only start if the user clicks an element that matches the css selectors.
-     * @param helper {Function|Element}
-     *  An element to use as a helper for dragging.  Can be a Element or a Function that returns an element.
-     * @param revert {Number|Boolean}
-     *  Controls if the draggable reverts back to the starting position if no droppable accepts the target.
-     * @param scroll {Number}
-     *  Controls the speed that the draggable will scroll the scrollParent when the draggable leaves the viewable area.
-     * @param selector {String}
-     *  Used to delegate dragging to sub items.
-     * @param droppables
-     *  An array of css selectors or elements that will be used as drop targets for the draggable.
-     * @param tolerance {String}
-     *  Controls the function that determines if an item intersects a drop target.
-     * @param setHelperSize {Boolean}
-     *  If true the helpers width and height will be set by javascript to match the original element.
-     * @param grid {{x, y} | [x, y] | Number}
-     *  Snaps draggable movement to a grid with the given x, y dimensions.
-     */
-    constructor(element, {container=null, axis='xy', exclude="input, button, select, .js-no-drag, textarea", delay=null, offset=cursor, disabled=false,
-        distance=null, handle=null, helper=null, revert=null, scroll=null, selector=null, droppables=null, tolerance='intersect',
-        setHelperSize=false, grid=null}={}) {
-        super();
-
-        if(typeof element === 'string') {
-            this.element = document.querySelector(element);
-        } else {
-            this.element = element;
-        }
-
-        this._onMouseDown = this.onMouseDown.bind(this);
-        this.disabled = disabled;
-        this.helper = helper;
-        this.offset = offset;
-        this.axis = axis;
-        this.delay = delay;
-        this.distance = distance;
-        this.container = container;
-        this.handle = handle;
-        this.exclude = exclude;
-        this.revert = revert;
-        this.selector = selector;
-        this.droppables = [];
-        this.tolerance = tolerance;
-        this.setHelperSize = setHelperSize;
-        this.scroll = scroll;
-
-        if(typeof grid === 'number') {
-            this.grid = {
-                x: grid,
-                y: grid
-            };
-        } else if(Array.isArray(grid)) {
-            this.grid = {
-                x: grid[0],
-                y: grid[1]
-            };
-        } else {
-            this.grid = grid;
-        }
-
-        if(droppables) {
-            this.addDroppables(droppables);
-        }
-
-        this.element.addEventListener('mousedown', this._onMouseDown);
-        this.isDragging = false;
-
-        this._revertFX = null;
+        this.frameID = window.requestAnimationFrame(frame);
     }
 
-    /**
-     * Adds a drop target item.  A `droppable` can be an element, a css selector or an array of those.
-     * @param droppables
-     */
-    addDroppables(droppables) {
-        if(Array.isArray(droppables)) {
-            this.droppables = this.droppables.concat(droppables);
-        } else {
-            this.droppables.push(droppables);
+    cancel() {
+        if(this.frameID) {
+            window.cancelAnimationFrame(this.frameID);
+            this.frameID = null;
         }
     }
 
-    /**
-     * Responsible for detecting dragging and starting the drag depending on delay and distance.
-     * @param event
-     */
-    onMouseDown(event) {
-        let element = this.element;
+    static getScrollSpeed(rect, scrollParentRect) {
+        let r = {x: 0, y: 0};
 
-        if(this.selector) {
-            element = event.target.closest(this.selector);
-
-            if(!this.element.contains(element)) {
-                element = null;
-            }
+        if(rect.right > scrollParentRect.right) {
+            r.x = clamp((rect.right - scrollParentRect.right) / rect.width, -1, 1);
+        } else if(rect.left < scrollParentRect.left) {
+            r.x = clamp((rect.left - scrollParentRect.left) / rect.width, -1, 1);
         }
 
-        if(!element) return;
-
-        let data = privateCache.cache(element);
-
-        if(data.isDragging || this.disabled) {
-            return;
-        }
-
-        if(this.handle) {
-            let handle = event.target.closest(this.handle);
-
-            if(!handle || !element.contains(handle)) {
-                return;
-            }
-        }
-
-        if(this.exclude) {
-            let excluded = event.target.closest(this.exclude);
-
-            if(excluded && element.contains(excluded)) {
-                return;
-            }
-        }
-
-        event.preventDefault();
-
-        let distance = this.distance || 0,
-            delay = typeof this.delay === 'number' ? this.delay : -1,
-            doc = document,
-            startMouseDocumentX = event.clientX + window.scrollX,
-            startMouseDocumentY = event.clientY + window.scrollY,
-            mouseDocumentX = startMouseDocumentX,
-            mouseDocumentY = startMouseDocumentY;
-
-        // Tests to see that delay and distance was met before dragging.
-        let startDragging = () => {
-            if(distance === 0 && delay < 0) {
-                this.startDrag(element, startMouseDocumentX, startMouseDocumentY, mouseDocumentX, mouseDocumentY);
-            }
-        };
-
-        // Delay dragging.
-        if(delay >= 0) {
-            let timer;
-
-            let onTimeout = () => {
-                delay = -1;
-                doc.removeEventListener('mouseup', onMouseUp);
-                startDragging();
-            };
-
-            let onMouseUp = () => {
-                doc.removeEventListener('mouseup', onMouseUp);
-                clearTimeout(timer);
-            };
-
-            doc.addEventListener('mouseup', onMouseUp);
-            timer = setTimeout(onTimeout, delay);
-        }
-
-        // Delay by distance.
-        if(distance > 0) {
-            let onMouseUp = () => {
-                doc.removeEventListener('mouseup', onMouseUp);
-                doc.removeEventListener('mousemove', onMouseMove);
-            };
-
-            let onMouseMove = (event) => {
-                mouseDocumentX = event.clientX + window.scrollX;
-                mouseDocumentY = event.clientY + window.scrollY;
-
-                let delta = Math.sqrt(
-                    (mouseDocumentX - startMouseDocumentX)**2 + (mouseDocumentY - startMouseDocumentY)**2
-                );
-
-                if(delta > distance) {
-                    distance = 0;
-                    doc.removeEventListener('mouseup', onMouseUp);
-                    doc.removeEventListener('mousemove', onMouseMove);
-                    startDragging();
-                }
-            };
-
-            doc.addEventListener('mouseup', onMouseUp);
-            doc.addEventListener('mousemove', onMouseMove);
-        }
-
-        startDragging();
-    }
-
-    /**
-     * Starts the drag animation at the given x, y origin.
-     *
-     * @param element
-     * @param startMouseX
-     * @param startMouseY
-     * @param posX
-     * @param posY
-     */
-    startDrag(element, startMouseX, startMouseY, posX, posY) {
-        if(this.isDragging) {
-            return;
-        }
-
-        this.isDragging = true;
-
-        // Cancel any animation that are running.
-        if(this._revertFX) {
-            this._revertFX.cancel();
-            this._revertFX = null;
-        }
-
-        let doc = document,
-            target,
-            droppables = this.getDropTargets(),
-            startBoundingBox = element.getBoundingClientRect(),
-            startBBDocument = clientRectToDocumentSpace(startBoundingBox),
-            helper,
-            scrollTick;
-
-        if(!this.helper || this.helper === 'self') {
-            target = element;
-        } else if(typeof this.helper === 'function') {
-            target = this.helper(this);
-            helper = target;
-        } else if(this.helper) {
-            target = this.helper;
-            helper = target;
-        }
-
-        if(helper) {
-            if(this.setHelperSize) {
-                if(this.setHelperSize === true) {
-                    helper.style.width = `${startBoundingBox.width}px`;
-                    helper.style.height = `${startBoundingBox.height}px`;
-                    helper.style.boxSizing = 'border-box';
-                } else if(Array.isArray(this.setHelperSize)) {
-                    helper.style.width = `${this.setHelperSize[0]}px`;
-                    helper.style.height = `${this.setHelperSize[1]}px`;
-                } else {
-                    helper.style.width = `${this.setHelperSize.width}px`;
-                    helper.style.height = `${this.setHelperSize.height}px`;
-                }
-            }
-        }
-
-        // If the target doesn't have a parentElement it needs to be added to the page.
-        if(!target.parentElement) {
-            element.parentElement.appendChild(target);
-        }
-
-        // mouseOffsetX and mouseOffsetY is the mouses offset relative to the top left corner of the element
-        // being dragged.
-
-        // offsetX and offsetY is how much the dragged element is offset from the cursor.
-        // By default it is at the top left of the element.
-        let startingTranslation = getTranslation(target),
-            offset = {x: 0, y: 0};
-
-        // The offset property controls how much the dragged element is offset from top left corner of the element.
-        // By default it is [0, 0] but a function can be or array can be passed to control this behavior.
-        if(this.offset) {
-            let _offset = this.offset;
-
-            if(typeof _offset === 'function') {
-                offset = this.offset({
-                    target: target,
-                    draggable: this,
-                    clientX: startMouseX - window.scrollX,
-                    clientY: startMouseY - window.scrollY,
-                    boundingRect: startBoundingBox
-                });
-            }
-        }
-
-        // Offset should be {x, y} not an array.
-        if(Array.isArray(offset)) {
-            offset = {
-                x: offset[0],
-                y: offset[1]
-            };
-        }
-
-        let onMouseMove = (event) => {
-            event.preventDefault();
-
-            let startingRect = target.getBoundingClientRect(),
-                position = this._getPosition(element, target, event.clientX, event.clientY, offset, this.container),
-                dropData;
-
-            setElementClientPosition(target, position, 'translate3d');
-            dropData = this._getDropData(droppables, startingRect, position);
-
-            for(let droppable of dropData) {
-                if(!droppable.intersectsBefore && droppable.intersectsAfter) {
-                    this._dispatchDroppableEvent(droppable.target, 'drag-enter', {
-                        bubbles: true,
-
-                        detail: {
-                            item: target
-                        }
-                    });
-                }
-            }
-
-            this._triggerEvent(element, 'drag-move', {
-                bubbles: false,
-                details: {
-                    mouseX: event.clientX + window.scrollX,
-                    mouseY: event.clientY + window.scrollY,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    startMouseX,
-                    startMouseY,
-                    offset,
-                    helper: target,
-                    originalEvent: event
-                },
-                topic: 'draggable.move'
-            });
-
-            // Refresh dropData incase something moved.
-            dropData = this._getDropData(droppables, startingRect, position);
-
-            for(let droppable of dropData) {
-                if(droppable.intersectsBefore && !droppable.intersectsAfter) {
-                    this._dispatchDroppableEvent(droppable.target, 'drag-leave', {
-                        bubbles: true,
-                        detail: {
-                            item: target
-                        }
-                    });
-                }
-            }
-
-            if(this.scroll && !scrollTick) {
-                let parent = _getScrollParent(element);
-
-                if(parent) {
-                    let lastTick = performance.now(),
-                        scrollX = parent.scrollLeft,
-                        scrollY = parent.scrollTop;
-
-                    scrollTick = timestamp => {
-                        let parentBB = parent.getBoundingClientRect(),
-                            helperBB = target.getBoundingClientRect(),
-                            x, y,
-                            delta = timestamp - lastTick,
-                            isOOB = false;
-
-                        lastTick = timestamp;
-
-                        if (helperBB.right > parentBB.right) {
-                            x = (helperBB.right - parentBB.right) / helperBB.width;
-                            isOOB = true;
-                            scrollX += delta * x * this.scroll;
-                            parent.scrollLeft = scrollX;
-                        } else if (helperBB.left < parentBB.left) {
-                            x = (parentBB.left - helperBB.left) / helperBB.width;
-                            isOOB = true;
-                            scrollX -= delta * x * this.scroll;
-                            parent.scrollLeft = scrollX;
-                        }
-
-                        if (helperBB.bottom > parentBB.bottom) {
-                            y = (helperBB.bottom - parentBB.bottom) / helperBB.height;
-                            isOOB = true;
-                            scrollY += delta * y * this.scroll;
-                            parent.scrollTop = scrollY;
-                        } else if (helperBB.top < parentBB.top) {
-                            y = (parentBB.top - helperBB.top) / helperBB.height;
-                            isOOB = true;
-                            scrollY -= delta * y * this.scroll;
-                            parent.scrollTop = scrollY;
-                        }
-
-                        helperBB = _clampPositionToContainer(helperBB, this.container, element, target);
-                        setElementClientPosition(target, helperBB, 'translate3d');
-
-                        if (isOOB && this.isDragging) {
-                            window.requestAnimationFrame(scrollTick);
-                        } else {
-                            scrollTick = null;
-                        }
-                    };
-
-                    window.requestAnimationFrame(scrollTick);
-                }
-            }
-        };
-
-        let onMouseUp = (event) => {
-            event.preventDefault();
-            doc.removeEventListener('mousemove', onMouseMove);
-            doc.removeEventListener('mouseup', onMouseUp);
-            doc = null;
-            this.isDragging = false;
-            element.classList.remove('ui-dragging');
-
-            let startingRect = target.getBoundingClientRect(),
-                position = this._getPosition(element, target, event.clientX, event.clientY, offset, this.container),
-                translation = getTranslation(target),
-                accepted = null;
-
-            function accept(element) {
-                if(!accepted) {
-                    accepted = element;
-                } else {
-                    throw new Error("Draggable has already been accepted.");
-                }
-            }
-
-            function isAccepted() {
-                return !!accepted;
-            }
-
-            this._triggerEvent(element, 'drag-end', {
-                bubbles: true,
-
-                details: {
-                    startX: startMouseX - window.scrollX,
-                    startMouseY,
-                    offset,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-
-                    originalEvent: event,
-                    helper: target,
-
-                    accept,
-                    isAccepted
-                },
-
-                topic: 'draggable.end',
-
-                accept,
-                isAccepted
-            });
-
-            if(!accepted && this.revert === true) {
-                _translate(target, startingTranslation.x, startingTranslation.y);
-
-                if(target !== element && target.parentElement) {
-                    target.parentElement.removeChild(target);
-                }
-
-                this._triggerEvent(element, 'drag-complete', {bubbles: true, topic: 'draggable.complete'});
-            } else if(!accepted && typeof this.revert === 'number') {
-                let animation = new Animation({
-                    applyFrame(element, frame) {
-                        _translate(element, frame.left, frame.top);
-                    },
-
-                    frames: {
-                        '0%': {
-                            left: translation.x + (position.left - startingRect.left),
-                            top: translation.y + (position.top - startingRect.top)
-                        },
-
-                        '100%': {
-                            left: startingTranslation.x,
-                            top: startingTranslation.y
-                        }
-                    }
-                });
-
-                this._revertFX = animation.animate(target, {
-                    duration: this.revert,
-
-                    onEnd() {
-                        if(target !== element && target.parentElement) {
-                            target.parentElement.removeChild(target);
-                        }
-                    },
-
-                    onComplete: () => {
-                        this._triggerEvent(element, 'drag-complete', {bubbles: true, topic: 'draggable.complete'});
-                    }
-                });
-            } else {
-                if(target !== element && target.parentElement) {
-                    target.parentElement.removeChild(target);
-                }
-
-                setElementClientPosition(element, position, 'translate3d');
-
-                let startingRect = documentRectToClientSpace(startBBDocument),
-                    dropped = [];
-
-                for(let droppable of droppables) {
-                    if(this._intersects(element.dataset.tolerance, droppable.getBoundingClientRect(), position)) {
-                        this._dispatchDroppableEvent(droppable, 'drop', {
-                            bubbles: true,
-                            clientX: event.clientX,
-                            clientY: event.clientY,
-                            relatedTarget: element,
-                            detail: {
-                                originalEvent: event,
-                                startingBoundingClientRect: startingRect,
-                                droppable: droppable
-                            }
-                        });
-                    }
-                }
-
-                this._triggerEvent(element, 'drag-complete', {
-                    topic: 'draggable.complete',
-                    details: {
-                        dropped
-                    },
-                    bubbles: true,
-                    dropped
-                });
-            }
-        };
-
-        doc.addEventListener('mousemove', onMouseMove);
-        doc.addEventListener('mouseup', onMouseUp);
-        element.classList.add('ui-dragging');
-
-        this._triggerEvent(element, 'drag-start', {
-            bubbles: true,
-            details: {
-                startMouseY,
-                startMouseX,
-                offset,
-                mouseX: posX,
-                mouseY: posY,
-                clientX: posX - window.scrollX,
-                clientY: posY - window.scrollY,
-                helper: target
-            },
-            topic: 'draggable.start'
-        });
-    }
-
-    /**
-     * Gets an array of elements of all the drop targets.
-     * If the drop target is a string, it queries for those elements.
-     *
-     * @returns {Array}
-     */
-    getDropTargets() {
-        let r = [];
-
-        for(let droppable of this.droppables) {
-            let type = typeof droppable;
-
-            if(type === 'string') {
-                for(let target of document.querySelectorAll(droppable)) {
-                    if(r.indexOf(target) !== -1) continue;
-                    r.push(target);
-                }
-            } else if(type === 'function') {
-                droppable = droppable.call(this, this);
-                if(r.indexOf(droppable) !== -1) continue;
-                r.push(droppable);
-            } else {
-                if(r.indexOf(droppable) !== -1) continue;
-                r.push(droppable);
-            }
+        if(rect.bottom > scrollParentRect.bottom) {
+            r.y = clamp((rect.bottom - scrollParentRect.bottom) / rect.width, -1, 1);
+        } else if(rect.top < scrollParentRect.top) {
+            r.y = clamp((rect.top - scrollParentRect.top) / rect.width, -1, 1);
         }
 
         return r;
     }
 
-    /**
-     * Takes an array of drop targets and tests to see if the target intersects the start and ending rectangles.
-     *
-     * Rects are objects that have the left, right, top, bottom, width and height properties defined.
-     * Similar to the results received from Element.getBoundingClientRect().
-     *
-     * @param droppables - Array of elements to tests.
-     * @param startingRect - Starting rect.
-     * @param endingRect - Ending rect.
-     * @returns {Array}
-     * @private
-     */
-    _getDropData(droppables, startingRect, endingRect) {
-        let dropData = [];
+    static buildScrollHelper(element, target, rect, pos, dragInstance, event, scrollSpeed, container) {
+        let scrollParent = _getScrollParent(element);
 
-        for(let droppable of droppables) {
-            // Convert to client space.
-            let dropBox = droppable.getBoundingClientRect();
+        if(scrollParent) {
+            let scrollParentRect = _getScrollRect(scrollParent),
+                speed = ScrollHelper.getScrollSpeed(rect, scrollParentRect);
 
-            let intersectsBefore = this._intersects(droppable.dataset.tolerance, dropBox, startingRect),
-                intersectsAfter = this._intersects(droppable.dataset.tolerance, dropBox, endingRect);
+            if(speed.x || speed.y) {
+                return new ScrollHelper(scrollParent, speed.x * scrollSpeed, speed.y * scrollSpeed, (scroller) => {
+                    let rect = _moveElementToPosition(this, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, dragInstance, target, element));
 
-            dropData.push({
-                intersectsBefore,
-                intersectsAfter,
-                target: droppable,
-                ...dropBox
-            });
-        }
+                    let scrollRect = new Rect(scroller.element);
 
-        return dropData;
-    }
+                    setElementClientPosition(target, rect, 'translate3d');
 
-    /**
-     * Triggers an event on the current item.
-     *
-     * @param item
-     * @param eventName
-     * @param details
-     * @param bubbles
-     * @param topic
-     * @param properties
-     * @private
-     */
-    _triggerEvent(item, eventName, {bubbles, details, topic, ...properties}) {
-        details = {
-            draggable: this,
-            item: item,
-
-            ...details
-        };
-
-        let event = new CustomEvent(eventName, {
-            bubbles: bubbles,
-            detail: details
-        });
-
-        if(properties) {
-            Object.assign(event, properties);
-        }
-
-        item.dispatchEvent(event);
-
-        if(topic !== false) {
-            topic = topic || eventName;
-
-            this.publish(topic, {
-                draggable: this,
-                item: this,
-
-                ...details
-            });
+                    if(scrollRect.contains(rect)) {
+                        scroller.cancel();
+                        scroller = null;
+                    }
+                });
+            }
         }
     }
+}
 
-    _dispatchDroppableEvent(dropElement, name, {bubbles=true, detail={}, ...properties}={}) {
+
+export function ScrollArea(selector) {
+    return function() {
+        let element = selector;
+
+        if(typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        let rect = new Rect(element),
+            scroll = getScroll(element);
+
+        rect.left -= scroll.scrollLeft;
+        rect.top -= scroll.scrollTop;
+        rect.right = rect.left + element.scrollWidth;
+        rect.bottom = rect.top + element.scrollHeight;
+
+        return rect;
+    }
+}
+
+
+export function clone(opacity=null, className=null, zIndex=null) {
+    if(typeof opacity === 'object' && opacity.nodeType) {
+        return opacity.cloneNode(true);
+    }
+
+    return function(element) {
+        let r = element.cloneNode(true);
+
+        if(opacity !== null) {
+            r.style.opacity = opacity;
+        }
+
+        if(className) {
+            r.className = className;
+        }
+
+        r.style.position = "absolute";
+        if(zIndex !== null) r.style.zIndex = zIndex;
+
+        return r;
+    }
+}
+
+
+function publishDragMoveEvent(self, element, helper, event, rect, bubbles=false, options=null) {
+    return dispatchDropEvent(self, 'drag.move', element, helper, event, rect, bubbles, true, true, options);
+}
+
+
+function publishDragDropEvent(self, element, helper, event, rect, bubbles=true, options=null) {
+    return dispatchDropEvent(self, 'drag.drop', element, helper, event, rect, bubbles, true, true, options);
+}
+
+
+function dispatchDropEvent(self, name, element, helper, originalEvent, currentRect, bubbles=false, dispatch=true, publish=false, detail=null, target=null) {
+    let eventPackage = {
+        name,
+        draggable: self,
+        target: helper,
+        element,
+        item: element, // alias for element
+        helper: helper,
+        originalEvent: null,
+        rect: currentRect
+    };
+
+    if(originalEvent) {
+        eventPackage.originalEvent = originalEvent;
+        eventPackage.clientX = originalEvent.clientX;
+        eventPackage.clientY = originalEvent.clientY;
+    }
+
+    if(!target) {
+        target = element;
+    }
+
+    if(detail) {
+        Object.assign(eventPackage, detail);
+    }
+
+    if(publish) {
+        self.publish(name, eventPackage);
+    }
+
+    if(dispatch) {
         let customEvent = new CustomEvent(name, {
             bubbles,
-            detail: {
-                dropElement: dropElement,
-                draggable: this,
-                ...detail
-            }
+            detail: eventPackage
         });
 
-        // if(topic !== false && droppable.publish) {
-        //     topic = topic || name;
-        //
-        //     droppable.publish(topic, {
-        //         target: droppable,
-        //         draggable: this,
-        //         name: topic,
-        //         ...detail
-        //     });
-        // }
-
-        Object.assign(customEvent, properties);
-
-        dropElement.dispatchEvent(customEvent);
-    }
-
-    /**
-     * Tests to see if the item intersects the droppable with the given tolerance function.
-     *
-     * @param tolerance
-     * @param droppable
-     * @param item
-     * @returns {*}
-     * @private
-     */
-    _intersects(tolerance, droppable, item) {
-        tolerance = tolerance || this.tolerance;
-        return TOLERANCE_FUNCTIONS[tolerance](droppable, item);
-    }
-
-    /**
-     * Retrieves the expected bound box of the helper element at the given mouse coordinates.
-     *
-     * @param element
-     * @param helper
-     * @param clientX
-     * @param clientY
-     * @param offset
-     * @param container
-     * @returns {{top: *, left: *, bottom: *, width: number, right: *, height: number, target: *}}
-     */
-    _getPosition(element, helper, clientX, clientY, offset, container) {
-        let bb = helper.getBoundingClientRect();
-
-        let left = clientX + offset.x,
-            top = clientY + offset.y;
-
-        if(this.grid) {
-            left = snapToGrid(left, this.grid.x);
-            top = snapToGrid(top, this.grid.y);
-        }
-
-        let r = {
-            left: left,
-            top: top,
-            width: bb.width,
-            height: bb.height,
-            right: left + bb.width,
-            bottom: top + bb.height,
-            target: helper
-        };
-
-        return {...r, ..._clampPositionToContainer(r, container, element, helper)};
+        target.dispatchEvent(customEvent);
     }
 }

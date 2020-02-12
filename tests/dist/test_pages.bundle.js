@@ -1934,13 +1934,13 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
     return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(5), __webpack_require__.e(15)]).then(__webpack_require__.bind(null, /*! test_positioner.js */ "./tests/src/test_positioner.js"));
   },
   'test_tooltip': function test_tooltip() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(6), __webpack_require__.e(13)]).then(__webpack_require__.bind(null, /*! test_tooltip.js */ "./tests/src/test_tooltip.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(11), __webpack_require__.e(12)]).then(__webpack_require__.bind(null, /*! test_tooltip.js */ "./tests/src/test_tooltip.js"));
   },
   'test_notifications': function test_notifications() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(6), __webpack_require__.e(12)]).then(__webpack_require__.bind(null, /*! test_notifications.js */ "./tests/src/test_notifications.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(11), __webpack_require__.e(13)]).then(__webpack_require__.bind(null, /*! test_notifications.js */ "./tests/src/test_notifications.js"));
   },
   'test_modal': function test_modal() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(11)]).then(__webpack_require__.bind(null, /*! test_modal.js */ "./tests/src/test_modal.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(3), __webpack_require__.e(4), __webpack_require__.e(6)]).then(__webpack_require__.bind(null, /*! test_modal.js */ "./tests/src/test_modal.js"));
   },
   'test_panes': function test_panes() {
     return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3), __webpack_require__.e(7)]).then(__webpack_require__.bind(null, /*! test_panes */ "./tests/src/test_panes.js"));

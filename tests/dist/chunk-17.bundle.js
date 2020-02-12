@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Modal; });
 /* harmony import */ var _Component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Component */ "./src/core/Component.js");
 /* harmony import */ var _Overlay__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Overlay */ "./src/core/ui/Overlay.js");
+/* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -37,6 +38,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
 
 
 
@@ -120,13 +122,26 @@ function (_Component) {
       var _show = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee(immediate) {
+        var promise, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                return _context.abrupt("return", _classPrivateFieldGet(this, _overlay).show(immediate));
+                promise = _classPrivateFieldGet(this, _overlay).show(immediate);
+                this.publish('modal.show', this);
+                _context.next = 4;
+                return promise;
 
-              case 1:
+              case 4:
+                result = _context.sent;
+
+                if (result === _fx_Animation__WEBPACK_IMPORTED_MODULE_2__["default"].complete) {
+                  this.publish('modal.visible');
+                }
+
+                return _context.abrupt("return", result);
+
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -142,9 +157,43 @@ function (_Component) {
     }()
   }, {
     key: "hide",
-    value: function hide(immediate) {
-      return _classPrivateFieldGet(this, _overlay).hide(immediate);
-    }
+    value: function () {
+      var _hide = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(immediate) {
+        var promise, result;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                promise = _classPrivateFieldGet(this, _overlay).hide(immediate);
+                this.publish('modal.hide', this);
+                _context2.next = 4;
+                return promise;
+
+              case 4:
+                result = _context2.sent;
+
+                if (result === _fx_Animation__WEBPACK_IMPORTED_MODULE_2__["default"].complete) {
+                  this.publish('modal.hidden', this);
+                }
+
+                return _context2.abrupt("return", result);
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function hide(_x2) {
+        return _hide.apply(this, arguments);
+      }
+
+      return hide;
+    }()
   }, {
     key: "isVisible",
     get: function get() {
@@ -198,9 +247,20 @@ function () {
       var modal = new _src_core_ui_Modal__WEBPACK_IMPORTED_MODULE_0__["default"]({
         element: '#my-modal'
       });
+      modal.on('modal.hidden', function () {
+        console.log("modal hidden", modal.isVisible);
+      });
+      modal.on('modal.hide', function () {
+        console.log("modal hiding");
+      });
+      modal.on('modal.show', function () {
+        console.log("modal showing");
+      });
+      modal.on("modal.visible", function () {
+        console.log("modal visible");
+      });
       document.querySelector("#show-modal1-btn").addEventListener('click', function () {
         modal.show();
-        console.log(modal.state);
       });
       this.modal = modal;
       window.testModal = modal;

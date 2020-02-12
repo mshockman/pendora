@@ -1,5 +1,5 @@
 import {getTranslation, setElementClientPosition} from "core/ui/position";
-import Draggable2, {cursor} from './Draggable2';
+import Draggable, {cursor} from './Draggable';
 
 
 export function placeholder(className, nodeName=null) {
@@ -35,7 +35,7 @@ export default class Sortable {
             this.element = element;
         }
 
-        this.#draggable = new Draggable2(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid});
+        this.#draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid});
 
         if(droppables) {
             this.connect(droppables);
