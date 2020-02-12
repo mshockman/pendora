@@ -267,7 +267,8 @@ export default class Draggable2 extends Publisher {
             container = this.container,
             scroller = null,
             dropTargets = [],
-            startPosition = new Rect(element);
+            startPosition = new Rect(element),
+            startingClientRect = startPosition;
 
         startPosition = startPosition.translate(
             window.pageXOffset,
@@ -309,7 +310,8 @@ export default class Draggable2 extends Publisher {
             // drag-enter
             let mouseX = mousePosition.x - window.pageXOffset,
                 mouseY = mousePosition.y - window.pageYOffset,
-                currentDropTargets;
+                currentDropTargets,
+                detail = {clientX: mouseX, clientY: mouseY};
 
             if(rect !== null) {
                 currentDropTargets = this.getDropTargets(rect, {mouseX, mouseY});
@@ -317,17 +319,15 @@ export default class Draggable2 extends Publisher {
                 currentDropTargets = [];
             }
 
-            console.log(currentDropTargets, dropTargets);
-
             for(let dropTarget of currentDropTargets) {
                 if(dropTargets.indexOf(dropTarget) === -1) {
-                    _dispatchDropEvent(this, dropTarget, 'drag.enter', {bubbles: true, detail: {clientX: mouseX, clientY: mouseY, target, element}});
+                    dispatchDropEvent(this, 'drag.enter', element, target, null, rect, true, true, false, detail, dropTarget);
                 }
             }
 
             for(let dropTarget of dropTargets) {
                 if(currentDropTargets.indexOf(dropTarget) === -1) {
-                    _dispatchDropEvent(this, dropTarget, 'drag.leave', {bubbles: false, detail: {clientX: mouseX, clientY: mouseY, target, element}});
+                    dispatchDropEvent(this, 'drag.leave', element, target, null, rect, true, true, false, detail, dropTarget);
                 }
             }
 
@@ -353,16 +353,7 @@ export default class Draggable2 extends Publisher {
 
             refreshDropTargets(rect);
 
-            this.publish('drag.move', {
-                draggable: this,
-                name: 'drag.enter',
-                target: target,
-                element: element,
-                originalEvent: event,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                rect
-            });
+            publishDragMoveEvent(this, element, target, event, rect);
         };
 
         let onMouseUp = async event => {
@@ -382,16 +373,7 @@ export default class Draggable2 extends Publisher {
                 reverted = false,
                 rect = new Rect(target);
 
-            this.publish('drag.drop', {
-                name: 'drag.drop',
-                draggable: this,
-                target,
-                element,
-                originalEvent: event,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                rect,
-
+            publishDragDropEvent(this, element, target, event, rect, false, {
                 isDefaultPrevented() {
                     return isDefaultPrevented;
                 },
@@ -444,43 +426,20 @@ export default class Draggable2 extends Publisher {
 
             this.#itemCache.delete(element);
 
-            this.publish('drag.end', {
-                draggable: this,
-                name: 'drag.end',
-                target: target,
-                element: element,
-                originalEvent: event,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                accepted: accepted,
-                reverted: reverted,
-                rect
-            });
+            dispatchDropEvent(this, 'drag.end', element, target, event, rect, true, true, true, {accepted, reverted}, element);
         };
 
         // Set target to starting position.
-        if(pos.startingX !== undefined && pos.startingY !== undefined) {
-            let rect = _moveElementToPosition(this, target, pos.startingX - window.pageXOffset, pos.startingY - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-            dropTargets = this.getDropTargets(rect, {mouseX: pos.startingX - window.pageXOffset, mouseY: pos.startingY - window.pageYOffset});
-
-            for(let dropTarget of dropTargets) {
-                _dispatchDropEvent(this, dropTarget, 'drag.enter', {bubbles: true, detail: {initial: true, clientX: pos.startingX - window.pageXOffset, clientY: pos.startingY - window.pageYOffset, target, element}});
-            }
+        if(mousePosition.x !== undefined && mousePosition.y !== undefined) {
+            let rect = _moveElementToPosition(this, target, mousePosition.x - window.pageXOffset, mousePosition.y - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+            refreshDropTargets(rect);
         }
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
         element.classList.add('ui-dragging');
 
-        this.publish('drag.start', {
-            draggable: this,
-            element,
-            target,
-            clientX: pos.startingX - window.pageXOffset,
-            clientY: pos.startingY - window.pageYOffset,
-            name: 'drag.start',
-            originalEvent: null
-        });
+        dispatchDropEvent(this, 'drag.start', element, target, null, startingClientRect, true, true, true, null);
     }
 
     getDropTargets(rect, mousePos) {
@@ -836,5 +795,54 @@ export function clone(opacity=null, className=null, zIndex=null) {
         if(zIndex !== null) r.style.zIndex = zIndex;
 
         return r;
+    }
+}
+
+
+function publishDragMoveEvent(self, element, helper, event, rect, bubbles=false, options=null) {
+    return dispatchDropEvent(self, 'drag.move', element, helper, event, rect, bubbles, true, true, options);
+}
+
+
+function publishDragDropEvent(self, element, helper, event, rect, bubbles=true, options=null) {
+    return dispatchDropEvent(self, 'drag.drop', element, helper, event, rect, bubbles, true, true, options);
+}
+
+
+function dispatchDropEvent(self, name, element, helper, originalEvent, currentRect, bubbles=false, dispatch=true, publish=false, detail=null, target=null) {
+    let eventPackage = {
+        name,
+        draggable: self,
+        target: helper,
+        element,
+        originalEvent: null,
+        rect: currentRect
+    };
+
+    if(originalEvent) {
+        eventPackage.originalEvent = originalEvent;
+        eventPackage.clientX = originalEvent.clientX;
+        eventPackage.clientY = originalEvent.clientY;
+    }
+
+    if(!target) {
+        target = element;
+    }
+
+    if(detail) {
+        Object.assign(eventPackage, detail);
+    }
+
+    if(publish) {
+        self.publish(name, eventPackage);
+    }
+
+    if(dispatch) {
+        let customEvent = new CustomEvent(name, {
+            bubbles,
+            detail: detail
+        });
+
+        target.dispatchEvent(customEvent);
     }
 }

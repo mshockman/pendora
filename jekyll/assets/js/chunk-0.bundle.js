@@ -1735,8 +1735,7 @@ function (_Publisher) {
       regeneratorRuntime.mark(function _callee3(element, pos) {
         var _this3 = this;
 
-        var cache, mousePosition, target, container, scroller, dropTargets, startPosition, refreshDropTargets, onMouseMove, onMouseUp, rect, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, dropTarget;
-
+        var cache, mousePosition, target, container, scroller, dropTargets, startPosition, startingClientRect, refreshDropTargets, onMouseMove, onMouseUp, rect;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -1780,7 +1779,7 @@ function (_Publisher) {
                 cache.fx = null;
 
               case 9:
-                target = element, container = this.container, scroller = null, dropTargets = [], startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
+                target = element, container = this.container, scroller = null, dropTargets = [], startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element), startingClientRect = startPosition;
                 startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
 
                 if (!cache.rect) {
@@ -1817,7 +1816,11 @@ function (_Publisher) {
                   // drag-enter
                   var mouseX = mousePosition.x - window.pageXOffset,
                       mouseY = mousePosition.y - window.pageYOffset,
-                      currentDropTargets;
+                      currentDropTargets,
+                      detail = {
+                    clientX: mouseX,
+                    clientY: mouseY
+                  };
 
                   if (rect !== null) {
                     currentDropTargets = _this3.getDropTargets(rect, {
@@ -1828,7 +1831,6 @@ function (_Publisher) {
                     currentDropTargets = [];
                   }
 
-                  console.log(currentDropTargets, dropTargets);
                   var _iteratorNormalCompletion = true;
                   var _didIteratorError = false;
                   var _iteratorError = undefined;
@@ -1838,15 +1840,7 @@ function (_Publisher) {
                       var dropTarget = _step.value;
 
                       if (dropTargets.indexOf(dropTarget) === -1) {
-                        _dispatchDropEvent(_this3, dropTarget, 'drag.enter', {
-                          bubbles: true,
-                          detail: {
-                            clientX: mouseX,
-                            clientY: mouseY,
-                            target: target,
-                            element: element
-                          }
-                        });
+                        dispatchDropEvent(_this3, 'drag.enter', element, target, null, rect, true, true, false, detail, dropTarget);
                       }
                     }
                   } catch (err) {
@@ -1873,15 +1867,7 @@ function (_Publisher) {
                       var _dropTarget = _step2.value;
 
                       if (currentDropTargets.indexOf(_dropTarget) === -1) {
-                        _dispatchDropEvent(_this3, _dropTarget, 'drag.leave', {
-                          bubbles: false,
-                          detail: {
-                            clientX: mouseX,
-                            clientY: mouseY,
-                            target: target,
-                            element: element
-                          }
-                        });
+                        dispatchDropEvent(_this3, 'drag.leave', element, target, null, rect, true, true, false, detail, _dropTarget);
                       }
                     } // drag-leave
 
@@ -1921,17 +1907,7 @@ function (_Publisher) {
                   }
 
                   refreshDropTargets(rect);
-
-                  _this3.publish('drag.move', {
-                    draggable: _this3,
-                    name: 'drag.enter',
-                    target: target,
-                    element: element,
-                    originalEvent: event,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    rect: rect
-                  });
+                  publishDragMoveEvent(_this3, element, target, event, rect);
                 };
 
                 onMouseUp =
@@ -1958,16 +1934,7 @@ function (_Publisher) {
                             }
 
                             accepted = false, _isDefaultPrevented = false, reverted = false, rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
-
-                            _this3.publish('drag.drop', {
-                              name: 'drag.drop',
-                              draggable: _this3,
-                              target: target,
-                              element: element,
-                              originalEvent: event,
-                              clientX: event.clientX,
-                              clientY: event.clientY,
-                              rect: rect,
+                            publishDragDropEvent(_this3, element, target, event, rect, false, {
                               isDefaultPrevented: function isDefaultPrevented() {
                                 return _isDefaultPrevented;
                               },
@@ -2029,18 +1996,10 @@ function (_Publisher) {
                           case 23:
                             _classPrivateFieldGet(_this3, _itemCache)["delete"](element);
 
-                            _this3.publish('drag.end', {
-                              draggable: _this3,
-                              name: 'drag.end',
-                              target: target,
-                              element: element,
-                              originalEvent: event,
-                              clientX: event.clientX,
-                              clientY: event.clientY,
+                            dispatchDropEvent(_this3, 'drag.end', element, target, event, rect, true, true, true, {
                               accepted: accepted,
-                              reverted: reverted,
-                              rect: rect
-                            });
+                              reverted: reverted
+                            }, element);
 
                           case 25:
                           case "end":
@@ -2056,89 +2015,22 @@ function (_Publisher) {
                 }(); // Set target to starting position.
 
 
-                if (!(pos.startingX !== undefined && pos.startingY !== undefined)) {
-                  _context3.next = 39;
-                  break;
+                if (mousePosition.x !== undefined && mousePosition.y !== undefined) {
+                  rect = _moveElementToPosition(this, target, mousePosition.x - window.pageXOffset, mousePosition.y - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
+                  refreshDropTargets(rect);
                 }
 
-                rect = _moveElementToPosition(this, target, pos.startingX - window.pageXOffset, pos.startingY - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-                dropTargets = this.getDropTargets(rect, {
-                  mouseX: pos.startingX - window.pageXOffset,
-                  mouseY: pos.startingY - window.pageYOffset
-                });
-                _iteratorNormalCompletion3 = true;
-                _didIteratorError3 = false;
-                _iteratorError3 = undefined;
-                _context3.prev = 23;
-
-                for (_iterator3 = dropTargets[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                  dropTarget = _step3.value;
-
-                  _dispatchDropEvent(this, dropTarget, 'drag.enter', {
-                    bubbles: true,
-                    detail: {
-                      initial: true,
-                      clientX: pos.startingX - window.pageXOffset,
-                      clientY: pos.startingY - window.pageYOffset,
-                      target: target,
-                      element: element
-                    }
-                  });
-                }
-
-                _context3.next = 31;
-                break;
-
-              case 27:
-                _context3.prev = 27;
-                _context3.t0 = _context3["catch"](23);
-                _didIteratorError3 = true;
-                _iteratorError3 = _context3.t0;
-
-              case 31:
-                _context3.prev = 31;
-                _context3.prev = 32;
-
-                if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-                  _iterator3["return"]();
-                }
-
-              case 34:
-                _context3.prev = 34;
-
-                if (!_didIteratorError3) {
-                  _context3.next = 37;
-                  break;
-                }
-
-                throw _iteratorError3;
-
-              case 37:
-                return _context3.finish(34);
-
-              case 38:
-                return _context3.finish(31);
-
-              case 39:
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
                 element.classList.add('ui-dragging');
-                this.publish('drag.start', {
-                  draggable: this,
-                  element: element,
-                  target: target,
-                  clientX: pos.startingX - window.pageXOffset,
-                  clientY: pos.startingY - window.pageYOffset,
-                  name: 'drag.start',
-                  originalEvent: null
-                });
+                dispatchDropEvent(this, 'drag.start', element, target, null, startingClientRect, true, true, true, null);
 
-              case 43:
+              case 22:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[23, 27, 31, 39], [32,, 34, 38]]);
+        }, _callee3, this);
       }));
 
       function startDragging(_x2, _x3) {
@@ -2168,29 +2060,29 @@ function (_Publisher) {
         testFunction = buildTestIntersectionFunction(testFunction);
       }
 
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator4 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var droppable = _step4.value;
+        for (var _iterator3 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var droppable = _step3.value;
 
           if (testFunction(droppable, rect, mousePos, this)) {
             r.push(droppable);
           }
         }
       } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-            _iterator4["return"]();
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
           }
         } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -2540,6 +2432,60 @@ function clone() {
     if (zIndex !== null) r.style.zIndex = zIndex;
     return r;
   };
+}
+
+function publishDragMoveEvent(self, element, helper, event, rect) {
+  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
+  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+  return dispatchDropEvent(self, 'drag.move', element, helper, event, rect, bubbles, true, true, options);
+}
+
+function publishDragDropEvent(self, element, helper, event, rect) {
+  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
+  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+  return dispatchDropEvent(self, 'drag.drop', element, helper, event, rect, bubbles, true, true, options);
+}
+
+function dispatchDropEvent(self, name, element, helper, originalEvent, currentRect) {
+  var bubbles = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+  var dispatch = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
+  var publish = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
+  var detail = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
+  var target = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
+  var eventPackage = {
+    name: name,
+    draggable: self,
+    target: helper,
+    element: element,
+    originalEvent: null,
+    rect: currentRect
+  };
+
+  if (originalEvent) {
+    eventPackage.originalEvent = originalEvent;
+    eventPackage.clientX = originalEvent.clientX;
+    eventPackage.clientY = originalEvent.clientY;
+  }
+
+  if (!target) {
+    target = element;
+  }
+
+  if (detail) {
+    Object.assign(eventPackage, detail);
+  }
+
+  if (publish) {
+    self.publish(name, eventPackage);
+  }
+
+  if (dispatch) {
+    var customEvent = new CustomEvent(name, {
+      bubbles: bubbles,
+      detail: detail
+    });
+    target.dispatchEvent(customEvent);
+  }
 }
 
 /***/ })
