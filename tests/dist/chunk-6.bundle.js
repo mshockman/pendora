@@ -1,23 +1,26 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[6],{
 
-/***/ "./src/core/ui/Modal.js":
-/*!******************************!*\
-  !*** ./src/core/ui/Modal.js ***!
-  \******************************/
+/***/ "./src/core/ui/PanesView.js":
+/*!**********************************!*\
+  !*** ./src/core/ui/PanesView.js ***!
+  \**********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Modal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return PaneView; });
 /* harmony import */ var _Component__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Component */ "./src/core/Component.js");
-/* harmony import */ var _Overlay__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Overlay */ "./src/core/ui/Overlay.js");
-/* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
+/* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
+/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
+/* harmony import */ var _autoloader__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../autoloader */ "./src/autoloader.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -43,189 +46,305 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
-var Modal =
+var symbolPane = Symbol('pane');
+
+function getClosestPaneController(element) {
+  while (element) {
+    if (element[symbolPane]) {
+      return element[symbolPane];
+    } else {
+      element = element.parentElement;
+    }
+  }
+
+  return null;
+}
+/**
+ * Creates a resizable pane view.
+ */
+
+
+var PaneView =
 /*#__PURE__*/
 function (_Component) {
-  _inherits(Modal, _Component);
+  _inherits(PaneView, _Component);
 
-  function Modal() {
+  function PaneView(element) {
     var _this;
 
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$element = _ref.element,
-        element = _ref$element === void 0 ? null : _ref$element,
-        _ref$closeOnClick = _ref.closeOnClick,
-        closeOnClick = _ref$closeOnClick === void 0 ? true : _ref$closeOnClick,
-        _ref$showFX = _ref.showFX,
-        showFX = _ref$showFX === void 0 ? null : _ref$showFX,
-        _ref$hideFX = _ref.hideFX,
-        hideFX = _ref$hideFX === void 0 ? null : _ref$hideFX,
-        _ref$showDuration = _ref.showDuration,
-        showDuration = _ref$showDuration === void 0 ? null : _ref$showDuration,
-        _ref$hideDuration = _ref.hideDuration,
-        hideDuration = _ref$hideDuration === void 0 ? null : _ref$hideDuration,
-        _ref$timeout = _ref.timeout,
-        timeout = _ref$timeout === void 0 ? null : _ref$timeout,
-        _ref$removeOnHide = _ref.removeOnHide,
-        removeOnHide = _ref$removeOnHide === void 0 ? false : _ref$removeOnHide;
+    var axis = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'x';
 
-    _classCallCheck(this, Modal);
+    _classCallCheck(this, PaneView);
 
-    if (!element) {
-      element = document.createElement('div');
-    }
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(PaneView).call(this, element));
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Modal).call(this, element));
-
-    _overlay.set(_assertThisInitialized(_this), {
+    _onMouseMove.set(_assertThisInitialized(_this), {
       writable: true,
       value: void 0
     });
 
-    _this.element.classList.add('modal');
-
-    _this.closeOnClick = closeOnClick;
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _overlay, new _Overlay__WEBPACK_IMPORTED_MODULE_1__["default"](_this.element, {
-      showFX: showFX,
-      showDuration: showDuration,
-      hideFX: hideFX,
-      hideDuration: hideDuration,
-      hiddenClassName: "closed",
-      visibleClassName: "open",
-      timeout: timeout,
-      removeOnHide: removeOnHide
-    }));
-
-    _this.element.addEventListener('click', function (event) {
-      var dismiss = event.target.closest("[data-dismiss]");
-
-      if (dismiss || _this.closeOnClick && event.target === _this.element) {
-        event.stopPropagation();
-
-        _this.hide();
-      }
+    _onMouseMoveTarget.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
     });
 
-    if (_this.classList.contains('open')) {
-      _this.show(true);
-    } else {
-      _this.hide(true);
+    _onMouseUp.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _axis.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _frameID.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    if (_this.element[symbolPane]) {
+      throw new Error("Can only initialize one pane controller per element.");
     }
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _onMouseMove, null);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _onMouseMoveTarget, null);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _onMouseUp, null);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _axis, _this.element.dataset.axis || axis);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _frameID, null);
+
+    _this.element[symbolPane] = _assertThisInitialized(_this);
+
+    _this.element.addEventListener('mousedown', function (event) {
+      var handle = event.target.closest('[data-handle]');
+
+      if (handle && getClosestPaneController(handle) === _assertThisInitialized(_this)) {
+        _this._startResizing(event);
+      }
+    });
 
     return _this;
   }
 
-  _createClass(Modal, [{
-    key: "show",
-    value: function () {
-      var _show = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(immediate) {
-        var promise, result;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                promise = _classPrivateFieldGet(this, _overlay).show(immediate);
-                this.publish('modal.show', this);
-                _context.next = 4;
-                return promise;
+  _createClass(PaneView, [{
+    key: "_startResizing",
+    value: function _startResizing(event) {
+      var _this2 = this;
 
-              case 4:
-                result = _context.sent;
-
-                if (result === _fx_Animation__WEBPACK_IMPORTED_MODULE_2__["default"].complete) {
-                  this.publish('modal.visible');
-                }
-
-                return _context.abrupt("return", result);
-
-              case 7:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function show(_x) {
-        return _show.apply(this, arguments);
+      if (_classPrivateFieldGet(this, _onMouseMove)) {
+        this.cancelResizing();
       }
 
-      return show;
-    }()
-  }, {
-    key: "hide",
-    value: function () {
-      var _hide = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(immediate) {
-        var promise, result;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                promise = _classPrivateFieldGet(this, _overlay).hide(immediate);
-                this.publish('modal.hide', this);
-                _context2.next = 4;
-                return promise;
+      var targetChild = this.getTargetChild(event.target);
+      event.stopPropagation();
 
-              case 4:
-                result = _context2.sent;
+      var mouse = {
+        x: event.clientX,
+        y: event.clientY
+      },
+          delta = {
+        x: 0,
+        y: 0
+      },
+          startMousePos = _objectSpread({}, mouse),
+          startingData = this.getPaneData(),
+          index = startingData.findIndex(function (item) {
+        return item.element === targetChild;
+      }),
+          next,
+          current = startingData[index];
 
-                if (result === _fx_Animation__WEBPACK_IMPORTED_MODULE_2__["default"].complete) {
-                  this.publish('modal.hidden', this);
-                }
-
-                return _context2.abrupt("return", result);
-
-              case 7:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2, this);
-      }));
-
-      function hide(_x2) {
-        return _hide.apply(this, arguments);
+      if (!current.pane) {
+        current = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["rangeFindItem"])(startingData, function (item) {
+          return item.pane;
+        }, index, 0);
+        next = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["rangeFindItem"])(startingData, function (item) {
+          return item.pane;
+        }, index + 1, null);
+      } else {
+        if (current.pane === '-x' || current.pane === '-y' || current.pane === '-') {
+          next = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["rangeFindItem"])(startingData, function (item) {
+            return item.pane;
+          }, index - 1, 0);
+        } else {
+          next = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["rangeFindItem"])(startingData, function (item) {
+            return item.pane;
+          }, index + 1, null);
+        }
       }
 
-      return hide;
-    }()
-  }, {
-    key: "isVisible",
-    get: function get() {
-      return this.state === _Overlay__WEBPACK_IMPORTED_MODULE_1__["default"].visible || this.state === _Overlay__WEBPACK_IMPORTED_MODULE_1__["default"].showing;
+      _classPrivateFieldSet(this, _onMouseMoveTarget, document);
+
+      _classPrivateFieldSet(this, _onMouseMove, function (event) {
+        event.preventDefault();
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+        delta = {
+          x: mouse.x - startMousePos.x,
+          y: mouse.y - startMousePos.y
+        };
+
+        if (_classPrivateFieldGet(_this2, _axis) === 'x') {
+          var x = current.pane === '-x' || current.pane === '-' ? -delta.x : delta.x,
+              maxShrink,
+              maxGrow,
+              amount;
+          maxShrink = Math.min(current.rect.width - current.minWidth, next.maxWidth - next.rect.width);
+          maxGrow = Math.min(current.maxWidth - current.rect.width, next.rect.width - next.minWidth);
+          amount = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["clamp"])(x, -maxShrink, maxGrow);
+
+          if (_classPrivateFieldGet(_this2, _frameID)) {
+            window.cancelAnimationFrame(_classPrivateFieldGet(_this2, _frameID));
+
+            _classPrivateFieldSet(_this2, _frameID, null);
+          }
+
+          _classPrivateFieldSet(_this2, _frameID, window.requestAnimationFrame(function () {
+            _classPrivateFieldSet(_this2, _frameID, null);
+
+            if (current.pane !== "fluid") current.element.style.width = "".concat(current.rect.width + amount, "px");
+            if (next.pane !== "fluid") next.element.style.width = "".concat(next.rect.width - amount, "px");
+          }));
+        } else {
+          var y = current.pane === '-y' || current.pane === '-' ? -delta.y : delta.y,
+              _maxShrink,
+              _maxGrow,
+              _amount;
+
+          _maxShrink = Math.min(current.rect.height - current.minHeight, next.maxHeight - next.rect.height);
+          _maxGrow = Math.min(current.maxHeight - current.rect.height, next.rect.height - next.minHeight);
+          _amount = Object(_utility__WEBPACK_IMPORTED_MODULE_2__["clamp"])(y, -_maxShrink, _maxGrow);
+
+          if (_classPrivateFieldGet(_this2, _frameID)) {
+            window.cancelAnimationFrame(_classPrivateFieldGet(_this2, _frameID));
+
+            _classPrivateFieldSet(_this2, _frameID, null);
+          }
+
+          _classPrivateFieldSet(_this2, _frameID, window.requestAnimationFrame(function () {
+            _classPrivateFieldSet(_this2, _frameID, null);
+
+            if (current.pane !== "fluid") current.element.style.height = "".concat(current.rect.height + _amount, "px");
+            if (next.pane !== "fluid") next.element.style.height = "".concat(next.rect.height - _amount, "px");
+          }));
+        }
+      });
+
+      _classPrivateFieldSet(this, _onMouseUp, function () {
+        _this2.cancelResizing();
+      });
+
+      _classPrivateFieldGet(this, _onMouseMoveTarget).addEventListener('mousemove', _classPrivateFieldGet(this, _onMouseMove));
+
+      _classPrivateFieldGet(this, _onMouseMoveTarget).addEventListener('mouseup', _classPrivateFieldGet(this, _onMouseUp));
     }
   }, {
-    key: "state",
-    get: function get() {
-      return _classPrivateFieldGet(this, _overlay).state;
+    key: "cancelResizing",
+    value: function cancelResizing() {
+      if (_classPrivateFieldGet(this, _onMouseMove)) {
+        _classPrivateFieldGet(this, _onMouseMoveTarget).removeEventListener('mousemove', _classPrivateFieldGet(this, _onMouseMove));
+
+        _classPrivateFieldGet(this, _onMouseMoveTarget).removeEventListener('mouseup', _classPrivateFieldGet(this, _onMouseUp));
+
+        _classPrivateFieldSet(this, _onMouseMoveTarget, null);
+
+        _classPrivateFieldSet(this, _onMouseMove, null);
+
+        _classPrivateFieldSet(this, _onMouseUp, null);
+      }
+    }
+  }, {
+    key: "getTargetChild",
+    value: function getTargetChild(element) {
+      var node = element;
+
+      while (node.parentElement) {
+        if (node.parentElement === this.element) {
+          return node;
+        }
+
+        node = node.parentElement;
+      }
+
+      return null;
+    }
+  }, {
+    key: "getPaneData",
+    value: function getPaneData() {
+      var r = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.element.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var child = _step.value;
+          var style = getComputedStyle(child),
+              rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_1__["default"](child);
+          r.push({
+            maxWidth: parseFloat(style.maxWidth) || Infinity,
+            maxHeight: parseFloat(style.maxHeight) || Infinity,
+            minWidth: parseFloat(style.minWidth) || 0,
+            minHeight: parseFloat(style.minHeight) || 0,
+            rect: rect,
+            element: child,
+            pane: child.dataset.pane
+          });
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return r;
     }
   }]);
 
-  return Modal;
+  return PaneView;
 }(_Component__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
-var _overlay = new WeakMap();
+var _onMouseMove = new WeakMap();
+
+var _onMouseMoveTarget = new WeakMap();
+
+var _onMouseUp = new WeakMap();
+
+var _axis = new WeakMap();
+
+var _frameID = new WeakMap();
 
 
+_autoloader__WEBPACK_IMPORTED_MODULE_3__["default"].register('panes', function (element) {
+  return new PaneView(element, element.dataset.axis || 'x');
+});
 
 /***/ }),
 
-/***/ "./tests/src/test_modal.js":
+/***/ "./tests/src/test_panes.js":
 /*!*********************************!*\
-  !*** ./tests/src/test_modal.js ***!
+  !*** ./tests/src/test_panes.js ***!
   \*********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TestModalPage; });
-/* harmony import */ var _src_core_ui_Modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../src/core/ui/Modal */ "./src/core/ui/Modal.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return PanesTestPage; });
+/* harmony import */ var _src_core_ui_PanesView__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../src/core/ui/PanesView */ "./src/core/ui/PanesView.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -234,40 +353,21 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-var TestModalPage =
+var PanesTestPage =
 /*#__PURE__*/
 function () {
-  function TestModalPage() {
-    _classCallCheck(this, TestModalPage);
-  }
+  // noinspection JSUnusedGlobalSymbols
+  function PanesTestPage() {
+    _classCallCheck(this, PanesTestPage);
+  } // noinspection JSUnusedGlobalSymbols
 
-  _createClass(TestModalPage, [{
+
+  _createClass(PanesTestPage, [{
     key: "load",
-    value: function load() {
-      var modal = new _src_core_ui_Modal__WEBPACK_IMPORTED_MODULE_0__["default"]({
-        element: '#my-modal'
-      });
-      modal.on('modal.hidden', function () {
-        console.log("modal hidden", modal.isVisible);
-      });
-      modal.on('modal.hide', function () {
-        console.log("modal hiding");
-      });
-      modal.on('modal.show', function () {
-        console.log("modal showing");
-      });
-      modal.on("modal.visible", function () {
-        console.log("modal visible");
-      });
-      document.querySelector("#show-modal1-btn").addEventListener('click', function () {
-        modal.show();
-      });
-      this.modal = modal;
-      window.testModal = modal;
-    }
+    value: function load() {}
   }]);
 
-  return TestModalPage;
+  return PanesTestPage;
 }();
 
 

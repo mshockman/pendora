@@ -261,16 +261,25 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
   // 'menubar': () =>  import("./pages/menubar_example.js"),
   // 'menu_examples': () =>  import("./pages/menu_examples.js"),
   'menu_page_index': function menu_page_index() {
-    return __webpack_require__.e(/*! import() */ 2).then(__webpack_require__.bind(null, /*! ./pages/menus/page_index */ "./jekyll/js/pages/menus/page_index.js"));
+    return __webpack_require__.e(/*! import() */ 4).then(__webpack_require__.bind(null, /*! ./pages/menus/page_index */ "./jekyll/js/pages/menus/page_index.js"));
   },
   'documentation_dropdown': function documentation_dropdown() {
-    return __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./pages/documentation/dropdown */ "./jekyll/js/pages/documentation/dropdown.js"));
+    return __webpack_require__.e(/*! import() */ 2).then(__webpack_require__.bind(null, /*! ./pages/documentation/dropdown */ "./jekyll/js/pages/documentation/dropdown.js"));
   },
   'test_draggable': function test_draggable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(3), __webpack_require__.e(5)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./jekyll/js/pages/documentation/test_draggable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3), __webpack_require__.e(11)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./jekyll/js/pages/documentation/test_draggable.js"));
   },
   'test_sortable': function test_sortable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(3), __webpack_require__.e(4)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./jekyll/js/pages/documentation/test_sortable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3), __webpack_require__.e(9)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./jekyll/js/pages/documentation/test_sortable.js"));
+  },
+  'test_resizeable': function test_resizeable() {
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3), __webpack_require__.e(5)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_resizeable */ "./jekyll/js/pages/documentation/test_resizeable.js"));
+  },
+  'test_animation': function test_animation() {
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(10)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_animation */ "./jekyll/js/pages/documentation/test_animation.js"));
+  },
+  'test_positioning': function test_positioning() {
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(3), __webpack_require__.e(1)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_positioning */ "./jekyll/js/pages/documentation/test_positioning.js"));
   }
 });
 window.addEventListener('load',
@@ -2146,6 +2155,7 @@ function setElementClientPosition(element, position) {
         top: parseInt(style.top, 10) || 0,
         bottom: parseInt(style.bottom, 10) || 0
       };
+      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
     } else {
       box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
       current = getBoundingOffsetRect(element);

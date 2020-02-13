@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Documentation</title>
+    <title>Animation</title>
 
     <link type="text/css" rel="stylesheet" href="/assets/css/styles2.css" />
     <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
 </head>
-<body>
+<body data-page="test_animation">
 
 <header class="navbar">
     <a href="/" class="navbar__brand">Pendora</a>
@@ -83,8 +83,28 @@
 </section>
 
 
-<div class="content-area">Hello World</div>
+<style type="text/css">
+    .test_box {
+        border: 4px solid #000;
+        box-sizing: border-box;
+        width: 100px;
+        height: 100px;
+        background-color: #333;
+        position: absolute;
+        left: 10px;
+        top: 10px;
+    }
+</style>
 
+
+
+<div class="content-area">
+    <h2>Basic Animations</h2>
+    <div class="example-zone" style="height: 600px;">
+        <div id="test_box1" class="test_box"></div>
+        <div id="test_box2" class="test_box"></div>
+    </div>
+</div>
 
 <script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>

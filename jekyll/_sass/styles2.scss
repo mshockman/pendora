@@ -26,3 +26,13 @@ body {
   right: 18rem;
   left: 18rem;
 }
+
+
+.example-zone {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  height: 400px;
+  margin: 1rem;
+  position: relative;
+  overflow: scroll;
+}

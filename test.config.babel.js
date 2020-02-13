@@ -14,8 +14,7 @@ export default {
     mode: "development",
 
     entry: {
-        'test_pages': ['core/polyfills', './tests/src/test_pages.js'],
-        'test_resizeable': ['./tests/src/test_resizeable.js']
+        'test_pages': ['core/polyfills', './tests/src/test_pages.js']
     },
 
     resolve: {

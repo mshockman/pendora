@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Documentation</title>
+    <title>Resizeable</title>
 
     <link type="text/css" rel="stylesheet" href="/assets/css/styles2.css" />
     <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
 </head>
-<body>
+<body data-page="test_resizeable">
 
 <header class="navbar">
     <a href="/" class="navbar__brand">Pendora</a>
@@ -83,8 +83,47 @@
 </section>
 
 
-<div class="content-area">Hello World</div>
+<style type="text/css">
+    .resizeable-box {
+        border: 1px solid #ccc;
+        background-color: #eee;
+        width: 150px;
+        height: 150px;
+        position: absolute;
+        left: 50px;
+        top: 50px;
+        text-align: center;
+        font-weight: bold;
+        user-select: none;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
 
+    .draggable {
+        cursor: move;
+    }
+
+    .ui-resizeable-handle.ui-resizeable-bottom-right {
+        background-color: #000;
+        cursor: nwse-resize;
+        width: 5px;
+        height: 5px;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+    }
+</style>
+
+
+<div class="content-area">
+    <h2>Basic Resizeable Box</h2>
+    <div class="example-zone">
+        <div id="resizeable1" class="resizeable-box draggable">Resize Me!<br>Drag Me!</div>
+    </div>
+</div>
 
 <script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>

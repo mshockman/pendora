@@ -279,9 +279,6 @@ function () {
           bottom = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_1__["snapToGrid"])(bottom, _this2.grid.y);
         }
 
-        console.log(left, right, bottom, top);
-        console.log(container);
-
         if (container) {
           left = Object(_utility_math__WEBPACK_IMPORTED_MODULE_2__["clamp"])(left, container.left, container.right);
           right = Object(_utility_math__WEBPACK_IMPORTED_MODULE_2__["clamp"])(right, container.left, container.right);

@@ -216,9 +216,6 @@ export default class Resizeable {
                 bottom = snapToGrid(bottom, this.grid.y);
             }
 
-            console.log(left, right, bottom, top);
-            console.log(container);
-
             if(container) {
                 left = clamp(left, container.left, container.right);
                 right = clamp(right, container.left, container.right);

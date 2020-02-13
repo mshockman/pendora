@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -1728,7 +1728,7 @@ function (_Publisher) {
         _ref$axis = _ref.axis,
         axis = _ref$axis === void 0 ? 'xy' : _ref$axis,
         _ref$exclude = _ref.exclude,
-        exclude = _ref$exclude === void 0 ? '' : _ref$exclude,
+        exclude = _ref$exclude === void 0 ? 'input, button, .ui-resizeable-handle, .no-drag' : _ref$exclude,
         _ref$delay = _ref.delay,
         delay = _ref$delay === void 0 ? 0 : _ref$delay,
         _ref$offset = _ref.offset,
@@ -3061,9 +3061,6 @@ function () {
           bottom = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_1__["snapToGrid"])(bottom, _this2.grid.y);
         }
 
-        console.log(left, right, bottom, top);
-        console.log(container);
-
         if (container) {
           left = Object(_utility_math__WEBPACK_IMPORTED_MODULE_2__["clamp"])(left, container.left, container.right);
           right = Object(_utility_math__WEBPACK_IMPORTED_MODULE_2__["clamp"])(right, container.left, container.right);
@@ -3387,6 +3384,7 @@ function setElementClientPosition(element, position) {
         top: parseInt(style.top, 10) || 0,
         bottom: parseInt(style.bottom, 10) || 0
       };
+      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
     } else {
       box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
       current = getBoundingOffsetRect(element);
@@ -6664,7 +6662,7 @@ function () {
 
 /***/ }),
 
-/***/ 2:
+/***/ 1:
 /*!********************************************!*\
   !*** multi ./tests/src/test_resizeable.js ***!
   \********************************************/

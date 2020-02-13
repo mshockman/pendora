@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Positioning</title>
+
+    <link type="text/css" rel="stylesheet" href="/assets/css/styles2.css" />
+    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
+</head>
+<body data-page="test_positioning">
+
+<header class="navbar">
+    <a href="/" class="navbar__brand">Pendora</a>
+    <ul class="navbar-nav">
+        <li class="navbar__item"><a href="/documentation/">Documentation</a></li>
+        <li class="navbar__item"><a href="/examples/">Examples</a></li>
+        <li class="navbar__item">Github</li>
+        <li class="navbar__item">Download</li>
+    </ul>
+</header>
+
+<section class="sidebar main-sidebar">
+    <h3>UI Interactions</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/ui/draggable.html">Draggable</a></li>
+        <li><a href="/documentation/ui/sortable.html">Sortable</a></li>
+        <li><a href="/documentation/ui/resizeable.html">Resizeable</a></li>
+        <li><a href="/documentation/ui/animation.html">Animation</a></li>
+        <li><a href="/documentation/ui/positioning.html">Positioning</a></li>
+    </ul>
+
+    <h3>Overlays</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Overlay</a></li>
+        <li><a href="#">Modal</a></li>
+        <li><a href="#">Notification</a></li>
+        <li><a href="#">Tooltip</a></li>
+    </ul>
+
+    <h3>Layout</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">Panes</a></li>
+        <li><a href="#">Tabs</a></li>
+    </ul>
+
+    <h3>Menus</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="/documentation/menus/dropdown.html">Dropdown</a></li>
+        <li><a href="/documentation/menus/menubar.html">MenuBar</a></li>
+        <li><a href="/documentation/menus/sidebar.html">SideBar</a></li>
+        <li><a href="/documentation/menus/ContextMenu.html">ContextMenu</a></li>
+        <li><a href="/documentation/menus/slidemenu.html">SlideMenu</a></li>
+        <li><a href="/documentation/menus/multicombobox.html">MultiComboBox</a></li>
+        <li><a href="/documentation/menus/combobox.html">ComboBox</a></li>
+        <li><a href="/documentation/menus/richselect.html">RichSelect</a></li>
+    </ul>
+
+    <h3>Planned</h3>
+    <ul class="nav sidebar-nav">
+        <li><a href="#">List</a></li>
+        <li><a href="#">QueryBuilder</a></li>
+        <li><a href="#">DataGrid</a></li>
+        <li><a href="#">DataTable</a></li>
+        <li><a href="#">Paginator</a></li>
+        <li><a href="#">Hint</a></li>
+        <li><a href="#">Carousel</a></li>
+        <li><a href="#">GridView</a></li>
+        <li><a href="#">Accordian</a></li>
+        <li><a href="#">ScrollView</a></li>
+        <li><a href="#">FileMenu</a></li>
+        <li><a href="#">Windows</a></li>
+        <li><a href="#">Dialog</a></li>
+        <li><a href="#">Slider</a></li>
+        <li><a href="#">Progressbar</a></li>
+        <li><a href="#">ColorPicker</a></li>
+        <li><a href="#">DatePicker</a></li>
+        <li><a href="#">Selectable</a></li>
+        <li><a href="#">Loader</a></li>
+        <li><a href="#">CustomAttributeComponent</a></li>
+        <li><a href="#">ImageManager</a></li>
+        <li><a href="#">NotificationMenu</a></li>
+    </ul>
+</section>
+
+
+<style type="text/css">
+    body {
+        background-color: #fafafa;
+    }
+
+    #container {
+        position: relative;
+        width: 1000px;
+        height: 600px;
+        border: 2px solid #777;
+        background-color: #fff;
+    }
+
+    #referenceElement {
+        position: absolute;
+        left: 50px;
+        top: 50px;
+        width: 150px;
+        height: 150px;
+        border: 2px solid #000;
+        padding: 5px;
+        box-sizing: border-box;
+        cursor: move;
+        background-color: #ffaaaa;
+        user-select: none;
+    }
+
+    #testOverlay {
+        line-height: 25px;
+        text-align: center;
+        border: 2px solid #000;
+        width: 100px;
+        height: 25px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        background-color: #aaffaa;
+        z-index: 100;
+    }
+
+    #controls {
+        border: 2px solid #777;
+        border-right: 0;
+        width: 200px;
+        padding: 0.5rem;
+    }
+
+    #page-wrapper {
+        display: inline-flex;
+        flex-direction: row;
+    }
+
+    .offset-row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .offset-row input {
+        width: 100%;
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+</style>
+
+
+<div class="content-area">
+    <h2>Positioning</h2>
+    <div id="page-wrapper">
+
+        <div id="controls">
+
+            <div>
+                <h3>My:</h3>
+                <label>
+                    <span>X: </span>
+                    <select name="my-x">
+                        <option value="left">left</option>
+                        <option value="center">center</option>
+                        <option value="right">right</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Y: </span>
+                    <select name="my-y">
+                        <option value="top">top</option>
+                        <option value="middle">middle</option>
+                        <option value="bottom">bottom</option>
+                    </select>
+                </label>
+            </div>
+
+            <div>
+                <h3>My Offset:</h3>
+                <label class="offset-row">
+                    <span>X: </span>
+                    <input type="number" value="0" name="my-x-offset" />
+                    <select name="my-x-offset-unit">
+                        <option value="px" selected>px</option>
+                        <option value="%">%</option>
+                    </select>
+                </label>
+                <label class="offset-row">
+                    <span>Y: </span>
+                    <input type="number" value="0" name="my-y-offset" />
+                    <select name="my-y-offset-unit">
+                        <option value="px" selected>px</option>
+                        <option value="%">%</option>
+                    </select>
+                </label>
+            </div>
+
+            <div>
+                <h3>At:</h3>
+                <label>
+                    <span>X: </span>
+                    <select name="at-x">
+                        <option value="left">left</option>
+                        <option value="center">center</option>
+                        <option value="right">right</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Y: </span>
+                    <select name="at-y">
+                        <option value="top">top</option>
+                        <option value="middle">middle</option>
+                        <option value="bottom">bottom</option>
+                    </select>
+                </label>
+            </div>
+
+            <div>
+                <h3>At Offset:</h3>
+                <label class="offset-row">
+                    <span>X: </span>
+                    <input type="number" value="0" name="at-x-offset" />
+                    <select name="at-x-offset-unit">
+                        <option value="px" selected>px</option>
+                        <option value="%">%</option>
+                    </select>
+                </label>
+                <label class="offset-row">
+                    <span>Y: </span>
+                    <input type="number" value="0" name="at-y-offset" />
+                    <select name="at-y-offset-unit">
+                        <option value="px" selected>px</option>
+                        <option value="%">%</option>
+                    </select>
+                </label>
+            </div>
+
+            <div>
+                <h3>Flip:</h3>
+                <label>
+                    <span>X: </span>
+                    <select name="flip-x">
+                        <option value="none">none</option>
+                        <option value="flip">flip</option>
+                        <option value="fit">fit</option>
+                        <option value="flipfit">flipfit</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Y: </span>
+                    <select name="flip-y">
+                        <option value="none">none</option>
+                        <option value="flip">flip</option>
+                        <option value="fit">fit</option>
+                        <option value="flipfit">flipfit</option>
+                    </select>
+                </label>
+            </div>
+
+        </div>
+
+
+        <div id="container">
+            <div id="testOverlay">Test Overlay!</div>
+            <div id="referenceElement">
+                Drag Me!
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+
+</body>
+</html>

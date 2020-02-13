@@ -1,6 +1,6 @@
-import {Rect} from "../../src/core/vectors";
-import {setElementClientPosition} from "../../src/core/ui/position";
-import Draggable from "../../src/core/ui/Draggable";
+import {Rect} from "core/vectors";
+import {setElementClientPosition} from "core/ui/position";
+import Draggable from "core/ui/Draggable";
 
 
 window.Rect = Rect;
@@ -62,7 +62,7 @@ export default class TestPositionerPage {
             setElementClientPosition(this.overlay, rect);
         };
 
-        this.referenceElement.addEventListener('drag-move', (event) => {
+        this.referenceElement.addEventListener('drag.move', (event) => {
             this.reposition();
         });
 

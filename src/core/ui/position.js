@@ -206,7 +206,9 @@ export function setElementClientPosition(element, position, method='top-left') {
                 right: parseInt(style.right, 10) || 0,
                 top: parseInt(style.top, 10) || 0,
                 bottom: parseInt(style.bottom, 10) || 0
-            }
+            };
+
+            box = Rect.getBoundingClientRect(element);
         } else {
             box = Rect.getBoundingClientRect(element);
             current = getBoundingOffsetRect(element);

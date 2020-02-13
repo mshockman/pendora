@@ -81,7 +81,7 @@ function () {
         Object(_src_core_ui_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(_this.overlay, rect);
       };
 
-      this.referenceElement.addEventListener('drag-move', function (event) {
+      this.referenceElement.addEventListener('drag.move', function (event) {
         _this.reposition();
       });
       controls.addEventListener('change', function () {

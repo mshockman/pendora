@@ -52,7 +52,7 @@ export default class OverlayTestPage {
             arrow: "right"
         });
 
-        this.draggable.on('draggable.move', (data) => {
+        this.draggable.on('drag.move', (data) => {
             this.overlay.position();
         });
 

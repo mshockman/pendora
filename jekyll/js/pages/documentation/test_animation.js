@@ -1,5 +1,5 @@
 import {Vec3} from 'core/vectors';
-import Animation from "../../src/core/fx/Animation";
+import Animation from "core/fx/Animation";
 
 
 window.Animation = Animation;
@@ -53,24 +53,7 @@ window.testAnimation = new Animation({
 });
 
 
-window.t = new Promise(function(resolve, reject) {
-    setTimeout(() => resolve(2), 1000);
-}).then(function(result) {
-    console.log(result);
-
-    return new Promise(function(resolve, reject) {
-        setTimeout(() => resolve(result * 2), 2000);
-    });
-}).then(function(result) {
-    console.log(result);
-});
-
-
 export default class TestAnimationPage {
-    constructor() {
-
-    }
-
     load() {
         let box1 = document.querySelector('#test_box1');
         let box2 = document.querySelector('#test_box2');

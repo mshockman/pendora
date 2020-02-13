@@ -13,6 +13,9 @@ let app = new Application({
     'documentation_dropdown': () => import("./pages/documentation/dropdown"),
     'test_draggable': () => import("./pages/documentation/test_draggable"),
     'test_sortable': () => import("./pages/documentation/test_sortable"),
+    'test_resizeable': () => import("./pages/documentation/test_resizeable"),
+    'test_animation': () => import("./pages/documentation/test_animation"),
+    'test_positioning': () => import("./pages/documentation/test_positioning"),
 });
 
 

@@ -49,7 +49,7 @@ export default class Draggable extends Publisher {
     #boundOnMouseDown;
     #itemCache;
 
-    constructor(element, {container=null, axis='xy', exclude='', delay=0, offset=cursor,
+    constructor(element, {container=null, axis='xy', exclude='input, button, .ui-resizeable-handle, .no-drag', delay=0, offset=cursor,
         resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
         scrollSpeed=0, selector=null, tolerance=0.5, setHelperSize=false, grid=null}={}) {
         super();
