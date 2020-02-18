@@ -3,7 +3,8 @@ import Application from "app";
 import "autoloader";
 import "menu";
 
-__webpack_public_path__ = "/assets/js/";
+__webpack_public_path__ = "/pendora/assets/js/";
+console.log("HERE");
 
 
 let app = new Application({
