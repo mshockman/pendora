@@ -1,34 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>DropDown</title>
+---
+title: "DropDown"
+description: A button with a contextual overlay that displays when the button is clicked that can contain menuitems and other html elements.
+layout: default
+pageClass: menu_page_index
+---
 
-    <link type="text/css" rel="stylesheet" href="/assets/css/styles.css" />
-    <link type="text/css" rel="stylesheet" href="/assets/css/pendora.css" />
-</head>
-<body data-page="menu_page_index">
-    <header id="header">
-        <nav>
-            <ul>
-                <li>Pendora</li>
-                <li>Examples</li>
-                <li>Download</li>
-                <li>Documentation</li>
-                <li class="mr-auto">Changelog</li>
-                <li><i class="fab fa-github"></i> Github</li>
-            </ul>
-        </nav>
-    </header>
-    <article id="splash">
-        <header>
-            <h2>DropDown</h2>
-            <p>A button with a contextual overlay that displays when the button is clicked that can contain menuitems and other html elements.</p>
-        </header>
-    </article>
-    <main id="main">
-        <article id="content">
-            <h1>DropDown</h1>
+<h1>DropDown</h1>
 
 Creates a contextual menu that toggles on and off when the user clicks the target button.  The dropdown menu can contain
 any html markup or menu items that can be used for navigation or can have drop down menus of their own creating a list
@@ -55,36 +32,15 @@ data-menuitem attribute so the class knows to initialize them.<br><br>
 </div>
 
 
-<figure class="highlight"><pre><code class="language-html" data-lang="html"><table class="rouge-table"><tbody><tr><td class="gutter gl"><pre class="lineno">1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-</pre></td><td class="code"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"dropdown"</span> <span class="na">data-init=</span><span class="s">"dropdown"</span> <span class="na">data-bind=</span><span class="s">"dropdown1"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span> <span class="na">data-button</span><span class="nt">&gt;</span>DropDown<span class="nt">&lt;/button&gt;</span>
-    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menu hidden"</span> <span class="na">data-menu</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>Item #1<span class="nt">&lt;/div&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">"http://google.com"</span><span class="nt">&gt;</span>Google<span class="nt">&lt;/a&gt;&lt;/div&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>Item #3<span class="nt">&lt;/div&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>Item #4<span class="nt">&lt;/div&gt;</span>
-        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"menuitem"</span> <span class="na">data-menuitem</span><span class="nt">&gt;</span>Item #5<span class="nt">&lt;/div&gt;</span>
-    <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/div&gt;</span>
-</pre></td></tr></tbody></table></code></pre></figure>
-
-        </article>
-    </main>
-    <footer id="footer">
-
-    </footer>
-
-<script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
-<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
-</body>
-</html>
+{% highlight html linenos %}
+<div class="dropdown" data-init="dropdown" data-bind="dropdown1">
+    <button type="button" data-button>DropDown</button>
+    <div class="menu hidden" data-menu>
+        <div class="menuitem" data-menuitem>Item #1</div>
+        <div class="menuitem" data-menuitem><a href="http://google.com">Google</a></div>
+        <div class="menuitem" data-menuitem>Item #3</div>
+        <div class="menuitem" data-menuitem>Item #4</div>
+        <div class="menuitem" data-menuitem>Item #5</div>
+    </div>
+</div>
+{% endhighlight %}
