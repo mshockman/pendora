@@ -11,8 +11,7 @@
     "jsc:tests": "webpack -w --config test.config.babel.js",
     "jsc:docs": "webpack -w --config docs.config.babel.js",
     "jekyll": "jekyll serve --source=docs --destination=jekyll",
-    "build:docs": "docs serve --source=jekyll --destination=docs | webpack -w --config docs.config.babel.js | sass --watch scss:jekyll/assets/css",
-    "sc:docs": "sass --watch scss:jekyll/assets/css"
+    "sc:docs": "sass --watch scss:docs/assets/css"
   },
   "repository": {
     "type": "git",

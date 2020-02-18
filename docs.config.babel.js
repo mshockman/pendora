@@ -14,7 +14,7 @@ export default {
     mode: "development",
 
     entry: {
-        'app': ['./jekyll/js/app.js'],
+        'app': ['./docs/js/app.js'],
     },
 
     resolve: {
