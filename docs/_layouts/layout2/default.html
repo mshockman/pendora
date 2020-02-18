@@ -6,14 +6,17 @@
 
     <link type="text/css" rel="stylesheet" href="{{ site.baseurl }}/assets/css/styles2.css" />
     <link type="text/css" rel="stylesheet" href="{{ site.baseurl }}/assets/css/pendora.css" />
+    <link rel="icon" type="image/png" href="{{ site.baseurl }}/favicon_io/favicon-16x16.png" />
 </head>
 <body{% if page.pageClass %} data-page="{{ page.pageClass }}"{% endif %}{% if page.pageArg %} data-page-arg="{{ page.pageArg }}"{% endif %}>
 
 {% include layout2/main-nav.html %}
 
+<div class="default-content-area">{{content}}</div>
+
 <script src="https://kit.fontawesome.com/43fafd7b08.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/assets/js/chunk-vendors.bundle.js"></script>
-<script type="text/javascript" src="/assets/js/app.bundle.js"></script>
+<script type="text/javascript" src="{{ site.baseurl }}/assets/js/chunk-vendors.bundle.js"></script>
+<script type="text/javascript" src="{{ site.baseurl }}/assets/js/app.bundle.js"></script>
 
 </body>
 </html>

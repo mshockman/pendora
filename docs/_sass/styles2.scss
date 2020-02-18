@@ -36,3 +36,18 @@ body {
   position: relative;
   overflow: scroll;
 }
+
+
+.default-content-area {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 3rem;
+  padding: 5px;
+}
+
+
+a {
+  color: #2a7ae2;
+}
