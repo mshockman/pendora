@@ -1,52 +1,76 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[3],{
 
-/***/ "./src/core/ui/Draggable.js":
-/*!**********************************!*\
-  !*** ./src/core/ui/Draggable.js ***!
-  \**********************************/
-/*! exports provided: cursor, default, ScrollArea, clone */
+/***/ "./docs/js/pages/documentation/test_sortable.js":
+/*!******************************************************!*\
+  !*** ./docs/js/pages/documentation/test_sortable.js ***!
+  \******************************************************/
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cursor", function() { return cursor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Draggable; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ScrollArea", function() { return ScrollArea; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clone", function() { return clone; });
-/* harmony import */ var _Publisher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Publisher */ "./src/core/Publisher.js");
-/* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
-/* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
-/* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
-/* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TestSortablePage; });
+/* harmony import */ var core_ui_Sortable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/ui/Sortable */ "./src/core/ui/Sortable.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var TestSortablePage =
+/*#__PURE__*/
+function () {
+  function TestSortablePage() {
+    _classCallCheck(this, TestSortablePage);
+  }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+  _createClass(TestSortablePage, [{
+    key: "load",
+    value: function load() {
+      window.sortableGrid = new core_ui_Sortable__WEBPACK_IMPORTED_MODULE_0__["default"]("#sortable-grid", {
+        layout: 'xy',
+        setPlaceholderSize: true
+      });
+      window.sortableList1 = new core_ui_Sortable__WEBPACK_IMPORTED_MODULE_0__["default"]('#drag-list-test', {
+        droppables: '.drop-list',
+        placeholder: true,
+        setPlaceholderSize: true
+      });
+      window.sortableList2 = new core_ui_Sortable__WEBPACK_IMPORTED_MODULE_0__["default"]('#drag-list-test2', {
+        droppables: '.drop-list',
+        placeholder: true,
+        setPlaceholderSize: true
+      });
+    }
+  }]);
 
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+  return TestSortablePage;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/core/ui/Sortable.js":
+/*!*********************************!*\
+  !*** ./src/core/ui/Sortable.js ***!
+  \*********************************/
+/*! exports provided: placeholder, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "placeholder", function() { return placeholder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Sortable; });
+/* harmony import */ var core_ui_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/ui/position */ "./src/core/ui/position.js");
+/* harmony import */ var _Draggable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Draggable */ "./src/core/ui/Draggable.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
@@ -54,1107 +78,440 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
+function placeholder(className) {
+  var nodeName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return function (element) {
+    var placeholder = document.createElement(nodeName || element.nodeName),
+        box = element.getBoundingClientRect();
+    placeholder.style.boxSizing = "border-box";
+    box.style.width = "".concat(box.width, "px");
+    box.style.height = "".concat(box.height, "px");
 
-
-
-
-var reg_percentage_test = /\s*\d+\.?\d*%\s*/;
-/**
- * Returns the offset position of the mouse relative to the target.
- *
- * @param target
- * @param event
- * @returns {{x: number, y: number}}
- */
-
-function cursor(target, event) {
-  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
-  return {
-    x: event.clientX - rect.left,
-    y: event.clientY - rect.top
-  };
-}
-
-function buildTestIntersectionFunction(amount) {
-  return function (element, rect) {
-    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect);
-    var targetRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
-        intersection = targetRect.intersection(rect),
-        p = intersection ? intersection.getArea() / rect.getArea() : 0;
-
-    if (amount === 0) {
-      return p > 0;
-    } else {
-      return p >= amount;
+    if (className) {
+      placeholder.className = className;
     }
   };
 }
+/**
+ * Creates a sortable list of items.
+ */
 
-var Draggable =
+var Sortable =
 /*#__PURE__*/
-function (_Publisher) {
-  _inherits(Draggable, _Publisher);
-
-  function Draggable(element) {
-    var _this;
-
+function () {
+  function Sortable(element) {
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref$items = _ref.items,
+        items = _ref$items === void 0 ? ".ui-sort-item" : _ref$items,
+        _ref$placeholder = _ref.placeholder,
+        placeholder = _ref$placeholder === void 0 ? null : _ref$placeholder,
+        _ref$layout = _ref.layout,
+        layout = _ref$layout === void 0 ? 'y' : _ref$layout,
+        _ref$dropOnEmpty = _ref.dropOnEmpty,
+        dropOnEmpty = _ref$dropOnEmpty === void 0 ? true : _ref$dropOnEmpty,
+        _ref$accepts = _ref.accepts,
+        accepts = _ref$accepts === void 0 ? null : _ref$accepts,
+        _ref$setPlaceholderSi = _ref.setPlaceholderSize,
+        setPlaceholderSize = _ref$setPlaceholderSi === void 0 ? false : _ref$setPlaceholderSi,
         _ref$container = _ref.container,
         container = _ref$container === void 0 ? null : _ref$container,
         _ref$axis = _ref.axis,
         axis = _ref$axis === void 0 ? 'xy' : _ref$axis,
         _ref$exclude = _ref.exclude,
-        exclude = _ref$exclude === void 0 ? 'input, button, .ui-resizeable-handle, .no-drag' : _ref$exclude,
+        exclude = _ref$exclude === void 0 ? null : _ref$exclude,
         _ref$delay = _ref.delay,
-        delay = _ref$delay === void 0 ? 0 : _ref$delay,
+        delay = _ref$delay === void 0 ? null : _ref$delay,
         _ref$offset = _ref.offset,
-        offset = _ref$offset === void 0 ? cursor : _ref$offset,
+        offset = _ref$offset === void 0 ? _Draggable__WEBPACK_IMPORTED_MODULE_1__["cursor"] : _ref$offset,
         _ref$resistance = _ref.resistance,
-        resistance = _ref$resistance === void 0 ? 0 : _ref$resistance,
+        resistance = _ref$resistance === void 0 ? null : _ref$resistance,
         _ref$handle = _ref.handle,
         handle = _ref$handle === void 0 ? null : _ref$handle,
         _ref$helper = _ref.helper,
         helper = _ref$helper === void 0 ? null : _ref$helper,
         _ref$revert = _ref.revert,
-        revert = _ref$revert === void 0 ? false : _ref$revert,
-        _ref$revertDuration = _ref.revertDuration,
-        revertDuration = _ref$revertDuration === void 0 ? 0 : _ref$revertDuration,
+        revert = _ref$revert === void 0 ? null : _ref$revert,
+        revertDuration = _ref.revertDuration,
         _ref$scrollSpeed = _ref.scrollSpeed,
-        scrollSpeed = _ref$scrollSpeed === void 0 ? 0 : _ref$scrollSpeed,
-        _ref$selector = _ref.selector,
-        selector = _ref$selector === void 0 ? null : _ref$selector,
+        scrollSpeed = _ref$scrollSpeed === void 0 ? null : _ref$scrollSpeed,
         _ref$tolerance = _ref.tolerance,
         tolerance = _ref$tolerance === void 0 ? 0.5 : _ref$tolerance,
         _ref$setHelperSize = _ref.setHelperSize,
         setHelperSize = _ref$setHelperSize === void 0 ? false : _ref$setHelperSize,
         _ref$grid = _ref.grid,
-        grid = _ref$grid === void 0 ? null : _ref$grid;
+        grid = _ref$grid === void 0 ? null : _ref$grid,
+        _ref$droppables = _ref.droppables,
+        droppables = _ref$droppables === void 0 ? null : _ref$droppables;
 
-    _classCallCheck(this, Draggable);
+    _classCallCheck(this, Sortable);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Draggable).call(this));
-
-    _element.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _droppables.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _boundOnMouseDown.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _itemCache.set(_assertThisInitialized(_this), {
+    _draggable.set(this, {
       writable: true,
       value: void 0
     });
 
     if (typeof element === 'string') {
-      _classPrivateFieldSet(_assertThisInitialized(_this), _element, document.querySelector(element));
+      this.element = document.querySelector(element);
     } else {
-      _classPrivateFieldSet(_assertThisInitialized(_this), _element, element);
+      this.element = element;
     }
 
-    _classPrivateFieldSet(_assertThisInitialized(_this), _droppables, []);
+    _classPrivateFieldSet(this, _draggable, new _Draggable__WEBPACK_IMPORTED_MODULE_1__["default"](this.element, {
+      container: container,
+      axis: axis,
+      exclude: exclude,
+      delay: delay,
+      offset: offset,
+      resistance: resistance,
+      handle: handle,
+      helper: helper,
+      revert: revert,
+      revertDuration: revertDuration,
+      scrollSpeed: scrollSpeed,
+      selector: items,
+      tolerance: tolerance,
+      setHelperSize: setHelperSize,
+      grid: grid
+    }));
 
-    _classPrivateFieldSet(_assertThisInitialized(_this), _itemCache, new WeakMap());
-
-    _this.container = container;
-    _this.axis = axis;
-    _this.exclude = exclude;
-    _this.delay = delay;
-    _this.offset = offset;
-    _this.resistance = resistance;
-    _this.handle = handle;
-    _this.helper = helper;
-    _this.revert = revert;
-    _this.revertDuration = revertDuration;
-    _this.scrollSpeed = scrollSpeed;
-    _this.selector = selector;
-    _this.tolerance = tolerance;
-    _this.setHelperSize = setHelperSize;
-    _this.grid = grid;
-
-    if (typeof _this.container === 'string') {
-      _this.container = document.querySelector(_this.container);
+    if (droppables) {
+      this.connect(droppables);
     }
 
-    _classPrivateFieldSet(_assertThisInitialized(_this), _boundOnMouseDown, function (event) {
-      return _this.onMouseDown(event);
-    });
-
-    _this.element.addEventListener('mousedown', _classPrivateFieldGet(_assertThisInitialized(_this), _boundOnMouseDown));
-
-    return _this;
+    this.items = items;
+    this.layout = layout;
+    this.placeholder = placeholder;
+    this.dropOnEmpty = dropOnEmpty;
+    this.accepts = accepts;
+    this.setPlaceholderSize = setPlaceholderSize;
+    this.initEvents();
   }
-  /**
-   * Starts dragging if the correct elements have been targeted and delay and resistance have been meet.
-   *
-   * @param event
-   * @returns {Promise<void>}
-   */
 
-
-  _createClass(Draggable, [{
-    key: "onMouseDown",
-    value: function () {
-      var _onMouseDown = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(event) {
-        var _this2 = this;
-
-        var startPosition, currentPosition, target, cancelMouseTracking, cancelTimer, distanceBrokenPromise, timerPromise, offset, handle, exclude, onMouseUp, _ref2, _ref3, timerStatus, distanceStatus;
-
-        return regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                startPosition = {
-                  x: event.clientX + window.pageXOffset,
-                  y: event.clientY + window.pageYOffset
-                }, currentPosition = {
-                  x: startPosition.x,
-                  y: startPosition.y
-                }, target = _classPrivateFieldGet(this, _element), cancelMouseTracking = null, cancelTimer = null; // Only start dragging if a draggable child of the element is targeted.
-                // If selector is null then the entire element is draggable and should be the target.
-
-                if (!this.selector) {
-                  _context.next = 5;
-                  break;
-                }
-
-                target = event.target.closest(this.selector);
-
-                if (!(!target || !_classPrivateFieldGet(this, _element).contains(target))) {
-                  _context.next = 5;
-                  break;
-                }
-
-                return _context.abrupt("return");
-
-              case 5:
-                if (!this.handle) {
-                  _context.next = 9;
-                  break;
-                }
-
-                handle = event.target.closest(this.handle);
-
-                if (!(!handle || !target.contains(handle))) {
-                  _context.next = 9;
-                  break;
-                }
-
-                return _context.abrupt("return");
-
-              case 9:
-                if (!this.exclude) {
-                  _context.next = 13;
-                  break;
-                }
-
-                exclude = event.target.closest(this.exclude);
-
-                if (!(exclude && target.contains(exclude))) {
-                  _context.next = 13;
-                  break;
-                }
-
-                return _context.abrupt("return");
-
-              case 13:
-                // Find the offset of the event.
-                if (typeof this.offset === 'function') {
-                  offset = this.offset(target, event);
-                } else if (Array.isArray(this.offset)) {
-                  offset = {
-                    x: this.offset[0],
-                    y: this.offset[1]
-                  };
-                } else if (_typeof(this.offset) === 'object') {
-                  offset = {
-                    x: this.offset.x,
-                    y: this.offset.y
-                  };
-                } else {
-                  offset = {
-                    x: 0,
-                    y: 0
-                  };
-                } // Prevent default browser actions.
-
-
-                event.preventDefault(); // At this point we can be sure that a draggable item was
-                // targeted by it's handle and no excluded items where clicked.
-                // Creates a promise that both tracks the current mouse coords and resolve
-                // when the user passes the given resistance.
-
-                distanceBrokenPromise = new Promise(function (resolve) {
-                  var isDistanceBroken = _this2.resistance <= 0;
-
-                  if (isDistanceBroken) {
-                    resolve('complete');
-                  }
-
-                  var onMouseMove = function onMouseMove(event) {
-                    currentPosition.x = event.clientX + window.pageXOffset;
-                    currentPosition.y = event.clientY + window.pageYOffset;
-                    event.preventDefault();
-
-                    if (!isDistanceBroken && Object(_utility__WEBPACK_IMPORTED_MODULE_1__["calcDistance"])(currentPosition.x, currentPosition.y, startPosition.x, startPosition.y) > _this2.resistance) {
-                      resolve('complete');
-                      isDistanceBroken = true;
-                    }
-                  }; // Cancel mouse tracking and resolve the promise to canceled if hasn't already been resolve.
-                  // This function must be called or their will be a memory leak before onMouseDown completes.
-
-
-                  cancelMouseTracking = function cancelMouseTracking() {
-                    if (onMouseMove) {
-                      document.removeEventListener('mousemove', onMouseMove);
-
-                      if (!isDistanceBroken) {
-                        resolve('canceled');
-                      }
-
-                      onMouseMove = null;
-                    }
-                  };
-
-                  document.addEventListener('mousemove', onMouseMove);
-                }); // Creates a promise that resolve when after the delay time passes or the user cancels the drag by
-                // releasing the mouse button.
-
-                timerPromise = new Promise(function (resolve) {
-                  var timer = null;
-
-                  if (_this2.delay >= 0) {
-                    timer = setTimeout(function () {
-                      resolve("complete");
-                      timer = null;
-                    }, _this2.delay);
-                  } else {
-                    resolve('complete');
-                  } // cancel the timer and resolve it to canceled if it is still active.
-
-
-                  cancelTimer = function cancelTimer() {
-                    if (timer) {
-                      clearTimeout(timer);
-                      resolve('canceled');
-                    }
-                  };
-                }); // cancel the timer and mouse tracking if they are still active.
-
-                onMouseUp = function onMouseUp(event) {
-                  event.preventDefault();
-                  cancelTimer();
-                  cancelMouseTracking();
-                  document.removeEventListener('mouseup', onMouseUp);
-                };
-
-                document.addEventListener('mouseup', onMouseUp); // Wait until the delay time and distance have passed or failed.
-
-                _context.next = 21;
-                return Promise.all([timerPromise, distanceBrokenPromise]);
-
-              case 21:
-                _ref2 = _context.sent;
-                _ref3 = _slicedToArray(_ref2, 2);
-                timerStatus = _ref3[0];
-                distanceStatus = _ref3[1];
-                // Ensure that mouse tracking has been canceled.
-                if (cancelMouseTracking) cancelMouseTracking(); // At this point both the timer and distance status should have passed or failed.
-                // If either failed do nothing.
-
-                if (timerStatus === 'complete' && distanceStatus === 'complete') {
-                  this.startDragging(target, {
-                    offsetX: offset.x,
-                    offsetY: offset.y,
-                    // Make relative to client.
-                    startingX: currentPosition.x,
-                    startingY: currentPosition.y
-                  });
-                }
-
-              case 27:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function onMouseDown(_x) {
-        return _onMouseDown.apply(this, arguments);
-      }
-
-      return onMouseDown;
-    }()
-  }, {
-    key: "startDragging",
-    value: function () {
-      var _startDragging = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(element, pos) {
-        var _this3 = this;
-
-        var cache, mousePosition, target, container, scroller, dropTargets, startPosition, startingClientRect, refreshDropTargets, onMouseMove, onMouseUp, rect;
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                cache = _classPrivateFieldGet(this, _itemCache).get(element), mousePosition = {
-                  x: pos.startingX,
-                  y: pos.startingY
-                };
-
-                if (!cache) {
-                  cache = {
-                    isDragging: false,
-                    fx: null,
-                    rect: null,
-                    helper: null,
-                    element: element
-                  };
-
-                  _classPrivateFieldGet(this, _itemCache).set(element, cache);
-                }
-
-                if (!cache.isDragging) {
-                  _context3.next = 4;
-                  break;
-                }
-
-                return _context3.abrupt("return");
-
-              case 4:
-                cache.isDragging = true;
-
-                if (!cache.fx) {
-                  _context3.next = 9;
-                  break;
-                }
-
-                _context3.next = 8;
-                return cache.fx.cancel();
-
-              case 8:
-                cache.fx = null;
-
-              case 9:
-                target = element, container = this.container, scroller = null, dropTargets = [], startPosition = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element), startingClientRect = startPosition;
-                startPosition = startPosition.translate(window.pageXOffset, window.pageYOffset);
-
-                if (!cache.rect) {
-                  cache.rect = startPosition;
-                }
-
-                if (typeof container === 'string') {
-                  container = document.querySelector(container);
-                }
-
-                if (this.helper) {
-                  if (typeof this.helper === 'function') {
-                    target = this.helper(element);
-                  } else {
-                    target = this.helper;
-                  }
-
-                  if (this.setHelperSize) {
-                    target.style.width = startPosition.width + "px";
-                    target.style.height = startPosition.height + "px";
-                  }
-
-                  target.style.pointerEvents = 'none';
-
-                  if (!target.parentElement && element.parentElement) {
-                    element.parentElement.appendChild(target);
-                  }
-
-                  target.classList.add('ui-drag-helper');
-                  cache.helper = target;
-                }
-
-                refreshDropTargets = function refreshDropTargets(rect) {
-                  // drag-enter
-                  var mouseX = mousePosition.x - window.pageXOffset,
-                      mouseY = mousePosition.y - window.pageYOffset,
-                      currentDropTargets,
-                      detail = {
-                    clientX: mouseX,
-                    clientY: mouseY
-                  };
-
-                  if (rect !== null) {
-                    currentDropTargets = _this3.getDropTargets(rect, {
-                      mouseX: mouseX,
-                      mouseY: mouseY
-                    });
-                  } else {
-                    currentDropTargets = [];
-                  }
-
-                  var _iteratorNormalCompletion = true;
-                  var _didIteratorError = false;
-                  var _iteratorError = undefined;
-
-                  try {
-                    for (var _iterator = currentDropTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                      var dropTarget = _step.value;
-
-                      if (dropTargets.indexOf(dropTarget) === -1) {
-                        dispatchDropEvent(_this3, 'drag.enter', element, target, null, rect, true, true, false, detail, dropTarget);
-                      }
-                    }
-                  } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                  } finally {
-                    try {
-                      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                        _iterator["return"]();
-                      }
-                    } finally {
-                      if (_didIteratorError) {
-                        throw _iteratorError;
-                      }
-                    }
-                  }
-
-                  var _iteratorNormalCompletion2 = true;
-                  var _didIteratorError2 = false;
-                  var _iteratorError2 = undefined;
-
-                  try {
-                    for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                      var _dropTarget = _step2.value;
-
-                      if (currentDropTargets.indexOf(_dropTarget) === -1) {
-                        dispatchDropEvent(_this3, 'drag.leave', element, target, null, rect, true, true, false, detail, _dropTarget);
-                      }
-                    } // drag-leave
-
-                  } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
-                  } finally {
-                    try {
-                      if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                        _iterator2["return"]();
-                      }
-                    } finally {
-                      if (_didIteratorError2) {
-                        throw _iteratorError2;
-                      }
-                    }
-                  }
-
-                  dropTargets = currentDropTargets;
-                };
-
-                onMouseMove = function onMouseMove(event) {
-                  event.preventDefault();
-
-                  var rect = _moveElementToPosition(_this3, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, _this3, target, element));
-
-                  mousePosition.x = event.clientX + window.pageXOffset;
-                  mousePosition.y = event.clientY + window.pageYOffset;
-
-                  if (_this3.scrollSpeed > 0) {
-                    if (scroller) {
-                      scroller.cancel();
-                      scroller = null;
-                    }
-
-                    scroller = ScrollHelper.buildScrollHelper(element, target, rect, pos, _this3, event, _this3.scrollSpeed, container);
-                  }
-
-                  refreshDropTargets(rect);
-                  publishDragMoveEvent(_this3, element, target, event, rect);
-                };
-
-                onMouseUp =
-                /*#__PURE__*/
-                function () {
-                  var _ref4 = _asyncToGenerator(
-                  /*#__PURE__*/
-                  regeneratorRuntime.mark(function _callee2(event) {
-                    var accepted, _isDefaultPrevented, reverted, rect, _pos;
-
-                    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-                      while (1) {
-                        switch (_context2.prev = _context2.next) {
-                          case 0:
-                            event.preventDefault();
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                            cache.isDragging = false;
-                            element.classList.remove('ui-dragging');
-
-                            if (scroller) {
-                              scroller.cancel();
-                              scroller = null;
-                            }
-
-                            accepted = false, _isDefaultPrevented = false, reverted = false, rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
-                            publishDragDropEvent(_this3, element, target, event, rect, false, {
-                              isDefaultPrevented: function isDefaultPrevented() {
-                                return _isDefaultPrevented;
-                              },
-                              isAccepted: function isAccepted() {
-                                return accepted;
-                              },
-                              accept: function accept() {
-                                accepted = true;
-                              },
-                              preventDefault: function preventDefault() {
-                                _isDefaultPrevented = true;
-                              }
-                            });
-
-                            if (!(_this3.revert && !accepted)) {
-                              _context2.next = 22;
-                              break;
-                            }
-
-                            refreshDropTargets(cache.rect);
-                            rect = cache.rect;
-
-                            if (_this3.revertDuration) {
-                              _context2.next = 15;
-                              break;
-                            }
-
-                            if (target !== element) {
-                              target.parentElement.removeChild(target);
-                            } else {
-                              _pos = startPosition.translate(-window.pageXOffset, -window.pageYOffset);
-                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, _pos, 'translate3d');
-                            }
-
-                            _context2.next = 19;
-                            break;
-
-                          case 15:
-                            cache.fx = _revert(target, cache.rect, _this3.revertDuration);
-                            _context2.next = 18;
-                            return cache.fx;
-
-                          case 18:
-                            if (target !== element) {
-                              target.parentElement.removeChild(target);
-                            }
-
-                          case 19:
-                            reverted = true;
-                            _context2.next = 23;
-                            break;
-
-                          case 22:
-                            if (target !== element) {
-                              target.parentElement.removeChild(target);
-                              Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(element, rect, 'translate3d');
-                            }
-
-                          case 23:
-                            _classPrivateFieldGet(_this3, _itemCache)["delete"](element);
-
-                            dispatchDropEvent(_this3, 'drag.end', element, target, event, rect, true, true, true, {
-                              accepted: accepted,
-                              reverted: reverted
-                            }, element);
-
-                          case 25:
-                          case "end":
-                            return _context2.stop();
-                        }
-                      }
-                    }, _callee2);
-                  }));
-
-                  return function onMouseUp(_x4) {
-                    return _ref4.apply(this, arguments);
-                  };
-                }(); // Set target to starting position.
-
-
-                if (mousePosition.x !== undefined && mousePosition.y !== undefined) {
-                  rect = _moveElementToPosition(this, target, mousePosition.x - window.pageXOffset, mousePosition.y - window.pageYOffset, pos.offsetX, pos.offsetY, _selectElementRect(container, this, target, element));
-                  refreshDropTargets(rect);
-                }
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-                element.classList.add('ui-dragging');
-                dispatchDropEvent(this, 'drag.start', element, target, null, startingClientRect, true, true, true, null);
-
-              case 22:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this);
-      }));
-
-      function startDragging(_x2, _x3) {
-        return _startDragging.apply(this, arguments);
-      }
-
-      return startDragging;
-    }()
-  }, {
-    key: "getDropTargets",
-    value: function getDropTargets(rect, mousePos) {
-      var r = [];
-      /**
-       * @type {number|String|Function|string}
-       */
-
-      var testFunction = this.tolerance,
-          type = _typeof(testFunction);
-
-      if (type === 'string') {
-        // noinspection JSCheckFunctionSignatures
-        if (reg_percentage_test.test(testFunction)) {
-          // noinspection JSCheckFunctionSignatures
-          testFunction = buildTestIntersectionFunction(parseFloat(testFunction) / 100);
-        }
-      } else if (type === 'number') {
-        testFunction = buildTestIntersectionFunction(testFunction);
-      }
-
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var droppable = _step3.value;
-
-          if (testFunction(droppable, rect, mousePos, this)) {
-            r.push(droppable);
-          }
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-            _iterator3["return"]();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-
-      return r;
-    }
-  }, {
+  _createClass(Sortable, [{
     key: "connect",
     value: function connect(droppables) {
-      if (typeof droppables === 'string') {
-        droppables = document.querySelectorAll(droppables);
-      } else if (typeof droppables.length !== 'number') {
-        droppables = [droppables];
-      }
-
-      for (var i = 0; i < droppables.length; i++) {
-        var item = droppables[i];
-
-        if (_classPrivateFieldGet(this, _droppables).indexOf(item) === -1) {
-          _classPrivateFieldGet(this, _droppables).push(item);
-        }
-      }
-    } // noinspection JSUnusedGlobalSymbols
-
+      _classPrivateFieldGet(this, _draggable).connect(droppables);
+    }
   }, {
     key: "disconnect",
-    value: function disconnect(droppable) {
-      if (typeof droppable === 'string') {
-        droppable = document.querySelector(droppable);
-      }
-
-      var i = _classPrivateFieldGet(this, _droppables).indexOf(droppable);
-
-      if (i !== -1) {
-        _classPrivateFieldGet(this, _droppables).splice(i, 1);
-      }
-    } // noinspection JSUnusedGlobalSymbols
-
+    value: function disconnect(droppables) {
+      _classPrivateFieldGet(this, _draggable).disconnect(droppables);
+    }
   }, {
     key: "hasDroppable",
     value: function hasDroppable(droppable) {
-      if (typeof droppable === 'string') {
-        droppable = document.querySelector(droppable);
-      }
-
-      return _classPrivateFieldGet(this, _droppables).indexOf(droppable) !== -1;
-    } // noinspection JSUnusedGlobalSymbols
-
-  }, {
-    key: "droppables",
-    get: function get() {
-      return _classPrivateFieldGet(this, _droppables).slice(0);
+      return _classPrivateFieldGet(this, _draggable).hasDroppable(droppable);
     }
   }, {
-    key: "element",
-    get: function get() {
-      return _classPrivateFieldGet(this, _element);
-    }
-  }]);
+    key: "initEvents",
 
-  return Draggable;
-}(_Publisher__WEBPACK_IMPORTED_MODULE_0__["default"]);
+    /**
+     * Initializes event listeners.
+     */
+    value: function initEvents() {
+      var _this = this;
 
-var _element = new WeakMap();
+      var placeholder,
+          isOver = false,
+          init = false,
+          target; // Attaches temporary events when drag starts.
 
-var _droppables = new WeakMap();
+      var initialize = function initialize(event) {
+        init = true;
+        target = event.detail.item;
+        target.addEventListener('drag.move', onDragMove);
+        target.addEventListener('drag.end', onDragComplete);
+        target.addEventListener('sort-append', onSortAppend);
+        var startBB = target.getBoundingClientRect();
+        target.classList.add('ui-sorting');
 
-var _boundOnMouseDown = new WeakMap();
+        if (!placeholder && _this.placeholder) {
+          if (typeof _this.placeholder === 'string') {
+            placeholder = document.createElement(target.nodeName);
+            placeholder.className = _this.placeholder;
+          } else if (typeof _this.placeholder === 'function') {
+            placeholder = _this.placeholder(target, _this);
+          } else if (_this.placeholder === true) {
+            placeholder = document.createElement(target.nodeName);
+          } else {
+            placeholder = _this.placeholder;
+          }
 
-var _itemCache = new WeakMap();
+          placeholder.classList.add('ui-placeholder');
 
-
-
-function _revert(target, position, revertDuration) {
-  var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-  var starting = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](target);
-  var animation = new _fx_Animation__WEBPACK_IMPORTED_MODULE_4__["default"]({
-    frames: {
-      '0%': {
-        left: starting.left + window.pageXOffset,
-        top: starting.top + window.pageYOffset
-      },
-      '100%': {
-        left: position.left,
-        top: position.top
-      }
-    },
-    applyFrame: function applyFrame(fx, frame) {
-      Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(fx.element, {
-        left: frame.left - window.pageXOffset,
-        top: frame.top - window.pageYOffset
-      }, 'translate3d');
-      if (onFrame) onFrame(fx);
-    }
-  });
-  return animation.animate(target, {
-    duration: revertDuration
-  });
-}
-/**
- * Takes a client (x, y) position and some offset coords and move the element to the given position.
- *
- * @param self
- * @param element
- * @param x
- * @param y
- * @param offsetX
- * @param offsetY
- * @param container
- * @private
- * @returns {*|Rect}
- */
-
-
-function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container) {
-  var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
-      startingRect = rect;
-  rect = rect.moveTo({
-    left: x,
-    top: y
-  });
-  offsetX = offsetX || 0;
-  offsetY = offsetY || 0;
-  rect = rect.translate(-offsetX, -offsetY);
-
-  if (self.axis === 'y') {
-    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](startingRect.left, rect.top, startingRect.right, rect.bottom);
-  } else if (self.axis === 'x') {
-    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](rect.left, startingRect.top, rect.right, startingRect.bottom);
-  }
-
-  if (typeof self.grid === 'number' && self.grid) {
-    var left = Math.floor(rect.left / self.grid) * self.grid,
-        top = Math.floor(rect.top / self.grid) * self.grid;
-    rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](left, top, left + startingRect.width, top + startingRect.height);
-  }
-
-  if (container) {
-    container = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](container);
-    rect = rect.fit(container);
-  }
-
-  Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(element, rect, 'translate3d');
-  return rect;
-} // noinspection JSCommentMatchesSignature
-
-/**
- * For module use only.  Selects the element either by css selector, if it's a string, or resolve a function.
- * If the element is already element is is returned direction.  Returns null if not element is provided.
- *
- * @param element
- * @param dragInstance
- * @param target
- * @returns {null|*}
- * @private
- */
-
-
-function _selectElementRect(element, dragInstance, target, originalTarget) {
-  if (element) {
-    var type = _typeof(element);
-
-    if (type === 'function') {
-      return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element.call(dragInstance, target, originalTarget, dragInstance));
-    } else if (type === 'string') {
-      return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](document.querySelector(element));
-    }
-
-    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
-  }
-
-  return null;
-}
-/**
- * Returns the first scrollable parent.
- *
- * @param element
- * @returns {HTMLElement|null}
- * @private
- */
-
-
-function _getScrollParent(element) {
-  var o = element.parentElement;
-
-  while (o) {
-    if (o.scrollWidth > o.clientWidth || o.scrollHeight > o.clientHeight) {
-      return o;
-    }
-
-    o = o.parentElement;
-  }
-
-  return null;
-}
-
-function _getScrollRect(element) {
-  if (element === window || element.nodeName === "HTML") {
-    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](0, 0, window.innerWidth, window.innerHeight);
-  } else {
-    return new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element);
-  }
-}
-/**
- * Helper class that is used to control scrolling when the element is dragged outside of bounds.
- */
-
-
-var ScrollHelper =
-/*#__PURE__*/
-function () {
-  function ScrollHelper(element) {
-    var _this4 = this;
-
-    var scrollXSpeed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-    var scrollYSpeed = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-    var onFrame = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-    _classCallCheck(this, ScrollHelper);
-
-    this.frameID = null;
-    this.element = element;
-    this.scrollXSpeed = scrollXSpeed;
-    this.scrollYSpeed = scrollYSpeed;
-    this.onFrame = onFrame;
-    this.timestamp = performance.now();
-
-    var frame = function frame(timestamp) {
-      var delta = (timestamp - _this4.timestamp) / 1000;
-      _this4.timestamp = timestamp;
-      _this4.element.scrollLeft += delta * _this4.scrollXSpeed;
-      _this4.element.scrollTop += delta * _this4.scrollYSpeed;
-
-      if (_this4.onFrame) {
-        _this4.onFrame(_this4);
-      }
-
-      _this4.frameID = window.requestAnimationFrame(frame);
-    };
-
-    this.frameID = window.requestAnimationFrame(frame);
-  }
-
-  _createClass(ScrollHelper, [{
-    key: "cancel",
-    value: function cancel() {
-      if (this.frameID) {
-        window.cancelAnimationFrame(this.frameID);
-        this.frameID = null;
-      }
-    }
-  }], [{
-    key: "getScrollSpeed",
-    value: function getScrollSpeed(rect, scrollParentRect) {
-      var r = {
-        x: 0,
-        y: 0
-      };
-
-      if (rect.right > scrollParentRect.right) {
-        r.x = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.right - scrollParentRect.right) / rect.width, -1, 1);
-      } else if (rect.left < scrollParentRect.left) {
-        r.x = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.left - scrollParentRect.left) / rect.width, -1, 1);
-      }
-
-      if (rect.bottom > scrollParentRect.bottom) {
-        r.y = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.bottom - scrollParentRect.bottom) / rect.width, -1, 1);
-      } else if (rect.top < scrollParentRect.top) {
-        r.y = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])((rect.top - scrollParentRect.top) / rect.width, -1, 1);
-      }
-
-      return r;
-    }
-  }, {
-    key: "buildScrollHelper",
-    value: function buildScrollHelper(element, target, rect, pos, dragInstance, event, scrollSpeed, container) {
-      var _this5 = this;
-
-      var scrollParent = _getScrollParent(element);
-
-      if (scrollParent) {
-        var scrollParentRect = _getScrollRect(scrollParent),
-            speed = ScrollHelper.getScrollSpeed(rect, scrollParentRect);
-
-        if (speed.x || speed.y) {
-          return new ScrollHelper(scrollParent, speed.x * scrollSpeed, speed.y * scrollSpeed, function (scroller) {
-            var rect = _moveElementToPosition(_this5, target, event.clientX, event.clientY, pos.offsetX, pos.offsetY, _selectElementRect(container, dragInstance, target, element));
-
-            var scrollRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](scroller.element);
-            Object(_position__WEBPACK_IMPORTED_MODULE_3__["setElementClientPosition"])(target, rect, 'translate3d');
-
-            if (scrollRect.contains(rect)) {
-              scroller.cancel();
-              scroller = null;
+          if (_this.setPlaceholderSize) {
+            if (_this.setPlaceholderSize === true) {
+              placeholder.style.width = "".concat(startBB.width, "px");
+              placeholder.style.height = "".concat(startBB.height, "px");
+              placeholder.style.boxSizing = 'border-box';
+            } else if (Array.isArray(_this.setPlaceholderSize)) {
+              placeholder.style.width = "".concat(_this.setPlaceholderSize[0], "px");
+              placeholder.style.height = "".concat(_this.setPlaceholderSize[1], "px");
+            } else {
+              placeholder.style.width = "".concat(_this.setPlaceholderSize.width, "px");
+              placeholder.style.height = "".concat(_this.setPlaceholderSize.height, "px");
             }
-          });
+          }
+
+          if (_this.element.contains(target)) {
+            target.parentElement.insertBefore(placeholder, target);
+          }
+        }
+
+        Object(core_ui_position__WEBPACK_IMPORTED_MODULE_0__["setElementClientPosition"])(target, startBB, 'translate3d');
+      }; // Cleanup after sorting finishes.
+
+
+      var destroy = function destroy() {
+        if (target) {
+          target.removeEventListener('drag.move', onDragMove);
+          target.removeEventListener('drag.end', onDragComplete);
+          target.removeEventListener('sort-append', onSortAppend);
+          init = false;
+          isOver = false;
+
+          if (placeholder && placeholder.parentElement) {
+            placeholder.parentElement.removeChild(placeholder);
+          }
+
+          placeholder = null;
+          target.style.transform = "";
+          target.classList.remove('ui-sorting');
+          target = null;
+        }
+      }; // Ensures that the placeholder is removed if the item gets moves to another sortable.
+
+
+      var onSortAppend = function onSortAppend(event) {
+        if (event.detail !== _this && placeholder && placeholder.parentElement) {
+          placeholder.parentElement.removeChild(placeholder);
+        }
+      }; // Moves the item to the correct position on mouse move.
+
+
+      var onDragMove = function onDragMove(event) {
+        if (!isOver || _this.accepts && !event.detail.item.matches(_this.accepts)) {
+          return;
+        }
+
+        var target = event.detail.item,
+            items = Array.prototype.slice.call(_this.getItems()).filter(function (i) {
+          return i !== target;
+        });
+
+        var before = _this.getItemBeforePoint(event.detail.clientX, event.detail.clientY, items),
+            after = _this.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
+            beforeBB = event.detail.helper.getBoundingClientRect(),
+            dropOnEmpty = target.dataset.dropOnEmpty !== null && target.dataset.dropOnEmpty !== undefined ? target.dataset.dropOnEmpty === 'true' : _this.dropOnEmpty; // Allow overriding on item level.
+
+
+        if (!items.length) {
+          if (dropOnEmpty) {
+            _this.element.appendChild(target);
+
+            if (placeholder) target.parentElement.insertBefore(placeholder, target);
+
+            _this._refreshPositions(event.detail.helper, beforeBB);
+
+            _this._triggerSortAppendEvent(target);
+          }
+        } else if (before && before !== target) {
+          before.parentElement.insertBefore(target, before.nextSibling);
+          if (placeholder) target.parentElement.insertBefore(placeholder, target);
+
+          _this._refreshPositions(event.detail.helper, beforeBB);
+
+          _this._triggerSortAppendEvent(target);
+        } else if (after && after !== target) {
+          after.parentElement.insertBefore(target, after);
+          if (placeholder) target.parentElement.insertBefore(placeholder, target);
+
+          _this._refreshPositions(event.detail.helper, beforeBB);
+
+          _this._triggerSortAppendEvent(target);
+        }
+      }; // Cleanup
+
+
+      var onDragComplete = function onDragComplete() {
+        destroy();
+      }; // Initialize sorting.
+
+
+      this.element.addEventListener('drag.enter', function (event) {
+        if (_this.accepts && !event.detail.item.matches(_this.accepts)) {
+          return;
+        }
+
+        isOver = true;
+
+        if (!init) {
+          initialize(event);
+        }
+      }); // Mark isOver state false.
+
+      this.element.addEventListener('drag.leave', function () {
+        isOver = false;
+      }); // Initialize sorting that started on another sortable.
+
+      this.element.addEventListener('drag.start', function (event) {
+        if (!init) {
+          initialize(event);
+        }
+
+        isOver = true;
+      });
+    }
+    /**
+     * Tests to see if the given (x, y) point is before or after the element.  Uses layout to determine if the test
+     * is for the x layout, the y layout or the xy layout.
+     * @param element
+     * @param x
+     * @param y
+     * @returns {string|null}
+     */
+
+  }, {
+    key: "getRelativePosition",
+    value: function getRelativePosition(element, x, y) {
+      var box = element.getBoundingClientRect(),
+          mx = box.left + box.width / 2,
+          my = box.top + box.height / 2;
+
+      if (this.layout === 'x') {
+        return mx < x ? 'after' : 'before';
+      } else if (this.layout === 'y') {
+        return my < y ? 'after' : 'before';
+      } else if (this.layout === 'xy') {
+        return box.bottom < y || mx < x && box.bottom >= y && box.top <= y ? 'after' : 'before';
+      }
+
+      return null;
+    }
+    /**
+     * Returns the item immediately before the given x, y point.
+     * @param x
+     * @param y
+     * @param items
+     * @returns {*}
+     */
+
+  }, {
+    key: "getItemBeforePoint",
+    value: function getItemBeforePoint(x, y, items) {
+      if (!items) items = this.getItems();
+      var r = null;
+
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+
+        if (this.getRelativePosition(item, x, y) === 'after') {
+          r = item;
+        } else {
+          break;
+        }
+      }
+
+      if (r) {
+        var box = r.getBoundingClientRect();
+
+        if ((this.layout === 'x' || this.layout === 'xy') && box.top <= y && box.bottom >= y) {
+          return r;
+        } else if (this.layout === 'y' && box.left <= x && box.right >= x) {
+          return r;
         }
       }
     }
+    /**
+     * Returns the item immediately after the given (x, y) point.
+     * @param x
+     * @param y
+     * @param items
+     * @returns {null|*}
+     */
+
+  }, {
+    key: "getItemAfterPoint",
+    value: function getItemAfterPoint(x, y, items) {
+      if (!items) items = this.getItems();
+      var r = null;
+
+      for (var i = items.length - 1; i >= 0; i--) {
+        var item = items[i];
+
+        if (this.getRelativePosition(item, x, y) === 'before') {
+          r = item;
+        } else {
+          break;
+        }
+      }
+
+      if (r) {
+        var box = r.getBoundingClientRect();
+
+        if ((this.layout === 'x' || this.layout === 'xy') && box.top <= y && box.bottom >= y) {
+          return r;
+        } else if (this.layout === 'y' && box.left <= x && box.right >= x) {
+          return r;
+        }
+      }
+
+      return null;
+    }
+    /**
+     * Returns a list of all items for the sortable.
+     * @returns {NodeListOf<SVGElementTagNameMap[string]> | NodeListOf<HTMLElementTagNameMap[string]> | NodeListOf<Element>}
+     */
+
+  }, {
+    key: "getItems",
+    value: function getItems() {
+      return this.element.querySelectorAll(this.items);
+    }
+    /**
+     * helper method that translates the target to the provided client position.
+     * @param target {{getBoundingClientRect, style} | Element}
+     * @param position {{left[Number], top[Number]}}
+     * @private
+     */
+
+  }, {
+    key: "_refreshPositions",
+    value: function _refreshPositions(target, position) {
+      var current = target.getBoundingClientRect(),
+          deltaLeft = current.left - position.left,
+          deltaTop = current.top - position.top,
+          translation = Object(core_ui_position__WEBPACK_IMPORTED_MODULE_0__["getTranslation"])(target);
+      target.style.transform = "translate3d(".concat(translation.x - deltaLeft, "px, ").concat(translation.y - deltaTop, "px, 0)");
+    }
+    /**
+     * Triggers the default sort-append event on the target.
+     * @param target {Element}
+     * @private
+     */
+
+  }, {
+    key: "_triggerSortAppendEvent",
+    value: function _triggerSortAppendEvent(target) {
+      var event = new CustomEvent('sort-append', {
+        bubbles: false,
+        detail: this
+      });
+      target.dispatchEvent(event);
+    }
+  }, {
+    key: "droppables",
+    get: function get() {
+      return _classPrivateFieldGet(this, _draggable).droppables;
+    }
   }]);
 
-  return ScrollHelper;
+  return Sortable;
 }();
 
-function ScrollArea(selector) {
-  return function () {
-    var element = selector;
+var _draggable = new WeakMap();
 
-    if (typeof element === 'string') {
-      element = document.querySelector(element);
-    }
 
-    var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__["default"](element),
-        scroll = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["getScroll"])(element);
-    rect.left -= scroll.scrollLeft;
-    rect.top -= scroll.scrollTop;
-    rect.right = rect.left + element.scrollWidth;
-    rect.bottom = rect.top + element.scrollHeight;
-    return rect;
-  };
-}
-function clone() {
-  var opacity = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var className = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var zIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-  if (_typeof(opacity) === 'object' && opacity.nodeType) {
-    return opacity.cloneNode(true);
-  }
-
-  return function (element) {
-    var r = element.cloneNode(true);
-
-    if (opacity !== null) {
-      r.style.opacity = opacity;
-    }
-
-    if (className) {
-      r.className = className;
-    }
-
-    r.style.position = "absolute";
-    if (zIndex !== null) r.style.zIndex = zIndex;
-    return r;
-  };
-}
-
-function publishDragMoveEvent(self, element, helper, event, rect) {
-  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
-  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
-  return dispatchDropEvent(self, 'drag.move', element, helper, event, rect, bubbles, true, true, options);
-}
-
-function publishDragDropEvent(self, element, helper, event, rect) {
-  var bubbles = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
-  var options = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
-  return dispatchDropEvent(self, 'drag.drop', element, helper, event, rect, bubbles, true, true, options);
-}
-
-function dispatchDropEvent(self, name, element, helper, originalEvent, currentRect) {
-  var bubbles = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
-  var dispatch = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
-  var publish = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
-  var detail = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
-  var target = arguments.length > 10 && arguments[10] !== undefined ? arguments[10] : null;
-  var eventPackage = {
-    name: name,
-    draggable: self,
-    target: helper,
-    element: element,
-    item: element,
-    // alias for element
-    helper: helper,
-    originalEvent: null,
-    rect: currentRect
-  };
-
-  if (originalEvent) {
-    eventPackage.originalEvent = originalEvent;
-    eventPackage.clientX = originalEvent.clientX;
-    eventPackage.clientY = originalEvent.clientY;
-  }
-
-  if (!target) {
-    target = element;
-  }
-
-  if (detail) {
-    Object.assign(eventPackage, detail);
-  }
-
-  if (publish) {
-    self.publish(name, eventPackage);
-  }
-
-  if (dispatch) {
-    var customEvent = new CustomEvent(name, {
-      bubbles: bubbles,
-      detail: eventPackage
-    });
-    target.dispatchEvent(customEvent);
-  }
-}
 
 /***/ })
 

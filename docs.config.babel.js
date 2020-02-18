@@ -28,7 +28,7 @@ export default {
     },
 
     output: {
-        path: path.resolve(ROOT, "jekyll/assets/js/"),
+        path: path.resolve(ROOT, "docs/assets/js/"),
         filename: "[name].bundle.js",
         publicPath: "/tests/dist/",
         chunkFilename: "chunk-[name].bundle.js",

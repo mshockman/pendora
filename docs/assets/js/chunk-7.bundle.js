@@ -1,16 +1,18 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[7],{
 
-/***/ "./jekyll/js/pages/documentation/test_draggable.js":
+/***/ "./docs/js/pages/documentation/test_positioning.js":
 /*!*********************************************************!*\
-  !*** ./jekyll/js/pages/documentation/test_draggable.js ***!
+  !*** ./docs/js/pages/documentation/test_positioning.js ***!
   \*********************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TestDraggablePage; });
-/* harmony import */ var core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/ui/Draggable */ "./src/core/ui/Draggable.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TestPositionerPage; });
+/* harmony import */ var core_vectors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/vectors */ "./src/core/vectors/index.js");
+/* harmony import */ var core_ui_position__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/ui/position */ "./src/core/ui/position.js");
+/* harmony import */ var core_ui_Draggable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core/ui/Draggable */ "./src/core/ui/Draggable.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -19,126 +21,83 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-var TestDraggablePage =
+
+window.Rect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"];
+window.setElementClientPosition = core_ui_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"];
+
+var TestPositionerPage =
 /*#__PURE__*/
 function () {
-  function TestDraggablePage() {
-    _classCallCheck(this, TestDraggablePage);
+  function TestPositionerPage() {
+    _classCallCheck(this, TestPositionerPage);
   }
 
-  _createClass(TestDraggablePage, [{
+  _createClass(TestPositionerPage, [{
     key: "load",
     value: function load() {
-      this.drag1 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example1", {
-        resistance: 0,
-        delay: 0,
-        scrollSpeed: 1000,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez1')
+      var _this = this;
+
+      this.referenceElement = document.getElementById('referenceElement');
+      this.container = document.getElementById('container');
+      this.overlay = document.getElementById('testOverlay');
+      var controls = document.getElementById('controls');
+      this.draggable = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_2__["default"](this.referenceElement, {});
+
+      this.reposition = function () {
+        var _p = function _p(offsetName) {
+          var value = _this.getSelectValue("".concat(offsetName, "-offset")),
+              unit = _this.getSelectValue("".concat(offsetName, "-offset-unit"));
+
+          value = parseFloat(value);
+
+          if (value < 0) {
+            return "".concat(value).concat(unit);
+          } else if (value > 0) {
+            return "+".concat(value).concat(unit);
+          } else {
+            return '';
+          }
+        };
+
+        var myX = _this.getSelectValue('my-x'),
+            myY = _this.getSelectValue('my-y'),
+            atX = _this.getSelectValue('at-x'),
+            atY = _this.getSelectValue('at-y'),
+            flipX = _this.getSelectValue('flip-x'),
+            flipY = _this.getSelectValue('flip-y'),
+            myOffsetX = _p('my-x'),
+            myOffsetY = _p('my-y'),
+            atOffsetX = _p('at-x'),
+            atOffsetY = _p('at-y');
+
+        var rect = new core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"](_this.overlay);
+        rect = rect.position({
+          my: "".concat(myX).concat(myOffsetX, " ").concat(myY).concat(myOffsetY),
+          at: "".concat(atX).concat(atOffsetX, " ").concat(atY).concat(atOffsetY),
+          of: _this.referenceElement,
+          inside: _this.container,
+          collision: "".concat(flipX, " ").concat(flipY)
+        });
+        Object(core_ui_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"])(_this.overlay, rect);
+      };
+
+      this.referenceElement.addEventListener('drag.move', function (event) {
+        _this.reposition();
       });
-      this.drag2 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example2", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez2'),
-        helper: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5),
-        revert: true,
-        revertDuration: 1000
+      controls.addEventListener('change', function () {
+        _this.reposition();
       });
-      this.drag3 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example3", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez3'),
-        revert: true,
-        revertDuration: 1000
-      });
-      this.drag4 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example4", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez4'),
-        tolerance: 1
-      });
-      this.drag5 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example5", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez5'),
-        axis: 'x'
-      });
-      this.drag6 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example6", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez6'),
-        axis: 'y'
-      });
-      this.drag7 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example7", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez7'),
-        grid: 50
-      });
-      this.drag8 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example8", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez8')
-      });
-      this.drag9 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example9", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez9'),
-        selector: '.drag-item'
-      });
-      this.drag10 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example10", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez10'),
-        helper: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5)
-      });
-      this.drag11 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example11", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez11'),
-        selector: '.drag-item',
-        revert: true,
-        revertDuration: 1000,
-        helper: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5)
-      });
-      this.drag12 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example12", {
-        resistance: 0,
-        delay: 500,
-        scrollSpeed: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez12')
-      });
-      this.drag13 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example13", {
-        resistance: 200,
-        delay: 0,
-        scrollSpeed: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez13')
-      });
-      this.drag14 = new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["default"]("#drag-example14", {
-        resistance: 0,
-        delay: 0,
-        container: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["ScrollArea"])('#ez14'),
-        tolerance: 1,
-        helper: Object(core_ui_Draggable__WEBPACK_IMPORTED_MODULE_0__["clone"])(0.5),
-        revertDuration: 1000,
-        revert: true
-      });
-      this.connectDZ(this.drag4, '#dz1');
-      this.connectDZ(this.drag14, '#dz14');
+      this.reposition();
     }
   }, {
-    key: "connectDZ",
-    value: function connectDZ(drag, dz) {
-      var dz1 = document.querySelector(dz);
-      drag.connect(dz1);
-      dz1.addEventListener('drag.enter', function (event) {
-        dz1.classList.add('active');
-      });
-      dz1.addEventListener('drag.leave', function (event) {
-        dz1.classList.remove('active');
-      });
+    key: "getSelectValue",
+    value: function getSelectValue(name) {
+      var select = document.querySelector("[name=\"".concat(name, "\"]"));
+      return select.value;
     }
   }]);
 
-  return TestDraggablePage;
+  return TestPositionerPage;
 }();
 
 

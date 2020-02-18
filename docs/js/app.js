@@ -3,6 +3,7 @@ import Application from "app";
 import "autoloader";
 import "menu";
 
+// noinspection JSUnresolvedVariable
 __webpack_public_path__ = "/pendora/assets/js/";
 console.log("HERE");
 
