@@ -198,21 +198,15 @@ export function setElementClientPosition(element, position, method='top-left') {
             positionType = "relative";
         }
 
-        if(positionType === "relative") {
-            style = getComputedStyle(element);
+        style = getComputedStyle(element);
+        box = Rect.getBoundingClientRect(element);
 
-            current = {
-                left: parseInt(style.left, 10) || 0,
-                right: parseInt(style.right, 10) || 0,
-                top: parseInt(style.top, 10) || 0,
-                bottom: parseInt(style.bottom, 10) || 0
-            };
-
-            box = Rect.getBoundingClientRect(element);
-        } else {
-            box = Rect.getBoundingClientRect(element);
-            current = getBoundingOffsetRect(element);
-        }
+        current = {
+            left: parseInt(style.left, 10) || 0,
+            right: parseInt(style.right, 10) || 0,
+            top: parseInt(style.top, 10) || 0,
+            bottom: parseInt(style.bottom, 10) || 0
+        };
 
         if(method === 'top-left') {
             deltaX = position.left - box.left;

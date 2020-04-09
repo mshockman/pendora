@@ -197,3 +197,25 @@ export function filterChildren(element, fn) {
 export function isWindow(variable) {
     return variable && typeof variable === 'object' && setInterval in variable;
 }
+
+
+/**
+ * Returns the closest element with the context.
+ * @param target
+ * @param selector
+ * @param context
+ * @returns {MenuNode|jQuery|any|Element|null}
+ */
+export function closest(target, selector, context=null) {
+    let closest = target.closest(selector);
+
+    if(typeof context === 'string') {
+        context = document.querySelector(context);
+    }
+
+    if(closest && (context === null || context.contains(closest))) {
+        return closest;
+    }
+
+    return null;
+}

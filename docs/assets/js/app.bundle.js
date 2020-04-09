@@ -2152,19 +2152,14 @@ function setElementClientPosition(element, position) {
       positionType = "relative";
     }
 
-    if (positionType === "relative") {
-      style = getComputedStyle(element);
-      current = {
-        left: parseInt(style.left, 10) || 0,
-        right: parseInt(style.right, 10) || 0,
-        top: parseInt(style.top, 10) || 0,
-        bottom: parseInt(style.bottom, 10) || 0
-      };
-      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
-    } else {
-      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
-      current = getBoundingOffsetRect(element);
-    }
+    style = getComputedStyle(element);
+    box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
+    current = {
+      left: parseInt(style.left, 10) || 0,
+      right: parseInt(style.right, 10) || 0,
+      top: parseInt(style.top, 10) || 0,
+      bottom: parseInt(style.bottom, 10) || 0
+    };
 
     if (method === 'top-left') {
       deltaX = position.left - box.left;
@@ -2705,7 +2700,7 @@ function proto(descriptor) {
 /*!*********************************!*\
   !*** ./src/core/utility/dom.js ***!
   \*********************************/
-/*! exports provided: parseHTML, createFragment, addClasses, removeClasses, assignAttributes, selectElement, emptyElement, getScroll, setScroll, findChild, filterChildren, isWindow */
+/*! exports provided: parseHTML, createFragment, addClasses, removeClasses, assignAttributes, selectElement, emptyElement, getScroll, setScroll, findChild, filterChildren, isWindow, closest */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2722,6 +2717,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "findChild", function() { return findChild; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filterChildren", function() { return filterChildren; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isWindow", function() { return isWindow; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "closest", function() { return closest; });
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -2943,6 +2939,28 @@ function filterChildren(element, fn) {
 function isWindow(variable) {
   return variable && _typeof(variable) === 'object' && setInterval in variable;
 }
+/**
+ * Returns the closest element with the context.
+ * @param target
+ * @param selector
+ * @param context
+ * @returns {MenuNode|jQuery|any|Element|null}
+ */
+
+function closest(target, selector) {
+  var context = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var closest = target.closest(selector);
+
+  if (typeof context === 'string') {
+    context = document.querySelector(context);
+  }
+
+  if (closest && (context === null || context.contains(closest))) {
+    return closest;
+  }
+
+  return null;
+}
 
 /***/ }),
 
@@ -2950,7 +2968,7 @@ function isWindow(variable) {
 /*!***********************************!*\
   !*** ./src/core/utility/index.js ***!
   \***********************************/
-/*! exports provided: debounce, proto, createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values, clamp, modulo, calcDistance, arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem */
+/*! exports provided: debounce, proto, createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values, clamp, modulo, calcDistance, arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem, closest */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2983,6 +3001,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isWindow", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["isWindow"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "setScroll", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["setScroll"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "closest", function() { return _dom__WEBPACK_IMPORTED_MODULE_2__["closest"]; });
 
 /* harmony import */ var _iter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./iter */ "./src/core/utility/iter.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "all", function() { return _iter__WEBPACK_IMPORTED_MODULE_3__["all"]; });

@@ -1,319 +1,144 @@
-import {isSuperset} from 'core/utility/set';
-import {clientRectToDocumentSpace, setElementClientPosition, snapToGrid} from 'core/ui/position';
-import {clamp} from "../utility/math";
-import {addClasses} from "../utility/dom";
+import Publisher from "../Publisher";
+import {addClasses, selectElement, clamp} from "../utility";
+import PointerTracker from "./PointerTracker";
+import Rect from "../vectors/Rect";
+import {setElementClientPosition} from "./position";
 
 
-const DIRECTIONS = new Set([
-    'top-left',
-    'top',
-    'top-right',
-    'right',
-    'bottom-right',
-    'bottom',
-    'bottom-left',
-    'left'
-]);
+export default class Resizeable extends Publisher {
+    #element;
 
+    #isResizing;
+    #isDisabled;
+    #container;
+    #axis;
+    #grid;
+    #keepAspectRatio;
+    #handles;
+    #helper;
+    #exclude;
 
-export const CONTAINERS = {
-    /**
-     * Constrains to client area.
-     * @returns {{top: number, left: number, width: number, height: number}}
-     */
-    client: function() {
-        return {
-            left: 0,
-            top: 0,
-            right: window.innerWidth,
-            bottom: window.innerHeight,
-            height: window.innerHeight,
-            width: window.innerWidth
-        };
-    },
+    minWidth;
+    maxWidth;
+    minHeight;
+    maxHeight;
 
-    /**
-     * Constrains to viewport.
-     * @param element
-     * @returns {{top: number, left: number, width: number, height: number}}
-     */
-    viewport: function(element) {
-        let parent = _getScrollParent(element),
-            bb = parent.getBoundingClientRect();
+    #position;
 
-        return {
-            left: bb.left - parent.scrollLeft,
-            top: bb.top - parent.scrollTop,
-            width: parent.scrollWidth,
-            height: parent.scrollHeight,
-            right: (bb.left - parent.scrollLeft) + parent.scrollWidth,
-            bottom: (bb.top - parent.scrollTop) + parent.scrollHeight
-        };
-    }
-};
+    #tracker;
 
+    constructor(element, {minWidth=null, maxWidth=null, minHeight=null, maxHeight=null, axis='xy', keepAspectRatio=false, container=null, grid=null, handles='.ui-resize-handle', helper=null, exclude='.no-resize', className='ui-resizeable', position="top-left"}={}) {
+        super();
 
-/**
- * Behavior class that makes an element resizeable.
- */
-export default class Resizeable {
-    constructor(element, {handles="bottom-right", helper=null, minWidth=null, maxWidth=null, minHeight=null, maxHeight=null,
-        keepAspectRatio=false, autoHide=false, container=null, grid=null}={}) {
-        if(typeof element === 'string') {
-            this.element = document.querySelector(element);
-        } else {
-            this.element = element;
-        }
+        this.#element = selectElement(element);
 
-        this.handles = {};
-        this.element.classList.add('ui-resizeable');
-
-        if(handles === 'all') {
-            handles = new Set(DIRECTIONS);
-        } else {
-            handles = new Set(handles.split(/\s+/));
-        }
-
-        if(!isSuperset(DIRECTIONS, handles)) {
-            throw new TypeError("Invalid direction.");
-        }
-
-        for(let direction of handles) {
-            let handle = document.createElement('div');
-            handle.classList.add('ui-resizeable-handle');
-            handle.classList.add(`ui-resizeable-${direction}`);
-            handle.dataset.direction = direction;
-            this.handles[direction] = handle;
-            this.element.appendChild(handle);
-        }
-
-        this._onMouseDown = (event) => {
-            this._startResizing(event);
-        };
-
-        this.element.addEventListener('mousedown', this._onMouseDown);
-
-        if(typeof grid === 'number') {
-            this.grid = {
-                x: grid,
-                y: grid
-            };
-        } else if(Array.isArray(grid)) {
-            this.grid = {
-                x: grid[0],
-                y: grid[1]
-            };
-        } else {
-            this.grid = grid;
-        }
-
-        this.helper = helper;
         this.minWidth = minWidth;
         this.maxWidth = maxWidth;
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
-        this.keepAspectRatio = keepAspectRatio;
-        this.isResizing = false;
-        this.container = container;
-    }
 
-    _startResizing(event) {
-        if(this.isResizing) return;
-        let handle = event.target.closest('.ui-resizeable-handle');
-        if(!handle || !this.element.contains(handle)) return;
-        let resizeable = handle.closest('.ui-resizeable');
-        if(!resizeable || resizeable !== this.element) return;
+        this.#axis = axis;
+        this.#keepAspectRatio = keepAspectRatio;
+        this.#container = container ? selectElement(container) : null;
+        this.#grid = grid;
+        this.#handles = handles;
+        this.#exclude = exclude;
+        this.#helper = helper;
+        this.#position = position;
 
-        event.preventDefault();
-
-        let direction = handle.dataset.direction,
-            startPosX = event.clientX + window.scrollX,
-            startPosY = event.clientY + window.scrollY,
-            doc = document,
-            startingClientRect = this.element.getBoundingClientRect(),
-            startBox = clientRectToDocumentSpace(startingClientRect),
-            target = this.element,
-            rect = {left: startBox.left, top: startBox.top, width: startBox.width, height: startBox.height};
-
-        if(this.helper) {
-            if(typeof this.helper === 'function') {
-                target = this.helper.call(this, this.element);
-            } else {
-                target = document.createElement('div');
-                addClasses(target, this.helper);
-            }
-
-            target.classList.add('ui-resizeable-helper');
-            target.style.width = startBox.width + 'px';
-            target.style.height = startBox.height + 'px';
-            target.style.boxSizing = getComputedStyle(this.element).boxSizing;
-            this.element.parentElement.appendChild(target);
-            setElementClientPosition(target, startingClientRect, 'translate3d');
-            setElementClientPosition(target, this.element.getBoundingClientRect(), 'translate3d');
+        if(className) {
+            addClasses(this.#element, className);
         }
 
-        let onMouseMove = event => {
-            let deltaX = event.clientX - (startPosX - window.scrollX),
-                deltaY = event.clientY - (startPosY - window.scrollY),
-                left = startBox.left,
-                top = startBox.top,
-                right = startBox.right - window.scrollX,
-                bottom = startBox.bottom - window.scrollY,
-                minWidth = this.minWidth !== null && this.minWidth !== undefined ? this.minWidth : 0,
-                maxWidth = this.maxWidth !== null && this.maxWidth !== undefined ? this.maxWidth : Infinity,
-                minHeight = this.minHeight !== null && this.maxHeight !== undefined ? this.minHeight : 0,
-                maxHeight = this.maxHeight !== null && this.maxHeight !== undefined ? this.maxHeight : Infinity;
+        this.#isResizing = false;
+        this.#isDisabled = false;
 
-            if(direction === 'right' || direction === 'bottom-right' || direction === 'top-right') {
-                right += deltaX;
-                right = clamp(right, left + minWidth, left + maxWidth);
-            } else if(direction === 'left' || direction === 'top-left' || direction === 'bottom-left') {
-                left += deltaX;
-                left = clamp(left, right - maxWidth, right - minWidth);
+        this.#tracker = new PointerTracker(this.#element, {capture: true, context: document, target: handles, exclude: exclude});
+
+        this.#initResizing();
+    }
+
+    #initResizing() {
+        let config;
+
+        this.#tracker.on('pointer-capture', event => {
+            config = this.#getHandleConfig(event.handle);
+        });
+
+        this.#tracker.on('pointer-move', event => {
+            let rect = new Rect(this.#element),
+                centerX = rect.left + (rect.width/2),
+                centerY = rect.top + (rect.height/2),
+                resize = config.resize;
+
+            let minWidth = this.minWidth || 0,
+                maxWidth = this.maxWidth || Infinity,
+                minHeight = this.minHeight || 0,
+                maxHeight = this.maxHeight || Infinity;
+
+            // if(config.resize === 'bottom-right' || config.resize === 'top-right' || config.resize === 'right') {
+            //     rect.right = clamp(event.clientX, rect.left + minWidth, rect.left + maxWidth);
+            // }
+            // if(config.resize === 'bottom-right' || config.resize === 'bottom-left' || config.resize === 'bottom') {
+            //     rect.bottom = clamp(event.clientY, rect.top + minHeight, rect.top + maxHeight);
+            // }
+            // if(config.resize === 'bottom-left' || config.resize === 'top-left' || config.resize === 'left') {
+            //     rect.left = clamp(event.clientX, rect.right - maxWidth, rect.right - minWidth);
+            // }
+            if(config.resize === 'top-left' || config.resize === 'top-right' || config.resize === 'top') {
+                rect.top = clamp(event.clientY, rect.bottom - maxHeight, rect.bottom - minHeight);
             }
+            setElementClientPosition(this.#element, rect, this.#position);
+            this.#element.style.width = `${rect.width}px`;
+            this.#element.style.height = `${rect.height}px`;
 
-            if(direction === 'bottom' || direction === 'bottom-right' || direction === 'bottom-left') {
-                bottom = clamp(bottom + deltaY, top + minHeight, top + maxHeight);
-            } else if(direction === 'top' || direction === 'top-left' || direction === 'top-right') {
-                top = clamp(top + deltaY, bottom - maxHeight, bottom - minHeight);
+            let c = new Rect(this.#element);
+
+            if(rect.top !== c.top || rect.height !== c.height) {
+                console.log(this.#position);
+                console.log(rect.top, '==', c.top);
+                console.log(rect.height, '==', c.height);
+                console.log("\n\n");
             }
+        });
 
-            let container;
+        this.#tracker.on('pointer-release', event => {
 
-            if(this.container) {
-                container = this.container.call(this, this.element, event);
+        });
+    }
 
-                if(container) {
-                    // I need to make my own object because the objects returned by Element.getBoundClientRect are readonly
-                    // and Object.assign({}, rect) doesn't map over the properties.
-                    let _container = {
-                        left: container.left,
-                        top: container.top,
-                        bottom: container.bottom,
-                        right: container.right
-                    };
+    #getHandleConfig(handle) {
+        let resize = handle.dataset.resize.trim().split(/\s*;\s*/);
 
-                    if(this.grid) {
-                        if (this.grid.x) {
-                            _container.left = snapToGrid(container.left, this.grid.x, Math.ceil);
-                            _container.right = snapToGrid(container.right, this.grid.x, Math.floor);
-                        }
-
-                        if (this.grid.y) {
-                            _container.top = snapToGrid(container.top, this.grid.y, Math.ceil);
-                            _container.bottom = snapToGrid(container.bottom, this.grid.y, Math.floor);
-                        }
-                    }
-
-                    container = _container;
-                }
-            }
-
-            if(this.grid) {
-                left = snapToGrid(left, this.grid.x);
-                top = snapToGrid(top, this.grid.y);
-                right = snapToGrid(right, this.grid.x);
-                bottom = snapToGrid(bottom, this.grid.y);
-            }
-
-            if(container) {
-                left = clamp(left, container.left, container.right);
-                right = clamp(right, container.left, container.right);
-                bottom = clamp(bottom, container.top, container.bottom);
-                top = clamp(top, container.top, container.bottom);
-            }
-
-            if(this.keepAspectRatio) {
-                if(direction === 'top-left' || direction === 'top-right') {
-                    top = bottom - ((right - left) * this.keepAspectRatio);
-                } else if(direction === 'bottom-left' || direction === 'bottom-right' || direction === 'left' || direction === 'right') {
-                    bottom = top + ((right - left) * this.keepAspectRatio);
-                } else if(direction === 'bottom' || direction === 'top') {
-                    right = left + ((bottom - top) / this.keepAspectRatio);
-                }
-            }
-
-            setElementClientPosition(target, {left, top}, 'translate3d');
-            target.style.width = `${right - left}px`;
-            target.style.height = `${bottom - top}px`;
-
-            rect.left = left + window.scrollX;
-            rect.top = top + window.scrollY;
-            rect.width = right - left;
-            rect.height = bottom - top;
-            rect.right = right + window.scrollX;
-            rect.bottom = bottom + window.scrollY;
-
-            this.element.dispatchEvent(new CustomEvent('resizing', {
-                bubbles: true,
-                detail: {
-                    resizeable: this,
-                    target: target,
-                    originalEvent: event,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    element: this.element,
-
-                    targetClientRect: {
-                        left: left,
-                        top: top,
-                        right: right,
-                        bottom: bottom,
-                        width: right - left,
-                        height: bottom - top,
-                        x: left,
-                        y: top
-                    }
-                }
-            }));
+        return {
+            resize: resize[0],
+            scale: resize[1]
         };
+    }
 
-        let onMouseUp = event => {
-            doc.removeEventListener('mousemove', onMouseMove);
-            doc.removeEventListener('mouseup', onMouseUp);
+    get position() {
 
-            if(this.element !== target) {
-                target.parentElement.removeChild(target);
+    }
 
-                setElementClientPosition(this.element, {
-                    left: rect.left - window.scrollX,
-                    top: rect.top - window.scrollY
-                }, 'translate3d');
+    set position(position) {
 
-                this.element.style.width = `${rect.width}px`;
-                this.element.style.height = `${rect.height}px`;
-            }
+    }
 
-            this.element.classList.remove('ui-resizing');
-            this.isResizing = false;
+    get width() {
 
-            this.element.dispatchEvent(new CustomEvent('resize-end', {
-                bubbles: true,
-                detail: {
-                    resizeable: this,
-                    element: this.element,
-                    originalEvent: event,
-                    clientX: event.clientX,
-                    clientY: event.clientY
-                }
-            }));
-        };
+    }
 
-        this.isResizing = true;
-        this.element.classList.add('ui-resizing');
-        doc.addEventListener('mousemove', onMouseMove);
-        doc.addEventListener('mouseup', onMouseUp);
+    set width(width) {
 
-        this.element.dispatchEvent(new CustomEvent('resize-start', {
-            bubbles: true,
-            detail: {
-                resizeable: this,
-                target: target,
-                originalEvent: event,
-                clientX: event.clientX,
-                clientY: event.clientY,
-                element: this.element
-            }
-        }));
+    }
+
+    get height() {
+
+    }
+
+    set height(height) {
+
     }
 }
+
+

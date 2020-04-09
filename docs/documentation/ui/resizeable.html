@@ -37,12 +37,48 @@ pageClass: test_resizeable
         right: 0;
         bottom: 0;
     }
+
+    .ui-resizeable-handle.ui-resizeable-bottom-left {
+        background-color: #000;
+        cursor: nesw-resize;
+        width: 5px;
+        height: 5px;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+    }
+
+    .ui-resizeable-handle.ui-resizeable-top-left {
+         background-color: #000;
+         cursor: nwse-resize;
+         width: 5px;
+         height: 5px;
+         position: absolute;
+         left: 0;
+         top: 0;
+     }
+
+    .ui-resizeable-handle.ui-resizeable-top-right {
+        background-color: #000;
+        cursor: nesw-resize;
+        width: 5px;
+        height: 5px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 </style>
 
 
 <div class="content-area">
     <h2>Basic Resizeable Box</h2>
     <div class="example-zone">
-        <div id="resizeable1" class="resizeable-box draggable">Resize Me!<br>Drag Me!</div>
+        <div id="resizeable1" class="resizeable-box draggable">
+            Resize Me!<br>Drag Me!
+            <div class="ui-resizeable-handle no-drag ui-resizeable-bottom-right ui-resize-handle" data-resize="bottom-right; scale-xy"></div>
+            <div class="ui-resizeable-handle no-drag ui-resizeable-bottom-left ui-resize-handle" data-resize="bottom-left; scale-xy"></div>
+            <div class="ui-resizeable-handle no-drag ui-resizeable-top-right ui-resize-handle" data-resize="top-right; scale-xy"></div>
+            <div class="ui-resizeable-handle no-drag ui-resizeable-top-left ui-resize-handle" data-resize="top-left; scale-xy"></div>
+        </div>
     </div>
 </div>

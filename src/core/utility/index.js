@@ -1,6 +1,6 @@
 import {debounce} from "./debounce";
 import {proto} from "./decorators";
-import {createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll} from "./dom";
+import {createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes, getScroll, isWindow, setScroll, closest} from "./dom";
 import {all, any, chain, enumerate, firstValue, items, keys, values} from "./iter";
 import {clamp, modulo, calcDistance} from "./math";
 import {arraysEqual, getOwnProperty, getPropertyByPath, isEmptyObject, randomChoice, rangeFindItem} from "./object";
@@ -11,5 +11,5 @@ export {
     createFragment, findChild, filterChildren, emptyElement, addClasses, removeClasses, selectElement, assignAttributes,
     getScroll, isWindow, setScroll, all, any, chain, enumerate, firstValue, items, keys, values,
     clamp, modulo, calcDistance,
-    arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem
+    arraysEqual, getPropertyByPath, getOwnProperty, isEmptyObject, randomChoice, rangeFindItem, closest
 };
