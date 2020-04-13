@@ -59,14 +59,16 @@ export default class Resizeable extends Publisher {
     }
 
     #initResizing() {
-        let config;
+        let config,
+            startingRect;
 
         this.#tracker.on('pointer-capture', event => {
             config = this.#getHandleConfig(event.handle);
+            startingRect = new Rect(this.#element);
         });
 
         this.#tracker.on('pointer-move', event => {
-            let rect = new Rect(this.#element),
+            let rect = new Rect(startingRect),
                 centerX = rect.left + (rect.width/2),
                 centerY = rect.top + (rect.height/2),
                 resize = config.resize;
@@ -76,30 +78,22 @@ export default class Resizeable extends Publisher {
                 minHeight = this.minHeight || 0,
                 maxHeight = this.maxHeight || Infinity;
 
-            // if(config.resize === 'bottom-right' || config.resize === 'top-right' || config.resize === 'right') {
-            //     rect.right = clamp(event.clientX, rect.left + minWidth, rect.left + maxWidth);
-            // }
-            // if(config.resize === 'bottom-right' || config.resize === 'bottom-left' || config.resize === 'bottom') {
-            //     rect.bottom = clamp(event.clientY, rect.top + minHeight, rect.top + maxHeight);
-            // }
-            // if(config.resize === 'bottom-left' || config.resize === 'top-left' || config.resize === 'left') {
-            //     rect.left = clamp(event.clientX, rect.right - maxWidth, rect.right - minWidth);
-            // }
+            if(config.resize === 'bottom-right' || config.resize === 'top-right' || config.resize === 'right') {
+                rect.right = clamp(event.clientX, rect.left + minWidth, rect.left + maxWidth);
+            }
+            if(config.resize === 'bottom-right' || config.resize === 'bottom-left' || config.resize === 'bottom') {
+                rect.bottom = clamp(event.clientY, rect.top + minHeight, rect.top + maxHeight);
+            }
+            if(config.resize === 'bottom-left' || config.resize === 'top-left' || config.resize === 'left') {
+                rect.left = clamp(event.clientX, rect.right - maxWidth, rect.right - minWidth);
+            }
             if(config.resize === 'top-left' || config.resize === 'top-right' || config.resize === 'top') {
                 rect.top = clamp(event.clientY, rect.bottom - maxHeight, rect.bottom - minHeight);
             }
+
             setElementClientPosition(this.#element, rect, this.#position);
             this.#element.style.width = `${rect.width}px`;
             this.#element.style.height = `${rect.height}px`;
-
-            let c = new Rect(this.#element);
-
-            if(rect.top !== c.top || rect.height !== c.height) {
-                console.log(this.#position);
-                console.log(rect.top, '==', c.top);
-                console.log(rect.height, '==', c.height);
-                console.log("\n\n");
-            }
         });
 
         this.#tracker.on('pointer-release', event => {
