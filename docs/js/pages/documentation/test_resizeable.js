@@ -1,4 +1,4 @@
-import Resizeable from "core/ui/Resizeable";
+import Resizeable, {cloneHelperFactory} from "core/ui/Resizeable";
 import Draggable from "core/ui/Draggable";
 import PointerTracker from "../../../../src/core/ui/PointerTracker";
 import Rect from "../../../../src/core/vectors/Rect";
@@ -16,7 +16,18 @@ export default class TestResizeablePage {
         let debugTracker = PointerTracker.DebugMouseTracker();
         document.body.appendChild(debugTracker.element);
 
-        this.resizeable1 = new Resizeable('#resizeable1');
+        this.resizeable1 = new Resizeable('#resizeable1', {
+            helper: cloneHelperFactory(1000, 0.5),
+            minWidth: 100,
+            minHeight: 100,
+            maxWidth: 250,
+            maxHeight: 250
+        });
+
+        this.resizeable2 = new Resizeable("#resizeable2", {});
+        this.resizeable3 = new Resizeable("#resizeable3", {position: "width-height"});
+
+        console.log("Hello WOrld");
     }
 
     loadDraggables() {

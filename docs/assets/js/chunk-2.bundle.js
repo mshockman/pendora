@@ -42,7 +42,18 @@ function () {
       this.loadDraggables();
       var debugTracker = _src_core_ui_PointerTracker__WEBPACK_IMPORTED_MODULE_2__["default"].DebugMouseTracker();
       document.body.appendChild(debugTracker.element);
-      this.resizeable1 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]('#resizeable1');
+      this.resizeable1 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]('#resizeable1', {
+        helper: Object(core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["cloneHelperFactory"])(1000, 0.5),
+        minWidth: 100,
+        minHeight: 100,
+        maxWidth: 250,
+        maxHeight: 250
+      });
+      this.resizeable2 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]("#resizeable2", {});
+      this.resizeable3 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]("#resizeable3", {
+        position: "width-height"
+      });
+      console.log("Hello WOrld");
     }
   }, {
     key: "loadDraggables",
@@ -487,17 +498,23 @@ var _triggerPointerEvent2 = function _triggerPointerEvent2(name, event) {
 /*!***********************************!*\
   !*** ./src/core/ui/Resizeable.js ***!
   \***********************************/
-/*! exports provided: default */
+/*! exports provided: default, cloneHelperFactory */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Resizeable; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cloneHelperFactory", function() { return cloneHelperFactory; });
 /* harmony import */ var _Publisher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Publisher */ "./src/core/Publisher.js");
 /* harmony import */ var _utility__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utility */ "./src/core/utility/index.js");
 /* harmony import */ var _PointerTracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PointerTracker */ "./src/core/ui/PointerTracker.js");
 /* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
-/* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
+/* harmony import */ var _vectors_Vec2__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../vectors/Vec2 */ "./src/core/vectors/Vec2.js");
+/* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -530,6 +547,17 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
+/**
+ * Creates a resizable component.
+ *
+ * Publisher Events
+ *
+ * resize-start
+ * resize
+ * resize-complete
+ * resize-cancel
+ */
+
 var Resizeable =
 /*#__PURE__*/
 function (_Publisher) {
@@ -540,9 +568,9 @@ function (_Publisher) {
 
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
         _ref$minWidth = _ref.minWidth,
-        minWidth = _ref$minWidth === void 0 ? null : _ref$minWidth,
+        _minWidth = _ref$minWidth === void 0 ? null : _ref$minWidth,
         _ref$maxWidth = _ref.maxWidth,
-        maxWidth = _ref$maxWidth === void 0 ? null : _ref$maxWidth,
+        _maxWidth = _ref$maxWidth === void 0 ? null : _ref$maxWidth,
         _ref$minHeight = _ref.minHeight,
         _minHeight = _ref$minHeight === void 0 ? null : _ref$minHeight,
         _ref$maxHeight = _ref.maxHeight,
@@ -644,8 +672,8 @@ function (_Publisher) {
 
     _classPrivateFieldSet(_assertThisInitialized(_this), _element, Object(_utility__WEBPACK_IMPORTED_MODULE_1__["selectElement"])(element));
 
-    _this.minWidth = minWidth;
-    _this.maxWidth = maxWidth;
+    _this.minWidth = _minWidth;
+    _this.maxWidth = _maxWidth;
     _this.minHeight = _minHeight;
     _this.maxHeight = _maxHeight;
 
@@ -686,17 +714,35 @@ function (_Publisher) {
   }
 
   _createClass(Resizeable, [{
+    key: "applyRect",
+    value: function applyRect(element, rect) {
+      if (_classPrivateFieldGet(this, _position) === 'width-height') {
+        element.style.width = rect.width + "px";
+        element.style.height = rect.height + "px";
+      } else if (_classPrivateFieldGet(this, _position) === "width") {
+        element.style.width = rect.width + "px";
+      } else if (_classPrivateFieldGet(this, _position) === "height") {
+        element.style.height = rect.height + "px";
+      } else {
+        Object(_position__WEBPACK_IMPORTED_MODULE_5__["setElementClientPosition"])(element, rect, _classPrivateFieldGet(this, _position));
+      }
+    }
+    /**
+     * Returns the resize config object from the given handle element.
+     * To specify options for resizing the handle should have a [data-resize] property in the format:
+     * <resize>; <scale>
+     *
+     * resize: Specifies the direction to resize in.  Can be top, right, bottom, left, top-left, top-right, bottom-left, bottom-right.
+     * scale: If specified it tells the instance to scale that object in the given axis.  Can be either none, scale-x, scale-y, scale-xy.  Defaults to none.
+     * @param handle
+     * @returns {{resize: string, scale: string}}
+     */
+
+  }, {
     key: "position",
-    get: function get() {},
-    set: function set(position) {}
-  }, {
-    key: "width",
-    get: function get() {},
-    set: function set(width) {}
-  }, {
-    key: "height",
-    get: function get() {},
-    set: function set(height) {}
+    get: function get() {
+      return _classPrivateFieldGet(this, _position);
+    }
   }]);
 
   return Resizeable;
@@ -733,59 +779,216 @@ var _getHandleConfig = new WeakSet();
 var _initResizing2 = function _initResizing2() {
   var _this2 = this;
 
-  var config;
+  var config,
+      startingRect,
+      target,
+      finalRect = null; // todo pointer-cancel, resize-cancel
 
   _classPrivateFieldGet(this, _tracker).on('pointer-capture', function (event) {
+    _classPrivateFieldSet(_this2, _isResizing, true);
+
     config = _classPrivateMethodGet(_this2, _getHandleConfig, _getHandleConfig2).call(_this2, event.handle);
+    startingRect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"](_classPrivateFieldGet(_this2, _element));
+    target = _classPrivateFieldGet(_this2, _element);
+
+    if (_classPrivateFieldGet(_this2, _helper)) {
+      if (typeof _classPrivateFieldGet(_this2, _helper) === 'function') {
+        target = _classPrivateFieldGet(_this2, _helper).call(_this2, _classPrivateFieldGet(_this2, _element));
+      } else {
+        target = _classPrivateFieldGet(_this2, _helper);
+      }
+
+      if (target.nodeType) {
+        target = buildHelperFromElement(target, _classPrivateFieldGet(_this2, _element));
+      }
+    } else {
+      target = buildHelperFromElement(_classPrivateFieldGet(_this2, _element), _classPrivateFieldGet(_this2, _element));
+    }
+
+    var topic = {
+      topic: "resize-start",
+      resizeable: _this2,
+      element: _classPrivateFieldGet(_this2, _element),
+      position: _classPrivateFieldGet(_this2, _position),
+      config: config,
+      startingRect: startingRect,
+      event: event
+    };
+
+    if (target.onResizeStart) {
+      target.onResizeStart(_objectSpread({}, topic));
+    }
+
+    _this2.publish('resize-start', _objectSpread({}, topic));
   });
 
   _classPrivateFieldGet(this, _tracker).on('pointer-move', function (event) {
-    var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"](_classPrivateFieldGet(_this2, _element)),
+    var rect = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"](startingRect),
         centerX = rect.left + rect.width / 2,
         centerY = rect.top + rect.height / 2,
-        resize = config.resize;
-    var minWidth = _this2.minWidth || 0,
+        scaleX = config.scale === 'scale-x' || config.scale === 'scale-xy',
+        scaleY = config.scale === 'scale-y' || config.scale === 'scale-xy',
+        ratio = rect.width / rect.height,
+        pointer = new _vectors_Vec2__WEBPACK_IMPORTED_MODULE_4__["default"](event.clientX, event.clientY);
+
+    if (_classPrivateFieldGet(_this2, _grid)) {
+      pointer.x = Math.floor(pointer.x / _classPrivateFieldGet(_this2, _grid)) * _classPrivateFieldGet(_this2, _grid);
+      pointer.y = Math.floor(pointer.y / _classPrivateFieldGet(_this2, _grid)) * _classPrivateFieldGet(_this2, _grid);
+    }
+
+    if (_classPrivateFieldGet(_this2, _container)) {
+      pointer = pointer.clamp(_vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"].getBoundingClientRect(_classPrivateFieldGet(_this2, _container)));
+    }
+
+    var minWidth = Math.max(0, _this2.minWidth || 0),
         maxWidth = _this2.maxWidth || Infinity,
-        minHeight = _this2.minHeight || 0,
-        maxHeight = _this2.maxHeight || Infinity; // if(config.resize === 'bottom-right' || config.resize === 'top-right' || config.resize === 'right') {
-    //     rect.right = clamp(event.clientX, rect.left + minWidth, rect.left + maxWidth);
-    // }
-    // if(config.resize === 'bottom-right' || config.resize === 'bottom-left' || config.resize === 'bottom') {
-    //     rect.bottom = clamp(event.clientY, rect.top + minHeight, rect.top + maxHeight);
-    // }
-    // if(config.resize === 'bottom-left' || config.resize === 'top-left' || config.resize === 'left') {
-    //     rect.left = clamp(event.clientX, rect.right - maxWidth, rect.right - minWidth);
-    // }
+        minHeight = Math.max(0, _this2.minHeight || 0),
+        maxHeight = _this2.maxHeight || Infinity,
+        width,
+        height;
 
-    if (config.resize === 'top-left' || config.resize === 'top-right' || config.resize === 'top') {
-      rect.top = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(event.clientY, rect.bottom - maxHeight, rect.bottom - minHeight);
+    if (_classPrivateFieldGet(_this2, _axis) === 'x' || _classPrivateFieldGet(_this2, _axis) === 'xy') {
+      if (config.resize === 'bottom-left' || config.resize === 'top-left' || config.resize === 'left') {
+        if (scaleX) {
+          width = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(2 * (centerX - pointer.x), minWidth, maxWidth);
+          rect.left = centerX - width / 2;
+          rect.right = centerX + width / 2;
+        } else {
+          width = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(rect.right - pointer.x, minWidth, maxWidth);
+          rect.left = rect.right - width;
+        }
+      } else if (config.resize === 'bottom-right' || config.resize === 'top-right' || config.resize === 'right') {
+        if (scaleX) {
+          width = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(2 * (pointer.x - centerX), minWidth, maxWidth);
+          rect.left = centerX - width / 2;
+          rect.right = centerX + width / 2;
+        } else {
+          width = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(pointer.x - rect.left, minWidth, maxWidth);
+          rect.right = rect.left + width;
+        }
+      }
     }
 
-    Object(_position__WEBPACK_IMPORTED_MODULE_4__["setElementClientPosition"])(_classPrivateFieldGet(_this2, _element), rect, _classPrivateFieldGet(_this2, _position));
-    _classPrivateFieldGet(_this2, _element).style.width = "".concat(rect.width, "px");
-    _classPrivateFieldGet(_this2, _element).style.height = "".concat(rect.height, "px");
-    var c = new _vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"](_classPrivateFieldGet(_this2, _element));
-
-    if (rect.top !== c.top || rect.height !== c.height) {
-      console.log(_classPrivateFieldGet(_this2, _position));
-      console.log(rect.top, '==', c.top);
-      console.log(rect.height, '==', c.height);
-      console.log("\n\n");
+    if (_classPrivateFieldGet(_this2, _axis) === 'y' || _classPrivateFieldGet(_this2, _axis) === 'xy') {
+      if (config.resize === 'bottom-right' || config.resize === 'bottom-left' || config.resize === 'bottom') {
+        if (scaleY) {
+          height = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(2 * (pointer.y - centerY), minHeight, maxHeight);
+          rect.bottom = centerY + height / 2;
+          rect.top = centerY - height / 2;
+        } else {
+          height = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(pointer.y - rect.top, minHeight, maxHeight);
+          rect.bottom = rect.top + height;
+        }
+      } else if (config.resize === 'top-left' || config.resize === 'top-right' || config.resize === 'top') {
+        if (scaleY) {
+          height = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(2 * (centerY - pointer.y), minHeight, maxHeight);
+          rect.bottom = centerY + height / 2;
+          rect.top = centerY - height / 2;
+        } else {
+          height = Object(_utility__WEBPACK_IMPORTED_MODULE_1__["clamp"])(rect.bottom - pointer.y, minHeight, maxHeight);
+          rect.top = rect.bottom - height;
+        }
+      }
     }
+
+    if (_classPrivateFieldGet(_this2, _keepAspectRatio)) {
+      if (_classPrivateFieldGet(_this2, _axis) === 'x' || _classPrivateFieldGet(_this2, _axis) === 'xy') {
+        rect.bottom = rect.top + rect.width / ratio;
+      } else {
+        rect.right = rect.left + rect.height * ratio;
+      }
+    }
+
+    finalRect = rect;
+    var topic = {
+      topic: "resize",
+      rect: rect,
+      resizeable: _this2,
+      position: _classPrivateFieldGet(_this2, _position),
+      element: _classPrivateFieldGet(_this2, _element),
+      event: event,
+      config: config,
+      startingRect: startingRect
+    };
+
+    if (target && target.onResize) {
+      target.onResize(_objectSpread({}, topic));
+    }
+
+    _this2.publish(topic.topic, _objectSpread({}, topic));
   });
 
-  _classPrivateFieldGet(this, _tracker).on('pointer-release', function (event) {});
+  _classPrivateFieldGet(this, _tracker).on('pointer-release', function (event) {
+    _classPrivateFieldSet(_this2, _isResizing, false);
+
+    if (_classPrivateFieldGet(_this2, _position)) {
+      _this2.applyRect(_classPrivateFieldGet(_this2, _element), finalRect);
+    }
+
+    _classPrivateFieldGet(_this2, _element).style.width = "".concat(finalRect.width, "px");
+    _classPrivateFieldGet(_this2, _element).style.height = "".concat(finalRect.height, "px");
+    var topic = {
+      topic: "resize-complete",
+      finalRect: finalRect,
+      resizeable: _this2,
+      element: _classPrivateFieldGet(_this2, _element),
+      position: _classPrivateFieldGet(_this2, _position),
+      event: event,
+      config: config,
+      startingRect: startingRect
+    };
+
+    if (target && target.onResizeComplete) {
+      target.onResizeComplete(_objectSpread({}, topic));
+    }
+
+    _this2.publish(topic.topic, _objectSpread({}, topic));
+  });
 };
 
 var _getHandleConfig2 = function _getHandleConfig2(handle) {
   var resize = handle.dataset.resize.trim().split(/\s*;\s*/);
   return {
     resize: resize[0],
-    scale: resize[1]
+    scale: resize[1] || "none"
   };
 };
 
 
+
+function buildHelperFromElement(helper, element) {
+  return {
+    helper: helper,
+    element: element,
+    onResizeStart: function onResizeStart(e) {
+      if (helper !== element && !helper.parentElement) {
+        element.parentElement.appendChild(helper);
+      }
+    },
+    onResize: function onResize(e) {
+      if (e.position) {
+        e.resizeable.applyRect(helper, e.rect);
+      }
+
+      helper.style.width = "".concat(e.rect.width, "px");
+      helper.style.height = "".concat(e.rect.height, "px");
+    },
+    onResizeComplete: function onResizeComplete(e) {
+      if (helper !== element && helper.parentElement) {
+        helper.parentElement.removeChild(helper);
+      }
+    }
+  };
+}
+
+function cloneHelperFactory(zIndex, opacity) {
+  return function (element) {
+    var r = element.cloneNode(true);
+    r.style.zIndex = zIndex;
+    r.style.opacity = opacity;
+    return r;
+  };
+}
 
 /***/ })
 

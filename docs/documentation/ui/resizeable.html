@@ -67,6 +67,46 @@ pageClass: test_resizeable
         right: 0;
         top: 0;
     }
+
+    .rel-resizeable-box {
+        position: relative;
+        left: 50px;
+        top: 50px;
+
+        border: 1px solid #ccc;
+        background-color: #eee;
+        width: 150px;
+        height: 150px;
+        text-align: center;
+        font-weight: bold;
+        user-select: none;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .static-resizeable-box {
+        position: relative;
+
+        border: 1px solid #ccc;
+        background-color: #eee;
+        width: 150px;
+        height: 150px;
+        text-align: center;
+        font-weight: bold;
+        user-select: none;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .example-zone.padded {
+        padding: 50px 0 0 50px;
+    }
 </style>
 
 
@@ -79,6 +119,20 @@ pageClass: test_resizeable
             <div class="ui-resizeable-handle no-drag ui-resizeable-bottom-left ui-resize-handle" data-resize="bottom-left; scale-xy"></div>
             <div class="ui-resizeable-handle no-drag ui-resizeable-top-right ui-resize-handle" data-resize="top-right; scale-xy"></div>
             <div class="ui-resizeable-handle no-drag ui-resizeable-top-left ui-resize-handle" data-resize="top-left; scale-xy"></div>
+        </div>
+    </div>
+
+    <h2>Relative Resizeable Box</h2>
+    <div class="example-zone">
+        <div id="resizeable2" class="rel-resizeable-box">
+            <div class="ui-resizeable-handle no-drag ui-resizeable-bottom-right ui-resize-handle" data-resize="bottom-right"></div>
+        </div>
+    </div>
+
+    <h2>Relative Resizeable Box with 0 left and right.</h2>
+    <div class="example-zone padded">
+        <div id="resizeable3" class="static-resizeable-box">
+            <div class="ui-resizeable-handle no-drag ui-resizeable-bottom-right ui-resize-handle" data-resize="bottom-right"></div>
         </div>
     </div>
 </div>
