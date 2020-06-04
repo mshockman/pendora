@@ -2302,19 +2302,14 @@ function setElementClientPosition(element, position) {
       positionType = "relative";
     }
 
-    if (positionType === "relative") {
-      style = getComputedStyle(element);
-      current = {
-        left: parseInt(style.left, 10) || 0,
-        right: parseInt(style.right, 10) || 0,
-        top: parseInt(style.top, 10) || 0,
-        bottom: parseInt(style.bottom, 10) || 0
-      };
-      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
-    } else {
-      box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
-      current = getBoundingOffsetRect(element);
-    }
+    style = getComputedStyle(element);
+    box = _vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"].getBoundingClientRect(element);
+    current = {
+      left: parseInt(style.left, 10) || 0,
+      right: parseInt(style.right, 10) || 0,
+      top: parseInt(style.top, 10) || 0,
+      bottom: parseInt(style.bottom, 10) || 0
+    };
 
     if (method === 'top-left') {
       deltaX = position.left - box.left;
