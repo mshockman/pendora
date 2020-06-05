@@ -5,7 +5,6 @@ import "menu";
 
 // noinspection JSUnresolvedVariable
 __webpack_public_path__ = "/pendora/assets/js/";
-console.log("HERE");
 
 
 let app = new Application({

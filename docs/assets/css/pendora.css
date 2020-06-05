@@ -506,6 +506,9 @@
   white-space: nowrap;
   overflow: hidden;
 }
+.data-column.ui-sorting {
+  visibility: hidden;
+}
 .data-column .ui-resize-handle {
   position: absolute;
   right: -5px;
@@ -515,6 +518,9 @@
   z-index: 10;
   background-color: #000000;
   cursor: col-resize;
+}
+.data-column.ui-drag-helper {
+  pointer-events: none;
 }
 
 .mr-auto {

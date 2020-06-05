@@ -1075,7 +1075,7 @@ function ScrollArea(selector) {
 }
 function clone() {
   var opacity = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var className = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var classes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var zIndex = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
   if (_typeof(opacity) === 'object' && opacity.nodeType) {
@@ -1089,8 +1089,8 @@ function clone() {
       r.style.opacity = opacity;
     }
 
-    if (className) {
-      r.className = className;
+    if (classes) {
+      Object(_utility__WEBPACK_IMPORTED_MODULE_1__["addClasses"])(r, classes);
     }
 
     r.style.position = "absolute";

@@ -1,5 +1,5 @@
 import Publisher from "../Publisher";
-import {calcDistance, clamp} from "../utility";
+import {addClasses, calcDistance, clamp} from "../utility";
 import Rect from "../vectors/Rect";
 import {getScroll} from "../utility";
 import {setElementClientPosition} from "./position";
@@ -771,7 +771,7 @@ export function ScrollArea(selector) {
 }
 
 
-export function clone(opacity=null, className=null, zIndex=null) {
+export function clone(opacity=null, classes=null, zIndex=null) {
     if(typeof opacity === 'object' && opacity.nodeType) {
         return opacity.cloneNode(true);
     }
@@ -783,8 +783,8 @@ export function clone(opacity=null, className=null, zIndex=null) {
             r.style.opacity = opacity;
         }
 
-        if(className) {
-            r.className = className;
+        if(classes) {
+            addClasses(r, classes);
         }
 
         r.style.position = "absolute";

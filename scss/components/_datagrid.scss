@@ -10,6 +10,10 @@
   white-space: nowrap;
   overflow: hidden;
 
+  &.ui-sorting {
+    visibility: hidden;
+  }
+
   .ui-resize-handle {
     position: absolute;
     right: -5px;
@@ -19,5 +23,9 @@
     z-index: 10;
     background-color: #000000;
     cursor: col-resize;
+  }
+
+  &.ui-drag-helper {
+    pointer-events: none;
   }
 }

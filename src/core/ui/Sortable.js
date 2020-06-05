@@ -1,5 +1,6 @@
 import {getTranslation, setElementClientPosition} from "core/ui/position";
 import Draggable, {cursor} from './Draggable';
+import Publisher from "../Publisher";
 
 
 export function placeholder(className, nodeName=null) {
@@ -21,13 +22,14 @@ export function placeholder(className, nodeName=null) {
 /**
  * Creates a sortable list of items.
  */
-export default class Sortable {
+export default class Sortable extends Publisher {
     #draggable;
 
     constructor(element, {items=".ui-sort-item", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false,
-        container=null, axis='xy', exclude=null, delay=null, offset=cursor,
+        container=null, axis='xy', exclude="input, button, .ui-resizeable-handle, .no-drag", delay=null, offset=cursor,
         resistance=null, handle=null, helper=null, revert=null, revertDuration, scrollSpeed=null, tolerance=0.5,
         setHelperSize=false, grid=null, droppables=null}={}) {
+        super();
 
         if(typeof element === 'string') {
             this.element = document.querySelector(element);
@@ -36,6 +38,8 @@ export default class Sortable {
         }
 
         this.#draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid});
+
+        this.#draggable.passTopic(this, ['drag.start', 'drag.end', 'drag.move']);
 
         if(droppables) {
             this.connect(droppables);
@@ -120,6 +124,8 @@ export default class Sortable {
             }
 
             setElementClientPosition(target, startBB, 'translate3d');
+
+            this.publish("sort-start", {topic: "sort-start", target: this, originalEvent: event});
         };
 
         // Cleanup after sorting finishes.
@@ -187,6 +193,7 @@ export default class Sortable {
         // Cleanup
         let onDragComplete = () => {
             destroy();
+            this.publish("sort-complete", {topic: "sort-complete", target: this});
         };
 
         // Initialize sorting.
@@ -344,5 +351,9 @@ export default class Sortable {
         });
 
         target.dispatchEvent(event);
+
+        this.publish("sort-append", {
+            target: this
+        });
     }
 }

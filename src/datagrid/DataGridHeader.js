@@ -13,6 +13,9 @@
  */
 import {Resizeable} from "../core/ui";
 import Publisher from "../core/Publisher";
+import {clone} from "../core/ui/Draggable";
+import Sortable from "../core/ui/Sortable";
+import {arraysEqual} from "../core/utility";
 
 export default class DataGridHeader extends Publisher {
     #element;
@@ -22,6 +25,9 @@ export default class DataGridHeader extends Publisher {
     #resizeable;
     #sortable;
     #tableSort;
+    #sorter;
+
+    #columnMap;
 
     constructor({columns=null, resizeable=false, sortable=false, tableSort=false}={}) {
         super();
@@ -30,11 +36,49 @@ export default class DataGridHeader extends Publisher {
         this.#body = document.createElement("div");
         this.#body.className = "data-grid-header__body";
         this.#element.appendChild(this.#body);
+        this.#columnMap = new WeakMap();
 
         this.#columns = [];
         this.#resizeable = resizeable;
         this.#sortable = sortable;
         this.#tableSort = tableSort;
+
+        if(this.#sortable) {
+            this.#sorter = new Sortable(this.#element, {
+                helper: clone(1, "sort-clone-helper", 100),
+                layout: 'x',
+                axis: 'x',
+                resistance: 25
+            });
+
+            this.#sorter.on(['sort-append', 'sort-complete', 'sort-start'], topic => {
+                this.#columns = this.#compileColumnListFromDom();
+            });
+
+            let startingColumns = null;
+
+            this.#sorter.on("sort-append", topic => {
+                this.#columns = this.#compileColumnListFromDom();
+                this.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this});
+            });
+
+            this.#sorter.on('sort-start', topic => {
+                this.#columns = this.#compileColumnListFromDom();
+                startingColumns = this.#columns.slice(0);
+                this.publish("sort-start", {topic: "sort-start", sorter: this.#sorter, target: this});
+            });
+
+            this.#sorter.on("sort-complete", topic => {
+                this.#columns = this.#compileColumnListFromDom();
+                this.publish("sort-complete", topic);
+
+                if(!startingColumns || !arraysEqual(startingColumns, this.#columns)) {
+                    this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter});
+                }
+
+                startingColumns = null;
+            });
+        }
 
         if(columns) {
             this.setColumns(columns);
@@ -60,7 +104,13 @@ export default class DataGridHeader extends Publisher {
     }
 
     removeColumn(column) {
-
+        let index = this.getColumnIndex(column);
+        if(index !== -1) {
+            this.#columns.splice(index, 1);
+            this.#columnMap.remove(column.element);
+            column.element.parentElement.removeChild(column.element);
+            this.#render();
+        }
     }
 
     clearColumns() {
@@ -73,6 +123,7 @@ export default class DataGridHeader extends Publisher {
         let dataColumn = this.#createColumn(column);
         this.#columns.push(dataColumn);
         dataColumn.appendTo(this.#body);
+        this.#columnMap.set(dataColumn.element, dataColumn);
         this.#render();
     }
 
@@ -115,15 +166,31 @@ export default class DataGridHeader extends Publisher {
     }
 
     #createColumn(column) {
-        let dataColumn = new DataColumn(column);
+        let dataColumn = new DataColumn({
+            ...column,
+            sortable: column.sortable !== false && this.#sortable
+        });
 
         dataColumn.on('resize', () => {
-            console.log(this.width);
             this.#render();
         });
         dataColumn.on('resize-complete', () => this.#render());
 
         return dataColumn;
+    }
+
+    #compileColumnListFromDom() {
+        let r = [];
+
+        for(let child of this.#body.children) {
+            let column = this.#columnMap.get(child);
+
+            if(column) {
+                r.push(column);
+            }
+        }
+
+        return r;
     }
 
     get width() {
@@ -134,6 +201,10 @@ export default class DataGridHeader extends Publisher {
         }
 
         return width + 20;
+    }
+
+    get element() {
+        return this.#element;
     }
 }
 
@@ -146,7 +217,8 @@ export class DataColumn extends Publisher {
     #renderer;
     #width;
 
-    constructor({label, resizeable=false, minWidth=0, maxWidth=Infinity, width=100, tableSort=false, dataSort="none", renderer=null}) {
+    constructor({label, resizeable=false, minWidth=0, maxWidth=Infinity, width=100, tableSort=false, dataSort="none", renderer=null,
+                id=null, classes=null, attributes=null, data=null, sortable=false}) {
         super();
 
         this.#renderer = renderer || function(label) {
@@ -156,19 +228,38 @@ export class DataColumn extends Publisher {
         }
 
         this.#element = document.createElement("div");
-        this.#element.className = "data-column";
+        this.#element.className = classes || '';
+        this.#element.classList.add("data-column");
         this.#body = this.#renderer.call(this, label);
         this.#body.className = "data-column__body";
         this.#element.appendChild(this.#body);
         this.#width = width;
         this.#element.style.width = `${width}px`;
 
+        if(id) {
+            this.#element.id = id;
+        }
+
+        if(attributes) {
+            for(let key of Object.keys(attributes)) {
+                this.#element.setAttribute(key, attributes[key]);
+            }
+        }
+
+        if(data) {
+            Object.assign(this.#element.dataset, data);
+        }
+
+        if(sortable) {
+            this.#element.classList.add('ui-sort-item');
+        }
+
         this.#resizer = null;
         this.#resizeHandle = null;
 
         if(resizeable) {
             this.#resizeHandle = document.createElement("div");
-            this.#resizeHandle.className = "ui-resize-handle no-sort";
+            this.#resizeHandle.className = "ui-resize-handle no-sort no-drag";
             this.#resizeHandle.dataset.resize = "right";
             this.#element.appendChild(this.#resizeHandle);
 
@@ -243,5 +334,9 @@ export class DataColumn extends Publisher {
 
     get width() {
         return this.#width;
+    }
+
+    get element() {
+        return this.#element;
     }
 }

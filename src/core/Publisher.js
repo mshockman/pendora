@@ -12,9 +12,17 @@ export default class Publisher {
     }
 
     on(topic, callback) {
-        if(!this[TOPICS][topic]) this[TOPICS][topic] = [];
-        this[TOPICS][topic].push(callback);
-        return this;
+        if(Array.isArray(topic)) {
+            for(let t of topic) {
+                this.on(t, callback);
+            }
+
+            return this;
+        } else {
+            if(!this[TOPICS][topic]) this[TOPICS][topic] = [];
+            this[TOPICS][topic].push(callback);
+            return this;
+        }
     }
 
     once(topic, fn) {
@@ -29,6 +37,13 @@ export default class Publisher {
     }
 
     off(topic, callback) {
+        if(Array.isArray(topic)) {
+            for(let t of topic) {
+                this.off(t, callback);
+            }
+            return this;
+        }
+
         if(arguments.length === 0) {
             // CLear all topics.
             this[TOPICS] = {};
@@ -96,5 +111,17 @@ export default class Publisher {
         }
 
         return true;
+    }
+
+    passTopic(target, topic) {
+        if(Array.isArray(topic)) {
+            for(let t of topic) {
+                this.passTopic(target, t);
+            }
+        } else {
+            this.on(topic, (...args) => {
+                target.publish(topic, ...args);
+            });
+        }
     }
 }

@@ -60,9 +60,13 @@ function () {
           tableSort: true,
           minWidth: 100,
           width: 200
-        }]
+        }],
+        sortable: true
       });
       header.appendTo("#data-grid-header-container1");
+      header.on('sort-change', function (topic) {
+        console.log(topic);
+      });
     }
   }]);
 
@@ -1753,6 +1757,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DataColumn", function() { return DataColumn; });
 /* harmony import */ var _core_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/ui */ "./src/core/ui/index.js");
 /* harmony import */ var _core_Publisher__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/Publisher */ "./src/core/Publisher.js");
+/* harmony import */ var _core_ui_Draggable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../core/ui/Draggable */ "./src/core/ui/Draggable.js");
+/* harmony import */ var _core_ui_Sortable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../core/ui/Sortable */ "./src/core/ui/Sortable.js");
+/* harmony import */ var _core_utility__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../core/utility */ "./src/core/utility/index.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1793,6 +1806,9 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 
 
+
+
+
 var DataGridHeader =
 /*#__PURE__*/
 function (_Publisher) {
@@ -1814,6 +1830,8 @@ function (_Publisher) {
     _classCallCheck(this, DataGridHeader);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(DataGridHeader).call(this));
+
+    _compileColumnListFromDom.add(_assertThisInitialized(_this));
 
     _createColumn.add(_assertThisInitialized(_this));
 
@@ -1849,6 +1867,16 @@ function (_Publisher) {
       value: void 0
     });
 
+    _sorter.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _columnMap.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
     _classPrivateFieldSet(_assertThisInitialized(_this), _element, document.createElement("div"));
 
     _classPrivateFieldGet(_assertThisInitialized(_this), _element).className = "data-grid-header";
@@ -1859,6 +1887,8 @@ function (_Publisher) {
 
     _classPrivateFieldGet(_assertThisInitialized(_this), _element).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this), _body));
 
+    _classPrivateFieldSet(_assertThisInitialized(_this), _columnMap, new WeakMap());
+
     _classPrivateFieldSet(_assertThisInitialized(_this), _columns, []);
 
     _classPrivateFieldSet(_assertThisInitialized(_this), _resizeable, resizeable);
@@ -1866,6 +1896,59 @@ function (_Publisher) {
     _classPrivateFieldSet(_assertThisInitialized(_this), _sortable, sortable);
 
     _classPrivateFieldSet(_assertThisInitialized(_this), _tableSort, tableSort);
+
+    if (_classPrivateFieldGet(_assertThisInitialized(_this), _sortable)) {
+      _classPrivateFieldSet(_assertThisInitialized(_this), _sorter, new _core_ui_Sortable__WEBPACK_IMPORTED_MODULE_3__["default"](_classPrivateFieldGet(_assertThisInitialized(_this), _element), {
+        helper: Object(_core_ui_Draggable__WEBPACK_IMPORTED_MODULE_2__["clone"])(1, "sort-clone-helper", 100),
+        layout: 'x',
+        axis: 'x',
+        resistance: 25
+      }));
+
+      _classPrivateFieldGet(_assertThisInitialized(_this), _sorter).on(['sort-append', 'sort-complete', 'sort-start'], function (topic) {
+        _classPrivateFieldSet(_assertThisInitialized(_this), _columns, _classPrivateMethodGet(_assertThisInitialized(_this), _compileColumnListFromDom, _compileColumnListFromDom2).call(_assertThisInitialized(_this)));
+      });
+
+      var startingColumns = null;
+
+      _classPrivateFieldGet(_assertThisInitialized(_this), _sorter).on("sort-append", function (topic) {
+        _classPrivateFieldSet(_assertThisInitialized(_this), _columns, _classPrivateMethodGet(_assertThisInitialized(_this), _compileColumnListFromDom, _compileColumnListFromDom2).call(_assertThisInitialized(_this)));
+
+        _this.publish("sort-append", {
+          topic: "sort-append",
+          sorter: _classPrivateFieldGet(_assertThisInitialized(_this), _sorter),
+          target: _assertThisInitialized(_this)
+        });
+      });
+
+      _classPrivateFieldGet(_assertThisInitialized(_this), _sorter).on('sort-start', function (topic) {
+        _classPrivateFieldSet(_assertThisInitialized(_this), _columns, _classPrivateMethodGet(_assertThisInitialized(_this), _compileColumnListFromDom, _compileColumnListFromDom2).call(_assertThisInitialized(_this)));
+
+        startingColumns = _classPrivateFieldGet(_assertThisInitialized(_this), _columns).slice(0);
+
+        _this.publish("sort-start", {
+          topic: "sort-start",
+          sorter: _classPrivateFieldGet(_assertThisInitialized(_this), _sorter),
+          target: _assertThisInitialized(_this)
+        });
+      });
+
+      _classPrivateFieldGet(_assertThisInitialized(_this), _sorter).on("sort-complete", function (topic) {
+        _classPrivateFieldSet(_assertThisInitialized(_this), _columns, _classPrivateMethodGet(_assertThisInitialized(_this), _compileColumnListFromDom, _compileColumnListFromDom2).call(_assertThisInitialized(_this)));
+
+        _this.publish("sort-complete", topic);
+
+        if (!startingColumns || !Object(_core_utility__WEBPACK_IMPORTED_MODULE_4__["arraysEqual"])(startingColumns, _classPrivateFieldGet(_assertThisInitialized(_this), _columns))) {
+          _this.publish("sort-change", {
+            topic: "sort-change",
+            target: _assertThisInitialized(_this),
+            sorter: _classPrivateFieldGet(_assertThisInitialized(_this), _sorter)
+          });
+        }
+
+        startingColumns = null;
+      });
+    }
 
     if (columns) {
       _this.setColumns(columns);
@@ -1916,7 +1999,19 @@ function (_Publisher) {
     }
   }, {
     key: "removeColumn",
-    value: function removeColumn(column) {}
+    value: function removeColumn(column) {
+      var index = this.getColumnIndex(column);
+
+      if (index !== -1) {
+        _classPrivateFieldGet(this, _columns).splice(index, 1);
+
+        _classPrivateFieldGet(this, _columnMap).remove(column.element);
+
+        column.element.parentElement.removeChild(column.element);
+
+        _classPrivateMethodGet(this, _render, _render2).call(this);
+      }
+    }
   }, {
     key: "clearColumns",
     value: function clearColumns() {
@@ -1952,6 +2047,8 @@ function (_Publisher) {
       _classPrivateFieldGet(this, _columns).push(dataColumn);
 
       dataColumn.appendTo(_classPrivateFieldGet(this, _body));
+
+      _classPrivateFieldGet(this, _columnMap).set(dataColumn.element, dataColumn);
 
       _classPrivateMethodGet(this, _render, _render2).call(this);
     }
@@ -2021,6 +2118,11 @@ function (_Publisher) {
 
       return width + 20;
     }
+  }, {
+    key: "element",
+    get: function get() {
+      return _classPrivateFieldGet(this, _element);
+    }
   }]);
 
   return DataGridHeader;
@@ -2038,9 +2140,15 @@ var _sortable = new WeakMap();
 
 var _tableSort = new WeakMap();
 
+var _sorter = new WeakMap();
+
+var _columnMap = new WeakMap();
+
 var _render = new WeakSet();
 
 var _createColumn = new WeakSet();
+
+var _compileColumnListFromDom = new WeakSet();
 
 var _render2 = function _render2() {
   _classPrivateFieldGet(this, _body).style.width = this.width + "px";
@@ -2049,16 +2157,50 @@ var _render2 = function _render2() {
 var _createColumn2 = function _createColumn2(column) {
   var _this2 = this;
 
-  var dataColumn = new DataColumn(column);
+  var dataColumn = new DataColumn(_objectSpread({}, column, {
+    sortable: column.sortable !== false && _classPrivateFieldGet(this, _sortable)
+  }));
   dataColumn.on('resize', function () {
-    console.log(_this2.width);
-
     _classPrivateMethodGet(_this2, _render, _render2).call(_this2);
   });
   dataColumn.on('resize-complete', function () {
     return _classPrivateMethodGet(_this2, _render, _render2).call(_this2);
   });
   return dataColumn;
+};
+
+var _compileColumnListFromDom2 = function _compileColumnListFromDom2() {
+  var r = [];
+  var _iteratorNormalCompletion4 = true;
+  var _didIteratorError4 = false;
+  var _iteratorError4 = undefined;
+
+  try {
+    for (var _iterator4 = _classPrivateFieldGet(this, _body).children[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+      var child = _step4.value;
+
+      var column = _classPrivateFieldGet(this, _columnMap).get(child);
+
+      if (column) {
+        r.push(column);
+      }
+    }
+  } catch (err) {
+    _didIteratorError4 = true;
+    _iteratorError4 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+        _iterator4["return"]();
+      }
+    } finally {
+      if (_didIteratorError4) {
+        throw _iteratorError4;
+      }
+    }
+  }
+
+  return r;
 };
 
 
@@ -2084,7 +2226,17 @@ function (_Publisher2) {
         _ref2$dataSort = _ref2.dataSort,
         dataSort = _ref2$dataSort === void 0 ? "none" : _ref2$dataSort,
         _ref2$renderer = _ref2.renderer,
-        renderer = _ref2$renderer === void 0 ? null : _ref2$renderer;
+        renderer = _ref2$renderer === void 0 ? null : _ref2$renderer,
+        _ref2$id = _ref2.id,
+        id = _ref2$id === void 0 ? null : _ref2$id,
+        _ref2$classes = _ref2.classes,
+        classes = _ref2$classes === void 0 ? null : _ref2$classes,
+        _ref2$attributes = _ref2.attributes,
+        attributes = _ref2$attributes === void 0 ? null : _ref2$attributes,
+        _ref2$data = _ref2.data,
+        data = _ref2$data === void 0 ? null : _ref2$data,
+        _ref2$sortable = _ref2.sortable,
+        sortable = _ref2$sortable === void 0 ? false : _ref2$sortable;
 
     _classCallCheck(this, DataColumn);
 
@@ -2128,7 +2280,9 @@ function (_Publisher2) {
 
     _classPrivateFieldSet(_assertThisInitialized(_this3), _element2, document.createElement("div"));
 
-    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).className = "data-column";
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).className = classes || '';
+
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.add("data-column");
 
     _classPrivateFieldSet(_assertThisInitialized(_this3), _body2, _classPrivateFieldGet(_assertThisInitialized(_this3), _renderer).call(_assertThisInitialized(_this3), label));
 
@@ -2140,6 +2294,26 @@ function (_Publisher2) {
 
     _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).style.width = "".concat(width, "px");
 
+    if (id) {
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).id = id;
+    }
+
+    if (attributes) {
+      for (var _i = 0, _Object$keys = Object.keys(attributes); _i < _Object$keys.length; _i++) {
+        var key = _Object$keys[_i];
+
+        _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).setAttribute(key, attributes[key]);
+      }
+    }
+
+    if (data) {
+      Object.assign(_classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset, data);
+    }
+
+    if (sortable) {
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.add('ui-sort-item');
+    }
+
     _classPrivateFieldSet(_assertThisInitialized(_this3), _resizer, null);
 
     _classPrivateFieldSet(_assertThisInitialized(_this3), _resizeHandle, null);
@@ -2147,7 +2321,7 @@ function (_Publisher2) {
     if (resizeable) {
       _classPrivateFieldSet(_assertThisInitialized(_this3), _resizeHandle, document.createElement("div"));
 
-      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle).className = "ui-resize-handle no-sort";
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle).className = "ui-resize-handle no-sort no-drag";
       _classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle).dataset.resize = "right";
 
       _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle));
@@ -2233,6 +2407,11 @@ function (_Publisher2) {
     key: "width",
     get: function get() {
       return _classPrivateFieldGet(this, _width);
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return _classPrivateFieldGet(this, _element2);
     }
   }]);
 

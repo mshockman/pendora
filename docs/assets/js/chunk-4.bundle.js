@@ -13,15 +13,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Sortable; });
 /* harmony import */ var core_ui_position__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/ui/position */ "./src/core/ui/position.js");
 /* harmony import */ var _Draggable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Draggable */ "./src/core/ui/Draggable.js");
+/* harmony import */ var _Publisher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../Publisher */ "./src/core/Publisher.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
+
 
 
 
@@ -45,8 +59,12 @@ function placeholder(className) {
 
 var Sortable =
 /*#__PURE__*/
-function () {
+function (_Publisher) {
+  _inherits(Sortable, _Publisher);
+
   function Sortable(element) {
+    var _this;
+
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
         _ref$items = _ref.items,
         items = _ref$items === void 0 ? ".ui-sort-item" : _ref$items,
@@ -65,7 +83,7 @@ function () {
         _ref$axis = _ref.axis,
         axis = _ref$axis === void 0 ? 'xy' : _ref$axis,
         _ref$exclude = _ref.exclude,
-        exclude = _ref$exclude === void 0 ? null : _ref$exclude,
+        exclude = _ref$exclude === void 0 ? "input, button, .ui-resizeable-handle, .no-drag" : _ref$exclude,
         _ref$delay = _ref.delay,
         delay = _ref$delay === void 0 ? null : _ref$delay,
         _ref$offset = _ref.offset,
@@ -92,18 +110,20 @@ function () {
 
     _classCallCheck(this, Sortable);
 
-    _draggable.set(this, {
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Sortable).call(this));
+
+    _draggable.set(_assertThisInitialized(_this), {
       writable: true,
       value: void 0
     });
 
     if (typeof element === 'string') {
-      this.element = document.querySelector(element);
+      _this.element = document.querySelector(element);
     } else {
-      this.element = element;
+      _this.element = element;
     }
 
-    _classPrivateFieldSet(this, _draggable, new _Draggable__WEBPACK_IMPORTED_MODULE_1__["default"](this.element, {
+    _classPrivateFieldSet(_assertThisInitialized(_this), _draggable, new _Draggable__WEBPACK_IMPORTED_MODULE_1__["default"](_this.element, {
       container: container,
       axis: axis,
       exclude: exclude,
@@ -121,17 +141,22 @@ function () {
       grid: grid
     }));
 
+    _classPrivateFieldGet(_assertThisInitialized(_this), _draggable).passTopic(_assertThisInitialized(_this), ['drag.start', 'drag.end', 'drag.move']);
+
     if (droppables) {
-      this.connect(droppables);
+      _this.connect(droppables);
     }
 
-    this.items = items;
-    this.layout = layout;
-    this.placeholder = placeholder;
-    this.dropOnEmpty = dropOnEmpty;
-    this.accepts = accepts;
-    this.setPlaceholderSize = setPlaceholderSize;
-    this.initEvents();
+    _this.items = items;
+    _this.layout = layout;
+    _this.placeholder = placeholder;
+    _this.dropOnEmpty = dropOnEmpty;
+    _this.accepts = accepts;
+    _this.setPlaceholderSize = setPlaceholderSize;
+
+    _this.initEvents();
+
+    return _this;
   }
 
   _createClass(Sortable, [{
@@ -156,7 +181,7 @@ function () {
      * Initializes event listeners.
      */
     value: function initEvents() {
-      var _this = this;
+      var _this2 = this;
 
       var placeholder,
           isOver = false,
@@ -172,40 +197,46 @@ function () {
         var startBB = target.getBoundingClientRect();
         target.classList.add('ui-sorting');
 
-        if (!placeholder && _this.placeholder) {
-          if (typeof _this.placeholder === 'string') {
+        if (!placeholder && _this2.placeholder) {
+          if (typeof _this2.placeholder === 'string') {
             placeholder = document.createElement(target.nodeName);
-            placeholder.className = _this.placeholder;
-          } else if (typeof _this.placeholder === 'function') {
-            placeholder = _this.placeholder(target, _this);
-          } else if (_this.placeholder === true) {
+            placeholder.className = _this2.placeholder;
+          } else if (typeof _this2.placeholder === 'function') {
+            placeholder = _this2.placeholder(target, _this2);
+          } else if (_this2.placeholder === true) {
             placeholder = document.createElement(target.nodeName);
           } else {
-            placeholder = _this.placeholder;
+            placeholder = _this2.placeholder;
           }
 
           placeholder.classList.add('ui-placeholder');
 
-          if (_this.setPlaceholderSize) {
-            if (_this.setPlaceholderSize === true) {
+          if (_this2.setPlaceholderSize) {
+            if (_this2.setPlaceholderSize === true) {
               placeholder.style.width = "".concat(startBB.width, "px");
               placeholder.style.height = "".concat(startBB.height, "px");
               placeholder.style.boxSizing = 'border-box';
-            } else if (Array.isArray(_this.setPlaceholderSize)) {
-              placeholder.style.width = "".concat(_this.setPlaceholderSize[0], "px");
-              placeholder.style.height = "".concat(_this.setPlaceholderSize[1], "px");
+            } else if (Array.isArray(_this2.setPlaceholderSize)) {
+              placeholder.style.width = "".concat(_this2.setPlaceholderSize[0], "px");
+              placeholder.style.height = "".concat(_this2.setPlaceholderSize[1], "px");
             } else {
-              placeholder.style.width = "".concat(_this.setPlaceholderSize.width, "px");
-              placeholder.style.height = "".concat(_this.setPlaceholderSize.height, "px");
+              placeholder.style.width = "".concat(_this2.setPlaceholderSize.width, "px");
+              placeholder.style.height = "".concat(_this2.setPlaceholderSize.height, "px");
             }
           }
 
-          if (_this.element.contains(target)) {
+          if (_this2.element.contains(target)) {
             target.parentElement.insertBefore(placeholder, target);
           }
         }
 
         Object(core_ui_position__WEBPACK_IMPORTED_MODULE_0__["setElementClientPosition"])(target, startBB, 'translate3d');
+
+        _this2.publish("sort-start", {
+          topic: "sort-start",
+          target: _this2,
+          originalEvent: event
+        });
       }; // Cleanup after sorting finishes.
 
 
@@ -230,63 +261,68 @@ function () {
 
 
       var onSortAppend = function onSortAppend(event) {
-        if (event.detail !== _this && placeholder && placeholder.parentElement) {
+        if (event.detail !== _this2 && placeholder && placeholder.parentElement) {
           placeholder.parentElement.removeChild(placeholder);
         }
       }; // Moves the item to the correct position on mouse move.
 
 
       var onDragMove = function onDragMove(event) {
-        if (!isOver || _this.accepts && !event.detail.item.matches(_this.accepts)) {
+        if (!isOver || _this2.accepts && !event.detail.item.matches(_this2.accepts)) {
           return;
         }
 
         var target = event.detail.item,
-            items = Array.prototype.slice.call(_this.getItems()).filter(function (i) {
+            items = Array.prototype.slice.call(_this2.getItems()).filter(function (i) {
           return i !== target;
         });
 
-        var before = _this.getItemBeforePoint(event.detail.clientX, event.detail.clientY, items),
-            after = _this.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
+        var before = _this2.getItemBeforePoint(event.detail.clientX, event.detail.clientY, items),
+            after = _this2.getItemAfterPoint(event.detail.clientX, event.detail.clientY, items),
             beforeBB = event.detail.helper.getBoundingClientRect(),
-            dropOnEmpty = target.dataset.dropOnEmpty !== null && target.dataset.dropOnEmpty !== undefined ? target.dataset.dropOnEmpty === 'true' : _this.dropOnEmpty; // Allow overriding on item level.
+            dropOnEmpty = target.dataset.dropOnEmpty !== null && target.dataset.dropOnEmpty !== undefined ? target.dataset.dropOnEmpty === 'true' : _this2.dropOnEmpty; // Allow overriding on item level.
 
 
         if (!items.length) {
           if (dropOnEmpty) {
-            _this.element.appendChild(target);
+            _this2.element.appendChild(target);
 
             if (placeholder) target.parentElement.insertBefore(placeholder, target);
 
-            _this._refreshPositions(event.detail.helper, beforeBB);
+            _this2._refreshPositions(event.detail.helper, beforeBB);
 
-            _this._triggerSortAppendEvent(target);
+            _this2._triggerSortAppendEvent(target);
           }
         } else if (before && before !== target) {
           before.parentElement.insertBefore(target, before.nextSibling);
           if (placeholder) target.parentElement.insertBefore(placeholder, target);
 
-          _this._refreshPositions(event.detail.helper, beforeBB);
+          _this2._refreshPositions(event.detail.helper, beforeBB);
 
-          _this._triggerSortAppendEvent(target);
+          _this2._triggerSortAppendEvent(target);
         } else if (after && after !== target) {
           after.parentElement.insertBefore(target, after);
           if (placeholder) target.parentElement.insertBefore(placeholder, target);
 
-          _this._refreshPositions(event.detail.helper, beforeBB);
+          _this2._refreshPositions(event.detail.helper, beforeBB);
 
-          _this._triggerSortAppendEvent(target);
+          _this2._triggerSortAppendEvent(target);
         }
       }; // Cleanup
 
 
       var onDragComplete = function onDragComplete() {
         destroy();
+
+        _this2.publish("sort-complete", {
+          topic: "sort-complete",
+          target: _this2
+        });
       }; // Initialize sorting.
 
 
       this.element.addEventListener('drag.enter', function (event) {
-        if (_this.accepts && !event.detail.item.matches(_this.accepts)) {
+        if (_this2.accepts && !event.detail.item.matches(_this2.accepts)) {
           return;
         }
 
@@ -445,6 +481,9 @@ function () {
         detail: this
       });
       target.dispatchEvent(event);
+      this.publish("sort-append", {
+        target: this
+      });
     }
   }, {
     key: "droppables",
@@ -454,7 +493,7 @@ function () {
   }]);
 
   return Sortable;
-}();
+}(_Publisher__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
 var _draggable = new WeakMap();
 
