@@ -503,6 +503,8 @@
   display: inline-block;
   padding: 0.25rem;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .data-column .ui-resize-handle {
   position: absolute;

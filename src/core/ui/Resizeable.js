@@ -203,7 +203,7 @@ export default class Resizeable extends Publisher {
             this.#element.style.width = `${finalRect.width}px`;
             this.#element.style.height = `${finalRect.height}px`;
 
-            let topic = {topic: "resize-complete", finalRect, resizeable: this, element: this.#element, position: this.#position, event, config, startingRect};
+            let topic = {topic: "resize-complete", finalRect, resizeable: this, element: this.#element, position: this.#position, event, config, startingRect, rect: finalRect};
 
             if(target && target.onResizeComplete) {
                 target.onResizeComplete({...topic});

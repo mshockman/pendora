@@ -29,10 +29,38 @@ function () {
   _createClass(DataHeaderPage, [{
     key: "load",
     value: function load() {
-      var header = new datagrid_DataGridHeader__WEBPACK_IMPORTED_MODULE_0__["DataColumn"]({
-        label: "Test 01",
-        resizeable: true,
-        tableSort: true
+      var header = new datagrid_DataGridHeader__WEBPACK_IMPORTED_MODULE_0__["default"]({
+        columns: [{
+          label: "Test #1",
+          resizeable: true,
+          tableSort: true,
+          minWidth: 100,
+          width: 200
+        }, {
+          label: "Test #2",
+          resizeable: true,
+          tableSort: true,
+          minWidth: 100,
+          width: 200
+        }, {
+          label: "Test #3",
+          resizeable: true,
+          tableSort: true,
+          minWidth: 100,
+          width: 200
+        }, {
+          label: "Test #4",
+          resizeable: true,
+          tableSort: true,
+          minWidth: 100,
+          width: 200
+        }, {
+          label: "Test #5",
+          resizeable: true,
+          tableSort: true,
+          minWidth: 100,
+          width: 200
+        }]
       });
       header.appendTo("#data-grid-header-container1");
     }
@@ -1727,6 +1755,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _core_Publisher__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../core/Publisher */ "./src/core/Publisher.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
@@ -1737,15 +1771,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 /**
  * column.resize-start
@@ -1765,26 +1795,166 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var DataGridHeader =
 /*#__PURE__*/
-function () {
+function (_Publisher) {
+  _inherits(DataGridHeader, _Publisher);
+
   function DataGridHeader() {
+    var _this;
+
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$columns = _ref.columns,
+        columns = _ref$columns === void 0 ? null : _ref$columns,
+        _ref$resizeable = _ref.resizeable,
+        resizeable = _ref$resizeable === void 0 ? false : _ref$resizeable,
+        _ref$sortable = _ref.sortable,
+        sortable = _ref$sortable === void 0 ? false : _ref$sortable,
+        _ref$tableSort = _ref.tableSort,
+        tableSort = _ref$tableSort === void 0 ? false : _ref$tableSort;
+
     _classCallCheck(this, DataGridHeader);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(DataGridHeader).call(this));
+
+    _createColumn.add(_assertThisInitialized(_this));
+
+    _render.add(_assertThisInitialized(_this));
+
+    _element.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _body.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _columns.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _resizeable.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _sortable.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _tableSort.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _element, document.createElement("div"));
+
+    _classPrivateFieldGet(_assertThisInitialized(_this), _element).className = "data-grid-header";
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _body, document.createElement("div"));
+
+    _classPrivateFieldGet(_assertThisInitialized(_this), _body).className = "data-grid-header__body";
+
+    _classPrivateFieldGet(_assertThisInitialized(_this), _element).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this), _body));
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _columns, []);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _resizeable, resizeable);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _sortable, sortable);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this), _tableSort, tableSort);
+
+    if (columns) {
+      _this.setColumns(columns);
+    }
+
+    return _this;
   }
 
   _createClass(DataGridHeader, [{
     key: "setColumns",
-    value: function setColumns(columns) {}
+    value: function setColumns(columns) {
+      this.clearColumns();
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = columns[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var column = _step.value;
+          this.appendColumn(column);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      _classPrivateMethodGet(this, _render, _render2).call(this);
+    }
   }, {
     key: "getColumn",
-    value: function getColumn(index) {}
+    value: function getColumn(index) {
+      return _classPrivateFieldGet(this, _columns)[index];
+    }
   }, {
     key: "getColumnIndex",
-    value: function getColumnIndex(index) {}
+    value: function getColumnIndex(column) {
+      return _classPrivateFieldGet(this, _columns).indexOf(column);
+    }
   }, {
     key: "removeColumn",
     value: function removeColumn(column) {}
   }, {
+    key: "clearColumns",
+    value: function clearColumns() {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = _classPrivateFieldGet(this, _columns)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var column = _step2.value;
+          this.removeColumn(column);
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+            _iterator2["return"]();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  }, {
     key: "appendColumn",
-    value: function appendColumn(column) {}
+    value: function appendColumn(column) {
+      var dataColumn = _classPrivateMethodGet(this, _createColumn, _createColumn2).call(this, column);
+
+      _classPrivateFieldGet(this, _columns).push(dataColumn);
+
+      dataColumn.appendTo(_classPrivateFieldGet(this, _body));
+
+      _classPrivateMethodGet(this, _render, _render2).call(this);
+    }
   }, {
     key: "insertColumn",
     value: function insertColumn(column, index) {}
@@ -1812,160 +1982,6 @@ function () {
     }
   }, {
     key: "appendTo",
-    value: function appendTo(selector) {}
-  }]);
-
-  return DataGridHeader;
-}();
-
-
-var DataColumn =
-/*#__PURE__*/
-function (_Publisher) {
-  _inherits(DataColumn, _Publisher);
-
-  function DataColumn(_ref) {
-    var _this;
-
-    var label = _ref.label,
-        _ref$resizeable = _ref.resizeable,
-        resizeable = _ref$resizeable === void 0 ? false : _ref$resizeable,
-        _ref$minWidth = _ref.minWidth,
-        minWidth = _ref$minWidth === void 0 ? 0 : _ref$minWidth,
-        _ref$maxWidth = _ref.maxWidth,
-        maxWidth = _ref$maxWidth === void 0 ? Infinity : _ref$maxWidth,
-        _ref$width = _ref.width,
-        width = _ref$width === void 0 ? 100 : _ref$width,
-        _ref$tableSort = _ref.tableSort,
-        tableSort = _ref$tableSort === void 0 ? false : _ref$tableSort,
-        _ref$dataSort = _ref.dataSort,
-        dataSort = _ref$dataSort === void 0 ? "none" : _ref$dataSort,
-        _ref$renderer = _ref.renderer,
-        renderer = _ref$renderer === void 0 ? null : _ref$renderer;
-
-    _classCallCheck(this, DataColumn);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(DataColumn).call(this));
-
-    _element.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _body.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _resizer.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _resizeHandle.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _renderer.set(_assertThisInitialized(_this), {
-      writable: true,
-      value: void 0
-    });
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _renderer, renderer || function (label) {
-      var body = document.createElement("div");
-      body.innerHTML = label;
-      return body;
-    });
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _element, document.createElement("div"));
-
-    _classPrivateFieldGet(_assertThisInitialized(_this), _element).className = "data-column";
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _body, _classPrivateFieldGet(_assertThisInitialized(_this), _renderer).call(_assertThisInitialized(_this), label));
-
-    _classPrivateFieldGet(_assertThisInitialized(_this), _body).className = "data-column__body";
-
-    _classPrivateFieldGet(_assertThisInitialized(_this), _element).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this), _body));
-
-    _classPrivateFieldGet(_assertThisInitialized(_this), _element).style.width = "".concat(width, "px");
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _resizer, null);
-
-    _classPrivateFieldSet(_assertThisInitialized(_this), _resizeHandle, null);
-
-    if (resizeable) {
-      _classPrivateFieldSet(_assertThisInitialized(_this), _resizeHandle, document.createElement("div"));
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizeHandle).className = "ui-resize-handle no-sort";
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizeHandle).dataset.resize = "right";
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _element).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this), _resizeHandle));
-
-      _classPrivateFieldSet(_assertThisInitialized(_this), _resizer, new _core_ui__WEBPACK_IMPORTED_MODULE_0__["Resizeable"](_classPrivateFieldGet(_assertThisInitialized(_this), _element), {
-        minWidth: minWidth,
-        maxWidth: maxWidth
-      }));
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizer).on('resize-start', function (topic) {
-        _classPrivateFieldGet(_assertThisInitialized(_this), _element).classList.add('no-sort');
-
-        _this.publish("resize-start", topic);
-      });
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizer).on('resize', function (topic) {
-        topic.event.originalEvent.preventDefault();
-
-        _this.publish("resize", topic);
-      });
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizer).on('resize-complete', function (topic) {
-        _classPrivateFieldGet(_assertThisInitialized(_this), _element).classList.add("no-resize");
-
-        setTimeout(function () {
-          _classPrivateFieldGet(_assertThisInitialized(_this), _element).classList.remove('no-sort');
-
-          _classPrivateFieldGet(_assertThisInitialized(_this), _element).classList.remove("no-resize");
-
-          _this.publish("resize-complete", topic);
-        }, 0);
-      });
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _resizer).on("resize-cancel", function (topic) {
-        _this.publish("resize-cancel", topic);
-      });
-    }
-
-    if (tableSort) {
-      _classPrivateFieldGet(_assertThisInitialized(_this), _element).dataset.dataSort = dataSort;
-
-      _classPrivateFieldGet(_assertThisInitialized(_this), _element).addEventListener("click", function (e) {
-        if (e.target.closest(".no-sort")) {
-          return;
-        }
-
-        var options = ["none", "ascending", "descending"],
-            index = options.indexOf(_classPrivateFieldGet(_assertThisInitialized(_this), _element).dataset.dataSort);
-
-        if (index === -1) {
-          _classPrivateFieldGet(_assertThisInitialized(_this), _element).dataset.dataSort = "none";
-        } else {
-          _classPrivateFieldGet(_assertThisInitialized(_this), _element).dataset.dataSort = options[(index + 1) % options.length];
-        }
-
-        _this.publish("data-sort", {
-          event: e,
-          column: _assertThisInitialized(_this),
-          dataSort: _classPrivateFieldGet(_assertThisInitialized(_this), _element).dataset.dataSort
-        });
-      });
-    }
-
-    return _this;
-  }
-
-  _createClass(DataColumn, [{
-    key: "appendTo",
     value: function appendTo(selector) {
       if (typeof selector === 'string') {
         document.querySelector(selector).appendChild(_classPrivateFieldGet(this, _element));
@@ -1975,20 +1991,265 @@ function (_Publisher) {
         selector.append(_classPrivateFieldGet(this, _element));
       }
     }
+  }, {
+    key: "width",
+    get: function get() {
+      var width = 0;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = _classPrivateFieldGet(this, _columns)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var column = _step3.value;
+          width += column.width;
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      return width + 20;
+    }
   }]);
 
-  return DataColumn;
+  return DataGridHeader;
 }(_core_Publisher__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 var _element = new WeakMap();
 
 var _body = new WeakMap();
 
+var _columns = new WeakMap();
+
+var _resizeable = new WeakMap();
+
+var _sortable = new WeakMap();
+
+var _tableSort = new WeakMap();
+
+var _render = new WeakSet();
+
+var _createColumn = new WeakSet();
+
+var _render2 = function _render2() {
+  _classPrivateFieldGet(this, _body).style.width = this.width + "px";
+};
+
+var _createColumn2 = function _createColumn2(column) {
+  var _this2 = this;
+
+  var dataColumn = new DataColumn(column);
+  dataColumn.on('resize', function () {
+    console.log(_this2.width);
+
+    _classPrivateMethodGet(_this2, _render, _render2).call(_this2);
+  });
+  dataColumn.on('resize-complete', function () {
+    return _classPrivateMethodGet(_this2, _render, _render2).call(_this2);
+  });
+  return dataColumn;
+};
+
+
+var DataColumn =
+/*#__PURE__*/
+function (_Publisher2) {
+  _inherits(DataColumn, _Publisher2);
+
+  function DataColumn(_ref2) {
+    var _this3;
+
+    var label = _ref2.label,
+        _ref2$resizeable = _ref2.resizeable,
+        resizeable = _ref2$resizeable === void 0 ? false : _ref2$resizeable,
+        _ref2$minWidth = _ref2.minWidth,
+        minWidth = _ref2$minWidth === void 0 ? 0 : _ref2$minWidth,
+        _ref2$maxWidth = _ref2.maxWidth,
+        maxWidth = _ref2$maxWidth === void 0 ? Infinity : _ref2$maxWidth,
+        _ref2$width = _ref2.width,
+        width = _ref2$width === void 0 ? 100 : _ref2$width,
+        _ref2$tableSort = _ref2.tableSort,
+        tableSort = _ref2$tableSort === void 0 ? false : _ref2$tableSort,
+        _ref2$dataSort = _ref2.dataSort,
+        dataSort = _ref2$dataSort === void 0 ? "none" : _ref2$dataSort,
+        _ref2$renderer = _ref2.renderer,
+        renderer = _ref2$renderer === void 0 ? null : _ref2$renderer;
+
+    _classCallCheck(this, DataColumn);
+
+    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(DataColumn).call(this));
+
+    _element2.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _body2.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _resizer.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _resizeHandle.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _renderer.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _width.set(_assertThisInitialized(_this3), {
+      writable: true,
+      value: void 0
+    });
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _renderer, renderer || function (label) {
+      var body = document.createElement("div");
+      body.innerHTML = label;
+      return body;
+    });
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _element2, document.createElement("div"));
+
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).className = "data-column";
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _body2, _classPrivateFieldGet(_assertThisInitialized(_this3), _renderer).call(_assertThisInitialized(_this3), label));
+
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _body2).className = "data-column__body";
+
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this3), _body2));
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _width, width);
+
+    _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).style.width = "".concat(width, "px");
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _resizer, null);
+
+    _classPrivateFieldSet(_assertThisInitialized(_this3), _resizeHandle, null);
+
+    if (resizeable) {
+      _classPrivateFieldSet(_assertThisInitialized(_this3), _resizeHandle, document.createElement("div"));
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle).className = "ui-resize-handle no-sort";
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle).dataset.resize = "right";
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).appendChild(_classPrivateFieldGet(_assertThisInitialized(_this3), _resizeHandle));
+
+      _classPrivateFieldSet(_assertThisInitialized(_this3), _resizer, new _core_ui__WEBPACK_IMPORTED_MODULE_0__["Resizeable"](_classPrivateFieldGet(_assertThisInitialized(_this3), _element2), {
+        minWidth: minWidth,
+        maxWidth: maxWidth
+      }));
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizer).on('resize-start', function (topic) {
+        _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.add('no-sort');
+
+        _this3.publish("resize-start", topic);
+      });
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizer).on('resize', function (topic) {
+        topic.event.originalEvent.preventDefault();
+
+        _classPrivateFieldSet(_assertThisInitialized(_this3), _width, topic.rect.width);
+
+        _this3.publish("resize", topic);
+      });
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizer).on('resize-complete', function (topic) {
+        _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.add("no-resize");
+
+        _classPrivateFieldSet(_assertThisInitialized(_this3), _width, topic.rect.width);
+
+        setTimeout(function () {
+          _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.remove('no-sort');
+
+          _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).classList.remove("no-resize");
+
+          _this3.publish("resize-complete", topic);
+        }, 0);
+      });
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _resizer).on("resize-cancel", function (topic) {
+        _this3.publish("resize-cancel", topic);
+      });
+    }
+
+    if (tableSort) {
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset.dataSort = dataSort;
+
+      _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).addEventListener("click", function (e) {
+        if (e.target.closest(".no-sort")) {
+          return;
+        }
+
+        var options = ["none", "ascending", "descending"],
+            index = options.indexOf(_classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset.dataSort);
+
+        if (index === -1) {
+          _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset.dataSort = "none";
+        } else {
+          _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset.dataSort = options[(index + 1) % options.length];
+        }
+
+        _this3.publish("data-sort", {
+          event: e,
+          column: _assertThisInitialized(_this3),
+          dataSort: _classPrivateFieldGet(_assertThisInitialized(_this3), _element2).dataset.dataSort
+        });
+      });
+    }
+
+    return _this3;
+  }
+
+  _createClass(DataColumn, [{
+    key: "appendTo",
+    value: function appendTo(selector) {
+      if (typeof selector === 'string') {
+        document.querySelector(selector).appendChild(_classPrivateFieldGet(this, _element2));
+      } else if (selector.appendChild) {
+        selector.appendChild(_classPrivateFieldGet(this, _element2));
+      } else {
+        selector.append(_classPrivateFieldGet(this, _element2));
+      }
+    }
+  }, {
+    key: "width",
+    get: function get() {
+      return _classPrivateFieldGet(this, _width);
+    }
+  }]);
+
+  return DataColumn;
+}(_core_Publisher__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+var _element2 = new WeakMap();
+
+var _body2 = new WeakMap();
+
 var _resizer = new WeakMap();
 
 var _resizeHandle = new WeakMap();
 
 var _renderer = new WeakMap();
+
+var _width = new WeakMap();
 
 /***/ })
 

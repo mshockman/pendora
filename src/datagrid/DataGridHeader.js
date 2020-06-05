@@ -14,29 +14,66 @@
 import {Resizeable} from "../core/ui";
 import Publisher from "../core/Publisher";
 
-export default class DataGridHeader {
-    constructor() {
+export default class DataGridHeader extends Publisher {
+    #element;
+    #body;
+    #columns;
 
+    #resizeable;
+    #sortable;
+    #tableSort;
+
+    constructor({columns=null, resizeable=false, sortable=false, tableSort=false}={}) {
+        super();
+        this.#element = document.createElement("div");
+        this.#element.className = "data-grid-header";
+        this.#body = document.createElement("div");
+        this.#body.className = "data-grid-header__body";
+        this.#element.appendChild(this.#body);
+
+        this.#columns = [];
+        this.#resizeable = resizeable;
+        this.#sortable = sortable;
+        this.#tableSort = tableSort;
+
+        if(columns) {
+            this.setColumns(columns);
+        }
     }
 
     setColumns(columns) {
+        this.clearColumns();
 
+        for(let column of columns) {
+            this.appendColumn(column);
+        }
+
+        this.#render();
     }
 
     getColumn(index) {
-
+        return this.#columns[index];
     }
 
-    getColumnIndex(index) {
-
+    getColumnIndex(column) {
+        return this.#columns.indexOf(column);
     }
 
     removeColumn(column) {
 
     }
 
-    appendColumn(column) {
+    clearColumns() {
+        for(let column of this.#columns) {
+            this.removeColumn(column);
+        }
+    }
 
+    appendColumn(column) {
+        let dataColumn = this.#createColumn(column);
+        this.#columns.push(dataColumn);
+        dataColumn.appendTo(this.#body);
+        this.#render();
     }
 
     insertColumn(column, index) {
@@ -64,7 +101,39 @@ export default class DataGridHeader {
     }
 
     appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.#element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.#element);
+        } else {
+            selector.append(this.#element);
+        }
+    }
 
+    #render() {
+        this.#body.style.width = this.width + "px";
+    }
+
+    #createColumn(column) {
+        let dataColumn = new DataColumn(column);
+
+        dataColumn.on('resize', () => {
+            console.log(this.width);
+            this.#render();
+        });
+        dataColumn.on('resize-complete', () => this.#render());
+
+        return dataColumn;
+    }
+
+    get width() {
+        let width = 0;
+
+        for(let column of this.#columns) {
+            width += column.width;
+        }
+
+        return width + 20;
     }
 }
 
@@ -75,6 +144,7 @@ export class DataColumn extends Publisher {
     #resizer;
     #resizeHandle;
     #renderer;
+    #width;
 
     constructor({label, resizeable=false, minWidth=0, maxWidth=Infinity, width=100, tableSort=false, dataSort="none", renderer=null}) {
         super();
@@ -90,6 +160,7 @@ export class DataColumn extends Publisher {
         this.#body = this.#renderer.call(this, label);
         this.#body.className = "data-column__body";
         this.#element.appendChild(this.#body);
+        this.#width = width;
         this.#element.style.width = `${width}px`;
 
         this.#resizer = null;
@@ -114,11 +185,13 @@ export class DataColumn extends Publisher {
 
             this.#resizer.on('resize', topic => {
                 topic.event.originalEvent.preventDefault();
+                this.#width = topic.rect.width;
                 this.publish("resize", topic);
             });
 
             this.#resizer.on('resize-complete', topic => {
                 this.#element.classList.add("no-resize");
+                this.#width = topic.rect.width;
 
                 setTimeout(() => {
                     this.#element.classList.remove('no-sort');
@@ -166,5 +239,9 @@ export class DataColumn extends Publisher {
         } else {
             selector.append(this.#element);
         }
+    }
+
+    get width() {
+        return this.#width;
     }
 }

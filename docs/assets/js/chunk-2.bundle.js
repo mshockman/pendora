@@ -840,7 +840,8 @@ var _initResizing2 = function _initResizing2() {
       position: _classPrivateFieldGet(_this2, _position),
       event: event,
       config: config,
-      startingRect: startingRect
+      startingRect: startingRect,
+      rect: finalRect
     };
 
     if (target && target.onResizeComplete) {
