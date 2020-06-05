@@ -496,6 +496,25 @@
   flex: 1;
 }
 
+.data-column {
+  border: 1px solid #000;
+  position: relative;
+  box-sizing: border-box !important;
+  display: inline-block;
+  padding: 0.25rem;
+  user-select: none;
+}
+.data-column .ui-resize-handle {
+  position: absolute;
+  right: -5px;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  z-index: 10;
+  background-color: #000000;
+  cursor: col-resize;
+}
+
 .mr-auto {
   margin-right: auto !important;
 }

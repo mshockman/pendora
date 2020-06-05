@@ -272,10 +272,10 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
     return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(7)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_draggable */ "./docs/js/pages/documentation/test_draggable.js"));
   },
   'test_sortable': function test_sortable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(3)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./docs/js/pages/documentation/test_sortable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(4), __webpack_require__.e(12)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_sortable */ "./docs/js/pages/documentation/test_sortable.js"));
   },
   'test_resizeable': function test_resizeable() {
-    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_resizeable */ "./docs/js/pages/documentation/test_resizeable.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(11)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_resizeable */ "./docs/js/pages/documentation/test_resizeable.js"));
   },
   'test_animation': function test_animation() {
     return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(6)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_animation */ "./docs/js/pages/documentation/test_animation.js"));
@@ -284,7 +284,7 @@ var app = new app__WEBPACK_IMPORTED_MODULE_1__["default"]({
     return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(8)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/test_positioning */ "./docs/js/pages/documentation/test_positioning.js"));
   },
   'doc_datagrid_dataheader': function doc_datagrid_dataheader() {
-    return __webpack_require__.e(/*! import() */ 4).then(__webpack_require__.bind(null, /*! ./pages/documentation/datagrid/page_dataheader */ "./docs/js/pages/documentation/datagrid/page_dataheader.js"));
+    return Promise.all(/*! import() */[__webpack_require__.e(0), __webpack_require__.e(1), __webpack_require__.e(2), __webpack_require__.e(4), __webpack_require__.e(10)]).then(__webpack_require__.bind(null, /*! ./pages/documentation/datagrid/page_dataheader */ "./docs/js/pages/documentation/datagrid/page_dataheader.js"));
   }
 });
 window.addEventListener('load',
