@@ -22,6 +22,8 @@ test
 node_modules/
 /node_modules/
 /jekyll/
+/docs/assets/js
+/docs/assets/css
 
 npm-debug.log
 .sass-cache/*
