@@ -1,3 +1,4 @@
+@import "../base/variables";
 
 
 .mr-auto {
@@ -50,4 +51,27 @@
 
 .fluid-height {
   height: 100% !important;
+}
+
+
+@each $mult in $SPACER-MULTIPLIERS {
+  $i: index($SPACER-MULTIPLIERS, $mult);
+  $s: ($SPACER * $mult);
+  $directions: r, l, b, t;
+
+  .m-#{$i} {
+    margin: $s !important;
+  }
+
+  .p-#{$i} {
+    padding: $s !important;
+  }
+
+  @each $d in right, left, bottom, top {
+    $c: str-slice($d, 0, 1);
+
+    .m#{$c}-#{$i} {
+      margin-#{$d}: $s !important;
+    }
+  }
 }

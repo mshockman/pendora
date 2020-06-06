@@ -3,9 +3,12 @@
 @import "components/windows";
 @import "components/panes";
 @import "components/datagrid";
+@import "components/tables";
 
 @import "layout/spacing";
 @import "layout/grid";
+@import "layout/helpers";
+@import "layout/text";
 
 
 * {

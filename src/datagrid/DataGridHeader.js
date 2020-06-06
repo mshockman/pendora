@@ -197,7 +197,7 @@ export default class DataGridHeader extends Publisher {
     }
 
     #render() {
-        this.#body.style.width = this.width + "px";
+        this.#body.style.width = (this.totalColumnWidth + 20) + "px";
     }
 
     #initColumn(column) {
@@ -210,12 +210,24 @@ export default class DataGridHeader extends Publisher {
         cache = {};
         COLUMN_MAP.set(column, cache);
 
-        cache.onResize = () => {
+        cache.onResize = topic => {
             this.#render();
+
+            this.publish('resize', {
+                ...topic,
+                header: this,
+                column: this.#columnElementMap.get(topic.element)
+            });
         };
 
-        cache.onResizeComplete = () => {
+        cache.onResizeComplete = topic => {
             this.#render();
+
+            this.publish('resize-complete', {
+                ...topic,
+                header: this,
+                column: this.#columnElementMap.get(topic.element)
+            });
         };
 
         cache.parent = this;
@@ -252,14 +264,14 @@ export default class DataGridHeader extends Publisher {
         return r;
     }
 
-    get width() {
+    get totalColumnWidth() {
         let width = 0;
 
         for(let column of this.#columns) {
             width += column.width;
         }
 
-        return width + 20;
+        return width;
     }
 
     get element() {
@@ -268,6 +280,10 @@ export default class DataGridHeader extends Publisher {
 
     get columns() {
         return this.#columns.splice(0);
+    }
+
+    get length() {
+        return this.#columns.length;
     }
 }
 
