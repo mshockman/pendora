@@ -22,7 +22,9 @@ body {
   padding: 0.5rem;
   position: absolute;
   top: 3rem;
-  right: 18rem;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
   left: 18rem;
 }
 

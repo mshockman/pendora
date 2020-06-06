@@ -19,6 +19,7 @@ let app = new Application({
     'test_positioning': () => import("./pages/documentation/test_positioning"),
     'doc_datagrid_dataheader': () => import("./pages/documentation/datagrid/page_dataheader"),
     'sliders_page': () => import("./pages/components/sliders"),
+    'viewports_page': () => import("./pages/components/ViewportsPage"),
 });
 
 

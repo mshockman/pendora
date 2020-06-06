@@ -2,26 +2,40 @@ import Publisher from "../Publisher";
 import {Draggable} from "./index";
 import {isPercentageString, clamp} from "../utility/math";
 import {Rect, setElementClientPosition} from "./position";
+import {addClasses} from "../utility";
 
 
+/**
+ * Topics:
+ *  slide
+ *  slide-start
+ *  slide-complete
+ *  change
+ */
 export default class Slider extends Publisher {
     #element;
+    #body;
     #handle;
     #axis;
     #draggable;
 
     #value;
     #sliderSize;
+    #clickScrollHandler;
 
-    constructor({id=null, className="slider", handleClassName="slider__handle", axis="x", value=0, sliderSize="10%"}={}) {
+    constructor({id=null, className="slider", handleClassName="slider__handle", axis="x",
+                 value=0, sliderSize="10%", classes=null, bodyClassName="slider__body", clickScrollHandler=gotoClickPosition}={}) {
         super();
 
         this.#element = document.createElement("div");
+        this.#body = document.createElement("div");
         this.#handle = document.createElement("div");
         this.#element.className = className;
+        this.#body.className = bodyClassName;
         this.#handle.className = handleClassName;
-        this.#axis = axis;
+        this.#axis = axis === "x" ? "x" : "y";
         this.#element.classList.add(this.#axis === 'x' ? 'slider-x' : 'slider-y');
+        this.#clickScrollHandler = clickScrollHandler;
 
         this.#draggable = new Draggable(this.#handle, {
             container: this.#element,
@@ -32,13 +46,18 @@ export default class Slider extends Publisher {
             this.#element.id = id;
         }
 
-        this.#element.appendChild(this.#handle);
+        if(classes) {
+            addClasses(this.#element, classes);
+        }
+
+        this.#element.appendChild(this.#body);
+        this.#body.appendChild(this.#handle);
         this.value = value;
 
         this.sliderSize = sliderSize;
 
         this.#draggable.on('drag.end', topic => {
-            let containerRect = Rect.getBoundingClientRect(this.#element),
+            let containerRect = Rect.getBoundingClientRect(this.#body),
                 handleRect = Rect.getBoundingClientRect(this.#handle),
                 startingValue = this.#value;
 
@@ -56,7 +75,7 @@ export default class Slider extends Publisher {
                     startingValue: startingValue
                 });
 
-                this.publish("slide-end", {
+                this.publish("slide-complete", {
                     ...topic,
                     topic: "slide-end",
                     slider: this,
@@ -77,7 +96,7 @@ export default class Slider extends Publisher {
         });
 
         this.#draggable.on("drag.move", topic => {
-            let containerRect = Rect.getBoundingClientRect(this.#element),
+            let containerRect = Rect.getBoundingClientRect(this.#body),
                 handleRect = Rect.getBoundingClientRect(this.#handle),
                 value;
 
@@ -95,6 +114,25 @@ export default class Slider extends Publisher {
                 startingValue: this.#value
             });
         });
+
+        this.#body.addEventListener('pointerdown', event => {
+            if(event.target === this.#body && this.#clickScrollHandler) {
+                let resolve = (value) => {
+                    let startingValue = this.value;
+                    this.value = value;
+
+                    this.publish('change', {
+                        topic: "change",
+                        slider: this,
+                        value: this.#value,
+                        startingValue: startingValue
+                    });
+                };
+
+                event.preventDefault();
+                this.#clickScrollHandler.call(this, this, event, resolve);
+            }
+        });
     }
 
     appendTo(selector) {
@@ -111,6 +149,14 @@ export default class Slider extends Publisher {
 
     get element() {
         return this.#element;
+    }
+
+    get body() {
+        return this.#body;
+    }
+
+    get handle() {
+        return this.#handle;
     }
 
     get value() {
@@ -139,8 +185,12 @@ export default class Slider extends Publisher {
         this.render();
     }
 
+    get axis() {
+        return this.#axis;
+    }
+
     render() {
-        let containerRect = Rect.getBoundingClientRect(this.#element);
+        let containerRect = Rect.getBoundingClientRect(this.#body);
 
         if(this.#axis === 'x') {
             this.#handle.style.width = (this.#sliderSize * containerRect.width) + "px";
@@ -162,4 +212,34 @@ export default class Slider extends Publisher {
             setElementClientPosition(this.#handle, handleRect, "translate3DY");
         }
     }
+}
+
+
+export class Scrollbar extends Slider {
+    constructor({id=null, axis="x", value=0, sliderSize="10%", classes=null}={}) {
+        super({
+            id,
+            className: "scrollbar",
+            bodyClassName: "scrollbar__body",
+            handleClassName: "scrollbar__handle",
+            axis,
+            value,
+            sliderSize,
+            classes
+        });
+    }
+}
+
+
+export function gotoClickPosition(self, event, resolve) {
+    let rect = Rect.getBoundingClientRect(self.body),
+        value;
+
+    if(self.axis === 'x') {
+
+    } else {
+        value = (event.clientY - rect.top) / rect.height;
+    }
+
+    resolve(value);
 }
