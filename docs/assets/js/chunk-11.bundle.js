@@ -1,20 +1,17 @@
 (window["webpackJsonppendora"] = window["webpackJsonppendora"] || []).push([[11],{
 
-/***/ "./docs/js/pages/documentation/test_resizeable.js":
-/*!********************************************************!*\
-  !*** ./docs/js/pages/documentation/test_resizeable.js ***!
-  \********************************************************/
+/***/ "./docs/js/pages/menus/page_index.js":
+/*!*******************************************!*\
+  !*** ./docs/js/pages/menus/page_index.js ***!
+  \*******************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TestResizeablePage; });
-/* harmony import */ var core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core/ui/Resizeable */ "./src/core/ui/Resizeable.js");
-/* harmony import */ var core_ui_Draggable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core/ui/Draggable */ "./src/core/ui/Draggable.js");
-/* harmony import */ var _src_core_ui_PointerTracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../src/core/ui/PointerTracker */ "./src/core/ui/PointerTracker.js");
-/* harmony import */ var _src_core_vectors_Rect__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../src/core/vectors/Rect */ "./src/core/vectors/Rect.js");
-/* harmony import */ var _src_core_ui_position__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../../src/core/ui/position */ "./src/core/ui/position.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MenuPageIndex; });
+/* harmony import */ var menu_Select2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! menu/Select2 */ "./src/menu/Select2.js");
+/* harmony import */ var menu_SlideMenu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! menu/SlideMenu */ "./src/menu/SlideMenu.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -24,71 +21,63 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-
-
-window.Rect = _src_core_vectors_Rect__WEBPACK_IMPORTED_MODULE_3__["default"];
-window.getBoundingOffsetRect = _src_core_ui_position__WEBPACK_IMPORTED_MODULE_4__["getBoundingOffsetRect"];
-
-var TestResizeablePage =
-/*#__PURE__*/
-function () {
-  function TestResizeablePage() {
-    _classCallCheck(this, TestResizeablePage);
+var MenuPageIndex = /*#__PURE__*/function () {
+  function MenuPageIndex() {
+    _classCallCheck(this, MenuPageIndex);
   }
 
-  _createClass(TestResizeablePage, [{
+  _createClass(MenuPageIndex, [{
     key: "load",
     value: function load() {
-      this.loadDraggables();
-      var debugTracker = _src_core_ui_PointerTracker__WEBPACK_IMPORTED_MODULE_2__["default"].DebugMouseTracker();
-      document.body.appendChild(debugTracker.element);
-      this.resizeable1 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]('#resizeable1', {
-        helper: Object(core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["cloneHelperFactory"])(1000, 0.5),
-        minWidth: 100,
-        minHeight: 100,
-        maxWidth: 250,
-        maxHeight: 250
-      });
-      this.resizeable2 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]("#resizeable2", {});
-      this.resizeable3 = new core_ui_Resizeable__WEBPACK_IMPORTED_MODULE_0__["default"]("#resizeable3", {
-        position: "width-height"
-      });
-      console.log("Hello WOrld");
+      var arg = document.body.dataset.pageArg;
+
+      if (arg === 'slidemenu') {
+        this.initSlideMenu();
+      }
     }
   }, {
-    key: "loadDraggables",
-    value: function loadDraggables() {
-      var elements = document.querySelectorAll('.draggable');
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+    key: "createSelectMenuTest",
+    value: function createSelectMenuTest(container) {
+      var testMenu = new menu_Select2__WEBPACK_IMPORTED_MODULE_0__["SelectMenu"]();
+      testMenu.isVisible = true;
+      testMenu.multiSelect = true;
+      testMenu.toggle = "ctrl";
+      testMenu.clearOldSelection = true;
+      testMenu.enableShiftSelect = true;
+      testMenu.enableCtrlToggle = true;
 
-      try {
-        for (var _iterator = elements[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var d = _step.value;
-          var container = d.closest('.example-zone') || null;
-          new core_ui_Draggable__WEBPACK_IMPORTED_MODULE_1__["default"](d, {
-            container: container
-          });
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-            _iterator["return"]();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+      for (var i = 0; i < 10; i++) {
+        var option = new menu_Select2__WEBPACK_IMPORTED_MODULE_0__["SelectOption"]({
+          text: "Option #".concat(i + 1),
+          value: i + 1
+        });
+        testMenu.append(option);
       }
+
+      window.testMenu = testMenu;
+      testMenu.appendTo(container);
+      console.log("Debugging SelectMenu as testMenu");
+      console.log(testMenu);
+    }
+  }, {
+    key: "initSlideMenu",
+    value: function initSlideMenu() {
+      var menuButton = document.getElementById('menu-button'),
+          slideMenuNode = document.getElementById('test-slide-menu');
+      var slideMenu = new menu_SlideMenu__WEBPACK_IMPORTED_MODULE_1__["default"]({
+        target: slideMenuNode
+      });
+      menuButton.addEventListener('click', function (event) {
+        if (!slideMenu.isActive) {
+          slideMenu.show();
+        } else {
+          slideMenu.hide();
+        }
+      });
     }
   }]);
 
-  return TestResizeablePage;
+  return MenuPageIndex;
 }();
 
 

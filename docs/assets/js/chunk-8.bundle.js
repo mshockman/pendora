@@ -25,9 +25,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 window.Rect = core_vectors__WEBPACK_IMPORTED_MODULE_0__["Rect"];
 window.setElementClientPosition = core_ui_position__WEBPACK_IMPORTED_MODULE_1__["setElementClientPosition"];
 
-var TestPositionerPage =
-/*#__PURE__*/
-function () {
+var TestPositionerPage = /*#__PURE__*/function () {
   function TestPositionerPage() {
     _classCallCheck(this, TestPositionerPage);
   }

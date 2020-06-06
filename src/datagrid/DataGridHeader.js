@@ -17,6 +17,10 @@ import {clone} from "../core/ui/Draggable";
 import Sortable from "../core/ui/Sortable";
 import {arraysEqual} from "../core/utility";
 
+
+const COLUMN_MAP = new WeakMap();
+
+
 export default class DataGridHeader extends Publisher {
     #element;
     #body;
@@ -27,7 +31,7 @@ export default class DataGridHeader extends Publisher {
     #tableSort;
     #sorter;
 
-    #columnMap;
+    #columnElementMap;
 
     constructor({columns=null, resizeable=false, sortable=false, tableSort=false}={}) {
         super();
@@ -36,7 +40,8 @@ export default class DataGridHeader extends Publisher {
         this.#body = document.createElement("div");
         this.#body.className = "data-grid-header__body";
         this.#element.appendChild(this.#body);
-        this.#columnMap = new WeakMap();
+
+        this.#columnElementMap = new WeakMap();
 
         this.#columns = [];
         this.#resizeable = resizeable;
@@ -51,18 +56,18 @@ export default class DataGridHeader extends Publisher {
                 resistance: 25
             });
 
-            this.#sorter.on(['sort-append', 'sort-complete', 'sort-start'], topic => {
+            this.#sorter.on(['sort-append', 'sort-complete', 'sort-start'], () => {
                 this.#columns = this.#compileColumnListFromDom();
             });
 
             let startingColumns = null;
 
-            this.#sorter.on("sort-append", topic => {
+            this.#sorter.on("sort-append", () => {
                 this.#columns = this.#compileColumnListFromDom();
                 this.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this});
             });
 
-            this.#sorter.on('sort-start', topic => {
+            this.#sorter.on('sort-start', () => {
                 this.#columns = this.#compileColumnListFromDom();
                 startingColumns = this.#columns.slice(0);
                 this.publish("sort-start", {topic: "sort-start", sorter: this.#sorter, target: this});
@@ -105,10 +110,11 @@ export default class DataGridHeader extends Publisher {
 
     removeColumn(column) {
         let index = this.getColumnIndex(column);
+
         if(index !== -1) {
             this.#columns.splice(index, 1);
-            this.#columnMap.remove(column.element);
             column.element.parentElement.removeChild(column.element);
+            this.#destroyColumn(column);
             this.#render();
         }
     }
@@ -120,15 +126,44 @@ export default class DataGridHeader extends Publisher {
     }
 
     appendColumn(column) {
-        let dataColumn = this.#createColumn(column);
-        this.#columns.push(dataColumn);
-        dataColumn.appendTo(this.#body);
-        this.#columnMap.set(dataColumn.element, dataColumn);
+        if(!(column instanceof DataColumn)) {
+            column = new DataColumn({
+                ...column,
+                sortable: column.sortable !== false && this.#sortable
+            });
+        }
+
+        this.#initColumn(column);
+        this.#columns.push(column);
+        column.appendTo(this.#body);
         this.#render();
     }
 
     insertColumn(column, index) {
+        if(!(column instanceof DataColumn)) {
+            column = new DataColumn({
+                ...column,
+                sortable: column.sortable !== false && this.#sortable
+            });
+        } else {
+            let cache = COLUMN_MAP.get(column);
 
+            if(cache) {
+                cache.parent.removeColumn(column);
+            }
+        }
+
+        this.#columns.splice(index, 0, column);
+        index = this.#columns.indexOf(column);
+        let after = this.#columns[index+1];
+
+        if(after) {
+            this.#body.insertBefore(column.element, after.element);
+        } else {
+            column.appendTo(this.#body);
+        }
+
+        this.#render();
     }
 
     insertColumnBefore(column, before) {
@@ -165,25 +200,49 @@ export default class DataGridHeader extends Publisher {
         this.#body.style.width = this.width + "px";
     }
 
-    #createColumn(column) {
-        let dataColumn = new DataColumn({
-            ...column,
-            sortable: column.sortable !== false && this.#sortable
-        });
+    #initColumn(column) {
+        let cache = COLUMN_MAP.get(column);
 
-        dataColumn.on('resize', () => {
+        if(cache) {
+            cache.parent.removeColumn(column);
+        }
+
+        cache = {};
+        COLUMN_MAP.set(column, cache);
+
+        cache.onResize = () => {
             this.#render();
-        });
-        dataColumn.on('resize-complete', () => this.#render());
+        };
 
-        return dataColumn;
+        cache.onResizeComplete = () => {
+            this.#render();
+        };
+
+        cache.parent = this;
+
+        column.on('resize', cache.onResize);
+        column.on('resize-complete', cache.onResizeComplete);
+        this.#columnElementMap.set(column.element, column);
+
+        return column;
+    }
+
+    #destroyColumn(column) {
+        let cache = COLUMN_MAP.get(column);
+
+        if(cache) {
+            column.off('resize', cache.onResize);
+            column.off('resize-complete', cache.onResizeComplete);
+            COLUMN_MAP.delete(column);
+            this.#columnElementMap.delete(column.element);
+        }
     }
 
     #compileColumnListFromDom() {
         let r = [];
 
         for(let child of this.#body.children) {
-            let column = this.#columnMap.get(child);
+            let column = this.#columnElementMap.get(child);
 
             if(column) {
                 r.push(column);
@@ -205,6 +264,10 @@ export default class DataGridHeader extends Publisher {
 
     get element() {
         return this.#element;
+    }
+
+    get columns() {
+        return this.#columns.splice(0);
     }
 }
 
@@ -265,7 +328,8 @@ export class DataColumn extends Publisher {
 
             this.#resizer = new Resizeable(this.#element, {
                 minWidth,
-                maxWidth
+                maxWidth,
+                position: "width"
             });
 
             this.#resizer.on('resize-start', topic => {
@@ -338,5 +402,10 @@ export class DataColumn extends Publisher {
 
     get element() {
         return this.#element;
+    }
+
+    get parent() {
+        let cache = COLUMN_MAP.get(this);
+        return cache ? cache.parent : null;
     }
 }

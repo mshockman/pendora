@@ -18,15 +18,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _vectors_Rect__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../vectors/Rect */ "./src/core/vectors/Rect.js");
 /* harmony import */ var _position__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./position */ "./src/core/ui/position.js");
 /* harmony import */ var _fx_Animation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../fx/Animation */ "./src/core/fx/Animation.js");
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
-function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -38,15 +44,19 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
@@ -90,10 +100,10 @@ function buildTestIntersectionFunction(amount) {
   };
 }
 
-var Draggable =
-/*#__PURE__*/
-function (_Publisher) {
+var Draggable = /*#__PURE__*/function (_Publisher) {
   _inherits(Draggable, _Publisher);
+
+  var _super = _createSuper(Draggable);
 
   function Draggable(element) {
     var _this;
@@ -132,7 +142,7 @@ function (_Publisher) {
 
     _classCallCheck(this, Draggable);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(Draggable).call(this));
+    _this = _super.call(this);
 
     _element.set(_assertThisInitialized(_this), {
       writable: true,
@@ -203,12 +213,10 @@ function (_Publisher) {
   _createClass(Draggable, [{
     key: "onMouseDown",
     value: function () {
-      var _onMouseDown = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(event) {
+      var _onMouseDown = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(event) {
         var _this2 = this;
 
-        var startPosition, currentPosition, target, cancelMouseTracking, cancelTimer, distanceBrokenPromise, timerPromise, offset, handle, exclude, onMouseUp, _ref2, _ref3, timerStatus, distanceStatus;
+        var startPosition, currentPosition, target, cancelMouseTracking, cancelTimer, distanceBrokenPromise, timerPromise, offset, handle, exclude, onMouseUp, _yield$Promise$all, _yield$Promise$all2, timerStatus, distanceStatus;
 
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -364,10 +372,10 @@ function (_Publisher) {
                 return Promise.all([timerPromise, distanceBrokenPromise]);
 
               case 21:
-                _ref2 = _context.sent;
-                _ref3 = _slicedToArray(_ref2, 2);
-                timerStatus = _ref3[0];
-                distanceStatus = _ref3[1];
+                _yield$Promise$all = _context.sent;
+                _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
+                timerStatus = _yield$Promise$all2[0];
+                distanceStatus = _yield$Promise$all2[1];
                 // Ensure that mouse tracking has been canceled.
                 if (cancelMouseTracking) cancelMouseTracking(); // At this point both the timer and distance status should have passed or failed.
                 // If either failed do nothing.
@@ -399,9 +407,7 @@ function (_Publisher) {
   }, {
     key: "startDragging",
     value: function () {
-      var _startDragging = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3(element, pos) {
+      var _startDragging = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(element, pos) {
         var _this3 = this;
 
         var cache, mousePosition, target, container, scroller, dropTargets, startPosition, startingClientRect, refreshDropTargets, onMouseMove, onMouseUp, rect;
@@ -500,12 +506,11 @@ function (_Publisher) {
                     currentDropTargets = [];
                   }
 
-                  var _iteratorNormalCompletion = true;
-                  var _didIteratorError = false;
-                  var _iteratorError = undefined;
+                  var _iterator = _createForOfIteratorHelper(currentDropTargets),
+                      _step;
 
                   try {
-                    for (var _iterator = currentDropTargets[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    for (_iterator.s(); !(_step = _iterator.n()).done;) {
                       var dropTarget = _step.value;
 
                       if (dropTargets.indexOf(dropTarget) === -1) {
@@ -513,26 +518,16 @@ function (_Publisher) {
                       }
                     }
                   } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
+                    _iterator.e(err);
                   } finally {
-                    try {
-                      if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-                        _iterator["return"]();
-                      }
-                    } finally {
-                      if (_didIteratorError) {
-                        throw _iteratorError;
-                      }
-                    }
+                    _iterator.f();
                   }
 
-                  var _iteratorNormalCompletion2 = true;
-                  var _didIteratorError2 = false;
-                  var _iteratorError2 = undefined;
+                  var _iterator2 = _createForOfIteratorHelper(dropTargets),
+                      _step2;
 
                   try {
-                    for (var _iterator2 = dropTargets[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
                       var _dropTarget = _step2.value;
 
                       if (currentDropTargets.indexOf(_dropTarget) === -1) {
@@ -541,18 +536,9 @@ function (_Publisher) {
                     } // drag-leave
 
                   } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
+                    _iterator2.e(err);
                   } finally {
-                    try {
-                      if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                        _iterator2["return"]();
-                      }
-                    } finally {
-                      if (_didIteratorError2) {
-                        throw _iteratorError2;
-                      }
-                    }
+                    _iterator2.f();
                   }
 
                   dropTargets = currentDropTargets;
@@ -579,12 +565,8 @@ function (_Publisher) {
                   publishDragMoveEvent(_this3, element, target, event, rect);
                 };
 
-                onMouseUp =
-                /*#__PURE__*/
-                function () {
-                  var _ref4 = _asyncToGenerator(
-                  /*#__PURE__*/
-                  regeneratorRuntime.mark(function _callee2(event) {
+                onMouseUp = /*#__PURE__*/function () {
+                  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(event) {
                     var accepted, _isDefaultPrevented, reverted, rect, _pos;
 
                     return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -679,7 +661,7 @@ function (_Publisher) {
                   }));
 
                   return function onMouseUp(_x4) {
-                    return _ref4.apply(this, arguments);
+                    return _ref2.apply(this, arguments);
                   };
                 }(); // Set target to starting position.
 
@@ -729,12 +711,11 @@ function (_Publisher) {
         testFunction = buildTestIntersectionFunction(testFunction);
       }
 
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
+      var _iterator3 = _createForOfIteratorHelper(_classPrivateFieldGet(this, _droppables)),
+          _step3;
 
       try {
-        for (var _iterator3 = _classPrivateFieldGet(this, _droppables)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
           var droppable = _step3.value;
 
           if (testFunction(droppable, rect, mousePos, this)) {
@@ -742,18 +723,9 @@ function (_Publisher) {
           }
         }
       } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
+        _iterator3.e(err);
       } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-            _iterator3["return"]();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
+        _iterator3.f();
       }
 
       return r;
@@ -960,9 +932,7 @@ function _getScrollRect(element) {
  */
 
 
-var ScrollHelper =
-/*#__PURE__*/
-function () {
+var ScrollHelper = /*#__PURE__*/function () {
   function ScrollHelper(element) {
     var _this4 = this;
 

@@ -63,9 +63,7 @@ window.testAnimation = new core_fx_Animation__WEBPACK_IMPORTED_MODULE_1__["defau
   }
 });
 
-var TestAnimationPage =
-/*#__PURE__*/
-function () {
+var TestAnimationPage = /*#__PURE__*/function () {
   function TestAnimationPage() {
     _classCallCheck(this, TestAnimationPage);
   }

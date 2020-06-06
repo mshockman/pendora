@@ -19,9 +19,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
-var TestDraggablePage =
-/*#__PURE__*/
-function () {
+var TestDraggablePage = /*#__PURE__*/function () {
   function TestDraggablePage() {
     _classCallCheck(this, TestDraggablePage);
   }
