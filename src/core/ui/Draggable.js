@@ -568,7 +568,8 @@ function _revert(target, position, revertDuration, onFrame=null) {
  */
 function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container) {
     let rect = new Rect(element),
-        startingRect = rect;
+        startingRect = rect,
+        method = 'translate3d';
 
     rect = rect.moveTo({left: x, top: y});
 
@@ -576,22 +577,6 @@ function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container
     offsetY = offsetY || 0;
 
     rect = rect.translate(-offsetX, -offsetY);
-
-    if(self.axis === 'y') {
-        rect = new Rect(
-            startingRect.left,
-            rect.top,
-            startingRect.right,
-            rect.bottom
-        );
-    } else if(self.axis === 'x') {
-        rect = new Rect(
-            rect.left,
-            startingRect.top,
-            rect.right,
-            startingRect.bottom
-        );
-    }
 
     if(typeof self.grid === 'number' && self.grid) {
         let left = Math.floor(rect.left / self.grid) * self.grid,
@@ -605,7 +590,27 @@ function _moveElementToPosition(self, element, x, y, offsetX, offsetY, container
         rect = rect.fit(container);
     }
 
-    setElementClientPosition(element, rect, 'translate3d');
+    if(self.axis === 'y') {
+        rect = new Rect(
+            startingRect.left,
+            rect.top,
+            startingRect.right,
+            rect.bottom
+        );
+
+        method = "translate3DY";
+    } else if(self.axis === 'x') {
+        rect = new Rect(
+            rect.left,
+            startingRect.top,
+            rect.right,
+            startingRect.bottom
+        );
+
+        method = "translate3DX";
+    }
+
+    setElementClientPosition(element, rect, method);
     return rect;
 }
 

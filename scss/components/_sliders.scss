@@ -1,0 +1,37 @@
+
+
+.slider {
+  background-color: #ccc;
+  position: relative;
+  height: 5px;
+
+  &.slider-x {
+    height: 10px;
+    margin: 1rem;
+
+    .slider__handle {
+      background-color: #000000;
+      position: absolute;
+      left: 0;
+      top: -5px;
+      bottom: -5px;
+      width: 10px;
+      cursor: pointer;
+    }
+  }
+
+  &.slider-y {
+    height: 500px;
+    margin: 1rem;
+    width: 10px;
+
+    .slider__handle {
+      background-color: #000000;
+      position: absolute;
+      left: -5px;
+      right: -5px;
+      height: 10px;
+      cursor: pointer;
+    }
+  }
+}

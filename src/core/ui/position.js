@@ -182,12 +182,12 @@ export function setCssPosition(element, {left=null, top=null}) {
  *
  * @param element {HTMLElement}
  * @param position {{x, y}|{left, top, right, bottom}|Array|Vec2}
- * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'}
+ * @param method {'top-left'|'top-right'|'bottom-left'|'bottom-right'|'translate'|'translate3d'|'left'|'top'|'bottom'|'right'|'translateX'|'translateY'|'translate3DX'|'translate3DY'}
  */
 export function setElementClientPosition(element, position, method='top-left') {
     position = new Rect(position);
 
-    if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right') {
+    if(method === 'top-left' || method === 'top-right' || method === 'bottom-left' || method === 'bottom-right' || method === "left" || method === "right" || method === "top" || method === "bottom") {
         let style = getComputedStyle(element);
 
         let positionType = style.position, box, deltaX, deltaY, current;
@@ -237,7 +237,7 @@ export function setElementClientPosition(element, position, method='top-left') {
             element.style.bottom = (current.bottom - deltaY) + 'px';
             element.style.right = '';
             element.style.top = '';
-        } else { // bottom-right
+        } else if(method === "bottom-right") { // bottom-right
             deltaX = position.right - box.right;
             deltaY = position.bottom - box.bottom;
 
@@ -245,22 +245,62 @@ export function setElementClientPosition(element, position, method='top-left') {
             element.style.bottom = (current.bottom - deltaY) + 'px';
             element.style.left = '';
             element.style.top = '';
+        } else if(method === "left") {
+            deltaX = position.left - box.left;
+
+            element.style.left = (current.left + deltaX) + 'px';
+            element.style.top = '';
+            element.style.right = '';
+            element.style.bottom = '';
+        } else if(method === "right") {
+            deltaX = position.right - box.right;
+
+            element.style.right = (current.right - deltaX) + 'px';
+            element.style.top = '';
+            element.style.left = '';
+            element.style.bottom = '';
+        } else if(method === "top") {
+            deltaY = position.top - box.top;
+
+            element.style.left = '';
+            element.style.top = (current.top + deltaY) + 'px';
+            element.style.right = '';
+            element.style.bottom = '';
+        } else if(method === "bottom") {
+            deltaY = position.bottom - box.bottom;
+
+            element.style.right = '';
+            element.style.bottom = (current.bottom - deltaY) + 'px';
+            element.style.left = '';
+            element.style.top = '';
         }
-    } else if(method === 'translate') {
+    } else if(method === 'translate' || method === 'translateX' || method === "translateY") {
         let box = Rect.getBoundingClientRect(element),
             deltaX = position.left - box.left,
             deltaY = position.top - box.top,
             cssPosition = getTranslation(element);
 
+        if(method === "translateX") {
+            deltaY = 0;
+        } else if(method === "translateY") {
+            deltaX = 0;
+        }
+
         setTranslation(element, {
             x: cssPosition.x + deltaX,
             y: cssPosition.y + deltaY
         });
-    } else if(method === 'translate3d') {
+    } else if(method === 'translate3d' || method === "translate3DX" || method === "translate3DY") {
         let box = Rect.getBoundingClientRect(element),
             deltaX = position.left - box.left,
             deltaY = position.top - box.top,
             cssPosition = getTranslation(element);
+
+        if(method === "translate3DX") {
+            deltaY = 0;
+        } else if(method === "translate3DY") {
+            deltaX = 0;
+        }
 
         setTranslation(element, {
             x: cssPosition.x + deltaX,
