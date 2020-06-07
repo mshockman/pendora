@@ -1,4 +1,3 @@
-import {emptyElement} from "../core/utility";
 import FormWidgetBase from "./FormWidgetBase";
 
 

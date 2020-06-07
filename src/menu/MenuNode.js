@@ -1,7 +1,7 @@
-import Publisher, {STOP} from "core/Publisher";
-import {KeyError} from "core/errors";
+import Publisher, {STOP} from "../core/Publisher";
+import {KeyError} from "../core/errors";
 import {attachMenuInstance, detachMenuInstance, hasMenuInstance, getMenuInstance, getClosestMenuNodeByElement} from "./utility";
-import {addClasses, removeClasses, selectElement} from "../core/utility/dom";
+import {addClasses, removeClasses, selectElement} from "../core/utility";
 
 
 /**

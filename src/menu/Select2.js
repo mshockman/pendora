@@ -5,7 +5,7 @@ import {getClosestMenuByElement} from "./utility";
 // import {inherit} from "./decorators";
 import {MultiHiddenInputWidget} from "../forms/";
 import {AttributeSchema, Attribute, Bool, Integer, Str} from "../core/serialize";
-import {createFragment, findChild, selectElement} from "../core/utility/dom";
+import {createFragment, findChild, selectElement} from "../core/utility";
 
 
 function copyNodeData(targetNode, referenceNode) {

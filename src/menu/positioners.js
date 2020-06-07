@@ -1,5 +1,5 @@
-import {Rect} from "core/vectors";
-import {getClientRect, setElementClientPosition} from "core/ui/position";
+import {Rect} from "../core/vectors";
+import {getClientRect, setElementClientPosition} from "../core/ui/position";
 
 const opposites = {
     left: 'right',

@@ -2,8 +2,8 @@ import MenuNode from "./MenuNode";
 import MenuItem from "./MenuItem";
 // import {inherit} from './decorators';
 import {Attribute, AttributeSchema, Integer, Bool, CompoundType} from "../core/serialize";
-import {modulo} from "../core/utility/math";
-import {createFragment} from "../core/utility/dom";
+import {modulo} from "../core/utility";
+import {createFragment} from "../core/utility";
 
 
 const INT_OR_BOOL_TYPE = new Attribute(new CompoundType(Bool, Integer), Attribute.DROP, Attribute.DROP),

@@ -1,5 +1,5 @@
 import Rect from "../vectors/Rect";
-import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} from "core/ui/position";
+import {getDistanceBetweenRects, getSubBoundingBox, setElementClientPosition} from "./position";
 import Component from "../Component";
 import Animation from "../fx/Animation";
 
