@@ -28,3 +28,10 @@
   display: flex;
   flex-direction: column;
 }
+
+
+@for $i from 1 to 12 {
+  .flex-#{$i} {
+    flex: $i;
+  }
+}
