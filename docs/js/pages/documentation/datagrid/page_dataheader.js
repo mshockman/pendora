@@ -1,6 +1,6 @@
 import DataGridHeader, {DataColumn} from "datagrid/DataGridHeader";
 import Viewport from "core/ui/Viewport";
-import DataTable from "datagrid/DataTable";
+import DataGridTable from "datagrid/DataGridTable";
 
 
 export default class DataHeaderPage {
@@ -11,7 +11,7 @@ export default class DataHeaderPage {
             rows.push([i, 2, 3, 4, 5]);
         }
 
-        let table = new DataTable({
+        let table = new DataGridTable({
             columns: [
                 {label: "Row", resizeable: true, tableSort: true, minWidth: 100, width: 200},
                 {label: "Test #2", resizeable: true, tableSort: true, minWidth: 100, width: 200},

@@ -11,11 +11,12 @@
  * column.drag-complete
  * sort-change
  */
-import {Resizeable} from "../core/ui";
 import Publisher from "../core/Publisher";
 import {clone} from "../core/ui/Draggable";
 import Sortable from "../core/ui/Sortable";
 import {arraysEqual} from "../core/utility";
+import {Resizeable} from "../core/ui";
+import {Rect} from "../core/vectors";
 
 
 const COLUMN_MAP = new WeakMap();
@@ -97,7 +98,7 @@ export default class DataGridHeader extends Publisher {
             this.appendColumn(column);
         }
 
-        this.#render();
+        this.render();
     }
 
     getColumn(index) {
@@ -115,7 +116,7 @@ export default class DataGridHeader extends Publisher {
             this.#columns.splice(index, 1);
             column.element.parentElement.removeChild(column.element);
             this.#destroyColumn(column);
-            this.#render();
+            this.render();
         }
     }
 
@@ -126,8 +127,8 @@ export default class DataGridHeader extends Publisher {
     }
 
     appendColumn(column) {
-        if(!(column instanceof DataColumn)) {
-            column = new DataColumn({
+        if(!(column instanceof DataGridColumn)) {
+            column = new DataGridColumn({
                 ...column,
                 sortable: column.sortable !== false && this.#sortable
             });
@@ -136,12 +137,12 @@ export default class DataGridHeader extends Publisher {
         this.#initColumn(column);
         this.#columns.push(column);
         column.appendTo(this.#body);
-        this.#render();
+        this.render();
     }
 
     insertColumn(column, index) {
-        if(!(column instanceof DataColumn)) {
-            column = new DataColumn({
+        if(!(column instanceof DataGridColumn)) {
+            column = new DataGridColumn({
                 ...column,
                 sortable: column.sortable !== false && this.#sortable
             });
@@ -163,7 +164,7 @@ export default class DataGridHeader extends Publisher {
             column.appendTo(this.#body);
         }
 
-        this.#render();
+        this.render();
     }
 
     insertColumnBefore(column, before) {
@@ -196,14 +197,29 @@ export default class DataGridHeader extends Publisher {
         }
     }
 
-    #render() {
+    render() {
+        console.log(this.#columns);
+        for(let column of this.#columns) {
+            column.render();
+        }
+
         this.#body.style.width = (this.totalColumnWidth + 20) + "px";
+    }
+
+    getColumnWidths() {
+        let r = [];
+
+        for(let column of this.#columns) {
+            r.push(column.width);
+        }
+
+        return r;
     }
 
     #initColumn(column) {
         let cache = COLUMN_MAP.get(column);
 
-        if(cache) {
+        if(column.parent) {
             cache.parent.removeColumn(column);
         }
 
@@ -211,7 +227,7 @@ export default class DataGridHeader extends Publisher {
         COLUMN_MAP.set(column, cache);
 
         cache.onResize = topic => {
-            this.#render();
+            this.render();
 
             this.publish('resize', {
                 ...topic,
@@ -221,7 +237,7 @@ export default class DataGridHeader extends Publisher {
         };
 
         cache.onResizeComplete = topic => {
-            this.#render();
+            this.render();
 
             this.publish('resize-complete', {
                 ...topic,
@@ -265,13 +281,8 @@ export default class DataGridHeader extends Publisher {
     }
 
     get totalColumnWidth() {
-        let width = 0;
-
-        for(let column of this.#columns) {
-            width += column.width;
-        }
-
-        return width;
+        let widths = this.getColumnWidths();
+        return widths.length ? widths.reduce((a, v) => a + v) : 0;
     }
 
     get element() {
@@ -279,7 +290,7 @@ export default class DataGridHeader extends Publisher {
     }
 
     get columns() {
-        return this.#columns.splice(0);
+        return this.#columns.slice(0);
     }
 
     get length() {
@@ -288,7 +299,7 @@ export default class DataGridHeader extends Publisher {
 }
 
 
-export class DataColumn extends Publisher {
+export class DataGridColumn extends Publisher {
     #element;
     #body;
     #resizer;
@@ -297,7 +308,7 @@ export class DataColumn extends Publisher {
     #width;
 
     constructor({label, resizeable=false, minWidth=0, maxWidth=Infinity, width=100, tableSort=false, dataSort="none", renderer=null,
-                id=null, classes=null, attributes=null, data=null, sortable=false}) {
+                    id=null, classes=null, attributes=null, data=null, sortable=false}) {
         super();
 
         this.#renderer = renderer || function(label) {
@@ -312,8 +323,7 @@ export class DataColumn extends Publisher {
         this.#body = this.#renderer.call(this, label);
         this.#body.className = "data-column__body";
         this.#element.appendChild(this.#body);
-        this.#width = width;
-        this.#element.style.width = `${width}px`;
+        this.width = width;
 
         if(id) {
             this.#element.id = id;
@@ -412,8 +422,24 @@ export class DataColumn extends Publisher {
         }
     }
 
+    render() {
+        if(typeof this.#width === 'number') {
+            this.#element.style.width = this.#width + "px";
+        } else {
+            this.#element.style.width = "";
+        }
+    }
+
     get width() {
-        return this.#width;
+        if(typeof this.#width === 'number') {
+            return this.#width;
+        } else {
+            return Rect.getBoundingClientRect(this.#element).width;
+        }
+    }
+
+    set width(width) {
+        this.#width = width;
     }
 
     get element() {

@@ -38,10 +38,12 @@ export default class Viewport extends Publisher {
         if(id) this.#element.id = id;
 
         this.#element.addEventListener("wheel", event => {
-            event.preventDefault();
-            this.scrollTop += event.deltaY;
-            this.render();
-            this.#publishScroll();
+            if(this.isScrollableY && getComputedStyle(this.#scrollArea).overflowY === 'hidden') {
+                event.preventDefault();
+                this.scrollTop += event.deltaY;
+                this.render();
+                this.#publishScroll();
+            }
         });
 
         this.#scrollArea.addEventListener("scroll", event => {
@@ -106,6 +108,18 @@ export default class Viewport extends Publisher {
 
     appendChild(element) {
         return this.#body.appendChild(element);
+    }
+
+    append(component) {
+        if(typeof component === "string") {
+            return this.appendChild(document.querySelector(component));
+        }
+
+        if(component.appendTo) {
+            component.appendTo(this.#body);
+        } else {
+            this.appendChild(component);
+        }
     }
 
     getScrollDetails() {
@@ -220,5 +234,21 @@ export default class Viewport extends Publisher {
 
     get scrollbars() {
         return this.#scrollbars.slice(0);
+    }
+
+    get isScrollableY() {
+        return this.#scrollArea.clientHeight < this.#scrollArea.scrollHeight;
+    }
+
+    get isScrollableX() {
+        return this.#scrollArea.clientWidth < this.#scrollArea.scrollWidth;
+    }
+
+    get scrollbarWidth() {
+        return this.#scrollArea.offsetWidth - this.#scrollArea.clientWidth;
+    }
+
+    get scrollbarHeight() {
+        return this.#scrollArea.offsetHeight - this.#scrollArea.clientHeight;
     }
 }

@@ -18,6 +18,7 @@ let app = new Application({
     'test_animation': () => import("./pages/documentation/test_animation"),
     'test_positioning': () => import("./pages/documentation/test_positioning"),
     'doc_datagrid_dataheader': () => import("./pages/documentation/datagrid/page_dataheader"),
+    'doc_datagrid': () => import("./pages/documentation/datagrid/page_datagrid"),
     'sliders_page': () => import("./pages/components/sliders"),
     'viewports_page': () => import("./pages/components/ViewportsPage"),
 });
