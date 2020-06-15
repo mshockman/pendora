@@ -198,7 +198,6 @@ export default class DataGridHeader extends Publisher {
     }
 
     render() {
-        console.log(this.#columns);
         for(let column of this.#columns) {
             column.render();
         }
@@ -295,6 +294,22 @@ export default class DataGridHeader extends Publisher {
 
     get length() {
         return this.#columns.length;
+    }
+
+    get scrollLeft() {
+        return this.#element.scrollLeft;
+    }
+
+    get scrollTop() {
+        return this.#element.scrollTop;
+    }
+
+    set scrollLeft(value) {
+        this.#element.scrollLeft = value;
+    }
+
+    set scrollTop(value) {
+        this.#element.scrollTop = value;
     }
 }
 

@@ -16,7 +16,8 @@ export default class PageDataGrid {
                 resizeable: true,
                 sortable: true,
                 tableSort: true,
-                width: null
+                width: null,
+                minWidth: 100
             });
 
             columns.push(column);

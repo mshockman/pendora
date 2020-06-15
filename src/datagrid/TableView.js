@@ -9,12 +9,14 @@ export default class TableView extends DataGridViewBase {
     #tbody;
     #model;
     #columns;
+    #cols;
 
     constructor(columns, model) {
         super();
         this.#element = document.createElement("table");
         this.#colGroup = document.createElement("colgroup");
         this.#tbody = document.createElement("tbody");
+        this.#cols = [];
 
         this.#element.appendChild(this.#colGroup);
         this.#element.appendChild(this.#tbody);
@@ -33,10 +35,33 @@ export default class TableView extends DataGridViewBase {
 
     setColumns(columns) {
         this.#columns = [];
+        emptyElement(this.#colGroup);
+        this.#cols = [];
 
+        let fragment = document.createDocumentFragment();
         for(let column of columns) {
-            this.#columns.push({...column});
+            column = {...column};
+            this.#columns.push(column);
+
+            let col = document.createElement("col");
+            fragment.appendChild(col);
+            this.#cols.push(col);
+
+            if(typeof column.width === 'number') {
+                col.style.width = column.width + "px";
+            }
         }
+
+        this.#colGroup.appendChild(fragment);
+    }
+
+    setColumnWidths(widths) {
+        for(let i = 0; i < widths.length; i++) {
+            this.#cols[i].style.width = widths[i] + "px";
+        }
+
+        let total = widths.reduce((a, v) => a+v);
+        this.#element.style.width = total + "px";
     }
 
     getColumnWidths() {
@@ -92,6 +117,10 @@ export default class TableView extends DataGridViewBase {
         }
 
         this.#tbody.appendChild(fragment);
+    }
+
+    onViewportScroll(topic) {
+        // do nothing
     }
 
     get element() {

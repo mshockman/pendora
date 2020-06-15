@@ -25,6 +25,8 @@
   background-color: #eee;
   color: #222;
   font-weight: 700;
+  width: 100%;
+  overflow: hidden;
 
   .data-grid-header__body {
     display: flex;
@@ -45,6 +47,7 @@
 .data-column {
   border-right: 1px solid #ccc;
   position: relative;
+  overflow: hidden;
 
   .data-column__body {
     white-space: nowrap;

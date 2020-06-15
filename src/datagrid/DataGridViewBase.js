@@ -24,9 +24,19 @@ export default class DataGridViewBase extends Publisher {
 
     /**
      * @abstract
+     */
+    setColumnWidths(widths) {}
+
+    /**
+     * @abstract
      * @param selector
      */
     appendTo(selector) {}
+
+    /**
+     * @abstract
+     */
+    onViewportScroll(topic) {}
 
     /**
      * @abstract

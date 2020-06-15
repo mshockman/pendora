@@ -38,6 +38,41 @@ export default class DataGridBase extends Publisher {
 
         this.#dataGridTable = dataGridTable;
         this.#viewport.append(this.#dataGridTable);
+
+        this.#dataGridHeader.on("resize", topic => {
+            this.#dataGridTable.setColumnWidths(this.#dataGridHeader.getColumnWidths());
+
+            this.publish("resize", {
+                ...topic,
+                grid: this,
+                target: this
+            });
+        });
+
+        this.#dataGridHeader.on("resize-complete", topic => {
+            this.#dataGridTable.setColumnWidths(this.#dataGridHeader.getColumnWidths());
+
+            this.publish("resize", {
+                ...topic,
+                grid: this,
+                target: this
+            });
+        });
+
+        this.#viewport.on("scroll", topic => {
+            this.#dataGridHeader.scrollLeft = this.#viewport.scrollLeft;
+
+            this.#dataGridTable.onViewportScroll({
+                grid: this,
+                viewport: this.#viewport,
+                scrollLeft: this.#viewport.scrollLeft,
+                scrollTop: this.#viewport.scrollTop,
+                scrollWidth: this.#viewport.scrollWidth,
+                scrollHeight: this.#viewport.scrollHeight
+            });
+
+            this.publish("scroll");
+        })
     }
 
     appendTo(selector) {
