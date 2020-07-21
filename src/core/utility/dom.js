@@ -168,19 +168,25 @@ export function findChild(element, fn) {
     return null;
 }
 
+
 /**
  * Creates a filtered list of element from the children that match the test function.
  * @param element - Parent element.
- * @param fn - Test function.
+ * @param matches - Test function or css selector.
  * @returns {Array}
  */
-export function filterChildren(element, fn) {
+export function findChildren(element, matches) {
     let r = [];
+
+    if(typeof matches === 'string') {
+        let selector = matches;
+        matches = (child) => child.matches(selector);
+    }
 
     for (let i = 0, l = element.children.length; i < l; i++) {
         let child = element.children[i];
 
-        if (fn(child)) {
+        if (matches(child)) {
             r.push(child);
         }
     }

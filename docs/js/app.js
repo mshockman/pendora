@@ -21,6 +21,7 @@ let app = new Application({
     'doc_datagrid': () => import("./pages/documentation/datagrid/page_datagrid"),
     'sliders_page': () => import("./pages/components/sliders"),
     'viewports_page': () => import("./pages/components/ViewportsPage"),
+    'page_datatable': () => import("./pages/documentation/datagrid/page_datatable"),
 });
 
 
