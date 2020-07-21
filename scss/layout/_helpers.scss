@@ -28,3 +28,37 @@
 .scroll-auto-y {
   overflow-y: auto !important;
 }
+
+
+.hide-x {
+  overflow-x: hidden !important;
+}
+
+
+.hide-y {
+  overflow-y: hidden !important;
+}
+
+
+.hide-xy {
+  overflow: hidden !important;
+}
+
+
+.relative {
+  position: relative;
+}
+
+
+.absolute {
+  position: absolute;
+}
+
+
+.absolute-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
