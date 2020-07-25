@@ -13,6 +13,11 @@
 }
 
 
+.viewport__body {
+  position: relative;
+}
+
+
 .viewport .scrollbar.slider-y {
   position: absolute;
   right: 5px;

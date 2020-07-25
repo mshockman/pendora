@@ -41,6 +41,20 @@ export default class DataGridModelBase extends Publisher {
      */
     getLength() {}
 
+    getRowAt(position) {}
+
+    getRowHeight(index) {}
+
+    getColumns() {}
+
+    setColumns(columns) {}
+
+    getColumn(index) {}
+
+    getColumnIndex() {}
+
+    getColumnWidth(index) {}
+
     /**
      * @abstract
      * @returns {Generator<*, void, *>}

@@ -1,5 +1,5 @@
 import Publisher from "../Publisher";
-import {addClasses} from "../utility";
+import {addClasses, emptyElement} from "../utility";
 import {Rect} from "./position";
 import {clamp} from "../utility";
 
@@ -18,7 +18,7 @@ export default class Viewport extends Publisher {
     #scrollCache;
     #scrollArea;
 
-    constructor({classes=null, id=null}={}) {
+    constructor({classes=null, id=null, simulateWheelScroll=false}={}) {
         super();
 
         this.#element = document.createElement("div");
@@ -37,14 +37,16 @@ export default class Viewport extends Publisher {
         if(classes) addClasses(this.#element, classes);
         if(id) this.#element.id = id;
 
-        this.#element.addEventListener("wheel", event => {
-            if(this.isScrollableY && getComputedStyle(this.#scrollArea).overflowY === 'hidden') {
-                event.preventDefault();
-                this.scrollTop += event.deltaY;
-                this.render();
-                this.#publishScroll();
-            }
-        });
+        if(simulateWheelScroll) {
+            this.#element.addEventListener("wheel", event => {
+                if (this.isScrollableY && getComputedStyle(this.#scrollArea).overflowY === 'hidden') {
+                    event.preventDefault();
+                    this.scrollTop += event.deltaY;
+                    this.render();
+                    this.#publishScroll();
+                }
+            });
+        }
 
         this.#scrollArea.addEventListener("scroll", event => {
             this.render();
@@ -122,6 +124,10 @@ export default class Viewport extends Publisher {
         }
     }
 
+    emptyViewport() {
+        emptyElement(this.#body);
+    }
+
     getScrollDetails() {
         let bv = Rect.getBoundingClientRect(this.#body),
             sv = Rect.getBoundingClientRect(this.#scrollArea),
@@ -136,7 +142,9 @@ export default class Viewport extends Publisher {
             innerWidth: bv.width,
             innerHeight: bv.height,
             outerWidth: sv.width,
-            outerHeight: sv.height
+            outerHeight: sv.height,
+            scrollLeft: this.scrollLeft,
+            scrollTop: this.scrollTop
         };
     }
 
@@ -179,7 +187,7 @@ export default class Viewport extends Publisher {
 
         if(!Number.isNaN(width)) {
             this.#innerWidth = width;
-            this.#body.style.width = this.#innerWidth+"px";
+            this.#body.style.minWidth = this.#innerWidth+"px";
             this.render();
         }
     }
@@ -189,9 +197,17 @@ export default class Viewport extends Publisher {
 
         if(!Number.isNaN(height)) {
             this.#innerHeight = height;
-            this.#body.style.height = this.#innerHeight+"px";
+            this.#body.style.minHeight = this.#innerHeight+"px";
             this.render();
         }
+    }
+
+    get offsetHeight() {
+        return this.#scrollArea.offsetHeight;
+    }
+
+    get offsetWidth() {
+        return this.#scrollArea.offsetWidth;
     }
 
     get scrollLeft() {

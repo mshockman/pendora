@@ -14,7 +14,7 @@
 import Publisher from "../core/Publisher";
 import {clone} from "../core/ui/Draggable";
 import Sortable from "../core/ui/Sortable";
-import {arraysEqual} from "../core/utility";
+import {arraysEqual, clamp} from "../core/utility";
 import {Resizeable} from "../core/ui";
 import {Rect} from "../core/vectors";
 
@@ -32,17 +32,29 @@ export default class DataGridHeader extends Publisher {
     #tableSort;
     #sorter;
 
-    #columnElementMap;
+    #dataModel;
 
-    constructor({columns=null, resizeable=false, sortable=false, tableSort=false}={}) {
+    #columnElementMap;
+    #columnHeaderMap;
+
+    #minInnerWidth;
+    #innerWidth;
+    #innerHeight;
+
+    constructor({dataModel=null, resizeable=false, sortable=false, tableSort=false}={}) {
         super();
         this.#element = document.createElement("div");
         this.#element.className = "data-grid-header";
         this.#body = document.createElement("div");
         this.#body.className = "data-grid-header__body";
         this.#element.appendChild(this.#body);
+        this.#minInnerWidth = null;
+        this.#innerWidth = null;
+        this.#innerHeight = null;
 
         this.#columnElementMap = new WeakMap();
+        this.#columnHeaderMap = new WeakMap();
+        this.#dataModel = null;
 
         this.#columns = [];
         this.#resizeable = resizeable;
@@ -79,112 +91,42 @@ export default class DataGridHeader extends Publisher {
                 this.publish("sort-complete", topic);
 
                 if(!startingColumns || !arraysEqual(startingColumns, this.#columns)) {
-                    this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter});
+                    let columns = this.#columns.map(c => c.column);
+                    this.#dataModel.setColumns(columns);
+
+                    this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter, columns});
                 }
 
                 startingColumns = null;
             });
         }
 
-        if(columns) {
-            this.setColumns(columns);
+        if(dataModel) {
+            this.setDataModel(dataModel);
         }
     }
 
-    setColumns(columns) {
-        this.clearColumns();
-
-        for(let column of columns) {
-            this.appendColumn(column);
-        }
-
-        this.render();
-    }
-
-    getColumn(index) {
-        return this.#columns[index];
-    }
-
-    getColumnIndex(column) {
-        return this.#columns.indexOf(column);
-    }
-
-    removeColumn(column) {
-        let index = this.getColumnIndex(column);
-
-        if(index !== -1) {
-            this.#columns.splice(index, 1);
-            column.element.parentElement.removeChild(column.element);
-            this.#destroyColumn(column);
-            this.render();
-        }
-    }
-
-    clearColumns() {
-        for(let column of this.#columns) {
-            this.removeColumn(column);
-        }
-    }
-
-    appendColumn(column) {
-        if(!(column instanceof DataGridColumn)) {
-            column = new DataGridColumn({
-                ...column,
-                sortable: column.sortable !== false && this.#sortable
-            });
-        }
-
-        this.#initColumn(column);
-        this.#columns.push(column);
-        column.appendTo(this.#body);
-        this.render();
-    }
-
-    insertColumn(column, index) {
-        if(!(column instanceof DataGridColumn)) {
-            column = new DataGridColumn({
-                ...column,
-                sortable: column.sortable !== false && this.#sortable
-            });
-        } else {
-            let cache = COLUMN_MAP.get(column);
-
-            if(cache) {
-                cache.parent.removeColumn(column);
+    setDataModel(dataModel) {
+        if(this.#dataModel) {
+            for(let headerColumn of this.#columns.slice(0)) {
+                this.#destroyHeaderColumn(headerColumn);
             }
         }
 
-        this.#columns.splice(index, 0, column);
-        index = this.#columns.indexOf(column);
-        let after = this.#columns[index+1];
+        this.#columns = [];
+        this.#dataModel = dataModel || null;
 
-        if(after) {
-            this.#body.insertBefore(column.element, after.element);
-        } else {
-            column.appendTo(this.#body);
-        }
+        if(!dataModel) return;
 
-        this.render();
-    }
-
-    insertColumnBefore(column, before) {
-        const index = this.getColumnIndex(before);
-
-        if(index !== -1) {
-            this.insertColumn(column, this.getColumnIndex(before));
-        } else {
-            throw new Error("Unknown column");
+        for(let column of this.#dataModel.getColumns()) {
+            this.#appendColumn(column);
         }
     }
 
-    insertColumnAfter(column, after) {
-        const index = this.getColumnIndex(after);
-
-        if(index !== -1) {
-            this.insertColumn(column, this.getColumnIndex(after) + 1);
-        } else {
-            throw new Error("Unknown column");
-        }
+    #appendColumn(column) {
+        let headerColumn = this.#createColumn(column);
+        this.#columns.push(headerColumn);
+        headerColumn.appendTo(this.#body);
     }
 
     appendTo(selector) {
@@ -202,7 +144,7 @@ export default class DataGridHeader extends Publisher {
             column.render();
         }
 
-        this.#body.style.width = (this.totalColumnWidth + 20) + "px";
+        this.innerWidth = clamp(this.totalColumnWidth + 20, this.#minInnerWidth, null);
     }
 
     getColumnWidths() {
@@ -215,15 +157,15 @@ export default class DataGridHeader extends Publisher {
         return r;
     }
 
-    #initColumn(column) {
-        let cache = COLUMN_MAP.get(column);
+    #createColumn(column) {
+        let headerColumn = new DataHeaderColumn(column, this),
+            cache = {};
 
-        if(column.parent) {
-            cache.parent.removeColumn(column);
-        }
+        COLUMN_MAP.set(headerColumn, cache);
 
-        cache = {};
-        COLUMN_MAP.set(column, cache);
+        cache.onResizeStart = topic => {
+            this.#minInnerWidth = this.innerWidth;
+        };
 
         cache.onResize = topic => {
             this.render();
@@ -231,37 +173,56 @@ export default class DataGridHeader extends Publisher {
             this.publish('resize', {
                 ...topic,
                 header: this,
-                column: this.#columnElementMap.get(topic.element)
+                column: column,
+                scrollLeft: this.scrollLeft,
+                scrollTop: this.scrollTop,
+                innerWidth: this.innerWidth,
+                innerHeight: this.innerHeight
             });
         };
 
         cache.onResizeComplete = topic => {
+            this.#minInnerWidth = null;
+
             this.render();
 
             this.publish('resize-complete', {
                 ...topic,
                 header: this,
-                column: this.#columnElementMap.get(topic.element)
+                column: column,
+                scrollLeft: this.scrollLeft,
+                scrollTop: this.scrollTop,
+                innerWidth: this.innerWidth,
+                innerHeight: this.innerHeight
             });
         };
 
         cache.parent = this;
 
-        column.on('resize', cache.onResize);
-        column.on('resize-complete', cache.onResizeComplete);
-        this.#columnElementMap.set(column.element, column);
+        headerColumn.on('resize-start', cache.onResizeStart);
+        headerColumn.on('resize', cache.onResize);
+        headerColumn.on('resize-complete', cache.onResizeComplete);
 
-        return column;
+        this.#columnElementMap.set(headerColumn.element, headerColumn);
+        this.#columnHeaderMap.set(headerColumn.column, headerColumn);
+
+        return headerColumn;
     }
 
-    #destroyColumn(column) {
-        let cache = COLUMN_MAP.get(column);
+    #destroyHeaderColumn(headerColumn) {
+        let cache = COLUMN_MAP.get(headerColumn);
 
         if(cache) {
-            column.off('resize', cache.onResize);
-            column.off('resize-complete', cache.onResizeComplete);
-            COLUMN_MAP.delete(column);
-            this.#columnElementMap.delete(column.element);
+            headerColumn.off('resize-start', cache.onResizeStart);
+            headerColumn.off('resize', cache.onResize);
+            headerColumn.off('resize-complete', cache.onResizeComplete);
+            COLUMN_MAP.delete(headerColumn);
+            this.#columnElementMap.delete(headerColumn.element);
+            this.#columnHeaderMap.delete(headerColumn.column);
+        }
+
+        if(headerColumn.element.parentElement) {
+            headerColumn.element.parentElement.removeChild(headerColumn.element);
         }
     }
 
@@ -280,8 +241,7 @@ export default class DataGridHeader extends Publisher {
     }
 
     get totalColumnWidth() {
-        let widths = this.getColumnWidths();
-        return widths.length ? widths.reduce((a, v) => a + v) : 0;
+        return this.#dataModel.getTotalColumnWidth();
     }
 
     get element() {
@@ -304,6 +264,24 @@ export default class DataGridHeader extends Publisher {
         return this.#element.scrollTop;
     }
 
+    get innerWidth() {
+        return this.#innerWidth;
+    }
+
+    get innerHeight() {
+        return this.#innerHeight;
+    }
+
+    set innerWidth(value) {
+        this.#innerWidth = value;
+        this.#body.style.minWidth = value + "px";
+    }
+
+    set innerHeight(value) {
+        this.#innerHeight = value;
+        this.#body.style.minHeight = value + "px";
+    }
+
     set scrollLeft(value) {
         this.#element.scrollLeft = value;
     }
@@ -314,117 +292,135 @@ export default class DataGridHeader extends Publisher {
 }
 
 
-export class DataGridColumn extends Publisher {
+export class DataHeaderColumn extends Publisher {
     #element;
-    #body;
     #resizer;
     #resizeHandle;
-    #renderer;
-    #width;
+    #parent;
 
-    constructor({label, resizeable=false, minWidth=0, maxWidth=Infinity, width=100, tableSort=false, dataSort="none", renderer=null,
-                    id=null, classes=null, attributes=null, data=null, sortable=false}) {
+    #rebuild;
+
+    /**
+     * @type DataColumn
+     */
+    #column;
+
+    /**
+     *
+     * @param column {DataColumn}
+     * @param parent
+     */
+    constructor(column, parent) {
         super();
+        this.#parent = parent;
+        this.#column = null;
+        this.#element = null;
+        this.#resizer = null;
+        this.#resizeHandle = null;
+        this.#rebuild = true;
+        this.#column = column;
 
-        this.#renderer = renderer || function(label) {
-            let body = document.createElement("div");
-            body.innerHTML = label;
-            return body;
-        }
+        this.#renderElement(column);
+    }
 
-        this.#element = document.createElement("div");
-        this.#element.className = classes || '';
-        this.#element.classList.add("data-column");
-        this.#body = this.#renderer.call(this, label);
-        this.#body.className = "data-column__body";
-        this.#element.appendChild(this.#body);
-        this.width = width;
-
-        if(id) {
-            this.#element.id = id;
-        }
-
-        if(attributes) {
-            for(let key of Object.keys(attributes)) {
-                this.#element.setAttribute(key, attributes[key]);
-            }
-        }
-
-        if(data) {
-            Object.assign(this.#element.dataset, data);
-        }
-
-        if(sortable) {
-            this.#element.classList.add('ui-sort-item');
-        }
-
+    #renderElement() {
         this.#resizer = null;
         this.#resizeHandle = null;
 
-        if(resizeable) {
-            this.#resizeHandle = document.createElement("div");
-            this.#resizeHandle.className = "ui-resize-handle no-sort no-drag";
-            this.#resizeHandle.dataset.resize = "right";
-            this.#element.appendChild(this.#resizeHandle);
+        let element = document.createElement("div");
+        element.className = "data-column";
+        element = this.#column.renderColumn(element);
 
-            this.#resizer = new Resizeable(this.#element, {
-                minWidth,
-                maxWidth,
-                position: "width"
-            });
-
-            this.#resizer.on('resize-start', topic => {
-                this.#element.classList.add('no-sort');
-
-                this.publish("resize-start", topic);
-            });
-
-            this.#resizer.on('resize', topic => {
-                topic.event.originalEvent.preventDefault();
-                this.#width = topic.rect.width;
-                this.publish("resize", topic);
-            });
-
-            this.#resizer.on('resize-complete', topic => {
-                this.#element.classList.add("no-resize");
-                this.#width = topic.rect.width;
-
-                setTimeout(() => {
-                    this.#element.classList.remove('no-sort');
-                    this.#element.classList.remove("no-resize");
-                    this.publish("resize-complete", topic);
-                }, 0);
-            });
-
-            this.#resizer.on("resize-cancel", topic => {
-                this.publish("resize-cancel", topic);
-            });
+        if(this.#column.columnId) {
+            element.id = id;
         }
 
-        if(tableSort) {
-            this.#element.dataset.dataSort = dataSort;
-
-            this.#element.addEventListener("click", e => {
-                if(e.target.closest(".no-sort")) {
-                    return;
-                }
-
-                let options = ["none", "ascending", "descending"],
-                    index = options.indexOf(this.#element.dataset.dataSort);
-
-                if(index === -1) {
-                    this.#element.dataset.dataSort = "none";
-                } else {
-                    this.#element.dataset.dataSort = options[(index+1) % options.length];
-                }
-
-                this.publish("data-sort", {
-                    event: e,
-                    column: this,
-                    dataSort: this.#element.dataset.dataSort
-                });
-            });
+        if(this.#column.sortable) {
+            element.classList.add('ui-sort-item');
         }
+
+        if(this.#element && this.#element.parentElement) {
+            this.#element.parentElement.replaceChild(element, this.#element);
+        }
+
+        this.#element = element;
+
+        if(this.#column.resizeable) {
+            this.#initResizeable();
+        }
+
+        if(this.#column.tableSort) {
+            this.#initTableSort();
+        }
+
+        this.#rebuild = false;
+    }
+
+    #initResizeable() {
+        this.#resizeHandle = document.createElement("div");
+        this.#resizeHandle.className = "ui-resize-handle no-sort no-drag";
+        this.#resizeHandle.dataset.resize = "right";
+        this.#element.appendChild(this.#resizeHandle);
+
+        this.#resizer = new Resizeable(this.#element, {
+            minWidth: this.#column.minWidth,
+            maxWidth: this.#column.maxWidth,
+            position: "width"
+        });
+
+        this.#resizer.on('resize-start', topic => {
+            this.#element.classList.add('no-sort');
+
+            this.publish("resize-start", topic);
+        });
+
+        this.#resizer.on('resize', topic => {
+            topic.event.originalEvent.preventDefault();
+            this.#column.width = topic.rect.width;
+            this.publish("resize", topic);
+        });
+
+        this.#resizer.on('resize-complete', topic => {
+            this.#element.classList.add("no-resize");
+            this.#column.width = topic.rect.width;
+
+            setTimeout(() => {
+                this.#element.classList.remove('no-sort');
+                this.#element.classList.remove("no-resize");
+                this.publish("resize-complete", topic);
+            }, 0);
+        });
+
+        this.#resizer.on("resize-cancel", topic => {
+            this.publish("resize-cancel", topic);
+        });
+    }
+
+    #initTableSort() {
+        this.#element.dataset.dataSort = this.#column.tableSortValue;
+
+        this.#element.addEventListener("click", e => {
+            if(e.target.closest(".no-sort")) {
+                return;
+            }
+
+            let options = ["none", "ascending", "descending"],
+                index = options.indexOf(this.#element.dataset.dataSort);
+
+            if(index === -1) {
+                this.#column.tableSortValue = "none";
+            } else {
+                this.#column.tableSortValue = options[(index+1) % options.length];
+            }
+
+            this.#element.dataset.dataSort = this.#column.tableSortValue;
+
+            this.publish("data-sort", {
+                event: e,
+                column: this,
+                dataSort: this.#element.dataset.dataSort
+            });
+        });
     }
 
     appendTo(selector) {
@@ -437,24 +433,32 @@ export class DataGridColumn extends Publisher {
         }
     }
 
-    render() {
-        if(typeof this.#width === 'number') {
-            this.#element.style.width = this.#width + "px";
+    render(clean=false) {
+        if(clean) {
+            this.#rebuild = true;
+        }
+
+        if(this.#rebuild) {
+            this.#renderElement();
+        }
+
+        if(typeof this.#column.width === 'number') {
+            this.#element.style.width = this.#column.width + "px";
         } else {
             this.#element.style.width = "";
         }
     }
 
     get width() {
-        if(typeof this.#width === 'number') {
-            return this.#width;
+        if(typeof this.#column.width === 'number') {
+            return this.#column.width;
         } else {
             return Rect.getBoundingClientRect(this.#element).width;
         }
     }
 
     set width(width) {
-        this.#width = width;
+        this.#column.width = width;
     }
 
     get element() {
@@ -462,7 +466,10 @@ export class DataGridColumn extends Publisher {
     }
 
     get parent() {
-        let cache = COLUMN_MAP.get(this);
-        return cache ? cache.parent : null;
+        return this.#parent;
+    }
+
+    get column() {
+        return this.#column;
     }
 }

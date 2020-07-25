@@ -40,7 +40,6 @@ export default class TableView extends DataGridViewBase {
 
         let fragment = document.createDocumentFragment();
         for(let column of columns) {
-            column = {...column};
             this.#columns.push(column);
 
             let col = document.createElement("col");

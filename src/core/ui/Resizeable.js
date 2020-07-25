@@ -98,6 +98,7 @@ export default class Resizeable extends Publisher {
             }
 
             let topic = {topic: "resize-start", resizeable: this, element: this.#element, position: this.#position, config, startingRect, event};
+            this.#element.classList.add("ui-resizing");
 
             if(target.onResizeStart) {
                 target.onResizeStart({...topic});
@@ -204,6 +205,7 @@ export default class Resizeable extends Publisher {
             this.#element.style.height = `${finalRect.height}px`;
 
             let topic = {topic: "resize-complete", finalRect, resizeable: this, element: this.#element, position: this.#position, event, config, startingRect, rect: finalRect};
+            this.#element.classList.remove("ui-resizing");
 
             if(target && target.onResizeComplete) {
                 target.onResizeComplete({...topic});

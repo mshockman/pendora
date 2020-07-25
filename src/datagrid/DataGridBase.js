@@ -10,37 +10,35 @@ export default class DataGridBase extends Publisher {
 
     #dataGridHeader;
     #dataGridTable;
-    #viewport;
 
     constructor(dataGridHeader, dataGridTable) {
         super();
 
         this.#element = document.createElement("div");
-        this.#element.className = "datagrid";
+        this.#element.className = "data-grid";
 
         this.#header = document.createElement("div");
         this.#body = document.createElement("div");
         this.#footer = document.createElement("div");
 
-        this.#header.className = "datagrid__header";
-        this.#body.className = "datagrid__body";
-        this.#footer.className = "datagrid__footer";
+        this.#header.className = "data-grid__header";
+        this.#body.className = "data-grid__body";
+        this.#footer.className = "data-grid__footer";
 
         this.#element.appendChild(this.#header);
         this.#element.appendChild(this.#body);
         this.#element.appendChild(this.#footer);
 
-        this.#viewport = new Viewport();
-        this.#viewport.appendTo(this.#body);
-
         this.#dataGridHeader = dataGridHeader;
         this.#dataGridHeader.appendTo(this.#header);
 
         this.#dataGridTable = dataGridTable;
-        this.#viewport.append(this.#dataGridTable);
+        this.#dataGridTable.appendTo(this.#body);
 
         this.#dataGridHeader.on("resize", topic => {
             this.#dataGridTable.setColumnWidths(this.#dataGridHeader.getColumnWidths());
+            this.#dataGridTable.scrollLeft = topic.scrollLeft;
+            this.#dataGridTable.innerWidth = topic.innerWidth;
 
             this.publish("resize", {
                 ...topic,
@@ -51,6 +49,8 @@ export default class DataGridBase extends Publisher {
 
         this.#dataGridHeader.on("resize-complete", topic => {
             this.#dataGridTable.setColumnWidths(this.#dataGridHeader.getColumnWidths());
+            this.#dataGridTable.scrollLeft = topic.scrollLeft;
+            this.#dataGridTable.innerWidth = topic.innerWidth;
 
             this.publish("resize", {
                 ...topic,
@@ -59,20 +59,14 @@ export default class DataGridBase extends Publisher {
             });
         });
 
-        this.#viewport.on("scroll", topic => {
-            this.#dataGridHeader.scrollLeft = this.#viewport.scrollLeft;
+        this.#dataGridTable.on("scroll", topic => {
+            this.#dataGridHeader.scrollLeft = topic.scrollLeft;
+        });
 
-            this.#dataGridTable.onViewportScroll({
-                grid: this,
-                viewport: this.#viewport,
-                scrollLeft: this.#viewport.scrollLeft,
-                scrollTop: this.#viewport.scrollTop,
-                scrollWidth: this.#viewport.scrollWidth,
-                scrollHeight: this.#viewport.scrollHeight
-            });
-
-            this.publish("scroll");
-        })
+        this.#dataGridHeader.on("sort-change", (topic) => {
+            this.#dataGridTable.clearCache();
+            this.#dataGridTable.render();
+        });
     }
 
     appendTo(selector) {
@@ -86,19 +80,8 @@ export default class DataGridBase extends Publisher {
     }
 
     render() {
-        let widths = this.#dataGridTable.getColumnWidths(),
-            columns = this.#dataGridHeader.columns;
-
-        for(let i = 0; i < columns.length; i++) {
-            let column = columns[i],
-                width = widths[i];
-
-            if(typeof width === 'number') {
-                column.width = width;
-            }
-        }
-
         this.#dataGridHeader.render();
+        this.#dataGridTable.render();
     }
 
     get element() {
@@ -115,10 +98,5 @@ export default class DataGridBase extends Publisher {
 
     get footer() {
         return this.#footer;
-    }
-
-    get theader() {
-        // todo remove
-        return this.#dataGridHeader;
     }
 }

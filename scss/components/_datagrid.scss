@@ -1,84 +1,109 @@
 
 
-.datagrid {
+.data-grid {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #ccc;
+  overflow: hidden;
+  height: 400px;
 
-  .datagrid__body {
-    position: relative;
-    height: 400px;
-    overflow: hidden;
+  .data-grid__row {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+  }
 
-    .viewport {
-      width: 100%;
-      height: 100%;
+  .data-grid__header {
+    background-color: #eaeaea;
+  }
 
-      .viewport__scroll-area {
-        overflow: auto;
-      }
+  .data-column {
+    background-color: #eaeaea;
+  }
+
+  .data-column.ui-drag-helper {
+    border: 1px solid #ccc;
+  }
+
+  .data-grid__body .data-grid__row {
+    border-bottom: 1px solid #ccc;
+
+    &:nth-child(even) {
+      background-color: #ffffff;
     }
+
+    &:nth-child(odd) {
+      background-color: #f8f6ff;
+    }
+  }
+
+  .data-grid__cell-body {
+    padding: 0.5rem 1rem;
+  }
+
+  .data-grid__cell {
+    border-right: 1px solid #ccc;
+  }
+
+  .viewport__scroll-area {
+    overflow-y: scroll;
+    overflow-x: auto;
+  }
+
+  .data-grid__body {
+    flex: 1;
+    position: relative;
+  }
+
+  .data-grid-view .viewport {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
   }
 }
 
 
 .data-grid-header {
-  border-bottom: 1px solid #ccc;
-  background-color: #eee;
-  color: #222;
-  font-weight: 700;
   width: 100%;
   overflow: hidden;
 
   .data-grid-header__body {
     display: flex;
     flex-direction: row;
-  }
-
-  .ui-resize-handle {
-    position: absolute;
-    right: -5px;
-    top: 0;
-    bottom: 0;
-    cursor: col-resize;
-    width: 10px;
+    width: 100%;
   }
 }
 
 
 .data-column {
-  border-right: 1px solid #ccc;
   position: relative;
-  overflow: hidden;
+  border-right: 1px solid #ccc;
 
   .data-column__body {
-    white-space: nowrap;
-    padding: 0.25rem;
-  }
-}
-
-
-.table-view {
-  width: 100%;
-  border-spacing: 0;
-
-  tr:first-child td {
-    border-top: 0;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
   }
 
-  td {
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+  .ui-resize-handle {
+    position: absolute;
+    right: -5px;
+    width: 10px;
+    top: 0;
+    bottom: 0;
+    cursor: col-resize;
 
-    .table-view__cell {
-      padding: 0.25rem;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.5);
     }
   }
 
-  td:first-child {
-    border-left: 0;
+  &.ui-resizing .ui-resize-handle {
+    background-color: rgba(0, 0, 0, 0.5);
+    bottom: -400px;
   }
-}
-
-
-.datagrid.datagrid--version1 {
-
 }
