@@ -7,6 +7,7 @@ export default class DataGridBase extends Publisher {
     #header;
     #body;
     #footer;
+    #model;
 
     #dataGridHeader;
     #dataGridTable;
@@ -28,6 +29,8 @@ export default class DataGridBase extends Publisher {
         this.#element.appendChild(this.#header);
         this.#element.appendChild(this.#body);
         this.#element.appendChild(this.#footer);
+
+        this.#model = null;
 
         this.#dataGridHeader = dataGridHeader;
         this.#dataGridHeader.appendTo(this.#header);
@@ -64,6 +67,9 @@ export default class DataGridBase extends Publisher {
         });
 
         this.#dataGridHeader.on("sort-change", (topic) => {
+            let columns = topic.columns.map(c => c.column);
+
+            this.#model.setColumns(columns);
             this.#dataGridTable.clearCache();
             this.#dataGridTable.render();
         });
@@ -77,6 +83,17 @@ export default class DataGridBase extends Publisher {
         } else {
             selector.append(this.#element);
         }
+    }
+
+    setModel(model) {
+        let columns = [];
+        this.#model = model;
+
+        for(let column of model.getColumns()) {
+            columns.push(this.columnHeaderFactory.call(this, column));
+        }
+
+        this.#dataGridHeader.setColumns(columns);
     }
 
     render() {

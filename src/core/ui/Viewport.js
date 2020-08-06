@@ -112,6 +112,22 @@ export default class Viewport extends Publisher {
         return this.#body.appendChild(element);
     }
 
+    prependChild(element) {
+        return this.#body.insertBefore(element, this.#body.firstElementChild);
+    }
+
+    removeChild(element) {
+        return this.#body.removeChild(element);
+    }
+
+    insertBefore(newNode, referenceNode) {
+        return this.#body.insertBefore(newNode, referenceNode);
+    }
+
+    insertAfter(newNode, referenceNode) {
+        return this.#body.insertBefore(newNode, referenceNode ? referenceNode.nextSibling : null);
+    }
+
     append(component) {
         if(typeof component === "string") {
             return this.appendChild(document.querySelector(component));

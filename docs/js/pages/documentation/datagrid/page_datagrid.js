@@ -1,6 +1,6 @@
 import {randomChoice} from "../../../../../src/core/utility";
 import DataColumn from "../../../../../src/datagrid/DataColumn";
-import DataModel2 from "../../../../../src/datagrid/DataModelBase";
+import DataModel from "../../../../../src/datagrid/DataModel";
 import DataGridHeader from "../../../../../src/datagrid/DataGridHeader";
 import DataGrid from "../../../../../src/datagrid/DataGrid";
 
@@ -19,7 +19,7 @@ export default class PageDataGrid {
             new DataColumn({key: "column5", label: "Column #5", minWidth: 100, maxWidth: 500, width: 200, resizeable: true, tableSort: true, tableSortValue: "none", sortable: true}),
         ];
 
-        let model = new DataModel2(columns, this.buildTestData(100000), 34);
+        let model = new DataModel(columns, this.buildTestData(100000), 34);
 
         let grid = new DataGrid(model, {resizeable: true, sortable: true, tableSort: true});
 

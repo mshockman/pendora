@@ -1,63 +1,154 @@
 import Publisher from "../core/Publisher";
-import DataGridModelBase from "./DataGridModelBase";
 
 
-export default class DataModel extends DataGridModelBase {
+export default class DataModel extends Publisher {
+    #columns;
     #data;
+    #rowHeight;
 
-    constructor(data) {
+    constructor(columns=null, data=null, rowHeight=25) {
         super();
-        this.#data = data;
-    }
+        this.#columns = [];
+        this.#rowHeight = rowHeight;
 
-    getRow(rowIndex) {
-        return this.#data[rowIndex];
-    }
+        if(columns) {
+            this.setColumns(columns);
+        }
 
-    getValue(rowIndex, key) {
-        return this.getRow(rowIndex)[key];
-    }
-
-    setValue(rowIndex, key, value) {
-        let originalValue = this.#data[rowIndex][key];
-
-        if(originalValue !== value) {
-            this.#data[rowIndex][key] = value;
-
-            this.publish("data.change", {
-                model: this,
-                topic: "value.change",
-                type: "cell",
-                originalValue,
-                rowIndex,
-                key,
-                value
-            });
+        if(data) {
+            this.setData(data);
         }
     }
 
     setData(data) {
-        if(data !== this.#data) {
-            let originalData = this.#data;
-            this.#data = data;
+        this.#data = data;
+    }
 
-            this.publish("data.change", {
-                model: this,
-                topic: "data.change",
-                type: "data",
-                originalData,
-                data
-            });
+    setColumns(columns) {
+        for(let column of this.#columns) {
+            column._setParent(null);
         }
+
+        this.#columns = [];
+
+        for(let column of columns) {
+            if(column.parent === this) {
+                this.#columns.push(column);
+            } else if(column.parent) {
+                column.parent.removeColumn(column);
+                column._setParent(this);
+                this.#columns.push(column);
+            } else {
+                column._setParent(this);
+                this.#columns.push(column);
+            }
+        }
+    }
+
+    getColumns() {
+        return this.#columns.slice();
+    }
+
+    removeColumn(column) {
+        if(column.parent !== this) {
+            return null;
+        }
+
+        let index;
+
+        if(typeof column === "number") {
+            if(!this.#columns[column]) {
+                return null;
+            }
+
+            index = column;
+        } else {
+            index = this.#columns.indexOf(column);
+        }
+
+        column._setParent(null);
+        this.#columns.splice(index, 1);
+    }
+
+    appendColumn(column) {
+        if(column.parent) {
+            column.parent.removeColumn(column);
+        }
+
+        column._setParent(this);
+        this.#columns.push(column);
+    }
+
+    insertColumn(column, before) {
+        if(!before) return this.appendColumn(column);
+
+        if(typeof before !== 'number') {
+            if(before.parent !== this) {
+                throw new Error("Before column is not a child the header.");
+            }
+
+            before = this.#columns.indexOf(before);
+        }
+
+        if(column.parent) {
+            column.parent.removeColumn(column);
+        }
+
+        this.#columns.splice(before, 0, [column]);
+        column._setParent(this);
+    }
+
+    getColumn(index) {
+        return this.#columns[index];
+    }
+
+    getColumnLength() {
+        return this.#columns.length;
     }
 
     getLength() {
         return this.#data.length;
     }
 
+    getRow(index) {
+        return this.#data[index];
+    }
+
+    getRowDetails(index) {
+        if(index >= 0 && index < this.getLength()) {
+            return {
+                index,
+                row: this.getRow(index),
+                height: this.#rowHeight,
+                top: index * this.#rowHeight
+            }
+        }
+
+        return null;
+    }
+
+    getTotalRowHeight() {
+        return this.getLength() * this.#rowHeight;
+    }
+
+    getTotalColumnWidth() {
+        let r = 0;
+
+        for(let column of this.#columns) {
+            r += column.width;
+        }
+
+        return r;
+    }
+
+    getRowIndexAtHeight(height) {
+        height = Math.max(height, 0);
+        return Math.floor(height / this.#rowHeight);
+    }
+
     *[Symbol.iterator]() {
-        for(let i = 0; i < this.#data.length; i++) {
-            yield this.#data[i];
+        for(let row of this.#data) {
+            yield row;
         }
     }
 }
