@@ -11,16 +11,11 @@ export const SYMBOLS = {
 
 export default class Component extends Publisher {
     #element;
-    #timers;
 
     constructor(element) {
         super();
 
         this.#element = selectElement(element);
-    }
-
-    render() {
-
     }
 
     appendTo(selector) {
@@ -68,104 +63,6 @@ export default class Component extends Publisher {
 
     removeClass(classes) {
         return removeClasses(this.#element, classes);
-    }
-
-    /**
-     * Creates a timer with the given name.  Only one timer with that name can be active per object.
-     * If another timer with the same name is created the previous one will be cleared if `clear` is true.
-     * Otherwise if `clear` is false a KeyError with be thrown.  The callback function for the timer is called
-     * with the current object as it's `this` and the timer object as it's only parameter following the pattern
-     *
-     * this::fn(timer);
-     *
-     * @param name {String} The name of the timer.
-     * @param fn {function(timer)} Function to call.
-     * @param time {Number} The time to wait.
-     * @param interval If true setInterval will be used instead of setTimeout
-     * @param clear If true an previous timers of the same name will be canceled before creating a new one.  Otherwise a KeyError will be thrown.
-     * @returns {{status, id, cancel, type}}
-     */
-    startTimer(name, fn, time, interval=false, clear=true) {
-        if(!this.#timers) {
-            this.#timers = {};
-        }
-
-        if(clear && this.#timers[name]) {
-            this.#timers[name].cancel();
-        } else if(this._timers[name]) {
-            throw new KeyError("Timer already exists.");
-        }
-
-        let timer = this.#timers[name] = {
-            status: 'running',
-            id: null,
-            cancel: null,
-            type: null,
-        };
-
-        if(interval) {
-            let id = timer.id = setInterval((timer) => {
-                fn.call(this, timer);
-            }, time, timer);
-
-            timer.type = 'interval';
-
-            timer.cancel = () => {
-                if(this.#timers[name] === timer) {
-                    clearInterval(id);
-                    delete this.#timers[name];
-                    timer.status = 'canceled';
-                }
-            };
-        } else {
-            let id = timer.id = setTimeout((timer) => {
-                delete this.#timers[name];
-                timer.status = 'complete';
-                fn.call(this, timer);
-            }, time, timer);
-
-            timer.type = 'timeout';
-
-            timer.cancel = () => {
-                if(this.#timers[name] === timer) {
-                    clearTimeout(id);
-                    delete this.#timers[name];
-                    timer.status = 'canceled';
-                }
-            };
-        }
-
-        return timer;
-    }
-
-    /**
-     * Clears the timer with the given name.
-     *
-     * @param name
-     * @returns {boolean} True if a timer was canceled. False if not timer exists.
-     */
-    clearTimer(name) {
-        if(this.#timers && this.#timers[name]) {
-            this.#timers[name].cancel();
-            return true;
-        }
-
-        return false;
-    }
-
-    // noinspection JSUnusedGlobalSymbols
-    /**
-     * Returns the timer object if it exists.
-     *
-     * @param name
-     * @returns {*}
-     */
-    getTimer(name) {
-        return this.#timers && this.#timers[name] ? this.#timers[name] : null;
-    }
-
-    hasTimer(name) {
-        return !!this.getTimer(name);
     }
 
     get isDisabled() {

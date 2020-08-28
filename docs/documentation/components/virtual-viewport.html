@@ -1,0 +1,44 @@
+---
+title: "Virtual Viewport"
+layout: layout2/documentation
+pageClass: virtual_viewport
+---
+
+<style type="text/css">
+    #test-vp1 {
+        width: 100%;
+        height: 400px;
+    }
+
+    .virtual-viewport {
+        border: 1px solid #ccc;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .virtual-viewport .viewport {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .viewport__scroll-area {
+        overflow: auto;
+        position: relative;
+    }
+
+    .virtual-row {
+        position: absolute;
+        min-width: 100%;
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    .virtual-row.even {
+        background-color: #fafafa;
+    }
+</style>
+
+<div class="content-area" id="viewports-container">
+    <div id="vp1"></div>
+</div>

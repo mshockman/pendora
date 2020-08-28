@@ -23,6 +23,7 @@ let app = new Application({
     'viewports_page': () => import("./pages/components/ViewportsPage"),
     'page_datatable': () => import("./pages/documentation/datagrid/page_datatable"),
     'doc_datagrid': () => import("./pages/documentation/datagrid/page_datagrid"),
+    'virtual_viewport': () => import("./pages/documentation/test_viewport"),
 });
 
 

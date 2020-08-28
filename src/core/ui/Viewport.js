@@ -6,6 +6,7 @@ import {clamp} from "../utility";
 
 /**
  * scroll
+ * render
  */
 export default class Viewport extends Publisher {
     #element;
@@ -180,6 +181,10 @@ export default class Viewport extends Publisher {
                 }
             }
         }
+
+        this.publish("render", {
+            viewport: this
+        });
     }
 
     #publishScroll() {
