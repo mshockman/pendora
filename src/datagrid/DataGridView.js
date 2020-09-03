@@ -1,156 +1,207 @@
-import Viewport from "../core/ui/Viewport";
 import DataGridRow from "./DataGridRow";
 import Publisher from "../core/Publisher";
+import VirtualViewport, {VirtualNodeList} from "../core/ui/VirtualViewport";
 
 
 export default class DataGridView extends Publisher {
-    #model;
     #element;
-    #columnToRowMap;
-    #visibleRows;
-
     #viewport;
-    #padding;
+    #nodeList;
 
-    #rowFactory;
+    #model;
+    #preprocessRows;
 
-    constructor(model=null, {padding=500, rowFactory=null}={}) {
+    constructor(model=null, {padding=500, rowFactory=null, preprocessRows=false}={}) {
         super();
 
         this.#element = document.createElement("div");
         this.#element.className = "data-grid-view";
-        this.#columnToRowMap = new WeakMap();
-        this.#visibleRows = [];
-
-        this.#viewport = new Viewport();
+        this.#viewport = new VirtualViewport(null, {overflow: padding, virtualizationEnabled: true});
         this.#viewport.appendTo(this.#element);
+        this.#nodeList = null;
+        this.#model = null;
+        this.#preprocessRows = preprocessRows;
 
-        this.#padding = padding;
+        this.#viewport.onRenderNode = (node) => {
+            let row = this.#nodeList.getRowByElement(node);
+            row.render();
+        };
 
         if(model) {
-            this.setDataModel(model);
+            this.setModel(model);
         }
-
-        this.#viewport.on("scroll", topic => {
-            this.publish("scroll", {grid: this, ...topic});
-
-            this.render();
-        });
-
-        this.#rowFactory = rowFactory || function(grid, data, index) {
-            return new DataGridRow(grid, data, index);
-        };
     }
 
-    setDataModel(model) {
+    setModel(model) {
         this.#model = model;
+        this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
+        this.#viewport.setNodes(this.#nodeList);
     }
 
-    render() {
-        this.innerHeight = this.#model.getTotalRowHeight();
-        this.innerWidth = this.#model.getTotalColumnWidth();
-
-        this.#viewport.emptyViewport();
-
-        let fragment = document.createDocumentFragment();
-
-        let startIndex = this.#model.getRowIndexAtHeight(this.#viewport.scrollTop - this.#padding),
-            endIndex = Math.min(this.#model.getRowIndexAtHeight(this.#viewport.scrollTop + this.#viewport.offsetHeight + this.#padding) + 1, this.#model.getLength());
-
-        this.#visibleRows = [];
-
-        for(let i = startIndex; i < endIndex; i++) {
-            let data = this.#model.getRow(i),
-                row = this.#columnToRowMap.get(data);
-
-            if(!row) {
-                row = this.#rowFactory(this, data, i);
-                this.#columnToRowMap.set(data, row);
-            }
-
-            row.appendTo(fragment);
-            this.#visibleRows.push(row);
-        }
-
-        this.renderRows();
-
-        this.#viewport.append(fragment);
-    }
-
-    clearCache() {
-        this.#columnToRowMap = new WeakMap();
-    }
-
-    renderRows() {
-        for(let row of this.#visibleRows) {
-            row.render();
-        }
-    }
-
-    setColumnWidths(widths) {
-        for(let i = 0; i < widths.length; i++) {
-            let column = this.#model.getColumn(i);
-            column.width = widths[i];
-        }
-
-        this.renderRows();
-    }
-
-    setInnerWidth(width) {
-        this.#viewport.innerWidth = width;
-    }
-
-    setInnerHeight(height) {
-        this.#viewport.innerHeight = height;
+    getModel() {
+        return this.#model;
     }
 
     appendTo(selector) {
-        if(typeof selector === "string") {
-            document.querySelector(selector).appendChild(this.#element);
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
         } else if(selector.appendChild) {
-            selector.appendChild(this.#element);
+            selector.appendChild(this.element);
         } else {
-            selector.append(this.#element);
+            selector.append(this.element);
         }
     }
 
-    get model() {
-        return this.#model;
+    render() {
+        this.#viewport.render();
     }
 
     get element() {
         return this.#element;
     }
+}
 
-    get scrollLeft() {
-        return this.#viewport.scrollLeft;
+
+/**
+ * @implements VirtualNodeListInterface
+ */
+class DataGridRowList {
+    #model;
+    #rowMap;
+    #elementToRowMap;
+    #preprocessRows;
+    #rowFactory;
+
+    // computed details
+    #height;
+    #rowDetails;
+
+    constructor(model, preprocessRows=false, rowFactory=null) {
+        this.#rowMap = new WeakMap();
+        this.#elementToRowMap = new WeakMap();
+        this.#height = null;
+        this.#model = null;
+        this.#rowDetails = null;
+        this.#preprocessRows = preprocessRows;
+
+        this.#rowFactory = rowFactory || function(list, model, data, index) {
+            return new DataGridRow(model, data, index);
+        };
+
+        if(model) {
+            this.setModel(model);
+        }
     }
 
-    get scrollTop() {
-        return this.#viewport.scrollTop;
+    setModel(model) {
+        this.#rowMap = new WeakMap();
+        this.#elementToRowMap = new WeakMap();
+        this.#height = null;
+        this.#rowDetails = null;
+        this.#model = model;
+
+        if(this.#preprocessRows) {
+            for(let i = 0, l = this.#model.getRowLength(); i < l; i++) {
+                this.getRow(i);
+            }
+        }
     }
 
-    set scrollLeft(value) {
-        this.#viewport.scrollLeft = value;
+    getRow(index) {
+        let data = this.#model.getRow(index);
+
+        if(!data) return null;
+
+        let row = this.#rowMap.get(data);
+
+        if(!row) {
+            row = this.#rowFactory(this, this.#model, data, index);
+            this.#rowMap.set(data, row);
+            this.#elementToRowMap.set(row.element, row);
+        }
+
+        return row;
     }
 
-    set scrollTop(value) {
-        this.#viewport.scrollTop = value;
+    getRowByElement(element) {
+        return this.#elementToRowMap.get(element);
     }
 
-    get innerWidth() {
-        return this.#viewport.innerWidth;
+    append(node) {
+        throw new Error("Does not support appending of nodes directly.");
     }
 
-    set innerWidth(value) {
-        this.#viewport.innerWidth = value;
+    getHeight() {
+        let rowHeight = this.#model.getRowHeight();
+
+        if(typeof rowHeight === "number") {
+            return rowHeight * this.#model.getRowLength();
+        } else {
+            this.#computeRowDetails();
+            return this.#height;
+        }
     }
 
-    get innerHeight() {
-        return this.#viewport.innerHeight;
+    getLength() {
+        return this.#model.getRowLength();
     }
 
-    set innerHeight(value) {
-        this.#viewport.innerHeight = value;
+    getNode(index) {
+        let row = this.getRow(index);
+        return row ? row.element : null;
+    }
+
+    getNodeHeight(index) {
+        if(index < 0 || index >= this.getLength()) {
+            return null;
+        }
+
+        let rowHeight = this.#model.getRowHeight();
+
+        if(typeof rowHeight === "number") {
+            return rowHeight;
+        } else {
+            this.#computeRowDetails();
+            return this.#rowDetails[index].height;
+        }
+    }
+
+    getNodeIndexAtPosition(pos) {
+        let rowHeight = this.#model.getRowHeight();
+
+        if(typeof rowHeight === 'function') {
+            this.#computeRowDetails();
+            return VirtualNodeList.searchForRowIndex(this, pos);
+        } else {
+            let index = Math.floor(pos / rowHeight);
+            return index < 0 || index >= this.getLength() ? -1 : index;
+        }
+    }
+
+    getNodePosition(index) {
+        if(index < 0 || index >= this.getLength()) {
+            return null;
+        }
+
+        let rowHeight = this.#model.getRowHeight();
+
+        if(typeof rowHeight === "number") {
+            return index * rowHeight;
+        } else {
+            this.#computeRowDetails();
+            return this.#rowDetails[index].position;
+        }
+    }
+
+    #computeRowDetails() {
+        let rowHeight = this.#model.getRowHeight();
+
+        if(typeof rowHeight !== 'function' || this.#rowDetails !== null) {
+            return;
+        }
+
+        let details = VirtualNodeList.getComputedRowDetails(rowHeight, this.#model, this.#model, 0, this.#model.getRowLength());
+        this.#height = details.height;
+        this.#rowDetails = details.details;
     }
 }

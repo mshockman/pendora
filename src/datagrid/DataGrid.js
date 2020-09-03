@@ -1,44 +1,84 @@
-import DataGridBase from "./DataGridBase";
 import DataGridHeader from "./DataGridHeader";
-import {addClasses} from "../core/utility";
 import DataGridView from "./DataGridView";
-import DataGridHeaderColumn from "./DataGridHeaderColumn";
 
 
-export default class DataGrid extends DataGridBase {
+export default class DataGrid {
+    #rootElement;
+    #headerElement;
+    #bodyElement;
+    #footerElement;
+
     #dataGridHeader;
-    #dataGridTable;
+    #dataGridView;
 
-    /**
-     *
-     * @param model {DataModel}
-     * @param resizeable
-     * @param sortable
-     * @param tableSort
-     * @param classes
-     * @param id
-     * @param columnHeaderFactory
-     */
-    constructor(model, {resizeable=false, sortable=false, tableSort=false, classes=null, id=null, columnHeaderFactory=null}={}) {
-        let dataGridHeader = new DataGridHeader({resizeable, sortable, tableSort}),
-            dataGridView = new DataGridView(model);
+    #model;
 
-        super(dataGridHeader, dataGridView);
-        this.#dataGridHeader = dataGridHeader;
-        this.#dataGridTable = dataGridView;
+    constructor(dataModel=null, {resizeable=true, sortable=true, tableSort=true, scrollBarPadding=30, preprocessRows=false}={}) {
+        this.#rootElement = document.createElement("div");
+        this.#headerElement = document.createElement("div");
+        this.#bodyElement = document.createElement("div");
+        this.#footerElement = document.createElement("div");
 
-        if(classes) {
-            addClasses(this.element, classes);
+        this.#rootElement.className = "data-grid";
+        this.#headerElement.className = "data-grid__header";
+        this.#bodyElement.className = "data-grid__body";
+        this.#footerElement.className = "data-grid__footer";
+
+        this.#rootElement.appendChild(this.#headerElement);
+        this.#rootElement.appendChild(this.#bodyElement);
+        this.#rootElement.appendChild(this.#footerElement);
+
+        this.#dataGridHeader = new DataGridHeader({resizeable, sortable, tableSort, scrollBarPadding});
+        this.#dataGridHeader.appendTo(this.#headerElement);
+
+        this.#dataGridView = new DataGridView();
+        this.#dataGridView.appendTo(this.#bodyElement);
+
+        this.#dataGridHeader.on('resize', () => {
+            this.#dataGridView.render();
+        });
+
+        this.#dataGridHeader.on("sort-change", topic => {
+            let columns = [];
+
+            for(let column of topic.columns) {
+                columns.push(column.column);
+            }
+
+            this.#model.setColumns(columns);
+            this.#dataGridView.render();
+        });
+
+        if(dataModel) {
+            this.setModel(dataModel);
         }
+    }
 
-        if(id) {
-            this.element.id = id;
+    setModel(model) {
+        this.#model = model;
+        this.#dataGridHeader.setModel(model);
+        this.#dataGridView.setModel(model);
+    }
+
+    appendTo(selector) {
+        if(typeof selector === 'string') {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else {
+            selector.append(this.element);
         }
+    }
 
-        this.columnHeaderFactory = columnHeaderFactory || function(column) {
-            return new DataGridHeaderColumn(column);
-        }
+    render() {
 
-        this.setModel(model);
+    }
+
+    get element() {
+        return this.#rootElement;
+    }
+
+    get model() {
+        return this.#model;
     }
 }

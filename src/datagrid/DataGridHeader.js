@@ -22,6 +22,7 @@ export default class DataGridHeader extends Publisher {
     #element;
     #body;
     #columns;
+    #model;
 
     #resizeable;
     #sortable;
@@ -36,7 +37,7 @@ export default class DataGridHeader extends Publisher {
 
     #scrollBarPadding;
 
-    constructor({columns=null, resizeable=false, sortable=false, tableSort=false, scrollBarPadding=30}={}) {
+    constructor({model=null, resizeable=false, sortable=false, tableSort=false, scrollBarPadding=30}={}) {
         super();
         this.#element = document.createElement("div");
         this.#element.className = "data-grid-header";
@@ -60,9 +61,36 @@ export default class DataGridHeader extends Publisher {
             this.#initTableSort();
         }
 
-        if(columns) {
-            this.setColumns(columns);
+        if(model) {
+            this.setModel(model);
         }
+    }
+
+    setModel(model) {
+        if(this.#model) {
+            this.clearColumns();
+            this.#model = null;
+        }
+
+        this.#model = model;
+
+        let headerColumns = [];
+
+        for(let i = 0, l = this.#model.getColumnLength(); i < l; i++) {
+            let column = this.#model.getColumn(i);
+            headerColumns.push(column.columnFactory(this.#model, column));
+        }
+
+        this.setColumns(headerColumns);
+        this.render();
+    }
+
+    clearColumns() {
+        for(let headerColumn of this.#columns.slice()) {
+            this.#detachHeaderColumn(headerColumn);
+        }
+
+        this.#columns = [];
     }
 
     /**
@@ -70,11 +98,7 @@ export default class DataGridHeader extends Publisher {
      * @param columns {DataGridHeaderColumn[]}
      */
     setColumns(columns) {
-        for(let headerColumn of this.#columns.slice()) {
-            this.#detachHeaderColumn(headerColumn);
-        }
-
-        this.#columns = [];
+        this.clearColumns();
 
         if(columns) {
             for(let column of columns) {

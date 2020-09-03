@@ -1,6 +1,7 @@
 import Publisher from "../core/Publisher";
 import {Resizeable} from "../core/ui";
 import {Rect} from "../core/vectors";
+import {addClasses} from "../core/utility";
 
 
 const HEADER_COLUMN_MAP = new WeakMap();
@@ -10,6 +11,7 @@ export default class DataGridHeaderColumn extends Publisher {
     #element;
     #resizer;
     #resizeHandle;
+    #model;
 
     #rebuild;
 
@@ -20,14 +22,16 @@ export default class DataGridHeaderColumn extends Publisher {
 
     /**
      *
+     * @param model
      * @param column {DataColumn}
      */
-    constructor(column) {
+    constructor(model, column) {
         super();
         this.#column = null;
         this.#element = null;
         this.#resizer = null;
         this.#resizeHandle = null;
+        this.#model = model;
         this.#rebuild = true;
         this.#column = column;
 
@@ -40,7 +44,16 @@ export default class DataGridHeaderColumn extends Publisher {
 
         let element = document.createElement("div");
         element.className = "data-column";
-        element = this.#column.renderColumn(element);
+
+        let body = document.createElement("div");
+        body.innerHTML = this.#column.label;
+
+        if(this.#column.columnClasses) {
+            addClasses(this.#column, this.#column.columnClasses);
+        }
+
+        body.classList.add("data-column__body");
+        element.appendChild(body);
 
         if(this.#column.columnId) {
             element.id = id;
@@ -187,6 +200,10 @@ export default class DataGridHeaderColumn extends Publisher {
 
     get column() {
         return this.#column;
+    }
+
+    get model() {
+        return this.#model;
     }
 
     /**

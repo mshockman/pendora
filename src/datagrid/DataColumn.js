@@ -1,5 +1,7 @@
 import Publisher from "../core/Publisher";
 import {addClasses, clamp} from "../core/utility";
+import DataGridCell from "./DataGridCell";
+import DataGridHeaderColumn from "./DataGridHeaderColumn";
 
 
 export default class DataColumn extends Publisher {
@@ -12,15 +14,15 @@ export default class DataColumn extends Publisher {
     #tableSort;
     #tableSortValue;
     #sortable;
-    #cellRenderer;
-    #columnRenderer;
     #columnClasses;
     #cellClasses;
     #columnId;
 
     #parent;
+    #columnFactory;
+    #cellFactory;
 
-    constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, cellRenderer=null, columnRenderer=null, columnClasses=null, cellClasses=null, columnId=null, ...options}={}) {
+    constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, columnFactory=null, cellFactory=null, ...options}={}) {
         super();
         this.#key = key;
         this.#label = label;
@@ -35,41 +37,14 @@ export default class DataColumn extends Publisher {
 
         this.#sortable = sortable;
 
-        this.#cellRenderer = cellRenderer;
-        this.#columnRenderer = columnRenderer;
-
         this.#columnClasses = columnClasses;
         this.#cellClasses = cellClasses;
         this.#columnId = columnId;
 
+        this.#columnFactory = columnFactory || DataColumn.defaultColumnFactory;
+        this.#cellFactory = cellFactory || DataColumn.defaultCellFactory;
+
         Object.assign(this, options);
-    }
-
-    renderColumn(column) {
-        let body;
-
-        if (this.#columnRenderer) {
-            body = this.#columnRenderer.call(this, this.label);
-        } else {
-            body = document.createElement("div");
-            body.innerHTML = this.#label;
-        }
-
-        if(this.columnClasses) {
-            addClasses(column, this.#columnClasses);
-        }
-
-        body.classList.add("data-column__body");
-        column.appendChild(body);
-        return column;
-    }
-
-    renderCell(cell, data) {
-        let body = document.createElement("div");
-        body.className = "data-grid__cell-body";
-        body.innerHTML = data[this.key];
-        cell.appendChild(body);
-        return cell;
     }
 
     _setParent(parent) {
@@ -124,12 +99,12 @@ export default class DataColumn extends Publisher {
         return this.#sortable;
     }
 
-    get cellRenderer() {
-        return this.#cellRenderer;
+    get cellFactory() {
+        return this.#cellFactory;
     }
 
-    get columnRenderer() {
-        return this.#columnRenderer;
+    get columnFactory() {
+        return this.#columnFactory;
     }
 
     get columnClasses() {
@@ -142,5 +117,24 @@ export default class DataColumn extends Publisher {
 
     get columnId() {
         return this.#columnId;
+    }
+
+    /**
+     *
+     * @param model {DataModel}
+     * @param column {DataColumn}
+     * @returns {DataGridHeaderColumn}
+     */
+    static defaultColumnFactory(model, column) {
+        return new DataGridHeaderColumn(model, column);
+    }
+
+    /**
+     * @param column {DataColumn}
+     * @param data {Object}
+     * @returns {DataGridCell}
+     */
+    static defaultCellFactory(column, data) {
+        return new DataGridCell(column, data);
     }
 }

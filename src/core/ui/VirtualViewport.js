@@ -21,11 +21,17 @@ export default class VirtualViewport extends Component {
 
     #renderId;
 
-    constructor(nodeList, {overflow=500, virtualizationEnabled=true}={}) {
+    /**
+     * @type {null|function}
+     */
+    onRenderNode = null;
+
+    constructor(nodeList, {overflow=500, virtualizationEnabled=true, onRenderNode}={}) {
         super(document.createElement("div"));
         this.addClass("virtual-viewport");
 
         this.#viewport = new Viewport();
+        this.#viewport.element.classList.add('virtual-viewport');
         this.#viewport.appendTo(this.element);
         this.#rows = nodeList;
         this.#rowDetails = null;
@@ -35,6 +41,8 @@ export default class VirtualViewport extends Component {
         this.#startingIndex = null;
         this.#endingIndex = null;
         this.#renderId = null;
+
+        this.onRenderNode = onRenderNode;
 
         this.#viewport.on("scroll", topic => {
             this.render();
@@ -161,6 +169,12 @@ export default class VirtualViewport extends Component {
 
         if(addedNodes.length) {
             this.publish("added-nodes", {topic: "added-nodes", viewport: this, addedNodes});
+        }
+
+        if(this.onRenderNode) {
+            for (let i = this.#startingIndex, l = this.#endingIndex; i < l; i++) {
+                this.onRenderNode(this.#rows.getNode(i));
+            }
         }
     }
 
@@ -340,6 +354,7 @@ export class VirtualNodeList {
 
     getNodeIndexAtPosition(position) {
         if(typeof this.#rowHeight === 'function') {
+            this.#computeRowDetails();
             return VirtualNodeList.searchForRowIndex(this, position);
         } else {
             let index = Math.floor(position / this.#rowHeight);
@@ -361,22 +376,27 @@ export class VirtualNodeList {
             return;
         }
 
-        this.#rowDetails = [];
-        let position = 0;
+        let details = VirtualNodeList.getComputedRowDetails(this.#rowHeight, this, this, 0, this.getLength());
+        this.#rowDetails = details.details;
+        this.#height = details.height;
+    }
 
-        for(let i = 0; i < this.getLength(); i++) {
-            let row = this.getNode(i),
-                height = this.#rowHeight.call(this, i, row);
+    static getComputedRowDetails(rowHeight, model, that, start, stop) {
+        let details = [],
+            position = 0;
 
-            this.#rowDetails.push({
-                position,
-                height
+        for(let i = start; i < stop; start++) {
+            let height = rowHeight.call(that, model, i);
+
+            details.push({
+                height,
+                position
             });
 
             position += height;
         }
 
-        this.#height = position;
+        return {details, height: position};
     }
 
     static searchForRowIndex(virtualNodeList, pos) {

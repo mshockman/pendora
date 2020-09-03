@@ -21,7 +21,7 @@ export default class PageDataGrid {
 
         let model = new DataModel(columns, this.buildTestData(100000), 34);
 
-        let grid = new DataGrid(model, {resizeable: true, sortable: true, tableSort: true});
+        let grid = new DataGrid(model,{resizeable: true, sortable: true, tableSort: true});
 
         grid.appendTo("#data-grid-container1");
         grid.render();
