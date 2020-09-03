@@ -41,6 +41,8 @@ export default class DataGrid {
         this.#dataGridHeader.on("sort-change", topic => {
             let columns = [];
 
+            console.log("sort-change");
+
             for(let column of topic.columns) {
                 columns.push(column.column);
             }
@@ -71,7 +73,8 @@ export default class DataGrid {
     }
 
     render() {
-
+        this.#dataGridHeader.render();
+        this.#dataGridView.render();
     }
 
     get element() {

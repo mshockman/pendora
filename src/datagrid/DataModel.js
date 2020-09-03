@@ -1,4 +1,4 @@
-import Publisher from "../core/Publisher";
+import DataGridRow from "./DataGridRow";
 
 
 export default class DataModel {
@@ -39,13 +39,8 @@ export default class DataModel {
     setColumns(columns) {
         this.#columns = columns;
     }
-}
 
-
-class DataModelInterface {
-    getItem(index) {}
-
-    getLength() {}
-
-    getRowHeight() {}
+    rowFactory(list, model, data, index) {
+        return new DataGridRow(model, data, index);
+    }
 }

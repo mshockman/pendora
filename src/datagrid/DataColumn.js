@@ -1,5 +1,5 @@
 import Publisher from "../core/Publisher";
-import {addClasses, clamp} from "../core/utility";
+import {clamp} from "../core/utility";
 import DataGridCell from "./DataGridCell";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
 
@@ -19,10 +19,8 @@ export default class DataColumn extends Publisher {
     #columnId;
 
     #parent;
-    #columnFactory;
-    #cellFactory;
 
-    constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, columnFactory=null, cellFactory=null, ...options}={}) {
+    constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, ...options}={}) {
         super();
         this.#key = key;
         this.#label = label;
@@ -40,9 +38,6 @@ export default class DataColumn extends Publisher {
         this.#columnClasses = columnClasses;
         this.#cellClasses = cellClasses;
         this.#columnId = columnId;
-
-        this.#columnFactory = columnFactory || DataColumn.defaultColumnFactory;
-        this.#cellFactory = cellFactory || DataColumn.defaultCellFactory;
 
         Object.assign(this, options);
     }
@@ -99,14 +94,6 @@ export default class DataColumn extends Publisher {
         return this.#sortable;
     }
 
-    get cellFactory() {
-        return this.#cellFactory;
-    }
-
-    get columnFactory() {
-        return this.#columnFactory;
-    }
-
     get columnClasses() {
         return this.#columnClasses;
     }
@@ -125,7 +112,7 @@ export default class DataColumn extends Publisher {
      * @param column {DataColumn}
      * @returns {DataGridHeaderColumn}
      */
-    static defaultColumnFactory(model, column) {
+    columnFactory(model, column) {
         return new DataGridHeaderColumn(model, column);
     }
 
@@ -134,7 +121,7 @@ export default class DataColumn extends Publisher {
      * @param data {Object}
      * @returns {DataGridCell}
      */
-    static defaultCellFactory(column, data) {
+    cellFactory(column, data) {
         return new DataGridCell(column, data);
     }
 }

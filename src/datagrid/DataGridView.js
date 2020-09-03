@@ -11,7 +11,7 @@ export default class DataGridView extends Publisher {
     #model;
     #preprocessRows;
 
-    constructor(model=null, {padding=500, rowFactory=null, preprocessRows=false}={}) {
+    constructor(model=null, {padding=500, preprocessRows=false}={}) {
         super();
 
         this.#element = document.createElement("div");
@@ -38,10 +38,6 @@ export default class DataGridView extends Publisher {
         this.#viewport.setNodes(this.#nodeList);
     }
 
-    getModel() {
-        return this.#model;
-    }
-
     appendTo(selector) {
         if(typeof selector === 'string') {
             document.querySelector(selector).appendChild(this.element);
@@ -59,6 +55,10 @@ export default class DataGridView extends Publisher {
     get element() {
         return this.#element;
     }
+
+    get model() {
+        return this.#model;
+    }
 }
 
 
@@ -70,7 +70,6 @@ class DataGridRowList {
     #rowMap;
     #elementToRowMap;
     #preprocessRows;
-    #rowFactory;
 
     // computed details
     #height;
@@ -83,10 +82,6 @@ class DataGridRowList {
         this.#model = null;
         this.#rowDetails = null;
         this.#preprocessRows = preprocessRows;
-
-        this.#rowFactory = rowFactory || function(list, model, data, index) {
-            return new DataGridRow(model, data, index);
-        };
 
         if(model) {
             this.setModel(model);
@@ -115,7 +110,7 @@ class DataGridRowList {
         let row = this.#rowMap.get(data);
 
         if(!row) {
-            row = this.#rowFactory(this, this.#model, data, index);
+            row = this.#model.rowFactory(this, this.#model, data, index);
             this.#rowMap.set(data, row);
             this.#elementToRowMap.set(row.element, row);
         }

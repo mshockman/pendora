@@ -11,7 +11,8 @@ export default class VirtualViewport extends Component {
     #viewport;
     #rows;
 
-    #overflow;
+    #offset;
+    #precision;
     #virtualizationEnabled;
 
     #rowDetails;
@@ -20,13 +21,14 @@ export default class VirtualViewport extends Component {
     #endingIndex;
 
     #renderId;
+    #renderer;
 
     /**
      * @type {null|function}
      */
     onRenderNode = null;
 
-    constructor(nodeList, {overflow=500, virtualizationEnabled=true, onRenderNode}={}) {
+    constructor(nodeList, {offset=500, virtualizationEnabled=true, onRenderNode, renderer=addAndRemoveRenderFunction, precision=1}={}) {
         super(document.createElement("div"));
         this.addClass("virtual-viewport");
 
@@ -35,7 +37,8 @@ export default class VirtualViewport extends Component {
         this.#viewport.appendTo(this.element);
         this.#rows = nodeList;
         this.#rowDetails = null;
-        this.#overflow = overflow;
+        this.#offset = offset;
+        this.#precision = precision;
         this.#virtualizationEnabled = virtualizationEnabled;
 
         this.#startingIndex = null;
@@ -43,6 +46,7 @@ export default class VirtualViewport extends Component {
         this.#renderId = null;
 
         this.onRenderNode = onRenderNode;
+        this.#renderer = renderer;
 
         this.#viewport.on("scroll", topic => {
             this.render();
@@ -70,112 +74,43 @@ export default class VirtualViewport extends Component {
     }
 
     #render() {
-        let start = this.#rows.getNodeIndexAtPosition(this.#viewport.scrollTop - this.#overflow),
-            end = this.#rows.getNodeIndexAtPosition(this.#viewport.scrollTop + this.#viewport.offsetHeight + this.#overflow);
+        let startPos = Math.floor(((this.#viewport.scrollTop - this.#offset) / this.#precision)) * this.#precision,
+            endPos = Math.ceil(((this.#viewport.scrollTop + this.#viewport.offsetHeight + this.#offset) / this.#precision)) * this.#precision;
 
-        if(start === this.#startingIndex && end === this.#endingIndex) return;
+        let start = this.#rows.getNodeIndexAtPosition(startPos),
+            end = this.#rows.getNodeIndexAtPosition(endPos),
+            rowLength = this.#rows.getLength();
 
-        if(start < 0) start = 0;
-        if(end < 0) end = this.#rows.getLength();
+        if(start >= 0 && end === -1) {
+            end = rowLength;
+        }
 
-        if(start === end) {
+        if(end >= 0 && start === -1) {
+            start = 0;
+        }
+
+        if(start >= end) {
             this.#viewport.emptyViewport();
+            this.#startingIndex = 0;
+            this.#endingIndex = 0;
             return;
         }
 
-        let removedNodes = [],
-            addedNodes = [],
-            prependNodes = document.createDocumentFragment(),
-            appendNodes = document.createDocumentFragment(),
-            prepend = false,
-            append = false;
+        start = Math.max(0, start);
+        end = Math.min(end, rowLength);
 
-        if(this.#startingIndex !== null) {
-            // Remove nodes before new starting
-            if (this.#startingIndex < start) {
-                for (let i = this.#startingIndex, l = Math.min(this.#endingIndex, start); i < l; i++) {
-                    let node = this.#rows.getNode(i);
-
-                    try {
-                        this.#viewport.removeChild(node);
-                    } catch(e) {}
-
-                    removedNodes.push(node);
-                }
-            }
-
-            // Remove Nodes after new ending
-            if (this.#endingIndex > end) {
-                for (let i = end, l = this.#endingIndex; i < l; i++) {
-                    let node = this.#rows.getNode(i);
-
-                    try {
-                        this.#viewport.removeChild(node);
-                    } catch(e) {}
-
-                    removedNodes.push(node);
-                }
-            }
-
-            // Add nodes after new starting but before old starting.
-            if (start < this.#startingIndex) {
-                prepend = true;
-
-                for (let i = Math.max(start, 0), l = Math.min(end, this.#startingIndex, this.#rows.getLength()); i < l; i++) {
-                    let node = this.#rows.getNode(i),
-                        position = this.#rows.getNodePosition(i),
-                        height = this.#rows.getNodeHeight(i);
-
-                    node.style.transform = `translateY(${position}px)`;
-                    node.style.height = height + "px";
-                    prependNodes.appendChild(node);
-                    addedNodes.push(node);
-                }
-            }
+        if(start === this.#startingIndex && end === this.#endingIndex) {
+            this.#refreshRows();
+            return;
         }
 
-        // Add nodes before new ending but after old ending.
-        if(end > this.#endingIndex) {
-            append = true;
-
-            for(let i = Math.max(this.#endingIndex === null ? -1 : this.#endingIndex, start, 0); i < Math.min(end, this.#rows.getLength()); i++) {
-                let node = this.#rows.getNode(i),
-                    position = this.#rows.getNodePosition(i),
-                    height = this.#rows.getNodeHeight(i);
-
-                node.style.transform = `translateY(${position}px)`;
-                node.style.height = height + "px";
-                appendNodes.appendChild(node);
-                addedNodes.push(node);
-            }
-        }
+        this.#renderer(this.#viewport, this.#startingIndex, this.#endingIndex, this.#rows, start, end);
 
         this.#viewport.innerHeight = this.#rows.getHeight();
-
-        if(prepend) {
-            this.#viewport.prependChild(prependNodes);
-        }
-
-        if(append) {
-            this.#viewport.appendChild(appendNodes);
-        }
-
         this.#startingIndex = start;
         this.#endingIndex = end;
 
-        if(removedNodes.length) {
-            this.publish("removed-nodes", {topic: "removed-nodes", viewport: this, removedNodes});
-        }
-
-        if(addedNodes.length) {
-            this.publish("added-nodes", {topic: "added-nodes", viewport: this, addedNodes});
-        }
-
-        if(this.onRenderNode) {
-            for (let i = this.#startingIndex, l = this.#endingIndex; i < l; i++) {
-                this.onRenderNode(this.#rows.getNode(i));
-            }
-        }
+        this.#refreshRows();
     }
 
     appendChild(element) {
@@ -188,6 +123,14 @@ export default class VirtualViewport extends Component {
 
     getLength() {
         return this.#rows.getLength();
+    }
+
+    #refreshRows() {
+        if(this.onRenderNode) {
+            for (let i = this.#startingIndex, l = this.#endingIndex; i < l; i++) {
+                this.onRenderNode(this.#rows.getNode(i));
+            }
+        }
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -232,6 +175,14 @@ export default class VirtualViewport extends Component {
     set scrollTop(value) {
         this.#viewport.scrollTop = value;
         this.render();
+    }
+
+    get rows() {
+        return this.#rows;
+    }
+
+    get viewport() {
+        return this.#viewport;
     }
 }
 
@@ -401,7 +352,8 @@ export class VirtualNodeList {
 
     static searchForRowIndex(virtualNodeList, pos) {
         let start = 0,
-            end = virtualNodeList.getLength();
+            end = virtualNodeList.getLength(),
+            index = -1;
 
         while(start < end) {
             let index = Math.floor((end-start) / 2),
@@ -418,6 +370,98 @@ export class VirtualNodeList {
             }
         }
 
-        return -1;
+        return index;
+    }
+}
+
+
+export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex, rows, start, end) {
+    let prependNodes = document.createDocumentFragment(),
+        appendNodes = document.createDocumentFragment(),
+        prepend = false,
+        append = false,
+        rowLength = rows.getLength();
+
+    if(startingIndex !== null) {
+        // Remove nodes before new starting
+        if (startingIndex < start) {
+            for (let i = startingIndex, l = Math.min(endingIndex, start); i < l; i++) {
+                let node = rows.getNode(i);
+
+                try {
+                    viewport.removeChild(node);
+                } catch(e) {}
+            }
+        }
+
+        // Remove Nodes after new ending
+        if (endingIndex > end) {
+            for (let i = Math.max(end, startingIndex), l = endingIndex; i < l; i++) {
+                let node = rows.getNode(i);
+
+                try {
+                    viewport.removeChild(node);
+                } catch(e) {}
+            }
+        }
+
+        // Add nodes after new starting but before old starting.
+        if (start < startingIndex) {
+            prepend = true;
+
+            for (let i = Math.max(start, 0), l = Math.min(end, startingIndex, rowLength); i < l; i++) {
+                let node = rows.getNode(i),
+                    position = rows.getNodePosition(i),
+                    height = rows.getNodeHeight(i);
+
+                node.style.transform = `translateY(${position}px)`;
+                node.style.height = height + "px";
+                prependNodes.appendChild(node);
+            }
+        }
+    }
+
+    // Add nodes before new ending but after old ending.
+    if(end > endingIndex) {
+        append = true;
+
+        for(let i = Math.max(endingIndex === null ? -1 : endingIndex, start, 0); i < Math.min(end, rowLength); i++) {
+            let node = rows.getNode(i),
+                position = rows.getNodePosition(i),
+                height = rows.getNodeHeight(i);
+
+            node.style.transform = `translateY(${position}px)`;
+            node.style.height = height + "px";
+            appendNodes.appendChild(node);
+        }
+    }
+
+    if(prepend) {
+        viewport.prependChild(prependNodes);
+    }
+
+    if(append) {
+        viewport.appendChild(appendNodes);
+    }
+}
+
+
+export function simpleRenderFunction(viewport, startingIndex, endingIndex, rows, start, end) {
+    viewport.emptyViewport();
+
+    if(end > start) {
+        let fragment = document.createDocumentFragment();
+
+        for (let i = start; i < end; i++) {
+            let node = rows.getNode(i),
+                position = rows.getNodePosition(i),
+                height = rows.getNodeHeight(i);
+
+            node.style.transform = `translateY(${position}px)`;
+            node.style.height = height + "px";
+            fragment.appendChild(node);
+        }
+
+        viewport.appendChild(fragment);
     }
 }

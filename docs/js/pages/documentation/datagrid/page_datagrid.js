@@ -1,7 +1,6 @@
 import {randomChoice} from "../../../../../src/core/utility";
 import DataColumn from "../../../../../src/datagrid/DataColumn";
 import DataModel from "../../../../../src/datagrid/DataModel";
-import DataGridHeader from "../../../../../src/datagrid/DataGridHeader";
 import DataGrid from "../../../../../src/datagrid/DataGrid";
 
 
