@@ -18,6 +18,9 @@ import {arraysEqual, clamp} from "../core/utility";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
 
 
+let HEADER_COLUMN_CACHE = new WeakMap();
+
+
 export default class DataGridHeader extends Publisher {
     #element;
     #body;
@@ -73,29 +76,19 @@ export default class DataGridHeader extends Publisher {
         }
 
         this.#model = model;
-
-        let headerColumns = [];
-
-        for(let i = 0, l = this.#model.getColumnLength(); i < l; i++) {
-            let column = this.#model.getColumn(i);
-            headerColumns.push(column.columnFactory(this, this.#model));
-        }
-
-        this.setColumns(headerColumns);
+        this.setColumns(this.#model.getColumns());
         this.render();
     }
 
     clearColumns() {
-        for(let headerColumn of this.#columns.slice()) {
-            this.#detachHeaderColumn(headerColumn);
+        while(this.#columns.length) {
+            this.removeColumn(this.#columns[this.#columns.length-1].column);
         }
-
-        this.#columns = [];
     }
 
     /**
      *
-     * @param columns {DataGridHeaderColumn[]}
+     * @param columns {DataColumnInterface}
      */
     setColumns(columns) {
         this.clearColumns();
@@ -109,34 +102,32 @@ export default class DataGridHeader extends Publisher {
 
     /**
      * Appends a DataHeaderColumn to the header instance.
-     * @param column {DataGridHeaderColumn}
+     * @param column {DataColumnInterface}
      */
     appendColumn(column) {
-        if(column.parent) {
-            column.parent.removeColumn(column);
-        }
-
-        this.#attachHeaderColumn(column);
-
-        this.#columns.push(column);
-        column.appendTo(this.#body);
+        let headerColumn = column.columnFactory(this, this.#model);
+        this.#attachHeaderColumn(headerColumn);
+        this.#columns.push(headerColumn);
+        headerColumn.appendTo(this.#body);
     }
 
     /**
      * Removes the DataHeaderColumn from the header.
-     * @param column {DataGridHeaderColumn}
+     * @param column {DataColumnInterface}
      */
     removeColumn(column) {
-        if(column.parent !== this) {
-            throw new Error("Could not remove. Column was not found to header.");
+        let index = this.#getColumnIndex(column);
+
+        if(index === -1) {
+            return;
         }
 
-        this.#detachHeaderColumn(column);
+        let headerColumn = this.#columns[index];
 
-        let index = this.#columns.indexOf(column);
+        this.#detachHeaderColumn(headerColumn);
 
-        if(column.element.parentElement) {
-            column.element.parentElement.removeChild(column.element);
+        if(headerColumn.element.parentElement) {
+            headerColumn.element.parentElement.removeChild(headerColumn.element);
         }
 
         this.#columns.splice(index, 1);
@@ -170,21 +161,36 @@ export default class DataGridHeader extends Publisher {
         return r;
     }
 
+    getColumnFromElement(element) {
+        return this.#columnElementMap.get(element);
+    }
+
+    #getColumnIndex(column) {
+        for(let i = 0, l = this.#columns.length; i < l; i++) {
+            let headerColumn = this.#columns[i];
+            if(headerColumn === column) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     /**
      *
      * @param headerColumn
      * @returns {DataGridHeaderColumn}
      */
     #attachHeaderColumn(headerColumn) {
-        let cache = DataGridHeaderColumn.getCache(headerColumn);
+        let cache = HEADER_COLUMN_CACHE.get(headerColumn);
 
         if(cache) {
-            throw Error("Header column is already bound to parent.");
+            throw Error("Header column is already bound.");
         }
 
-        cache = {parent: this};
+        cache = {};
 
-        DataGridHeaderColumn.setCache(headerColumn, cache);
+        HEADER_COLUMN_CACHE.set(headerColumn, cache);
 
         cache.onResizeStart = () => {
             this.#minInnerWidth = this.innerWidth;
@@ -230,13 +236,13 @@ export default class DataGridHeader extends Publisher {
     }
 
     #detachHeaderColumn(headerColumn) {
-        let cache = DataGridHeaderColumn.getCache(headerColumn);
+        let cache = HEADER_COLUMN_CACHE.get(headerColumn);
 
         if(cache) {
             headerColumn.off('resize-start', cache.onResizeStart);
             headerColumn.off('resize', cache.onResize);
             headerColumn.off('resize-complete', cache.onResizeComplete);
-            DataGridHeaderColumn.removeCache(headerColumn);
+            HEADER_COLUMN_CACHE.delete(headerColumn);
             this.#columnElementMap.delete(headerColumn.element);
         }
     }
@@ -245,7 +251,7 @@ export default class DataGridHeader extends Publisher {
         let r = [];
 
         for(let child of this.#body.children) {
-            let column = this.#columnElementMap.get(child);
+            let column = this.getColumnFromElement(child);
 
             if(column) {
                 r.push(column);

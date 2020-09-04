@@ -5,11 +5,9 @@
 export default class DataGridHeaderColumnInterface {
     appendTo(selector) {}
 
-    render(clean=false) {}
+    render() {}
 
     get width() {}
-
-    set width(width) {}
 
     get element() {}
 

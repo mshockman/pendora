@@ -106,7 +106,7 @@ export default class DataColumn extends Publisher {
      * @returns {DataGridHeaderColumn}
      */
     columnFactory(header, model) {
-        return new DataGridHeaderColumn(model, this);
+        return new DataGridHeaderColumn(header, model, this);
     }
 
     /**

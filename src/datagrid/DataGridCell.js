@@ -17,6 +17,10 @@ export default class DataGridCell {
         this.setWidth(column.width);
     }
 
+    render() {
+        // do nothing.
+    }
+
     appendTo(selector) {
         if(typeof selector === 'string') {
             document.querySelector(selector).appendChild(this.element);

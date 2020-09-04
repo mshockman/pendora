@@ -58,6 +58,8 @@ export default class DataGridRow {
             if(this.#cells[i] !== cell) {
                 append = true;
             }
+
+            cell.render();
         }
 
         this.#cells = cells;

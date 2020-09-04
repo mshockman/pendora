@@ -6,6 +6,8 @@ export default class DataGridCellInterface {
 
     setWidth(width) {}
 
+    render() {}
+
     get column() {}
 
     get element() {}
