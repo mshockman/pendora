@@ -188,62 +188,6 @@ export default class VirtualViewport extends Component {
 
 
 /**
- * @interface
- */
-export class VirtualNodeListInterface {
-    /**
-     * Appends the node to the end of the list.
-     * @abstract
-     * @param node {Element}
-     */
-    append(node) {}
-
-    /**
-     * Returns the number of nodes in the list.
-     * @abstract
-     * @returns {Number}
-     */
-    getLength() {}
-
-    /**
-     * Returns the total height of all of the rows.
-     * @abstract
-     * @returns {Number}
-     */
-    getHeight() {}
-
-    /**
-     * Returns the node at the given index or null if outside of range.
-     * @param index {Number}
-     * @returns {Element|null}
-     */
-    getNode(index) {}
-
-    /**
-     * Returns the height of the node at the given index or null if outside of range.
-     * @abstract
-     * @param index {Number}
-     * @returns {Number|null}
-     */
-    getNodeHeight(index) {}
-
-    /**
-     * Returns the starting position of the node at the given index or null if the index is outside of range.
-     * @abstract
-     * @param index {Number}
-     * @returns {Number|null}
-     */
-    getNodePosition(index) {}
-
-    /**
-     * Returns the index of the node at the given position or -1 if it fall outside of range.
-     * @param pos
-     */
-    getNodeIndexAtPosition(pos) {}
-}
-
-
-/**
  * @implements VirtualNodeListInterface
  */
 export class VirtualNodeList {
@@ -375,18 +319,27 @@ export class VirtualNodeList {
 }
 
 
-export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex, rows, start, end) {
+/**
+ *
+ * @param viewport {Viewport}
+ * @param startingIndex {Number}
+ * @param endingIndex {Number}
+ * @param nodeList {VirtualNodeListInterface}
+ * @param start {Number}
+ * @param end {Number}
+ */
+export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex, nodeList, start, end) {
     let prependNodes = document.createDocumentFragment(),
         appendNodes = document.createDocumentFragment(),
         prepend = false,
         append = false,
-        rowLength = rows.getLength();
+        rowLength = nodeList.getLength();
 
     if(startingIndex !== null) {
         // Remove nodes before new starting
         if (startingIndex < start) {
             for (let i = startingIndex, l = Math.min(endingIndex, start); i < l; i++) {
-                let node = rows.getNode(i);
+                let node = nodeList.getNode(i);
 
                 try {
                     viewport.removeChild(node);
@@ -397,7 +350,7 @@ export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex,
         // Remove Nodes after new ending
         if (endingIndex > end) {
             for (let i = Math.max(end, startingIndex), l = endingIndex; i < l; i++) {
-                let node = rows.getNode(i);
+                let node = nodeList.getNode(i);
 
                 try {
                     viewport.removeChild(node);
@@ -410,9 +363,9 @@ export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex,
             prepend = true;
 
             for (let i = Math.max(start, 0), l = Math.min(end, startingIndex, rowLength); i < l; i++) {
-                let node = rows.getNode(i),
-                    position = rows.getNodePosition(i),
-                    height = rows.getNodeHeight(i);
+                let node = nodeList.getNode(i),
+                    position = nodeList.getNodePosition(i),
+                    height = nodeList.getNodeHeight(i);
 
                 node.style.transform = `translateY(${position}px)`;
                 node.style.height = height + "px";
@@ -426,9 +379,9 @@ export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex,
         append = true;
 
         for(let i = Math.max(endingIndex === null ? -1 : endingIndex, start, 0); i < Math.min(end, rowLength); i++) {
-            let node = rows.getNode(i),
-                position = rows.getNodePosition(i),
-                height = rows.getNodeHeight(i);
+            let node = nodeList.getNode(i),
+                position = nodeList.getNodePosition(i),
+                height = nodeList.getNodeHeight(i);
 
             node.style.transform = `translateY(${position}px)`;
             node.style.height = height + "px";
@@ -446,6 +399,15 @@ export function addAndRemoveRenderFunction(viewport, startingIndex, endingIndex,
 }
 
 
+/**
+ *
+ * @param viewport {Viewport}
+ * @param startingIndex {Number}
+ * @param endingIndex {Number}
+ * @param rows {VirtualNodeListInterface}
+ * @param start {Number}
+ * @param end {Number}
+ */
 export function simpleRenderFunction(viewport, startingIndex, endingIndex, rows, start, end) {
     viewport.emptyViewport();
 

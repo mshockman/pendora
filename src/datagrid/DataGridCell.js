@@ -1,5 +1,6 @@
-
-
+/**
+ * @implements DataGridCellInterface
+ */
 export default class DataGridCell {
     #element;
     #column;

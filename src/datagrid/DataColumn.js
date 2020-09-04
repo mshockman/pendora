@@ -4,6 +4,9 @@ import DataGridCell from "./DataGridCell";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
 
 
+/**
+ * @implements DataColumnInterface
+ */
 export default class DataColumn extends Publisher {
     #key;
     #label;
@@ -17,8 +20,6 @@ export default class DataColumn extends Publisher {
     #columnClasses;
     #cellClasses;
     #columnId;
-
-    #parent;
 
     constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, ...options}={}) {
         super();
@@ -40,14 +41,6 @@ export default class DataColumn extends Publisher {
         this.#columnId = columnId;
 
         Object.assign(this, options);
-    }
-
-    _setParent(parent) {
-        this.#parent = parent;
-    }
-
-    get parent() {
-        return this.#parent;
     }
 
     get key() {
@@ -108,20 +101,20 @@ export default class DataColumn extends Publisher {
 
     /**
      *
+     * @param header
      * @param model {DataModel}
-     * @param column {DataColumn}
      * @returns {DataGridHeaderColumn}
      */
-    columnFactory(model, column) {
-        return new DataGridHeaderColumn(model, column);
+    columnFactory(header, model) {
+        return new DataGridHeaderColumn(model, this);
     }
 
     /**
-     * @param column {DataColumn}
+     * @param row
      * @param data {Object}
      * @returns {DataGridCell}
      */
-    cellFactory(column, data) {
-        return new DataGridCell(column, data);
+    cellFactory(row, data) {
+        return new DataGridCell(this, data);
     }
 }

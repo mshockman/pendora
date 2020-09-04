@@ -78,7 +78,7 @@ export default class DataGridHeader extends Publisher {
 
         for(let i = 0, l = this.#model.getColumnLength(); i < l; i++) {
             let column = this.#model.getColumn(i);
-            headerColumns.push(column.columnFactory(this.#model, column));
+            headerColumns.push(column.columnFactory(this, this.#model));
         }
 
         this.setColumns(headerColumns);

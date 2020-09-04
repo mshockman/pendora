@@ -7,6 +7,9 @@ import {addClasses} from "../core/utility";
 const HEADER_COLUMN_MAP = new WeakMap();
 
 
+/**
+ * @implements DataGridHeaderColumnInterface
+ */
 export default class DataGridHeaderColumn extends Publisher {
     #element;
     #resizer;

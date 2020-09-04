@@ -1,6 +1,9 @@
 import {addClasses, emptyElement} from "../core/utility";
 
 
+/**
+ * @implements DataGridRowInterface
+ */
 export default class DataGridRow {
     #element;
     #columnMap;
@@ -31,7 +34,7 @@ export default class DataGridRow {
 
         for(let i = 0, l = this.#model.getColumnLength(); i < l; i++) {
             let column = this.#model.getColumn(i),
-                cell = column.cellFactory.call(this, column, this.#data);
+                cell = column.cellFactory(this, this.#data);
 
             this.#columnMap.set(column, cell);
             cell.appendTo(fragment);

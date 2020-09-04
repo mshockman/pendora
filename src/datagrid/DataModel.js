@@ -1,6 +1,9 @@
 import DataGridRow from "./DataGridRow";
 
 
+/**
+ * @implements DataModelInterface
+ */
 export default class DataModel {
     #columns;
     #data;
