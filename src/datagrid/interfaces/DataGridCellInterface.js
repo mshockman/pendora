@@ -1,5 +1,6 @@
-
-
+/**
+ * @interface
+ */
 export default class DataGridCellInterface {
     appendTo(selector) {}
 
