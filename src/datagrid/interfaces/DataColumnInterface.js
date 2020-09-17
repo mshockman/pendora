@@ -17,6 +17,8 @@ export class DataColumnInterface {
     get cellClasses() {};
     get columnId() {};
 
+    get model() {};
+
     columnFactory(header, model) {};
-    cellFactory(row, data) {};
+    cellFactory(row, data, model) {};
 }

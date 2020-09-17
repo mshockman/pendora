@@ -34,7 +34,7 @@ export default class DataGridRow {
 
         for(let i = 0, l = this.#model.getColumnLength(); i < l; i++) {
             let column = this.#model.getColumn(i),
-                cell = column.cellFactory(this, this.#data);
+                cell = column.cellFactory(this, this.#data, this.#model);
 
             this.#columnMap.set(column, cell);
             cell.appendTo(fragment);

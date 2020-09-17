@@ -1,4 +1,3 @@
-import DataGridRow from "./DataGridRow";
 import Publisher from "../core/Publisher";
 import VirtualViewport, {VirtualNodeList} from "../core/ui/VirtualViewport";
 
@@ -34,6 +33,11 @@ export default class DataGridView extends Publisher {
 
     setModel(model) {
         this.#model = model;
+
+        this.#model.on('refresh', () => {
+            this.render();
+        });
+
         this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
         this.#viewport.setNodes(this.#nodeList);
     }

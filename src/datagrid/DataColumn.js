@@ -1,10 +1,11 @@
-import Publisher from "../core/Publisher";
 import {clamp} from "../core/utility";
-import DataGridCell from "./DataGridCell";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
+import DataGridCell from "./DataGridCell";
+import Publisher from "../core/Publisher";
 
 
 /**
+ * Basic DataColumn class.  Defines all of the base operations expected for a normal data grid column.
  * @implements DataColumnInterface
  */
 export default class DataColumn extends Publisher {
@@ -20,6 +21,7 @@ export default class DataColumn extends Publisher {
     #columnClasses;
     #cellClasses;
     #columnId;
+    #model;
 
     constructor({key, label, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, ...options}={}) {
         super();
@@ -41,6 +43,18 @@ export default class DataColumn extends Publisher {
         this.#columnId = columnId;
 
         Object.assign(this, options);
+    }
+
+    init(model) {
+        if(this.#model) {
+            throw new Error("Column is already bound to model.");
+        }
+
+        this.#model = model;
+    }
+
+    destroy() {
+        this.#model = null;
     }
 
     get key() {
@@ -116,5 +130,9 @@ export default class DataColumn extends Publisher {
      */
     cellFactory(row, data) {
         return new DataGridCell(this, data);
+    }
+
+    get model() {
+        return this.#model;
     }
 }

@@ -76,7 +76,7 @@ export default class DataGridHeader extends Publisher {
         }
 
         this.#model = model;
-        this.setColumns(this.#model.getColumns());
+        this.setColumns(this.#model.columns);
         this.render();
     }
 

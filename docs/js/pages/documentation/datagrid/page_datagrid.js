@@ -2,6 +2,7 @@ import {randomChoice} from "../../../../../src/core/utility";
 import DataColumn from "../../../../../src/datagrid/DataColumn";
 import DataModel from "../../../../../src/datagrid/DataModel";
 import DataGrid from "../../../../../src/datagrid/DataGrid";
+import CheckboxColumn from "../../../../../src/datagrid/CheckboxColumn";
 
 
 export default class PageDataGrid {
@@ -11,6 +12,7 @@ export default class PageDataGrid {
 
     load() {
         let columns = [
+            new CheckboxColumn({key: "selected"}),
             new DataColumn({key: "column1", label: "Column #1", minWidth: 100, maxWidth: null, width: 200, resizeable: true, tableSort: true, tableSortValue: "none", sortable: true}),
             new DataColumn({key: "column2", label: "Column #2", minWidth: 100, maxWidth: 500, width: 200, resizeable: true, tableSort: true, tableSortValue: "none", sortable: true}),
             new DataColumn({key: "column3", label: "Column #3", minWidth: 100, maxWidth: 500, width: 200, resizeable: true, tableSort: true, tableSortValue: "none", sortable: true}),
@@ -18,7 +20,7 @@ export default class PageDataGrid {
             new DataColumn({key: "column5", label: "Column #5", minWidth: 100, maxWidth: 500, width: 200, resizeable: true, tableSort: true, tableSortValue: "none", sortable: true}),
         ];
 
-        let model = new DataModel(columns, this.buildTestData(100000), 34);
+        let model = new DataModel(columns, this.buildTestData(1000), 34);
 
         let grid = new DataGrid(model,{resizeable: true, sortable: true, tableSort: true});
 
