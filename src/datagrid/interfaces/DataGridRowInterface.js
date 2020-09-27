@@ -6,6 +6,10 @@ export default class DataGridRowInterface {
 
     appendTo(selector) {}
 
+    getCellByElement(element) {}
+
+    getTargetCell(target) {}
+
     get element() {}
 
     get index() {}

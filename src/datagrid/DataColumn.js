@@ -129,7 +129,11 @@ export default class DataColumn extends Publisher {
      * @returns {DataGridCell}
      */
     cellFactory(row, data) {
-        return new DataGridCell(this, data);
+        return new DataGridCell(this, data, row);
+    }
+
+    onChange(event) {
+        console.log(event);
     }
 
     get model() {

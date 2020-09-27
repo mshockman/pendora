@@ -38,19 +38,6 @@ export default class DataGrid {
             this.#dataGridView.render();
         });
 
-        this.#dataGridHeader.on("sort-change", topic => {
-            let columns = [];
-
-            console.log("sort-change");
-
-            for(let column of topic.columns) {
-                columns.push(column.column);
-            }
-
-            this.#model.setColumns(columns);
-            this.#dataGridView.render();
-        });
-
         if(dataModel) {
             this.setModel(dataModel);
         }

@@ -11,11 +11,13 @@ export default class DataGridRow {
     #index;
     #model;
     #cells;
+    #elementToCellMap;
 
     constructor(model, data, index, {classes=null, id=null}={}) {
         this.#element = document.createElement("div");
         this.#element.className = "data-grid__row";
         this.#columnMap = new WeakMap();
+        this.#elementToCellMap = new WeakMap();
         this.#index = index;
         this.#cells = [];
 
@@ -37,6 +39,7 @@ export default class DataGridRow {
                 cell = column.cellFactory(this, this.#data, this.#model);
 
             this.#columnMap.set(column, cell);
+            this.#elementToCellMap.set(cell.element, cell);
             cell.appendTo(fragment);
             this.#cells.push(cell);
         }
@@ -100,5 +103,19 @@ export default class DataGridRow {
 
     get data() {
         return this.#data;
+    }
+
+    getCellByElement(element) {
+        return this.#elementToCellMap.get(element) || null;
+    }
+
+    getTargetCell(target) {
+        for(let cell of this.#cells) {
+            if(cell.element === target || cell.element.contains(target)) {
+                return cell;
+            }
+        }
+
+        return null;
     }
 }

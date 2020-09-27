@@ -14,17 +14,13 @@
 import Publisher from "../core/Publisher";
 import {clone} from "../core/ui/Draggable";
 import Sortable from "../core/ui/Sortable";
-import {arraysEqual, clamp} from "../core/utility";
+import {arraysEqual, clamp, emptyElement} from "../core/utility";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
-
-
-let HEADER_COLUMN_CACHE = new WeakMap();
 
 
 export default class DataGridHeader extends Publisher {
     #element;
     #body;
-    #columns;
     #model;
 
     #resizeable;
@@ -32,7 +28,8 @@ export default class DataGridHeader extends Publisher {
     #tableSort;
     #sorter;
 
-    #columnElementMap;
+    #elementToHeaderColumnMap;
+    #dataColumnToHeaderColumnMap;
 
     #minInnerWidth;
     #innerWidth;
@@ -51,9 +48,9 @@ export default class DataGridHeader extends Publisher {
         this.#innerWidth = null;
         this.#innerHeight = null;
 
-        this.#columnElementMap = new WeakMap();
+        this.#elementToHeaderColumnMap = new WeakMap();
+        this.#dataColumnToHeaderColumnMap = new WeakMap();
 
-        this.#columns = [];
         this.#resizeable = resizeable;
         this.#sortable = sortable;
         this.#tableSort = tableSort;
@@ -76,61 +73,13 @@ export default class DataGridHeader extends Publisher {
         }
 
         this.#model = model;
-        this.setColumns(this.#model.columns);
         this.render();
     }
 
     clearColumns() {
-        while(this.#columns.length) {
-            this.removeColumn(this.#columns[this.#columns.length-1].column);
-        }
-    }
-
-    /**
-     *
-     * @param columns {DataColumnInterface}
-     */
-    setColumns(columns) {
-        this.clearColumns();
-
-        if(columns) {
-            for(let column of columns) {
-                this.appendColumn(column);
-            }
-        }
-    }
-
-    /**
-     * Appends a DataHeaderColumn to the header instance.
-     * @param column {DataColumnInterface}
-     */
-    appendColumn(column) {
-        let headerColumn = column.columnFactory(this, this.#model);
-        this.#attachHeaderColumn(headerColumn);
-        this.#columns.push(headerColumn);
-        headerColumn.appendTo(this.#body);
-    }
-
-    /**
-     * Removes the DataHeaderColumn from the header.
-     * @param column {DataColumnInterface}
-     */
-    removeColumn(column) {
-        let index = this.#getColumnIndex(column);
-
-        if(index === -1) {
-            return;
-        }
-
-        let headerColumn = this.#columns[index];
-
-        this.#detachHeaderColumn(headerColumn);
-
-        if(headerColumn.element.parentElement) {
-            headerColumn.element.parentElement.removeChild(headerColumn.element);
-        }
-
-        this.#columns.splice(index, 1);
+        this.#dataColumnToHeaderColumnMap = new WeakMap();
+        this.#elementToHeaderColumnMap = new WeakMap();
+        emptyElement(this.#body);
     }
 
     appendTo(selector) {
@@ -144,8 +93,17 @@ export default class DataGridHeader extends Publisher {
     }
 
     render() {
-        for(let column of this.#columns) {
-            column.render();
+        let headerColumns = this.#listHeaderColumns(),
+            /** @type {null|DataGridHeaderColumn} */
+            previous = null;
+
+        for(let headerColumn of headerColumns) {
+            if(!headerColumn.element.parentElement) {
+                this.#body.insertBefore(headerColumn.element, previous ? previous.element.nextSibling : null)
+            }
+
+            previous = headerColumn;
+            headerColumn.render();
         }
 
         this.innerWidth = clamp(this.totalColumnWidth + this.#scrollBarPadding, this.#minInnerWidth, null);
@@ -154,26 +112,31 @@ export default class DataGridHeader extends Publisher {
     getColumnWidths() {
         let r = [];
 
-        for(let column of this.#columns) {
+        for(let column of this.#listHeaderColumns()) {
             r.push(column.width);
         }
 
         return r;
     }
 
-    getColumnFromElement(element) {
-        return this.#columnElementMap.get(element);
-    }
+    #listHeaderColumns() {
+        let r = [];
 
-    #getColumnIndex(column) {
-        for(let i = 0, l = this.#columns.length; i < l; i++) {
-            let headerColumn = this.#columns[i];
-            if(headerColumn === column) {
-                return i;
+        if(this.#model) {
+            for(let dataColumn of this.#model.columns) {
+                let headerColumn = this.#dataColumnToHeaderColumnMap.get(dataColumn);
+
+                if(!headerColumn) {
+                    headerColumn = dataColumn.columnFactory(this, this.#model);
+                    this.#attachHeaderColumn(headerColumn);
+                    this.#dataColumnToHeaderColumnMap.set(dataColumn, headerColumn);
+                }
+
+                r.push(headerColumn);
             }
         }
 
-        return -1;
+        return r;
     }
 
     /**
@@ -182,21 +145,11 @@ export default class DataGridHeader extends Publisher {
      * @returns {DataGridHeaderColumn}
      */
     #attachHeaderColumn(headerColumn) {
-        let cache = HEADER_COLUMN_CACHE.get(headerColumn);
-
-        if(cache) {
-            throw Error("Header column is already bound.");
-        }
-
-        cache = {};
-
-        HEADER_COLUMN_CACHE.set(headerColumn, cache);
-
-        cache.onResizeStart = () => {
+        headerColumn.on('resize-start', () => {
             this.#minInnerWidth = this.innerWidth;
-        };
+        });
 
-        cache.onResize = topic => {
+        headerColumn.on('resize', topic => {
             this.render();
 
             this.publish('resize', {
@@ -208,9 +161,9 @@ export default class DataGridHeader extends Publisher {
                 innerWidth: this.innerWidth,
                 innerHeight: this.innerHeight
             });
-        };
+        });
 
-        cache.onResizeComplete = topic => {
+        headerColumn.on('resize-complete', topic => {
             this.#minInnerWidth = null;
 
             this.render();
@@ -224,37 +177,21 @@ export default class DataGridHeader extends Publisher {
                 innerWidth: this.innerWidth,
                 innerHeight: this.innerHeight
             });
-        };
+        });
 
-        headerColumn.on('resize-start', cache.onResizeStart);
-        headerColumn.on('resize', cache.onResize);
-        headerColumn.on('resize-complete', cache.onResizeComplete);
-
-        this.#columnElementMap.set(headerColumn.element, headerColumn);
+        this.#elementToHeaderColumnMap.set(headerColumn.element, headerColumn);
 
         return headerColumn;
-    }
-
-    #detachHeaderColumn(headerColumn) {
-        let cache = HEADER_COLUMN_CACHE.get(headerColumn);
-
-        if(cache) {
-            headerColumn.off('resize-start', cache.onResizeStart);
-            headerColumn.off('resize', cache.onResize);
-            headerColumn.off('resize-complete', cache.onResizeComplete);
-            HEADER_COLUMN_CACHE.delete(headerColumn);
-            this.#columnElementMap.delete(headerColumn.element);
-        }
     }
 
     #compileColumnListFromDom() {
         let r = [];
 
         for(let child of this.#body.children) {
-            let column = this.getColumnFromElement(child);
+            let headerColumn = this.#elementToHeaderColumnMap.get(child);
 
-            if(column) {
-                r.push(column);
+            if(headerColumn) {
+                r.push(headerColumn.column);
             }
         }
 
@@ -269,29 +206,25 @@ export default class DataGridHeader extends Publisher {
             resistance: 25
         });
 
-        this.#sorter.on(['sort-append', 'sort-complete', 'sort-start'], () => {
-            this.#columns = this.#compileColumnListFromDom();
-        });
-
         let startingColumns = null;
 
         this.#sorter.on("sort-append", () => {
-            this.#columns = this.#compileColumnListFromDom();
-            this.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this});
+            this.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this, columns: this.#compileColumnListFromDom()});
         });
 
         this.#sorter.on('sort-start', () => {
-            this.#columns = this.#compileColumnListFromDom();
-            startingColumns = this.#columns.slice(0);
-            this.publish("sort-start", {topic: "sort-start", sorter: this.#sorter, target: this});
+            startingColumns = this.#compileColumnListFromDom();
+            this.publish("sort-start", {topic: "sort-start", sorter: this.#sorter, target: this, columns: startingColumns});
         });
 
         this.#sorter.on("sort-complete", topic => {
-            this.#columns = this.#compileColumnListFromDom();
-            this.publish("sort-complete", topic);
+            let columns = this.#compileColumnListFromDom();
+            this.publish("sort-complete", {...topic, columns});
 
-            if(!startingColumns || !arraysEqual(startingColumns, this.#columns)) {
-                this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter, columns: this.#columns});
+            if(!startingColumns || !arraysEqual(startingColumns, columns)) {
+                this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter, columns});
+                this.#model.setColumns(columns);
+                this.#model.refresh();
             }
 
             startingColumns = null;
@@ -307,12 +240,8 @@ export default class DataGridHeader extends Publisher {
         return this.#element;
     }
 
-    get columns() {
-        return this.#columns.slice(0);
-    }
-
-    get length() {
-        return this.#columns.length;
+    get model() {
+        return this.#model;
     }
 
     get scrollLeft() {

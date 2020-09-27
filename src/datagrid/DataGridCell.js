@@ -5,7 +5,7 @@ import DataGridCellBase from "./DataGridCellBase";
  * @implements DataGridCellInterface
  */
 export default class DataGridCell extends DataGridCellBase {
-    constructor(column, data) {
+    constructor(column, data, row) {
         let element = document.createElement("div");
         element.className = "data-grid__cell";
 
@@ -14,6 +14,6 @@ export default class DataGridCell extends DataGridCellBase {
         body.innerHTML = data[column.key];
         element.appendChild(body);
 
-        super(element, column);
+        super(element, column, row);
     }
 }

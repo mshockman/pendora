@@ -4,16 +4,19 @@ import DataColumn from "./DataColumn";
 
 
 export default class CheckboxColumn extends DataColumn {
+    #header;
+
     constructor({key, width=null, minWidth=0, maxWidth=Infinity, resizeable=false, tableSort=false, tableSortValue="none", sortable=false, columnClasses=null, cellClasses=null, columnId=null, ...options}={}) {
         super({key, label: "", width, minWidth, maxWidth, resizeable, tableSort, tableSortValue, sortable, columnClasses, cellClasses, columnId, ...options});
     }
 
     cellFactory(row, data) {
-        return new CheckboxCell(this, data);
+        return new CheckboxCell(this, data, row);
     }
 
     columnFactory(header, model) {
-        return new CheckboxHeaderColumn(header, model, this);
+        this.#header = new CheckboxHeaderColumn(header, model, this);
+        return this.#header;
     }
 
     getSelectedRows() {
@@ -37,8 +40,21 @@ export default class CheckboxColumn extends DataColumn {
     }
 
     destroy() {
+        this.#header = null;
         delete this.model.getSelectedRows;
         super.destroy();
+    }
+
+    get header() {
+        return this.#header;
+    }
+
+    get checked() {
+        return this.#header.checked;
+    }
+
+    set checked(value) {
+        this.#header.checked = value;
     }
 }
 
@@ -68,6 +84,14 @@ export class CheckboxHeaderColumn extends DataGridHeaderColumnBase {
             }
         });
     }
+
+    get checked() {
+        return this.#checkbox.checked;
+    }
+
+    set checked(value) {
+        this.#checkbox.checked = value;
+    }
 }
 
 
@@ -78,7 +102,7 @@ export class CheckboxCell extends DataGridCellBase {
     #data;
     #checkbox;
 
-    constructor(column, data) {
+    constructor(column, data, row) {
         let element = document.createElement("div"),
             checkbox = document.createElement("input");
 
@@ -87,7 +111,7 @@ export class CheckboxCell extends DataGridCellBase {
 
         element.appendChild(checkbox);
 
-        super(element, column);
+        super(element, column, row);
 
         this.#data = data;
         this.#checkbox = checkbox;
@@ -95,5 +119,30 @@ export class CheckboxCell extends DataGridCellBase {
 
     render() {
         this.#checkbox.checked = !!this.#data[this.column.key];
+    }
+
+    onChange(event) {
+        if(event.target === this.#checkbox) {
+            let checked = this.#checkbox.checked;
+
+            this.#data[this.column.key] = checked;
+
+            if(!checked) {
+                this.column.checked = false;
+            }
+        }
+    }
+
+    get value() {
+        let value = super.value;
+        return value != null ? value : false;
+    }
+
+    get checked() {
+        return this.value;
+    }
+
+    set checked(value) {
+        this.value = value;
     }
 }

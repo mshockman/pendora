@@ -10,6 +10,8 @@ export default class DataGridView extends Publisher {
     #model;
     #preprocessRows;
 
+    #cellEventHandler;
+
     constructor(model=null, {padding=500, preprocessRows=false}={}) {
         super();
 
@@ -29,6 +31,16 @@ export default class DataGridView extends Publisher {
         if(model) {
             this.setModel(model);
         }
+
+        this.#cellEventHandler = event => {
+            let cell = this.#getTargetCell(event.target);
+
+            if(cell && cell.onChange) {
+                cell.onChange(event);
+            }
+        };
+
+        this.#element.addEventListener("change", this.#cellEventHandler);
     }
 
     setModel(model) {
@@ -54,6 +66,16 @@ export default class DataGridView extends Publisher {
 
     render() {
         this.#viewport.render();
+    }
+
+    #getTargetCell(target) {
+        let row = this.#nodeList.getContainingRow(target);
+
+        if(row) {
+            return row.getTargetCell(target);
+        }
+
+        return null;
     }
 
     get element() {
@@ -124,6 +146,20 @@ class DataGridRowList {
 
     getRowByElement(element) {
         return this.#elementToRowMap.get(element);
+    }
+
+    getContainingRow(element) {
+        while(element) {
+            let r = this.getRowByElement(element);
+
+            if(r) {
+                return r;
+            }
+
+            element = element.parentElement;
+        }
+
+        return null;
     }
 
     append(node) {
