@@ -6,8 +6,15 @@ export function STOP() {
 }
 
 
+/**
+ * @implements PublisherInterface
+ */
 export default class Publisher {
     constructor() {
+        this[TOPICS] = {};
+    }
+
+    clearTopics() {
         this[TOPICS] = {};
     }
 
@@ -124,4 +131,24 @@ export default class Publisher {
             });
         }
     }
+}
+
+
+/**
+ * @interface
+ */
+class PublisherInterface {
+    on(topic, callback) {}
+
+    once(topic, callback) {}
+
+    off(topic, callback) {}
+
+    passTopic(target, topic) {}
+
+    publish(topic, ...args) {}
+
+    hasEvent(topic, callback) {}
+
+    clearTopics() {}
 }

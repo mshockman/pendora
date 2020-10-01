@@ -51,10 +51,12 @@ export default class DataColumn extends Publisher {
         }
 
         this.#model = model;
+        this.publish("init", {column: this});
     }
 
     destroy() {
         this.#model = null;
+        this.publish("destroy", {column: this});
     }
 
     get key() {
@@ -74,7 +76,16 @@ export default class DataColumn extends Publisher {
     }
 
     set width(width) {
-        this.#width = clamp(width, this.#minWidth, this.#maxWidth);
+        let newValue = clamp(width, this.#minWidth, this.#maxWidth),
+            oldValue = this.#width;
+
+        if(newValue !== oldValue) {
+            this.#width = width;
+
+            if(this.#model) {
+                this.#model.publish("col-resize", {topic: "resize", oldValue, newValue, column: this, model: this.#model});
+            }
+        }
     }
 
     get minWidth() {
@@ -94,7 +105,15 @@ export default class DataColumn extends Publisher {
     }
 
     set tableSortValue(value) {
-        this.#tableSortValue = value;
+        let oldValue = this.#tableSortValue;
+
+        if(value !== oldValue) {
+            this.#tableSortValue = value;
+
+            if(this.#model) {
+                this.#model.publish("table-sort", {topic: "table-sort", oldValue, newValue: value, column: this, model: this.#model});
+            }
+        }
     }
 
     get sortable() {

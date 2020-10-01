@@ -17,9 +17,9 @@ export class DataModelInterface {
 
     getColumnLength() {}
 
-    getColumns() {}
-
     setColumns(columns) {}
 
     rowFactory(list, model, data, index) {}
+
+    setData(data) {}
 }

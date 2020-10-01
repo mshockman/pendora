@@ -12,6 +12,8 @@ export default class DataGridView extends Publisher {
 
     #cellEventHandler;
 
+    #onRender;
+
     constructor(model=null, {padding=500, preprocessRows=false}={}) {
         super();
 
@@ -41,6 +43,10 @@ export default class DataGridView extends Publisher {
         };
 
         this.#element.addEventListener("change", this.#cellEventHandler);
+
+        this.#onRender = () => {
+            this.render();
+        };
     }
 
     setModel(model) {
@@ -49,6 +55,8 @@ export default class DataGridView extends Publisher {
         this.#model.on('refresh', () => {
             this.render();
         });
+
+        this.#model.on(['col-resize', 'column-change'], this.#onRender);
 
         this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
         this.#viewport.setNodes(this.#nodeList);

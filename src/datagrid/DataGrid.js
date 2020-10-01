@@ -34,10 +34,6 @@ export default class DataGrid {
         this.#dataGridView = new DataGridView();
         this.#dataGridView.appendTo(this.#bodyElement);
 
-        this.#dataGridHeader.on('resize', () => {
-            this.#dataGridView.render();
-        });
-
         if(dataModel) {
             this.setModel(dataModel);
         }

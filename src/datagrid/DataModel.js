@@ -2,28 +2,39 @@ import DataGridRow from "./DataGridRow";
 import Publisher from "../core/Publisher";
 
 
+/**
+ * @implements DataModelInterface
+ */
 export default class DataModel extends Publisher {
+    static COLUMN_CHANGE_TOPIC = "column-change";
+    static DATA_CHANGE_TOPIC = "data-change";
+    static REFRESH_TOPIC = "refresh";
+
     #columns;
     #data;
     #rowHeight;
 
     constructor(columns, data, rowHeight) {
         super();
-        this.#data = data;
+        this.#data = null;
         this.#rowHeight = rowHeight;
         this.#columns = [];
 
         if(columns) {
             this.setColumns(columns);
         }
+
+        if(data) {
+            this.setData(data);
+        }
     }
 
     refresh(args) {
         args = args || {};
 
-        this.publish("refresh", {
+        this.publish(DataModel.REFRESH_TOPIC, {
             ...args,
-            topic: "refresh",
+            topic: DataModel.REFRESH_TOPIC,
             model: this,
         });
     }
@@ -53,13 +64,22 @@ export default class DataModel extends Publisher {
     }
 
     setColumns(columns) {
-        while(this.#columns.length) {
-            this.removeColumn(this.#columns[this.#columns.length - 1]);
+        for(let column of this.#columns) {
+            column.destroy();
         }
 
+        this.#columns = [];
+
         for(let column of columns) {
-            this.appendColumn(column);
+            if(column.model) {
+                column.destroy();
+            }
+
+            column.init(this);
+            this.#columns.push(column);
         }
+
+        this.publish(DataModel.COLUMN_CHANGE_TOPIC, {target: this, columns: this.#columns});
     }
 
     removeColumn(column) {
@@ -68,6 +88,7 @@ export default class DataModel extends Publisher {
         if(index !== -1) {
             this.#columns.splice(index, 1);
             column.destroy();
+            this.publish(DataModel.COLUMN_CHANGE_TOPIC, {target: this, columns: this.#columns});
             return column;
         }
 
@@ -80,10 +101,18 @@ export default class DataModel extends Publisher {
         }
 
         column.init(this);
+
         this.#columns.push(column);
+        this.publish(DataModel.COLUMN_CHANGE_TOPIC, {target: this, columns: this.#columns});
     }
 
     prependColumn(column) {
+        if(column.model) {
+            column.destroy();
+        }
+
+        column.init(this);
+
         return this.insertColumn(column, 0);
     }
 
@@ -93,7 +122,9 @@ export default class DataModel extends Publisher {
         }
 
         column.init(this);
+
         this.#columns.splice(index, 0, [column]);
+        this.publish(DataModel.COLUMN_CHANGE_TOPIC, {target: this});
     }
 
     rowFactory(list, model, data, index) {
@@ -116,5 +147,10 @@ export default class DataModel extends Publisher {
         for(let row of this.data) {
             yield row;
         }
+    }
+
+    setData(data) {
+        this.publish(DataModel.DATA_CHANGE_TOPIC, {target: this});
+        this.#data = data;
     }
 }

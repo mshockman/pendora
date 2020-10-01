@@ -16,6 +16,7 @@ import {clone} from "../core/ui/Draggable";
 import Sortable from "../core/ui/Sortable";
 import {arraysEqual, clamp, emptyElement} from "../core/utility";
 import DataGridHeaderColumn from "./DataGridHeaderColumn";
+import DataModel from "./DataModel";
 
 
 export default class DataGridHeader extends Publisher {
@@ -36,6 +37,11 @@ export default class DataGridHeader extends Publisher {
     #innerHeight;
 
     #scrollBarPadding;
+
+    #onColumnChange;
+    #onResizeStart;
+    #onResize;
+    #onResizeComplete;
 
     constructor({model=null, resizeable=false, sortable=false, tableSort=false, scrollBarPadding=30}={}) {
         super();
@@ -64,15 +70,54 @@ export default class DataGridHeader extends Publisher {
         if(model) {
             this.setModel(model);
         }
+
+        let columnChangeQueueId = null;
+
+        this.#onColumnChange = () => {
+            if(!columnChangeQueueId) {
+                columnChangeQueueId = window.requestAnimationFrame(() => {
+                    columnChangeQueueId = null;
+
+                    this.clearColumns();
+                    this.render();
+                });
+            }
+        };
+
+        this.#onResizeComplete = () => {
+            this.#minInnerWidth = null;
+            this.render();
+        };
+
+        this.#onResize = () => {
+            this.render();
+        };
+
+        this.#onResizeStart = () => {
+            this.#minInnerWidth = this.innerWidth;
+        };
     }
 
     setModel(model) {
         if(this.#model) {
+            this.#model.off(DataModel.COLUMN_CHANGE_TOPIC, this.#onColumnChange);
+            this.#model.off('col-resize-start', this.#onResizeStart);
+            this.#model.off('col-resize', this.#onResize);
+            this.#model.off('col-resize-complete', this.#onResizeComplete);
             this.clearColumns();
             this.#model = null;
         }
 
-        this.#model = model;
+        if(model) {
+            this.#model = model;
+            this.#model.on(DataModel.COLUMN_CHANGE_TOPIC, this.#onColumnChange);
+            this.#model.on('col-resize-start', this.#onResizeStart);
+            this.#model.on('col-resize', this.#onResize);
+            this.#model.on('col-resize-complete', this.#onResizeComplete);
+        } else {
+            this.#model = null;
+        }
+
         this.render();
     }
 
@@ -128,7 +173,8 @@ export default class DataGridHeader extends Publisher {
 
                 if(!headerColumn) {
                     headerColumn = dataColumn.columnFactory(this, this.#model);
-                    this.#attachHeaderColumn(headerColumn);
+
+                    this.#elementToHeaderColumnMap.set(headerColumn.element, headerColumn);
                     this.#dataColumnToHeaderColumnMap.set(dataColumn, headerColumn);
                 }
 
@@ -137,51 +183,6 @@ export default class DataGridHeader extends Publisher {
         }
 
         return r;
-    }
-
-    /**
-     *
-     * @param headerColumn
-     * @returns {DataGridHeaderColumn}
-     */
-    #attachHeaderColumn(headerColumn) {
-        headerColumn.on('resize-start', () => {
-            this.#minInnerWidth = this.innerWidth;
-        });
-
-        headerColumn.on('resize', topic => {
-            this.render();
-
-            this.publish('resize', {
-                ...topic,
-                header: this,
-                headerColumn: headerColumn,
-                scrollLeft: this.scrollLeft,
-                scrollTop: this.scrollTop,
-                innerWidth: this.innerWidth,
-                innerHeight: this.innerHeight
-            });
-        });
-
-        headerColumn.on('resize-complete', topic => {
-            this.#minInnerWidth = null;
-
-            this.render();
-
-            this.publish('resize-complete', {
-                ...topic,
-                header: this,
-                headerColumn: headerColumn,
-                scrollLeft: this.scrollLeft,
-                scrollTop: this.scrollTop,
-                innerWidth: this.innerWidth,
-                innerHeight: this.innerHeight
-            });
-        });
-
-        this.#elementToHeaderColumnMap.set(headerColumn.element, headerColumn);
-
-        return headerColumn;
     }
 
     #compileColumnListFromDom() {
@@ -209,22 +210,21 @@ export default class DataGridHeader extends Publisher {
         let startingColumns = null;
 
         this.#sorter.on("sort-append", () => {
-            this.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this, columns: this.#compileColumnListFromDom()});
+            this.#model.publish("sort-append", {topic: "sort-append", sorter: this.#sorter, target: this, columns: this.#compileColumnListFromDom()});
         });
 
         this.#sorter.on('sort-start', () => {
             startingColumns = this.#compileColumnListFromDom();
-            this.publish("sort-start", {topic: "sort-start", sorter: this.#sorter, target: this, columns: startingColumns});
+            this.#model.publish("col-sort-start", {topic: "sort-start", sorter: this.#sorter, target: this, columns: startingColumns});
         });
 
         this.#sorter.on("sort-complete", topic => {
             let columns = this.#compileColumnListFromDom();
-            this.publish("sort-complete", {...topic, columns});
+            this.#model.publish("col-sort-complete", {...topic, columns});
 
             if(!startingColumns || !arraysEqual(startingColumns, columns)) {
-                this.publish("sort-change", {topic: "sort-change", target: this, sorter: this.#sorter, columns});
+                this.#model.publish("col-sort-change", {topic: "sort-change", target: this, sorter: this.#sorter, columns});
                 this.#model.setColumns(columns);
-                this.#model.refresh();
             }
 
             startingColumns = null;

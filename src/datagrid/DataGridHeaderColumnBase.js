@@ -62,13 +62,12 @@ export default class DataGridHeaderColumnBase extends Publisher {
         this.#resizer.on('resize-start', topic => {
             this.#element.classList.add('no-sort');
 
-            this.publish("resize-start", topic);
+            this.#column.model.publish("col-resize-start", {column: this.#column, headerColumn: this, ...topic});
         });
 
         this.#resizer.on('resize', topic => {
             topic.event.originalEvent.preventDefault();
             this.#column.width = topic.rect.width;
-            this.publish("resize", topic);
         });
 
         this.#resizer.on('resize-complete', topic => {
@@ -78,12 +77,12 @@ export default class DataGridHeaderColumnBase extends Publisher {
             setTimeout(() => {
                 this.#element.classList.remove('no-sort');
                 this.#element.classList.remove("no-resize");
-                this.publish("resize-complete", topic);
+                this.#column.model.publish("col-resize-complete", {column: this.#column, headerColumn: this, ...topic});
             }, 0);
         });
 
         this.#resizer.on("resize-cancel", topic => {
-            this.publish("resize-cancel", topic);
+            this.#column.model.publish("col-resize-cancel", {column: this.#column, headerColumn: this, ...topic});
         });
     }
 
@@ -96,21 +95,11 @@ export default class DataGridHeaderColumnBase extends Publisher {
             }
 
             let options = ["none", "ascending", "descending"],
-                index = options.indexOf(this.#element.dataset.dataSort);
+                index = options.indexOf(this.#element.dataset.dataSort),
+                newValue = index === -1 ? "none" : options[(index+1) % options.length];
 
-            if(index === -1) {
-                this.#column.tableSortValue = "none";
-            } else {
-                this.#column.tableSortValue = options[(index+1) % options.length];
-            }
-
-            this.#element.dataset.dataSort = this.#column.tableSortValue;
-
-            this.publish("data-sort", {
-                event: e,
-                column: this,
-                dataSort: this.#element.dataset.dataSort
-            });
+            this.#element.dataset.dataSort = newValue;
+            this.#column.tableSortValue = newValue;
         });
     }
 
