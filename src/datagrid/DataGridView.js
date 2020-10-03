@@ -1,8 +1,10 @@
-import Publisher from "../core/Publisher";
 import VirtualViewport, {VirtualNodeList} from "../core/ui/VirtualViewport";
 
 
-export default class DataGridView extends Publisher {
+/**
+ * @implements DataGridPluginInterface
+ */
+export default class DataGridView {
     #element;
     #viewport;
     #nodeList;
@@ -13,10 +15,9 @@ export default class DataGridView extends Publisher {
     #cellEventHandler;
 
     #onRender;
+    #onDataChange;
 
     constructor(model=null, {padding=500, preprocessRows=false}={}) {
-        super();
-
         this.#element = document.createElement("div");
         this.#element.className = "data-grid-view";
         this.#viewport = new VirtualViewport(null, {overflow: padding, virtualizationEnabled: true});
@@ -47,16 +48,25 @@ export default class DataGridView extends Publisher {
         this.#onRender = () => {
             this.render();
         };
+
+        this.#onDataChange = () => {
+            this.#viewport.scrollTop = 0;
+            this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
+            this.#viewport.setNodes(this.#nodeList);
+        };
+    }
+
+    plugin(grid) {
+        this.appendTo(grid.body);
+        this.setModel(grid.model);
     }
 
     setModel(model) {
         this.#model = model;
 
-        this.#model.on('refresh', () => {
-            this.render();
-        });
+        this.#model.on("data-change", this.#onDataChange);
 
-        this.#model.on(['col-resize', 'column-change'], this.#onRender);
+        this.#model.on(['col-resize', 'column-change', 'refresh'], this.#onRender);
 
         this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
         this.#viewport.setNodes(this.#nodeList);
@@ -109,7 +119,7 @@ class DataGridRowList {
     #height;
     #rowDetails;
 
-    constructor(model, preprocessRows=false, rowFactory=null) {
+    constructor(model, preprocessRows=false) {
         this.#rowMap = new WeakMap();
         this.#elementToRowMap = new WeakMap();
         this.#height = null;

@@ -151,10 +151,6 @@ export default class DataColumn extends Publisher {
         return new DataGridCell(this, data, row);
     }
 
-    onChange(event) {
-        console.log(event);
-    }
-
     get model() {
         return this.#model;
     }

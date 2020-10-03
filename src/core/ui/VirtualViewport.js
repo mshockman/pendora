@@ -59,6 +59,8 @@ export default class VirtualViewport extends Component {
     }
 
     setNodes(nodeList) {
+        this.#startingIndex = null;
+        this.#endingIndex = null;
         this.#rows = nodeList;
         this.#viewport.emptyViewport();
         this.render();
@@ -81,13 +83,20 @@ export default class VirtualViewport extends Component {
             end = this.#rows.getNodeIndexAtPosition(endPos),
             rowLength = this.#rows.getLength();
 
-        if(start >= 0 && end === -1) {
+        if(start === -1 && end === -1) {
+            start = 0;
             end = rowLength;
+        } else {
+            if(start >= 0 && end === -1) {
+                end = rowLength;
+            }
+
+            if(end >= 0 && start === -1) {
+                start = 0;
+            }
         }
 
-        if(end >= 0 && start === -1) {
-            start = 0;
-        }
+        console.log({start, end, startingIndex: this.#startingIndex, endingIndex: this.#endingIndex});
 
         if(start >= end) {
             this.#viewport.emptyViewport();

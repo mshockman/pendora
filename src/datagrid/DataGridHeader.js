@@ -42,6 +42,7 @@ export default class DataGridHeader extends Publisher {
     #onResizeStart;
     #onResize;
     #onResizeComplete;
+    #onDataChange;
 
     constructor({model=null, resizeable=false, sortable=false, tableSort=false, scrollBarPadding=30}={}) {
         super();
@@ -96,6 +97,16 @@ export default class DataGridHeader extends Publisher {
         this.#onResizeStart = () => {
             this.#minInnerWidth = this.innerWidth;
         };
+
+        this.#onDataChange = () => {
+            this.clearColumns();
+            this.render();
+        };
+    }
+
+    plugin(grid) {
+        this.appendTo(grid.header);
+        this.setModel(grid.model);
     }
 
     setModel(model) {
@@ -104,6 +115,7 @@ export default class DataGridHeader extends Publisher {
             this.#model.off('col-resize-start', this.#onResizeStart);
             this.#model.off('col-resize', this.#onResize);
             this.#model.off('col-resize-complete', this.#onResizeComplete);
+            this.#model.off("data-change", this.#onDataChange);
             this.clearColumns();
             this.#model = null;
         }
@@ -114,6 +126,7 @@ export default class DataGridHeader extends Publisher {
             this.#model.on('col-resize-start', this.#onResizeStart);
             this.#model.on('col-resize', this.#onResize);
             this.#model.on('col-resize-complete', this.#onResizeComplete);
+            this.#model.on("data-change", this.#onDataChange);
         } else {
             this.#model = null;
         }

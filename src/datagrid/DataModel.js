@@ -9,16 +9,20 @@ export default class DataModel extends Publisher {
     static COLUMN_CHANGE_TOPIC = "column-change";
     static DATA_CHANGE_TOPIC = "data-change";
     static REFRESH_TOPIC = "refresh";
+    static LOADING_START_TOPIC = "loading-start";
+    static LOADING_END_TOPIC = "loading-end";
 
     #columns;
     #data;
     #rowHeight;
+    #isLoading;
 
     constructor(columns, data, rowHeight) {
         super();
         this.#data = null;
         this.#rowHeight = rowHeight;
         this.#columns = [];
+        this.#isLoading = false;
 
         if(columns) {
             this.setColumns(columns);
@@ -143,6 +147,22 @@ export default class DataModel extends Publisher {
         return this.#rowHeight;
     }
 
+    get isLoading() {
+        return this.#isLoading;
+    }
+
+    set isLoading(value) {
+        value = !!value;
+
+        if(value !== this.#isLoading && value) {
+            this.#isLoading = value;
+            this.publish(DataModel.LOADING_START_TOPIC, {topic: DataModel.LOADING_START_TOPIC, model: this});
+        } else if(value !== this.#isLoading && value) {
+            this.#isLoading = value;
+            this.publish(DataModel.LOADING_END_TOPIC, {topic: DataModel.LOADING_END_TOPIC, model: this});
+        }
+    }
+
     *[Symbol.iterator]() {
         for(let row of this.data) {
             yield row;
@@ -150,7 +170,11 @@ export default class DataModel extends Publisher {
     }
 
     setData(data) {
-        this.publish(DataModel.DATA_CHANGE_TOPIC, {target: this});
         this.#data = data;
+        this.publish(DataModel.DATA_CHANGE_TOPIC, {target: this});
+    }
+
+    getAllData() {
+        return this.#data;
     }
 }

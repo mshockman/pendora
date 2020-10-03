@@ -37,12 +37,27 @@ export default class CheckboxColumn extends DataColumn {
         this.model.getSelectedRows = () => {
             return this.getSelectedRows();
         };
+
+        this.model.setAllSelected = (value) => {
+            this.setAllSelected(value);
+        };
     }
 
     destroy() {
         this.#header = null;
         delete this.model.getSelectedRows;
+        delete this.model.setAllSelected;
         super.destroy();
+    }
+
+    isAllSelected() {
+        for(let datum of this.model) {
+            if(datum[this.key] !== true) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     get header() {
@@ -76,6 +91,8 @@ export class CheckboxHeaderColumn extends DataGridHeaderColumnBase {
         super(element, parent, model, column);
 
         this.#checkbox = checkbox;
+
+        this.#checkbox.checked = column.isAllSelected();
 
         checkbox.addEventListener('change', event => {
             for(let data of this.model) {

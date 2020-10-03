@@ -17,9 +17,27 @@ export class DataModelInterface {
 
     getColumnLength() {}
 
+    getColumnIndex() {}
+
     setColumns(columns) {}
 
     rowFactory(list, model, data, index) {}
 
     setData(data) {}
+
+    refresh() {}
+
+    getAllData() {}
+
+    get isLoading() {}
+
+    set isLoading(value) {}
+
+    get rowHeight() {}
+
+    get data() {}
+
+    get columns() {}
+
+    *[Symbol.iterator]() {}
 }
