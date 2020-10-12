@@ -38,7 +38,7 @@ export default class Resizeable extends Publisher {
 
     #tracker;
 
-    constructor(element, {minWidth=null, maxWidth=null, minHeight=null, maxHeight=null, axis='xy', keepAspectRatio=false, container=null, grid=null, handles='.ui-resize-handle', helper=null, exclude='.no-resize', className='ui-resizeable', position="top-left"}={}) {
+    constructor(element, {minWidth=null, maxWidth=null, minHeight=null, maxHeight=null, axis='xy', keepAspectRatio=false, container=null, grid=null, handles='.ui-resize-handle', helper=null, exclude='.no-resize', className='ui-resizeable', position="top-left", disable=null}={}) {
         super();
 
         this.#element = selectElement(element);
@@ -64,7 +64,7 @@ export default class Resizeable extends Publisher {
         this.#isResizing = false;
         this.#isDisabled = false;
 
-        this.#tracker = new PointerTracker(this.#element, {capture: true, context: document, target: handles, exclude: exclude});
+        this.#tracker = new PointerTracker(this.#element, {capture: true, context: document, target: handles, exclude: exclude, disable});
 
         this.#initResizing();
     }

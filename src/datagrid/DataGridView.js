@@ -1,9 +1,6 @@
 import VirtualViewport, {VirtualNodeList} from "../core/ui/VirtualViewport";
 
 
-/**
- * @implements DataGridPluginInterface
- */
 export default class DataGridView {
     #element;
     #viewport;
@@ -54,11 +51,6 @@ export default class DataGridView {
             this.#nodeList = new DataGridRowList(this.#model, this.#preprocessRows);
             this.#viewport.setNodes(this.#nodeList);
         };
-    }
-
-    plugin(grid) {
-        this.appendTo(grid.body);
-        this.setModel(grid.model);
     }
 
     setModel(model) {

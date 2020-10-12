@@ -10,7 +10,6 @@ import {closest} from "../utility";
 export default class PointerTracker extends Publisher {
     #element;
     #pointerId;
-    #isDisabled;
 
     #pageX;
     #pageY;
@@ -26,13 +25,15 @@ export default class PointerTracker extends Publisher {
     #target;
     #exclude;
 
-    constructor(element, {capture=false, context=null, target=null, exclude=null}={}) {
+    #disable;
+
+    constructor(element, {capture=false, context=null, target=null, exclude=null, disable=null}={}) {
         super();
 
         this.#element = selectElement(element);
 
         this.#isTracking = false;
-        this.#isDisabled = false;
+        this.#disable = disable;
 
         this.#capture = capture;
         this.#context = context;
@@ -100,14 +101,14 @@ export default class PointerTracker extends Publisher {
         this.#type = "pointer";
 
         this.#onPointerMove = event => {
-            if(!this.#isDisabled) {
+            if(!this.isDisabled) {
                 this.#triggerPointerEvent('pointer-move', event);
             }
         };
 
         if(this.#capture) {
             this.#onPointerDown = event => {
-                if(this.isTracking) return;
+                if(this.isTracking || this.isDisabled) return;
 
                 let targetElement = this.#target ? closest(event.target, this.#target, this.#element) : null,
                     excludedElement = this.#exclude ? closest(event.target, this.#exclude, this.#element) : null;
@@ -176,15 +177,7 @@ export default class PointerTracker extends Publisher {
     }
 
     get isDisabled() {
-        return this.#isDisabled;
-    }
-
-    set isDisabled(value) {
-        if(!value) {
-
-        } else {
-
-        }
+        return this.#disable ? !!this.#element.closest(this.#disable) : false;
     }
 
     static DebugMouseTracker(zIndex=10000) {

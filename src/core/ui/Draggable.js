@@ -51,7 +51,7 @@ export default class Draggable extends Publisher {
 
     constructor(element, {container=null, axis='xy', exclude='input, button, .ui-resizeable-handle, .no-drag', delay=0, offset=cursor,
         resistance=0, handle=null, helper=null, revert=false, revertDuration=0,
-        scrollSpeed=0, selector=null, tolerance=0.5, setHelperSize=false, grid=null}={}) {
+        scrollSpeed=0, selector=null, tolerance=0.5, setHelperSize=false, grid=null, disable=null}={}) {
         super();
 
         if(typeof element === 'string') {
@@ -66,6 +66,7 @@ export default class Draggable extends Publisher {
         this.container = container;
         this.axis = axis;
         this.exclude = exclude;
+        this.disable = disable;
         this.delay = delay;
         this.offset = offset;
         this.resistance = resistance;
@@ -133,6 +134,11 @@ export default class Draggable extends Publisher {
             if(exclude && target.contains(exclude)) {
                 return;
             }
+        }
+        
+        if(this.disable && event.target.closest(this.disable)) {
+            event.preventDefault();
+            return;
         }
 
         // Find the offset of the event.

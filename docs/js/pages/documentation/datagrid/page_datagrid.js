@@ -1,10 +1,8 @@
 import {randomChoice} from "../../../../../src/core/utility";
 import DataColumn from "../../../../../src/datagrid/DataColumn";
-import DataModel from "../../../../../src/datagrid/DataModel";
 import DataGrid from "../../../../../src/datagrid/DataGrid";
 import CheckboxColumn from "../../../../../src/datagrid/CheckboxColumn";
 import PageableListModel from "../../../../../src/datagrid/PageableListModel";
-import DataGridPageBar from "../../../../../src/datagrid/DataGridPageBar";
 
 
 export default class PageDataGrid {
@@ -24,14 +22,17 @@ export default class PageDataGrid {
 
         let model = new PageableListModel(columns, this.buildTestData(10000), 34, 500);
 
-        let grid = new DataGrid(model,{resizeable: true, sortable: true, tableSort: true});
-        grid.plugin(new DataGridPageBar([
-            {value: 25},
-            {value: 50},
-            {value: 100},
-            {value: 250},
-            {value: 500, selected: true}
-        ]));
+        let grid = new DataGrid(model, {resizeable: true, sortable: true, tableSort: true, pageBar: true,
+            pageSizes: [
+                {value: 25},
+                {value: 50},
+                {value: 100},
+                {value: 250},
+                {value: 500, selected: true}
+            ],
+
+            loader: "default"
+        });
 
         grid.appendTo("#data-grid-container1");
         grid.render();

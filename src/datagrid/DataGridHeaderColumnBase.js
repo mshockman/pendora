@@ -56,7 +56,8 @@ export default class DataGridHeaderColumnBase extends Publisher {
         this.#resizer = new Resizeable(this.#element, {
             minWidth: this.#column.minWidth,
             maxWidth: this.#column.maxWidth,
-            position: "width"
+            position: "width",
+            disable: ".disabled"
         });
 
         this.#resizer.on('resize-start', topic => {

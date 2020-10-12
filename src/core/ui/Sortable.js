@@ -28,7 +28,7 @@ export default class Sortable extends Publisher {
     constructor(element, {items=".ui-sort-item", placeholder=null, layout='y', dropOnEmpty=true, accepts=null, setPlaceholderSize=false,
         container=null, axis='xy', exclude="input, button, .ui-resizeable-handle, .no-drag", delay=null, offset=cursor,
         resistance=null, handle=null, helper=null, revert=null, revertDuration, scrollSpeed=null, tolerance=0.5,
-        setHelperSize=false, grid=null, droppables=null}={}) {
+        setHelperSize=false, grid=null, droppables=null, disable=null}={}) {
         super();
 
         if(typeof element === 'string') {
@@ -37,7 +37,7 @@ export default class Sortable extends Publisher {
             this.element = element;
         }
 
-        this.#draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid});
+        this.#draggable = new Draggable(this.element, {container, axis, exclude, delay, offset, resistance, handle, helper, revert, revertDuration, scrollSpeed, selector: items, tolerance, setHelperSize, grid, disable});
 
         this.#draggable.passTopic(this, ['drag.start', 'drag.end', 'drag.move']);
 

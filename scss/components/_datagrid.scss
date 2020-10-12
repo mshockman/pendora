@@ -6,6 +6,23 @@
   border: 1px solid #ccc;
   overflow: hidden;
   height: 400px;
+  position: relative;
+
+  .loader {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .ui-dragging > * {
+    visibility: hidden;
+  }
 
   .data-grid__row {
     display: flex;
@@ -65,6 +82,10 @@
     bottom: 0;
     right: 0;
   }
+
+  .data-grid__footer {
+
+  }
 }
 
 
@@ -105,5 +126,22 @@
   &.ui-resizing .ui-resize-handle {
     background-color: rgba(0, 0, 0, 0.5);
     bottom: -400px;
+  }
+}
+
+
+.data-grid__status-bar {
+  display: flex;
+  flex-direction: row;
+  padding: 0.25rem;
+  border-top: 1px solid #ccc;
+  background-color: #eaeaea;
+
+  .paginator-container {
+    margin-right: auto;
+  }
+
+  button, input[type="number"] {
+    margin-right: 0.5rem;
   }
 }

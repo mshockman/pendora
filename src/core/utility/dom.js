@@ -1,14 +1,7 @@
 const REG_WHITESPACE = /\s+/;
 
 
-/**
- * Parses an html string into a document fragment.
- *
- * @deprecated
- * @param html
- * @return {DocumentFragment}
- */
-export function parseHTML(html) {
+export function createFragment(html) {
     let template = document.createElement('template');
     template.innerHTML = html.trim();
 
@@ -20,11 +13,6 @@ export function parseHTML(html) {
         while (template.firstChild) fragment.appendChild(template.firstChild);
         return fragment;
     }
-}
-
-export function createFragment(html) {
-    // noinspection JSDeprecatedSymbols
-    return parseHTML(html);
 }
 
 /**

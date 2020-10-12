@@ -104,11 +104,6 @@ export default class DataGridHeader extends Publisher {
         };
     }
 
-    plugin(grid) {
-        this.appendTo(grid.header);
-        this.setModel(grid.model);
-    }
-
     setModel(model) {
         if(this.#model) {
             this.#model.off(DataModel.COLUMN_CHANGE_TOPIC, this.#onColumnChange);
@@ -217,7 +212,8 @@ export default class DataGridHeader extends Publisher {
             helper: clone(1, "sort-clone-helper", 100),
             layout: 'x',
             axis: 'x',
-            resistance: 25
+            resistance: 25,
+            disable: ".disabled"
         });
 
         let startingColumns = null;

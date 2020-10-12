@@ -19,6 +19,8 @@ export default class Viewport extends Publisher {
     #scrollCache;
     #scrollArea;
 
+    #isDisabled;
+
     constructor({classes=null, id=null, simulateWheelScroll=false}={}) {
         super();
 
@@ -28,6 +30,8 @@ export default class Viewport extends Publisher {
         this.#element.appendChild(this.#scrollArea);
         this.#scrollArea.appendChild(this.#body);
         this.#scrollCache = new WeakMap();
+
+        this.#isDisabled = false;
 
         this.#element.className = "viewport";
         this.#scrollArea.className = "viewport__scroll-area";
@@ -51,7 +55,7 @@ export default class Viewport extends Publisher {
 
         this.#scrollArea.addEventListener("scroll", event => {
             this.render();
-            this.#publishScroll();
+            this.#publishScroll(event);
         });
     }
 
@@ -187,11 +191,12 @@ export default class Viewport extends Publisher {
         });
     }
 
-    #publishScroll() {
+    #publishScroll(event=null) {
         this.publish("scroll", {
             ...this.getScrollDetails(),
             topic: "scroll",
-            viewport: this
+            viewport: this,
+            originalEvent: event
         });
     }
 
@@ -287,5 +292,23 @@ export default class Viewport extends Publisher {
 
     get scrollbarHeight() {
         return this.#scrollArea.offsetHeight - this.#scrollArea.clientHeight;
+    }
+
+    get disabled() {
+        return this.#isDisabled;
+    }
+
+    set disabled(value) {
+        value = !!value;
+
+        if(this.#isDisabled !== value) {
+            this.#isDisabled = value;
+
+            if(value) {
+                this.#element.classList.add("disabled");
+            } else {
+                this.#element.classList.remove("disabled");
+            }
+        }
     }
 }

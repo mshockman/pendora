@@ -28,6 +28,8 @@ export default class VirtualViewport extends Component {
      */
     onRenderNode = null;
 
+    #isDisabled;
+
     constructor(nodeList, {offset=500, virtualizationEnabled=true, onRenderNode, renderer=addAndRemoveRenderFunction, precision=1}={}) {
         super(document.createElement("div"));
         this.addClass("virtual-viewport");
@@ -40,6 +42,7 @@ export default class VirtualViewport extends Component {
         this.#offset = offset;
         this.#precision = precision;
         this.#virtualizationEnabled = virtualizationEnabled;
+        this.#isDisabled = false;
 
         this.#startingIndex = null;
         this.#endingIndex = null;
@@ -95,8 +98,6 @@ export default class VirtualViewport extends Component {
                 start = 0;
             }
         }
-
-        console.log({start, end, startingIndex: this.#startingIndex, endingIndex: this.#endingIndex});
 
         if(start >= end) {
             this.#viewport.emptyViewport();
@@ -192,6 +193,25 @@ export default class VirtualViewport extends Component {
 
     get viewport() {
         return this.#viewport;
+    }
+
+    get disabled() {
+        return this.#isDisabled;
+    }
+
+    set disabled(value) {
+        value = !!value;
+
+        if(value !== this.#isDisabled) {
+            this.#isDisabled = value;
+            this.#viewport.disabled = value;
+
+            if(value) {
+                this.addClass('disabled');
+            } else {
+                this.removeClass('disabled');
+            }
+        }
     }
 }
 

@@ -13,7 +13,8 @@ export default class BaseDataGrid {
     #dataGridView;
 
     #model;
-    #plugins = [];
+    #isDisabled;
+    #isLoading;
 
     constructor(dataModel=null) {
         this.#rootElement = document.createElement("div");
@@ -30,23 +31,20 @@ export default class BaseDataGrid {
         this.#rootElement.appendChild(this.#bodyElement);
         this.#rootElement.appendChild(this.#footerElement);
 
-        this.#plugins = [];
+        this.#isDisabled = false;
+        this.#isLoading = false;
+
+        this.#dataGridView = new DataGridView();
+        this.#dataGridView.appendTo(this.bodyElement);
 
         if(dataModel) {
             this.setModel(dataModel);
         }
-
-        this.#dataGridView = this.plugin(new DataGridView());
     }
 
     setModel(model) {
         this.#model = model;
-
-        for(let plugin of this.#plugins) {
-            if(plugin.setModel) {
-                plugin.setModel(model);
-            }
-        }
+        this.#dataGridView.setModel(model);
     }
 
     appendTo(selector) {
@@ -59,18 +57,8 @@ export default class BaseDataGrid {
         }
     }
 
-    plugin(plugin) {
-        plugin.plugin({grid: this, body: this.#bodyElement, footer: this.#footerElement, header: this.#headerElement, root: this.#rootElement, model: this.#model});
-        this.#plugins.push(plugin);
-        return plugin;
-    }
-
     render() {
-        for(let plugin of this.#plugins) {
-            if(plugin.render) {
-                plugin.render();
-            }
-        }
+        this.#dataGridView.render();
     }
 
     get element() {
@@ -95,5 +83,25 @@ export default class BaseDataGrid {
 
     get dataGridView() {
         return this.#dataGridView;
+    }
+
+    set disabled(value) {
+        value = !!value;
+
+        if(value !== this.#isDisabled) {
+            if(value) {
+                this.#rootElement.classList.add("disabled");
+                this.#isDisabled = true;
+            } else {
+                this.#rootElement.classList.remove("disabled");
+                this.#isDisabled = false;
+            }
+
+            this.#dataGridView.disabled = value;
+        }
+    }
+
+    get disabled() {
+        return this.#isDisabled;
     }
 }
