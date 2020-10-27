@@ -8,9 +8,9 @@ export default class Paginator extends Publisher {
     #nextPageButton;
     #lastPageButton;
     #pageNumberInput;
-    #pageSizeSelect;
 
     #model;
+    #onPageChange;
 
     #handleDataChange;
     #handleLoadingStart;
@@ -18,12 +18,11 @@ export default class Paginator extends Publisher {
 
     #currentPageNumber;
     #pageNumberCount;
-    #pageSize;
     #disabled;
 
     #isLoading;
 
-    constructor(pageSizes=null) {
+    constructor() {
         super();
 
         this.#model = null;
@@ -32,8 +31,7 @@ export default class Paginator extends Publisher {
         this.#pageNumberCount = null;
         this.#disabled = false;
         this.#isLoading = false;
-        this.#pageSizeSelect = null;
-        this.#pageSize = null;
+        this.#onPageChange = null;
 
         this.#firstPageButton = document.createElement("button");
         this.#previousPageButton = document.createElement("button");
@@ -66,29 +64,6 @@ export default class Paginator extends Publisher {
         this.#nextPageButton.dataset.cmd = "next";
         this.#lastPageButton.dataset.cmd = "last";
 
-        if(pageSizes) {
-            this.#pageSizeSelect = document.createElement("select");
-            this.#pageSizeSelect.dataset.cmd = "page-size";
-
-            for(let size of pageSizes) {
-                let {label=null, value, selected=false} = size;
-                label = label === null ? value : label;
-
-                let option = document.createElement("option");
-                option.innerHTML = label;
-                option.value = value;
-
-                if(selected) {
-                    option.selected = true;
-                    this.#pageSize = value;
-                }
-
-                this.#pageSizeSelect.appendChild(option);
-            }
-
-            this.#element.appendChild(this.#pageSizeSelect);
-        }
-
         this.#element.addEventListener("click", event => {
             let control = event.target.closest("[data-cmd]"),
                 cmd = control ? control.dataset.cmd : null;
@@ -105,9 +80,6 @@ export default class Paginator extends Publisher {
                 this.nextPage();
             } else if(cmd === "last") {
                 this.lastPage();
-            } else if(cmd === "page-size") {
-                let value = control.value;
-                this.setPageSize(parseInt(value, 10));
             }
         });
 
@@ -122,7 +94,6 @@ export default class Paginator extends Publisher {
         this.#handleDataChange = () => {
             this.#currentPageNumber = this.#model.getPageNumber();
             this.#pageNumberCount = this.#model.getPageCount();
-            this.#pageSize = this.#model.getPageSize();
             this.render();
         };
 
@@ -135,6 +106,12 @@ export default class Paginator extends Publisher {
             this.#isLoading = false;
             this.render();
         };
+
+        this.#onPageChange = topic => {
+            this.#model.setPageNumber(topic.page);
+        };
+
+        this.render();
     }
 
     render() {
@@ -146,76 +123,70 @@ export default class Paginator extends Publisher {
 
         this.#nextPageButton.disabled = this.#isLoading || this.#disabled || (this.#pageNumberCount !== null && this.#currentPageNumber >= this.#pageNumberCount);
         this.#lastPageButton.disabled = this.#isLoading || this.#disabled || this.#pageNumberCount === null || this.#pageNumberCount <= this.#currentPageNumber;
-
-        if(this.#pageSizeSelect) {
-            this.#pageSizeSelect.disabled = this.#isLoading || this.#disabled;
-            this.#pageSizeSelect.value = this.#pageSize;
-        }
     }
 
     setModel(model) {
         if(this.#model) {
             this.#model.off("data-change", this.#handleDataChange);
+            this.off("page-change", this.#onPageChange);
             this.#model = null;
         }
 
         if(model) {
             this.#model = model;
             this.#model.on('data-change', this.#handleDataChange);
+            this.#currentPageNumber = this.#model.getPageNumber();
+            this.#pageNumberCount = this.#model.getPageCount();
+
+            this.on("page-change", this.#onPageChange);
+        } else {
+            this.#currentPageNumber = 1;
+            this.#pageNumberCount = null;
         }
 
-        this.#currentPageNumber = this.#model.getPageNumber();
-        this.#pageNumberCount = this.#model.getPageCount();
         this.render();
     }
 
     nextPage() {
-        this.#currentPageNumber = this.#pageNumberCount !== null ? Math.min(this.#pageNumberCount, this.#currentPageNumber + 1) : this.#currentPageNumber + 1;
+        let page = this.#currentPageNumber + 1;
 
-        if(this.#model) {
-            this.#model.setPageNumber(this.#currentPageNumber);
+        if(this.#pageNumberCount === null || page <= this.#pageNumberCount) {
+            this.setPage(page);
         }
-
-        this.render();
     }
 
     previousPage() {
-        this.#currentPageNumber = this.#pageNumberCount !== null ? Math.min(this.#pageNumberCount, this.#currentPageNumber - 1) : this.#currentPageNumber - 1;
-
-        if(this.#model) {
-            this.#model.setPageNumber(this.#currentPageNumber);
-        }
-
-        this.render();
+        let page = Math.max(1, this.#currentPageNumber-1);
+        this.setPage(page);
     }
 
     firstPage() {
-        this.#currentPageNumber = 1;
-
-        if(this.#model) {
-            this.#model.setPageNumber(this.#currentPageNumber);
-        }
-
-        this.render();
-    }
-
-    setPageSize(size) {
-        this.#pageSize = size;
-
-        if(this.#model) {
-            this.#model.setPageSize(size);
-        }
-
-        this.render();
+        this.setPage(1);
     }
 
     lastPage() {
         if(this.#pageNumberCount !== null) {
-            this.#pageNumberCount = this.#currentPageNumber;
+            this.setPage(this.#pageNumberCount);
+        }
+    }
 
-            if(this.#model) {
-                this.#model.setPageNumber(this.#model.getPageCount());
-            }
+    setPage(page) {
+        page = Math.max(1, page);
+
+        if(page !== this.#currentPageNumber) {
+            this.#currentPageNumber = page;
+
+            this.publish("page-change", {topic: "page-change", page: this.#currentPageNumber, pageCount: this.#pageNumberCount, paginator: this});
+
+            this.render();
+        }
+    }
+
+    setPageCount(count) {
+        if(count !== this.#pageNumberCount) {
+            this.#pageNumberCount = count;
+
+            this.publish("page-count-change", {topic: "page-count-change", page: this.#currentPageNumber, pageCount: this.#pageNumberCount, paginator: this});
 
             this.render();
         }
@@ -241,12 +212,16 @@ export default class Paginator extends Publisher {
 
     set page(value) {
         this.#currentPageNumber = value;
-
-        if(this.#model) {
-            this.#model.setPageNumber(value);
-        }
-
         this.render();
+    }
+
+    set pageNumberCount(value) {
+        this.#pageNumberCount = value;
+        this.render();
+    }
+
+    get pageNumberCount() {
+        return this.#pageNumberCount;
     }
 
     get model() {

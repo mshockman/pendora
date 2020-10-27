@@ -22,6 +22,7 @@ let app = new Application({
     'viewports_page': () => import("./pages/components/ViewportsPage"),
     'doc_datagrid': () => import("./pages/documentation/datagrid/page_datagrid"),
     'virtual_viewport': () => import("./pages/documentation/test_viewport"),
+    'doc_paginator': () => import("./pages/documentation/datagrid/page_paginator")
 });
 
 
