@@ -22,13 +22,13 @@ export default class Paginator extends Publisher {
 
     #isLoading;
 
-    constructor() {
+    constructor(page=1, pageNumberCount=null) {
         super();
 
         this.#model = null;
         this.#element = document.createElement("div");
-        this.#currentPageNumber = 1;
-        this.#pageNumberCount = null;
+        this.#currentPageNumber = parseInt(page, 10);
+        this.#pageNumberCount = pageNumberCount !== null ? parseInt(pageNumberCount, 10) : null;
         this.#disabled = false;
         this.#isLoading = false;
         this.#onPageChange = null;
@@ -86,8 +86,8 @@ export default class Paginator extends Publisher {
         this.#pageNumberInput.addEventListener("change", event => {
             let value = parseInt(this.#pageNumberInput.value);
 
-            if(!Number.isNaN(value)) {
-                this.page = value;
+            if(!Number.isNaN(value) && value !== this.page) {
+                this.setPage(value);
             }
         });
 
@@ -110,6 +110,9 @@ export default class Paginator extends Publisher {
         this.#onPageChange = topic => {
             this.#model.setPageNumber(topic.page);
         };
+
+        this.page = page;
+        this.pageNumberCount = pageNumberCount;
 
         this.render();
     }
@@ -211,12 +214,12 @@ export default class Paginator extends Publisher {
     }
 
     set page(value) {
-        this.#currentPageNumber = value;
+        this.#currentPageNumber = parseInt(value, 10);
         this.render();
     }
 
     set pageNumberCount(value) {
-        this.#pageNumberCount = value;
+        this.#pageNumberCount = value === null ? null : parseInt(value, 10);
         this.render();
     }
 
@@ -239,6 +242,38 @@ export default class Paginator extends Publisher {
     set disabled(value) {
         this.#disabled = !!value;
         this.render();
+    }
+
+    static BuildUrlPaginator({host=null, mapParams="*", pageParam="page", autoDisabled=false, pageNumberCount=null}={}) {
+        let current = new URL(window.location),
+            startingPage = current.searchParams.has(pageParam) ? current.searchParams.get(pageParam) : 1,
+            paginator = new Paginator(startingPage, pageNumberCount);
+
+        paginator.on("page-change", topic => {
+            if(autoDisabled) {
+                paginator.disabled = true;
+            }
+
+            let url = new URL(host || window.location);
+
+            if(mapParams === "*") {
+                url.search = current.search;
+            } else if(mapParams) {
+                for(let param of mapParams) {
+                    if(current.searchParams.has(param)) {
+                        for(let value of current.searchParams.getAll(param)) {
+                            url.searchParams.append(param, value);
+                        }
+                    }
+                }
+            }
+
+            url.searchParams.set(pageParam, paginator.page);
+
+            window.location = url.toString();
+        });
+
+        return paginator;
     }
 }
 

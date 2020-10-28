@@ -7,8 +7,7 @@ export default class PaginatorPage {
     }
 
     load() {
-        let paginator = new Paginator();
-        paginator.setPageCount(10);
+        let paginator = Paginator.BuildUrlPaginator({pageNumberCount: 100});
         paginator.appendTo("#paginator-test1");
     }
 }
