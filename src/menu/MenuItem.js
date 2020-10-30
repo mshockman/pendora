@@ -586,11 +586,11 @@ export class AbstractMenuItem extends MenuNode {
         this.#toggle = value;
     }
 
-    _navigate(event, _depth=0) {
+    _navigate(event, allowTargetKeys=true, _depth=0) {
         if(_depth === 0 && this.hasSubMenu()) {
-            return this.submenu._navigate(event, 0);
+            return this.submenu._navigate(event, allowTargetKeys, 0);
         } else if(this.parent) {
-            return this.parent._navigate(event, _depth);
+            return this.parent._navigate(event, allowTargetKeys, _depth);
         }
     }
 

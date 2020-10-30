@@ -228,11 +228,6 @@ export function setElementClientPosition(element, position, method='top-left') {
             deltaX = position.left - box.left;
             deltaY = position.bottom - box.bottom;
 
-            console.log({
-                right: (current.left + deltaX) + 'px',
-                bottom: (current.bottom - deltaY) + 'px'
-            });
-
             element.style.left = (current.left + deltaX) + 'px';
             element.style.bottom = (current.bottom - deltaY) + 'px';
             element.style.right = '';

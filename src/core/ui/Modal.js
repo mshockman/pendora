@@ -1,6 +1,7 @@
 import Component from "../Component";
 import Overlay from "./Overlay";
 import Animation from "../fx/Animation";
+import AutoLoader from "../../autoloader";
 
 
 export default class Modal extends Component {

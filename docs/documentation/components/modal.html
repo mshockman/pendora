@@ -1,0 +1,32 @@
+---
+title: "Viewports"
+layout: layout2/documentation
+pageClass: test_modal
+---
+
+<style type="text/css">
+
+</style>
+
+<div class="content-area" id="modal-container">
+    <button type="button" id="show-modal-btn" data-toggle="my-modal" data-init="toggle">Show Modal</button>
+
+    <div id="my-modal" class="modal closed" data-init="modal">
+        <div class="dialog modal__dialog">
+            <div class="dialog__header">
+                <div class="dialog__titlebar">
+                    <div class="dialog__title mr-auto">This is the title!</div>
+                    <div class="dialog__exit-button" data-dismiss><i class="fas fa-times"></i></div>
+                </div>
+            </div>
+            <div class="dialog__body">
+                <strong>Hello World</strong>
+            </div>
+            <div class="dialog__footer">
+                <div class="row">
+                    <button type="button" class="ml-auto" data-dismiss>Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
