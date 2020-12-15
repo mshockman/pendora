@@ -1,4 +1,3 @@
-import {ExtendableError} from "../core/errors";
 
 
 export class InvalidErrorBase {
