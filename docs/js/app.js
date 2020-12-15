@@ -24,7 +24,8 @@ let app = new Application({
     'virtual_viewport': () => import("./pages/documentation/test_viewport"),
     'doc_paginator': () => import("./pages/documentation/datagrid/page_paginator"),
     'test_modal': () => import("./pages/documentation/test_modal"),
-    'test_overlay': () => import("./pages/documentation/test_overlay")
+    'test_overlay': () => import("./pages/documentation/test_overlay"),
+    'documentation_validation': () => import("./pages/documentation/test_validation")
 });
 
 
