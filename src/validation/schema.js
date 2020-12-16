@@ -13,13 +13,13 @@ export class SchemaNode {
 
     /**
      *
-     * @param name {String}
+     * @param name {String|null}
      * @param type {TypeBase|null}
-     * @param validator {Function|null}
+     * @param validator {Function|Validator|null}
      * @param missing {REQUIRED|DROP|*}
      * @param prop {String|null}
      */
-    constructor({name, type, validator=null, missing=REQUIRED, prop=null}) {
+    constructor({name=null, type=null, validator=null, missing=REQUIRED, prop=null}) {
         this.name = name;
         this.type = type;
         this.validator = validator;

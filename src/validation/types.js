@@ -38,7 +38,7 @@ export class StringType extends TypeBase {
             if(this.allowEmpty) {
                 return value;
             } else {
-                // todo throw error.
+                throw new InvalidNode(null, "Value cannot be empty.");
             }
         }
 
