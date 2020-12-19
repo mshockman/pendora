@@ -1,7 +1,7 @@
 import Overlay from "../../../../src/core/ui/Overlay";
 import Arrow from "../../../../src/core/ui/Arrow";
 import {SlideIn, SlideInY, SlideOutY} from "../../../../src/core/fx/effects";
-import Notification2 from "../../../../src/core/ui/Notification2";
+import Notification from "../../../../src/core/ui/Notification";
 import Rect from "../../../../src/core/vectors/Rect";
 import PointerTracker from "../../../../src/core/ui/PointerTracker";
 
@@ -31,7 +31,7 @@ export default class TestOverlayPage {
         // let showing = false;
 
         toggleBTN.addEventListener("click", () => {
-            Notification2.notify("Hello World", "success", {target: toggleBTN, placement: "top"});
+            Notification.notify("Hello World", "success", {target: toggleBTN, placement: "top"});
         });
 
         for(let btn of document.querySelectorAll("[data-notification]")) {
@@ -39,9 +39,9 @@ export default class TestOverlayPage {
 
             btn.addEventListener('click', () => {
                 if(notification === "page") {
-                    Notification2.notify(message, type, {placement});
+                    Notification.notify(message, type, {placement});
                 } else {
-                    Notification2.notify(message, type, {target: btn, placement});
+                    Notification.notify(message, type, {target: btn, placement});
                 }
             });
         }

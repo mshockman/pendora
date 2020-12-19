@@ -10,6 +10,8 @@ pageClass: test_notifications
 }
 </style>
 <div class="content-area" id="overlay-container-page">
+    <div id="notification-placeholder"></div>
+
     <h1>Summary</h1>
     <p>
     The Notification class is used to create fully customizable notifications that can be displayed inside an element, overlaying the page, or targeting an element.
@@ -37,6 +39,10 @@ pageClass: test_notifications
                 <div><label><input type="radio" name="placement-radio-button" value="bottom-left"> bottom-left</label></div>
                 <div><label><input type="radio" name="placement-radio-button" value="bottom"> bottom</label></div>
                 <div><label><input type="radio" name="placement-radio-button" value="bottom-right"> bottom-right</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="left-top"> left-top</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="left-bottom"> left-bottom</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="right-top"> right-top</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="right-bottom"> right-bottom</label></div>
             </div>
         </div>
         <div class="flex-1">
@@ -44,12 +50,20 @@ pageClass: test_notifications
                 <div class="mb-2"><strong>Target</strong></div>
                 <div><label><input type="radio" name="target-radio-button" value="global" checked> Global</label></div>
                 <div><label><input type="radio" name="target-radio-button" value="element"> Element</label></div>
+                <div><label><input type="radio" name="target-radio-button" value="target"> Inside target element</label></div>
             </div>
         </div>
     </div>
-    <div class="mb-5 ta-center">
+    <div class="mb-5 row flex-center">
+        <div class="ta-center mr-3">
         <div class="mb-2"><label for="message-input" class="b">Message</label></div>
         <input id="message-input" type="text" name="message" value="Hello World!" />
+        </div>
+
+        <div class="ta-center">
+            <div class="mb-2"><label for="timeout" class="b">Timeout</label></div>
+            <input id="timeout" type="number" name="message" value="5000" />
+        </div>
     </div>
     <div class="ta-center">
         <button type="button" id="apply-notification-btn">Apply Notification</button>
@@ -59,8 +73,20 @@ pageClass: test_notifications
     <p>Element notifications are notifications that display on an element as a tooltip.</p>
 
 {% highlight javascript linenos %}
-function() {
-    alert("Hello world");
-}
+Notification.notify("Hello World", "success", {placement, "top": target: "#target"});
+{% endhighlight %}
+
+    <h1>Global Notifications</h1>
+    <p>Global notifications are notifications that appear at predefined positions on the page.  This positions are top-left, top, top-right, left, right, bottom-left, bottom, and bottom-right.</p>
+
+{% highlight javascript linenos %}
+Notification.notify("Hello World", "success", {placement, "top"});
+{% endhighlight %}
+
+    <h1>Inside Target Element</h1>
+    <p>Notification can also be place inline with the page by specifying an element to append the notification to as the placement.</p>
+
+{% highlight javascript linenos %}
+Notification.notify("Hello World", "success", {placement, "#selector"});
 {% endhighlight %}
 </div>

@@ -1,73 +1,193 @@
-import Component from "../Component";
-import Overlay from "./Overlay";
+import {FadeIn, FadeOut, SlideIn, SlideInX, SlideInY, SlideOut, SlideOutX, SlideOutY} from "../fx/effects";
 import {addClasses} from "../utility";
-import {FadeIn, FadeOut, SlideInX, SlideOutX, SlideInY, SlideOutY} from "../fx/effects";
+import {assignNotNull} from "../utility/object";
+import Overlay from "./Overlay";
+import Arrow from "./Arrow";
+import Publisher from "../Publisher";
+
+
+const ACTIVE_TOOLTIPS_NOTIFICATIONS = new WeakMap();
+
+
+function getTooltipAnimationAxis(element) {
+    let placement = element.dataset.placement;
+
+    if(placement === 'top' || placement === 'bottom') {
+        return 'y';
+    } else {
+        return 'x';
+    }
+}
+
+
+export class SlideInToolTip extends SlideIn {
+    constructor(duration) {
+        super(duration, getTooltipAnimationAxis);
+    }
+}
+
+
+export class SlideOutToolTip extends SlideOut {
+    constructor(duration) {
+        super(duration, getTooltipAnimationAxis);
+    }
+}
 
 
 const ANIMATIONS = {
-    slideInY: SlideInY,
-    slideOutY: SlideOutY,
-    slideInX: SlideInX,
-    slideOutX: SlideOutX,
-    fadeIn: FadeIn,
-    fadeOut: FadeOut
+    full: {
+        slide: {
+            showFX: "slideIn",
+            hideFX: "slideOut"
+        },
+
+        fade: {
+            showFX: "fadeIn",
+            hideFX: "fadeOut"
+        }
+    },
+
+    tooltip: {
+        slideIn: {
+            showFX: SlideInToolTip,
+            showDuration: 200
+        },
+
+        slideOut: {
+            hideFX: SlideOutToolTip,
+            hideDuration: 200
+        },
+    },
+
+    other: {
+        slideInY: {
+            showFX: SlideInY,
+            showDuration: 200
+        },
+
+        slideOutY: {
+            hideFX: SlideOutY,
+            hideDuration: 200
+        },
+
+        slideInX: {
+            showFX: SlideInX,
+            showDuration: 200
+        },
+
+        slideOutX: {
+            hideFX: SlideOutX,
+            hideDuration: 200
+        },
+
+        slideIn: {
+            showFX: SlideInY,
+            showDuration: 200
+        },
+
+        slideOut: {
+            hideFX: SlideOutY,
+            hideDuration: 200
+        },
+
+        fadeIn: {
+            showFX: FadeIn,
+            showDuration: 200
+        },
+
+        fadeOut: {
+            hideFX: FadeOut,
+            hideDuration: 200
+        }
+    },
+
+    mapAnimations(options, type) {
+        let {fx, showDuration, hideDuration, showFX, hideFX} = options;
+
+        if(fx) {
+            if(typeof fx === "string") {
+                Object.assign(options, ANIMATIONS.full[fx]);
+            } else {
+                Object.assign(options, fx);
+            }
+
+            delete options.fx;
+        }
+
+        if(typeof showFX === "string") {
+            if(ANIMATIONS.other[showFX]) {
+                Object.assign(options, ANIMATIONS.other[showFX]);
+            }
+
+            console.log({showFX});
+            if(type === "tooltip" && ANIMATIONS.tooltip[showFX]) {
+                Object.assign(options, ANIMATIONS.tooltip[showFX]);
+            }
+
+            console.log(options);
+        }
+
+        if(typeof hideFX === "string") {
+            if(ANIMATIONS.other[hideFX]) {
+                Object.assign(options, ANIMATIONS.other[hideFX]);
+            }
+
+            if(type === "tooltip" && ANIMATIONS.tooltip[hideFX]) {
+                Object.assign(options, ANIMATIONS.tooltip[hideFX]);
+            }
+        }
+
+        if(showDuration !== null && showDuration !== undefined) {
+            options.showDuration = showDuration;
+        }
+
+        if(hideDuration !== null && hideDuration !== undefined) {
+            options.hideDuration = hideDuration;
+        }
+
+        return options;
+    }
 };
 
 
-const PLACEMENTS = {};
-for(let placement of ['top-left', 'top-right', 'left', 'right', 'bottom-left', 'bottom-right']) {
-    let node = document.createElement('div');
-    node.className = `notification-placement-${placement} notification-placement-body`;
-    PLACEMENTS[placement] = node;
-}
+const TEMPLATES = {
+    "default": function(context) {
+        let element = document.createElement("div"),
+            body = document.createElement("div"),
+            content = document.createElement("div"),
+            label = document.createElement("div"),
+            container = document.createElement("div");
 
+        element.className = "notification";
+        body.className = "notification__body";
+        content.className = "notification__content";
+        container.className = "notification__row";
+        label.className = "notification__label";
+        console.log(context.message);
+        label.innerHTML = context.message;
 
-for(let placement of ['top', 'bottom']) {
-    let node = document.createElement('div'),
-        body = document.createElement('div');
-    node.className = `notification-placement-${placement}`;
-    body.className = 'notification-placement-body';
-    node.appendChild(body);
-    PLACEMENTS[placement] = node;
-}
+        element.appendChild(body);
+        body.appendChild(content);
+        content.appendChild(container);
 
+        if(context.icon) {
+            let icon = document.createElement("div");
+            icon.className = "notification__icon";
+            icon.innerHTML = context.icon;
+            container.appendChild(icon);
+        }
 
-function basicNotificationTemplate(context) {
-    let element = document.createElement('div'),
-        inner = document.createElement('div'),
-        textContainer = document.createElement('div'),
-        iconContainer = document.createElement('div');
+        container.appendChild(label);
 
-    element.appendChild(inner);
-    element.className = "notification";
-    inner.className = "notification__inner";
-    textContainer.classname = "notification__text";
-    iconContainer.className = "notification__icon";
-    textContainer.innerHTML = context.text || "";
-
-    if(context.text) {
-        textContainer.innerHTML = context.text;
+        return {label, body, element, content};
     }
-
-    if(context.icon) {
-        iconContainer.innerHTML = context.icon;
-    }
-
-    inner.appendChild(iconContainer);
-    inner.appendChild(textContainer);
-
-    if(context.className) {
-        addClasses(element, context.className);
-    }
-
-    return element;
-}
+};
 
 
-const BASIC_NOTIFICATIONS = {
-    success: {
+const NOTIFICATIONS = {
+    "success": {
         className: "success",
-        template: basicNotificationTemplate,
+        template: "default",
         timeout: 5000,
         showFX: 'slideInY',
         showDuration: 400,
@@ -77,21 +197,9 @@ const BASIC_NOTIFICATIONS = {
         icon: `<i class="fas fa-check-square"></i>`
     },
 
-    danger: {
-        className: "error",
-        template: basicNotificationTemplate,
-        timeout: 5000,
-        showFX: 'slideInY',
-        showDuration: 400,
-        hideFX: "slideOutY",
-        hideDuration: 200,
-        closeOnClick: true,
-        icon: `<i class="fas fa-exclamation"></i>`
-    },
-
-    warning: {
+    "warning": {
         className: "warning",
-        template: basicNotificationTemplate,
+        template: "default",
         timeout: 5000,
         showFX: 'slideInY',
         showDuration: 400,
@@ -101,53 +209,116 @@ const BASIC_NOTIFICATIONS = {
         icon: `<i class="fas fa-exclamation-triangle"></i>`
     },
 
-    info: {
+    "info": {
         className: "info",
-        template: basicNotificationTemplate,
+        template: "default",
         timeout: 5000,
         showFX: 'slideInY',
         showDuration: 400,
         hideFX: "slideOutY",
         hideDuration: 200,
         closeOnClick: true,
-        icon: `<i class="fas fa-info"></i>`
-    }
+        icon: `<i class="fas fa-info-circle"></i>`
+    },
+
+    "error": {
+        className: "error",
+        template: "default",
+        timeout: 5000,
+        showFX: 'slideInY',
+        showDuration: 400,
+        hideFX: "slideOutY",
+        hideDuration: 200,
+        closeOnClick: true,
+        icon: `<i class="fas fa-exclamation-circle"></i>`
+    },
 };
 
 
-export default class Notification extends Component {
+export class PlacementArea {
+    constructor(element, body) {
+        this.element = element;
+        this.body = body;
+    }
+
+    appendTo(selector) {
+        if(typeof selector === "string") {
+            document.querySelector(selector).appendChild(this.element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.element);
+        } else {
+            selector.append(this.element);
+        }
+    }
+
+    appendChild(child) {
+        this.body.appendChild(child);
+    }
+
+    get parentElement() {
+        return this.element.parentElement;
+    }
+}
+
+
+const PLACEMENTS = {};
+for(let placement of ['top-left', 'top-right', 'left', 'right', 'bottom-left', 'bottom-right']) {
+    let node = document.createElement('div');
+    node.className = `notification-placement-${placement} notification-placement-body`;
+    PLACEMENTS[placement] = new PlacementArea(node, node);
+}
+
+
+for(let placement of ['top', 'bottom']) {
+    let node = document.createElement('div'),
+        body = document.createElement('div');
+    node.className = `notification-placement-${placement}`;
+    body.className = 'notification-placement-body';
+    node.appendChild(body);
+    PLACEMENTS[placement] = new PlacementArea(node, body);
+}
+
+
+PLACEMENTS["left-top"] = PLACEMENTS["top-left"];
+PLACEMENTS["left-bottom"] = PLACEMENTS["bottom-left"];
+PLACEMENTS["right-top"] = PLACEMENTS["top-right"];
+PLACEMENTS["right-bottom"] = PLACEMENTS["bottom-right"];
+
+
+export default class Notification extends Publisher {
+    #element;
+    #body;
+    #label;
+    #content;
     #overlay;
+    #arrow;
 
-    constructor(element, {closeOnClick=false, timeout=5000, showFX='slideInY', showDuration=200, hideFX='slideOutY', hideDuration=200, className=null, id=null}={}) {
-        super(element);
+    constructor({message, className=null, icon=null, id=null, showFX=null, hideFX=null, showDuration=null, hideDuration=null, template="default", timeout=null, closeOnClick=false, removeOnHide=true}) {
+        super();
 
-        if(typeof showFX === 'string') {
-            showFX = ANIMATIONS[showFX];
+        if(typeof template === "string") {
+            template = TEMPLATES[template];
         }
 
-        if(typeof hideFX === 'string') {
-            hideFX = ANIMATIONS[hideFX];
-        }
-
-        if(className) {
-            addClasses(this.element, className);
-        }
-
-        if(id) {
-            this.element.id = id;
-        }
-
-        this.#overlay = new Overlay(this.element, {
-            showFX,
-            showDuration,
-            hideFX,
-            hideDuration,
-            removeOnHide: true,
-            timeout
+        let {element, body, label, content} = template({
+            message, icon, notification:this
         });
 
+        this.#element = element;
+        this.#body = body;
+        this.#label = label;
+        this.#content = content;
         this.closeOnClick = closeOnClick;
-        this.hide(true);
+
+        if(id !== null) {
+            this.#element.id = id;
+        }
+
+        if(className !== null) {
+            addClasses(this.#element, className);
+        }
+
+        this.#overlay = new Overlay(this.#element, {showFX, showDuration, hideFX, hideDuration, timeout, removeOnHide});
 
         this.element.addEventListener('click', event => {
             let dismiss = event.target.closest("[data-dismiss]");
@@ -158,6 +329,53 @@ export default class Notification extends Component {
                 }
             }
         });
+
+        this.#overlay.on("notification.removed", {name: "notification.removed", target: this, overlay: this.#overlay});
+    }
+
+    destroy() {
+        this.#overlay.destroy();
+    }
+
+    appendTo(selector) {
+        if(typeof selector === "string") {
+            document.querySelector(selector).appendChild(this.#element);
+        } else if(selector.appendChild) {
+            selector.appendChild(this.#element);
+        } else {
+            selector.append(this.#element);
+        }
+    }
+
+    setArrow(arrow) {
+        if(this.#arrow) {
+            this.#arrow.parent = null;
+            this.#overlay.setArrow(null);
+            this.#arrow = null;
+        }
+
+        if(arrow) {
+            this.#overlay.setArrow(arrow);
+            arrow.parent = this.#content;
+            arrow.appendTo(this.#content);
+            this.#arrow = arrow;
+        }
+    }
+
+    setTarget(target) {
+        this.#overlay.setTarget(target);
+    }
+
+    addPlacement(name, options=undefined) {
+        this.#overlay.addPlacement(name, options);
+    }
+
+    setPlacement(name, options=undefined) {
+        this.#overlay.setPlacement(name, options);
+    }
+
+    removeFrom() {
+        this.#overlay.removeFrom();
     }
 
     async show(immediate) {
@@ -168,55 +386,111 @@ export default class Notification extends Component {
         return this.#overlay.hide(immediate);
     }
 
+    get element() {
+        return this.#element;
+    }
+
+    get body() {
+        return this.#body;
+    }
+
+    get label() {
+        return this.#label;
+    }
+
+    get content() {
+        return this.#content;
+    }
+
+    get overlay() {
+        return this.#overlay;
+    }
+
     get state() {
         return this.#overlay.state;
     }
 
-    static notify(message, type, options) {
-        let config = {placement: "top-left", ...BASIC_NOTIFICATIONS.success};
+    get target() {
+        return this.#overlay.target;
+    }
 
-        if(typeof type === 'string') {
-            config = {...config, ...BASIC_NOTIFICATIONS[type]};
-        } else if(typeof type === 'object') {
-            config = {...config, ...type};
+    get arrow() {
+        return this.#arrow;
+    }
+
+    static notify(message, type, {target=null, placement=null, className=null, icon=null, id=null, showFX=null, hideFX=null, showDuration=null, hideDuration=null, template=null, timeout=null, closeOnClick=null, fx=null}={}) {
+        let args = {showFX: null, hideFX: null, showDuration: null, hideDuration: null, id: null, className: null, timeout: null, closeOnClick: null, message: null, icon: null, template: "default"};
+
+        if(fx) {
+            Object.assign(args, ANIMATIONS[fx]);
         }
 
-        if(typeof options === 'object') {
-            config = {...config, ...options};
+        if(type) {
+            Object.assign(args, NOTIFICATIONS[type]);
         }
 
-        config.text = message;
+        assignNotNull(args, {fx, showFX, showDuration, hideFX, hideDuration, icon, timeout, template, closeOnClick});
 
-        let element = config.template(config);
+        if(target) {
+            args = ANIMATIONS.mapAnimations(args, "tooltip");
+            Object.assign(args, {message, id});
 
-        let notification = new this(element, config);
+            let notification = new Notification(args);
 
-        let placement = config.placement;
+            addClasses(notification.element, "notification--tooltip");
 
-        if(typeof placement === 'string') {
-            placement = PLACEMENTS[placement];
-
-            if(placement && !placement.parentElement) {
-                document.body.appendChild(placement);
-            }
-        }
-
-        if(placement) {
-            let container;
-
-            if(placement.classList.contains('notification-placement-body')) {
-                container = placement;
-            } else {
-                container = document.querySelector('.notification-placement-body');
+            if(className !== null) {
+                addClasses(notification.element, className);
             }
 
-            if(!container) container = placement;
+            let arrow = new Arrow("bottom", "center", true);
+            notification.setArrow(arrow);
+            notification.setTarget(target);
+            notification.addPlacement(placement);
 
-            notification.appendTo(container);
+            notification.on("notification.removed", () => {
+                ACTIVE_TOOLTIPS_NOTIFICATIONS.delete(notification.target);
+                notification.setTarget(null);
+            });
+
+            if(ACTIVE_TOOLTIPS_NOTIFICATIONS.has(notification.target)) {
+                let current = ACTIVE_TOOLTIPS_NOTIFICATIONS.get(notification.target);
+                current.destroy();
+                ACTIVE_TOOLTIPS_NOTIFICATIONS.set(notification.target, notification);
+            }
+
+            notification.appendTo(notification.target.parentElement);
+            ACTIVE_TOOLTIPS_NOTIFICATIONS.set(notification.target, notification);
+            notification.hide(true);
+            notification.show();
+        } else {
+            args = ANIMATIONS.mapAnimations(args, "other");
+            Object.assign(args, {message, id});
+
+            let notification = new Notification(args);
+
+            addClasses(notification.element, "notification--basic");
+
+            if(PLACEMENTS[placement]) {
+                placement = PLACEMENTS[placement];
+
+                if(placement && !placement.parentElement) {
+                    if(placement.appendTo) {
+                        placement.appendTo(document.body);
+                    } else {
+                        document.body.appendChild(placement);
+                    }
+                }
+            }
+
+            if(typeof placement === "string") {
+                placement = document.querySelector(placement);
+            }
+
+            notification.appendTo(placement);
+            notification.hide(true);
+            notification.appendTo(placement);
+            notification.show();
         }
-
-        notification.show();
-
-        return placement;
     }
 }

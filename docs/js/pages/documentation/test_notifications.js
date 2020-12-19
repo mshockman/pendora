@@ -1,4 +1,4 @@
-import Notification2 from "../../../../src/core/ui/Notification2";
+import Notification from "../../../../src/core/ui/Notification";
 
 export default class TestNotificationsPage {
     load() {
@@ -19,12 +19,16 @@ export default class TestNotificationsPage {
         btn.addEventListener("click", () => {
             let message = getMessage(),
                 placement = getRadioValue("placement-radio-button"),
-                target = getRadioValue("target-radio-button");
+                target = getRadioValue("target-radio-button"),
+                type = getRadioValue("style-radio-button"),
+                timeout = parseInt(document.querySelector("#timeout").value, 10);
 
             if(target === "element") {
-                Notification2.notify(message, "success", {placement, target: btn});
-            } else {
-                Notification2.notify(message, "success", {placement});
+                Notification.notify(message, type, {placement, target: btn, timeout});
+            } else if(target === "global") {
+                Notification.notify(message, type, {placement, timeout});
+            } else if(target === "target") {
+                Notification.notify(message, type, {placement: "#notification-placeholder", timeout});
             }
         });
     }

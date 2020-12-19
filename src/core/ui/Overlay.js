@@ -51,6 +51,62 @@ const DEFAULT_PLACEMENTS = {
         at: "left",
         of: "border-left",
         arrow: "right"
+    },
+
+    "top-left": {
+        my: "bottom-left",
+        at: "top-left",
+        of: "border-top",
+        arrow: "bottom-start"
+    },
+
+    "top-right": {
+        my: "bottom-right",
+        at: "top-right",
+        of: "border-top",
+        arrow: "bottom-end"
+    },
+
+    "bottom-left": {
+        my: "top-left",
+        at: "bottom-left",
+        of: "border-bottom",
+        arrow: "top-start"
+    },
+
+    "bottom-right": {
+        my: "top-right",
+        at: "bottom-right",
+        of: "border-bottom",
+        arrow: "top-end"
+    },
+
+    "left-top": {
+        my: "top-right",
+        at: "top-left",
+        of: "border-left",
+        arrow: "right-start"
+    },
+
+    "left-bottom": {
+        my: "bottom-right",
+        at: "bottom-left",
+        of: "border-left",
+        arrow: "right-end"
+    },
+
+    "right-top": {
+        my: "top-left",
+        at: "top-right",
+        of: "border-right",
+        arrow: "left-start"
+    },
+
+    "right-bottom": {
+        my: "bottom-left",
+        at: "bottom-right",
+        of: "border-right",
+        arrow: "left-end"
     }
 };
 
