@@ -409,6 +409,7 @@ export default class FX {
      * @returns {FX}
      */
     cancel(completeAnimation = false) {
+        console.log("Canceling animation");
         return this._cancel(completeAnimation, FX.canceled);
     }
 
@@ -417,6 +418,7 @@ export default class FX {
      * @returns {FX}
      */
     complete() {
+        console.log("Completing animation.");
         return this._cancel(true, FX.complete);
     }
 

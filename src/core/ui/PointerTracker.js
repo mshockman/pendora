@@ -197,6 +197,8 @@ export default class PointerTracker extends Publisher {
         output.style.border = "1px solid #cccccc";
         output.style.zIndex = ""+zIndex;
 
+        document.body.appendChild(output);
+
         return {element: output, tracker: tracker};
     }
 }

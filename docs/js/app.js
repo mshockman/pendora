@@ -25,7 +25,10 @@ let app = new Application({
     'doc_paginator': () => import("./pages/documentation/datagrid/page_paginator"),
     'test_modal': () => import("./pages/documentation/test_modal"),
     'test_overlay': () => import("./pages/documentation/test_overlay"),
-    'documentation_validation': () => import("./pages/documentation/test_validation")
+    'documentation_validation': () => import("./pages/documentation/test_validation"),
+    'documentation_form_validation': () => import("./pages/documentation/form_validation"),
+    'test_tooltip': () => import("./pages/documentation/test_toolip"),
+    'test_notifications': () => import("./pages/documentation/test_notifications")
 });
 
 

@@ -9,12 +9,12 @@ import {setElementClientPosition} from "./position";
  */
 export default class Arrow extends Component {
     /**
-     * The starting alignment of the arrow.
-     * Can be start, end, or center.
+     *
+     * @param placement
+     * @param align
+     * @param setMargins
      */
-    #align;
-
-    constructor(placement="bottom", align="center") {
+    constructor(placement="bottom", align="center", setMargins=false) {
         let element = document.createElement('div');
         element.className = "arrow";
 
@@ -22,18 +22,19 @@ export default class Arrow extends Component {
 
         this.parent = null;
         this.target = null;
-        this.#align = align;
+        this.setMargins = setMargins;
 
         this.element.dataset.placement = placement;
+        this.element.dataset.align = align;
     }
 
     set align(value) {
-        this.#align = value;
+        this.element.dataset.align = value;
         this.render();
     }
 
     get align() {
-        return this.#align;
+        return this.element.dataset.align;
     }
 
     set placement(value) {
@@ -60,15 +61,22 @@ export default class Arrow extends Component {
     }
 
     render() {
-        this.element.dataset.direction = this.direction;
         this.element.style.left = "";
         this.element.style.right = "";
         this.element.style.top = "";
         this.element.style.bottom = "";
+        let parent = this.parent || this.element.offsetParent;
 
-        let parentRect = new Rect(this.parent || this.element.offsetParent),
+        let parentRect = new Rect(parent),
             targetRect = this.target ? new Rect(this.target) : null,
             pos = new Rect(this.element);
+
+        if(this.setMargins) {
+            parent.style.marginLeft = "";
+            parent.style.marginTop = "";
+            parent.style.marginRight = "";
+            parent.style.marginBottom = "";
+        }
 
         if(this.placement === "top") {
             if(this.align === "start") {
@@ -81,6 +89,8 @@ export default class Arrow extends Component {
 
             if(targetRect) pos = pos.fitX(targetRect);
             pos = pos.fitX(parentRect);
+
+            if(this.setMargins) parent.style.marginTop = pos.height + "px";
         } else if(this.placement === "right") {
             if(this.align === "start") {
                 pos = pos.position({my: "left top", at: "right top", of: parentRect});
@@ -92,6 +102,7 @@ export default class Arrow extends Component {
 
             if(targetRect) pos = pos.fitY(targetRect);
             pos = pos.fitY(parentRect);
+            if(this.setMargins) parent.style.marginRight = pos.height + "px";
         } else if(this.placement === "bottom") {
             if(this.align === "start") {
                 pos = pos.position({my: "left top", at: "left bottom", of: parentRect});
@@ -103,6 +114,7 @@ export default class Arrow extends Component {
 
             if(targetRect) pos = pos.fitX(targetRect);
             pos = pos.fitX(parentRect);
+            if(this.setMargins) parent.style.marginBottom = pos.height + "px";
         } else if(this.placement === "left") {
             if(this.align === "start") {
                 pos = pos.position({my: "right top", at: "left top", of: parentRect});
@@ -114,6 +126,7 @@ export default class Arrow extends Component {
 
             if(targetRect) pos = pos.fitY(targetRect);
             pos = pos.fitY(parentRect);
+            if(this.setMargins) parent.style.marginLeft = pos.height + "px";
         }
 
         setElementClientPosition(this.element, pos);

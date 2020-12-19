@@ -144,14 +144,34 @@ export default class Overlay extends Component {
         }
     }
 
-    setArrow(arrow) {
+    destroy() {
+        this.clearTimeOut();
+
+        if(this.#fx) {
+            this.clearFX();
+        }
+
+        this.removeFrom();
+    }
+
+    removeFrom() {
+        if(this.element.parentElement) {
+            this.element.parentElement.removeChild(this.element);
+            this.publish("overlay.removed", {name: "overlay.removed", target: this});
+        }
+    }
+
+    setArrow(arrow, append=true) {
         if(this.#arrow) {
             this.#arrow.removeFrom();
             this.#arrow = null;
         }
 
         this.#arrow = arrow;
-        this.#arrow.appendTo(this.element);
+
+        if(append && this.#arrow) {
+            this.#arrow.appendTo(this.element);
+        }
     }
 
     addPlacement(name, options=undefined) {
@@ -222,7 +242,7 @@ export default class Overlay extends Component {
                 pos,
                 newIntersectAmount,
                 subBoundingBox = position.of ? getSubBoundingBox(targetRect, position.of) : targetRect,
-                arrowOffset = new Rect(0, 0, 0, 0),
+                // arrowOffset = new Rect(0, 0, 0, 0),
                 arrowRect;
 
             this.element.dataset.placement = position.name;
@@ -236,9 +256,9 @@ export default class Overlay extends Component {
             if(this.#arrow && position.arrow) {
                 this.#arrow.setPlacement(position.arrow);
                 arrowRect = this.#arrow.getBoundingClientRect();
-                let unionBox = pos.union(arrowRect);
-                arrowOffset = pos.subtract(unionBox);
-                pos = unionBox;
+                // let unionBox = pos.union(arrowRect);
+                // arrowOffset = pos.subtract(unionBox);
+                // pos = unionBox;
             }
 
             clampSpace = targetRect.add(new Rect(
@@ -282,29 +302,38 @@ export default class Overlay extends Component {
 
             pos = pos.clamp(clampSpace);
 
-            newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
+            if(containerRect) {
+                newIntersectAmount = getXIntersectAmount(subBoundingBox, containerRect) + getYIntersectAmount(subBoundingBox, containerRect);
 
-            // noinspection JSCheckFunctionSignatures
-            if(!currentPos || (containerRect && containerRect.contains(pos)) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
-                if(containerRect) {
-                    if(this.fit === true || this.fit === "xy") {
-                        pos = pos.fit(containerRect);
-                    } else if(this.fit === "y") {
-                        pos = pos.fitY(containerRect);
-                    } else if(this.fit === "x") {
-                        pos = pos.fitX(containerRect);
+                // noinspection JSCheckFunctionSignatures
+                if (!currentPos || (containerRect && containerRect.contains(pos)) || (newIntersectAmount > currentIntersectAmount && getDistanceBetweenRects(pos, containerRect) <= getDistanceBetweenRects(currentPos, containerRect))) {
+                    if (containerRect) {
+                        if (this.fit === true || this.fit === "xy") {
+                            pos = pos.fit(containerRect);
+                        } else if (this.fit === "y") {
+                            pos = pos.fitY(containerRect);
+                        } else if (this.fit === "x") {
+                            pos = pos.fitX(containerRect);
+                        }
+                    }
+
+                    // currentPos = pos.add(arrowOffset);
+                    currentPos = pos;
+                    currentIntersectAmount = newIntersectAmount;
+                    currentPlacement = position;
+
+                    this.#currentIndex = index;
+
+                    if (!containerRect || containerRect.contains(pos)) {
+                        break;
                     }
                 }
-
-                currentPos = pos.add(arrowOffset);
-                currentIntersectAmount = newIntersectAmount;
+            } else {
+                // currentPos = pos.add(arrowOffset);
+                currentPos = pos;
                 currentPlacement = position;
-
                 this.#currentIndex = index;
-
-                if(!containerRect || containerRect.contains(pos)) {
-                    break;
-                }
+                break;
             }
         }
 
@@ -344,7 +373,7 @@ export default class Overlay extends Component {
 
         let result;
 
-        if(immediate) {
+        if(immediate || !this.#showFX) {
             if(this.#fx) {
                 await this.#fx.cancel();
             }
@@ -372,9 +401,8 @@ export default class Overlay extends Component {
 
             if(startingState === Overlay.hidden && this.#hideFX) {
                 await this.#hideFX.goto(this.element, 1);
+                this.position("current");
             }
-
-            this.position("current");
 
             this.#state = Overlay.showing;
             this.publish("overlay.showing", this);
@@ -384,10 +412,9 @@ export default class Overlay extends Component {
             };
 
             if(this.#showFX) {
-                this.#fx = this.#showFX.animate(this.element, {duration: this.#showDuration, onFrame});
+                this.#fx = this.#showFX.animate(this.element, {duration: this.#showDuration, onFrame, position: 0});
+                this.position("current");
             }
-
-            this.position("current");
 
             if(this.#fx) {
                 result = await this.#fx;
@@ -423,7 +450,7 @@ export default class Overlay extends Component {
 
         this.publish("overlay.hide", this);
 
-        if(immediate) {
+        if(immediate || !this.#hideFX) {
             if(this.#fx) {
                 await this.#fx.cancel();
             }
@@ -461,6 +488,7 @@ export default class Overlay extends Component {
 
             if(this.#fx) {
                 result = await this.#fx;
+                this.#fx = null;
             } else {
                 result = Animation.complete;
             }
@@ -513,6 +541,14 @@ export default class Overlay extends Component {
         return !!this.#timer;
     }
 
+    setTarget(target) {
+        if(typeof value === 'string') {
+            this.#target = document.querySelector(target);
+        } else {
+            this.#target = target || null;
+        }
+    }
+
     async clearFX() {
         if(this.#fx) {
             await this.#fx.cancel();
@@ -533,11 +569,11 @@ export default class Overlay extends Component {
     }
 
     set target(target) {
-        if(typeof value === 'string') {
-            this.#target = document.querySelector(target);
-        } else {
-            this.#target = target || null;
-        }
+        this.setTarget(target);
+    }
+
+    get arrow() {
+        return this.#arrow;
     }
 
     set container(container) {

@@ -112,3 +112,24 @@ export function rangeFindItem(array, predicate, startingIndex=0, endingIndex=nul
         }
     }
 }
+
+
+/**
+ * Assigns all own values from the values object that are not null or undefined.
+ * @param obj
+ * @param values
+ * @return {*}
+ */
+export function assignNotNull(obj, values) {
+    for(let key in values) {
+        if(values.hasOwnProperty(key)) {
+            let v = values[key];
+
+            if(v !== null && v !== undefined) {
+                obj[key] = v;
+            }
+        }
+    }
+
+    return obj;
+}

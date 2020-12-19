@@ -1,0 +1,92 @@
+---
+title: "Tooltip"
+layout: layout2/documentation
+pageClass: test_tooltip
+---
+
+<style type="text/css">
+    .tooltip {
+        position: absolute;
+        overflow: hidden;
+        z-index: 1000;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .tooltip.hidden {
+        display: none;
+    }
+
+    .tooltip__body {
+        position: relative;
+    }
+
+    .tooltip .tooltip__label {
+        padding: 5px;
+        border: 1px solid #000;
+        background-color: #000;
+        color: #fff;
+        font-weight: 700;
+        font-family: "Open Sans", Helvetica, sans-serif;
+        border-radius: 5px;
+    }
+
+    .tooltip .arrow {
+        position: absolute;
+    }
+
+    .tooltip[data-placement="top"] .arrow {
+        bottom: 0;
+        left: 50%;
+        border-top: 5px solid #000000;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        margin-left: -2.5px;
+    }
+
+    .tooltip[data-placement="top"] .tooltip__body {
+        padding-bottom: 5px;
+    }
+
+    .tooltip[data-placement="bottom"] .tooltip__body {
+        padding-top: 5px;
+    }
+
+    .tooltip[data-placement="right"] .tooltip__body {
+        padding-left: 5px;
+    }
+
+    .tooltip[data-placement="left"] .tooltip__body {
+        padding-right: 5px;
+    }
+
+    .tooltip[data-placement="bottom"] .arrow {
+        top: 0;
+        left: 50%;
+        border-bottom: 5px solid #000000;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        margin-left: -2.5px;
+    }
+
+    .tooltip[data-placement="left"] .arrow {
+        right: 0;
+        top: 50%;
+        border-left: 5px solid #000000;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        margin-top: -5px;
+    }
+
+    .tooltip[data-placement="right"] .arrow {
+        left: 0;
+        top: 50%;
+        border-right: 5px solid #000000;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        margin-top: -5px;
+    }
+</style>
+<div class="content-area" id="tooltip-page">
+    <button type="button" id="tooltip-top-btn">Tooltip Top</button>
+</div>

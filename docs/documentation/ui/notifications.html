@@ -1,0 +1,66 @@
+---
+title: "Notifications"
+layout: layout2/documentation
+pageClass: test_notifications
+---
+
+<style type="text/css">
+.b {
+    font-weight: 700;
+}
+</style>
+<div class="content-area" id="overlay-container-page">
+    <h1>Summary</h1>
+    <p>
+    The Notification class is used to create fully customizable notifications that can be displayed inside an element, overlaying the page, or targeting an element.
+    </p>
+
+    <div class="row fluid-width mb-6">
+        <div class="flex-1">
+            <div id="style-radio-button">
+                <div class="mb-2"><strong>Type</strong></div>
+                <div><label><input type="radio" name="style-radio-button" value="success" checked> Success</label></div>
+                <div><label><input type="radio" name="style-radio-button" value="warning"> Warning</label></div>
+                <div><label><input type="radio" name="style-radio-button" value="info"> Info</label></div>
+                <div><label><input type="radio" name="style-radio-button" value="error"> Error</label></div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <div id="placement-radio-button">
+                <div class="mb-2"><strong>Placement</strong></div>
+                <div><label><input type="radio" name="placement-radio-button" value="top-left"> top-left</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="top" checked> top</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="top-right"> top-right</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="left"> left</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="center"> center</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="right"> right</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="bottom-left"> bottom-left</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="bottom"> bottom</label></div>
+                <div><label><input type="radio" name="placement-radio-button" value="bottom-right"> bottom-right</label></div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <div id="target-radio-button">
+                <div class="mb-2"><strong>Target</strong></div>
+                <div><label><input type="radio" name="target-radio-button" value="global" checked> Global</label></div>
+                <div><label><input type="radio" name="target-radio-button" value="element"> Element</label></div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-5 ta-center">
+        <div class="mb-2"><label for="message-input" class="b">Message</label></div>
+        <input id="message-input" type="text" name="message" value="Hello World!" />
+    </div>
+    <div class="ta-center">
+        <button type="button" id="apply-notification-btn">Apply Notification</button>
+    </div>
+
+    <h1>Element Notifications</h1>
+    <p>Element notifications are notifications that display on an element as a tooltip.</p>
+
+{% highlight javascript linenos %}
+function() {
+    alert("Hello world");
+}
+{% endhighlight %}
+</div>
