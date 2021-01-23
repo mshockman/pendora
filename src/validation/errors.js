@@ -11,6 +11,7 @@ export class InvalidErrorBase {
         this.node = node;
         this.name = name;
         this.index = index;
+        this.parent = null;
 
         if(node) this.setNode(node);
     }
@@ -21,6 +22,22 @@ export class InvalidErrorBase {
         if(!this.name) {
             this.name = this.node.name;
         }
+    }
+
+    getPath() {
+        let r = [],
+            o = this;
+
+        while(o) {
+            if(o instanceof ValidationErrorList && o.name != null) {
+                r.push(o.name);
+            }
+
+            o = o.parent;
+        }
+
+        r.reverse();
+        return r.join('.');
     }
 }
 
@@ -40,18 +57,42 @@ export class ValidationErrorList extends InvalidErrorBase {
             }
         } else if(error.node === this.node) {
             if(this.children.indexOf(error) === -1) {
+                if(error.name == null) {
+                    error.name = this.name;
+                }
+
+                if(error.index == null) {
+                    error.index = this.index;
+                }
+
+                error.parent = this;
                 this.children.push(error);
             }
         } else if(this.node.hasChildNode(error.node)) {
             let childErrorNode = this.get(error.node);
 
             if(!childErrorNode) {
-                childErrorNode = new ValidationErrorList(error.node, error.name);
+                childErrorNode = new ValidationErrorList(error.node, error.name, error.index);
+                childErrorNode.parent = this;
                 this.children.push(childErrorNode);
             }
 
             childErrorNode.addError(error);
         }
+    }
+
+    getInvalidNodes() {
+        let r = [];
+
+        for(let child of this.children) {
+            if(child.getInvalidNodes) {
+                r = r.concat(child.getInvalidNodes());
+            } else {
+                r.push(child);
+            }
+        }
+
+        return r;
     }
 
     get(node) {

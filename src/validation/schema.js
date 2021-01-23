@@ -18,13 +18,15 @@ export class SchemaNode {
      * @param validator {Function|Validator|null}
      * @param missing {REQUIRED|DROP|*}
      * @param prop {String|null}
+     * @param options
      */
-    constructor({name=null, type=null, validator=null, missing=REQUIRED, prop=null}) {
+    constructor({name=null, type=null, validator=null, missing=REQUIRED, prop=null, ...options}) {
         this.name = name;
         this.type = type;
         this.validator = validator;
         this.missing = missing;
         this.#prop = prop;
+        this.options = options;
     }
 
     deserialize(value) {
@@ -146,15 +148,27 @@ export class Schema extends SchemaNode {
      * @param validator {function||null}
      * @param missing
      * @param prop
+     * @param schema
+     * @param options
      */
-    constructor({nodes=null, name, type, validator=null, missing=REQUIRED, prop=null}) {
-        super({name, type, validator, missing, prop});
+    constructor({nodes=null, name=null, type=null, validator=null, missing=REQUIRED, prop=null, schema=null, ...options}={}) {
+        super({name, type, validator, missing, prop, ...options});
 
         this.children = [];
 
         if(nodes) {
             for(let node of nodes) {
                 this.addNode(node);
+            }
+        }
+
+        if(schema) {
+            for(let [key, value] of Object.entries(schema)) {
+                if(value.name === null) {
+                    value.name = key;
+                }
+
+                this.addNode(value);
             }
         }
     }
@@ -211,10 +225,16 @@ export class Schema extends SchemaNode {
         }
 
         if(errorList.length) {
-            throw error;
+            throw errorList;
         }
 
         return r;
+    }
+
+    *[Symbol.iterator]() {
+        for(let child of this.children) {
+            yield child;
+        }
     }
 }
 

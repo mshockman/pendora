@@ -1,33 +1,23 @@
-import {FormValidator, Field, InputWidget} from "../../../../src/validation/form";
-import {SchemaNode} from "../../../../src/validation/schema";
+import Form, {Field} from "../../../../src/validation/form";
+import {SchemaNode, Schema} from "../../../../src/validation/schema";
 import {StringType} from "../../../../src/validation/types";
 import {All, LengthValidator} from "../../../../src/validation/validators";
 import Notification from "../../../../src/core/ui/Notification";
-
-
-function notifyError(e) {
-    Notification.notify()
-}
+import InputWidget from "../../../../src/forms/InputWidget";
 
 
 export default class FormValidationPage {
     load() {
-        let form = new FormValidator("#attribute-form");
+        const formValidator = new Form({
+            schema: {
+                "name": new SchemaNode({type: new StringType(), validator: new LengthValidator(1, 32), widget: new InputWidget("[name='name']")}),
+                "options": new SchemaNode({type: new StringType(), widget: new InputWidget("[name='options']")}),
+                "default_value": new SchemaNode({type: new StringType(), widget: new InputWidget("[name='default_value']")})
+            },
 
-        form.addValidator(new Field(
-            new InputWidget("#attribute_form__name"),
-            new SchemaNode({
-                type: new StringType(false, true),
-                validator: new All(
-                    [
-                        new LengthValidator(0, 20)
-                    ]
-                )
-            })
-        ));
+            form: "#attribute-form"
+        });
 
-        form.onInvalid = (e, node) => {
-            console.log(e);
-        };
+        window.f = formValidator;
     }
 }

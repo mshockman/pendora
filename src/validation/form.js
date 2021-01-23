@@ -1,176 +1,87 @@
-import {InvalidErrorBase} from "./errors";
+import {Schema} from "./schema";
+import {selectElement} from "../core/utility";
 
 
-export class FormValidator {
-    #element;
-    #validators;
+export default class Form {
+    #form;
+    #schema;
+    #onSubmitEventListener;
 
-    /**
-     *
-     * @param selector
-     * @param onInvalid {null|function}
-     */
-    constructor(selector, onInvalid=null) {
-        this.#element = null;
-        this.onInvalid = onInvalid;
-
-        if(typeof selector === "string") {
-            this.#element = document.querySelector(selector);
-        } else if(typeof selector === "function") {
-            this.#element = selector.call(this);
-        } else if(selector) {
-            this.#element = selector;
+    constructor({form, schema}) {
+        if(schema instanceof Schema) {
+            this.#schema = schema;
+        } else {
+            this.#schema = new Schema({schema});
         }
 
-        this.#validators = [];
-
-        if(this.#element) {
-            this.#element.addEventListener("submit", (event) => {
-                if (!this.validate()) {
-                    event.preventDefault();
-                    return false;
-                }
-            });
+        if(form) {
+            this.setForm(form);
         }
     }
 
-    validate() {
-        let valid = true;
+    setForm(form) {
+        if(this.#form) {
+            this.#form.removeEventListener("submit", this.#onSubmitEventListener);
+            this.#form = null;
+            this.#onSubmitEventListener = null;
+        }
 
-        for(let validator of this.#validators) {
-            try {
-                validator.validate();
-            } catch (e) {
-                if(e instanceof InvalidErrorBase) {
-                    if(this.onInvalid) {
-                        this.onInvalid(e, validator);
-                    }
-                    valid = false;
-                } else {
-                    throw e;
+        if(form) {
+            this.#form = selectElement(form);
+
+            this.#onSubmitEventListener = (event) => {
+                try {
+                    console.log(this.validate());
+                } catch (e) {
+                    window.t1 = e;
                 }
+
+                event.preventDefault();
+                return false;
+            };
+
+            this.#form.addEventListener("submit", this.#onSubmitEventListener);
+        }
+    }
+
+    getValue() {
+        let r = {};
+
+        for(let node of this.#schema) {
+            if(node.options.widget) {
+                r[node.name] = node.options.widget.getValue();
             }
         }
 
-        return valid;
+        return r;
     }
 
-    addValidator(validator) {
-        this.#validators.push(validator);
+    addField() {
+
     }
 
-    get element() {
-        return this.#element;
+    get(field) {
+
     }
 
-    get validators() {
-        return this.#validators;
+    validate() {
+        return this.#schema.deserialize(this.getValue());
+    }
+
+    serialize() {
+
+    }
+
+    deserialize(value) {
+
     }
 }
 
 
 export class Field {
-    constructor(widget, validatorNode, onInvalid) {
-        this.widget = widget;
-        this.node = validatorNode;
-        this.onInvalid = onInvalid;
-    }
+    #errorHandlers;
 
-    validate() {
-        try {
-            this.node.deserialize(this.widget.getValue());
-        } catch (e) {
-            if(e instanceof InvalidErrorBase) {
-                if(this.onInvalid) {
-                    this.onInvalid(e, this);
-                }
-
-                throw e;
-            } else {
-                throw e;
-            }
-        }
-    }
-}
-
-
-export class InputWidget {
-    #element;
-
-    constructor(selector) {
-        if(typeof selector === "string") {
-            this.#element = document.querySelector(selector);
-        } else if(typeof selector === "function") {
-            this.#element = selector.call(this);
-        } else if(!selector) {
-            this.#element = document.createElement("input");
-            this.#element.type = "text";
-        } else {
-            this.#element = selector;
-        }
-    }
-
-    getValue() {
-        return this.#element.value;
-    }
-
-    setValue(value) {
-        this.#element.value = value;
-    }
-
-    getName() {
-        return this.#element.name;
-    }
-
-    setName(name) {
-        this.#element.name = name;
-    }
-
-    getDisabled() {
-        return this.#element.disabled;
-    }
-
-    setDisabled(disabled) {
-        this.#element.disabled = disabled;
-    }
-
-    addClass(classList) {
-        this.#element.classList.add(...classList.split(/\s+/));
-    }
-
-    removeClass(classList) {
-        this.#element.classList.remove(...classList.split(/\s+/));
-    }
-
-    hasClass(className) {
-        return this.#element.classList.contains(className);
-    }
-
-    getAttribute(key) {
-        return this.#element.getAttribute(key);
-    }
-
-    setAttribute(key, value) {
-        this.#element.setAttribute("id", value);
-    }
-
-    getId() {
-        return this.#element.id;
-    }
-
-    setId(id) {
-        this.#element.id = id;
-    }
-
-    getDataSetValue(key) {
-        return this.#element.dataset[key];
-    }
-
-    setDataSetValue(key, value) {
-        this.#element.dataset[key] = value;
-    }
-
-    get element() {
-        return this.#element;
+    constructor(widget, validationNode, onError) {
+        this.#errorHandlers = [];
     }
 }
