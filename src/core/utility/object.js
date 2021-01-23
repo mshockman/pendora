@@ -73,6 +73,41 @@ export function getPropertyByPath(obj, path) {
 }
 
 
+export function setPropertyByPath(obj, path, value) {
+    let parts = path.split("."),
+        r = obj;
+
+    for(let i = 0, l = parts.length-1; i < l; i++) {
+        let part = parts[i];
+
+        if(!r.hasOwnProperty(part)) {
+            r = r[part] = {};
+        } else {
+            r = r[part];
+        }
+    }
+
+    r[parts[parts.length-1]] = value;
+    return obj;
+}
+
+
+export function hasPropertyPath(obj, path) {
+    let parts = path.split("."),
+        r = obj;
+
+    for(let part of parts) {
+        if(!r.hasOwnProperty(part)) {
+            return false;
+        }
+
+        r = r[part];
+    }
+
+    return true;
+}
+
+
 /**
  * rangeFindItem
  *
@@ -132,4 +167,9 @@ export function assignNotNull(obj, values) {
     }
 
     return obj;
+}
+
+
+export function exportWND(obj) {
+    Object.assign(window, obj);
 }
