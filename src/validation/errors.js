@@ -19,7 +19,7 @@ export class InvalidErrorBase {
     setNode(node) {
         this.node = node;
 
-        if(!this.name) {
+        if(this.name == null) {
             this.name = this.node.name;
         }
     }
@@ -51,11 +51,13 @@ export class ValidationErrorList extends InvalidErrorBase {
     }
 
     addError(error) {
-        if(error instanceof ValidationErrorList) {
+        if(error instanceof ValidationErrorList && error.node === this.node) {
+            // Founds a list of errors for several child nodes.
             for(let child of error.children) {
                 this.addError(child);
             }
         } else if(error.node === this.node) {
+            // Found global error for current node.
             if(this.children.indexOf(error) === -1) {
                 if(error.name == null) {
                     error.name = this.name;
@@ -69,7 +71,7 @@ export class ValidationErrorList extends InvalidErrorBase {
                 this.children.push(error);
             }
         } else if(this.node.hasChildNode(error.node)) {
-            let childErrorNode = this.get(error.node);
+            let childErrorNode = this.get(error.name);
 
             if(!childErrorNode) {
                 childErrorNode = new ValidationErrorList(error.node, error.name, error.index);

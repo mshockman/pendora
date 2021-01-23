@@ -31,7 +31,7 @@ export class SchemaNode {
 
     deserialize(value) {
         try {
-            let error = new ValidationErrorList(this);
+            let error = new ValidationErrorList(this, this.name, null);
             error.cstruct = value;
 
             value = this._handleMissing(error, value);
@@ -174,8 +174,8 @@ export class Schema extends SchemaNode {
     }
 
     addNode(node) {
-        if(this.hasChildNode(node)) {
-            throw new Error("Node already exists");
+        if(!node.name || this.hasChildNode(node.name)) {
+            throw new Error("Node must have a unique name.");
         }
 
         this.children.push(node);
@@ -265,7 +265,7 @@ export class SchemaList extends SchemaNode {
                 r.push(v);
             } catch(e) {
                 if(e instanceof InvalidErrorBase) {
-                    errorList.setNode(this.node);
+                    e.setNode(this.node);
                     e.name = i;
                     e.index = i;
                     errorList.addError(e);
@@ -281,5 +281,9 @@ export class SchemaList extends SchemaNode {
         }
 
         return r;
+    }
+
+    hasChildNode(node) {
+        return node === this.node;
     }
 }
