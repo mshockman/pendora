@@ -1,0 +1,9 @@
+
+.btn.btn-link {
+  color: #2a7ae2;
+  cursor: pointer;
+
+  &:hover {
+    color: lighten(#2a7ae2, 10%);
+  }
+}

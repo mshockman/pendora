@@ -3,13 +3,15 @@
  * @abstract
  */
 export default class FormWidgetBase {
+    #element;
+
     constructor(element) {
-        this.element = null;
+        this.#element = null;
 
         if(typeof element === 'string') {
-            this.element = document.querySelector(element);
+            this.#element = document.querySelector(element);
         } else if(element) {
-            this.element = element;
+            this.#element = element;
         }
     }
 
@@ -102,5 +104,9 @@ export default class FormWidgetBase {
 
     set value(value) {
         this.setValue(value);
+    }
+
+    get element() {
+        return this.#element;
     }
 }

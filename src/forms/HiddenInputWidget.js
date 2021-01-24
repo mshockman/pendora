@@ -67,8 +67,12 @@ export class MultiHiddenInputWidget extends FormWidgetBase {
 
 
 export default class HiddenInputWidget extends InputWidget {
-    constructor(input=null) {
+    constructor(input=null, name=null) {
         super(input);
         this.type = 'hidden';
+
+        if(name !== null) {
+            this.setName(name);
+        }
     }
 }

@@ -1,6 +1,11 @@
 const REG_WHITESPACE = /\s+/;
 
 
+/**
+ *
+ * @param html
+ * @return {DocumentFragment}
+ */
 export function createFragment(html) {
     let template = document.createElement('template');
     template.innerHTML = html.trim();
