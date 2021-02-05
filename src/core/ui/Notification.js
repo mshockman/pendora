@@ -119,12 +119,9 @@ const ANIMATIONS = {
                 Object.assign(options, ANIMATIONS.other[showFX]);
             }
 
-            console.log({showFX});
             if(type === "tooltip" && ANIMATIONS.tooltip[showFX]) {
                 Object.assign(options, ANIMATIONS.tooltip[showFX]);
             }
-
-            console.log(options);
         }
 
         if(typeof hideFX === "string") {
@@ -163,7 +160,6 @@ const TEMPLATES = {
         content.className = "notification__content";
         container.className = "notification__row";
         label.className = "notification__label";
-        console.log(context.message);
         label.innerHTML = context.message;
 
         element.appendChild(body);

@@ -8,7 +8,6 @@ export default class InputWidget extends FormWidgetBase {
         }
 
         super(input);
-        this.input = input;
     }
 
     getValue() {
@@ -41,5 +40,9 @@ export default class InputWidget extends FormWidgetBase {
 
     set placeholder(value) {
         this.input.placeholder = value;
+    }
+
+    get input() {
+        return this.element;
     }
 }
