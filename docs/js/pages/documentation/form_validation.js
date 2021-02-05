@@ -13,6 +13,9 @@ import {
 } from "../../../../src/core/utility";
 import TextareaWidget from "../../../../src/forms/TextareaWidget";
 import HiddenInputWidget from "../../../../src/forms/HiddenInputWidget";
+import {ComboBox, SelectOption} from "../../../../src/menu";
+import {Loader} from "../../../../src/core/ui/Loader";
+import SearchComboBox from "../../../../src/menu/SearchComboBox";
 
 
 class ClassificationForm extends Form {
@@ -140,6 +143,230 @@ class AttributeWidgetItem {
     get element() {
         return this.#element;
     }
+
+    get attribute() {
+        return this.#attribute;
+    }
+}
+
+
+class AttributeRepositoryMock {
+    #attributes;
+
+    constructor(delay=1000) {
+        this.#attributes = [];
+        this.delay = delay;
+
+        for(let i = 0; i < 100; i++) {
+            this.#attributes.push(new AttributeDO(i, `Attribute ${i}`, '', ''));
+        }
+    }
+
+    find({name=null, limit=10, exclude_ids=null}) {
+        if(name) {
+            name = name.toLowerCase();
+        }
+
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                let r = this.#attributes.filter((item) => {
+                    if(name && !item.name.toLowerCase().includes(name)) {
+                        return false;
+                    }
+
+                    return !(exclude_ids !== null && exclude_ids.indexOf(item.id) !== -1);
+                });
+
+                r = r.slice(0, limit);
+                resolve(r);
+            }, this.delay);
+        });
+    }
+}
+
+
+class AttributeSearchBox extends ComboBox {
+    #loader;
+    #attributes;
+    #attributeRepo;
+    #filterWait;
+    #search;
+
+    #request;
+
+    constructor(filterWait=250) {
+        super();
+
+        this.closeOnSelect = false;
+        this.#attributeRepo = new AttributeRepositoryMock(1000);
+        this.#loader = new Loader();
+        this.#loader.element.classList.add("menu-loader");
+        this.#loader.hide();
+        this.#loader.appendTo(this.submenu.body);
+        this.#attributes = null;
+        this.#filterWait = filterWait;
+        this.element.classList.add('attribute-search-box');
+        this.#attributes = new WeakMap();
+
+        this.#search = (value) => {
+            this.findAttributes(value);
+        };
+
+        this.on("menuitem.select", topic => {
+            this.clearSelection();
+            let attribute = this.#attributes.get(topic.target);
+            this.publish("attribute.select", {target: attribute});
+            this.deactivate();
+        });
+
+        this.on("menuitem.click", topic => {
+            if(topic.target === this) {
+                topic.preventDefault();
+
+                if(this.submenu.options.length) {
+                    this.activate();
+                }
+            }
+        });
+
+        this.on("keyboard-navigation-start", topic => {
+            if(!this.options.length) {
+                topic.cancel();
+            }
+        });
+
+        this.on("menu.hide", topic => {
+            this.clearOptions();
+        });
+    }
+
+    findAttributes(value) {
+        this.clearOptions();
+        this.#loader.show();
+
+        if(this.#request) {
+            this.#request.cancel();
+            this.#request = null;
+        }
+
+        let canceled = false;
+
+        this.#request = {
+            cancel() { canceled = true },
+            isCanceled() { return canceled }
+        };
+
+        this.#attributeRepo.find(value).then((attributes) => {
+            if(!canceled) {
+                this.#request = null;
+                this.#loader.hide();
+
+                for (let attribute of attributes) {
+                    let option = new SelectOption({text: attribute.name, value: null});
+                    this.#attributes.set(option, attribute);
+                    this.append(option);
+                }
+
+                if(!this.isActive) {
+                    this.activate();
+                }
+            }
+        });
+    }
+
+    initFilter() {
+        let timer = null;
+
+        let applyFilter= () => {
+            timer = null;
+            this.#search(this.getFilterValue());
+            this.activateSelectedItemOrFirst();
+        };
+
+        let onInput = () => {
+            if(timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+
+            if(this.#filterWait === false || this.#filterWait < 0) {
+                applyFilter();
+            } else {
+                timer = setTimeout(applyFilter, this.#filterWait);
+            }
+        };
+
+        let onKeyDown = event => {
+            // Apply the filter immediately on enter.
+            if(event.key === "Enter" && timer) {
+                clearTimeout(timer);
+                timer = null;
+                applyFilter();
+            }
+        };
+
+        this.textbox.addEventListener('input', onInput);
+        this.textbox.addEventListener('keydown', onKeyDown);
+    }
+
+    clearOptions() {
+        this.submenu.clearChildMenuNodes();
+    }
+
+    clearSelection() {
+        for(let item of this.submenu.selection) {
+            item.optionDeselect();
+        }
+    }
+}
+
+
+class AttributeSearchBox2 extends SearchComboBox {
+    #request;
+    #repo;
+
+    constructor() {
+        let repo = new AttributeRepositoryMock(1000);
+
+        let find = (value) => {
+            if(this.#request) {
+                this.#request.cancel();
+                this.#request = null;
+            }
+
+            let canceled = false;
+
+            let request = {
+                cancel() { canceled = true; },
+                isCanceled() { return canceled; }
+            }
+
+            return new Promise((resolve, reject) => {
+                this.#repo.find({name: value, ...this.getFilter()}).then(attributes => {
+                    if(request.isCanceled()) {
+                        resolve(null);
+                    } else {
+                        let r = [];
+
+                        for(let attr of attributes) {
+                            r.push(new SelectOption({text: attr.name, model: attr}));
+                        }
+
+                        resolve(r);
+                    }
+                }).catch(e => {
+                    reject(e);
+                });
+            });
+        };
+
+        super({find, delay: 250});
+        this.#request = null;
+        this.#repo = repo;
+        this.getFilter = () => {};
+
+        this.element.classList.add("attribute-search-box");
+    }
 }
 
 
@@ -185,6 +412,22 @@ class AttributesWidget {
                 }
             }
         });
+
+        let controls = this.#element.querySelector(".attributes-widget__controls"),
+            attributeSearchBox = new AttributeSearchBox2();
+
+        attributeSearchBox.getFilter = () => {
+            return {
+                exclude_ids: this.#attributes.map(item => item.attribute.id)
+            };
+        };
+
+        attributeSearchBox.on("menuitem.select", topic => {
+            this.addAttribute(topic.target.model);
+        });
+
+        attributeSearchBox.appendTo(controls);
+
     }
 
     appendTo(selector) {
@@ -198,7 +441,7 @@ class AttributesWidget {
     }
 
     addAttribute(attribute) {
-        if(this.getAttributeById(attribute.id)) {
+        if(this.getAttributeItemById(attribute.id)) {
            throw new Error("Attribute already exists.");
         }
 
@@ -237,10 +480,10 @@ class AttributesWidget {
         return this.#name;
     }
 
-    getAttributeById(id) {
-        for(let attribute of this.#attributes) {
-            if(attribute.id === id) {
-                return attribute;
+    getAttributeItemById(id) {
+        for(let item of this.#attributes) {
+            if(item.attribute.id === id) {
+                return item;
             }
         }
 

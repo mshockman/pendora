@@ -2,6 +2,13 @@
 
 
 .attributes-widget {
+  .attribute-search-box {
+    .select-menu {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+
   .attribute-item {
     margin-bottom: 1rem;
 
