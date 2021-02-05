@@ -408,16 +408,16 @@ export class AbstractMenuItem extends MenuNode {
         isDisabled = this.getDisabled();
 
         if(!isDisabled && !isDefaultPrevented) {
+            if (isActive && !hasSubMenu) {
+                this.select({trigger: event});
+            }
+
             if (isActive && hasSubMenu && !isSubMenuVisible) {
                 this.showSubMenu();
             } else if (!isActive) {
                 this.activate();
             } else if (isActive && toggle && hasSubMenu) {
                 this.deactivate();
-            }
-
-            if (isActive && !hasSubMenu) {
-                this.select({trigger: event});
             }
         }
     }

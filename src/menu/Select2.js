@@ -52,7 +52,7 @@ function createOptGroup(node) {
  * The class SelectOption is used to construct an item contained in SelectMenu object.
  */
 export class SelectOption extends AbstractMenuItem {
-    constructor({target, text, value=null, targetKey=null}={}) {
+    constructor({target, text, value=null, targetKey=null, model=null}={}) {
         let targetChildren = null;
 
         if(typeof target === 'string') {
@@ -96,6 +96,7 @@ export class SelectOption extends AbstractMenuItem {
         });
 
         this.textContainer = this.element.querySelector('[data-text]');
+        this.model = model;
 
         // If initializing the object from a target element
         // the label text is gathered from the children of the target
@@ -1324,6 +1325,9 @@ export class MultiComboBox extends AbstractSelect {
 
 
 export class ComboBox extends RichSelect {
+    #filterMethod;
+    #filterWait;
+
     constructor({target=null, timeout=false, submenu=null, widget=null, wait=500, filter=FILTERS.istartsWith, name=null}={}) {
         super({
             target,
@@ -1338,11 +1342,74 @@ export class ComboBox extends RichSelect {
         this.element.classList.add('combo-box');
         this.element.classList.remove('rich-select');
 
-        this.wait = wait;
-        this.filter = filter;
+        this.#filterMethod = filter;
+        this.#filterWait = wait;
+        this.textbox.readOnly = false;
 
+        this.initFilter();
         this.parseDOM();
         this.refreshUI();
+    }
+
+    activateSelectedItemOrFirst() {
+        // Flag if we found a select item.
+        let f = false;
+
+        // Activate the selected items.
+        if (!this.submenu.multiSelect) {
+            for (let option of this.submenu.options) {
+                if (!option.isDisabled && !option.isFiltered && option.isSelected) {
+                    option.activate();
+                    f = true;
+                    break;
+                }
+            }
+        }
+
+        // If not selected item was found activate first possible item.
+        if (!f) {
+            for (let option of this.submenu.options) {
+                if (!option.isDisabled && !option.isFiltered) {
+                    option.activate();
+                    break;
+                }
+            }
+        }
+    }
+
+    initFilter() {
+        let _timer = null;
+
+        let applyFilter = () => {
+            _timer = null;
+            this.submenu.filter(this.#filterMethod(this.textbox.value));
+            this.activateSelectedItemOrFirst();
+        };
+
+        let onInput = () => {
+            if(_timer) {
+                clearTimeout(_timer);
+                _timer = null;
+            }
+
+            if(this.#filterWait === false || this.#filterWait < 0) {
+                applyFilter();
+            } else {
+                _timer = setTimeout(applyFilter, this.#filterWait);
+            }
+        };
+
+        let onKeyDown = event => {
+            // Apply the filter immediately on enter.
+            if(event.key === "Enter" && _timer) {
+                clearTimeout(_timer);
+                _timer = null;
+                applyFilter();
+            }
+        };
+
+        this.textbox.addEventListener('input', onInput);
+        this.textbox.addEventListener('keydown', onKeyDown);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -1360,88 +1427,16 @@ export class ComboBox extends RichSelect {
         }
     }
 
-    set filter(method) {
-        if(this._destroyFilter) {
-            this._destroyFilter();
-            this._destroyFilter = null;
-        }
-
-        if(!method) return;
-
-        this._filterMethod = method;
-
-        let _timer = null;
-
-        let applyFilter = () => {
-            _timer = null;
-            this.submenu.filter(this._filterMethod(this.textbox.value));
-
-            // Flag if we found a select item.
-            let f = false;
-
-            // Activate the selected items.
-            if (!this.submenu.multiSelect) {
-                for (let option of this.submenu.options) {
-                    if (!option.isDisabled && !option.isFiltered && option.isSelected) {
-                        option.activate();
-                        f = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!f) {
-                for (let option of this.submenu.options) {
-                    if (!option.isDisabled && !option.isFiltered) {
-                        option.activate();
-                        break;
-                    }
-                }
-            }
-        };
-
-        let onInput = () => {
-            if(_timer) {
-                clearTimeout(_timer);
-                _timer = null;
-            }
-
-            if(this.wait === false || this.wait < 0) {
-                applyFilter();
-            } else {
-                _timer = setTimeout(applyFilter, this.wait);
-            }
-        };
-
-        let onKeyDown = event => {
-            // Apply the filter immediately on enter.
-            if(event.key === "Enter" && _timer) {
-                clearTimeout(_timer);
-                _timer = null;
-                applyFilter();
-            }
-        };
-
-        this.textbox.addEventListener('input', onInput);
-        this.textbox.addEventListener('keydown', onKeyDown);
-        this.textbox.readOnly = false;
-
-        // Create method to destroy event listener.
-        this._destroyFilter = () => {
-            this.textbox.removeEventListener('input', onInput);
-            this.textbox.removeEventListener('keydown', onKeyDown);
-            this.textbox.readOnly = true;
-
-            this._destroyFilter = null;
-        };
+    getFilterValue() {
+        return this.textbox.value;
     }
 
     get filter() {
-        return !!this._filterMethod;
+        return this.#filterMethod;
     }
 
     get hasFilter() {
-        return !!this._destroyFilter;
+        return !!this.#filterMethod;
     }
 
     static getAttributes(element) {

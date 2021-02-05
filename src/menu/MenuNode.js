@@ -123,12 +123,11 @@ export default class MenuNode extends Publisher {
     }
 
     removeChildMenuNode(menuNode) {
-        if(menuNode.#parent !== this) return;
-
-        let i = menuNode.#parent.#children.indexOf(this);
+        let i = this.#children.indexOf(menuNode);
 
         if(i !== -1) {
-            menuNode.#parent.#children.splice(i, 1);
+            this.#children.splice(i, 1);
+            menuNode.remove();
         }
 
         menuNode.#parent = null;
@@ -896,6 +895,22 @@ export default class MenuNode extends Publisher {
 
     _rootKeyDown(topic) {
         if(this.isRoot) {
+            let canceled = false;
+
+            this.dispatchTopic("keyboard-navigation-start", {
+                topic: "keyboard-navigation-start",
+                target: this,
+                isCanceled() {
+                    return canceled;
+                },
+
+                cancel() {
+                    canceled = true;
+                }
+            });
+
+            if(canceled) return;
+
             let event = topic.originalEvent;
 
             if(event.key === "Escape") {
