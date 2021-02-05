@@ -2,12 +2,16 @@ import FormWidgetBase from "./FormWidgetBase";
 
 
 export default class InputWidget extends FormWidgetBase {
-    constructor(input=null) {
+    constructor(input=null, name=null) {
         if(!input) {
             input = document.createElement('input');
         }
 
         super(input);
+
+        if(name !== null) {
+            this.setName(name);
+        }
     }
 
     getValue() {
