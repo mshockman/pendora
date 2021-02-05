@@ -18,18 +18,20 @@ export class SchemaNode {
      * @param validator {Function|Validator|null}
      * @param missing {REQUIRED|DROP|*}
      * @param prop {String|null}
+     * @param options
      */
-    constructor({name=null, type=null, validator=null, missing=REQUIRED, prop=null}) {
+    constructor({name=null, type=null, validator=null, missing=REQUIRED, prop=null, ...options}) {
         this.name = name;
         this.type = type;
         this.validator = validator;
         this.missing = missing;
         this.#prop = prop;
+        this.options = options;
     }
 
     deserialize(value) {
         try {
-            let error = new ValidationErrorList(this);
+            let error = new ValidationErrorList(this, this.name, null);
             error.cstruct = value;
 
             value = this._handleMissing(error, value);
@@ -146,9 +148,11 @@ export class Schema extends SchemaNode {
      * @param validator {function||null}
      * @param missing
      * @param prop
+     * @param schema
+     * @param options
      */
-    constructor({nodes=null, name, type, validator=null, missing=REQUIRED, prop=null}) {
-        super({name, type, validator, missing, prop});
+    constructor({nodes=null, name=null, type=null, validator=null, missing=REQUIRED, prop=null, schema=null, ...options}={}) {
+        super({name, type, validator, missing, prop, ...options});
 
         this.children = [];
 
@@ -157,11 +161,21 @@ export class Schema extends SchemaNode {
                 this.addNode(node);
             }
         }
+
+        if(schema) {
+            for(let [key, value] of Object.entries(schema)) {
+                if(value.name === null) {
+                    value.name = key;
+                }
+
+                this.addNode(value);
+            }
+        }
     }
 
     addNode(node) {
-        if(this.hasChildNode(node)) {
-            throw new Error("Node already exists");
+        if(!node.name || this.hasChildNode(node.name)) {
+            throw new Error("Node must have a unique name.");
         }
 
         this.children.push(node);
@@ -211,10 +225,16 @@ export class Schema extends SchemaNode {
         }
 
         if(errorList.length) {
-            throw error;
+            throw errorList;
         }
 
         return r;
+    }
+
+    *[Symbol.iterator]() {
+        for(let child of this.children) {
+            yield child;
+        }
     }
 }
 
@@ -245,7 +265,7 @@ export class SchemaList extends SchemaNode {
                 r.push(v);
             } catch(e) {
                 if(e instanceof InvalidErrorBase) {
-                    errorList.setNode(this.node);
+                    e.setNode(this.node);
                     e.name = i;
                     e.index = i;
                     errorList.addError(e);
@@ -261,5 +281,9 @@ export class SchemaList extends SchemaNode {
         }
 
         return r;
+    }
+
+    hasChildNode(node) {
+        return node === this.node;
     }
 }
