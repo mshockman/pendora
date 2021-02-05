@@ -11,6 +11,7 @@ export class InvalidErrorBase {
         this.node = node;
         this.name = name;
         this.index = index;
+        this.parent = null;
 
         if(node) this.setNode(node);
     }
@@ -18,9 +19,25 @@ export class InvalidErrorBase {
     setNode(node) {
         this.node = node;
 
-        if(!this.name) {
+        if(this.name == null) {
             this.name = this.node.name;
         }
+    }
+
+    getPath() {
+        let r = [],
+            o = this;
+
+        while(o) {
+            if(o instanceof ValidationErrorList && o.name != null) {
+                r.push(o.name);
+            }
+
+            o = o.parent;
+        }
+
+        r.reverse();
+        return r.join('.');
     }
 }
 
@@ -34,24 +51,50 @@ export class ValidationErrorList extends InvalidErrorBase {
     }
 
     addError(error) {
-        if(error instanceof ValidationErrorList) {
+        if(error instanceof ValidationErrorList && error.node === this.node) {
+            // Founds a list of errors for several child nodes.
             for(let child of error.children) {
                 this.addError(child);
             }
         } else if(error.node === this.node) {
+            // Found global error for current node.
             if(this.children.indexOf(error) === -1) {
+                if(error.name == null) {
+                    error.name = this.name;
+                }
+
+                if(error.index == null) {
+                    error.index = this.index;
+                }
+
+                error.parent = this;
                 this.children.push(error);
             }
         } else if(this.node.hasChildNode(error.node)) {
-            let childErrorNode = this.get(error.node);
+            let childErrorNode = this.get(error.name);
 
             if(!childErrorNode) {
-                childErrorNode = new ValidationErrorList(error.node, error.name);
+                childErrorNode = new ValidationErrorList(error.node, error.name, error.index);
+                childErrorNode.parent = this;
                 this.children.push(childErrorNode);
             }
 
             childErrorNode.addError(error);
         }
+    }
+
+    getInvalidNodes() {
+        let r = [];
+
+        for(let child of this.children) {
+            if(child.getInvalidNodes) {
+                r = r.concat(child.getInvalidNodes());
+            } else {
+                r.push(child);
+            }
+        }
+
+        return r;
     }
 
     get(node) {
