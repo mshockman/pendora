@@ -218,3 +218,28 @@ export function closest(target, selector, context=null) {
 
     return null;
 }
+
+
+export function attachEventListeners(element, listeners) {
+    let r = {};
+
+    for(let key of Object.keys(listeners)) {
+        let events = key.split(/\s+/),
+            listeners = Array.isArray(listeners[key]) ? listeners[key] : [listeners[key]];
+
+        for(let event of events) {
+            for(let listener of listeners) {
+                element.addEventListener(event, listener);
+            }
+        }
+
+        r[key] = listeners;
+    }
+
+    return r;
+}
+
+
+export function detachEventListeners(element, listeners) {
+
+}
