@@ -28,7 +28,8 @@ let app = new Application({
     'documentation_validation': () => import("./pages/documentation/test_validation"),
     'documentation_form_validation': () => import("./pages/documentation/form_validation"),
     'test_tooltip': () => import("./pages/documentation/test_toolip"),
-    'test_notifications': () => import("./pages/documentation/test_notifications")
+    'test_notifications': () => import("./pages/documentation/test_notifications"),
+    'test_menu2': () => import("./pages/documentation/menu/test_menu"),
 });
 
 
