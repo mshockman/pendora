@@ -2,10 +2,15 @@ import MenuNode, {MenuNodeTopic} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import Timer from "../core/utility/timers";
 import {POSITIONERS} from "./positioners";
+import {queryMenu} from "./core";
 
 
 export default class MenuItem extends MenuNode {
-    constructor({element=null, text=null, href=null, toggle=false, autoActivate=true, delay=false, timeout=false, activateOnMouseOver=true, activateOnClick=true, activateOnSelect=false, positioner=POSITIONERS.inherit, closeOnBlur=false, closeOnSelect=false}) {
+    #textContainer;
+    #altContainer;
+    #iconContainer;
+
+    constructor({element=null, text=null, href=null, toggle=false, autoActivate=true, delay=false, timeout=false, activateOnMouseOver=true, activateOnClick=true, activateOnSelect=false, positioner=POSITIONERS.inherit, closeOnBlur=false, closeOnSelect=false, altText=null, icon=null}) {
         if(!element) {
             element = menuItemTemplate({text, href});
         }
@@ -18,6 +23,20 @@ export default class MenuItem extends MenuNode {
         this.activateOnMouseOver = activateOnMouseOver;
         this.activateOnClick = activateOnClick;
         this.activateOnSelect = activateOnSelect;
+
+        this.element.dataset.controller = "menuitem";
+
+        this.#textContainer = queryMenu(this.element, "[data-controller='text']");
+        this.#altContainer = queryMenu(this.element, "[data-controller='alt']");
+        this.#iconContainer = queryMenu(this.element, "[data-controller='icon']");
+
+        if(altText !== null) {
+            this.#altContainer.innerHTML = altText;
+        }
+
+        if(icon !== null) {
+            this.#iconContainer.innerHTML = icon;
+        }
 
         this.on("event.mouseenter", topic => this.onMouseEnter(topic));
         this.on("event.mouseleave", topic => this.onMouseLeave(topic));
@@ -74,9 +93,11 @@ export default class MenuItem extends MenuNode {
     }
 
     detachMenu() {
-        if(this.submenu) {
-            this.removeItem(this.submenu);
-            this.submenu.removeFromDom();
+        let submenu = this.submenu;
+
+        if(submenu) {
+            this.removeItem(submenu);
+            submenu.removeFromDom();
             this.element.classList.remove("has-submenu");
         }
     }
@@ -170,12 +191,24 @@ export default class MenuItem extends MenuNode {
     get submenu() {
         return this.children[0] || null;
     }
+
+    get textContainer() {
+        return this.#textContainer;
+    }
+
+    get altContainer() {
+        return this.#altContainer;
+    }
+
+    get iconContainer() {
+        return this.#iconContainer;
+    }
 }
 
 
 
 function menuItemTemplate(context) {
     return createFragment(`
-        <div class="menuitem"><a${context.href ? ` ${context.href}` : ""}>${context.text}</a></div>
+        <div class="menuitem" data-controller="menuitem"><a ${context.href ? `${context.href}` : ""} data-controller="btn" class="menuitem__btn"><span class="menuitem__icon" data-controller="icon"></span><span data-controller="text">${context.text}</span><span class="menuitem__alt" data-controller="alt"></span></a></div>
     `).firstElementChild;
 }

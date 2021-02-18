@@ -33,6 +33,7 @@ export default class Menu extends MenuNode {
         this.element.addEventListener("click", this);
         this.element.addEventListener("mouseover", this);
         this.element.addEventListener("mouseout", this);
+        this.element.dataset.controller = "menu";
 
         this.multiple = multiple;
         this.closeOnBlur = closeOnBlur;
