@@ -2,7 +2,41 @@ import MenuNode, {MenuNodeTopic} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import Timer from "../core/utility/timers";
 import {POSITIONERS} from "./positioners";
-import {queryMenu} from "./core";
+import {OptionRegistry, queryMenu, returnFalse, returnTrue} from "./core";
+
+
+export const TOGGLE = new OptionRegistry("boolean");
+TOGGLE.register("never", returnFalse);
+
+TOGGLE.register("ctrl", function(item, topic) {
+    return topic?.originalEvent?.ctrlKey === true;
+});
+
+
+export const ACTIVATE = new OptionRegistry("boolean");
+ACTIVATE.register("never", returnFalse);
+
+
+ACTIVATE.whenParentActive = function(delay) {
+    return function(item, topic) {
+        if(item.parent && item.parent.isActive) {
+            return delay;
+        } else {
+            return false;
+        }
+    }
+};
+
+
+ACTIVATE.always = function(delay, parentInactiveOverride=null) {
+    return function(item, topic) {
+        if(!item.parent || !item.parent.isActive) {
+            return parentInactiveOverride === null ? delay : parentInactiveOverride;
+        } else {
+            return delay;
+        }
+    }
+};
 
 
 export default class MenuItem extends MenuNode {
@@ -10,33 +44,40 @@ export default class MenuItem extends MenuNode {
     #altContainer;
     #iconContainer;
 
-    constructor({element=null, text=null, href=null, toggle=false, autoActivate=true, delay=false, timeout=false, activateOnMouseOver=true, activateOnClick=true, activateOnSelect=false, positioner=POSITIONERS.inherit, closeOnBlur=false, closeOnSelect=false, altText=null, icon=null}) {
+    // closeOnSelect;
+    // closeOnBlur;
+    // positioner;
+
+    /**
+     * This property is only used when the property `activateOnClick` is true.
+     *
+     * If true the MenuItem can be toggled off on click.
+     * If "ctrl" the MenuItem can be toggled off on click if the ctrl key is pressed.
+     *
+     * @type {boolean|"ctrl"|String|Function}
+     */
+    toggle;
+    autoActivate;
+    timeout;
+
+    constructor({element=null, text=null, href=null, toggle=false, autoActivate=true,
+                    timeout=false, positioner=POSITIONERS.inherit, closeOnBlur=false,
+                    closeOnSelect=false, altText=null, icon=null}) {
         if(!element) {
-            element = menuItemTemplate({text, href});
+            element = menuItemTemplate({text, href, altText, icon});
         }
 
-        super({element, positioner, closeOnBlur, closeOnSelect, timeout});
+        super({element, positioner, closeOnBlur, closeOnSelect});
 
-        this.delay = delay;
         this.toggle = toggle;
         this.autoActivate = autoActivate;
-        this.activateOnMouseOver = activateOnMouseOver;
-        this.activateOnClick = activateOnClick;
-        this.activateOnSelect = activateOnSelect;
+        this.timeout = timeout;
 
         this.element.dataset.controller = "menuitem";
 
         this.#textContainer = queryMenu(this.element, "[data-controller='text']");
         this.#altContainer = queryMenu(this.element, "[data-controller='alt']");
         this.#iconContainer = queryMenu(this.element, "[data-controller='icon']");
-
-        if(altText !== null) {
-            this.#altContainer.innerHTML = altText;
-        }
-
-        if(icon !== null) {
-            this.#iconContainer.innerHTML = icon;
-        }
 
         this.on("event.mouseenter", topic => this.onMouseEnter(topic));
         this.on("event.mouseleave", topic => this.onMouseLeave(topic));
@@ -60,6 +101,10 @@ export default class MenuItem extends MenuNode {
 
             if(this.submenu) {
                 this.submenu.hide();
+
+                if(this.submenu.isActive) {
+                    this.submenu.deactivate();
+                }
             }
         }
     }
@@ -102,14 +147,28 @@ export default class MenuItem extends MenuNode {
         }
     }
 
-    select() {
-        if(!this.isActive && this.activateOnSelect) {
+    select(trigger=null) {
+        if(!this.isActive) {
             this.activate();
         }
 
-        setTimeout(() => {
-            this.dispatchTopic(new MenuNodeTopic("menuitem.select"));
-        }, 0)
+        if(!this.submenu) {
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menuitem.select", {trigger}));
+            });
+        }
+    }
+
+    deselect(trigger=null) {
+        if(this.isActive) {
+            this.deactivate();
+        }
+
+        if(!this.submenu) {
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menuitem.deselect", {trigger}));
+            });
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -118,57 +177,33 @@ export default class MenuItem extends MenuNode {
     onClick(topic) {
         if(topic.target !== this || this.getDisabled()) return;
 
-        let active = true;
+        let toggle = TOGGLE.getComputedValue(this.toggle, this, topic);
 
-        if(!this.isActive && this.activateOnClick) {
-            this.activate();
-        } else if(this.toggle) {
-            this.deactivate();
-            active = false;
+        if(this.isActive && toggle === true) {
+            this.deselect(topic);
+        } else {
+            this.select(topic);
         }
-
-        if(active && !this.submenu) {
-            this.select();
-        }
-    }
-
-    onMouseOver(topic) {
-        Timer.clearTargetTimer(this, "timeout");
     }
 
     onMouseEnter(topic) {
         this.isHover = true;
         if(this.getDisabled()) return;
 
-        if(this.activateOnMouseOver) {
-            if (!this.isActive) {
-                if (this.parent && this.parent.isActive) {
-                    if (Timer.isValidInterval(this.delay)) {
-                        Timer.forceSetTargetTimeout(this, "activate", () => this.activate(), this.delay);
-                    } else if (this.delay !== true) {
-                        this.activate();
-                    }
-                } else {
-                    if (this.autoActivate === true) {
-                        this.activate();
-                    } else if (Timer.isValidInterval(this.autoActivate)) {
-                        Timer.forceSetTargetTimeout(this, "activate", () => this.activate(), this.autoActivate);
-                    }
-                }
+        if (!this.isActive) {
+            let autoActivate = ACTIVATE.getComputedValue(this.autoActivate, this, topic);
+
+            if(autoActivate === true) {
+                this.activate();
+            } else if(Timer.isValidInterval(autoActivate)) {
+                Timer.forceSetTargetTimeout(this, "activate", () => this.activate(), this.autoActivate);
             }
         }
     }
 
     onMouseLeave(topic) {
         this.isHover = false;
-
-        if(this.isActive) {
-            if(this.timeout === true) {
-                this.deactivate();
-            } else if(Timer.isValidInterval(this.timeout)) {
-                Timer.forceSetTargetTimeout(this, "timeout", () => this.deactivate(), this.timeout);
-            }
-        }
+        super.onMouseLeave(topic);
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -203,12 +238,27 @@ export default class MenuItem extends MenuNode {
     get iconContainer() {
         return this.#iconContainer;
     }
-}
 
+    get text() {
+        if(this.#textContainer.nodeName === "INPUT") {
+            return this.#textContainer.value;
+        } else {
+            return this.#textContainer.innerHTML;
+        }
+    }
+
+    set text(value) {
+        if(this.#textContainer.nodeName === "INPUT") {
+            this.#textContainer.value = value;
+        } else {
+            this.#textContainer.innerHTML = value;
+        }
+    }
+}
 
 
 function menuItemTemplate(context) {
     return createFragment(`
-        <div class="menuitem" data-controller="menuitem"><a ${context.href ? `${context.href}` : ""} data-controller="btn" class="menuitem__btn"><span class="menuitem__icon" data-controller="icon"></span><span data-controller="text">${context.text}</span><span class="menuitem__alt" data-controller="alt"></span></a></div>
+        <div class="menuitem" data-controller="menuitem"><a ${context.href ? `${context.href}` : ""} data-controller="btn" class="menuitem__btn"><span class="menuitem__icon" data-controller="icon">${context.icon || ''}</span><span data-controller="text">${context.text}</span><span class="menuitem__alt" data-controller="alt">${context.altText || ''}</span></a></div>
     `).firstElementChild;
 }

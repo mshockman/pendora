@@ -1,15 +1,18 @@
 import MenuNode, {MenuNodeTopic} from "./MenuNode";
 import {createFragment} from "../core/utility";
-import {getClosestMenuNodeByElement, queryMenu} from "./core";
-import MenuItem from "./MenuItem";
-import Timer from "../core/utility/timers";
+import {OptionRegistry, queryMenu} from "./core";
 import {POSITIONERS} from "./positioners";
+
+
+export const MULTIPLE = new OptionRegistry("boolean");
 
 
 export default class Menu extends MenuNode {
     #body;
     #header;
     #footer;
+
+    multiple;
 
     constructor({element=null, multiple=false, closeOnBlur=false, timeout=false, positioner=POSITIONERS.inherit, closeOnSelect=false}={}) {
         if(!element) {
@@ -24,7 +27,7 @@ export default class Menu extends MenuNode {
             `).firstElementChild;
         }
 
-        super({element, timeout, closeOnSelect, positioner});
+        super({element, closeOnSelect, closeOnBlur, positioner, timeout});
 
         this.#body = queryMenu(this.element, "[data-controller='menu-body']");
         this.#header = queryMenu(this.element, "[data-controller='menu-header']");
@@ -36,7 +39,6 @@ export default class Menu extends MenuNode {
         this.element.dataset.controller = "menu";
 
         this.multiple = multiple;
-        this.closeOnBlur = closeOnBlur;
         this.isVisible = false;
 
         this.on("menunode.activate", (topic) => {
@@ -44,7 +46,9 @@ export default class Menu extends MenuNode {
                 this.activate();
             }
 
-            if(!this.multiple && this.isChild(topic.target)) {
+            let multiple = MULTIPLE.getComputedValue(this.multiple, this, topic);
+
+            if(!multiple && this.isChild(topic.target)) {
                 for(let child of this.children) {
                     if(child.isActive && child !== topic.target && !topic.target.isAncestor(child)) {
                         child.deactivate();
@@ -87,7 +91,9 @@ export default class Menu extends MenuNode {
                 this.positioner(this);
             }
 
-            this.dispatchTopic(new MenuNodeTopic("menu.show"));
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menu.show"));
+            });
         }
     }
 
@@ -95,7 +101,9 @@ export default class Menu extends MenuNode {
         if(this.isVisible) {
             this.isVisible = false;
 
-            this.dispatchTopic(new MenuNodeTopic("menu.hide"));
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menu.hide"));
+            });
         }
     }
 
@@ -143,18 +151,4 @@ export default class Menu extends MenuNode {
     //         }
     //     }
     // }
-
-    onMouseOver(topic) {
-        Timer.clearTargetTimer(this, "timeout");
-    }
-
-    onMouseLeave(topic) {
-        if(this.isActive) {
-            if(this.timeout === true) {
-                this.deactivate();
-            } else if(Timer.isValidInterval(this.timeout)) {
-                Timer.forceSetTargetTimeout(this, "timeout", () => this.deactivate(), this.timeout);
-            }
-        }
-    }
 }

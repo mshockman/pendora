@@ -16,23 +16,31 @@ export default class TestMenuPage {
     test4() {
         let cont4 = document.querySelector("#menu1-cont4");
 
-        let richSelect = new RichSelect();
+        let richSelect = new RichSelect({placeholder: "Please Select An Item", multiSelect: true});
+        richSelect.submenu.shiftSelect = true;
+
 
         for(let i = 0; i < 5; i++) {
-            let menuitem = new SelectMenuOption({text: `Item ${i}`, value: i});
+            let menuitem = new SelectMenuOption({text: `Item ${i}`, value: i, toggle: true});
             richSelect.addOption(menuitem);
         }
 
         richSelect.appendTo(cont4);
-        console.log(richSelect);
+
+        richSelect.on("menu.select.change", topic => { console.log(topic); });
+        richSelect.on("menuitem.select", topic => { console.log(topic); });
+        richSelect.on("menuitem.deselect", topic => { console.log(topic); });
+        richSelect.on("event.click", topic => { console.log(topic); });
+        richSelect.on("menu.show", topic => { console.log(topic); });
+        richSelect.on("menu.hide", topic => { console.log(topic); });
     }
 
     test3() {
         let cont3 = document.querySelector("#menu1-cont3");
-        let selectMenu = new SelectMenu({closeOnBlur: true});
+        let selectMenu = new SelectMenu({closeOnBlur: true, multiSelect: false, shiftSelect: true});
 
         for(let i = 0; i < 5; i++) {
-            let menuitem = new SelectMenuOption({text: `Item ${i}`, value: i, toggle: false, toggleOnCtrlClick: true});
+            let menuitem = new SelectMenuOption({text: `Item ${i}`, value: i, toggle: true, toggleOnCtrlClick: true});
             selectMenu.appendItem(menuitem);
         }
 

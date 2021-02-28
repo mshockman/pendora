@@ -24,6 +24,7 @@ export const POSITIONERS = {
                 my: 'left top',
                 at: 'left bottom',
                 of: menu.parent.element,
+                inside: Rect.getClientRect(),
                 collision: 'flip flip'
             });
         } else {
@@ -31,6 +32,7 @@ export const POSITIONERS = {
                 my: 'left top',
                 at: 'right top',
                 of: menu.parent.element,
+                inside: Rect.getClientRect(),
                 collision: 'flip flip'
             });
         }

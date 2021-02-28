@@ -1,6 +1,6 @@
 import Publisher, {STOP} from "../core/Publisher";
 import {selectElement} from "../core/utility";
-import {bindMenuNodeToElement, getClosestMenuNodeByElement} from "./core";
+import {bindMenuNodeToElement, getClosestMenuNodeByElement, returnTrue, returnFalse, OptionRegistry} from "./core";
 import Timer from "../core/utility/timers";
 import MenuItem from "../menu/MenuItem";
 import Menu from "../menu/Menu";
@@ -10,6 +10,10 @@ import {POSITIONERS} from "./positioners";
 const MENU_NODE_PARENT_MAP = new WeakMap();
 
 
+export const TIMEOUT = new OptionRegistry("boolean");
+TIMEOUT.register("never", returnFalse);
+
+
 export default class MenuNode extends Publisher {
     #element;
     #children;
@@ -17,23 +21,30 @@ export default class MenuNode extends Publisher {
 
     #documentClickHandler;
 
-    constructor({element, closeOnBlur=false, timeout=false, positioner=POSITIONERS.noop, closeOnSelect=false}) {
+    positioner;
+    closeOnSelect;
+    closeOnBlur;
+    timeout;
+
+    constructor({element, closeOnBlur=false, closeOnSelect=false, positioner=POSITIONERS.noop, timeout=false}) {
         super();
 
         this.#element = selectElement(element);
         this.#children = [];
         this.#documentClickHandler = null;
         this.closeOnBlur = closeOnBlur;
-        this.timeout = timeout;
         this.#isController = false;
-        this.positioner = positioner;
         this.closeOnSelect = closeOnSelect;
+        this.positioner = positioner;
+        this.timeout = timeout;
 
         bindMenuNodeToElement(this.#element, this);
 
         this.on("menuitem.select", topic => {
             if(this.closeOnSelect) {
-                this.deactivate();
+                window.queueMicrotask(() => {
+                    this.deactivate();
+                });
             }
         });
     }
@@ -84,7 +95,9 @@ export default class MenuNode extends Publisher {
                 document.addEventListener("click", this.#documentClickHandler);
             }
 
-            this.dispatchTopic(new MenuNodeTopic("menunode.activate"));
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menunode.activate"));
+            });
         }
     }
 
@@ -98,8 +111,11 @@ export default class MenuNode extends Publisher {
 
             Timer.clearTargetTimer(this, "activate");
             Timer.clearTargetTimer(this, "timeout");
+            Timer.clearTargetTimer(this, "deactivate");
 
-            this.dispatchTopic(new MenuNodeTopic("menunode.deactivate"));
+            window.queueMicrotask(() => {
+                this.dispatchTopic(new MenuNodeTopic("menunode.deactivate"));
+            });
         }
     }
 
@@ -160,9 +176,10 @@ export default class MenuNode extends Publisher {
     }
 
     dispatchTopic(topic) {
+        topic.target = this;
+
         let o = this;
         let name = topic.name;
-        topic.target = this;
 
         while(o && !topic.isPropagationStopped()) {
             topic.currentTarget = o;
@@ -245,6 +262,22 @@ export default class MenuNode extends Publisher {
 
             for(let topic of topics) {
                 targetNode.dispatchTopic(new MenuNodeTopic(`event.${topic}`, {originalEvent: event}));
+            }
+        }
+    }
+
+    onMouseOver(topic) {
+        Timer.clearTargetTimer(this, "timeout");
+    }
+
+    onMouseLeave(topic) {
+        if(this.isActive) {
+            let timeout = TIMEOUT.getComputedValue(this.timeout, this, topic);
+
+            if(timeout === true) {
+                this.deactivate();
+            } else if(Timer.isValidInterval(timeout)) {
+                Timer.forceSetTargetTimeout(this, "timeout", () => this.deactivate(), timeout);
             }
         }
     }
@@ -341,10 +374,6 @@ export default class MenuNode extends Publisher {
 }
 
 
-function returnTrue() { return true; }
-function returnFalse() { return false; }
-
-
 export class MenuNodeTopic {
     constructor(name, options=null) {
         this.name = name;
@@ -355,6 +384,7 @@ export class MenuNodeTopic {
         this.timestamp = Date.now();
         this.isDefaultPrevented = returnFalse;
         this.isPropagationStopped = returnFalse;
+        this.promise = null;
         if(options) Object.assign(this, options);
     }
 

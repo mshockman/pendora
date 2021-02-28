@@ -2,6 +2,9 @@ const MENU_ELEMENT_MAP = new WeakMap();
 const MENU_CONTROLLER_MAP = new WeakMap();
 
 
+export const INHERIT = {};
+
+
 export function queryMenu(menuElement, selector) {
     let test;
 
@@ -96,4 +99,109 @@ export function getMenuNodeController(menuNode) {
     }
 
     return null;
+}
+
+
+export function getInheritedProperty(obj, prop, default_value=undefined, getter=null, next=null) {
+    if(!next) {
+        next = obj => obj.parent;
+    }
+
+    if(!getter) {
+        getter = (target, property) => target[property];
+    }
+
+    let o = obj;
+
+    while(o) {
+        let value = getter(o, prop);
+
+        if(value !== undefined && value !== "inherit" && value !== INHERIT) {
+            return value;
+        }
+
+        o = next(o);
+    }
+
+    return default_value;
+}
+
+
+export function returnTrue() {
+    return true;
+}
+
+
+export function returnFalse() {
+    return false;
+}
+
+
+export class OptionRegistry {
+    #registry;
+    #handler;
+
+    constructor(handler=null) {
+        this.#registry = {};
+
+        if(handler === "boolean") {
+            handler = function(value) {
+                if(value === "true" || value === "false") {
+                    value = value === "true";
+                }
+
+                return function() { return value; };
+            }
+        } else if(!handler || handler === "default") {
+            handler = function(value) {
+                return function() { return value; };
+            }
+        }
+
+        this.#handler = handler;
+    }
+
+    get(value) {
+        let type = typeof value;
+
+        if(this.#registry[value]) {
+            return this.#registry[value];
+        }
+
+        if(type === "function") {
+            return value;
+        } else {
+            return this.#handler(value);
+        }
+    }
+
+    getComputedValue(value, ...args) {
+        return this.get(value)(...args);
+    }
+
+    register(name, fn) {
+        if(this.#registry[name]) {
+            throw new Error("A function is already registered with that name.");
+        }
+
+        if(typeof fn !== "function") {
+            throw new Error("Property fn must be a function.");
+        }
+
+        this.#registry[name] = fn;
+    }
+
+    copy() {
+        let r = new OptionRegistry(this.#handler);
+
+        for(let name of Object.keys(this.#registry)) {
+            r.register(name, this.#registry[name]);
+        }
+
+        return r;
+    }
+
+    get registry() {
+        return this.#registry;
+    }
 }
