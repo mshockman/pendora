@@ -1,4 +1,4 @@
-import MenuNode, {MenuNodeTopic} from "./MenuNode";
+import MenuNode, {MenuNodeTopic, MENU_NODE_TYPE} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import Timer from "../core/utility/timers";
 import {POSITIONERS} from "./positioners";
@@ -17,10 +17,10 @@ export const ACTIVATE = new OptionRegistry("boolean");
 ACTIVATE.register("never", returnFalse);
 
 
-ACTIVATE.whenParentActive = function(delay) {
+ACTIVATE.whenParentActive = function(delay=false) {
     return function(item, topic) {
         if(item.parent && item.parent.isActive) {
-            return delay;
+            return typeof delay === "boolean" ? !delay : delay;
         } else {
             return false;
         }
@@ -43,6 +43,9 @@ export default class MenuItem extends MenuNode {
     #textContainer;
     #altContainer;
     #iconContainer;
+    #btn;
+    #locationHandler;
+    #location;
 
     // closeOnSelect;
     // closeOnBlur;
@@ -72,12 +75,15 @@ export default class MenuItem extends MenuNode {
         this.toggle = toggle;
         this.autoActivate = autoActivate;
         this.timeout = timeout;
+        this.#location = null;
+        this[MENU_NODE_TYPE] = "menuitem";
 
         this.element.dataset.controller = "menuitem";
 
         this.#textContainer = queryMenu(this.element, "[data-controller='text']");
         this.#altContainer = queryMenu(this.element, "[data-controller='alt']");
         this.#iconContainer = queryMenu(this.element, "[data-controller='icon']");
+        this.#btn = queryMenu(this.element, "[data-controller='btn']");
 
         this.on("event.mouseenter", topic => this.onMouseEnter(topic));
         this.on("event.mouseleave", topic => this.onMouseLeave(topic));
@@ -155,6 +161,7 @@ export default class MenuItem extends MenuNode {
         if(!this.submenu) {
             window.queueMicrotask(() => {
                 this.dispatchTopic(new MenuNodeTopic("menuitem.select", {trigger}));
+                this.publish("select", new MenuNodeTopic("select", {trigger}));
             });
         }
     }
@@ -167,6 +174,7 @@ export default class MenuItem extends MenuNode {
         if(!this.submenu) {
             window.queueMicrotask(() => {
                 this.dispatchTopic(new MenuNodeTopic("menuitem.deselect", {trigger}));
+                this.publish("deselect", new MenuNodeTopic("deselect", {trigger}));
             });
         }
     }
@@ -252,6 +260,42 @@ export default class MenuItem extends MenuNode {
             this.#textContainer.value = value;
         } else {
             this.#textContainer.innerHTML = value;
+        }
+    }
+
+    get location() {
+        return this.#location;
+    }
+
+    set location(location) {
+        if(this.#locationHandler) {
+            this.off("select", this.#locationHandler);
+            this.#locationHandler = null;
+        }
+
+        this.#location = location;
+
+        if(this.#location) {
+            this.#locationHandler = () => window.location = location;
+            this.on("select", this.#locationHandler);
+        }
+    }
+
+    get href() {
+        if(this.#btn && this.#btn.nodeName === "A") {
+            return this.#btn.href;
+        }
+
+        return null;
+    }
+
+    set href(value) {
+        if(this.#btn && this.#btn.nodeName === "A") {
+            if(value === null) {
+                this.#btn.removeAttribute("href");
+            } else {
+                this.#btn.href = value;
+            }
         }
     }
 }

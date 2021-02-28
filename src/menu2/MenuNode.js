@@ -14,6 +14,9 @@ export const TIMEOUT = new OptionRegistry("boolean");
 TIMEOUT.register("never", returnFalse);
 
 
+export const MENU_NODE_TYPE = Symbol("MENU_NODE_TYPE");
+
+
 export default class MenuNode extends Publisher {
     #element;
     #children;
@@ -37,6 +40,7 @@ export default class MenuNode extends Publisher {
         this.closeOnSelect = closeOnSelect;
         this.positioner = positioner;
         this.timeout = timeout;
+        this[MENU_NODE_TYPE] = "menunode";
 
         bindMenuNodeToElement(this.#element, this);
 
@@ -289,11 +293,11 @@ export default class MenuNode extends Publisher {
     }
 
     get parentItem() {
-        return this.parent ? this.parent.closest(item => item instanceof MenuItem) : null;
+        return this.parent ? this.parent.closest(item => item[MENU_NODE_TYPE] === "menuitem") : null;
     }
 
     get parentMenu() {
-        return this.parent ? this.parent.closest(item => item instanceof Menu) : null;
+        return this.parent ? this.parent.closest(item => item[MENU_NODE_TYPE] === "menu") : null;
     }
 
     get element() {

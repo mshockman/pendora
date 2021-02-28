@@ -19,32 +19,34 @@ export const POSITIONERS = {
     dropdown(menu) {
         let rect = new Rect(menu.element);
 
-        if(!menu.parent.parentItem) {
-            rect = rect.position({
-                my: 'left top',
-                at: 'left bottom',
-                of: menu.parent.element,
-                inside: Rect.getClientRect(),
-                collision: 'flip flip'
-            });
-        } else {
-            rect = rect.position({
-                my: 'left top',
-                at: 'right top',
-                of: menu.parent.element,
-                inside: Rect.getClientRect(),
-                collision: 'flip flip'
-            });
-        }
+        if(menu.parent) {
+            if (!menu.parent.parentItem) {
+                rect = rect.position({
+                    my: 'left top',
+                    at: 'left bottom',
+                    of: menu.parent.element,
+                    inside: Rect.getClientRect(),
+                    collision: 'flip flip'
+                });
+            } else {
+                rect = rect.position({
+                    my: 'left top',
+                    at: 'right top',
+                    of: menu.parent.element,
+                    inside: Rect.getClientRect(),
+                    collision: 'flip flip'
+                });
+            }
 
-        setElementClientPosition(menu.element, rect);
+            setElementClientPosition(menu.element, rect);
+        }
     },
 
     inherit(menu) {
         let o = menu.parent;
 
         while(o) {
-            if(o.positioner) {
+            if(o.positioner && o.positioner !== POSITIONERS.inherit) {
                 return o.positioner(menu);
             }
 

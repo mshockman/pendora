@@ -1,4 +1,4 @@
-import MenuNode, {MenuNodeTopic} from "./MenuNode";
+import MenuNode, {MenuNodeTopic, MENU_NODE_TYPE} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import {OptionRegistry, queryMenu} from "./core";
 import {POSITIONERS} from "./positioners";
@@ -40,6 +40,7 @@ export default class Menu extends MenuNode {
 
         this.multiple = multiple;
         this.isVisible = false;
+        this[MENU_NODE_TYPE] = "menu";
 
         this.on("menunode.activate", (topic) => {
             if(!this.isActive) {
@@ -126,29 +127,4 @@ export default class Menu extends MenuNode {
             }
         }
     }
-
-    //------------------------------------------------------------------------------------------------------------------
-    // Event Handlers
-
-    // handleEvent(event) {
-    //     let targetNode = getClosestMenuNodeByElement(event.target);
-    //
-    //     if((targetNode === this || this.isChild(targetNode)) && !targetNode.getDisabled()) {
-    //         if(event.type === "mouseover") {
-    //             targetNode.dispatchTopic(new MenuNodeTopic("mouseover", {originalEvent: event}));
-    //
-    //             if(!targetNode.element.contains(event.relatedTarget)) {
-    //                 targetNode.dispatchTopic(new MenuNodeTopic("mouseenter", {originalEvent: event}));
-    //             }
-    //         } else if(event.type === "mouseout") {
-    //             targetNode.dispatchTopic(new MenuNodeTopic("mouseout", {originalEvent: event}));
-    //
-    //             if(!targetNode.element.contains(event.relatedTarget)) {
-    //                 targetNode.dispatchTopic(new MenuNodeTopic("mouseleave", {originalEvent: event}));
-    //             }
-    //         } else if(event.type === "click") {
-    //             targetNode.dispatchTopic(new MenuNodeTopic("click", {originalEvent: event}));
-    //         }
-    //     }
-    // }
 }

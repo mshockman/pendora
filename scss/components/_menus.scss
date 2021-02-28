@@ -22,13 +22,15 @@
 
 
 .menubar {
-  display: flex;
-  flex-direction: row;
-  background-color: rgb(215, 220, 225);
-  position: relative;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  .menubar__body {
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(215, 220, 225);
+    position: relative;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
 
   a:hover {
     text-decoration: none;
