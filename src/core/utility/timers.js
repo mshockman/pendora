@@ -87,7 +87,7 @@ export default class Timer {
 
     constructor(name, type, controller, handler, timeout, ...args) {
         this.#name = name;
-        this.#type = name;
+        this.#type = type;
         this.#controller = controller;
         this.#status = "active";
 

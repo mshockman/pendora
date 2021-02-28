@@ -286,7 +286,7 @@ export class RichSelect extends DropDown {
     }
 
     set multiple(value) {
-        this.submenu.multiSelect = true;
+        this.submenu.multiSelect = value;
     }
 
     get multiple() {

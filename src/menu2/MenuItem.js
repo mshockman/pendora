@@ -183,7 +183,10 @@ export default class MenuItem extends MenuNode {
     // Event handlers
 
     onClick(topic) {
-        if(topic.target !== this || this.getDisabled()) return;
+        if(topic.target !== this || this.getDisabled()) {
+            topic.originalEvent.preventDefault();
+            return;
+        }
 
         let toggle = TOGGLE.getComputedValue(this.toggle, this, topic);
 
@@ -228,6 +231,20 @@ export default class MenuItem extends MenuNode {
             this.element.classList.add("hover");
         } else {
             this.element.classList.remove("hover");
+        }
+    }
+
+    get isFiltered() {
+        return this.element.classList.contains("filtered");
+    }
+
+    set isFiltered(value) {
+        value = !!value;
+
+        if(value) {
+            this.element.classList.add("filtered");
+        } else {
+            this.element.classList.remove("filtered");
         }
     }
 

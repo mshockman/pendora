@@ -2,8 +2,6 @@ import Publisher, {STOP} from "../core/Publisher";
 import {selectElement} from "../core/utility";
 import {bindMenuNodeToElement, getClosestMenuNodeByElement, returnTrue, returnFalse, OptionRegistry} from "./core";
 import Timer from "../core/utility/timers";
-import MenuItem from "../menu/MenuItem";
-import Menu from "../menu/Menu";
 import {POSITIONERS} from "./positioners";
 
 
@@ -77,7 +75,7 @@ export default class MenuNode extends Publisher {
 
             Timer.clearTargetTimer(this, "activate");
 
-            if(this.closeOnBlur && !this.#documentClickHandler) {
+            if(!this.#documentClickHandler) {
                 this.#documentClickHandler = {
                     target: document,
 
@@ -91,7 +89,14 @@ export default class MenuNode extends Publisher {
 
                         if(!targetNode || (targetNode !== this && !this.contains(targetNode))) {
                             this.#documentClickHandler.clear();
-                            this.deactivate();
+
+                            if(this.closeOnBlur) {
+                                this.deactivate();
+                            }
+
+                            window.queueMicrotask(() => {
+                                this.dispatchTopic(new MenuNodeTopic("menunode.blur", {originalEvent: event}));
+                            });
                         }
                     }
                 };

@@ -30,7 +30,8 @@ let app = new Application({
     'test_tooltip': () => import("./pages/documentation/test_toolip"),
     'test_notifications': () => import("./pages/documentation/test_notifications"),
     'test_menu2': () => import("./pages/documentation/menu/test_menu"),
-    'test_menubar2': () => import("./pages/documentation/menu/test_menubar")
+    'test_menubar2': () => import("./pages/documentation/menu/test_menubar"),
+    'test_combobox2': () => import("./pages/documentation/menu/test_combobox2")
 });
 
 

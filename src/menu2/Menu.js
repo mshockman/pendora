@@ -12,6 +12,8 @@ export default class Menu extends MenuNode {
     #header;
     #footer;
 
+    #filter;
+
     multiple;
 
     constructor({element=null, multiple=false, closeOnBlur=false, timeout=false, positioner=POSITIONERS.inherit, closeOnSelect=false}={}) {
@@ -32,6 +34,7 @@ export default class Menu extends MenuNode {
         this.#body = queryMenu(this.element, "[data-controller='menu-body']");
         this.#header = queryMenu(this.element, "[data-controller='menu-header']");
         this.#footer = queryMenu(this.element, "[data-controller='menu-footer']");
+        this.#filter = null;
 
         this.element.addEventListener("click", this);
         this.element.addEventListener("mouseover", this);
@@ -114,6 +117,34 @@ export default class Menu extends MenuNode {
         if(child.parent === this && !child.element.parentElement) {
             child.appendTo(this.#body);
         }
+
+        if(child.parent === this) {
+            this.refreshFilter();
+        }
+    }
+
+    filter(filter) {
+        this.#filter = filter;
+        this.refreshFilter();
+    }
+
+    refreshFilter() {
+        let itemFound = false;
+
+        for(let child of this.children) {
+            if(this.#filter && !this.#filter(child)) {
+                child.isFiltered = true;
+            } else {
+                child.isFiltered = false;
+                itemFound = true;
+            }
+        }
+
+        if(this.children.length > 0 && !itemFound) {
+            this.element.classList.add('no-items-found');
+        } else {
+            this.element.classList.remove("no-items-found");
+        }
     }
 
     getActiveItems() {
@@ -126,5 +157,17 @@ export default class Menu extends MenuNode {
                 child.deactivate();
             }
         }
+    }
+
+    get header() {
+        return this.#header;
+    }
+
+    get footer() {
+        return this.#footer;
+    }
+
+    get body() {
+        return this.#body;
     }
 }
