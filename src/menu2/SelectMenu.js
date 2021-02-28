@@ -228,6 +228,14 @@ export class SelectMenuOption extends MenuItem {
     set isSelected(value) {
         this.element.classList[value ? "add" : "remove"]("selected");
     }
+
+    get multiple() {
+        return this.submenu.multiSelect;
+    }
+
+    set multiple(value) {
+        this.submenu.multiSelect = value;
+    }
 }
 
 
