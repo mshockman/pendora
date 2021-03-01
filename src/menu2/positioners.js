@@ -2,6 +2,17 @@ import {Rect} from "../core/vectors";
 import {setElementClientPosition} from "../core/ui/position";
 
 
+function _container(menu) {
+    let container = menu.container;
+
+    if(typeof container === "function") {
+        return container(menu);
+    } else {
+        return container;
+    }
+}
+
+
 export const POSITIONERS = {
     submenu(menu) {
         let rect = new Rect(menu.element);
@@ -10,6 +21,7 @@ export const POSITIONERS = {
             my: 'left top',
             at: 'right top',
             of: menu.parent.element,
+            inside: _container(menu),
             collision: 'flip flip'
         });
 
@@ -25,7 +37,7 @@ export const POSITIONERS = {
                     my: 'left top',
                     at: 'left bottom',
                     of: menu.parent.element,
-                    inside: Rect.getClientRect(),
+                    inside: _container(menu),
                     collision: 'flip flip'
                 });
             } else {
@@ -33,7 +45,7 @@ export const POSITIONERS = {
                     my: 'left top',
                     at: 'right top',
                     of: menu.parent.element,
-                    inside: Rect.getClientRect(),
+                    inside: _container(menu),
                     collision: 'flip flip'
                 });
             }

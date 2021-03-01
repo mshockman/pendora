@@ -2,6 +2,7 @@ import MenuNode, {MenuNodeTopic, MENU_NODE_TYPE} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import {OptionRegistry, queryMenu} from "./core";
 import {POSITIONERS} from "./positioners";
+import {Rect} from "../core/vectors";
 
 
 export const MULTIPLE = new OptionRegistry("boolean");
@@ -15,6 +16,7 @@ export default class Menu extends MenuNode {
     #filter;
 
     multiple;
+    container;
 
     constructor({element=null, multiple=false, closeOnBlur=false, timeout=false, positioner=POSITIONERS.inherit, closeOnSelect=false}={}) {
         if(!element) {
@@ -35,6 +37,7 @@ export default class Menu extends MenuNode {
         this.#header = queryMenu(this.element, "[data-controller='menu-header']");
         this.#footer = queryMenu(this.element, "[data-controller='menu-footer']");
         this.#filter = null;
+        this.container = () => Rect.getClientRect();
 
         this.element.addEventListener("click", this);
         this.element.addEventListener("mouseover", this);
