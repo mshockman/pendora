@@ -126,6 +126,21 @@ export default class Menu extends MenuNode {
         }
     }
 
+    removeItem(item) {
+        if(super.removeItem(item)) {
+            item.element.parentElement.removeChild(item.element);
+            return true;
+        }
+
+        return false;
+    }
+
+    empty() {
+        while(this.children.length) {
+            this.removeItem(this.children[this.children.length-1]);
+        }
+    }
+
     filter(filter) {
         this.#filter = filter;
         this.refreshFilter();

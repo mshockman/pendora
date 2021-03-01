@@ -46,6 +46,7 @@ export default class MenuItem extends MenuNode {
     #btn;
     #locationHandler;
     #location;
+    #value;
 
     // closeOnSelect;
     // closeOnBlur;
@@ -65,7 +66,7 @@ export default class MenuItem extends MenuNode {
 
     constructor({element=null, text=null, href=null, toggle=false, autoActivate=true,
                     timeout=false, positioner=POSITIONERS.inherit, closeOnBlur=false,
-                    closeOnSelect=false, altText=null, icon=null}) {
+                    closeOnSelect=false, altText=null, icon=null, value=null}) {
         if(!element) {
             element = menuItemTemplate({text, href, altText, icon});
         }
@@ -76,6 +77,7 @@ export default class MenuItem extends MenuNode {
         this.autoActivate = autoActivate;
         this.timeout = timeout;
         this.#location = null;
+        this.#value = value;
         this[MENU_NODE_TYPE] = "menuitem";
 
         this.element.dataset.controller = "menuitem";
@@ -318,6 +320,14 @@ export default class MenuItem extends MenuNode {
                 this.#btn.href = value;
             }
         }
+    }
+
+    get value() {
+        return this.#value;
+    }
+
+    set value(value) {
+        this.#value = value;
     }
 }
 
