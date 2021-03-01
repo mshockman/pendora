@@ -54,6 +54,39 @@ export const POSITIONERS = {
         }
     },
 
+    contextMenu(menu) {
+        let rect = new Rect(menu.element);
+
+        if(!menu.parent) {
+            // todo
+            console.log(menu.contextMenuEvent);
+
+            let x = menu.contextMenuEvent.clientX,
+                y = menu.contextMenuEvent.clientY,
+                targetRect = new Rect(x, y, x, y);
+
+            rect = rect.position({
+                my: 'left top',
+                at: 'left top',
+                of: targetRect,
+                inside: _container(menu),
+                collision: 'flip flip'
+            });
+
+            console.log(rect);
+        } else {
+            rect = rect.position({
+                my: 'left top',
+                at: 'right top',
+                of: menu.parent.element,
+                inside: _container(menu),
+                collision: 'flip flip'
+            });
+        }
+
+        setElementClientPosition(menu.element, rect);
+    },
+
     inherit(menu) {
         let o = menu.parent;
 

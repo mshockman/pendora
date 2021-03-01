@@ -33,6 +33,7 @@ let app = new Application({
     'test_menubar2': () => import("./pages/documentation/menu/test_menubar"),
     'test_combobox2': () => import("./pages/documentation/menu/test_combobox2"),
     'test_multicombobox2': () => import("./pages/documentation/menu/test_multicombobox2"),
+    'test_contextmenu2': () => import("./pages/documentation/menu/test_contextmenu2"),
 });
 
 
