@@ -256,6 +256,10 @@ export default class MenuItem extends MenuNode {
         return this.#textContainer;
     }
 
+    get textbox() {
+        return this.#textContainer;
+    }
+
     get altContainer() {
         return this.#altContainer;
     }

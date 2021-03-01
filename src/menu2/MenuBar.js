@@ -36,7 +36,7 @@ export class MenuBarItem extends MenuItem {
         };
 
         this.autoActivate = (item, topic) => {
-            return ACTIVATE.getComputedValue(this.autoActivate, item, topic);
+            return ACTIVATE.getComputedValue(this.parent.autoActivate, item, topic);
         };
 
         this.attachMenu(new Menu());

@@ -4,6 +4,7 @@ import {POSITIONERS} from "./positioners";
 import {MenuNodeTopic} from "./MenuNode";
 import {createFragment} from "../core/utility";
 import DropDown from "./DropDown";
+import {MultiHiddenInputWidget} from "../forms";
 
 
 function selectOptionTemplate(context) {
@@ -240,7 +241,7 @@ export class SelectMenuOption extends MenuItem {
 
 
 export class RichSelect extends DropDown {
-    constructor({element=null, placeholder=null, widget=null, multiple=false, join=", ", closeOnSelect=false}={}) {
+    constructor({element=null, placeholder=null, multiple=false, join=", ", closeOnSelect=false, widget=null}={}) {
         if(!element) {
             element = createFragment(`
                 <div class="rich-select">
@@ -251,13 +252,22 @@ export class RichSelect extends DropDown {
 
         super({element});
         this.placeholder = placeholder;
-        this.widget = widget;
         this.join = join;
         this.element.classList.add("rich-select");
         this.detachMenu();
         this.attachMenu(new SelectMenu());
         this.closeOnSelect = closeOnSelect;
         this.multiple = multiple;
+
+        this.widget = widget;
+
+        if(typeof this.widget === "function") {
+            this.widget = new this.widget();
+        }
+
+        if(this.widget && !this.widget.element.parentElement) {
+            this.widget.appendTo(this.element);
+        }
 
         let onChange = topic => this.onChange(topic);
         this.on("menu.select.change", onChange);
@@ -275,11 +285,11 @@ export class RichSelect extends DropDown {
         this.submenu.appendItem(option);
     }
 
-    onChange() {
+    onChange(topic) {
         let selection = this.getSelection();
 
         if(this.widget) {
-            this.widget.setValue(selection);
+            this.widget.setValue(selection.map(item => item.value));
         }
 
         this.textContainer.value = selection.map(item => item.text.toString()).join(this.join);
@@ -291,5 +301,13 @@ export class RichSelect extends DropDown {
 
     get multiple() {
         return this.submenu.multiSelect;
+    }
+
+    get name() {
+        return this.widget.getName();
+    }
+
+    set name(name) {
+        this.widget.setName(name);
     }
 }
